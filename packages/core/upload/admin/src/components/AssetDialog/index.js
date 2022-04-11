@@ -10,13 +10,15 @@ import { useIntl } from 'react-intl';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Badge } from '@strapi/design-system/Badge';
 import { Loader } from '@strapi/design-system/Loader';
+import { Stack } from '@strapi/design-system/Stack';
 import { NoPermissions, AnErrorOccurred, useSelectionState } from '@strapi/helper-plugin';
 import getTrad from '../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
 import { BrowseStep } from './BrowseStep';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { useModalAssets } from '../../hooks/useModalAssets';
-import useModalQueryParams from '../../hooks/useModalAssets/useModalQueryParams';
+import { useAssets } from '../../hooks/useAssets';
+import { useFolders } from '../../hooks/useFolders';
+import useModalQueryParams from '../../hooks/useModalQueryParams';
 import { AssetDefinition } from '../../constants';
 import getAllowedFiles from '../../utils/getAllowedFiles';
 import { DialogTitle } from './DialogTitle';
@@ -29,6 +31,7 @@ export const AssetDialog = ({
   allowedTypes,
   onClose,
   onAddAsset,
+  onAddFolder,
   onValidate,
   multiple,
   initiallySelectedAssets,
@@ -46,12 +49,28 @@ export const AssetDialog = ({
   } = useMediaLibraryPermissions();
   const [
     { rawQuery, queryObject },
-    { onChangeFilters, onChangePage, onChangePageSize, onChangeSort, onChangeSearch },
+    {
+      onChangeFilters,
+      onChangePage,
+      onChangePageSize,
+      onChangeSort,
+      onChangeSearch,
+      onChangeFolder,
+    },
   ] = useModalQueryParams();
-  const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
+  const {
+    data: { pagination, results: assets } = {},
+    isLoading: isLoadingAssets,
+    error: errorAssets,
+  } = useAssets({ skipWhen: !canRead, rawQuery });
+  const {
+    data: { results: folders } = {},
+    isLoading: isLoadingFolders,
+    error: errorFolders,
+  } = useFolders();
 
   const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
-    'id',
+    ['id'],
     initiallySelectedAssets
   );
 
@@ -75,10 +94,10 @@ export const AssetDialog = ({
     return multiple ? selectOne(asset) : selectOnly(asset);
   };
 
-  const loading = isLoadingPermissions || isLoading;
-  const assets = data?.results;
+  const isLoading = isLoadingPermissions || isLoadingAssets || isLoadingFolders;
+  const hasError = errorAssets || errorFolders;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
         <DialogTitle />
@@ -95,7 +114,7 @@ export const AssetDialog = ({
     );
   }
 
-  if (error) {
+  if (hasError) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />
@@ -125,12 +144,21 @@ export const AssetDialog = ({
             count={6}
             action={
               canCreate ? (
-                <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
-                  {formatMessage({
-                    id: getTrad('header.actions.add-assets'),
-                    defaultMessage: 'Add new assets',
-                  })}
-                </Button>
+                <Stack space={2} horizontal id="asset-dialog-title">
+                  <Button variant="tertiary" onClick={onAddFolder}>
+                    {formatMessage({
+                      id: getTrad('header.actions.add-folder'),
+                      defaultMessage: 'Add folder',
+                    })}
+                  </Button>
+
+                  <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
+                    {formatMessage({
+                      id: getTrad('header.actions.add-assets'),
+                      defaultMessage: 'Add new assets',
+                    })}
+                  </Button>
+                </Stack>
               ) : (
                 undefined
               )
@@ -175,7 +203,7 @@ export const AssetDialog = ({
   };
 
   return (
-    <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={loading}>
+    <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={isLoading}>
       <DialogTitle />
 
       <TabGroup
@@ -218,14 +246,16 @@ export const AssetDialog = ({
               <BrowseStep
                 allowedTypes={allowedTypes}
                 assets={assets}
+                folder={folders}
                 onSelectAsset={handleSelectAsset}
                 selectedAssets={selectedAssets}
                 multiple={multiple}
                 onSelectAllAsset={handleSelectAllAssets}
                 onEditAsset={canUpdate ? setAssetToEdit : undefined}
-                pagination={data?.pagination}
+                pagination={pagination}
                 queryObject={queryObject}
                 onChangeFilters={onChangeFilters}
+                onChangeFolder={onChangeFolder}
                 onChangePage={onChangePage}
                 onChangePageSize={onChangePageSize}
                 onChangeSort={onChangeSort}
@@ -262,6 +292,7 @@ AssetDialog.propTypes = {
   initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition),
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,
+  onAddFolder: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onValidate: PropTypes.func.isRequired,
   trackedLocation: PropTypes.string,

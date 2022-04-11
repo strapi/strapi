@@ -1,19 +1,18 @@
 import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import { useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { axiosInstance, getRequestUrl } from '../utils';
 
-export const useAssets = ({ skipWhen }) => {
+export const useAssets = ({ skipWhen, rawQuery }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
-  const [{ rawQuery }] = useQueryParams();
   const dataRequestURL = getRequestUrl('files');
 
   const getAssets = async () => {
     try {
-      const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery}`);
+      const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery || ''}`);
 
       notifyStatus(
         formatMessage({

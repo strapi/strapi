@@ -32,6 +32,7 @@ const EndBlockActions = styled(StartBlockActions)`
 export const BrowseStep = ({
   allowedTypes,
   assets,
+  folders,
   multiple,
   onChangeFilters,
   onChangePage,
@@ -97,6 +98,8 @@ export const BrowseStep = ({
           </Box>
         )}
 
+        {folders.length > 0 && <></>}
+
         {assets.length > 0 ? (
           <AssetList
             allowedTypes={allowedTypes}
@@ -120,6 +123,7 @@ export const BrowseStep = ({
           </Box>
         )}
       </Stack>
+
       {pagination.pageCount > 0 && (
         <Flex justifyContent="space-between">
           <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
@@ -143,7 +147,11 @@ BrowseStep.defaultProps = {
 
 BrowseStep.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
+
+  // TODO: add asset & folder shapes
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  folders: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+
   multiple: PropTypes.bool,
   onChangeFilters: PropTypes.func.isRequired,
   onChangePage: PropTypes.func.isRequired,

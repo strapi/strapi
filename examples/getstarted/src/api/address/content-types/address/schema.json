@@ -80,6 +80,22 @@
       "component": "blog.test-como",
       "required": false,
       "min": 2
+    },
+    "wat": {
+      "type": "component",
+      "repeatable": true,
+      "component": "basic.simple"
+    },
+    "wat2": {
+      "type": "dynamiczone",
+      "components": [
+        "basic.simple"
+      ]
+    },
+    "bla": {
+      "type": "component",
+      "repeatable": false,
+      "component": "basic.simple"
     }
   }
 }

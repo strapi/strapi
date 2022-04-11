@@ -3,27 +3,33 @@ import PropTypes from 'prop-types';
 import { AssetDialog } from '../AssetDialog';
 import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
 
-const Steps = {
-  SelectAsset: 'SelectAsset',
-  UploadAsset: 'UploadAsset',
+const STEPS = {
+  AssetSelect: 'SelectAsset',
+  AssetUpload: 'UploadAsset',
+  FolderCreate: 'FolderCreate',
 };
 
 export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) => {
-  const [step, setStep] = useState(Steps.SelectAsset);
+  const [step, setStep] = useState(STEPS.AssetSelect);
 
-  if (step === Steps.SelectAsset) {
+  if (step === STEPS.AssetSelect) {
     return (
       <AssetDialog
         allowedTypes={allowedTypes}
         onClose={onClose}
         onValidate={onSelectAssets}
-        onAddAsset={() => setStep(Steps.UploadAsset)}
+        onAddAsset={() => setStep(STEPS.AssetUpload)}
+        onAddFolder={() => setStep(STEPS.FolderCreate)}
         multiple
       />
     );
   }
 
-  return <UploadAssetDialog onClose={() => setStep(Steps.SelectAsset)} />;
+  if (step === STEPS.FolderCreate) {
+    return null;
+  }
+
+  return <UploadAssetDialog onClose={() => setStep(STEPS.AssetSelect)} />;
 };
 
 MediaLibraryDialog.defaultProps = {
