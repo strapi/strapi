@@ -75,7 +75,7 @@ module.exports = ({ strapi }) => ({
       alternativeText: fileInfo.alternativeText,
       caption: fileInfo.caption,
       folder: fileInfo.folder,
-      location: await fileService.getLocation(fileInfo.folder),
+      folderPath: await fileService.getFolderPath(fileInfo.folder),
       hash: generateFileName(basename),
       ext,
       mime: type,
@@ -216,7 +216,7 @@ module.exports = ({ strapi }) => ({
       alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
       caption: _.isNil(caption) ? dbFile.caption : caption,
       folder: _.isUndefined(folder) ? dbFile.folder : folder,
-      location: _.isUndefined(folder) ? dbFile.path : await fileService.getLocation(folder),
+      folderPath: _.isUndefined(folder) ? dbFile.path : await fileService.getFolderPath(folder),
     };
 
     return this.update(id, newInfos, { user });

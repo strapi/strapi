@@ -75,11 +75,11 @@ module.exports = {
       request: { files: { files } = {} },
     } = ctx;
 
-    if (id && (_.isEmpty(files) || files.size === 0)) {
-      return this.updateFileInfo(ctx);
-    }
-
     if (_.isEmpty(files) || files.size === 0) {
+      if (id) {
+        return this.updateFileInfo(ctx);
+      }
+
       throw new ApplicationError('Files are empty');
     }
 

@@ -76,7 +76,7 @@ describe('File', () => {
         url: expect.any(String),
         provider: 'local',
         folder: null,
-        location: '/',
+        folderPath: '/',
       });
 
       data.files.push(file);
@@ -115,7 +115,7 @@ describe('File', () => {
         url: expect.any(String),
         provider: 'local',
         folder: { id: data.folders[0].id },
-        location: data.folders[0].location,
+        folderPath: data.folders[0].path,
       });
 
       data.files.push(file);
@@ -134,7 +134,7 @@ describe('File', () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe("the folder doesn't exist");
+      expect(res.body.error.message).toBe('the folder does not exist');
     });
   });
 
@@ -170,7 +170,7 @@ describe('File', () => {
           url: expect.any(String),
           provider: 'local',
           folder: { id: data.folders[1].id },
-          location: data.folders[1].location,
+          folderPath: data.folders[1].path,
         });
         data.files[1] = file;
       });
@@ -204,7 +204,7 @@ describe('File', () => {
           url: expect.any(String),
           provider: 'local',
           folder: { id: data.folders[0].id },
-          location: data.folders[0].location,
+          folderPath: data.folders[0].path,
         });
         data.files[1] = file;
       });
@@ -240,7 +240,7 @@ describe('File', () => {
           url: expect.any(String),
           provider: 'local',
           folder: { id: data.folders[0].id },
-          location: data.folders[0].location,
+          folderPath: data.folders[0].path,
         });
         data.files[0] = file;
       });
@@ -274,7 +274,7 @@ describe('File', () => {
           url: expect.any(String),
           provider: 'local',
           folder: { id: data.folders[1].id },
-          location: data.folders[1].location,
+          folderPath: data.folders[1].path,
         });
         data.files[1] = file;
       });
@@ -311,7 +311,7 @@ describe('File', () => {
           url: expect.any(String),
           provider: 'local',
           folder: null,
-          location: '/',
+          folderPath: '/',
         });
         data.files[0] = file;
       });
@@ -345,7 +345,7 @@ describe('File', () => {
           url: expect.any(String),
           provider: 'local',
           folder: null,
-          location: '/',
+          folderPath: '/',
         });
         data.files[1] = file;
       });
@@ -365,7 +365,7 @@ describe('File', () => {
         });
 
         expect(res.status).toBe(400);
-        expect(res.body.error.message).toBe("the folder doesn't exist");
+        expect(res.body.error.message).toBe('the folder does not exist');
       });
 
       test('whithout replacing the file', async () => {
@@ -374,13 +374,13 @@ describe('File', () => {
           url: `/upload?id=${data.files[1].id}`,
           formData: {
             fileInfo: JSON.stringify({
-              folder: '1234', // id that doesn't exist
+              folder: '1234', // id that does not exist
             }),
           },
         });
 
         expect(res.status).toBe(400);
-        expect(res.body.error.message).toBe("the folder doesn't exist");
+        expect(res.body.error.message).toBe('the folder does not exist');
       });
     });
   });
