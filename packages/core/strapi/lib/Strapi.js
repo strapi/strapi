@@ -77,10 +77,6 @@ class Strapi {
 
     // Load the app configuration from the dist directory
     const appConfig = loadConfiguration({ appDir: rootDirs.app, distDir: rootDirs.dist }, opts);
-    appConfig.server.typescript = {
-      server: isTypeScriptProjectSync(this.dirs.app.root),
-      admin: isTypeScriptProjectSync(path.join(this.dirs.app.src, 'admin')),
-    };
 
     // Instanciate the Strapi container
     this.container = createContainer(this);
