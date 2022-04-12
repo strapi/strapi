@@ -14,7 +14,7 @@ into `react-select` are forwarded.
 <Canvas>
   <Story name="base">
     {() => {
-        const [value, setValue] = useState(null);
+        const [value, setValue] = useState({ value: 22, label: "Folder 2.2" });
         const options = [
             {
                 value: 1,
@@ -51,8 +51,8 @@ into `react-select` are forwarded.
         ];
         return (
             <>
-                <SelectTree options={options} defaultValue={{ value: 22 }} onChange={({ value }) => setValue(value)} />
-                <p>Selected Value: {value}</p>
+                <SelectTree options={options} defaultValue={value} onChange={({ value, label }) => setValue({ value, label })} />
+                <p>Selected Value: {value.value}</p>
             </>
         )
     }}
