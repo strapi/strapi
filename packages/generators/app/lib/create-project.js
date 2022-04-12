@@ -92,7 +92,7 @@ module.exports = async function createProject(scope, { client, connection, depen
 
         const json = require(srcPath)();
 
-        await fse.writeJSON(destPath, JSON.stringify(json, null, 2));
+        await fse.writeJSON(destPath, json, { spaces: 2 });
       }
     }
 

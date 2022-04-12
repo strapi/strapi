@@ -3,6 +3,11 @@
 module.exports = () => ({
   extends: '@strapi/typescript-utils/lib/configs/server',
 
+  compilerOptions: {
+    outDir: 'dist',
+    rootDir: '.'
+  },
+
   include: [
     // Include the root directory
     './',
