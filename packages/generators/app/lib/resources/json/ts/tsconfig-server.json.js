@@ -5,7 +5,7 @@ module.exports = () => ({
 
   compilerOptions: {
     outDir: 'dist',
-    rootDir: '.'
+    rootDir: '.',
   },
 
   include: [

@@ -8,7 +8,7 @@ const getCustomAppConfigFile = require('./get-custom-app-config-file');
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
 async function createPluginsJs(plugins, dest) {
-  const pluginsArray = plugins.map(({ appPathToPlugin, name }) => {
+  const pluginsArray = plugins.map(({ pathToPlugin, name }) => {
     const shortName = _.camelCase(name);
 
     /**
@@ -20,7 +20,7 @@ async function createPluginsJs(plugins, dest) {
      * Backslash looks to work only for absolute paths with webpack => https://webpack.js.org/concepts/module-resolution/#absolute-paths
      */
     const realPath = path
-      .join(path.relative(path.resolve(dest, 'admin', 'src'), appPathToPlugin), 'strapi-admin.js')
+      .join(path.relative(path.resolve(dest, 'admin', 'src'), pathToPlugin), 'strapi-admin.js')
       .replace(/\\/g, '/');
 
     return {
