@@ -1,6 +1,6 @@
 'use strict';
 
-const uuid = require('uuid/v4');
+const uuid = require('uuid').v4;
 const { joinBy } = require('@strapi/utils');
 
 const folderModel = 'plugin::upload.folder';
