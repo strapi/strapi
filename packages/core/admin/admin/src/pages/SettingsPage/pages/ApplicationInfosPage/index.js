@@ -19,6 +19,7 @@ import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';
 import Form from './components/Form';
 import { fetchProjectSettings, updateProjectSettings } from './utils/api';
+import { getFormData } from './utils/getFormData';
 
 const permissions = [{ action: 'admin::project-settings.update', subject: null }];
 
@@ -43,12 +44,8 @@ const ApplicationInfosPage = () => {
   });
 
   const handleSubmit = async () => {
-    const { menuLogo } = inputsRef.current.getValues();
-    const formData = new FormData();
-
-    if (menuLogo.rawFile) {
-      formData.append('menuLogo', menuLogo.rawFile);
-    }
+    const data = inputsRef.current.getValues();
+    const formData = getFormData(data);
 
     submitMutation.mutate(formData, {
       onError: error => {
