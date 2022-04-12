@@ -36,6 +36,8 @@ module.exports = strapi => {
   const deviceId = machineID();
   const isEE = strapi.EE === true && ee.isEE === true;
 
+  const { typescript: useTypescript } = strapi.config.server;
+
   const anonymous_metadata = {
     environment: strapi.config.environment,
     os: os.type(),
@@ -47,7 +49,8 @@ module.exports = strapi => {
     version: strapi.config.get('info.strapi'),
     strapiVersion: strapi.config.get('info.strapi'),
     projectType: isEE ? 'Enterprise' : 'Community',
-    useTypescript: strapi.config.server.useTypescript,
+    useTypescriptOnServer: useTypescript.server,
+    useTypescriptOnAdmin: useTypescript.admin,
   };
 
   addPackageJsonStrapiMetadata(anonymous_metadata, strapi);

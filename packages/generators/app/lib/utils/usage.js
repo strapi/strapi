@@ -86,7 +86,8 @@ function trackError({ scope, error }) {
     nodeVersion: process.version,
     docker: scope.docker,
     useYarn: scope.useYarn,
-    useTypescript: scope.useTypescript,
+    useTypescriptOnServer: scope.useTypescript,
+    useTypescriptOnAdmin: scope.useTypescript,
   };
 
   try {
@@ -113,7 +114,8 @@ function trackUsage({ event, scope, error }) {
     version: scope.strapiVersion,
     docker: scope.docker,
     useYarn: scope.useYarn.toString(),
-    useTypescript: scope.useTypescript.toString(),
+    useTypescriptOnServer: scope.useTypescript,
+    useTypescriptOnAdmin: scope.useTypescript,
     noRun: (scope.runQuickstartApp !== true).toString(),
   };
 
