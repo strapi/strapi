@@ -14,6 +14,7 @@
   "dependencies": {
     "@strapi/admin": "4.1.7",
     "@strapi/provider-email-mailgun": "4.1.7",
+    "@strapi/plugin-documentation": "4.1.7",
     "@strapi/provider-upload-aws-s3": "4.1.7",
     "@strapi/provider-upload-cloudinary": "4.1.7",
     "@strapi/strapi": "4.1.7",

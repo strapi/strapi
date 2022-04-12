@@ -5,7 +5,6 @@ const isTypeScriptProjectSync = require('./is-typescript-project-sync');
 const getConfigPath = require('./get-config-path');
 const reportDiagnostics = require('./report-diagnostics');
 const resolveConfigOptions = require('./resolve-config-options');
-const copyResources = require('./copy-resources');
 const formatHost = require('./format-host');
 
 module.exports = {
@@ -14,6 +13,5 @@ module.exports = {
   getConfigPath,
   reportDiagnostics,
   resolveConfigOptions,
-  copyResources,
   formatHost,
 };

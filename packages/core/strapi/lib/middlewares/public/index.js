@@ -81,7 +81,7 @@ module.exports = (config, { strapi }) => {
       {
         method: 'GET',
         path: '/(.*)',
-        handler: koaStatic(strapi.dirs.app.public, {
+        handler: koaStatic(strapi.dirs.static.public, {
           maxage: maxAge,
           defer: true,
         }),

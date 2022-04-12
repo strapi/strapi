@@ -49,7 +49,7 @@ module.exports = {
               .getDocumentationVersion();
 
       const openAPISpecsPath = path.join(
-        strapi.dirs.dist.extensions,
+        strapi.dirs.app.extensions,
         'documentation',
         'documentation',
         version,
@@ -82,7 +82,7 @@ module.exports = {
 
           try {
             const staticFolder = path.resolve(
-              strapi.dirs.dist.extensions,
+              strapi.dirs.app.extensions,
               'documentation',
               'public'
             );
@@ -120,7 +120,7 @@ module.exports = {
 
       try {
         const layoutPath = path.resolve(
-          strapi.dirs.dist.extensions,
+          strapi.dirs.app.extensions,
           'documentation',
           'public',
           'login.html'
@@ -131,7 +131,7 @@ module.exports = {
         ctx.url = path.basename(`${ctx.url}/login.html`);
 
         try {
-          const staticFolder = path.resolve(strapi.dirs.dist.extensions, 'documentation', 'public');
+          const staticFolder = path.resolve(strapi.dirs.app.extensions, 'documentation', 'public');
           return koaStatic(staticFolder)(ctx, next);
         } catch (e) {
           strapi.log.error(e);
