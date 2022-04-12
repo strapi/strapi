@@ -24,7 +24,6 @@ module.exports = async ({ optimization, forceBuild = true }) => {
   await buildAdmin({
     buildDestDir,
     forceBuild,
-    // TODO: Delegate the is-ts-project check to the admin
     isTSProject: useTypeScriptServer,
     optimization,
     srcDir,

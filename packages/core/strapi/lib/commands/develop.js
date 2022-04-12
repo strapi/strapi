@@ -61,7 +61,6 @@ const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin,
       await buildAdmin({
         buildDestDir: distDir,
         forceBuild: false,
-        // TODO: delegates the is-ts-project check to the admin
         isTSProject,
         optimization: false,
         srcDir: appDir,
