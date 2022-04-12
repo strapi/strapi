@@ -256,13 +256,17 @@ describe('Folder', () => {
         data: [
           {
             children: [
-              { children: [{ children: [], id: 7, name: 'folder1A1' }], id: 5, name: 'folder1A' },
-              { children: [], id: 6, name: 'folder1B' },
+              {
+                children: [{ children: [], id: expect.anything(), name: 'folder1A1' }],
+                id: expect.anything(),
+                name: 'folder1A',
+              },
+              { children: [], id: expect.anything(), name: 'folder1B' },
             ],
             id: 3,
             name: 'folder1',
           },
-          { children: [], id: 4, name: 'folder2' },
+          { children: [], id: expect.anything(), name: 'folder2' },
         ],
       });
     });
