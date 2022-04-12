@@ -32,32 +32,24 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ..
     });
   }, [openValues, flatDefaultOptions, optionsFiltered]);
 
-  function handleToggle(e, value) {
-    e.preventDefault();
-    e.stopPropagation();
-
+  const handleToggle = value => {
     if (openValues.includes(value)) {
       setOpenValues(prev => prev.filter(prevData => prevData !== value));
     } else {
       setOpenValues(prev => [...prev, value]);
     }
-  }
+  };
 
   return (
     <Select
-      components={{
-        Option: props => (
-          <Option
-            {...props}
-            onToggle={(...args) => handleToggle(...args)}
-            // eslint-disable-next-line react/prop-types
-            isOpen={openValues.includes(props.data?.value)}
-            maxDisplayDepth={maxDisplayDepth}
-          />
-        ),
-      }}
+      components={{ Option }}
       options={options}
       defaultValue={defaultValue}
+      /* -- custom props, used by the Option component */
+      maxDisplayDepth={maxDisplayDepth}
+      openValues={openValues}
+      onOptionToggle={handleToggle}
+      /* -- / custom props */
       {...props}
     />
   );

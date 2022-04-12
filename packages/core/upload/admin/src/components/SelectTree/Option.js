@@ -15,21 +15,31 @@ const ToggleButton = styled.button`
   margin-left: auto;
 `;
 
-const Option = ({ children, data, onToggle, isOpen, maxDisplayDepth, ...props }) => {
-  const hasChildren = data?.children?.length > 0;
-  const { depth, value } = data;
-  const normalizedDepth = Math.min(depth, maxDisplayDepth);
+const Option = ({ children, data, selectProps, ...props }) => {
+  const { depth, value, children: options } = data;
+  const { maxDisplayDepth, openValues, onOptionToggle } = selectProps;
+  const isOpen = openValues.includes(value);
 
   return (
     <>
       <components.Option {...props}>
         <Flex alignItems="start">
           <Typography textColor="neutral800">
-            <span style={{ paddingLeft: `${normalizedDepth * 10}px` }}>{children}</span>
+            <span style={{ paddingLeft: `${Math.min(depth, maxDisplayDepth) * 10}px` }}>
+              {children}
+            </span>
           </Typography>
 
-          {hasChildren && (
-            <ToggleButton type="button" onClick={event => onToggle(event, value)}>
+          {options?.length > 0 && (
+            <ToggleButton
+              type="button"
+              onClick={event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                onOptionToggle(value);
+              }}
+            >
               <Icon width={pxToRem(14)} color="neutral500" as={isOpen ? ChevronUp : ChevronDown} />
             </ToggleButton>
           )}
@@ -39,17 +49,15 @@ const Option = ({ children, data, onToggle, isOpen, maxDisplayDepth, ...props })
   );
 };
 
-Option.defaultProps = {
-  isOpen: false,
-  maxDisplayDepth: 5,
-};
-
 Option.propTypes = {
   children: PropTypes.arrayOf(PropTypes.element).isRequired,
   data: PropTypes.object.isRequired,
-  isOpen: PropTypes.bool,
-  maxDisplayDepth: PropTypes.number,
   onToggle: PropTypes.func.isRequired,
+  selectProps: PropTypes.shape({
+    maxDisplayDepth: PropTypes.number,
+    openValues: PropTypes.arrayOf([PropTypes.string, PropTypes.number]),
+    onOptionToggle: PropTypes.func,
+  }).isRequired,
 };
 
 export default Option;
