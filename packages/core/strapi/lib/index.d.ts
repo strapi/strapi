@@ -3,7 +3,7 @@ import { EntityService } from './services/entity-service';
 import { Strapi as StrapiClass } from './Strapi';
 
 export * as factories from './factories';
-interface StrapiInterface extends StrapiClass {
+export interface StrapiInterface extends StrapiClass {
   query: Database['query'];
   entityService: EntityService;
 }
