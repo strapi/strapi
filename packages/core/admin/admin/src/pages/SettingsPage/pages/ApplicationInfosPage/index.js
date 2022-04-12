@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useIntl } from 'react-intl';
 import {
   useAppInfos,
@@ -17,25 +18,43 @@ import { Button } from '@strapi/design-system/Button';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';
 import Form from './components/Form';
+import { fetchProjectSettings, updateProjectSettings } from './utils/api';
 
 const permissions = [{ action: 'admin::project-settings.update', subject: null }];
 
 const ApplicationInfosPage = () => {
   const inputsRef = useRef();
   const { formatMessage } = useIntl();
+  const queryClient = useQueryClient();
   useFocusWhenNavigate();
   const appInfos = useAppInfos();
   const { shouldUpdateStrapi, latestStrapiReleaseTag, strapiVersion } = appInfos;
-  const [modifiedData] = useState({ menuLogo: undefined });
+
+  const { data } = useQuery('project-settings', fetchProjectSettings);
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
     : 'app.components.UpgradePlanModal.text-ee';
 
-  const handleSubmit = () => {
-    // form values received here
-    // to do - handle this data
-    // const data = inputsRef.current.getValues();
+  const submitMutation = useMutation(body => updateProjectSettings(body), {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries('project-settings', { refetchActive: true });
+    },
+  });
+
+  const handleSubmit = async () => {
+    const { menuLogo } = inputsRef.current.getValues();
+    const formData = new FormData();
+
+    if (menuLogo.rawFile) {
+      formData.append('menuLogo', menuLogo.rawFile);
+    }
+
+    submitMutation.mutate(formData, {
+      onError: error => {
+        console.log(error);
+      },
+    });
   };
 
   return (
@@ -149,9 +168,11 @@ const ApplicationInfosPage = () => {
                 </Box>
               </Stack>
             </Box>
-            <CheckPermissions permissions={permissions}>
-              <Form ref={inputsRef} projectSettingsStored={modifiedData} />
-            </CheckPermissions>
+            {data && (
+              <CheckPermissions permissions={permissions}>
+                <Form ref={inputsRef} projectSettingsStored={data} />
+              </CheckPermissions>
+            )}
           </Stack>
         </ContentLayout>
       </Main>

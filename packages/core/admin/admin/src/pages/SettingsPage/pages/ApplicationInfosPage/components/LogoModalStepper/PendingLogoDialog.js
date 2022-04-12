@@ -73,6 +73,11 @@ const PendingLogoDialog = ({ onClose, asset, prev, next, goTo, setLocalImage, on
   );
 };
 
+PendingLogoDialog.defaultProps = {
+  next: null,
+  prev: null,
+};
+
 PendingLogoDialog.propTypes = {
   goTo: PropTypes.func.isRequired,
   asset: PropTypes.shape({
@@ -82,10 +87,10 @@ PendingLogoDialog.propTypes = {
     height: PropTypes.number,
     ext: PropTypes.string,
   }).isRequired,
-  next: PropTypes.string.isRequired,
+  next: PropTypes.string,
   onClose: PropTypes.func.isRequired,
   onChangeLogo: PropTypes.func.isRequired,
-  prev: PropTypes.string.isRequired,
+  prev: PropTypes.string,
   setLocalImage: PropTypes.func.isRequired,
 };
 
