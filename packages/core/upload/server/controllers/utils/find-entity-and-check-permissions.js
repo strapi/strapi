@@ -1,11 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
-const { contentTypes: contentTypesUtils } = require('@strapi/utils');
+const { CREATED_BY_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
 const { NotFoundError, ForbiddenError } = require('@strapi/utils').errors;
 const { getService } = require('../../utils');
-
-const { CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   const file = await getService('upload').findOne(id, [CREATED_BY_ATTRIBUTE, 'folder']);

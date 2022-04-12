@@ -92,17 +92,20 @@ describe('Test type date', () => {
   });
 
   test('Updating entry sets the right value and format JSON', async () => {
+    const now = new Date(2018, 7, 5);
+
     const res = await rq.post('/content-manager/collection-types/api::withdate.withdate', {
       body: {
-        field: '2018-06-05',
+        field: now,
       },
     });
 
+    const newDate = new Date(2017, 10, 23);
     const updateRes = await rq.put(
       `/content-manager/collection-types/api::withdate.withdate/${res.body.id}`,
       {
         body: {
-          field: '2017-11-23',
+          field: newDate,
         },
       }
     );

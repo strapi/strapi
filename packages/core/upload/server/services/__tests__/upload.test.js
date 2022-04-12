@@ -9,7 +9,7 @@ describe('Upload service', () => {
         upload: {
           services: {
             file: {
-              getLocation: () => '/a-location',
+              getFolderPath: () => '/a-folder-path',
             },
           },
         },

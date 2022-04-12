@@ -45,7 +45,7 @@ module.exports = {
       target: 'plugin::upload.file',
       mappedBy: 'folder',
     },
-    location: {
+    path: {
       type: 'string',
       min: 1,
       required: true,

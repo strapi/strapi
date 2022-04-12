@@ -39,10 +39,10 @@ module.exports = {
 
     await validateCreateFolder(body);
 
-    const { setLocationAndUID } = getService('folder');
+    const { setPathAndUID } = getService('folder');
 
     // TODO: wrap with a transaction
-    const enrichFolder = pipeAsync(setLocationAndUID, setCreatorFields({ user }));
+    const enrichFolder = pipeAsync(setPathAndUID, setCreatorFields({ user }));
     const enrichedFolder = await enrichFolder(body);
 
     const folder = await strapi.entityService.create(folderModel, {
