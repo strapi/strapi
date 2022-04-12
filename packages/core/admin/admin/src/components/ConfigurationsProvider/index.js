@@ -6,11 +6,11 @@ import reducer, { initialState } from './reducer';
 const ConfigurationsProvider = ({
   children,
   authLogo,
-  menuLogo,
+  menuLogo: defaultMenuLogo,
   showReleaseNotification,
   showTutorials,
 }) => {
-  const [{ logos }, dispatch] = useReducer(reducer, initialState);
+  const [{ menuLogo }, dispatch] = useReducer(reducer, initialState);
 
   const setCustomLogo = (logo, logoType) => {
     return dispatch({
@@ -21,14 +21,24 @@ const ConfigurationsProvider = ({
   };
   const setCustomLogoRef = useRef(setCustomLogo);
 
+  const setProjectSettings = ({ menuLogo }) => {
+    return dispatch({
+      type: 'SET_PROJECT_SETTINGS',
+      values: {
+        menuLogo: menuLogo || defaultMenuLogo,
+      },
+    });
+  };
+
   return (
     <ConfigurationsContext.Provider
       value={{
         logos: {
-          menu: { custom: logos.menu, default: menuLogo },
+          menu: { custom: menuLogo, default: defaultMenuLogo },
           auth: { custom: null, default: authLogo },
         },
         setCustomLogo: setCustomLogoRef.current,
+        setProjectSettings,
         showReleaseNotification,
         showTutorials,
       }}

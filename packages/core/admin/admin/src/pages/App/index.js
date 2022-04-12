@@ -72,7 +72,7 @@ function App() {
           data: { hasAdmin, uuid, menuLogo },
         } = await request('/admin/init', { method: 'GET' });
 
-        setCustomLogo(prefixFileUrlWithBackendUrl(menuLogo), 'menu');
+        setCustomLogo(prefixFileUrlWithBackendUrl(menuLogo), 'menuLogo');
 
         if (uuid) {
           try {

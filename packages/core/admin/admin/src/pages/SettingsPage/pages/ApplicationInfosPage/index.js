@@ -31,10 +31,7 @@ const ApplicationInfosPage = () => {
   useFocusWhenNavigate();
   const appInfos = useAppInfos();
   const { shouldUpdateStrapi, latestStrapiReleaseTag, strapiVersion } = appInfos;
-  const {
-    setCustomLogo,
-    logos: { menu },
-  } = useConfigurations();
+  const { setProjectSettings } = useConfigurations();
 
   const { data } = useQuery('project-settings', fetchProjectSettings);
 
@@ -45,7 +42,7 @@ const ApplicationInfosPage = () => {
   const submitMutation = useMutation(body => updateProjectSettings(body), {
     onSuccess: async ({ menuLogo }) => {
       await queryClient.invalidateQueries('project-settings', { refetchActive: true });
-      setCustomLogo(menuLogo?.url || menu.default, 'menu');
+      setProjectSettings({ menuLogo: menuLogo?.url });
     },
   });
 
