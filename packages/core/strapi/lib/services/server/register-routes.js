@@ -20,7 +20,7 @@ const createRouteScopeGenerator = namespace => route => {
  * Register all routes
  * @param {import('../../').Strapi} strapi
  */
-module.exports = strapi => {
+module.exports = async strapi => {
   registerAdminRoutes(strapi);
   registerAPIRoutes(strapi);
   registerPluginRoutes(strapi);
