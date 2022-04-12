@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
@@ -44,11 +44,15 @@ const ComponentFixture = props => (
 );
 
 const setup = props => {
-  return render(<ComponentFixture options={FIXTURE_OPTIONS} {...props} />);
+  return new Promise(resolve => {
+    return act(() => {
+      resolve(render(<ComponentFixture options={FIXTURE_OPTIONS} {...props} />));
+    });
+  });
 };
 
 describe('SelectTree', () => {
-  test('renders', () => {
-    expect(setup()).toMatchSnapshot();
+  test('renders', async () => {
+    expect(await setup()).toMatchSnapshot();
   });
 });
