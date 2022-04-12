@@ -10,11 +10,6 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/files/count',
-      handler: 'content-api.count',
-    },
-    {
-      method: 'GET',
       path: '/files',
       handler: 'content-api.find',
     },
