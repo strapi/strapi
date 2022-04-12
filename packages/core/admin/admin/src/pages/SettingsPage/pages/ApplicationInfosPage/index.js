@@ -17,6 +17,7 @@ import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';
+import { useConfigurations } from '../../../../hooks';
 import Form from './components/Form';
 import { fetchProjectSettings, updateProjectSettings } from './utils/api';
 import { getFormData } from './utils/getFormData';
@@ -30,6 +31,10 @@ const ApplicationInfosPage = () => {
   useFocusWhenNavigate();
   const appInfos = useAppInfos();
   const { shouldUpdateStrapi, latestStrapiReleaseTag, strapiVersion } = appInfos;
+  const {
+    setCustomLogo,
+    logos: { menu },
+  } = useConfigurations();
 
   const { data } = useQuery('project-settings', fetchProjectSettings);
 
@@ -38,8 +43,9 @@ const ApplicationInfosPage = () => {
     : 'app.components.UpgradePlanModal.text-ee';
 
   const submitMutation = useMutation(body => updateProjectSettings(body), {
-    onSuccess: async () => {
+    onSuccess: async ({ menuLogo }) => {
       await queryClient.invalidateQueries('project-settings', { refetchActive: true });
+      setCustomLogo(menuLogo?.url || menu.default, 'menu');
     },
   });
 

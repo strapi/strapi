@@ -12,6 +12,7 @@ import {
   request,
   useNotification,
   TrackingContext,
+  prefixFileUrlWithBackendUrl,
 } from '@strapi/helper-plugin';
 import { SkipToContent } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
@@ -71,7 +72,7 @@ function App() {
           data: { hasAdmin, uuid, menuLogo },
         } = await request('/admin/init', { method: 'GET' });
 
-        setCustomLogo(menuLogo, 'menu');
+        setCustomLogo(prefixFileUrlWithBackendUrl(menuLogo), 'menu');
 
         if (uuid) {
           try {

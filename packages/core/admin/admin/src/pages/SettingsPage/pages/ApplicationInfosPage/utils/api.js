@@ -8,7 +8,9 @@ const fetchProjectSettings = async () => {
 };
 
 const updateProjectSettings = async body => {
-  await axiosInstance.post('/admin/project-settings', body);
+  const { data } = await axiosInstance.post('/admin/project-settings', body);
+
+  return prefixAllUrls(data);
 };
 
 export { fetchProjectSettings, updateProjectSettings };
