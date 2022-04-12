@@ -1,3 +1,5 @@
+import type { Strapi } from '@strapi/strapi';
+
 export default {
   register({ strapi }: { strapi: Strapi }) {
     // No error when trying the access & set the
@@ -7,7 +9,7 @@ export default {
   },
 
   bootstrap({ strapi }: { strapi: Strapi }) {
-    const result = strapi.customAddMethod(12, 32);
+    const result = strapi.customAddMethod(11, 31);
 
     // This should print "42"
     console.log(result);
