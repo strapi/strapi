@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const urlToFile = async url => {
   try {
-    const res = await axios.get(url, { responseType: 'blob', timeout: 60000 });
+    const res = await axios.get(url, { responseType: 'blob', timeout: 30000 });
     const loadedFile = new File([res.data], res.config.url, {
       type: res.headers['content-type'],
     });

@@ -12,7 +12,7 @@ import { SIZE, DIMENSION } from '../../utils/constants';
 const FromUrlForm = ({ goTo, next, onClose, setLocalImage }) => {
   const { formatMessage } = useIntl();
   const [logoUrl, setLogoUrl] = useState('');
-  const [error, setError] = useState(undefined);
+  const [error, setError] = useState(null);
 
   const handleChange = e => {
     setLogoUrl(e.target.value);

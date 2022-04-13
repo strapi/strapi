@@ -237,5 +237,47 @@ describe('ApplicationsInfosPage || LogoInput', () => {
         ).toBeInTheDocument()
       );
     });
+
+    it('should accept upload and lead user to next modal', async () => {
+      render();
+      const changeLogoButton = document.querySelector('button');
+      fireEvent.click(changeLogoButton);
+      fireEvent.click(screen.getByText('From url'));
+
+      const textInput = document.querySelector('input[name="logo-url"]');
+
+      fireEvent.change(textInput, {
+        target: {
+          value: 'https://cdn.pixabay.com/photo/2022/01/18/07/38/cat-6946505__340.jpg',
+        },
+      });
+
+      fireEvent.click(screen.getByText('Next'));
+
+      await waitFor(() => expect(screen.getByText('Pending logo')).toBeInTheDocument());
+    });
+
+    it('should let user choose another logo', async () => {
+      render();
+      const changeLogoButton = document.querySelector('button');
+      fireEvent.click(changeLogoButton);
+      fireEvent.click(screen.getByText('From url'));
+
+      const textInput = document.querySelector('input[name="logo-url"]');
+
+      fireEvent.change(textInput, {
+        target: {
+          value: 'https://cdn.pixabay.com/photo/2022/01/18/07/38/cat-6946505__340.jpg',
+        },
+      });
+
+      fireEvent.click(screen.getByText('Next'));
+
+      await waitFor(() => expect(screen.getByText('Pending logo')).toBeInTheDocument());
+
+      fireEvent.click(screen.getByText('Choose another logo'));
+
+      await waitFor(() => expect(screen.getByText('Upload logo')).toBeInTheDocument());
+    });
   });
 });
