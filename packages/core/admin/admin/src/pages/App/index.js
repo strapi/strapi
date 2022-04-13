@@ -13,6 +13,7 @@ import {
   useNotification,
   TrackingContext,
 } from '@strapi/helper-plugin';
+import axios from 'axios';
 import { SkipToContent } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
 import PrivateRoute from '../../components/PrivateRoute';
@@ -37,6 +38,8 @@ function App() {
       routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
     );
   }, []);
+
+  const [telemetryProperties, setTelemetryProperties] = useState(null);
 
   useEffect(() => {
     const currentToken = auth.getToken();
@@ -65,9 +68,21 @@ function App() {
   useEffect(() => {
     const getData = async () => {
       try {
-        const {
-          data: { hasAdmin, uuid },
-        } = await request('/admin/init', { method: 'GET' });
+        const [
+          {
+            data: {
+              data: { hasAdmin, uuid },
+            },
+          },
+          {
+            data: { data: properties },
+          },
+        ] = await Promise.all([
+          axios.get(`${strapi.backendURL}/admin/init`),
+          axios.get(`${strapi.backendURL}/admin/telemetry-properties`),
+        ]);
+
+        setTelemetryProperties(properties);
 
         if (uuid) {
           try {
@@ -79,6 +94,9 @@ function App() {
                 event: 'didInitializeAdministration',
                 uuid,
                 deviceId,
+                properties: {
+                  ...properties,
+                },
               }),
               headers: {
                 'Content-Type': 'application/json',
@@ -110,7 +128,7 @@ function App() {
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
       <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
-      <TrackingContext.Provider value={uuid}>
+      <TrackingContext.Provider value={{ uuid, telemetryProperties }}>
         <Switch>
           {authRoutes}
           <Route
