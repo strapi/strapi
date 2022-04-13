@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { NotificationsProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider, TrackingContext } from '@strapi/helper-plugin';
 import { EditAssetDialog } from '../index';
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
@@ -96,13 +96,15 @@ const renderCompo = (
 ) =>
   render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
-        <NotificationsProvider toggleNotification={toggleNotification}>
-          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-            <EditAssetDialog asset={asset} onClose={jest.fn()} {...props} />
-          </IntlProvider>
-        </NotificationsProvider>
-      </ThemeProvider>
+      <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
+        <ThemeProvider theme={lightTheme}>
+          <NotificationsProvider toggleNotification={toggleNotification}>
+            <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+              <EditAssetDialog asset={asset} onClose={jest.fn()} {...props} />
+            </IntlProvider>
+          </NotificationsProvider>
+        </ThemeProvider>
+      </TrackingContext.Provider>
     </QueryClientProvider>,
     { container: document.body }
   );
