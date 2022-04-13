@@ -22,15 +22,6 @@ const getFolderPathRegex = uid =>
     'i'
   );
 
-const createFolder = async (name, parent = null) => {
-  const res = await rq({
-    method: 'POST',
-    url: '/upload/folders',
-    body: { name, parent },
-  });
-  return res.body.data;
-};
-
 describe('Folder', () => {
   const builder = createTestBuilder();
 
@@ -234,41 +225,6 @@ describe('Folder', () => {
           pick(['id', 'name', 'path', 'uid', 'updatedAt', 'createdAt'])(data.folders[1]),
         ])
       );
-    });
-  });
-
-  describe('tree', () => {
-    test('Get tree', async () => {
-      const rootFolder1 = await createFolder('folder1');
-      const rootFolder2 = await createFolder('folder2');
-      const nestedFolder1a = await createFolder('folder1A', rootFolder1.id);
-      const nestedFolder1b = await createFolder('folder1B', rootFolder1.id);
-      const nestedFolder1a1 = await createFolder('folder1A1', nestedFolder1a.id);
-      data.folders.push(rootFolder1, rootFolder2, nestedFolder1a, nestedFolder1b, nestedFolder1a1);
-
-      const res = await rq({
-        method: 'POST',
-        url: '/upload/folders/actions/tree',
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toMatchObject({
-        data: [
-          {
-            children: [
-              {
-                children: [{ children: [], id: expect.anything(), name: 'folder1A1' }],
-                id: expect.anything(),
-                name: 'folder1A',
-              },
-              { children: [], id: expect.anything(), name: 'folder1B' },
-            ],
-            id: 3,
-            name: 'folder1',
-          },
-          { children: [], id: expect.anything(), name: 'folder2' },
-        ],
-      });
     });
   });
 });

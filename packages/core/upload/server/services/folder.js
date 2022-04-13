@@ -43,7 +43,7 @@ const exists = async (params = {}) => {
   return count > 0;
 };
 
-const getTree = async () => {
+const getStructure = async () => {
   const joinTable = strapi.db.metadata.get('plugin::upload.folder').attributes.parent.joinTable;
   const qb = strapi.db.queryBuilder('plugin::upload.folder');
   const alias = qb.getAlias();
@@ -79,5 +79,5 @@ module.exports = {
   exists,
   deleteByIds,
   setPathAndUID,
-  getTree,
+  getStructure,
 };

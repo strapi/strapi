@@ -140,9 +140,9 @@ module.exports = {
       },
     },
     {
-      method: 'POST',
-      path: '/folders/actions/tree',
-      handler: 'admin-folder.getTree',
+      method: 'GET',
+      path: '/folder-structure',
+      handler: 'admin-folder.getStructure',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',

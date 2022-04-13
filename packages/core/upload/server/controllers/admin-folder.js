@@ -74,13 +74,13 @@ module.exports = {
     };
   },
 
-  async getTree(ctx) {
-    const { getTree } = getService('folder');
+  async getStructure(ctx) {
+    const { getStructure } = getService('folder');
 
-    const tree = await getTree();
+    const structure = await getStructure();
 
     ctx.body = {
-      data: tree,
+      data: structure,
     };
   },
 };
