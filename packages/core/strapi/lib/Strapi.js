@@ -6,7 +6,6 @@ const { isFunction } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 const { createAsyncParallelHook } = require('@strapi/utils').hooks;
-const { isTypeScriptProjectSync } = require('@strapi/typescript-utils');
 
 const loadConfiguration = require('./core/app-configuration');
 

@@ -68,23 +68,19 @@ function App() {
   useEffect(() => {
     const getData = async () => {
       try {
-        const [
-          {
-            data: {
-              data: { hasAdmin, uuid },
-            },
+        const {
+          data: {
+            data: { hasAdmin, uuid },
           },
-          {
-            data: { data: properties },
-          },
-        ] = await Promise.all([
-          axios.get(`${strapi.backendURL}/admin/init`),
-          axios.get(`${strapi.backendURL}/admin/telemetry-properties`),
-        ]);
-
-        setTelemetryProperties(properties);
+        } = await axios.get(`${strapi.backendURL}/admin/init`);
 
         if (uuid) {
+          const {
+            data: { data: properties },
+          } = await axios.get(`${strapi.backendURL}/admin/telemetry-properties`);
+
+          setTelemetryProperties(properties);
+
           try {
             const deviceId = await getUID();
 

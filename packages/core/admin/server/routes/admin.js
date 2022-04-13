@@ -25,7 +25,10 @@ module.exports = [
     method: 'GET',
     path: '/telemetry-properties',
     handler: 'admin.telemetryProperties',
-    config: { auth: false },
+    config: {
+      auth: false,
+      policies: ['admin::isTelemetryEnabled'],
+    },
   },
   {
     method: 'GET',
