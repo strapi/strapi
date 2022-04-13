@@ -32,7 +32,7 @@ describe('ConfigurationsProvider', () => {
 
       return (
         <div>
-          <button type="button" onClick={() => setCustomLogo('michka.jpg', 'menu')}>
+          <button type="button" onClick={() => setCustomLogo('michka.jpg', 'menuLogo')}>
             Change logo
           </button>
           <div>{menu.custom}</div>
@@ -57,7 +57,7 @@ describe('ConfigurationsProvider', () => {
     expect(queryByText('strapi-menu.jpg')).not.toBeInTheDocument();
   });
 
-  it.only('should give access to defaultMenuLogo', () => {
+  it('should give access to defaultMenuLogo', () => {
     const Test = () => {
       const {
         logos: { menu },

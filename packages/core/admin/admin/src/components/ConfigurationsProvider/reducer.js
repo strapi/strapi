@@ -15,7 +15,9 @@ const reducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {
       case 'SET_CUSTOM_LOGO': {
-        draftState[action.logoType] = action.value;
+        if (action.logoType in draftState) {
+          draftState[action.logoType] = action.value;
+        }
         break;
       }
       case 'SET_PROJECT_SETTINGS': {
