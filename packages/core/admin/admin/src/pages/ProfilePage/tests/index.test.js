@@ -20,6 +20,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useFocusWhenNavigate: jest.fn(),
   useAppInfos: jest.fn(() => ({ setUserDisplayName: jest.fn() })),
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn, unlockApp: jest.fn() })),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const client = new QueryClient({

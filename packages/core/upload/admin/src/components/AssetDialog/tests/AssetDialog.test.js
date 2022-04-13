@@ -15,6 +15,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useRBAC: jest.fn(),
   useNotification: jest.fn(() => jest.fn()),
   useQueryParams: jest.fn(),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 jest.mock('../../../utils/getTrad', () => x => x);

@@ -14,9 +14,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn, unlockApp: jest.fn() })),
   useRBAC: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
-  // useTracking: jest.fn(() => ({
-  //   trackUsage: jest.fn()
-  // }))
+  useTracking: jest.fn(() => ({
+    trackUsage: jest.fn(),
+  })),
 }));
 
 const client = new QueryClient({
