@@ -32,7 +32,8 @@ jest.mock('../utils/api', () => ({
   fetchStrapiLatestRelease: jest.fn(),
   fetchAppInfo: jest.fn(),
   fetchCurrentUserPermissions: jest.fn(),
-  fetchUserRoles: jest.fn(() => [{ code: 'strapi-super-admin' }]),
+  // fetchUserRoles: jest.fn(() => [{ code: 'strapi-super-admin' }]),
+  fetchUserRoles: jest.fn(),
 }));
 
 jest.mock('../../PluginsInitializer', () => () => <div>PluginsInitializer</div>);
@@ -152,21 +153,22 @@ describe('Admin | components | AuthenticatedApp', () => {
     expect(fetchStrapiLatestRelease).not.toHaveBeenCalled();
   });
 
-  it('should call setGuidedTourVisibility when user is super admin', async () => {
-    const setGuidedTourVisibility = jest.fn();
-    useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
-    render(app);
-
-    await waitFor(() => expect(setGuidedTourVisibility).toHaveBeenCalledWith(true));
-  });
-
-  it.only('should not setGuidedTourVisibility when user is not super admin', async () => {
-    fetchUserRoles.mockImplementation(() => [{ code: 'strapi-editor' }]);
+  it('should not setGuidedTourVisibility when user is not super admin', async () => {
+    fetchUserRoles.mockImplementationOnce(() => [{ code: 'strapi-editor' }]);
     const setGuidedTourVisibility = jest.fn();
     useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
 
     render(app);
 
     await waitFor(() => expect(setGuidedTourVisibility).not.toHaveBeenCalled());
+  });
+
+  it('should call setGuidedTourVisibility when user is super admin', async () => {
+    fetchUserRoles.mockImplementationOnce(() => [{ code: 'strapi-super-admin' }]);
+    const setGuidedTourVisibility = jest.fn();
+    useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
+    render(app);
+
+    await waitFor(() => expect(setGuidedTourVisibility).toHaveBeenCalledWith(true));
   });
 });
