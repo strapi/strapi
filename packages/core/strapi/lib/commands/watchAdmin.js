@@ -41,6 +41,5 @@ module.exports = async function({ browser }) {
       backend: backendURL,
       adminPath: addSlash(adminPath),
     },
-    useTypeScript: isTSProject,
   });
 };

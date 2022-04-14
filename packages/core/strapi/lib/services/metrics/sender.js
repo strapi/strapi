@@ -6,7 +6,7 @@ const _ = require('lodash');
 const isDocker = require('is-docker');
 const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
-const { isTypeScriptProjectSync } = require('@strapi/typescript-utils');
+const { isUsingTypeScriptSync } = require('@strapi/typescript-utils');
 const ee = require('../../utils/ee');
 const machineID = require('../../utils/machine-id');
 const stringifyDeep = require('./stringify-deep');
@@ -52,8 +52,8 @@ module.exports = strapi => {
     version: strapi.config.get('info.strapi'),
     strapiVersion: strapi.config.get('info.strapi'),
     projectType: isEE ? 'Enterprise' : 'Community',
-    useTypescriptOnServer: isTypeScriptProjectSync(serverRootPath),
-    useTypescriptOnAdmin: isTypeScriptProjectSync(adminRootPath),
+    useTypescriptOnServer: isUsingTypeScriptSync(serverRootPath),
+    useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
   };
 
   addPackageJsonStrapiMetadata(anonymous_metadata, strapi);

@@ -30,10 +30,10 @@ const hasNonDefaultPlugins = plugins => {
   return diff.length > 0;
 };
 
-const hasCustomAdminCode = async (dir, useTypeScript) => {
+const hasCustomAdminCode = async dir => {
   const customAdminPath = path.join(dir, 'src', 'admin');
 
-  const customAdminAppConfigFile = await getCustomAppConfigFile(dir, useTypeScript);
+  const customAdminAppConfigFile = await getCustomAppConfigFile(dir);
   const customAdminWebpackFile = path.join(customAdminPath, 'webpack.config.js');
 
   const hasCustomConfigFile = !!customAdminAppConfigFile;
@@ -42,8 +42,8 @@ const hasCustomAdminCode = async (dir, useTypeScript) => {
   return hasCustomConfigFile || hasCustomWebpackFile;
 };
 
-const shouldBuildAdmin = async ({ appDir, plugins, useTypeScript }) => {
-  const appHasCustomAdminCode = await hasCustomAdminCode(appDir, useTypeScript);
+const shouldBuildAdmin = async ({ appDir, plugins }) => {
+  const appHasCustomAdminCode = await hasCustomAdminCode(appDir);
   const appHasNonDefaultPlugins = hasNonDefaultPlugins(plugins);
 
   return appHasCustomAdminCode || appHasNonDefaultPlugins;

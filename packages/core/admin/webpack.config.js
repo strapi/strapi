@@ -13,7 +13,6 @@ const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
 
 module.exports = ({
-  appDir,
   cacheDir,
   dest,
   entry,
@@ -29,7 +28,7 @@ module.exports = ({
     eeRoot: './ee/admin',
     ceRoot: './admin/src',
   },
-  useTypeScript,
+  tsConfigFilePath,
 }) => {
   const isProduction = env === 'production';
 
@@ -49,34 +48,6 @@ module.exports = ({
         new WebpackBar(),
       ]
     : [];
-
-  if (useTypeScript) {
-    const tsChecker = new ForkTsCheckerPlugin({
-      typescript: {
-        configFile: path.join(appDir, 'src', 'admin', 'tsconfig.json'),
-      },
-    });
-
-    webpackPlugins.push(tsChecker);
-  }
-
-  const rules = [];
-
-  // webpack is quite slow to compile so it is best not to use the ts loader when
-  // it is not needed in javascript apps.
-  // Users can still add it by using the custom webpack config.
-  if (useTypeScript) {
-    rules.push({
-      test: /\.tsx?$/,
-      loader: require.resolve('esbuild-loader'),
-      include: [cacheDir, ...pluginsPath],
-      exclude: /node_modules/,
-      options: {
-        loader: 'tsx',
-        target: 'es2015',
-      },
-    });
-  }
 
   // Directly inject a polyfill in the webpack entry point before the entry point
   // FIXME: I have noticed a bug regarding the helper-plugin and esbuild-loader
@@ -111,6 +82,16 @@ module.exports = ({
     },
     module: {
       rules: [
+        {
+          test: /\.tsx?$/,
+          loader: require.resolve('esbuild-loader'),
+          include: [cacheDir, ...pluginsPath],
+          exclude: /node_modules/,
+          options: {
+            loader: 'tsx',
+            target: 'es2015',
+          },
+        },
         {
           test: /\.m?js$/,
           include: cacheDir,
@@ -221,7 +202,6 @@ module.exports = ({
             },
           },
         },
-        ...rules,
       ],
     },
     resolve: {
@@ -239,6 +219,12 @@ module.exports = ({
       new webpack.DefinePlugin(envVariables),
 
       new NodePolyfillPlugin(),
+
+      new ForkTsCheckerPlugin({
+        typescript: {
+          configFile: tsConfigFilePath,
+        },
+      }),
       ...webpackPlugins,
     ],
   };

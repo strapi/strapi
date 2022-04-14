@@ -22,6 +22,8 @@ const smp = new SpeedMeasurePlugin();
 const buildAdmin = async () => {
   const entry = path.join(__dirname, '..', 'admin', 'src');
   const dest = path.join(__dirname, '..', 'build');
+  const tsConfigFilePath = path.join(__dirname, '..', 'admin', 'src', 'tsconfig.json');
+
   const corePlugins = getCorePluginsPath();
   const plugins = getPluginToInstallPath(PLUGINS_TO_INSTALL);
   const allPlugins = { ...corePlugins, ...plugins };
@@ -40,6 +42,7 @@ const buildAdmin = async () => {
       backend: 'http://localhost:1337',
       adminPath: '/admin/',
     },
+    tsConfigFilePath,
   };
 
   const config =

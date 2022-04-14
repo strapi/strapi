@@ -28,6 +28,7 @@ module.exports = () => {
     dest,
     env,
     options,
+    tsConfigFilePath: path.resolve(__dirname, 'admin', 'src', 'tsconfig.json'),
   };
 
   const config = webpackConfig(args);

@@ -1,7 +1,13 @@
 'use strict';
 
 const fse = require('fs-extra');
+const { isUsingTypeScript } = require('@strapi/typescript-utils');
 const getCustomAppConfigFile = require('../get-custom-app-config-file');
+
+jest.mock('@strapi/typescript-utils', () => ({
+  ...jest.requireActual('@strapi/typescript-utils'),
+  isUsingTypeScript: jest.fn(),
+}));
 
 describe('getCustomAppConfigFile', () => {
   test('It should return undefined when the app config file extension is not .js and useTypeScript is falsy', async () => {
@@ -9,9 +15,9 @@ describe('getCustomAppConfigFile', () => {
       return ['app.example.js', 'webpack.config.js', 'app.ts', 'app.tsx'];
     });
 
-    const useTypeScript = false;
+    isUsingTypeScript.mockImplementation(() => false);
 
-    const result = await getCustomAppConfigFile('/', useTypeScript);
+    const result = await getCustomAppConfigFile('/');
 
     expect(result).toBeUndefined();
   });
@@ -21,9 +27,9 @@ describe('getCustomAppConfigFile', () => {
       return ['app.js', 'webpack.config.js', 'app.example.ts', 'app.example.tsx'];
     });
 
-    const useTypeScript = true;
+    isUsingTypeScript.mockImplementation(() => true);
 
-    const result = await getCustomAppConfigFile('/', useTypeScript);
+    const result = await getCustomAppConfigFile('/');
 
     expect(result).toBeUndefined();
   });
@@ -33,9 +39,9 @@ describe('getCustomAppConfigFile', () => {
       return ['app.js', 'webpack.config.js', 'app.ts', 'app.tsx'];
     });
 
-    const useTypeScript = false;
+    isUsingTypeScript.mockImplementation(() => false);
 
-    const result = await getCustomAppConfigFile('/', useTypeScript);
+    const result = await getCustomAppConfigFile('/');
 
     expect(result).toEqual('app.js');
   });
@@ -45,9 +51,9 @@ describe('getCustomAppConfigFile', () => {
       return ['app.js', 'webpack.config.js', 'app.ts', 'app.example.tsx'];
     });
 
-    const useTypeScript = true;
+    isUsingTypeScript.mockImplementation(() => true);
 
-    const result = await getCustomAppConfigFile('/', useTypeScript);
+    const result = await getCustomAppConfigFile('/');
 
     expect(result).toEqual('app.ts');
 
@@ -55,7 +61,7 @@ describe('getCustomAppConfigFile', () => {
       return ['app.js', 'webpack.config.js', 'app.tsx'];
     });
 
-    const otherResult = await getCustomAppConfigFile('/', useTypeScript);
+    const otherResult = await getCustomAppConfigFile('/');
 
     expect(otherResult).toEqual('app.tsx');
   });
