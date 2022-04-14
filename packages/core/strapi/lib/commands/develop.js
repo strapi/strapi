@@ -21,7 +21,7 @@ const { buildTypeScript, buildAdmin } = require('./builders');
 module.exports = async function({ build, watchAdmin, polling, browser }) {
   const appDir = process.cwd();
 
-  const isTSProject = await tsUtils.isTypeScriptProject(appDir);
+  const isTSProject = await tsUtils.isUsingTypeScript(appDir);
   const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
 
   try {

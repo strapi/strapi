@@ -11,10 +11,10 @@ module.exports = async ({ optimization, forceBuild = true }) => {
   let buildDestDir = process.cwd();
   const srcDir = process.cwd();
 
-  const isTSProject = await tsUtils.isTypeScriptProject(srcDir);
+  const useTypeScriptServer = await tsUtils.isUsingTypeScript(srcDir);
 
   // Typescript
-  if (isTSProject) {
+  if (useTypeScriptServer) {
     await buildTypeScript({ srcDir, watch: false });
 
     // Update the dir path for the next steps
@@ -24,7 +24,7 @@ module.exports = async ({ optimization, forceBuild = true }) => {
   await buildAdmin({
     buildDestDir,
     forceBuild,
-    isTSProject,
+    isTSProject: useTypeScriptServer,
     optimization,
     srcDir,
   });
