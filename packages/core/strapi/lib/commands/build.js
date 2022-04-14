@@ -24,7 +24,6 @@ module.exports = async ({ optimization, forceBuild = true }) => {
   await buildAdmin({
     buildDestDir,
     forceBuild,
-    isTSProject,
     optimization,
     srcDir,
   });
