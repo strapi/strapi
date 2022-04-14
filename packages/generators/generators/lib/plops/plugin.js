@@ -9,12 +9,14 @@ const logInstructions = (pluginName, { language }) => {
     .fill('─')
     .join('');
 
+  const exportInstruction = language === 'js' ? 'module.exports =' : 'export default';
+
   return `
 You can now enable your plugin by adding the following in ${chalk.yellow(
     `./config/plugins.${language}`
   )}
 ${separator}
-module.exports = {
+${exportInstruction} {
   ${chalk.gray('// ...')}
   ${chalk.green(`'${pluginName}'`)}: {
     enabled: ${chalk.yellow(true)},
