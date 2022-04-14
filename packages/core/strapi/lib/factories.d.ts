@@ -8,23 +8,23 @@ type ControllerConfig = Controller;
 type ServiceConfig = Service;
 
 type HandlerConfig = {
-  auth: false | { scope: string[] };
-  policies: Array<string | Policy>;
-  middlewares: Array<string | Middleware>;
+  auth?: false | { scope: string[] };
+  policies?: Array<string | Policy>;
+  middlewares?: Array<string | Middleware>;
 };
 
 type SingleTypeRouterConfig = {
-  find: HandlerConfig;
-  update: HandlerConfig;
-  delete: HandlerConfig;
+  find?: HandlerConfig;
+  update?: HandlerConfig;
+  delete?: HandlerConfig;
 };
 
 type CollectionTypeRouterConfig = {
-  find: HandlerConfig;
-  findOne: HandlerConfig;
-  create: HandlerConfig;
-  update: HandlerConfig;
-  delete: HandlerConfig;
+  find?: HandlerConfig;
+  findOne?: HandlerConfig;
+  create?: HandlerConfig;
+  update?: HandlerConfig;
+  delete?: HandlerConfig;
 };
 
 type RouterConfig = {
