@@ -22,8 +22,8 @@ const loopContentTypeNames = (api, callback) => {
         ? strapi.plugin(api.name).routes['content-api']
         : strapi.api[api.name].routes[contentTypeName];
 
-    // Return early when routeInfo is undefined
-    if (!routeInfo) return;
+    // Continue to next iteration if routeInfo is undefined
+    if (!routeInfo) continue;
 
     // Uppercase the first letter of the api name
     const apiName = _.upperFirst(api.name);

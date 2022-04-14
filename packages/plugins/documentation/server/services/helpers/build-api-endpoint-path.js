@@ -53,20 +53,23 @@ const getPathParams = routePath => {
 /**
  *
  * @param {string} prefix - The prefix found on the routes object
- * @param {string} path - The current route
+ * @param {string} route - The current route
+ * @property {string} route.path - The current route's path
+ * @property {object} route.config - The current route's config object
  *
  * @returns {string}
  */
-const getPathWithPrefix = (globalRoutePrefix, route) => {
-  if (_.has(route.info, 'pluginName') && _.has(route.config, 'prefix')) {
-    // Use the prefix specified on a plugin route
-    return route.config.prefix.concat(route.path);
+const getPathWithPrefix = (prefix, route) => {
+  // When the prefix is set on the routes and
+  // the current route is not trying to remove it
+  if (prefix && !_.has(route.config, 'prefix')) {
+    // Add the prefix to the path
+    return prefix.concat(route.path);
   }
 
-  // Use the prefix specified for all routes
-  return globalRoutePrefix.concat(route.path);
+  // Otherwise just return path
+  return route.path;
 };
-
 /**
  * @description Gets all paths based on routes
  *
@@ -90,15 +93,9 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
     // TODO: Find a more reliable way to determine list of entities vs a single entity
     const isListOfEntities = route.handler.split('.').pop() === 'find';
     const methodVerb = route.method.toLowerCase();
-
     const hasPathParams = route.path.includes('/:');
-
-    const pathWithPrefix = routeInfo.prefix
-      ? getPathWithPrefix(routeInfo.prefix, route)
-      : route.path;
-
+    const pathWithPrefix = getPathWithPrefix(routeInfo.prefix, route);
     const routePath = hasPathParams ? parsePathWithVariables(pathWithPrefix) : pathWithPrefix;
-
     const { responses } = getApiResponses(uniqueName, route, isListOfEntities);
 
     const swaggerConfig = {
