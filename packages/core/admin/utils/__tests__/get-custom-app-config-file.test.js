@@ -1,12 +1,12 @@
 'use strict';
 
 const fse = require('fs-extra');
-const { isTypeScriptProject } = require('@strapi/typescript-utils');
+const { isUsingTypeScript } = require('@strapi/typescript-utils');
 const getCustomAppConfigFile = require('../get-custom-app-config-file');
 
 jest.mock('@strapi/typescript-utils', () => ({
   ...jest.requireActual('@strapi/typescript-utils'),
-  isTypeScriptProject: jest.fn(),
+  isUsingTypeScript: jest.fn(),
 }));
 
 describe('getCustomAppConfigFile', () => {
@@ -15,7 +15,7 @@ describe('getCustomAppConfigFile', () => {
       return ['app.example.js', 'webpack.config.js', 'app.ts', 'app.tsx'];
     });
 
-    isTypeScriptProject.mockImplementation(() => false);
+    isUsingTypeScript.mockImplementation(() => false);
 
     const result = await getCustomAppConfigFile('/');
 
@@ -27,7 +27,7 @@ describe('getCustomAppConfigFile', () => {
       return ['app.js', 'webpack.config.js', 'app.example.ts', 'app.example.tsx'];
     });
 
-    isTypeScriptProject.mockImplementation(() => true);
+    isUsingTypeScript.mockImplementation(() => true);
 
     const result = await getCustomAppConfigFile('/');
 
@@ -39,7 +39,7 @@ describe('getCustomAppConfigFile', () => {
       return ['app.js', 'webpack.config.js', 'app.ts', 'app.tsx'];
     });
 
-    isTypeScriptProject.mockImplementation(() => false);
+    isUsingTypeScript.mockImplementation(() => false);
 
     const result = await getCustomAppConfigFile('/');
 
@@ -51,7 +51,7 @@ describe('getCustomAppConfigFile', () => {
       return ['app.js', 'webpack.config.js', 'app.ts', 'app.example.tsx'];
     });
 
-    isTypeScriptProject.mockImplementation(() => true);
+    isUsingTypeScript.mockImplementation(() => true);
 
     const result = await getCustomAppConfigFile('/');
 

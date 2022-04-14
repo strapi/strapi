@@ -3,7 +3,7 @@
 const path = require('path');
 const _ = require('lodash');
 const fs = require('fs-extra');
-const { isTypeScriptProject } = require('@strapi/typescript-utils');
+const { isUsingTypeScript } = require('@strapi/typescript-utils');
 const getCustomAppConfigFile = require('./get-custom-app-config-file');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
@@ -71,7 +71,7 @@ async function copyAdmin(dest) {
 async function createCacheDir({ appDir, plugins }) {
   const cacheDir = path.resolve(appDir, '.cache');
 
-  const useTypeScript = await isTypeScriptProject(
+  const useTypeScript = await isUsingTypeScript(
     path.join(appDir, 'src', 'admin'),
     'tsconfig.json'
   );

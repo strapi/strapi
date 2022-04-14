@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const { isTypeScriptProject } = require('@strapi/typescript-utils');
+const { isUsingTypeScript } = require('@strapi/typescript-utils');
 const chalk = require('chalk');
 
 const {
@@ -17,7 +17,7 @@ const {
 async function build({ appDir, buildDestDir, env, forceBuild, optimize, options, plugins }) {
   const buildAdmin = await shouldBuildAdmin({ appDir, plugins });
 
-  const useTypeScript = await isTypeScriptProject(
+  const useTypeScript = await isUsingTypeScript(
     path.join(appDir, 'src', 'admin'),
     'tsconfig.json'
   );
@@ -99,7 +99,7 @@ async function clean({ appDir, buildDestDir }) {
 }
 
 async function watchAdmin({ appDir, browser, buildDestDir, host, options, plugins, port }) {
-  const useTypeScript = await isTypeScriptProject(
+  const useTypeScript = await isUsingTypeScript(
     path.join(appDir, 'src', 'admin'),
     'tsconfig.json'
   );

@@ -2,7 +2,7 @@
 
 const { join } = require('path');
 const fse = require('fs-extra');
-const { isTypeScriptProject } = require('@strapi/typescript-utils');
+const { isUsingTypeScript } = require('@strapi/typescript-utils');
 
 /**
  * Retrieve the custom admin entry file name
@@ -11,7 +11,7 @@ const { isTypeScriptProject } = require('@strapi/typescript-utils');
  */
 const getCustomAppConfigFile = async dir => {
   const adminSrcPath = join(dir, 'src', 'admin');
-  const useTypeScript = await isTypeScriptProject(adminSrcPath, 'tsconfig.json');
+  const useTypeScript = await isUsingTypeScript(adminSrcPath, 'tsconfig.json');
 
   const files = await fse.readdir(adminSrcPath);
 

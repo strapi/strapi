@@ -3,7 +3,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const chokidar = require('chokidar');
-const { isTypeScriptProject } = require('@strapi/typescript-utils');
+const { isUsingTypeScript } = require('@strapi/typescript-utils');
 
 /**
  * Listen to files change and copy the changed files in the .cache/admin folder
@@ -11,7 +11,7 @@ const { isTypeScriptProject } = require('@strapi/typescript-utils');
  * @param {string} dir
  */
 async function watchAdminFiles(dir) {
-  const useTypeScript = await isTypeScriptProject(path.join(dir, 'src', 'admin'), 'tsconfig.json');
+  const useTypeScript = await isUsingTypeScript(path.join(dir, 'src', 'admin'), 'tsconfig.json');
 
   const cacheDir = path.join(dir, '.cache');
   const targetExtensionFile = useTypeScript ? 'app.tsx' : 'app.js';
