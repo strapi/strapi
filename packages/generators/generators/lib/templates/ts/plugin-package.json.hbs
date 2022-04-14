@@ -8,6 +8,10 @@
     "kind": "plugin"
   },
   "dependencies": {},
+  "devDependencies": {
+    "typescript": "4.6.3",
+    "@strapi/strapi": "4.1.7"
+  },
   "author": {
     "name": "A Strapi developer"
   },
@@ -19,6 +23,10 @@
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
+  },
+  "scripts": {
+    "develop": "tsc -w",
+    "build": "tsc"
   },
   "license": "MIT"
 }

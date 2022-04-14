@@ -12,7 +12,7 @@ const strapi = require('../index');
 module.exports = async function({ browser }) {
   const currentDirectory = process.cwd();
 
-  const isTSProject = await tsUtils.isTypeScriptProject(currentDirectory);
+  const isTSProject = await tsUtils.isUsingTypeScript(currentDirectory);
   const buildDestDir = isTSProject ? path.join(currentDirectory, 'dist') : currentDirectory;
 
   const strapiInstance = strapi({

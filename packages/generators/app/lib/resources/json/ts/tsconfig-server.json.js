@@ -1,23 +1,32 @@
 'use strict';
 
 module.exports = () => ({
+  extends: '@strapi/typescript-utils/lib/configs/server',
+
   compilerOptions: {
-    lib: ['es2019', 'es2020.promise', 'es2020.bigint', 'es2020.string', 'DOM'],
-    module: 'commonjs',
-    target: 'es2019',
-    strict: false,
-    jsx: 'react',
-    noImplicitAny: false,
-    esModuleInterop: true,
-    skipLibCheck: true,
-    forceConsistentCasingInFileNames: true,
-    allowJs: true,
     outDir: 'dist',
     rootDir: '.',
-    noEmitOnError: true,
-    resolveJsonModule: true,
   },
 
-  include: ['src/**/*.json', './'],
-  exclude: ['node_modules/', 'build/', 'dist/', 'src/admin', '.cache/', '.tmp/'],
+  include: [
+    // Include the root directory
+    './',
+    // Force the JSON files in the src folder to be included
+    'src/**/*.json',
+  ],
+
+  exclude: [
+    'node_modules/',
+    'build/',
+    'dist/',
+    '.cache/',
+    '.tmp/',
+
+    // Do not include admin files in the server compilation
+    'src/admin/',
+    // Do not include test files
+    '**/*.test.ts',
+    // Do not include plugins in the server compilation
+    'src/plugins/**',
+  ],
 });

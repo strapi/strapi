@@ -39,7 +39,7 @@ async function build({ appDir, buildDestDir, env, forceBuild, optimize, options,
     ceRoot: path.resolve(cacheDir, 'admin', 'src'),
   };
 
-  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].appPathToPlugin);
+  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
 
   // Either use the tsconfig file from the generated app or the one inside the .cache folder
   // so we can develop plugins in TS while being in a JS app
@@ -117,7 +117,7 @@ async function watchAdmin({ appDir, browser, buildDestDir, host, options, plugin
     ceRoot: path.resolve(cacheDir, 'admin', 'src'),
   };
 
-  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].appPathToPlugin);
+  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
 
   // Either use the tsconfig file from the generated app or the one inside the .cache folder
   // so we can develop plugins in TS while being in a JS app

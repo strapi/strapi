@@ -29,15 +29,11 @@ const toDetailedDeclaration = declaration => {
   let detailedDeclaration = pick(['enabled'], declaration);
   if (has('resolve', declaration)) {
     let pathToPlugin = '';
-    let appPathToPlugin = '';
 
     try {
       pathToPlugin = dirname(require.resolve(declaration.resolve));
-      appPathToPlugin = pathToPlugin;
     } catch (e) {
-      // FIXME: It'll break for resolve paths that are located outside the project files
-      pathToPlugin = resolve(strapi.dirs.dist.root, declaration.resolve);
-      appPathToPlugin = resolve(strapi.dirs.app.root, declaration.resolve);
+      pathToPlugin = resolve(strapi.dirs.app.root, declaration.resolve);
 
       if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
         throw new Error(`${declaration.resolve} couldn't be resolved`);
@@ -45,7 +41,6 @@ const toDetailedDeclaration = declaration => {
     }
 
     detailedDeclaration.pathToPlugin = pathToPlugin;
-    detailedDeclaration.appPathToPlugin = appPathToPlugin;
   }
   return detailedDeclaration;
 };
