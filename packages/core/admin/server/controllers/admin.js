@@ -5,6 +5,7 @@ const execa = require('execa');
 const _ = require('lodash');
 const { exists } = require('fs-extra');
 const { ValidationError } = require('@strapi/utils').errors;
+const { isTypeScriptProject } = require('@strapi/typescript-utils');
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
 
@@ -41,6 +42,20 @@ module.exports = {
     const hasAdmin = await getService('user').exists();
 
     return { data: { uuid, hasAdmin } };
+  },
+
+  async telemetryProperties() {
+    const useTypescriptOnServer = await isTypeScriptProject(strapi.dirs.app.root);
+    const useTypescriptOnAdmin = await isTypeScriptProject(
+      path.join(strapi.dirs.app.root, 'src', 'admin')
+    );
+
+    return {
+      data: {
+        useTypescriptOnServer,
+        useTypescriptOnAdmin,
+      },
+    };
   },
 
   async information() {

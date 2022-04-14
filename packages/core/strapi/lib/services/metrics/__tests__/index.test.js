@@ -24,6 +24,11 @@ describe('metrics', () => {
       server: {
         use,
       },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
     }).register();
 
     expect(use).toHaveBeenCalled();
@@ -46,6 +51,11 @@ describe('metrics', () => {
       server: {
         use,
       },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
     }).register();
 
     expect(use).not.toHaveBeenCalled();
@@ -65,6 +75,11 @@ describe('metrics', () => {
       },
       server: {
         use() {},
+      },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
       },
     });
 
@@ -99,6 +114,11 @@ describe('metrics', () => {
       },
       server: {
         use() {},
+      },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
       },
     });
 

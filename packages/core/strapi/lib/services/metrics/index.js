@@ -31,6 +31,10 @@ const createTelemetryInstance = strapi => {
   const sendEvent = wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS });
 
   return {
+    get isDisabled() {
+      return isDisabled;
+    },
+
     register() {
       if (!isDisabled) {
         const pingCron = scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
