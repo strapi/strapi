@@ -5,6 +5,7 @@ import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/
 import { Box } from '@strapi/design-system/Box';
 import { Divider } from '@strapi/design-system/Divider';
 import FromComputerForm from './FromComputerForm';
+import FromUrlForm from './FromUrlForm';
 
 const AddLogoDialog = ({ setLocalImage, goTo, next, onClose }) => {
   const { formatMessage } = useIntl();
@@ -44,7 +45,9 @@ const AddLogoDialog = ({ setLocalImage, goTo, next, onClose }) => {
             next={next}
           />
         </TabPanel>
-        <TabPanel>TO DO</TabPanel>
+        <TabPanel>
+          <FromUrlForm onClose={onClose} setLocalImage={setLocalImage} goTo={goTo} next={next} />
+        </TabPanel>
       </TabPanels>
     </TabGroup>
   );
