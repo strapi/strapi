@@ -49,15 +49,6 @@ module.exports = ({
       ]
     : [];
 
-  const tsChecker = new ForkTsCheckerPlugin({
-    typescript: {
-      // FIXME
-      configFile: tsConfigFilePath,
-    },
-  });
-
-  webpackPlugins.push(tsChecker);
-
   // Directly inject a polyfill in the webpack entry point before the entry point
   // FIXME: I have noticed a bug regarding the helper-plugin and esbuild-loader
   // The only I could fix it was to inject the babel polyfill
@@ -228,6 +219,12 @@ module.exports = ({
       new webpack.DefinePlugin(envVariables),
 
       new NodePolyfillPlugin(),
+
+      new ForkTsCheckerPlugin({
+        typescript: {
+          configFile: tsConfigFilePath,
+        },
+      }),
       ...webpackPlugins,
     ],
   };
