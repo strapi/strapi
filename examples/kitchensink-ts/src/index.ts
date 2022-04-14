@@ -9,9 +9,7 @@ export default {
   },
 
   bootstrap({ strapi }: { strapi: Strapi }) {
-    const result = strapi.customAddMethod(11, 31);
-
-    // This should print "42"
-    console.log(result);
+    // This should return 42
+    strapi.customAddMethod(11, 31);
   },
 };
