@@ -24,7 +24,9 @@ const LIMITED_EVENTS = [
 
 const createTelemetryInstance = strapi => {
   const uuid = strapi.config.get('uuid');
-  const isDisabled = !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED);
+  const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled');
+  const isDisabled =
+    !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED) || isTruthy(telemetryDisabled);
 
   const crons = [];
   const sender = createSender(strapi);

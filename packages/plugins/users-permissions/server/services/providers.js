@@ -18,17 +18,16 @@ module.exports = ({ strapi }) => {
    * Helper to get profiles
    *
    * @param {String}   provider
-   * @param {Function} callback
    */
 
-  const getProfile = async (provider, query, callback) => {
+  const getProfile = async (provider, query) => {
     const access_token = query.access_token || query.code || query.oauth_token;
 
     const providers = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
       .get();
 
-    await providerRequest({ provider, query, callback, access_token, providers });
+    return providerRequest({ provider, query, access_token, providers });
   };
 
   /**
@@ -46,79 +45,69 @@ module.exports = ({ strapi }) => {
 
     return new Promise((resolve, reject) => {
       if (!access_token) {
-        return reject([null, { message: 'No access_token.' }]);
+        return reject({ message: 'No access_token.' });
       }
 
       // Get the profile.
-      getProfile(provider, query, async (err, profile) => {
-        if (err) {
-          return reject([null, err]);
-        }
+      getProfile(provider, query)
+        .then(async profile => {
+          const email = _.toLower(profile.email);
 
-        const email = _.toLower(profile.email);
-
-        // We need at least the mail.
-        if (!email) {
-          return reject([null, { message: 'Email was not available.' }]);
-        }
-
-        try {
-          const users = await strapi.query('plugin::users-permissions.user').findMany({
-            where: { email },
-          });
-
-          const advanced = await strapi
-            .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-            .get();
-
-          const user = _.find(users, { provider });
-
-          if (_.isEmpty(user) && !advanced.allow_register) {
-            return resolve([
-              null,
-              [{ messages: [{ id: 'Auth.advanced.allow_register' }] }],
-              'Register action is actually not available.',
-            ]);
+          // We need at least the mail.
+          if (!email) {
+            return reject({ message: 'Email was not available.' });
           }
 
-          if (!_.isEmpty(user)) {
-            return resolve([user, null]);
+          try {
+            const users = await strapi.query('plugin::users-permissions.user').findMany({
+              where: { email },
+            });
+
+            const advanced = await strapi
+              .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
+              .get();
+
+            const user = _.find(users, { provider });
+
+            if (_.isEmpty(user) && !advanced.allow_register) {
+              return reject({ message: 'Register action is actually not available.' });
+            }
+
+            if (!_.isEmpty(user)) {
+              return resolve(user);
+            }
+
+            if (
+              !_.isEmpty(_.find(users, user => user.provider !== provider)) &&
+              advanced.unique_email
+            ) {
+              return reject({ message: 'Email is already taken.' });
+            }
+
+            // Retrieve default role.
+            const defaultRole = await strapi
+              .query('plugin::users-permissions.role')
+              .findOne({ where: { type: advanced.default_role } });
+
+            // Create the new user.
+            const params = {
+              ...profile,
+              email, // overwrite with lowercased email
+              provider,
+              role: defaultRole.id,
+              confirmed: true,
+            };
+
+            const createdUser = await strapi
+              .query('plugin::users-permissions.user')
+              .create({ data: params });
+
+            return resolve(createdUser);
+          } catch (err) {
+            reject(err);
           }
-
-          if (
-            !_.isEmpty(_.find(users, user => user.provider !== provider)) &&
-            advanced.unique_email
-          ) {
-            return resolve([
-              null,
-              [{ messages: [{ id: 'Auth.form.error.email.taken' }] }],
-              'Email is already taken.',
-            ]);
-          }
-
-          // Retrieve default role.
-          const defaultRole = await strapi
-            .query('plugin::users-permissions.role')
-            .findOne({ where: { type: advanced.default_role } });
-
-          // Create the new user.
-          const params = {
-            ...profile,
-            email, // overwrite with lowercased email
-            provider,
-            role: defaultRole.id,
-            confirmed: true,
-          };
-
-          const createdUser = await strapi
-            .query('plugin::users-permissions.user')
-            .create({ data: params });
-
-          return resolve([createdUser, null]);
-        } catch (err) {
-          reject([null, err]);
-        }
-      });
+        })
+        .catch(reject);
     });
   };
 

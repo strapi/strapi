@@ -12,6 +12,8 @@ const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
 
+const EE_REGEX = /from.* ['"]ee_else_ce\//;
+
 module.exports = ({
   cacheDir,
   dest,
@@ -111,7 +113,7 @@ module.exports = ({
                     return true;
                   }
 
-                  return false;
+                  return EE_REGEX.test(fileContent);
                 } catch (e) {
                   return false;
                 }
