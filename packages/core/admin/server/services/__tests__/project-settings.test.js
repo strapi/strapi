@@ -191,13 +191,14 @@ describe('Project setting', () => {
           type: 'image/png',
           provider: 'local',
           url: 'file/url',
+          hash: '123',
         },
       };
 
       const newSettings = {
         menuLogo: {
           ...previousSettings.menuLogo,
-          url: 'file/new',
+          hash: '456',
         },
       };
 
