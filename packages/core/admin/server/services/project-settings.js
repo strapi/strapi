@@ -78,7 +78,7 @@ const uploadFiles = async (files = {}) => {
   return Promise.all(
     Object.values(files)
       .filter(file => file.stream instanceof fs.ReadStream)
-      .map(strapi.plugin('upload').provider.uploadStream)
+      .map(file => strapi.plugin('upload').provider.uploadStream(file))
   );
 };
 
