@@ -75,7 +75,11 @@ const getProjectSettings = async () => {
 
 const uploadFiles = async (files = {}) => {
   // Call the provider upload function for each file
-  return Promise.all(Object.values(files).map(strapi.plugin('upload').provider.uploadStream));
+  return Promise.all(
+    Object.values(files)
+      .filter(file => file.stream instanceof fs.ReadStream)
+      .map(strapi.plugin('upload').provider.uploadStream)
+  );
 };
 
 const deleteOldFiles = async ({ previousSettings, newSettings }) => {
@@ -106,16 +110,12 @@ const deleteOldFiles = async ({ previousSettings, newSettings }) => {
   );
 };
 
-const updateProjectSettings = async ({ body, files }) => {
+const updateProjectSettings = async newSettings => {
   const store = strapi.store({ type: 'core', name: 'admin' });
   const previousSettings = await store.get({ key: 'project-settings' });
+  const files = pick(newSettings, PROJECT_SETTINGS_FILE_INPUTS);
 
   await uploadFiles(files);
-
-  const newSettings = {
-    ...body,
-    ...files,
-  };
 
   PROJECT_SETTINGS_FILE_INPUTS.forEach(inputName => {
     // If the user input exists but is not a formdata "file" remove it
