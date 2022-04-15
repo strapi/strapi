@@ -73,7 +73,7 @@ const getProjectSettings = async () => {
   return projectSettings;
 };
 
-const uploadFiles = async files => {
+const uploadFiles = async (files = {}) => {
   // Call the provider upload function for each file
   return Promise.all(Object.values(files).map(strapi.plugin('upload').provider.uploadStream));
 };
