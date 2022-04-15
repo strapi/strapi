@@ -8,6 +8,7 @@ const {
 } = require('../project-settings');
 
 jest.mock('fs', () => ({
+  ...jest.requireActual('fs'),
   createReadStream: () => null,
 }));
 
@@ -230,7 +231,7 @@ describe('Project setting', () => {
         menuLogo: {
           name: 'filename.png',
           hash: 'filename_123',
-          url: '/uploads/filename_123',
+          url: '/uploads/filename_123.png',
           width: 100,
           height: 100,
           ext: '.png',
@@ -238,7 +239,7 @@ describe('Project setting', () => {
         },
       };
 
-      await updateProjectSettings({ body, files });
+      await updateProjectSettings({ ...body, ...files });
 
       expect(storeSet).toBeCalledTimes(1);
       expect(storeSet).toBeCalledWith({
@@ -255,7 +256,7 @@ describe('Project setting', () => {
         menuLogo: null,
       };
 
-      await updateProjectSettings({ body, files });
+      await updateProjectSettings({ ...body, ...files });
 
       expect(storeSet).toBeCalledTimes(1);
       expect(storeSet).toBeCalledWith({
@@ -280,7 +281,7 @@ describe('Project setting', () => {
         },
       };
 
-      await updateProjectSettings({ body, files });
+      await updateProjectSettings({ ...body, ...files });
 
       expect(storeSet).toBeCalledTimes(1);
       expect(storeSet).toBeCalledWith({
