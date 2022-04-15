@@ -8,6 +8,11 @@ const { ValidationError } = require('@strapi/utils').errors;
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
 
+const {
+  validateUpdateProjectSettings,
+  validateUpdateProjectSettingsFiles,
+  validateUpdateProjectSettingsImagesDimensions,
+} = require('../validation/project-settings');
 const { getService } = require('../utils');
 
 const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
@@ -41,6 +46,22 @@ module.exports = {
     const hasAdmin = await getService('user').exists();
 
     return { data: { uuid, hasAdmin } };
+  },
+
+  async updateProjectSettings(ctx) {
+    const projectSettingsService = getService('project-settings');
+
+    const {
+      request: { files, body },
+    } = ctx;
+
+    await validateUpdateProjectSettings(body);
+    await validateUpdateProjectSettingsFiles(files);
+
+    const formatedFiles = await projectSettingsService.parseFilesData(files);
+    await validateUpdateProjectSettingsImagesDimensions(formatedFiles);
+
+    return projectSettingsService.updateProjectSettings({ ...body, ...formatedFiles });
   },
 
   async information() {
