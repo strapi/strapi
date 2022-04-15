@@ -51,7 +51,7 @@ const parseFilesData = async files => {
 };
 
 const getProjectSettings = async () => {
-  const store = await strapi.store({ type: 'core', name: 'admin' });
+  const store = strapi.store({ type: 'core', name: 'admin' });
   const projectSettings = await store.get({ key: 'project-settings' });
 
   // Filter file input fields
@@ -107,7 +107,7 @@ const deleteOldFiles = async ({ previousSettings, newSettings }) => {
 };
 
 const updateProjectSettings = async ({ body, files }) => {
-  const store = await strapi.store({ type: 'core', name: 'admin' });
+  const store = strapi.store({ type: 'core', name: 'admin' });
   const previousSettings = await store.get({ key: 'project-settings' });
 
   await uploadFiles(files);
