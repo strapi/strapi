@@ -89,7 +89,7 @@ const deleteOldFiles = async ({ previousSettings, newSettings }) => {
       // Skip if the file was not changed
       if (
         newSettings[inputName] &&
-        previousSettings[inputName].url === newSettings[inputName].url
+        previousSettings[inputName].hash === newSettings[inputName].hash
       ) {
         return;
       }
