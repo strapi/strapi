@@ -41,6 +41,17 @@ const applySearch = (knex, query, ctx) => {
 
       break;
     }
+    case 'cockroachdb': {
+      searchColumns.forEach(attr => {
+        const columnName = toColumnName(meta, attr);
+        return knex.orWhereRaw(`??::text ILIKE ?`, [
+          qb.aliasColumn(columnName),
+          `%${escapeQuery(query, '*%\\')}%`,
+        ]);
+      });
+
+      break;
+    }
     case 'sqlite': {
       searchColumns.forEach(attr => {
         const columnName = toColumnName(meta, attr);

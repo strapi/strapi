@@ -293,8 +293,11 @@ const createHelpers = db => {
         debug(`Updating column ${updatedColumn.name}`);
 
         const { object } = updatedColumn;
+        if (updatedColumn.name === 'id') {
+          continue;
+        }
 
-        createColumn(tableBuilder, object).alter();
+        createColumn(tableBuilder, object).alter({ alterNullable: false, alterType: true });
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
