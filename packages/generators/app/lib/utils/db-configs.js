@@ -11,5 +11,6 @@ module.exports = {
     useNullAsDefault: true,
   },
   postgres: {},
+  cockroachdb: {},
   mysql: {},
 };

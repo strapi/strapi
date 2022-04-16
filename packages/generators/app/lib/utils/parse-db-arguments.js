@@ -5,7 +5,7 @@ const stopProcess = require('./stop-process');
 
 const DB_ARGS = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
 
-const VALID_CLIENTS = ['sqlite', 'mysql', 'postgres'];
+const VALID_CLIENTS = ['sqlite', 'mysql', 'postgres', 'cockroachdb'];
 
 module.exports = function parseDatabaseArguments({ scope, args }) {
   const argKeys = Object.keys(args);

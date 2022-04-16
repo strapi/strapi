@@ -7,7 +7,6 @@ const CockroachdbSchemaInspector = require('./schema-inspector');
 class CockroachDialect extends Dialect {
   constructor(db) {
     super(db);
-    console.log('CockroachDialect');
 
     this.schemaInspector = new CockroachdbSchemaInspector(db);
   }
@@ -17,6 +16,7 @@ class CockroachDialect extends Dialect {
   }
 
   initialize() {
+    this.db.connection.client.driver.types.setTypeParser(1082, 'text', v => v); // Don't cast DATE string to Date()
     this.db.connection.client.driver.types.setTypeParser(1700, 'text', parseFloat);
   }
 

@@ -301,15 +301,11 @@ const createHelpers = db => {
         debug(`Updating column ${updatedColumn.name}`);
         console.log(`Updating column ${updatedColumn.name}`);
         const { object } = updatedColumn;
-        console.log('updating column');
-        console.log(updatedColumn);
-        let alterNullable = false;
         if (updatedColumn.name === 'id') {
-          alterNullable = true;
           continue;
         }
 
-        createColumn(tableBuilder, object).alter({ alterNullable, alterType: true });
+        createColumn(tableBuilder, object).alter({ alterNullable: false, alterType: true });
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
