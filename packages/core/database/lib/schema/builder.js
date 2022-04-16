@@ -180,7 +180,7 @@ const createHelpers = db => {
     }
 
     const { type, columns, name } = index;
-
+    console.log('dropping index', name);
     switch (type) {
       case 'primary': {
         return tableBuilder.dropPrimary(name);
@@ -221,7 +221,7 @@ const createHelpers = db => {
     console.log('past if');
     if (notNullable === true) {
       console.log('Is not Nullable');
-      // col.notNullable()
+      col.notNullable();
       console.log('done not nullable');
     } else {
       console.log('Is Nullable');
@@ -266,6 +266,7 @@ const createHelpers = db => {
   };
 
   const alterTable = async (schemaBuilder, table) => {
+    console.log('Altering Table');
     await schemaBuilder.alterTable(table.name, tableBuilder => {
       // Delete indexes / fks / columns
 
@@ -301,11 +302,11 @@ const createHelpers = db => {
         debug(`Updating column ${updatedColumn.name}`);
         console.log(`Updating column ${updatedColumn.name}`);
         const { object } = updatedColumn;
-        if (updatedColumn.name === 'id') {
-          continue;
-        }
+        // if (updatedColumn.name === 'id') {
+        //   continue;
+        // }
 
-        createColumn(tableBuilder, object).alter({ alterNullable: false, alterType: true });
+        createColumn(tableBuilder, object).alter({ alterNullable: false, alterType: false });
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {

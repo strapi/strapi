@@ -82,6 +82,7 @@ const createTable = meta => {
       }
 
       if (column.primary) {
+        console.log('primary', column);
         table.indexes.push({
           type: 'primary',
           name: `${table.name}_${column.name}_primary`,
