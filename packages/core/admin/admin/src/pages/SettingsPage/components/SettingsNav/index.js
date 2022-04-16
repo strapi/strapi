@@ -29,7 +29,10 @@ const SettingsNav = ({ menu }) => {
     };
   });
 
-  const label = formatMessage({ id: 'app.components.LeftMenuLinkContainer.settings' });
+  const label = formatMessage({
+    id: 'global.settings',
+    defaultMessage: 'Settings',
+  });
 
   return (
     <SubNav ariaLabel={label}>

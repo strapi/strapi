@@ -73,7 +73,7 @@ module.exports = plop => {
         }
 
         if (answer.attributeType === 'media') {
-          val.allowedTypes = ['images', 'files', 'videos'];
+          val.allowedTypes = ['images', 'files', 'videos', 'audios'];
           val.multiple = answer.multiple;
         }
 

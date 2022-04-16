@@ -96,11 +96,15 @@ const DateTimePicker = ({
   const handleTimeClear = () => {
     setTimeValue(undefined);
 
-    if (dateValue && onChange) {
-      const dateToSet = new Date(dateValue);
+    let dateToSet;
+
+    if (dateValue) {
+      dateToSet = new Date(dateValue);
       dateToSet.setHours('00');
       dateToSet.setMinutes('00');
+    }
 
+    if (onChange) {
       onChange(dateToSet);
     }
   };
@@ -113,7 +117,7 @@ const DateTimePicker = ({
       hint={hint}
       error={error}
     >
-      <Stack size={1}>
+      <Stack spacing={1}>
         {label && (
           <Flex>
             <FieldLabel required={required} id="datetime-label">
@@ -122,7 +126,7 @@ const DateTimePicker = ({
             {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
           </Flex>
         )}
-        <Stack horizontal size={2}>
+        <Stack horizontal spacing={2}>
           <DatePicker
             data-testid="datetimepicker-date"
             name={name}

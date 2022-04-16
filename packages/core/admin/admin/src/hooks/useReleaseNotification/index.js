@@ -15,7 +15,7 @@ const useReleaseNotification = () => {
         link: {
           url: `https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`,
           label: {
-            id: 'notification.version.update.link',
+            id: 'global.see-more',
           },
         },
         blockTransition: true,

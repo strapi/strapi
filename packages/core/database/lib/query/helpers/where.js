@@ -249,12 +249,16 @@ const applyOperator = (qb, column, operator, value) => {
     case '$null': {
       if (value) {
         qb.whereNull(column);
+      } else {
+        qb.whereNotNull(column);
       }
       break;
     }
     case '$notNull': {
       if (value) {
         qb.whereNotNull(column);
+      } else {
+        qb.whereNull(column);
       }
       break;
     }

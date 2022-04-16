@@ -66,7 +66,7 @@ const CardPreview = ({ labelField, transparent, isSibling }) => {
       transparent={transparent}
       isSibling={isSibling}
     >
-      <Stack horizontal size={3}>
+      <Stack horizontal spacing={3}>
         <DragButton alignItems="center">
           <Drag />
         </DragButton>

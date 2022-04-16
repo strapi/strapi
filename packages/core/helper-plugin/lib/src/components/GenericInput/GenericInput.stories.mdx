@@ -28,10 +28,13 @@ Description...
         firstname: 'ee',
         email: '',
         private: null,
+        isNullable: null,
+        isActiveByDefault: true,
+        isInactiveByDefault: false
       });
       return (
         <ContentLayout>
-          <Stack size={4}>
+          <Stack spacing={4}>
             {layout.map((row, rowIndex) => {
               return (
                 <Box key={rowIndex}>

@@ -8,6 +8,7 @@ const execa = require('execa');
 const { getOr } = require('lodash/fp');
 
 const { createLogger } = require('@strapi/logger');
+const { joinBy } = require('@strapi/utils');
 const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
 const buildAdmin = require('./build');
@@ -120,7 +121,7 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
       /(^|[/\\])\../, // dot files
       /tmp/,
       '**/src/admin/**',
-      '**/src/plugins/**/admin/',
+      '**/src/plugins/**/admin/**',
       '**/documentation',
       '**/documentation/**',
       '**/node_modules',
@@ -131,6 +132,8 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
       '**/index.html',
       '**/public',
       '**/public/**',
+      strapiInstance.dirs.public,
+      joinBy('/', strapiInstance.dirs.public, '**'),
       '**/*.db*',
       '**/exports/**',
       ...watchIgnoreFiles,

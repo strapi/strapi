@@ -59,8 +59,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
         'relation',
         'component',
         'boolean',
-        'date',
         'media',
+        'password',
         'richtext',
         'timestamp',
       ].includes(type) && !!type
@@ -106,6 +106,14 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
     dispatch({
       type: 'ON_CHANGE_META',
       keys: name.split('.'),
+      value,
+    });
+  };
+
+  const handleSizeChange = ({ name, value }) => {
+    dispatch({
+      type: 'ON_CHANGE_SIZE',
+      name,
       value,
     });
   };
@@ -242,7 +250,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                 to="/"
               >
                 {formatMessage({
-                  id: 'app.components.go-back',
+                  id: 'global.back',
                   defaultMessage: 'Back',
                 })}
               </Link>
@@ -253,7 +261,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                 startIcon={<Check />}
                 type="submit"
               >
-                {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+                {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>
             }
           />
@@ -267,7 +275,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
               paddingLeft={7}
               paddingRight={7}
             >
-              <Stack size={4}>
+              <Stack spacing={4}>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('containers.SettingPage.settings'),
@@ -365,7 +373,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
             onSubmit={handleMetaSubmit}
             onToggle={handleToggleModal}
             type={get(attributes, [metaToEdit, 'type'], '')}
-            onChange={handleMetaChange}
+            onMetaChange={handleMetaChange}
+            onSizeChange={handleSizeChange}
           />
         )}
       </Main>

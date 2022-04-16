@@ -2,6 +2,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const { isObject } = require('lodash');
 const webpackConfig = require('../webpack.config');
 const {
   getCorePluginsPath,
@@ -23,7 +24,7 @@ const buildAdmin = async () => {
   const args = {
     entry,
     dest,
-    cacheDir: __dirname,
+    cacheDir: path.resolve(__dirname, '..'),
     pluginsPath: [path.resolve(__dirname, '../../../../packages')],
     env: 'production',
     optimize: true,
@@ -58,7 +59,20 @@ const buildAdmin = async () => {
         if (messages.errors.length > 1) {
           messages.errors.length = 1;
         }
-        return reject(new Error(messages.errors.join('\n\n')));
+
+        return reject(
+          new Error(
+            messages.errors.reduce((acc, error) => {
+              if (isObject(error)) {
+                acc += error.message;
+              } else {
+                acc += error.join('\n\n');
+              }
+
+              return acc;
+            }, '')
+          )
+        );
       }
 
       return resolve({

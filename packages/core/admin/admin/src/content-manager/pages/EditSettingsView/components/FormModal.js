@@ -26,7 +26,7 @@ const HeaderContainer = styled(Flex)`
   }
 `;
 
-const FormModal = ({ onToggle, onChange, onSubmit, type }) => {
+const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type }) => {
   const { selectedField } = useLayoutDnd();
   const { formatMessage } = useIntl();
 
@@ -61,7 +61,7 @@ const FormModal = ({ onToggle, onChange, onSubmit, type }) => {
         </ModalHeader>
         <ModalBody>
           <Grid gap={4}>
-            <ModalForm onChange={onChange} />
+            <ModalForm onMetaChange={onMetaChange} onSizeChange={onSizeChange} />
           </Grid>
         </ModalBody>
         <ModalFooter
@@ -72,7 +72,7 @@ const FormModal = ({ onToggle, onChange, onSubmit, type }) => {
           }
           endActions={
             <Button type="submit">
-              {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
+              {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
             </Button>
           }
         />
@@ -84,7 +84,8 @@ const FormModal = ({ onToggle, onChange, onSubmit, type }) => {
 FormModal.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
-  onChange: PropTypes.func.isRequired,
+  onMetaChange: PropTypes.func.isRequired,
+  onSizeChange: PropTypes.func.isRequired,
   type: PropTypes.string.isRequired,
 };
 

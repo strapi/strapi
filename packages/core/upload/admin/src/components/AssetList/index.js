@@ -75,7 +75,7 @@ export const AssetList = ({
 };
 
 AssetList.defaultProps = {
-  allowedTypes: ['images', 'files', 'videos'],
+  allowedTypes: ['images', 'files', 'videos', 'audios'],
   onEditAsset: undefined,
   size: 'M',
   onReorderAsset: undefined,

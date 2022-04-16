@@ -109,7 +109,7 @@ const EditPage = () => {
             <>
               <HeaderLayout
                 primaryAction={
-                  <Stack horizontal size={2}>
+                  <Stack horizontal spacing={2}>
                     <Button
                       disabled={role.code === 'strapi-super-admin'}
                       onClick={handleSubmit}
@@ -117,7 +117,7 @@ const EditPage = () => {
                       size="L"
                     >
                       {formatMessage({
-                        id: 'app.components.Button.save',
+                        id: 'global.save',
                         defaultMessage: 'Save',
                       })}
                     </Button>
@@ -134,14 +134,14 @@ const EditPage = () => {
                 navigationAction={
                   <Link startIcon={<ArrowLeft />} to="/settings/roles">
                     {formatMessage({
-                      id: 'app.components.go-back',
+                      id: 'global.back',
                       defaultMessage: 'Back',
                     })}
                   </Link>
                 }
               />
               <ContentLayout>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   <RoleForm
                     isLoading={isRoleLoading}
                     disabled={isFormDisabled}

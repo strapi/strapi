@@ -75,7 +75,7 @@ const unformatLayout = arr => {
   }, []);
 };
 
-const getInputSize = type => {
+const getDefaultInputSize = type => {
   switch (type) {
     case 'boolean':
     case 'date':
@@ -95,4 +95,41 @@ const getInputSize = type => {
   }
 };
 
-export { createLayout, formatLayout, getInputSize, getRowSize, unformatLayout };
+const getFieldSize = (name, layouts = []) => {
+  return layouts.reduce((acc, { rowContent }) => {
+    const size = rowContent.find(row => row.name === name)?.size ?? null;
+
+    if (size) {
+      acc = size;
+    }
+
+    return acc;
+  }, null);
+};
+
+const setFieldSize = (name, size, layouts = []) => {
+  return layouts.map(row => {
+    row.rowContent = row.rowContent.map(column => {
+      if (column.name === name) {
+        return {
+          ...column,
+          size,
+        };
+      }
+
+      return column;
+    });
+
+    return row;
+  });
+};
+
+export {
+  createLayout,
+  formatLayout,
+  getDefaultInputSize,
+  getFieldSize,
+  setFieldSize,
+  getRowSize,
+  unformatLayout,
+};

@@ -1,7 +1,12 @@
-import { isEmpty } from 'lodash';
+// TODO @soupette we need to refactor this file
+
+import isEmpty from 'lodash/isEmpty';
 
 const TOKEN_KEY = 'jwtToken';
 const USER_INFO = 'userInfo';
+const CURRENT_STEP = 'GUIDED_TOUR_CURRENT_STEP';
+const COMPLETED_STEPS = 'GUIDED_TOUR_COMPLETED_STEPS';
+const THEME_KEY = 'STRAPI_THEME'; // Also used in packages/core/admin/admin/src/components/ThemeToggleProvider/index.js
 
 const parse = JSON.parse;
 const stringify = JSON.stringify;
@@ -25,6 +30,9 @@ const auth = {
       const onboarding = auth.get('onboarding');
       const strapiUpdateNotification = auth.get('STRAPI_UPDATE_NOTIF');
       const localeLang = localStorage.getItem('strapi-admin-language');
+      const guidedTourCurrentStep = auth.get(CURRENT_STEP);
+      const guidedTourState = auth.get(COMPLETED_STEPS);
+      const applicationTheme = localStorage.getItem(THEME_KEY);
 
       localStorage.clear();
 
@@ -32,6 +40,9 @@ const auth = {
       localStorage.setItem('onboarding', onboarding);
       localStorage.setItem('STRAPI_UPDATE_NOTIF', strapiUpdateNotification);
       localStorage.setItem('strapi-admin-language', localeLang);
+      localStorage.setItem(CURRENT_STEP, stringify(guidedTourCurrentStep));
+      localStorage.setItem(COMPLETED_STEPS, stringify(guidedTourState));
+      localStorage.setItem(THEME_KEY, applicationTheme);
     }
 
     if (sessionStorage) {

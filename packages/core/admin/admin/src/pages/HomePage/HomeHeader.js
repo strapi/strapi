@@ -23,7 +23,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
   return (
     <div>
       <Box paddingLeft={6} paddingBottom={10}>
-        <StackCustom size={5}>
+        <StackCustom spacing={5}>
           <Typography as="h1" variant="alpha">
             {hasCreatedContentType
               ? formatMessage({

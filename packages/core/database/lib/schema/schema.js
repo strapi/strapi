@@ -105,7 +105,7 @@ const getColumnType = attribute => {
     case 'increments': {
       return {
         type: 'increments',
-        args: [{ primary: true }],
+        args: [{ primary: true, primaryKey: true }],
         notNullable: true,
       };
     }
