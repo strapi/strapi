@@ -192,6 +192,11 @@ module.exports = db => {
     }
 
     for (const srcColumn of srcTable.columns) {
+      console.log('srcColumn loop', srcColumn);
+      if (srcColumn.name === 'rowid') {
+        continue;
+      }
+
       if (!helpers.hasColumn(destTable, srcColumn.name)) {
         removedColumns.push(srcColumn);
       }
@@ -232,7 +237,13 @@ module.exports = db => {
     }
 
     for (const srcIndex of srcTable.indexes) {
+      // console.log("Src table loop", srcIndex);
+      if (srcIndex.name === 'primary') {
+        console.log('cont');
+        continue;
+      }
       if (!helpers.hasIndex(destTable, srcIndex.name)) {
+        console.log('Removed index', srcIndex.name);
         removedIndexes.push(srcIndex);
       }
     }
