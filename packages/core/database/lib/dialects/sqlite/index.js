@@ -10,7 +10,6 @@ const SqliteSchmeaInspector = require('./schema-inspector');
 class SqliteDialect extends Dialect {
   constructor(db) {
     super(db);
-    console.log('SQLLiteDialect');
 
     this.schemaInspector = new SqliteSchmeaInspector(db);
   }

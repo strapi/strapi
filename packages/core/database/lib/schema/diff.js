@@ -365,24 +365,6 @@ module.exports = db => {
     }
 
     const hasChanged = [addedTables, updatedTables, removedTables].some(arr => arr.length > 0);
-    console.log('===========DIFF FUNC===========');
-    console.log('===========DIFF FUNC===========');
-    console.log('===========DIFF FUNC===========');
-    console.log('Has Changed');
-    console.log(hasChanged);
-    console.log('Added Tables');
-    console.log(addedTables);
-
-    console.log('first index');
-    console.log(updatedTables[0].columns.updated);
-    console.log('Updated Tables');
-    console.log(updatedTables);
-
-    // console.log(JSON.stringify(updatedTables, null, 2));
-    // console.log("Unchanged Tables")
-    // console.log(unchangedTables);
-    console.log('Removed Tables');
-    console.log(removedTables);
 
     return {
       status: hasChanged ? statuses.CHANGED : statuses.UNCHANGED,

@@ -7,7 +7,6 @@ const PostgresqlSchemaInspector = require('./schema-inspector');
 class PostgresDialect extends Dialect {
   constructor(db) {
     super(db);
-    console.log('PostgresDialect');
 
     this.schemaInspector = new PostgresqlSchemaInspector(db);
   }
