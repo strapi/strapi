@@ -4,6 +4,9 @@ const fs = require('fs');
 const { pick } = require('lodash');
 
 const PROJECT_SETTINGS_FILE_INPUTS = ['menuLogo'];
+const DEFAULT_PROJECT_SETTINGS = {
+  menuLogo: null,
+};
 
 const parseFilesData = async files => {
   const formatedFilesData = {};
@@ -52,7 +55,10 @@ const parseFilesData = async files => {
 
 const getProjectSettings = async () => {
   const store = strapi.store({ type: 'core', name: 'admin' });
-  const projectSettings = await store.get({ key: 'project-settings' });
+  const projectSettings = {
+    ...DEFAULT_PROJECT_SETTINGS,
+    ...(await store.get({ key: 'project-settings' })),
+  };
 
   // Filter file input fields
   PROJECT_SETTINGS_FILE_INPUTS.forEach(inputName => {

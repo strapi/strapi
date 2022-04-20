@@ -48,6 +48,10 @@ module.exports = {
     return { data: { uuid, hasAdmin } };
   },
 
+  async getProjectSettings() {
+    return getService('project-settings').getProjectSettings();
+  },
+
   async updateProjectSettings(ctx) {
     const projectSettingsService = getService('project-settings');
 
