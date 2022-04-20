@@ -64,7 +64,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
             <Td>
               <Stack
                 horizontal
-                size={1}
+                spacing={1}
                 style={{ justifyContent: 'flex-end' }}
                 {...stopPropagation}
               >

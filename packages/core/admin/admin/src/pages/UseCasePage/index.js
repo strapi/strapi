@@ -41,7 +41,7 @@ export const options = [
   },
   {
     intlLabel: {
-      id: 'Usecase.content-manager',
+      id: 'global.content-manager',
       defaultMessage: 'Content Manager',
     },
     value: 'content_manager',
@@ -121,7 +121,7 @@ const UseCasePage = () => {
                 </TypographyCenter>
               </Box>
             </Flex>
-            <Stack size={6}>
+            <Stack spacing={6}>
               <Select
                 id="usecase"
                 data-testid="usecase"
@@ -150,7 +150,7 @@ const UseCasePage = () => {
                 />
               )}
               <Button type="submit" size="L" fullWidth disabled={!role}>
-                {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
+                {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
               </Button>
             </Stack>
           </form>

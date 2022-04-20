@@ -4,6 +4,8 @@ const path = require('path');
 const execa = require('execa');
 const yargs = require('yargs');
 
+process.env.NODE_ENV = 'test';
+
 const appName = 'testApp';
 process.env.ENV_PATH = path.resolve(__dirname, '..', appName, '.env');
 
@@ -46,6 +48,7 @@ const runAllTests = async args => {
     env: {
       FORCE_COLOR: 1,
       ENV_PATH: process.env.ENV_PATH,
+      JWT_SECRET: 'aSecret',
     },
   });
 };

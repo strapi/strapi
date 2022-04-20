@@ -58,7 +58,7 @@ describe('Admin | UseCasePage', () => {
       }
 
       .c9 {
-        padding-top: 64px;
+        padding-top: 8px;
         padding-bottom: 64px;
       }
 
@@ -168,7 +168,7 @@ describe('Admin | UseCasePage', () => {
         width: 100%;
       }
 
-      .c33 .sc-cvlWTT {
+      .c33 .sc-DtmNo {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -219,6 +219,11 @@ describe('Admin | UseCasePage', () => {
       .c33:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c33 svg > g,
+      .c33 svg path {
+        fill: #ffffff;
       }
 
       .c13 {
@@ -294,23 +299,6 @@ describe('Admin | UseCasePage', () => {
         cursor: not-allowed;
       }
 
-      .c21 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c28 {
-        color: #666687;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c27 {
         padding-right: 16px;
         padding-left: 16px;
@@ -350,6 +338,23 @@ describe('Admin | UseCasePage', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c21 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c28 {
+        color: #666687;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c20 {
@@ -786,17 +791,23 @@ describe('Admin | UseCasePage', () => {
                   </div>
                   <div
                     class="c19"
+                    spacing="6"
                   >
                     <div>
                       <div
                         class="c20"
+                        spacing="1"
                       >
                         <span
                           class="c21"
                           for="usecase"
                           id="usecase-label"
                         >
-                          What type of work do you do?
+                          <div
+                            class="c22"
+                          >
+                            What type of work do you do?
+                          </div>
                         </span>
                         <div
                           class="c22 c23"

@@ -280,7 +280,7 @@ function SelectWrapper({
   const styles = getSelectStyles(theme);
 
   return (
-    <Stack size={1}>
+    <Stack spacing={1}>
       <Label
         intlLabel={intlLabel}
         isSingle={isSingle}
@@ -368,7 +368,4 @@ SelectWrapper.propTypes = {
 
 const Memoized = memo(SelectWrapper);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);

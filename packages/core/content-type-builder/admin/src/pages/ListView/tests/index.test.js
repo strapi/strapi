@@ -8,8 +8,10 @@ import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import LanguageProvider from '../../../../../../admin/admin/src/components/LanguageProvider';
 import Theme from '../../../../../../admin/admin/src/components/Theme';
+import ThemeToggleProvider from '../../../../../../admin/admin/src/components/ThemeToggleProvider';
 import en from '../../../../../../admin/admin/src/translations/en.json';
 import FormModalNavigationProvider from '../../../components/FormModalNavigationProvider';
 import pluginEn from '../../../translations/en.json';
@@ -52,13 +54,15 @@ const makeApp = () => {
 
   return (
     <LanguageProvider messages={messages} localeNames={localeNames}>
-      <Theme>
-        <Router history={history}>
-          <FormModalNavigationProvider>
-            <ListView />
-          </FormModalNavigationProvider>
-        </Router>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+        <Theme>
+          <Router history={history}>
+            <FormModalNavigationProvider>
+              <ListView />
+            </FormModalNavigationProvider>
+          </Router>
+        </Theme>
+      </ThemeToggleProvider>
     </LanguageProvider>
   );
 };

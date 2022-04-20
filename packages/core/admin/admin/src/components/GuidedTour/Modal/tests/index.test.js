@@ -2,7 +2,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useGuidedTour } from '@strapi/helper-plugin';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../Theme';
+import ThemeToggleProvider from '../../../ThemeToggleProvider';
 import GuidedTourModal from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -28,11 +30,13 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const App = (
-  <Theme>
-    <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-      <GuidedTourModal />
-    </IntlProvider>
-  </Theme>
+  <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+    <Theme>
+      <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
+        <GuidedTourModal />
+      </IntlProvider>
+    </Theme>
+  </ThemeToggleProvider>
 );
 
 describe('<GuidedTourModal />', () => {
@@ -193,6 +197,11 @@ describe('<GuidedTourModal />', () => {
       .c24:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c24 svg > g,
+      .c24 svg path {
+        fill: #ffffff;
       }
 
       .c29 {
@@ -559,7 +568,7 @@ describe('<GuidedTourModal />', () => {
         position: fixed;
         z-index: 4;
         inset: 0;
-        background: #32324d33;
+        background: #32324d1F;
       }
 
       <body>
@@ -598,6 +607,7 @@ describe('<GuidedTourModal />', () => {
                 aria-modal="true"
                 class="c4 c5"
                 role="dialog"
+                spacing="8"
                 width="41.25rem"
               >
                 <div
@@ -684,6 +694,7 @@ describe('<GuidedTourModal />', () => {
                     >
                       <div
                         class="c20 c21"
+                        spacing="4"
                       >
                         <span
                           class="c22"

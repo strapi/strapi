@@ -50,8 +50,8 @@ const LIFECYCLES = {
 class Strapi {
   constructor(opts = {}) {
     destroyOnSignal(this);
-    this.dirs = utils.getDirs(opts.dir || process.cwd());
-    const appConfig = loadConfiguration(this.dirs.root, opts);
+    const rootDir = opts.dir || process.cwd();
+    const appConfig = loadConfiguration(rootDir, opts);
     this.container = createContainer(this);
     this.container.register('config', createConfigProvider(appConfig));
     this.container.register('content-types', contentTypesRegistry(this));
@@ -64,6 +64,8 @@ class Strapi {
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
+
+    this.dirs = utils.getDirs(rootDir, { strapi: this });
 
     this.isLoaded = false;
     this.reload = this.reload();
@@ -205,7 +207,12 @@ class Strapi {
       this.config.get('admin.autoOpen', true) !== false;
 
     if (shouldOpenAdmin && !isInitialized) {
-      await utils.openBrowser(this.config);
+      try {
+        await utils.openBrowser(this.config);
+        this.telemetry.send('didOpenTab');
+      } catch (e) {
+        this.telemetry.send('didNotOpenTab');
+      }
     }
   }
 

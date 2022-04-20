@@ -18,12 +18,7 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
 
       switch (attrType) {
         case 'json':
-          try {
-            cleanedData = JSON.parse(value);
-          } catch (err) {
-            cleanedData = value;
-          }
-
+          cleanedData = JSON.parse(value);
           break;
         // TODO
         // case 'date':

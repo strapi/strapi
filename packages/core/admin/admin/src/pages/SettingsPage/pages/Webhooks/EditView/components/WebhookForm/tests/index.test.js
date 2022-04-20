@@ -3,8 +3,10 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import en from '../../../../../../../../translations/en.json';
 import Theme from '../../../../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../../../../components/ThemeToggleProvider';
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
 
@@ -15,9 +17,11 @@ const makeApp = component => {
 
   return (
     <LanguageProvider messages={messages} localeNames={localeNames}>
-      <Theme>
-        <Router history={history}>{component}</Router>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+        <Theme>
+          <Router history={history}>{component}</Router>
+        </Theme>
+      </ThemeToggleProvider>
     </LanguageProvider>
   );
 };

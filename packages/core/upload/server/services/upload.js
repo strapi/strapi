@@ -189,11 +189,11 @@ module.exports = ({ strapi }) => ({
       const { width, height } = await getDimensions(fileData);
 
       _.assign(fileData, {
-        provider: config.provider,
         width,
         height,
       });
     }
+    _.set(fileData, 'provider', config.provider);
 
     return this.add(fileData, { user });
   },
@@ -285,11 +285,11 @@ module.exports = ({ strapi }) => ({
         const { width, height } = await getDimensions(fileData);
 
         _.assign(fileData, {
-          provider: config.provider,
           width,
           height,
         });
       }
+      _.set(fileData, 'provider', config.provider);
     } finally {
       // delete temporary folder
       await fse.remove(tmpWorkingDirectory);

@@ -75,7 +75,7 @@ const Login = ({ onSubmit, schema, children }) => {
                 )}
               </Column>
 
-              <Stack size={6}>
+              <Stack spacing={6}>
                 <TextInput
                   error={
                     errors.email
@@ -107,7 +107,7 @@ const Login = ({ onSubmit, schema, children }) => {
                   onChange={handleChange}
                   value={values.password}
                   label={formatMessage({
-                    id: 'Auth.form.password.label',
+                    id: 'global.password',
                     defaultMessage: 'Password',
                   })}
                   name="password"

@@ -106,7 +106,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c43 .sc-cvlWTT {
+.c43 .sc-DtmNo {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -178,7 +178,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c46 .sc-cvlWTT {
+.c46 .sc-DtmNo {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -260,7 +260,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #4945ff;
 }
 
-.c47 .sc-cvlWTT {
+.c47 .sc-DtmNo {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -311,6 +311,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 .c47:active {
   border: 1px solid #4945ff;
   background: #4945ff;
+}
+
+.c47 svg > g,
+.c47 svg path {
+  fill: #ffffff;
 }
 
 .c16 {
@@ -520,19 +525,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c33 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c37 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c32 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -564,6 +556,19 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
+.c32 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c37 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
 .c36 {
   border: none;
   border-radius: 4px;
@@ -574,6 +579,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   font-size: 0.875rem;
   display: block;
   width: 100%;
+  background: inherit;
 }
 
 .c36::-webkit-input-placeholder {
@@ -597,7 +603,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c36[aria-disabled='true'] {
-  background: inherit;
   color: inherit;
 }
 
@@ -710,7 +715,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   position: fixed;
   z-index: 4;
   inset: 0;
-  background: rgb(220,220,228,0.8);
+  background: #32324d1F;
   padding: 0 40px;
   display: -webkit-box;
   display: -webkit-flex;
@@ -1020,6 +1025,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                     >
                       <div
                         class="c19 c20"
+                        spacing="1"
                       >
                         <span>
                           <button
@@ -1143,6 +1149,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                   >
                     <div
                       class="c25"
+                      spacing="3"
                     >
                       <div
                         class="c26"
@@ -1158,6 +1165,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                             >
                               <div
                                 class="c27"
+                                spacing="1"
                               >
                                 <span
                                   class="c28"
@@ -1180,6 +1188,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                             >
                               <div
                                 class="c27"
+                                spacing="1"
                               >
                                 <span
                                   class="c28"
@@ -1202,6 +1211,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                             >
                               <div
                                 class="c27"
+                                spacing="1"
                               >
                                 <span
                                   class="c28"
@@ -1224,6 +1234,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                             >
                               <div
                                 class="c27"
+                                spacing="1"
                               >
                                 <span
                                   class="c28"
@@ -1244,17 +1255,18 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                         <div>
                           <div
                             class="c31"
+                            spacing="1"
                           >
-                            <div
+                            <label
                               class="c32"
+                              for="textinput-1"
                             >
-                              <label
+                              <div
                                 class="c33"
-                                for="textinput-1"
                               >
                                 File name
-                              </label>
-                            </div>
+                              </div>
+                            </label>
                             <div
                               class="c34 c35"
                             >
@@ -1274,17 +1286,18 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                         <div>
                           <div
                             class="c31"
+                            spacing="1"
                           >
-                            <div
+                            <label
                               class="c32"
+                              for="textinput-2"
                             >
-                              <label
+                              <div
                                 class="c33"
-                                for="textinput-2"
                               >
                                 Alternative text
-                              </label>
-                            </div>
+                              </div>
+                            </label>
                             <div
                               class="c34 c35"
                             >
@@ -1311,17 +1324,18 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                         <div>
                           <div
                             class="c31"
+                            spacing="1"
                           >
-                            <div
+                            <label
                               class="c32"
+                              for="textinput-3"
                             >
-                              <label
+                              <div
                                 class="c33"
-                                for="textinput-3"
                               >
                                 Caption
-                              </label>
-                            </div>
+                              </div>
+                            </label>
                             <div
                               class="c34 c35"
                             >

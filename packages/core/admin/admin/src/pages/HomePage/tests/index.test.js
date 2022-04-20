@@ -214,6 +214,11 @@ describe('Homepage', () => {
         background: #4945ff;
       }
 
+      .c15 svg > g,
+      .c15 svg path {
+        fill: #ffffff;
+      }
+
       .c22 {
         background: #ffffff;
         padding: 24px;
@@ -628,10 +633,6 @@ describe('Homepage', () => {
         fill: #ff4500;
       }
 
-      .c52 > path:last-child {
-        fill: #ffffff;
-      }
-
       .c55 > path:first-child {
         fill: #8e75ff;
       }
@@ -800,6 +801,7 @@ describe('Homepage', () => {
                       >
                         <div
                           class="c9 c10"
+                          spacing="5"
                         >
                           <h1
                             class="c11"
@@ -856,6 +858,7 @@ describe('Homepage', () => {
                   >
                     <div
                       class="c9"
+                      spacing="5"
                     >
                       <a
                         class="c21"
@@ -888,6 +891,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -939,6 +943,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -990,6 +995,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -1039,6 +1045,7 @@ describe('Homepage', () => {
                           </div>
                           <div
                             class="c26"
+                            spacing="1"
                           >
                             <div
                               class="c23"
@@ -1075,9 +1082,11 @@ describe('Homepage', () => {
                       >
                         <div
                           class="c9"
+                          spacing="5"
                         >
                           <div
                             class="c36"
+                            spacing="3"
                           >
                             <h2
                               class="c37"
@@ -1093,7 +1102,7 @@ describe('Homepage', () => {
                           </div>
                           <a
                             class="c38"
-                            href="https://portal.productboard.com/strapi/1-roadmap/tabs/2-under-consideration"
+                            href="https://feedback.strapi.io/"
                             rel="noreferrer noopener"
                             target="_blank"
                           >

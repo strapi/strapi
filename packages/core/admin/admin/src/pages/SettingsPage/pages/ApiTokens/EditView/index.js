@@ -159,7 +159,7 @@ const ApiTokenCreateView = () => {
                     size="L"
                   >
                     {formatMessage({
-                      id: 'app.components.Button.save',
+                      id: 'global.save',
                       defaultMessage: 'Save',
                     })}
                   </Button>
@@ -167,14 +167,14 @@ const ApiTokenCreateView = () => {
                 navigationAction={
                   <Link startIcon={<ArrowLeft />} to="/settings/api-tokens">
                     {formatMessage({
-                      id: 'app.components.go-back',
+                      id: 'global.back',
                       defaultMessage: 'Back',
                     })}
                   </Link>
                 }
               />
               <ContentLayout>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   {Boolean(apiToken?.name) && <HeaderContentBox apiToken={apiToken.accessKey} />}
                   <Box
                     background="neutral0"
@@ -185,10 +185,10 @@ const ApiTokenCreateView = () => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack size={4}>
+                    <Stack spacing={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
-                          id: 'Settings.apiTokens.details',
+                          id: 'global.details',
                           defaultMessage: 'Details',
                         })}
                       </Typography>

@@ -8,7 +8,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
 import Informations from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -22,9 +24,11 @@ const makeApp = () => {
       defaultLocale="en"
       messages={{ 'containers.Edit.information': 'Information' }}
     >
-      <Theme>
-        <Informations />
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+        <Theme>
+          <Informations />
+        </Theme>
+      </ThemeToggleProvider>
     </IntlProvider>
   );
 };
@@ -142,6 +146,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         </div>
         <div
           class="c4"
+          spacing="4"
         >
           <div
             class="c5"

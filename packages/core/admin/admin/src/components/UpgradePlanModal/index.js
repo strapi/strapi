@@ -82,14 +82,14 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
             <CloseButtonContainer>
               <IconButton onClick={onClose} aria-label="Close" icon={<Cross />} />
             </CloseButtonContainer>
-            <StackFlexStart size={6}>
+            <StackFlexStart spacing={6}>
               <Typography fontWeight="bold" textColor="primary600">
                 {formatMessage({
                   id: 'app.components.UpgradePlanModal.text-ce',
                   defaultMessage: 'COMMUNITY EDITION',
                 })}
               </Typography>
-              <Stack size={2}>
+              <Stack spacing={2}>
                 <Typography variant="alpha" as="h2" id="upgrade-plan">
                   {formatMessage({
                     id: 'app.components.UpgradePlanModal.limit-reached',

@@ -38,7 +38,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c9 {
-        padding-top: 64px;
+        padding-top: 8px;
         padding-bottom: 64px;
       }
 
@@ -77,7 +77,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c21 > * + * {
-        margin-top: 32px;
+        margin-top: 24px;
       }
 
       .c12:focus-visible {
@@ -255,27 +255,9 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         background: #4945ff;
       }
 
-      .c26 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c27 {
-        color: #d02b20;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c37 {
-        color: #666687;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c28 {
-        line-height: 0;
+      .c45 svg > g,
+      .c45 svg path {
+        fill: #ffffff;
       }
 
       .c34 {
@@ -283,7 +265,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         padding-left: 8px;
       }
 
-      .c25 {
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -315,6 +297,29 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         align-items: center;
       }
 
+      .c25 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c27 {
+        color: #d02b20;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c37 {
+        color: #666687;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c28 {
+        line-height: 0;
+      }
+
       .c31 {
         border: none;
         border-radius: 4px;
@@ -325,6 +330,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c31::-webkit-input-placeholder {
@@ -348,7 +354,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c31[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -367,6 +372,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         font-size: 0.875rem;
         display: block;
         width: 100%;
+        background: inherit;
       }
 
       .c32::-webkit-input-placeholder {
@@ -390,7 +396,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       }
 
       .c32[aria-disabled='true'] {
-        background: inherit;
         color: inherit;
       }
 
@@ -871,7 +876,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     <h1
                       class="c17"
                     >
-                      Welcome!
+                      Welcome to Strapi!
                     </h1>
                   </div>
                   <div
@@ -880,12 +885,13 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     <span
                       class="c20"
                     >
-                      Your credentials are only used to authenticate yourself on the admin panel. All saved data will be stored in your own database.
+                      Credentials are only used to authenticate in Strapi. All saved data will be stored in your database.
                     </span>
                   </div>
                 </div>
                 <div
                   class="c21"
+                  spacing="6"
                 >
                   <div
                     class="c22"
@@ -900,14 +906,15 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           <div>
                             <div
                               class="c24"
+                              spacing="1"
                             >
-                              <div
+                              <label
                                 class="c25"
+                                for="textinput-1"
+                                required=""
                               >
-                                <label
+                                <div
                                   class="c26"
-                                  for="textinput-1"
-                                  required=""
                                 >
                                   Firstname
                                   <span
@@ -915,8 +922,8 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                   >
                                     *
                                   </span>
-                                </label>
-                              </div>
+                                </div>
+                              </label>
                               <div
                                 class="c29 c30"
                               >
@@ -944,17 +951,18 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           <div>
                             <div
                               class="c24"
+                              spacing="1"
                             >
-                              <div
+                              <label
                                 class="c25"
+                                for="textinput-2"
                               >
-                                <label
+                                <div
                                   class="c26"
-                                  for="textinput-2"
                                 >
                                   Lastname
-                                </label>
-                              </div>
+                                </div>
+                              </label>
                               <div
                                 class="c29 c30"
                               >
@@ -977,14 +985,15 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     <div>
                       <div
                         class="c24"
+                        spacing="1"
                       >
-                        <div
+                        <label
                           class="c25"
+                          for="textinput-3"
+                          required=""
                         >
-                          <label
+                          <div
                             class="c26"
-                            for="textinput-3"
-                            required=""
                           >
                             Email
                             <span
@@ -992,8 +1001,8 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                             >
                               *
                             </span>
-                          </label>
-                        </div>
+                          </div>
+                        </label>
                         <div
                           class="c29 c30"
                         >
@@ -1014,14 +1023,15 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     <div>
                       <div
                         class="c24"
+                        spacing="1"
                       >
-                        <div
+                        <label
                           class="c25"
+                          for="textinput-4"
+                          required=""
                         >
-                          <label
+                          <div
                             class="c26"
-                            for="textinput-4"
-                            required=""
                           >
                             Password
                             <span
@@ -1029,8 +1039,8 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                             >
                               *
                             </span>
-                          </label>
-                        </div>
+                          </div>
+                        </label>
                         <div
                           class="c29 c30"
                         >
@@ -1071,7 +1081,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           class="c37"
                           id="textinput-4-hint"
                         >
-                          Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number
+                          Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number
                         </p>
                       </div>
                     </div>
@@ -1080,14 +1090,15 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     <div>
                       <div
                         class="c24"
+                        spacing="1"
                       >
-                        <div
+                        <label
                           class="c25"
+                          for="textinput-5"
+                          required=""
                         >
-                          <label
+                          <div
                             class="c26"
-                            for="textinput-5"
-                            required=""
                           >
                             Confirmation Password
                             <span
@@ -1095,8 +1106,8 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                             >
                               *
                             </span>
-                          </label>
-                        </div>
+                          </div>
+                        </label>
                         <div
                           class="c29 c30"
                         >
@@ -1138,6 +1149,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                   <div>
                     <div
                       class="c38"
+                      spacing="1"
                     >
                       <label
                         class="c39 c40"
@@ -1152,7 +1164,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         <div
                           class="c42"
                         >
-                          Keep me updated about the new features and upcoming improvements (by doing this you accept the 
+                          Keep me updated about new features & upcoming improvements (by doing this you accept the 
                           <a
                             class="c43"
                             href="https://strapi.io/terms"

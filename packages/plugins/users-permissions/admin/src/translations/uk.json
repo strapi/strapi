@@ -15,7 +15,6 @@
   "HeaderNav.link.advancedSettings": "Розширені налаштування",
   "HeaderNav.link.emailTemplates": "Шаблони листів",
   "HeaderNav.link.providers": "Провайдери",
-  "HeaderNav.link.roles": "Ролі та дозволи",
   "Plugin.permissions.plugins.description": "Встановіть всі дозволені дії у плаґіні {name}.",
   "Plugins.header.description": "Нижче перераховано лише дії, пов'язані з маршрутом.",
   "Plugins.header.title": "Дозволи",

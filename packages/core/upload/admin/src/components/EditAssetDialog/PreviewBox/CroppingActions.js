@@ -16,7 +16,7 @@ export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {
   return (
     <FocusTrap onEscape={onCancel}>
       <CroppingActionRow justifyContent="flex-end" paddingLeft={3} paddingRight={3}>
-        <Stack size={1} horizontal>
+        <Stack spacing={1} horizontal>
           <IconButton
             label={formatMessage({
               id: getTrad('control-card.stop-crop'),
