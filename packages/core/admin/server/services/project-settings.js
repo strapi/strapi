@@ -91,6 +91,11 @@ const uploadFiles = async (files = {}) => {
 const deleteOldFiles = async ({ previousSettings, newSettings }) => {
   return Promise.all(
     PROJECT_SETTINGS_FILE_INPUTS.map(async inputName => {
+      // Skip if the store doesn't contain project settings
+      if (!previousSettings) {
+        return;
+      }
+
       // Skip if there was no previous file
       if (!previousSettings[inputName]) {
         return;
