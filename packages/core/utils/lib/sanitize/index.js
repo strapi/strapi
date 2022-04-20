@@ -28,6 +28,12 @@ module.exports = {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
       }
 
+      // Apply sanitizers from registry if exists
+      const sanitizersRegistry = strapi.container.get('sanitizers').get('content-api.input');
+      if (Array.isArray(sanitizersRegistry)) {
+        sanitizersRegistry.forEach(sanitizer => transforms.push(sanitizer(schema)));
+      }
+
       return pipeAsync(...transforms)(data);
     },
 
@@ -36,13 +42,16 @@ module.exports = {
         return Promise.all(data.map(entry => this.output(entry, schema, { auth })));
       }
 
-      const transforms = [
-        sanitizers.defaultSanitizeOutput(schema),
-        sanitizers.sanitizeUserRelationFromRoleEntities(schema),
-      ];
+      const transforms = [sanitizers.defaultSanitizeOutput(schema)];
 
       if (auth) {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
+      }
+
+      // Apply sanitizers from registry if exists
+      const sanitizersRegistry = strapi.container.get('sanitizers').get('content-api.output');
+      if (Array.isArray(sanitizersRegistry)) {
+        sanitizersRegistry.forEach(sanitizer => transforms.push(sanitizer(schema)));
       }
 
       return pipeAsync(...transforms)(data);
