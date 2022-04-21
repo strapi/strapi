@@ -26,13 +26,13 @@ describe('ConfigurationsProvider', () => {
   it('should update customMenuLogo with setCustomMenuLogo', () => {
     const Test = () => {
       const {
-        setCustomLogo,
+        updateProjectSettings,
         logos: { menu },
       } = useConfigurations();
 
       return (
         <div>
-          <button type="button" onClick={() => setCustomLogo('michka.jpg', 'menuLogo')}>
+          <button type="button" onClick={() => updateProjectSettings({ menuLogo: 'michka.jpg' })}>
             Change logo
           </button>
           <div>{menu.custom}</div>

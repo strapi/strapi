@@ -12,23 +12,16 @@ const ConfigurationsProvider = ({
 }) => {
   const [{ menuLogo }, dispatch] = useReducer(reducer, initialState);
 
-  const setCustomLogo = (logo, logoType) => {
+  const updateProjectSettings = ({ menuLogo }) => {
     return dispatch({
-      type: 'SET_CUSTOM_LOGO',
-      logoType,
-      value: logo,
-    });
-  };
-  const setCustomLogoRef = useRef(setCustomLogo);
-
-  const setProjectSettings = ({ menuLogo }) => {
-    return dispatch({
-      type: 'SET_PROJECT_SETTINGS',
+      type: 'UPDATE_PROJECT_SETTINGS',
       values: {
         menuLogo: menuLogo || defaultMenuLogo,
       },
     });
   };
+
+  const updateProjectSettingsRef = useRef(updateProjectSettings);
 
   return (
     <ConfigurationsContext.Provider
@@ -37,8 +30,7 @@ const ConfigurationsProvider = ({
           menu: { custom: menuLogo, default: defaultMenuLogo },
           auth: { custom: null, default: authLogo },
         },
-        setCustomLogo: setCustomLogoRef.current,
-        setProjectSettings,
+        updateProjectSettings: updateProjectSettingsRef.current,
         showReleaseNotification,
         showTutorials,
       }}

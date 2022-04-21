@@ -1,4 +1,4 @@
-export const getFormData = data => {
+const getFormData = data => {
   const formData = new FormData();
 
   Object.entries(data).forEach(([key, value]) => {
@@ -13,3 +13,5 @@ export const getFormData = data => {
 
   return formData;
 };
+
+export default getFormData;

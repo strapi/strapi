@@ -31,7 +31,7 @@ const AuthenticatedApp = lazy(() =>
 
 function App() {
   const toggleNotification = useNotification();
-  const { setCustomLogo } = useConfigurations();
+  const { updateProjectSettings } = useConfigurations();
   const { formatMessage } = useIntl();
   const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
 
@@ -72,7 +72,7 @@ function App() {
           data: { hasAdmin, uuid, menuLogo },
         } = await request('/admin/init', { method: 'GET' });
 
-        setCustomLogo(prefixFileUrlWithBackendUrl(menuLogo), 'menuLogo');
+        updateProjectSettings({ menuLogo: prefixFileUrlWithBackendUrl(menuLogo) });
 
         if (uuid) {
           try {
@@ -104,7 +104,7 @@ function App() {
     };
 
     getData();
-  }, [toggleNotification, setCustomLogo]);
+  }, [toggleNotification, updateProjectSettings]);
 
   const setHasAdmin = hasAdmin => setState(prev => ({ ...prev, hasAdmin }));
 
