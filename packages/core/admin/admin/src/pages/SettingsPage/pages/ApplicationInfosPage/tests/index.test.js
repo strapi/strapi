@@ -12,6 +12,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   // eslint-disable-next-line
   CheckPermissions: ({ children }) => <div>{children}</div>,
   useAppInfos: jest.fn(),
+  useNotification: jest.fn(),
 }));
 jest.mock('../../../../../hooks/useConfigurations', () => () => ({
   logos: {
