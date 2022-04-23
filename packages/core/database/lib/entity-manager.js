@@ -336,7 +336,7 @@ const createEntityManager = db => {
 
       const result = { count: deletedRows };
 
-      await db.lifecycles.run('afterDelete', uid, { params, result }, states);
+      await db.lifecycles.run('afterDeleteMany', uid, { params, result }, states);
 
       return result;
     },
