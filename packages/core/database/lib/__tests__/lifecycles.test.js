@@ -34,12 +34,12 @@ describe('LifecycleProvider', () => {
     });
 
     it('use shared state', async () => {
-      const expectedState = new Date().toISOString();
+      const expectedState = { value: new Date().toISOString() };
       let receivedState;
 
       provider.subscribe({
         async beforeEvent(event) {
-          event.state = expectedState;
+          event.state.value = expectedState.value;
         },
         async afterEvent(event) {
           receivedState = event.state;
