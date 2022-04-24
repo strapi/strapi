@@ -234,25 +234,11 @@ const createQueryBuilder = (uid, db) => {
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
       state.populate = helpers.processPopulate(state.populate, { qb: this, uid, db });
       state.data = helpers.toRow(meta, state.data);
-
-      this.processSelect();
+      state.select = state.select.map(field => helpers.toColumnName(meta, field));
     },
 
     shouldUseDistinct() {
       return state.joins.length > 0 && _.isEmpty(state.groupBy);
-    },
-
-    processSelect() {
-      state.select = state.select.map(field => helpers.toColumnName(meta, field));
-
-      if (this.shouldUseDistinct()) {
-        const joinsOrderByColumns = state.joins.flatMap(join => {
-          return _.keys(join.orderBy).map(key => this.aliasColumn(key, join.alias));
-        });
-        const orderByColumns = state.orderBy.map(({ column }) => column);
-
-        state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
-      }
     },
 
     getKnexQuery() {
