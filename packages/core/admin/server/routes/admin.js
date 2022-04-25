@@ -16,7 +16,7 @@ module.exports = [
         'admin::isAuthenticatedAdmin',
         {
           name: 'admin::hasPermissions',
-          config: { actions: ['admin::project-settings.update'] },
+          config: { actions: ['admin::project-settings.read'] },
         },
       ],
     },
