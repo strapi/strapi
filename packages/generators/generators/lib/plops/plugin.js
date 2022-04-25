@@ -27,6 +27,14 @@ ${separator}
 };
 
 module.exports = (plop) => {
+  const currentDir = process.cwd();
+  const typescriptPrompt = tsUtils.isUsingTypeScriptSync(currentDir) ? [] : [{
+    type: 'list',
+    name: 'isTypescript',
+    message: 'Choose your preferred language',
+    choices: ['Javascript', 'Typescript'],
+    default: 'Javascript',
+  }];
   // Plugin generator
   plop.setGenerator('plugin', {
     description: 'Generate a basic plugin',
@@ -36,17 +44,10 @@ module.exports = (plop) => {
         name: 'pluginName',
         message: 'Plugin name',
       },
-      {
-        type: 'list',
-        name: 'isTypescript',
-        message: 'Choose your preferred language',
-        choices: ['Javascript', 'Typescript'],
-        default: 'Javascript',
-      },
+      ...typescriptPrompt
     ],
     actions(answers) {
-      const currentDir = process.cwd();
-      const isTypescript = answers.isTypescript === 'Typescript';
+      const isTypescript = answers?.isTypescript === 'Typescript';
       const language = tsUtils.isUsingTypeScriptSync(currentDir) || isTypescript ? 'ts' : 'js';
 
       // TODO: Adds tsconfig & build command for TS plugins?
