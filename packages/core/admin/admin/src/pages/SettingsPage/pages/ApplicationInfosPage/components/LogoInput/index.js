@@ -5,12 +5,13 @@ import { CarouselInput, CarouselSlide, CarouselActions } from '@strapi/design-sy
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Box } from '@strapi/design-system/Box';
 import Plus from '@strapi/icons/Plus';
+import Refresh from '@strapi/icons/Refresh';
 import reducer, { initialState } from './reducer';
 import LogoModalStepper from '../LogoModalStepper';
 import { SIZE, DIMENSION } from '../../utils/constants';
 import stepper from './stepper';
 
-const LogoInput = ({ customLogo, defaultLogo, onChangeLogo }) => {
+const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) => {
   const [{ currentStep }, dispatch] = useReducer(reducer, initialState);
   const { Component, next, prev, modalTitle } = stepper[currentStep] || {};
   const { formatMessage } = useIntl();
@@ -53,6 +54,16 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo }) => {
               })}
               icon={<Plus />}
             />
+            {customLogo && (
+              <IconButton
+                onClick={onResetMenuLogo}
+                label={formatMessage({
+                  id: 'Settings.application.customization.carousel.reset-action',
+                  defaultMessage: 'Reset logo',
+                })}
+                icon={<Refresh />}
+              />
+            )}
           </CarouselActions>
         }
       >
@@ -99,6 +110,7 @@ LogoInput.propTypes = {
   }),
   defaultLogo: PropTypes.string.isRequired,
   onChangeLogo: PropTypes.func.isRequired,
+  onResetMenuLogo: PropTypes.func.isRequired,
 };
 
 export default LogoInput;

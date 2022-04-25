@@ -1,15 +1,18 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { QueryClientProvider, QueryClient } from 'react-query';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useAppInfos } from '@strapi/helper-plugin';
 import ApplicationInfosPage from '../index';
+import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
   CheckPermissions: ({ children }) => <div>{children}</div>,
   useAppInfos: jest.fn(),
+  useNotification: jest.fn(),
 }));
 jest.mock('../../../../../hooks/useConfigurations', () => () => ({
   logos: {
@@ -17,17 +20,29 @@ jest.mock('../../../../../hooks/useConfigurations', () => () => ({
   },
 }));
 
+const client = new QueryClient();
+
 const App = (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}} textComponent="span">
-      <ApplicationInfosPage />
-    </IntlProvider>
-  </ThemeProvider>
+  <QueryClientProvider client={client}>
+    <ThemeProvider theme={lightTheme}>
+      <IntlProvider locale="en" messages={{}} textComponent="span">
+        <ApplicationInfosPage />
+      </IntlProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
 );
 
 describe('Application page', () => {
-  it('renders and matches the snapshot', () => {
-    useAppInfos.mockImplementationOnce(() => {
+  beforeAll(() => server.listen());
+
+  afterEach(() => {
+    server.resetHandlers();
+  });
+
+  afterAll(() => server.close());
+
+  it('renders and matches the snapshot', async () => {
+    useAppInfos.mockImplementation(() => {
       return {
         shouldUpdateStrapi: true,
         latestStrapiReleaseTag: 'v3.6.8',
@@ -38,6 +53,8 @@ describe('Application page', () => {
     const {
       container: { firstChild },
     } = render(App);
+
+    await waitFor(() => expect(screen.getByText('Logo')).toBeInTheDocument());
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c18 {
@@ -977,7 +994,7 @@ describe('Application page', () => {
                                         <img
                                           alt="Logo"
                                           class="c43"
-                                          src="defaultAuthLogo.png"
+                                          src="http://localhost:1337/uploads/michka.svg"
                                         />
                                       </div>
                                     </div>
@@ -1008,6 +1025,30 @@ describe('Application page', () => {
                                           </svg>
                                         </button>
                                       </span>
+                                      <span>
+                                        <button
+                                          aria-disabled="false"
+                                          aria-labelledby="tooltip-3"
+                                          class="c46 c47"
+                                          tabindex="0"
+                                          type="button"
+                                        >
+                                          <svg
+                                            fill="none"
+                                            height="1em"
+                                            viewBox="0 0 24 24"
+                                            width="1em"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          >
+                                            <path
+                                              clip-rule="evenodd"
+                                              d="M15.681 2.804A9.64 9.64 0 0011.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 003.589-4.831 1.117 1.117 0 00-.664-1.418 1.086 1.086 0 00-1.393.676 7.769 7.769 0 01-2.792 3.758 7.546 7.546 0 01-4.41 1.428V4.222h.002a7.492 7.492 0 013.003.625 7.61 7.61 0 012.5 1.762l.464.551-2.986 3.042a.186.186 0 00.129.316H22V3.317a.188.188 0 00-.112-.172.179.179 0 00-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 00-3.239-2.293zm-3.863 1.418V2v2.222zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778z"
+                                              fill="#212134"
+                                              fill-rule="evenodd"
+                                            />
+                                          </svg>
+                                        </button>
+                                      </span>
                                     </div>
                                   </section>
                                   <div
@@ -1022,7 +1063,7 @@ describe('Application page', () => {
                                         <span
                                           class="c49"
                                         >
-                                          logo.png
+                                          michka.svg
                                         </span>
                                       </div>
                                     </span>
@@ -1051,7 +1092,7 @@ describe('Application page', () => {
   });
 
   it('should display latest version and link upgrade version', () => {
-    useAppInfos.mockImplementationOnce(() => {
+    useAppInfos.mockImplementation(() => {
       return {
         shouldUpdateStrapi: true,
         latestStrapiReleaseTag: 'v3.6.8',
@@ -1066,7 +1107,20 @@ describe('Application page', () => {
   });
 
   it("shouldn't display link upgrade version if not necessary", () => {
-    useAppInfos.mockImplementationOnce(() => {
+    useAppInfos.mockImplementation(() => {
+      return {
+        shouldUpdateStrapi: false,
+        latestStrapiReleaseTag: 'v3.6.8',
+      };
+    });
+
+    const { queryByText } = render(App);
+
+    expect(queryByText('Upgrade your admin panel')).not.toBeInTheDocument();
+  });
+
+  it('should display', () => {
+    useAppInfos.mockImplementation(() => {
       return {
         shouldUpdateStrapi: false,
         latestStrapiReleaseTag: 'v3.6.8',

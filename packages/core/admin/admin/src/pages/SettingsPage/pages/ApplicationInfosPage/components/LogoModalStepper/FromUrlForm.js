@@ -5,7 +5,7 @@ import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { ModalFooter } from '@strapi/design-system/ModalLayout';
-import { urlToFile } from '../../utils/urlToFile';
+import urlToFile from '../../utils/urlToFile';
 import { parseFileMetadatas } from '../../utils/parseFileMetadatas';
 import { SIZE, DIMENSION } from '../../utils/constants';
 

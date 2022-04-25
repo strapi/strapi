@@ -15,7 +15,7 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
     logos: { menu },
   } = useConfigurations();
   const [{ menuLogo }, dispatch] = useReducer(reducer, initialState, () =>
-    init(projectSettingsStored)
+    init(initialState, projectSettingsStored)
   );
 
   const handleChangeMenuLogo = asset => {
@@ -25,8 +25,14 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
     });
   };
 
+  const handleResetMenuLogo = () => {
+    dispatch({
+      type: 'RESET_CUSTOM_MENU_LOGO',
+    });
+  };
+
   useImperativeHandle(ref, () => ({
-    getValues: () => ({ menuLogo }),
+    getValues: () => ({ menuLogo: menuLogo.submit }),
   }));
 
   return (
@@ -49,8 +55,9 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
         <GridItem col={6} s={12}>
           <LogoInput
             onChangeLogo={handleChangeMenuLogo}
-            customLogo={menuLogo}
+            customLogo={menuLogo.display}
             defaultLogo={menu.default}
+            onResetMenuLogo={handleResetMenuLogo}
           />
         </GridItem>
       </Grid>

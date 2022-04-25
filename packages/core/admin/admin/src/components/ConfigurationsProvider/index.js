@@ -6,29 +6,31 @@ import reducer, { initialState } from './reducer';
 const ConfigurationsProvider = ({
   children,
   authLogo,
-  menuLogo,
+  menuLogo: defaultMenuLogo,
   showReleaseNotification,
   showTutorials,
 }) => {
-  const [{ logos }, dispatch] = useReducer(reducer, initialState);
+  const [{ menuLogo }, dispatch] = useReducer(reducer, initialState);
 
-  const setCustomLogo = (logo, logoType) => {
+  const updateProjectSettings = ({ menuLogo }) => {
     return dispatch({
-      type: 'SET_CUSTOM_LOGO',
-      logoType,
-      value: logo,
+      type: 'UPDATE_PROJECT_SETTINGS',
+      values: {
+        menuLogo: menuLogo || defaultMenuLogo,
+      },
     });
   };
-  const setCustomLogoRef = useRef(setCustomLogo);
+
+  const updateProjectSettingsRef = useRef(updateProjectSettings);
 
   return (
     <ConfigurationsContext.Provider
       value={{
         logos: {
-          menu: { custom: logos.menu, default: menuLogo },
+          menu: { custom: menuLogo, default: defaultMenuLogo },
           auth: { custom: null, default: authLogo },
         },
-        setCustomLogo: setCustomLogoRef.current,
+        updateProjectSettings: updateProjectSettingsRef.current,
         showReleaseNotification,
         showTutorials,
       }}

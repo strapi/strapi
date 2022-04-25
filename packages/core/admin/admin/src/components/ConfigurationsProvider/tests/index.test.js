@@ -26,13 +26,13 @@ describe('ConfigurationsProvider', () => {
   it('should update customMenuLogo with setCustomMenuLogo', () => {
     const Test = () => {
       const {
-        setCustomLogo,
+        updateProjectSettings,
         logos: { menu },
       } = useConfigurations();
 
       return (
         <div>
-          <button type="button" onClick={() => setCustomLogo('michka.jpg', 'menu')}>
+          <button type="button" onClick={() => updateProjectSettings({ menuLogo: 'michka.jpg' })}>
             Change logo
           </button>
           <div>{menu.custom}</div>
@@ -57,7 +57,7 @@ describe('ConfigurationsProvider', () => {
     expect(queryByText('strapi-menu.jpg')).not.toBeInTheDocument();
   });
 
-  it.only('should give access to defaultMenuLogo', () => {
+  it('should give access to defaultMenuLogo', () => {
     const Test = () => {
       const {
         logos: { menu },

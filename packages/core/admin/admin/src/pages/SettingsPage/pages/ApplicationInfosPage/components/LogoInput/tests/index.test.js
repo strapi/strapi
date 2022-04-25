@@ -25,7 +25,12 @@ const render = props =>
   renderTL(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} textComponent="span">
-        <LogoInput {...props} defaultLogo="/admin/defaultLogo.png" onChangeLogo={() => jest.fn()} />
+        <LogoInput
+          {...props}
+          defaultLogo="/admin/defaultLogo.png"
+          onChangeLogo={() => jest.fn()}
+          onResetMenuLogo={jest.fn()}
+        />
       </IntlProvider>
     </ThemeProvider>
   );

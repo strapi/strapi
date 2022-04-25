@@ -102,6 +102,7 @@
   "Settings.application.customization": "Customization",
   "Settings.application.customization.carousel.title": "Logo",
   "Settings.application.customization.carousel.change-action": "Change logo",
+  "Settings.application.customization.carousel.reset-action": "Reset logo",
   "Settings.application.customization.carousel-slide.label": "Logo slide",
   "Settings.application.customization.carousel-hint": "Change the admin panel logo (Max dimension: {dimension}*{dimension}, Max file size: {size}KB)",
   "Settings.application.customization.modal.cancel": "Cancel",
