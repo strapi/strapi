@@ -1,10 +1,12 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useIntl } from 'react-intl';
 import {
   useAppInfos,
   SettingsPageTitle,
   useFocusWhenNavigate,
   CheckPermissions,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -16,26 +18,48 @@ import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';
+import { useConfigurations } from '../../../../hooks';
 import Form from './components/Form';
+import { fetchProjectSettings, postProjectSettings } from './utils/api';
+import getFormData from './utils/getFormData';
 
 const permissions = [{ action: 'admin::project-settings.update', subject: null }];
 
 const ApplicationInfosPage = () => {
   const inputsRef = useRef();
+  const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
+  const queryClient = useQueryClient();
   useFocusWhenNavigate();
   const appInfos = useAppInfos();
   const { shouldUpdateStrapi, latestStrapiReleaseTag, strapiVersion } = appInfos;
-  const [modifiedData] = useState({ menuLogo: undefined });
+  const { updateProjectSettings } = useConfigurations();
+
+  const { data } = useQuery('project-settings', fetchProjectSettings);
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
     : 'app.components.UpgradePlanModal.text-ee';
 
+  const submitMutation = useMutation(body => postProjectSettings(body), {
+    onSuccess: async ({ menuLogo }) => {
+      await queryClient.invalidateQueries('project-settings', { refetchActive: true });
+      updateProjectSettings({ menuLogo: menuLogo?.url });
+    },
+  });
+
   const handleSubmit = () => {
-    // form values received here
-    // to do - handle this data
-    // const data = inputsRef.current.getValues();
+    const data = inputsRef.current.getValues();
+    const formData = getFormData(data);
+
+    submitMutation.mutate(formData, {
+      onError: () => {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occurred' },
+        });
+      },
+    });
   };
 
   return (
@@ -149,9 +173,11 @@ const ApplicationInfosPage = () => {
                 </Box>
               </Stack>
             </Box>
-            <CheckPermissions permissions={permissions}>
-              <Form ref={inputsRef} projectSettingsStored={modifiedData} />
-            </CheckPermissions>
+            {data && (
+              <CheckPermissions permissions={permissions}>
+                <Form ref={inputsRef} projectSettingsStored={data} />
+              </CheckPermissions>
+            )}
           </Stack>
         </ContentLayout>
       </Main>
