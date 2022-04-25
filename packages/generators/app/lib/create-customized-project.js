@@ -19,10 +19,8 @@ module.exports = async scope => {
 
   if (!scope.useTypescript) {
     // check how to handle track usage here 
-    const isTypescript = await askAboutLanguages(scope).catch(error => {
-      console.log(error)
-    })
-    scope.useTypescript = isTypescript;
+    const language = await askAboutLanguages(scope);
+    scope.useTypescript = language === "Typescript";
   }
 
   const configuration = await askDbInfosAndTest(scope).catch(error => {
@@ -167,15 +165,15 @@ async function installDatabaseTestingDep({ scope, configuration }) {
 }
 
 async function askAboutLanguages() {
-  const { client } = await inquirer.prompt([
+  const { language } = await inquirer.prompt([
     {
       type: 'list',
-      name: 'client',
-      message: 'Choose your language',
-      choices: ['Typescript', 'Javascript'],
+      name: 'language',
+      message: 'Choose your preferred language',
+      choices: ['Javascript', 'Typescript'],
       default: 'Javascript',
     },
   ]);
 
-  return client === 'Typescript';
+  return language;
 }
