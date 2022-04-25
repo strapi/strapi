@@ -17,6 +17,14 @@ const createProject = require('./create-project');
 module.exports = async scope => {
   await trackUsage({ event: 'didChooseCustomDatabase', scope });
 
+  if (!scope.useTypescript) {
+    // check how to handle track usage here 
+    const isTypescript = await askAboutLanguages(scope).catch(error => {
+      console.log(error)
+    })
+    scope.useTypescript = isTypescript;
+  }
+
   const configuration = await askDbInfosAndTest(scope).catch(error => {
     return trackUsage({ event: 'didNotConnectDatabase', scope, error }).then(() => {
       throw error;
@@ -156,4 +164,18 @@ async function installDatabaseTestingDep({ scope, configuration }) {
   });
 
   await execa(packageManager, cmd.concat(deps));
+}
+
+async function askAboutLanguages() {
+  const { client } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'client',
+      message: 'Choose your language',
+      choices: ['Typescript', 'Javascript'],
+      default: 'Javascript',
+    },
+  ]);
+
+  return client === 'Typescript';
 }
