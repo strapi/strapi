@@ -48,7 +48,7 @@ const ApplicationInfosPage = () => {
     },
   });
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const data = inputsRef.current.getValues();
     const formData = getFormData(data);
 
