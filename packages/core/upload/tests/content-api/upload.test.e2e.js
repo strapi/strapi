@@ -4,9 +4,9 @@ const fs = require('fs');
 const path = require('path');
 
 // Helpers.
-const { createTestBuilder } = require('../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createTestBuilder } = require('../../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
 let strapi;
@@ -28,7 +28,7 @@ describe('Upload plugin end to end tests', () => {
   beforeAll(async () => {
     await builder.addContentType(dogModel).build();
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
+    rq = await createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {
@@ -36,59 +36,13 @@ describe('Upload plugin end to end tests', () => {
     await builder.cleanup();
   });
 
-  describe('GET /upload/settings => Get settings for an environment', () => {
-    test('Returns the settings', async () => {
-      const res = await rq({ method: 'GET', url: '/upload/settings' });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toEqual({
-        data: {
-          autoOrientation: false,
-          sizeOptimization: true,
-          responsiveDimensions: true,
-        },
-      });
-    });
-  });
-
-  describe('PUT /upload/settings/:environment', () => {
-    test('Updates an environment config correctly', async () => {
-      const updateRes = await rq({
-        method: 'PUT',
-        url: '/upload/settings',
-        body: {
-          sizeOptimization: true,
-          responsiveDimensions: true,
-        },
-      });
-
-      expect(updateRes.statusCode).toBe(200);
-      expect(updateRes.body).toEqual({
-        data: {
-          sizeOptimization: true,
-          responsiveDimensions: true,
-        },
-      });
-
-      const getRes = await rq({ method: 'GET', url: '/upload/settings' });
-
-      expect(getRes.statusCode).toBe(200);
-      expect(getRes.body).toEqual({
-        data: {
-          sizeOptimization: true,
-          responsiveDimensions: true,
-        },
-      });
-    });
-  });
-
-  describe('POST /upload => Upload a file', () => {
+  describe('Create', () => {
     test('Simple image upload', async () => {
       const res = await rq({
         method: 'POST',
         url: '/upload',
         formData: {
-          files: fs.createReadStream(path.join(__dirname, 'rec.jpg')),
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
         },
       });
 
@@ -121,7 +75,7 @@ describe('Upload plugin end to end tests', () => {
         method: 'POST',
         url: '/upload',
         formData: {
-          files: fs.createReadStream(path.join(__dirname, 'thumbnail_target.png')),
+          files: fs.createReadStream(path.join(__dirname, '../utils/thumbnail_target.png')),
         },
       });
 
@@ -158,34 +112,30 @@ describe('Upload plugin end to end tests', () => {
     });
   });
 
-  test('GET /upload/files => Find files', async () => {
-    const getRes = await rq({ method: 'GET', url: '/upload/files' });
+  describe('Read', () => {
+    test('Get files', async () => {
+      const getRes = await rq({ method: 'GET', url: '/upload/files' });
 
-    expect(getRes.statusCode).toBe(200);
-    expect(getRes.body).toEqual({
-      results: expect.arrayContaining([
-        expect.objectContaining({
-          id: expect.anything(),
-          url: expect.any(String),
-        }),
-      ]),
-      pagination: {
-        page: expect.any(Number),
-        pageSize: expect.any(Number),
-        pageCount: expect.any(Number),
-        total: expect.any(Number),
-      },
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.anything(),
+            url: expect.any(String),
+          }),
+        ])
+      );
     });
   });
 
-  describe('POST /api/:uid => Create an entity with a file', () => {
+  describe('Create an entity with a file', () => {
     test('With an image', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/api/dogs?populate=*',
+        url: '/dogs?populate=*',
         formData: {
           data: '{}',
-          'files.profilePicture': fs.createReadStream(path.join(__dirname, 'rec.jpg')),
+          'files.profilePicture': fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
         },
       });
 
@@ -210,10 +160,10 @@ describe('Upload plugin end to end tests', () => {
     test('With a pdf', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/api/dogs?populate=*',
+        url: '/dogs?populate=*',
         formData: {
           data: '{}',
-          'files.profilePicture': fs.createReadStream(path.join(__dirname, 'rec.pdf')),
+          'files.profilePicture': fs.createReadStream(path.join(__dirname, '../utils/rec.pdf')),
         },
       });
 
@@ -235,7 +185,4 @@ describe('Upload plugin end to end tests', () => {
       });
     });
   });
-  test.todo('GET /upload/files/:id => Find one file');
-  test.todo('GET /upload/search/:id => Search files');
-  test.todo('DELETE /upload/files/:id => Delete a file');
 });

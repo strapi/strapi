@@ -89,5 +89,16 @@ module.exports = {
       relation: 'morphToMany',
       configurable: false,
     },
+    folder: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: 'plugin::upload.folder',
+      inversedBy: 'files',
+    },
+    folderPath: {
+      type: 'string',
+      min: 1,
+      required: true,
+    },
   },
 };
