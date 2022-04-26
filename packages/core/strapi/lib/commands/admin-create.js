@@ -3,6 +3,8 @@
 const { yup } = require('@strapi/utils');
 const _ = require('lodash');
 const inquirer = require('inquirer');
+const tsUtils = require('@strapi/typescript-utils')
+const path = require('path')
 const strapi = require('../index');
 
 const emailValidator = yup
@@ -60,7 +62,7 @@ const promptQuestions = [
  * @param {string} cmdOptions.firstname - new admin's first name
  * @param {string} [cmdOptions.lastname] - new admin's last name
  */
-module.exports = async function(cmdOptions = {}) {
+module.exports = async function (cmdOptions = {}) {
   let { email, password, firstname, lastname } = cmdOptions;
 
   if (
@@ -90,7 +92,12 @@ module.exports = async function(cmdOptions = {}) {
 };
 
 async function createAdmin({ email, password, firstname, lastname }) {
-  const app = await strapi().load();
+  const appDir = process.cwd();
+
+  const isTSProject = await tsUtils.isUsingTypeScript(appDir)
+  const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
+
+  const app = await strapi({ appDir, distDir }).load();
 
   const user = await app.admin.services.user.exists({ email });
 
