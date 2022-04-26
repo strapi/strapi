@@ -124,7 +124,10 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
             uid: 'compo',
             layouts: {
               edit: [
-                [{ name: 'full_name', size: 6 }, { name: 'city', size: 6 }],
+                [
+                  { name: 'full_name', size: 6 },
+                  { name: 'city', size: 6 },
+                ],
                 [{ name: 'compo', size: 12 }],
               ],
             },
@@ -166,7 +169,10 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
             editRelations: [],
             edit: [
               [{ name: 'dz', size: 12 }],
-              [{ name: 'full_name', size: 6 }, { name: 'city', size: 6 }],
+              [
+                { name: 'full_name', size: 6 },
+                { name: 'city', size: 6 },
+              ],
               [{ name: 'compo', size: 12 }],
             ],
           },
@@ -364,7 +370,10 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
         layouts: {
           edit: [
             [{ name: 'dz', size: 12 }],
-            [{ name: 'full_name', size: 6 }, { name: 'city', size: 6 }],
+            [
+              { name: 'full_name', size: 6 },
+              { name: 'city', size: 6 },
+            ],
             [{ name: 'compo', size: 12 }],
           ],
         },
@@ -612,7 +621,10 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
 
   describe('getDisplayedModels', () => {
     it('should return an array containing only the displayable models', () => {
-      const models = [{ uid: 'test', isDisplayed: false }, { uid: 'testtest', isDisplayed: true }];
+      const models = [
+        { uid: 'test', isDisplayed: false },
+        { uid: 'testtest', isDisplayed: true },
+      ];
 
       expect(getDisplayedModels([])).toHaveLength(0);
       expect(getDisplayedModels(models)).toHaveLength(1);

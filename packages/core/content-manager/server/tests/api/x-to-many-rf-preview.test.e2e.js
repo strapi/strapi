@@ -208,25 +208,26 @@ describe('x-to-many RF Preview', () => {
   });
 
   describe('Pagination', () => {
-    test.each([[1, 10], [2, 10], [5, 1], [4, 2], [1, 100]])(
-      'Custom pagination (%s, %s)',
-      async (page, pageSize) => {
-        const product = data.product[0];
+    test.each([
+      [1, 10],
+      [2, 10],
+      [5, 1],
+      [4, 2],
+      [1, 100],
+    ])('Custom pagination (%s, %s)', async (page, pageSize) => {
+      const product = data.product[0];
 
-        const { body, statusCode } = await rq.get(
-          `${cmProductUrl}/${product.id}/shops?page=${page}&pageSize=${pageSize}`
-        );
+      const { body, statusCode } = await rq.get(
+        `${cmProductUrl}/${product.id}/shops?page=${page}&pageSize=${pageSize}`
+      );
 
-        expect(statusCode).toBe(200);
+      expect(statusCode).toBe(200);
 
-        const { pagination, results } = body;
+      const { pagination, results } = body;
 
-        expect(pagination.page).toBe(page);
-        expect(pagination.pageSize).toBe(pageSize);
-        expect(results).toHaveLength(
-          Math.min(pageSize, PRODUCT_SHOP_COUNT - pageSize * (page - 1))
-        );
-      }
-    );
+      expect(pagination.page).toBe(page);
+      expect(pagination.pageSize).toBe(pageSize);
+      expect(results).toHaveLength(Math.min(pageSize, PRODUCT_SHOP_COUNT - pageSize * (page - 1)));
+    });
   });
 });

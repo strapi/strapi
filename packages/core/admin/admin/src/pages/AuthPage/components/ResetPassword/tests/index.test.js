@@ -43,7 +43,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
       }
 
       .c9 {
-        padding-top: 64px;
+        padding-top: 8px;
         padding-bottom: 64px;
       }
 

@@ -59,8 +59,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
         'relation',
         'component',
         'boolean',
-        'date',
         'media',
+        'password',
         'richtext',
         'timestamp',
       ].includes(type) && !!type

@@ -106,7 +106,6 @@ const FieldComponent = ({
             componentValue={componentValue}
             componentValueLength={componentValueLength}
             componentUid={componentUid}
-            isNested={isNested}
             isReadOnly={isReadOnly}
             max={max}
             min={min}

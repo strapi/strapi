@@ -51,6 +51,39 @@ const GenericInput = ({
   // therefore we cast this case to undefined
   const value = defaultValue ?? undefined;
 
+  /*
+   TODO: ideally we should pass in `defaultValue` and `value` for
+   inputs, in order to make them controlled components. This variable
+   acts as a fallback for now, to prevent React errors in devopment mode
+
+   See: https://github.com/strapi/strapi/pull/12861
+  */
+  const valueWithEmptyStringFallback = value ?? '';
+
+  function getErrorMessage(error) {
+    if (!error) {
+      return null;
+    }
+
+    const values = {
+      ...error.values,
+    };
+
+    if (typeof error === 'string') {
+      return formatMessage({ id: error, defaultMessage: error }, values);
+    }
+
+    return formatMessage(
+      {
+        id: error.id,
+        defaultMessage: error?.defaultMessage ?? error.id,
+      },
+      values
+    );
+  }
+
+  const errorMessage = getErrorMessage(error);
+
   if (CustomInput) {
     return (
       <CustomInput
@@ -59,7 +92,7 @@ const GenericInput = ({
         disabled={disabled}
         intlLabel={intlLabel}
         labelAction={labelAction}
-        error={error}
+        error={errorMessage}
         name={name}
         onChange={onChange}
         options={options}
@@ -91,8 +124,6 @@ const GenericInput = ({
         { ...placeholder.values }
       )
     : '';
-
-  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
   switch (type) {
     case 'bool': {
@@ -244,7 +275,7 @@ const GenericInput = ({
           placeholder={formattedPlaceholder}
           required={required}
           type="email"
-          value={value}
+          value={valueWithEmptyStringFallback}
         />
       );
     }
@@ -265,7 +296,7 @@ const GenericInput = ({
           placeholder={formattedPlaceholder}
           required={required}
           type="text"
-          value={value}
+          value={valueWithEmptyStringFallback}
         />
       );
     }
@@ -307,7 +338,7 @@ const GenericInput = ({
           placeholder={formattedPlaceholder}
           required={required}
           type={showPassword ? 'text' : 'password'}
-          value={value}
+          value={valueWithEmptyStringFallback}
         />
       );
     }
@@ -352,7 +383,7 @@ const GenericInput = ({
           required={required}
           placeholder={formattedPlaceholder}
           type={type}
-          value={value}
+          value={valueWithEmptyStringFallback}
         >
           {value}
         </Textarea>
@@ -431,7 +462,13 @@ GenericInput.propTypes = {
     values: PropTypes.object,
   }),
   disabled: PropTypes.bool,
-  error: PropTypes.string,
+  error: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string,
+    }),
+  ]),
   intlLabel: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,

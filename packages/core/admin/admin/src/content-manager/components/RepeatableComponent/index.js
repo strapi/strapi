@@ -5,7 +5,6 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-import take from 'lodash/take';
 import { useNotification } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
@@ -17,6 +16,7 @@ import ItemTypes from '../../utils/ItemTypes';
 import ComponentInitializer from '../ComponentInitializer';
 import connect from './utils/connect';
 import select from './utils/select';
+import getComponentErrorKeys from './utils/getComponentErrorKeys';
 import DraggedItem from './DraggedItem';
 import AccordionGroupCustom from './AccordionGroupCustom';
 
@@ -38,7 +38,6 @@ const RepeatableComponent = ({
   componentUid,
   componentValue,
   componentValueLength,
-  isNested,
   isReadOnly,
   max,
   min,
@@ -59,16 +58,7 @@ const RepeatableComponent = ({
     return getMaxTempKey(componentValue || []) + 1;
   }, [componentValue]);
 
-  const componentErrorKeys = Object.keys(formErrors)
-    .filter(errorKey => {
-      return take(errorKey.split('.'), isNested ? 3 : 1).join('.') === name;
-    })
-    .map(errorKey => {
-      return errorKey
-        .split('.')
-        .slice(0, name.split('.').length + 1)
-        .join('.');
-    });
+  const componentErrorKeys = getComponentErrorKeys(name, formErrors);
 
   const toggleCollapses = () => {
     setCollapseToOpen('');
@@ -187,7 +177,6 @@ RepeatableComponent.defaultProps = {
   componentValue: null,
   componentValueLength: 0,
   formErrors: {},
-  isNested: false,
   max: Infinity,
   min: 0,
 };
@@ -198,7 +187,6 @@ RepeatableComponent.propTypes = {
   componentValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   componentValueLength: PropTypes.number,
   formErrors: PropTypes.object,
-  isNested: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
   max: PropTypes.number,
   min: PropTypes.number,
@@ -207,9 +195,6 @@ RepeatableComponent.propTypes = {
 
 const Memoized = memo(RepeatableComponent);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);
 
 export { RepeatableComponent };
