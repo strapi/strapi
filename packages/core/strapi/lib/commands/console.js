@@ -1,8 +1,8 @@
 'use strict';
 
 const REPL = require('repl');
-const tsUtils = require('@strapi/typescript-utils')
-const path = require('path')
+const path = require('path');
+const tsUtils = require('@strapi/typescript-utils');
 
 const strapi = require('../index');
 
@@ -13,7 +13,7 @@ module.exports = async () => {
   // Now load up the Strapi framework for real.
   const appDir = process.cwd();
 
-  const isTSProject = await tsUtils.isUsingTypeScript(appDir)
+  const isTSProject = await tsUtils.isUsingTypeScript(appDir);
   const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
 
   const app = await strapi({ appDir, distDir }).load();
@@ -21,7 +21,7 @@ module.exports = async () => {
   app.start().then(() => {
     const repl = REPL.start(app.config.info.name + ' > ' || 'strapi > '); // eslint-disable-line prefer-template
 
-    repl.on('exit', function (err) {
+    repl.on('exit', function(err) {
       if (err) {
         app.log.error(err);
         process.exit(1);

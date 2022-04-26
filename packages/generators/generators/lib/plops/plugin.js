@@ -1,11 +1,12 @@
 'use strict';
 
 const chalk = require('chalk');
-const tsUtils = require('@strapi/typescript-utils');
 
 const logInstructions = (pluginName, { language }) => {
   const maxLength = `    resolve: './src/plugins/${pluginName}'`.length;
-  const separator = Array(maxLength).fill('─').join('');
+  const separator = Array(maxLength)
+    .fill('─')
+    .join('');
 
   const exportInstruction = language === 'js' ? 'module.exports =' : 'export default';
 
@@ -26,7 +27,7 @@ ${separator}
 `;
 };
 
-module.exports = (plop) => {
+module.exports = plop => {
   // Plugin generator
   plop.setGenerator('plugin', {
     description: 'Generate a basic plugin',
@@ -42,10 +43,10 @@ module.exports = (plop) => {
         message: 'Choose your preferred language',
         choices: ['Javascript', 'Typescript'],
         default: 'Javascript',
-      }
+      },
     ],
     actions(answers) {
-      const isTypescript = answers?.language === 'Typescript';
+      const isTypescript = answers.language === 'Typescript';
       const language = isTypescript ? 'ts' : 'js';
 
       // TODO: Adds tsconfig & build command for TS plugins?

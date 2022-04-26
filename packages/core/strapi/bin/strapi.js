@@ -95,6 +95,7 @@ program
   .option('--dbssl <dbssl>', 'Database SSL')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Allow overwriting existing database content')
+  .option('-ts, --typescript', 'Create a typescript project')
   .description('Create a new application')
   .action(require('../lib/commands/new'));
 
