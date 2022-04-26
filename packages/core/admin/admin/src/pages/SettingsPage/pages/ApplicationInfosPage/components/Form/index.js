@@ -40,10 +40,10 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
       hasRadius
       background="neutral0"
       shadow="tableShadow"
-      paddingTop={7}
-      paddingBottom={7}
-      paddingRight={6}
-      paddingLeft={6}
+      paddingTop={6}
+      paddingBottom={6}
+      paddingRight={7}
+      paddingLeft={7}
     >
       <Typography variant="delta" as="h3">
         {formatMessage({
@@ -51,7 +51,7 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
           defaultMessage: 'Customization',
         })}
       </Typography>
-      <Grid paddingTop={5}>
+      <Grid paddingTop={4}>
         <GridItem col={6} s={12}>
           <LogoInput
             onChangeLogo={handleChangeMenuLogo}

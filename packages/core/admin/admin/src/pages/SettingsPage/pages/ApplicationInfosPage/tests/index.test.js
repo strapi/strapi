@@ -59,10 +59,10 @@ describe('Application page', () => {
     expect(firstChild).toMatchInlineSnapshot(`
       .c18 {
         background: #ffffff;
-        padding-top: 32px;
-        padding-right: 24px;
-        padding-bottom: 32px;
-        padding-left: 24px;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
@@ -456,7 +456,7 @@ describe('Application page', () => {
       }
 
       .c31 {
-        padding-top: 20px;
+        padding-top: 16px;
       }
 
       .c22 {

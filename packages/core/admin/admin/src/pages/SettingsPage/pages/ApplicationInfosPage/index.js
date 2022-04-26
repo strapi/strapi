@@ -84,10 +84,10 @@ const ApplicationInfosPage = () => {
               hasRadius
               background="neutral0"
               shadow="tableShadow"
-              paddingTop={7}
-              paddingBottom={7}
-              paddingRight={6}
-              paddingLeft={6}
+              paddingTop={6}
+              paddingBottom={6}
+              paddingRight={7}
+              paddingLeft={7}
             >
               <Stack spacing={5}>
                 <Typography variant="delta" as="h3">
