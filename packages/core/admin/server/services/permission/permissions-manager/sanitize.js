@@ -46,6 +46,8 @@ module.exports = ({ action, ability, model }) => {
     const permittedFields = fields.shouldIncludeAll ? null : getOutputFields(fields.permitted);
 
     return pipeAsync(
+      // Remove fields hidden from the admin
+      traverseEntity(omitHiddenFields, { schema }),
       // Remove unallowed fields from admin::user relations
       traverseEntity(pickAllowedAdminUserFields, { schema }),
       // Remove not allowed fields (RBAC)
@@ -61,6 +63,8 @@ module.exports = ({ action, ability, model }) => {
     const permittedFields = fields.shouldIncludeAll ? null : getInputFields(fields.permitted);
 
     return pipeAsync(
+      // Remove fields hidden from the admin
+      traverseEntity(omitHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
       traverseEntity(allowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updateBy fields
@@ -107,8 +111,23 @@ module.exports = ({ action, ability, model }) => {
     return defaults({ subject: asSubject(model, data), action }, options);
   };
 
+  /**
+   * Omit creator fields' (createdBy & updatedBy) roles from the admin API responses
+   */
   const omitCreatorRoles = omit([`${CREATED_BY_ATTRIBUTE}.roles`, `${UPDATED_BY_ATTRIBUTE}.roles`]);
 
+  /**
+   * Visitor used to remove hidden fields from the admin API responses
+   */
+  const omitHiddenFields = ({ key, attribute }, { remove }) => {
+    if (attribute.hidden) {
+      remove(key);
+    }
+  };
+
+  /**
+   * Visitor used to only select needed fields from the admin users entities & avoid leaking sensitive information
+   */
   const pickAllowedAdminUserFields = ({ attribute, key, value }, { set }) => {
     const pickAllowedFields = pick(['id', 'firstname', 'lastname', 'username']);
 
