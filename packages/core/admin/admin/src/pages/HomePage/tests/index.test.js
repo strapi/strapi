@@ -57,113 +57,6 @@ describe('Homepage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c23 {
-        background: #ffffff;
-        padding: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c25 {
-        background: #f0f0ff;
-        padding: 12px;
-        border-radius: 4px;
-      }
-
-      .c31 {
-        background: #fdf4dc;
-        padding: 12px;
-        border-radius: 4px;
-      }
-
-      .c32 {
-        background: #eaf5ff;
-        padding: 12px;
-        border-radius: 4px;
-      }
-
-      .c33 {
-        background: #f6ecfc;
-        padding: 12px;
-        border-radius: 4px;
-      }
-
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c27 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c27 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c27 > * + * {
-        margin-top: 4px;
-      }
-
-      .c28 {
-        font-weight: 500;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c30 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c26 {
-        margin-right: 24px;
-      }
-
-      .c26 svg {
-        width: 2rem;
-        height: 2rem;
-      }
-
-      .c29 {
-        word-break: break-all;
-      }
-
-      .c1 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .c2 {
-        overflow-x: hidden;
-      }
-
-      .c3:focus-visible {
-        outline: none;
-      }
-
       .c5 {
         padding: 56px;
       }
@@ -185,235 +78,6 @@ describe('Homepage', () => {
 
       .c36 {
         padding-bottom: 32px;
-      }
-
-      .c6 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 0px;
-      }
-
-      .c21 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 24px;
-      }
-
-      .c7 {
-        grid-column: span 8;
-        max-width: 100%;
-      }
-
-      .c34 {
-        grid-column: span 4;
-        max-width: 100%;
-      }
-
-      .c45 {
-        grid-column: span 6;
-        max-width: 100%;
-      }
-
-      .c9 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c10 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c10 > * + * {
-        margin-top: 20px;
-      }
-
-      .c37 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c37 > * + * {
-        margin-top: 12px;
-      }
-
-      .c12 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c13 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
-      .c38 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c39 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c52 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c50 {
-        padding-right: 8px;
-      }
-
-      .c46 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c46 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c46 svg > g,
-      .c46 svg path {
-        fill: #ffffff;
-      }
-
-      .c46[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c46:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c46:focus-visible {
-        outline: none;
-      }
-
-      .c46:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c47 {
-        padding: 10px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-        border-radius: 4px;
-        border: 1px solid #dcdce4;
-        background: #ffffff;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-      }
-
-      .c47 .c49 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c47 .c51 {
-        color: #ffffff;
-      }
-
-      .c47[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c47[aria-disabled='true'] .c51 {
-        color: #666687;
-      }
-
-      .c47[aria-disabled='true'] svg > g,
-      .c47[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c47[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c47[aria-disabled='true']:active .c51 {
-        color: #666687;
-      }
-
-      .c47[aria-disabled='true']:active svg > g,
-      .c47[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c47:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c47:active {
-        background-color: #eaeaef;
-      }
-
-      .c47 .c51 {
-        color: #32324d;
-      }
-
-      .c47 svg > g,
-      .c47 svg path {
-        fill: #32324d;
       }
 
       .c18 {
@@ -553,40 +217,222 @@ describe('Homepage', () => {
         fill: #ffffff;
       }
 
-      .c41 {
-        color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+      .c23 {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c42 {
-        padding-left: 8px;
+      .c25 {
+        background: #f0f0ff;
+        padding: 12px;
+        border-radius: 4px;
       }
 
-      .c40 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
+      .c31 {
+        background: #fdf4dc;
+        padding: 12px;
+        border-radius: 4px;
+      }
+
+      .c32 {
+        background: #eaf5ff;
+        padding: 12px;
+        border-radius: 4px;
+      }
+
+      .c33 {
+        background: #f6ecfc;
+        padding: 12px;
+        border-radius: 4px;
+      }
+
+      .c24 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        -webkit-text-decoration: none;
-        text-decoration: none;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c9 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c10 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c10 > * + * {
+        margin-top: 20px;
+      }
+
+      .c27 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c27 > * + * {
+        margin-top: 4px;
+      }
+
+      .c37 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c37 > * + * {
+        margin-top: 12px;
+      }
+
+      .c12 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+      }
+
+      .c13 {
+        color: #666687;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .c28 {
+        font-weight: 500;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c30 {
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c38 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c26 {
+        margin-right: 24px;
+      }
+
+      .c26 svg {
+        width: 2rem;
+        height: 2rem;
+      }
+
+      .c29 {
+        word-break: break-all;
+      }
+
+      .c1 {
+        padding-bottom: 56px;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .c2 {
+        overflow-x: hidden;
+      }
+
+      .c3:focus-visible {
+        outline: none;
+      }
+
+      .c6 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 0px;
+      }
+
+      .c21 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 24px;
+      }
+
+      .c7 {
+        grid-column: span 8;
+        max-width: 100%;
+      }
+
+      .c34 {
+        grid-column: span 4;
+        max-width: 100%;
+      }
+
+      .c44 {
+        grid-column: span 6;
+        max-width: 100%;
+      }
+
+      .c51 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c49 {
+        padding-right: 8px;
+      }
+
+      .c45 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
         position: relative;
         outline: none;
       }
 
-      .c40 svg path {
-        fill: #4945ff;
+      .c45 svg {
+        height: 12px;
+        width: 12px;
       }
 
-      .c40 svg {
-        font-size: 0.625rem;
+      .c45 svg > g,
+      .c45 svg path {
+        fill: #ffffff;
       }
 
-      .c40:after {
+      .c45[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c45:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -601,11 +447,11 @@ describe('Homepage', () => {
         border: 2px solid transparent;
       }
 
-      .c40:focus-visible {
+      .c45:focus-visible {
         outline: none;
       }
 
-      .c40:focus-visible:after {
+      .c45:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -616,62 +462,200 @@ describe('Homepage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c43 {
+      .c46 {
+        padding: 10px 16px;
+        background: #4945ff;
+        border: 1px solid #4945ff;
+        border-radius: 4px;
+        border: 1px solid #dcdce4;
+        background: #ffffff;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+      }
+
+      .c46 .c48 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c46 .c50 {
+        color: #ffffff;
+      }
+
+      .c46[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c46[aria-disabled='true'] .c50 {
+        color: #666687;
+      }
+
+      .c46[aria-disabled='true'] svg > g,
+      .c46[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c46[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c46[aria-disabled='true']:active .c50 {
+        color: #666687;
+      }
+
+      .c46[aria-disabled='true']:active svg > g,
+      .c46[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c46:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c46:active {
+        background-color: #eaeaef;
+      }
+
+      .c46 .c50 {
+        color: #32324d;
+      }
+
+      .c46 svg > g,
+      .c46 svg path {
+        fill: #32324d;
+      }
+
+      .c40 {
+        color: #4945ff;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c41 {
+        padding-left: 8px;
+      }
+
+      .c39 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c39 svg path {
+        fill: #4945ff;
+      }
+
+      .c39 svg {
+        font-size: 0.625rem;
+      }
+
+      .c39:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c39:focus-visible {
+        outline: none;
+      }
+
+      .c39:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c42 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
       }
 
-      .c53 path {
+      .c52 path {
         fill: #7289da !important;
       }
 
-      .c54 > path:first-child {
+      .c53 > path:first-child {
         fill: #ff4500;
       }
 
-      .c57 > path:first-child {
-        fill: #8e75ff;
-      }
-
-      .c57 > path:nth-child(2) {
-        fill: #8e75ff;
-      }
-
-      .c57 > path:nth-child(3) {
-        fill: #8e75ff;
-      }
-
-      .c55 path {
-        fill: #1da1f2 !important;
-      }
-
       .c56 > path:first-child {
-        fill: #231f20;
+        fill: #8e75ff;
       }
 
       .c56 > path:nth-child(2) {
-        fill: #fff9ae;
+        fill: #8e75ff;
       }
 
       .c56 > path:nth-child(3) {
+        fill: #8e75ff;
+      }
+
+      .c54 path {
+        fill: #1da1f2 !important;
+      }
+
+      .c55 > path:first-child {
+        fill: #231f20;
+      }
+
+      .c55 > path:nth-child(2) {
+        fill: #fff9ae;
+      }
+
+      .c55 > path:nth-child(3) {
         fill: #00aeef;
       }
 
-      .c56 > path:nth-child(4) {
+      .c55 > path:nth-child(4) {
         fill: #00a94f;
       }
 
-      .c56 > path:nth-child(5) {
+      .c55 > path:nth-child(5) {
         fill: #f15d22;
       }
 
-      .c56 > path:nth-child(6) {
+      .c55 > path:nth-child(6) {
         fill: #e31b23;
       }
 
-      .c48 {
+      .c47 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -683,16 +667,16 @@ describe('Homepage', () => {
         border: none;
       }
 
-      .c48 svg {
+      .c47 svg {
         width: 24px;
         height: 24px;
       }
 
-      .c48 span {
+      .c47 span {
         word-break: keep-all;
       }
 
-      .c44 {
+      .c43 {
         row-gap: 8px;
         -webkit-column-gap: 16px;
         column-gap: 16px;
@@ -749,13 +733,13 @@ describe('Homepage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c45 {
+        .c44 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c45 {
+        .c44 {
           grid-column: span;
         }
       }
@@ -888,7 +872,7 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c27"
+                            class="c9 c27"
                             spacing="1"
                           >
                             <div
@@ -940,7 +924,7 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c27"
+                            class="c9 c27"
                             spacing="1"
                           >
                             <div
@@ -992,7 +976,7 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c27"
+                            class="c9 c27"
                             spacing="1"
                           >
                             <div
@@ -1042,7 +1026,7 @@ describe('Homepage', () => {
                             </svg>
                           </div>
                           <div
-                            class="c27"
+                            class="c9 c27"
                             spacing="1"
                           >
                             <div
@@ -1093,25 +1077,25 @@ describe('Homepage', () => {
                               Join the community
                             </h2>
                             <span
-                              class="c39"
+                              class="c30"
                             >
                               Discuss with team members, contributors and developers on different channels
                             </span>
                           </div>
                           <a
-                            class="c40"
+                            class="c39"
                             href="https://feedback.strapi.io/"
                             rel="noreferrer noopener"
                             target="_blank"
                           >
                             <span
-                              class="c41"
+                              class="c40"
                             >
                               See our road map
                             </span>
                             <span
                               aria-hidden="true"
-                              class="c42 c43"
+                              class="c41 c42"
                             >
                               <svg
                                 fill="none"
@@ -1130,24 +1114,24 @@ describe('Homepage', () => {
                         </div>
                       </div>
                       <div
-                        class="c6 c44"
+                        class="c6 c43"
                       >
                         <div
-                          class="c45"
+                          class="c44"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c46 c47 c48"
+                              class="c45 c46 c47"
                               href="https://github.com/strapi/strapi/"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c49 c50"
+                                class="c48 c49"
                               >
                                 <svg
                                   fill="#7289DA"
@@ -1163,7 +1147,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c51 c52"
+                                class="c50 c51"
                               >
                                 Github
                               </span>
@@ -1171,24 +1155,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c45"
+                          class="c44"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c46 c47 c48"
+                              class="c45 c46 c47"
                               href="https://slack.strapi.io/"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c49 c50"
+                                class="c48 c49"
                               >
                                 <svg
-                                  class="c53"
+                                  class="c52"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1202,7 +1186,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c51 c52"
+                                class="c50 c51"
                               >
                                 Discord
                               </span>
@@ -1210,24 +1194,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c45"
+                          class="c44"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c46 c47 c48"
+                              class="c45 c46 c47"
                               href="https://www.reddit.com/r/Strapi/"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c49 c50"
+                                class="c48 c49"
                               >
                                 <svg
-                                  class="c54"
+                                  class="c53"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1243,7 +1227,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c51 c52"
+                                class="c50 c51"
                               >
                                 Reddit
                               </span>
@@ -1251,24 +1235,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c45"
+                          class="c44"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c46 c47 c48"
+                              class="c45 c46 c47"
                               href="https://twitter.com/strapijs"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c49 c50"
+                                class="c48 c49"
                               >
                                 <svg
-                                  class="c55"
+                                  class="c54"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1282,7 +1266,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c51 c52"
+                                class="c50 c51"
                               >
                                 Twitter
                               </span>
@@ -1290,24 +1274,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c45"
+                          class="c44"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c46 c47 c48"
+                              class="c45 c46 c47"
                               href="https://forum.strapi.io"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c49 c50"
+                                class="c48 c49"
                               >
                                 <svg
-                                  class="c56"
+                                  class="c55"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1341,7 +1325,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c51 c52"
+                                class="c50 c51"
                               >
                                 Forum
                               </span>
@@ -1349,24 +1333,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c45"
+                          class="c44"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c46 c47 c48"
+                              class="c45 c46 c47"
                               href="https://strapi.io/blog?utm_source=referral&utm_medium=admin&utm_campaign=career%20page"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c49 c50"
+                                class="c48 c49"
                               >
                                 <svg
-                                  class="c57"
+                                  class="c56"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1389,7 +1373,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c51 c52"
+                                class="c50 c51"
                               >
                                 Blog
                               </span>
@@ -1397,24 +1381,24 @@ describe('Homepage', () => {
                           </div>
                         </div>
                         <div
-                          class="c45"
+                          class="c44"
                         >
                           <div
                             class=""
                           >
                             <a
                               aria-disabled="false"
-                              class="c46 c47 c48"
+                              class="c45 c46 c47"
                               href="https://strapi.io/careers?utm_source=referral&utm_medium=admin&utm_campaign=blog"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
                               <div
                                 aria-hidden="true"
-                                class="c49 c50"
+                                class="c48 c49"
                               >
                                 <svg
-                                  class="c57"
+                                  class="c56"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -1437,7 +1421,7 @@ describe('Homepage', () => {
                                 </svg>
                               </div>
                               <span
-                                class="c51 c52"
+                                class="c50 c51"
                               >
                                 We are hiring!
                               </span>

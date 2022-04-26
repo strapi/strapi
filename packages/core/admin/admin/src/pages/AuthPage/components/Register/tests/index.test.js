@@ -590,6 +590,22 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         line-height: 1.5;
       }
 
+      .c37 {
+        border: none;
+        background: transparent;
+        font-size: 1.6rem;
+        width: auto;
+        padding: 0;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
       .c5 {
         font-weight: 600;
         color: #32324d;
@@ -761,22 +777,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
       .c15 {
         height: 4.5rem;
-      }
-
-      .c37 {
-        border: none;
-        background: transparent;
-        font-size: 1.6rem;
-        width: auto;
-        padding: 0;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c38 svg {

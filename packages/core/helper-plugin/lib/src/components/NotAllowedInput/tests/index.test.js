@@ -27,12 +27,30 @@ describe('<NotAllowedInput />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c5 {
+      .c6 {
         padding-right: 8px;
         padding-left: 12px;
       }
 
-      .c2 {
+      .c0 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -40,13 +58,13 @@ describe('<NotAllowedInput />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -58,24 +76,22 @@ describe('<NotAllowedInput />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c1 {
+      .c2 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c7 {
+      .c8 {
         border: none;
         border-radius: 4px;
+        padding-bottom: 0.65625rem;
         padding-left: 0;
         padding-right: 16px;
+        padding-top: 0.65625rem;
         cursor: not-allowed;
         color: #32324d;
         font-weight: 400;
@@ -85,40 +101,39 @@ describe('<NotAllowedInput />', () => {
         background: inherit;
       }
 
-      .c7::-webkit-input-placeholder {
+      .c8::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c7::-moz-placeholder {
+      .c8::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c7:-ms-input-placeholder {
+      .c8:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c7::placeholder {
+      .c8::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c7[aria-disabled='true'] {
+      .c8[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c7:focus {
+      .c8:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c4 {
+      .c5 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
-        height: 2.5rem;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -129,59 +144,49 @@ describe('<NotAllowedInput />', () => {
         background: #eaeaef;
       }
 
-      .c4:focus-within {
+      .c5:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c0 > * {
+      .c1 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c0 > * + * {
+      .c1 > * + * {
         margin-top: 4px;
       }
 
-      .c6 > path {
+      .c7 > path {
         fill: #666687;
       }
 
       <div>
         <div>
           <div
-            class="c0"
+            class="c0 c1"
             spacing="1"
           >
             <label
-              class="c1"
+              class="c2"
               for="test"
             >
               <div
-                class="c2"
+                class="c3"
               >
                 test
               </div>
             </label>
             <div
-              class="c3 c4"
+              class="c4 c5"
               disabled=""
             >
               <div
-                class="c5"
+                class="c6"
               >
                 <svg
-                  class="c6"
+                  class="c7"
                   fill="none"
                   height="1em"
                   viewBox="0 0 24 24"
@@ -197,7 +202,7 @@ describe('<NotAllowedInput />', () => {
               <input
                 aria-disabled="true"
                 aria-invalid="false"
-                class="c7"
+                class="c8"
                 id="test"
                 name="test"
                 placeholder="No permissions to see this field"

@@ -1,140 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditSettingsView renders and matches the snapshot 1`] = `
-.c0:focus-visible {
-  outline: none;
-}
-
-.c1 {
-  background: #f6f6f9;
+.c19 {
+  background: #ffffff;
   padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c2 {
+.c39 {
+  padding-top: 8px;
   padding-bottom: 8px;
 }
 
-.c18 {
-  padding-right: 56px;
-  padding-left: 56px;
+.c53 {
+  padding: 16px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
 }
 
-.c7 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c9 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-}
-
-.c17 {
-  color: #666687;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.c6 {
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c4 {
-  padding-right: 8px;
-}
-
-.c3 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  position: relative;
-  outline: none;
-}
-
-.c3 svg path {
-  fill: #4945ff;
-}
-
-.c3 svg {
-  font-size: 0.625rem;
-}
-
-.c3:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c3:focus-visible {
-  outline: none;
-}
-
-.c3:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
+.c64 {
+  overflow: hidden;
+  width: 100%;
 }
 
 .c16 {
@@ -369,95 +261,167 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   fill: #271fe0;
 }
 
-.c19 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
+.c58 {
+  background: #f6f6f9;
   border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c39 {
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
-.c53 {
-  padding: 16px;
-  border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
-}
-
-.c64 {
-  overflow: hidden;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
   width: 100%;
+  min-height: 2rem;
 }
 
-.c22 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
+.c61 {
+  padding-right: 12px;
+  padding-left: 12px;
 }
 
-.c45 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c65 {
+  padding-left: 12px;
 }
 
-.c46 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
-.c66 {
-  font-weight: 500;
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c56 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c23 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
+.c59 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c42 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
+.c67 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
 }
 
-.c24 {
-  grid-column: span 6;
-  max-width: 100%;
+.c67 svg {
+  height: 12px;
+  width: 12px;
 }
 
-.c43 {
-  grid-column: span 8;
-  max-width: 100%;
+.c67 svg > g,
+.c67 svg path {
+  fill: #ffffff;
 }
 
-.c55 {
-  grid-column: span 6;
-  max-width: 100%;
+.c67[aria-disabled='true'] {
+  pointer-events: none;
 }
 
-.c72 {
-  grid-column: span 4;
-  max-width: 100%;
+.c67:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c67:focus-visible {
+  outline: none;
+}
+
+.c67:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c68 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  border: none;
+}
+
+.c68 svg > g,
+.c68 svg path {
+  fill: #8e8ea9;
+}
+
+.c68:hover svg > g,
+.c68:hover svg path {
+  fill: #666687;
+}
+
+.c68:active svg > g,
+.c68:active svg path {
+  fill: #a5a5ba;
+}
+
+.c68[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c68[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c30 {
@@ -652,35 +616,59 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   margin-top: 8px;
 }
 
-.c40 {
-  background: #eaeaef;
+.c22 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
 }
 
-.c41 {
-  height: 1px;
-  border: none;
-  margin: 0;
+.c45 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
-.c58 {
+.c46 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c66 {
+  font-weight: 500;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c1 {
   background: #f6f6f9;
-  border-radius: 4px;
-  border-color: #eaeaef;
-  border: 1px solid #eaeaef;
-  width: 100%;
-  min-height: 2rem;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
 }
 
-.c61 {
-  padding-right: 12px;
-  padding-left: 12px;
+.c2 {
+  padding-bottom: 8px;
 }
 
-.c65 {
-  padding-left: 12px;
+.c18 {
+  padding-right: 56px;
+  padding-left: 56px;
 }
 
-.c44 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -698,7 +686,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c56 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -712,49 +700,53 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c59 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c9 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
 }
 
-.c67 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+.c17 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c6 {
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c4 {
+  padding-right: 8px;
+}
+
+.c3 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
   position: relative;
   outline: none;
 }
 
-.c67 svg {
-  height: 12px;
-  width: 12px;
+.c3 svg path {
+  fill: #4945ff;
 }
 
-.c67 svg > g,
-.c67 svg path {
-  fill: #ffffff;
+.c3 svg {
+  font-size: 0.625rem;
 }
 
-.c67[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c67:after {
+.c3:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -769,11 +761,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c67:focus-visible {
+.c3:focus-visible {
   outline: none;
 }
 
-.c67:focus-visible:after {
+.c3:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -784,45 +776,53 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c68 {
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
+}
+
+.c23 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c42 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c24 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c43 {
+  grid-column: span 8;
+  max-width: 100%;
+}
+
+.c55 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c72 {
+  grid-column: span 4;
+  max-width: 100%;
+}
+
+.c40 {
+  background: #eaeaef;
+}
+
+.c41 {
+  height: 1px;
   border: none;
-}
-
-.c68 svg > g,
-.c68 svg path {
-  fill: #8e8ea9;
-}
-
-.c68:hover svg > g,
-.c68:hover svg path {
-  fill: #666687;
-}
-
-.c68:active svg > g,
-.c68:active svg path {
-  fill: #a5a5ba;
-}
-
-.c68[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c68[aria-disabled='true'] svg path {
-  fill: #666687;
+  margin: 0;
 }
 
 .c69 {
@@ -1879,140 +1879,32 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
 
 exports[`EditSettingsView should add field 1`] = `
 <body>
-  .c0:focus-visible {
-  outline: none;
-}
-
-.c1 {
-  background: #f6f6f9;
+  .c19 {
+  background: #ffffff;
   padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c2 {
+.c39 {
+  padding-top: 8px;
   padding-bottom: 8px;
 }
 
-.c18 {
-  padding-right: 56px;
-  padding-left: 56px;
+.c53 {
+  padding: 16px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
 }
 
-.c7 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c9 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-}
-
-.c17 {
-  color: #666687;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.c6 {
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c4 {
-  padding-right: 8px;
-}
-
-.c3 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  position: relative;
-  outline: none;
-}
-
-.c3 svg path {
-  fill: #4945ff;
-}
-
-.c3 svg {
-  font-size: 0.625rem;
-}
-
-.c3:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c3:focus-visible {
-  outline: none;
-}
-
-.c3:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
+.c64 {
+  overflow: hidden;
+  width: 100%;
 }
 
 .c16 {
@@ -2247,95 +2139,167 @@ exports[`EditSettingsView should add field 1`] = `
   fill: #271fe0;
 }
 
-.c19 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
+.c58 {
+  background: #f6f6f9;
   border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c39 {
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
-.c53 {
-  padding: 16px;
-  border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
-}
-
-.c64 {
-  overflow: hidden;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
   width: 100%;
+  min-height: 2rem;
 }
 
-.c22 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
+.c61 {
+  padding-right: 12px;
+  padding-left: 12px;
 }
 
-.c45 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c65 {
+  padding-left: 12px;
 }
 
-.c46 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
-.c66 {
-  font-weight: 500;
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c56 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c23 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
+.c59 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c42 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
+.c67 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
 }
 
-.c24 {
-  grid-column: span 6;
-  max-width: 100%;
+.c67 svg {
+  height: 12px;
+  width: 12px;
 }
 
-.c43 {
-  grid-column: span 8;
-  max-width: 100%;
+.c67 svg > g,
+.c67 svg path {
+  fill: #ffffff;
 }
 
-.c55 {
-  grid-column: span 6;
-  max-width: 100%;
+.c67[aria-disabled='true'] {
+  pointer-events: none;
 }
 
-.c72 {
-  grid-column: span 4;
-  max-width: 100%;
+.c67:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c67:focus-visible {
+  outline: none;
+}
+
+.c67:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c68 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  border: none;
+}
+
+.c68 svg > g,
+.c68 svg path {
+  fill: #8e8ea9;
+}
+
+.c68:hover svg > g,
+.c68:hover svg path {
+  fill: #666687;
+}
+
+.c68:active svg > g,
+.c68:active svg path {
+  fill: #a5a5ba;
+}
+
+.c68[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c68[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c30 {
@@ -2530,35 +2494,59 @@ exports[`EditSettingsView should add field 1`] = `
   margin-top: 8px;
 }
 
-.c40 {
-  background: #eaeaef;
+.c22 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
 }
 
-.c41 {
-  height: 1px;
-  border: none;
-  margin: 0;
+.c45 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
-.c58 {
+.c46 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c66 {
+  font-weight: 500;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c1 {
   background: #f6f6f9;
-  border-radius: 4px;
-  border-color: #eaeaef;
-  border: 1px solid #eaeaef;
-  width: 100%;
-  min-height: 2rem;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
 }
 
-.c61 {
-  padding-right: 12px;
-  padding-left: 12px;
+.c2 {
+  padding-bottom: 8px;
 }
 
-.c65 {
-  padding-left: 12px;
+.c18 {
+  padding-right: 56px;
+  padding-left: 56px;
 }
 
-.c44 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2576,7 +2564,7 @@ exports[`EditSettingsView should add field 1`] = `
   justify-content: space-between;
 }
 
-.c56 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2590,49 +2578,53 @@ exports[`EditSettingsView should add field 1`] = `
   flex-direction: row;
 }
 
-.c59 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c9 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
 }
 
-.c67 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+.c17 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c6 {
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c4 {
+  padding-right: 8px;
+}
+
+.c3 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
   position: relative;
   outline: none;
 }
 
-.c67 svg {
-  height: 12px;
-  width: 12px;
+.c3 svg path {
+  fill: #4945ff;
 }
 
-.c67 svg > g,
-.c67 svg path {
-  fill: #ffffff;
+.c3 svg {
+  font-size: 0.625rem;
 }
 
-.c67[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c67:after {
+.c3:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2647,11 +2639,11 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c67:focus-visible {
+.c3:focus-visible {
   outline: none;
 }
 
-.c67:focus-visible:after {
+.c3:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2662,45 +2654,53 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c68 {
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
+}
+
+.c23 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c42 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c24 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c43 {
+  grid-column: span 8;
+  max-width: 100%;
+}
+
+.c55 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c72 {
+  grid-column: span 4;
+  max-width: 100%;
+}
+
+.c40 {
+  background: #eaeaef;
+}
+
+.c41 {
+  height: 1px;
   border: none;
-}
-
-.c68 svg > g,
-.c68 svg path {
-  fill: #8e8ea9;
-}
-
-.c68:hover svg > g,
-.c68:hover svg path {
-  fill: #666687;
-}
-
-.c68:active svg > g,
-.c68:active svg path {
-  fill: #a5a5ba;
-}
-
-.c68[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c68[aria-disabled='true'] svg path {
-  fill: #666687;
+  margin: 0;
 }
 
 .c69 {
@@ -4231,140 +4231,32 @@ exports[`EditSettingsView should add relation 1`] = `
   width: 1px;
 }
 
-.c0:focus-visible {
-  outline: none;
-}
-
-.c1 {
-  background: #f6f6f9;
+.c19 {
+  background: #ffffff;
   padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c2 {
+.c39 {
+  padding-top: 8px;
   padding-bottom: 8px;
 }
 
-.c18 {
-  padding-right: 56px;
-  padding-left: 56px;
+.c53 {
+  padding: 16px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
 }
 
-.c7 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c9 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-}
-
-.c17 {
-  color: #666687;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.c6 {
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c4 {
-  padding-right: 8px;
-}
-
-.c3 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  position: relative;
-  outline: none;
-}
-
-.c3 svg path {
-  fill: #4945ff;
-}
-
-.c3 svg {
-  font-size: 0.625rem;
-}
-
-.c3:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c3:focus-visible {
-  outline: none;
-}
-
-.c3:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
+.c64 {
+  overflow: hidden;
+  width: 100%;
 }
 
 .c16 {
@@ -4599,95 +4491,186 @@ exports[`EditSettingsView should add relation 1`] = `
   fill: #271fe0;
 }
 
-.c19 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
+.c58 {
+  background: #f6f6f9;
   border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c39 {
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
-.c53 {
-  padding: 16px;
-  border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
-}
-
-.c64 {
-  overflow: hidden;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
   width: 100%;
+  min-height: 2rem;
 }
 
-.c22 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
+.c61 {
+  padding-right: 12px;
+  padding-left: 12px;
 }
 
-.c45 {
+.c65 {
+  padding-left: 12px;
+}
+
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c56 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c59 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c77 {
+  background: #212134;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.c79 {
   font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c46 {
-  color: #666687;
+  color: #ffffff;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c66 {
-  font-weight: 500;
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c78 {
+  position: absolute;
+  z-index: 4;
+  display: none;
 }
 
-.c23 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
+.c67 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
 }
 
-.c42 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
+.c67 svg {
+  height: 12px;
+  width: 12px;
 }
 
-.c24 {
-  grid-column: span 6;
-  max-width: 100%;
+.c67 svg > g,
+.c67 svg path {
+  fill: #ffffff;
 }
 
-.c43 {
-  grid-column: span 8;
-  max-width: 100%;
+.c67[aria-disabled='true'] {
+  pointer-events: none;
 }
 
-.c55 {
-  grid-column: span 6;
-  max-width: 100%;
+.c67:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
 }
 
-.c72 {
-  grid-column: span 4;
-  max-width: 100%;
+.c67:focus-visible {
+  outline: none;
+}
+
+.c67:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c68 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  border: none;
+}
+
+.c68 svg > g,
+.c68 svg path {
+  fill: #8e8ea9;
+}
+
+.c68:hover svg > g,
+.c68:hover svg path {
+  fill: #666687;
+}
+
+.c68:active svg > g,
+.c68:active svg path {
+  fill: #a5a5ba;
+}
+
+.c68[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c68[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c30 {
@@ -4882,35 +4865,59 @@ exports[`EditSettingsView should add relation 1`] = `
   margin-top: 8px;
 }
 
-.c40 {
-  background: #eaeaef;
+.c22 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
 }
 
-.c41 {
-  height: 1px;
-  border: none;
-  margin: 0;
+.c45 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
-.c58 {
+.c46 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c66 {
+  font-weight: 500;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c1 {
   background: #f6f6f9;
-  border-radius: 4px;
-  border-color: #eaeaef;
-  border: 1px solid #eaeaef;
-  width: 100%;
-  min-height: 2rem;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
 }
 
-.c61 {
-  padding-right: 12px;
-  padding-left: 12px;
+.c2 {
+  padding-bottom: 8px;
 }
 
-.c65 {
-  padding-left: 12px;
+.c18 {
+  padding-right: 56px;
+  padding-left: 56px;
 }
 
-.c44 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -4928,7 +4935,7 @@ exports[`EditSettingsView should add relation 1`] = `
   justify-content: space-between;
 }
 
-.c56 {
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -4942,68 +4949,53 @@ exports[`EditSettingsView should add relation 1`] = `
   flex-direction: row;
 }
 
-.c59 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c77 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c79 {
+.c9 {
+  color: #32324d;
   font-weight: 600;
-  color: #ffffff;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.c17 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c6 {
+  color: #4945ff;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c78 {
-  position: absolute;
-  z-index: 4;
-  display: none;
+.c4 {
+  padding-right: 8px;
 }
 
-.c67 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
+.c3 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
   position: relative;
   outline: none;
 }
 
-.c67 svg {
-  height: 12px;
-  width: 12px;
+.c3 svg path {
+  fill: #4945ff;
 }
 
-.c67 svg > g,
-.c67 svg path {
-  fill: #ffffff;
+.c3 svg {
+  font-size: 0.625rem;
 }
 
-.c67[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c67:after {
+.c3:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -5018,11 +5010,11 @@ exports[`EditSettingsView should add relation 1`] = `
   border: 2px solid transparent;
 }
 
-.c67:focus-visible {
+.c3:focus-visible {
   outline: none;
 }
 
-.c67:focus-visible:after {
+.c3:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -5033,45 +5025,53 @@ exports[`EditSettingsView should add relation 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c68 {
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
+}
+
+.c23 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c42 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c24 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c43 {
+  grid-column: span 8;
+  max-width: 100%;
+}
+
+.c55 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c72 {
+  grid-column: span 4;
+  max-width: 100%;
+}
+
+.c40 {
+  background: #eaeaef;
+}
+
+.c41 {
+  height: 1px;
   border: none;
-}
-
-.c68 svg > g,
-.c68 svg path {
-  fill: #8e8ea9;
-}
-
-.c68:hover svg > g,
-.c68:hover svg path {
-  fill: #666687;
-}
-
-.c68:active svg > g,
-.c68:active svg path {
-  fill: #a5a5ba;
-}
-
-.c68[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c68[aria-disabled='true'] svg path {
-  fill: #666687;
+  margin: 0;
 }
 
 .c69 {

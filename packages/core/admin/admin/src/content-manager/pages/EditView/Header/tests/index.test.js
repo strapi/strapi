@@ -50,63 +50,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
     } = render(makeApp());
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c0 {
-        background: #f6f6f9;
-        padding-top: 24px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c1 {
-        padding-bottom: 8px;
-      }
-
-      .c6 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c7 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c8 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c15 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
       .c14 {
         font-weight: 600;
         color: #32324d;
@@ -182,7 +125,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 1px solid #4945ff;
       }
 
-      .c12 .sc-jEItEs {
+      .c12 .sc-ezHhwS {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -238,6 +181,86 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       .c12 svg > g,
       .c12 svg path {
         fill: #ffffff;
+      }
+
+      .c9 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c10 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c10 > * + * {
+        margin-left: 8px;
+      }
+
+      .c0 {
+        background: #f6f6f9;
+        padding-top: 24px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c1 {
+        padding-bottom: 8px;
+      }
+
+      .c6 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c7 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c8 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+      }
+
+      .c15 {
+        color: #666687;
+        font-size: 1rem;
+        line-height: 1.5;
       }
 
       .c5 {
@@ -308,29 +331,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-      }
-
-      .c9 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c10 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c10 > * + * {
-        margin-left: 8px;
       }
 
       <div

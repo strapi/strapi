@@ -33,6 +33,64 @@ describe('Application page', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c10 {
+        background: #ffffff;
+        padding-top: 32px;
+        padding-right: 24px;
+        padding-bottom: 32px;
+        padding-left: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c23 {
+        padding-top: 4px;
+      }
+
+      .c11 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c12 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c12 > * + * {
+        margin-top: 20px;
+      }
+
+      .c13 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c17 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c18 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
       .c1 {
         padding-bottom: 56px;
       }
@@ -108,20 +166,6 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c10 {
-        background: #ffffff;
-        padding-top: 32px;
-        padding-right: 24px;
-        padding-bottom: 32px;
-        padding-left: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c23 {
-        padding-top: 4px;
-      }
-
       .c14 {
         padding-top: 4px;
       }
@@ -135,50 +179,6 @@ describe('Application page', () => {
       .c16 {
         grid-column: span 6;
         max-width: 100%;
-      }
-
-      .c13 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c17 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
-      .c18 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c11 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c12 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c12 > * + * {
-        margin-top: 20px;
       }
 
       .c20 {

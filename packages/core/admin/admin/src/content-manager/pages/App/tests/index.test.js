@@ -117,6 +117,10 @@ describe('Content manager | App | main', () => {
     expect(history.location.pathname).toEqual('/content-manager/collectionType/category');
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c32 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -128,10 +132,6 @@ describe('Content manager | App | main', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c34 {
