@@ -1,10 +1,12 @@
 'use strict';
 
 const uuid = require('uuid').v4;
-const { keys, sortBy, omit } = require('lodash/fp');
+const { keys, sortBy, omit, map } = require('lodash/fp');
 const { joinBy } = require('@strapi/utils');
+const { getService } = require('../utils');
 
 const folderModel = 'plugin::upload.folder';
+const fileModel = 'plugin::upload.file';
 
 const generateUID = () => uuid();
 
@@ -22,15 +24,36 @@ const setPathAndUID = async folder => {
   });
 };
 
-const deleteByIds = async ids => {
-  const deletedFolders = [];
-  for (const id of ids) {
-    const deletedFolder = await strapi.entityService.delete(folderModel, id);
-
-    deletedFolders.push(deletedFolder);
+/**
+ * Recursively delete folders and included files
+ * @param ids ids of the folders to delete
+ * @returns {Promise<Object[]>}
+ */
+const deleteByIds = async (ids = []) => {
+  const folders = await strapi.db.query(folderModel).findMany({ where: { id: { $in: ids } } });
+  if (folders.length === 0) {
+    return [];
   }
 
-  return deletedFolders;
+  const pathsToDelete = map('path', folders);
+
+  // delete files
+  const filesToDelete = await strapi.db.query(fileModel).findMany({
+    where: {
+      $or: pathsToDelete.map(path => ({ folderPath: { $startsWith: path } })),
+    },
+  });
+
+  await Promise.all(filesToDelete.map(file => getService('upload').remove(file)));
+
+  // delete folders
+  await strapi.db.query(folderModel).deleteMany({
+    where: {
+      $or: pathsToDelete.map(path => ({ path: { $startsWith: path } })),
+    },
+  });
+
+  return folders;
 };
 
 /**

@@ -1,6 +1,7 @@
 'use strict';
 
-// Test a simple default API with no relations
+const fs = require('fs');
+const path = require('path');
 
 const { omit, pick } = require('lodash/fp');
 
@@ -22,6 +23,27 @@ const getFolderPathRegex = uid =>
     'i'
   );
 
+const createFolder = async (name, parent = null) => {
+  const res = await rq({
+    method: 'POST',
+    url: '/upload/folders',
+    body: { name, parent },
+  });
+  return res.body.data;
+};
+
+const createAFile = async (parent = null) => {
+  const res = await rq({
+    method: 'POST',
+    url: '/upload',
+    formData: {
+      files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+      fileInfo: JSON.stringify({ folder: parent }),
+    },
+  });
+  return res.body[0];
+};
+
 describe('Folder', () => {
   const builder = createTestBuilder();
 
@@ -33,9 +55,9 @@ describe('Folder', () => {
   afterAll(async () => {
     await rq({
       method: 'POST',
-      url: '/upload/folders/batch-delete',
+      url: '/upload/actions/bulk-delete',
       body: {
-        ids: data.folders.map(f => f.id),
+        folderIds: data.folders.map(f => f.id),
       },
     });
 
@@ -113,12 +135,26 @@ describe('Folder', () => {
         url: '/upload/folders?populate=parent',
         body: {
           name: 'folder-2',
-          parent: data.folders[0],
+          parent: data.folders[0].id,
         },
       });
 
       expect(res.status).toBe(400);
       expect(res.body.error.message).toBe('name already taken');
+    });
+
+    test('Cannot create a folder inside a folder that does not exist', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/folders?populate=parent',
+        body: {
+          name: 'folder-3',
+          parent: 99999,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('parent folder does not exist');
     });
 
     test('Cannot create a folder with name containing a slash', async () => {
@@ -210,21 +246,81 @@ describe('Folder', () => {
   });
 
   describe('delete', () => {
-    test('Can delete folders', async () => {
+    test('Can delete folders and belonging files', async () => {
+      const folder1 = await createFolder('folder1', null);
+      const folder1a = await createFolder('folder1a', folder1.id);
+      const folder1b = await createFolder('folder1b', folder1.id);
+      const folder1a1 = await createFolder('folder1a1', folder1a.id);
+      const file1 = await createAFile(null);
+      const file1b = await createAFile(folder1b.id);
+      const file1a = await createAFile(folder1a.id);
+      const file1a1 = await createAFile(folder1a1.id);
+
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders/batch-delete',
+        url: '/upload/actions/bulk-delete',
         body: {
-          ids: data.folders.map(f => f.id),
+          fileIds: [file1.id],
+          folderIds: [folder1a.id],
         },
       });
 
-      expect(res.body.data).toEqual(
-        expect.arrayContaining([
-          pick(['id', 'name', 'path', 'uid', 'updatedAt', 'createdAt'])(data.folders[0]),
-          pick(['id', 'name', 'path', 'uid', 'updatedAt', 'createdAt'])(data.folders[1]),
-        ])
+      expect(res.body.data).toMatchObject({
+        files: [
+          {
+            alternativeText: null,
+            caption: null,
+            createdAt: expect.anything(),
+            ext: '.jpg',
+            folderPath: '/',
+            formats: null,
+            hash: expect.anything(),
+            height: 20,
+            id: file1.id,
+            mime: 'image/jpeg',
+            name: 'rec.jpg',
+            previewUrl: null,
+            provider: 'local',
+            provider_metadata: null,
+            size: 0.27,
+            updatedAt: expect.anything(),
+            url: expect.anything(),
+            width: 20,
+          },
+        ],
+        folders: [
+          {
+            id: folder1a.id,
+            name: 'folder1a',
+            path: expect.anything(),
+            uid: expect.anything(),
+            createdAt: expect.anything(),
+            updatedAt: expect.anything(),
+          },
+        ],
+      });
+
+      const resFolder = await rq({
+        method: 'GET',
+        url: '/upload/folders?pagination[pageSize]=100',
+      });
+
+      const existingfoldersIds = resFolder.body.results.map(f => f.id);
+      expect(existingfoldersIds).toEqual(expect.not.arrayContaining([folder1a.id, folder1a1.id]));
+      expect(existingfoldersIds).toEqual(expect.arrayContaining([folder1.id, folder1b.id]));
+
+      const resFiles = await rq({
+        method: 'GET',
+        url: '/upload/files?pagination[pageSize]=100',
+      });
+
+      const existingfilesIds = resFiles.body.results.map(f => f.id);
+      expect(existingfilesIds).toEqual(
+        expect.not.arrayContaining([file1.id, file1a.id, file1a1.id])
       );
+      expect(existingfilesIds).toEqual(expect.arrayContaining([file1b.id]));
+
+      data.folders.push(folder1, folder1b);
     });
   });
 });
