@@ -15,11 +15,9 @@ const dbQuestions = require('./utils/db-questions');
 const createProject = require('./create-project');
 
 module.exports = async scope => {
-
   if (!scope.useTypescript) {
-    // check how to handle track usage here 
     const language = await askAboutLanguages(scope);
-    scope.useTypescript = language === "Typescript";
+    scope.useTypescript = language === 'Typescript';
   }
 
   await trackUsage({ event: 'didChooseCustomDatabase', scope });
