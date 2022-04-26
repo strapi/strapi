@@ -153,5 +153,12 @@ module.exports = {
       section: 'settings',
       category: 'project',
     },
+    {
+      uid: 'project-settings.read',
+      displayName: 'Read the project level settings',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'project',
+    },
   ],
 };

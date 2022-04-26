@@ -31,6 +31,9 @@ describe('Admin Controller', () => {
             user: {
               exists: jest.fn(() => true),
             },
+            'project-settings': {
+              getProjectSettings: jest.fn(() => ({ menuLogo: null })),
+            },
           },
         },
       };
@@ -45,6 +48,7 @@ describe('Admin Controller', () => {
       expect(result.data).toStrictEqual({
         uuid: 'foo',
         hasAdmin: true,
+        menuLogo: null,
       });
     });
   });
