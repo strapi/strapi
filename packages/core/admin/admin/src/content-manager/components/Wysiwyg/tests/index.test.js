@@ -55,52 +55,42 @@ describe('Wysiwyg render and actions buttons', () => {
 
     expect(getContainerByText('hello world')).toBeInTheDocument();
     expect(renderedContainer.firstChild).toMatchInlineSnapshot(`
-      .c3 {
+      .c4 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c37 {
+      .c39 {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c4 {
+      .c5 {
         border-radius: 4px;
         border-style: solid;
         border-width: 1px;
         border-color: #dcdce4;
       }
 
-      .c5 {
+      .c6 {
         background: #f6f6f9;
         padding: 8px;
       }
 
-      .c33 {
+      .c35 {
         background: #f6f6f9;
         padding: 8px;
         border-radius: 4px;
       }
 
-      .c1 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
       .c0 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -110,510 +100,48 @@ describe('Wysiwyg render and actions buttons', () => {
         flex-direction: column;
       }
 
-      .c0 > * {
+      .c2 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c1 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c0 > * + * {
+      .c1 > * + * {
         margin-top: 4px;
       }
 
-      .c2 > * {
+      .c3 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c2 > * + * {
+      .c3 > * + * {
         margin-left: 4px;
       }
 
-      .c30 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c27 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c27 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c27 svg > g,
-      .c27 svg path {
-        fill: #ffffff;
-      }
-
-      .c27[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c27:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c27:focus-visible {
-        outline: none;
-      }
-
-      .c27:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c28 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        padding: 8px 16px;
-        background: #4945ff;
-        border: none;
-        border: 1px solid #dcdce4;
-        background: #ffffff;
-      }
-
-      .c28 .sc-pVTFL {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c28 .c29 {
-        color: #ffffff;
-      }
-
-      .c28[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c28[aria-disabled='true'] .c29 {
-        color: #666687;
-      }
-
-      .c28[aria-disabled='true'] svg > g,
-      .c28[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c28[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c28[aria-disabled='true']:active .c29 {
-        color: #666687;
-      }
-
-      .c28[aria-disabled='true']:active svg > g,
-      .c28[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c28:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c28:active {
-        background-color: #eaeaef;
-      }
-
-      .c28 .c29 {
-        color: #32324d;
-      }
-
-      .c28 svg > g,
-      .c28 svg path {
-        fill: #32324d;
-      }
-
-      .c6 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c7 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
       .c34 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: end;
-        -webkit-justify-content: flex-end;
-        -ms-flex-pack: end;
-        justify-content: flex-end;
-        -webkit-align-items: flex-end;
-        -webkit-box-align: flex-end;
-        -ms-flex-align: flex-end;
-        align-items: flex-end;
-      }
-
-      .c22 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c22 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c22 svg > g,
-      .c22 svg path {
-        fill: #ffffff;
-      }
-
-      .c22[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c22:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c22:focus-visible {
-        outline: none;
-      }
-
-      .c22:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c19 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-      }
-
-      .c24 svg > g,
-      .c24 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c24:hover svg > g,
-      .c24:hover svg path {
-        fill: #666687;
-      }
-
-      .c24:active svg > g,
-      .c24:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c24[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c24[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c20 span:first-child button {
-        border-left: 1px solid #dcdce4;
-        border-radius: 4px 0 0 4px;
-      }
-
-      .c20 span:last-child button {
-        border-radius: 0 4px 4px 0;
-      }
-
-      .c20 .c23 {
-        border-radius: 0;
-        border-left: none;
-      }
-
-      .c20 .c23 svg path {
-        fill: #4a4a6a;
-      }
-
-      .c20 .c23:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c20 .c23:hover svg path {
-        fill: #32324d;
-      }
-
-      .c20 .c23:active {
-        background-color: #eaeaef;
-      }
-
-      .c20 .c23:active svg path {
-        fill: #212134;
-      }
-
-      .c20 .c23[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c11 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c11:focus {
-        outline: none;
-      }
-
-      .c11[aria-disabled='true'] {
-        cursor: not-allowed;
-      }
-
-      .c14 {
-        padding-right: 16px;
-        padding-left: 16px;
-      }
-
-      .c16 {
-        padding-left: 12px;
-      }
-
-      .c9 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c12 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c15 {
-        color: #666687;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c8 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c10 {
-        position: relative;
-        border: 1px solid #dcdce4;
-        padding-right: 12px;
-        border-radius: 4px;
-        background: #ffffff;
-        overflow: hidden;
-        min-height: 2rem;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c10:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c17 {
-        background: transparent;
-        border: none;
-        position: relative;
-        z-index: 1;
-      }
-
-      .c17 svg {
-        height: 0.6875rem;
-        width: 0.6875rem;
-      }
-
-      .c17 svg path {
-        fill: #666687;
-      }
-
-      .c18 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        background: none;
-        border: none;
-      }
-
-      .c18 svg {
-        width: 0.375rem;
-      }
-
-      .c13 {
-        width: 100%;
-      }
-
-      .c32 {
         cursor: auto;
         height: 100%;
       }
 
-      .c32 .CodeMirror-placeholder {
+      .c34 .CodeMirror-placeholder {
         color: #666687 !important;
       }
 
-      .c32 .CodeMirror {
+      .c34 .CodeMirror {
         font-size: 0.875rem;
         height: 290px;
         color: #32324d;
@@ -621,22 +149,22 @@ describe('Wysiwyg render and actions buttons', () => {
         font-family: --apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell, 'Open Sans','Helvetica Neue',sans-serif;
       }
 
-      .c32 .CodeMirror-lines {
+      .c34 .CodeMirror-lines {
         padding: 12px 16px;
       }
 
-      .c32 .CodeMirror-scrollbar-filler,
-      .c32 .CodeMirror-gutter-filler {
+      .c34 .CodeMirror-scrollbar-filler,
+      .c34 .CodeMirror-gutter-filler {
         background-color: #ffffff;
       }
 
-      .c32 .CodeMirror-gutters {
+      .c34 .CodeMirror-gutters {
         border-right: 1px solid #ddd;
         background-color: #f7f7f7;
         white-space: nowrap;
       }
 
-      .c32 .CodeMirror-linenumber {
+      .c34 .CodeMirror-linenumber {
         padding: 0 3px 0 5px;
         min-width: 20px;
         text-align: right;
@@ -644,31 +172,31 @@ describe('Wysiwyg render and actions buttons', () => {
         white-space: nowrap;
       }
 
-      .c32 .CodeMirror-guttermarker {
+      .c34 .CodeMirror-guttermarker {
         color: black;
       }
 
-      .c32 .CodeMirror-guttermarker-subtle {
+      .c34 .CodeMirror-guttermarker-subtle {
         color: #999;
       }
 
-      .c32 .CodeMirror-cursor {
+      .c34 .CodeMirror-cursor {
         border-left: 1px solid black;
         border-right: none;
         width: 0;
       }
 
-      .c32 .CodeMirror div.CodeMirror-secondarycursor {
+      .c34 .CodeMirror div.CodeMirror-secondarycursor {
         border-left: 1px solid silver;
       }
 
-      .c32 .cm-fat-cursor .CodeMirror-cursor {
+      .c34 .cm-fat-cursor .CodeMirror-cursor {
         width: auto;
         border: 0 !important;
         background: #7e7;
       }
 
-      .c32 .cm-fat-cursor-mark {
+      .c34 .cm-fat-cursor-mark {
         background-color: rgba(20,255,20,0.5);
         -webkit-animation: blink 1.06s steps(1) infinite;
         -moz-animation: blink 1.06s steps(1) infinite;
@@ -676,7 +204,7 @@ describe('Wysiwyg render and actions buttons', () => {
         animation: blink 1.06s steps(1) infinite;
       }
 
-      .c32 .cm-animate-fat-cursor {
+      .c34 .cm-animate-fat-cursor {
         width: auto;
         border: 0;
         -webkit-animation: blink 1.06s steps(1) infinite;
@@ -686,13 +214,13 @@ describe('Wysiwyg render and actions buttons', () => {
         background-color: #7e7;
       }
 
-      .c32 .cm-tab {
+      .c34 .cm-tab {
         display: inline-block;
         -webkit-text-decoration: inherit;
         text-decoration: inherit;
       }
 
-      .c32 .CodeMirror-rulers {
+      .c34 .CodeMirror-rulers {
         position: absolute;
         left: 0;
         right: 0;
@@ -701,59 +229,59 @@ describe('Wysiwyg render and actions buttons', () => {
         overflow: hidden;
       }
 
-      .c32 .CodeMirror-ruler {
+      .c34 .CodeMirror-ruler {
         border-left: 1px solid #ccc;
         top: 0;
         bottom: 0;
         position: absolute;
       }
 
-      .c32 .cm-header,
-      .c32 .cm-strong {
+      .c34 .cm-header,
+      .c34 .cm-strong {
         font-weight: bold;
       }
 
-      .c32 .cm-em {
+      .c34 .cm-em {
         font-style: italic;
       }
 
-      .c32 .cm-link {
+      .c34 .cm-link {
         -webkit-text-decoration: underline;
         text-decoration: underline;
       }
 
-      .c32 .cm-strikethrough {
+      .c34 .cm-strikethrough {
         -webkit-text-decoration: line-through;
         text-decoration: line-through;
       }
 
-      .c32 .CodeMirror-composing {
+      .c34 .CodeMirror-composing {
         border-bottom: 2px solid;
       }
 
-      .c32 div.CodeMirror span.CodeMirror-matchingbracket {
+      .c34 div.CodeMirror span.CodeMirror-matchingbracket {
         color: #0b0;
       }
 
-      .c32 div.CodeMirror span.CodeMirror-nonmatchingbracket {
+      .c34 div.CodeMirror span.CodeMirror-nonmatchingbracket {
         color: #a22;
       }
 
-      .c32 .CodeMirror-matchingtag {
+      .c34 .CodeMirror-matchingtag {
         background: rgba(255,150,0,0.3);
       }
 
-      .c32 .CodeMirror-activeline-background {
+      .c34 .CodeMirror-activeline-background {
         background: #e8f2ff;
       }
 
-      .c32 .CodeMirror {
+      .c34 .CodeMirror {
         position: relative;
         overflow: hidden;
         background: #ffffff;
       }
 
-      .c32 .CodeMirror-scroll {
+      .c34 .CodeMirror-scroll {
         overflow: scroll !important;
         margin-bottom: -50px;
         margin-right: -50px;
@@ -763,47 +291,47 @@ describe('Wysiwyg render and actions buttons', () => {
         position: relative;
       }
 
-      .c32 .CodeMirror-sizer {
+      .c34 .CodeMirror-sizer {
         position: relative;
         border-right: 50px solid transparent;
       }
 
-      .c32 .CodeMirror-vscrollbar,
-      .c32 .CodeMirror-hscrollbar,
-      .c32 .CodeMirror-scrollbar-filler,
-      .c32 .CodeMirror-gutter-filler {
+      .c34 .CodeMirror-vscrollbar,
+      .c34 .CodeMirror-hscrollbar,
+      .c34 .CodeMirror-scrollbar-filler,
+      .c34 .CodeMirror-gutter-filler {
         position: absolute;
         z-index: 1;
         display: none;
         outline: none;
       }
 
-      .c32 .CodeMirror-vscrollbar {
+      .c34 .CodeMirror-vscrollbar {
         right: 0;
         top: 0;
         overflow-x: hidden;
         overflow-y: scroll;
       }
 
-      .c32 .CodeMirror-hscrollbar {
+      .c34 .CodeMirror-hscrollbar {
         bottom: 0;
         left: 0;
         overflow-y: hidden;
         overflow-x: scroll;
       }
 
-      .c32 .CodeMirror-scrollbar-filler {
+      .c34 .CodeMirror-scrollbar-filler {
         right: 0;
         bottom: 0;
       }
 
-      .c32 .CodeMirror-lines {
+      .c34 .CodeMirror-lines {
         cursor: text;
         min-height: 1px;
       }
 
-      .c32 .CodeMirror pre.CodeMirror-line,
-      .c32 .CodeMirror pre.CodeMirror-line-like {
+      .c34 .CodeMirror pre.CodeMirror-line,
+      .c34 .CodeMirror pre.CodeMirror-line-like {
         -moz-border-radius: 0;
         -webkit-border-radius: 0;
         border-radius: 0;
@@ -823,18 +351,18 @@ describe('Wysiwyg render and actions buttons', () => {
         font-variant-ligatures: contextual;
       }
 
-      .c32 .CodeMirror pre.CodeMirror-line-like {
+      .c34 .CodeMirror pre.CodeMirror-line-like {
         z-index: 2;
       }
 
-      .c32 .CodeMirror-wrap pre.CodeMirror-line,
-      .c32 .CodeMirror-wrap pre.CodeMirror-line-like {
+      .c34 .CodeMirror-wrap pre.CodeMirror-line,
+      .c34 .CodeMirror-wrap pre.CodeMirror-line-like {
         word-wrap: break-word;
         white-space: pre-wrap;
         word-break: normal;
       }
 
-      .c32 .CodeMirror-linebackground {
+      .c34 .CodeMirror-linebackground {
         position: absolute;
         left: 0;
         right: 0;
@@ -843,29 +371,29 @@ describe('Wysiwyg render and actions buttons', () => {
         z-index: 0;
       }
 
-      .c32 .CodeMirror-linewidget {
+      .c34 .CodeMirror-linewidget {
         position: relative;
         padding: 0.1px;
       }
 
-      .c32 .CodeMirror-rtl pre {
+      .c34 .CodeMirror-rtl pre {
         direction: rtl;
       }
 
-      .c32 .CodeMirror-code {
+      .c34 .CodeMirror-code {
         outline: none;
       }
 
-      .c32 .CodeMirror-scroll,
-      .c32 .CodeMirror-sizer,
-      .c32 .CodeMirror-gutter,
-      .c32 .CodeMirror-gutters,
-      .c32 .CodeMirror-linenumber {
+      .c34 .CodeMirror-scroll,
+      .c34 .CodeMirror-sizer,
+      .c34 .CodeMirror-gutter,
+      .c34 .CodeMirror-gutters,
+      .c34 .CodeMirror-linenumber {
         -moz-box-sizing: content-box;
         box-sizing: content-box;
       }
 
-      .c32 .CodeMirror-measure {
+      .c34 .CodeMirror-measure {
         position: absolute;
         width: 100%;
         height: 0;
@@ -873,58 +401,58 @@ describe('Wysiwyg render and actions buttons', () => {
         visibility: hidden;
       }
 
-      .c32 .CodeMirror-cursor {
+      .c34 .CodeMirror-cursor {
         position: absolute;
         pointer-events: none;
         border-color: #32324d;
       }
 
-      .c32 .CodeMirror-measure pre {
+      .c34 .CodeMirror-measure pre {
         position: static;
       }
 
-      .c32 div.CodeMirror-cursors {
+      .c34 div.CodeMirror-cursors {
         visibility: hidden;
         position: relative;
       }
 
-      .c32 div.CodeMirror-cursors + div {
+      .c34 div.CodeMirror-cursors + div {
         z-index: 0 !important;
       }
 
-      .c32 div.CodeMirror-dragcursors {
+      .c34 div.CodeMirror-dragcursors {
         visibility: visible;
       }
 
-      .c32 .CodeMirror-focused div.CodeMirror-cursors {
+      .c34 .CodeMirror-focused div.CodeMirror-cursors {
         visibility: visible;
       }
 
-      .c32 .CodeMirror-selected {
+      .c34 .CodeMirror-selected {
         background: #dcdce4;
       }
 
-      .c32 .CodeMirror-crosshair {
+      .c34 .CodeMirror-crosshair {
         cursor: crosshair;
       }
 
-      .c32 .cm-force-border {
+      .c34 .cm-force-border {
         padding-right: 0.1px;
       }
 
-      .c32 .cm-tab-wrap-hack:after {
+      .c34 .cm-tab-wrap-hack:after {
         content: '';
       }
 
-      .c32 span.CodeMirror-selectedtext {
+      .c34 span.CodeMirror-selectedtext {
         background: none;
       }
 
-      .c32 span {
+      .c34 span {
         color: #32324d !important;
       }
 
-      .c35 {
+      .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -938,21 +466,21 @@ describe('Wysiwyg render and actions buttons', () => {
         outline: none;
       }
 
-      .c35 svg {
+      .c24 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c35 svg > g,
-      .c35 svg path {
+      .c24 svg > g,
+      .c24 svg path {
         fill: #ffffff;
       }
 
-      .c35[aria-disabled='true'] {
+      .c24[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c35:after {
+      .c24:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -967,11 +495,11 @@ describe('Wysiwyg render and actions buttons', () => {
         border: 2px solid transparent;
       }
 
-      .c35:focus-visible {
+      .c24:focus-visible {
         outline: none;
       }
 
-      .c35:focus-visible:after {
+      .c24:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -982,36 +510,186 @@ describe('Wysiwyg render and actions buttons', () => {
         border: 2px solid #4945ff;
       }
 
-      .c25 {
+      .c21 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c26 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+      }
+
+      .c26 svg > g,
+      .c26 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c26:hover svg > g,
+      .c26:hover svg path {
+        fill: #666687;
+      }
+
+      .c26:active svg > g,
+      .c26:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c26[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c26[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c22 span:first-child button {
+        border-left: 1px solid #dcdce4;
+        border-radius: 4px 0 0 4px;
+      }
+
+      .c22 span:last-child button {
+        border-radius: 0 4px 4px 0;
+      }
+
+      .c22 .c25 {
+        border-radius: 0;
+        border-left: none;
+      }
+
+      .c22 .c25 svg path {
+        fill: #4a4a6a;
+      }
+
+      .c22 .c25:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c22 .c25:hover svg path {
+        fill: #32324d;
+      }
+
+      .c22 .c25:active {
+        background-color: #eaeaef;
+      }
+
+      .c22 .c25:active svg path {
+        fill: #212134;
+      }
+
+      .c22 .c25[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c37 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c37 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c37 svg > g,
+      .c37 svg path {
+        fill: #ffffff;
+      }
+
+      .c37[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c37:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c37:focus-visible {
+        outline: none;
+      }
+
+      .c37:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c27 {
         padding: 8px;
         outline-offset: -2px !important;
       }
 
-      .c25 svg {
+      .c27 svg {
         width: 1.125rem;
         height: 1.125rem;
       }
 
-      .c21 {
+      .c23 {
         margin-left: 16px;
       }
 
-      .c26 {
+      .c28 {
         margin: 0 8px;
         padding: 8px;
       }
 
-      .c26 svg {
+      .c28 svg {
         width: 1.125rem;
         height: 1.125rem;
       }
 
-      .c31 {
+      .c33 {
         position: relative;
         height: calc(100% - 48px);
       }
 
-      .c36 {
+      .c38 {
         background-color: transparent;
         border: none;
         -webkit-align-items: center;
@@ -1020,69 +698,399 @@ describe('Wysiwyg render and actions buttons', () => {
         align-items: center;
       }
 
-      .c36 svg {
+      .c38 svg {
         margin-left: 8px;
       }
 
-      .c36 svg path {
+      .c38 svg path {
         fill: #4a4a6a;
         width: 0.75rem;
         height: 0.75rem;
       }
 
+      .c32 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c29 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c29 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c29 svg > g,
+      .c29 svg path {
+        fill: #ffffff;
+      }
+
+      .c29[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c29:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c29:focus-visible {
+        outline: none;
+      }
+
+      .c29:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c30 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        padding: 8px 16px;
+        background: #4945ff;
+        border: 1px solid #4945ff;
+        border: 1px solid #dcdce4;
+        background: #ffffff;
+      }
+
+      .c30 .sc-ljMRFG {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c30 .c31 {
+        color: #ffffff;
+      }
+
+      .c30[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c30[aria-disabled='true'] .c31 {
+        color: #666687;
+      }
+
+      .c30[aria-disabled='true'] svg > g,
+      .c30[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c30[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c30[aria-disabled='true']:active .c31 {
+        color: #666687;
+      }
+
+      .c30[aria-disabled='true']:active svg > g,
+      .c30[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c30:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c30:active {
+        background-color: #eaeaef;
+      }
+
+      .c30 .c31 {
+        color: #32324d;
+      }
+
+      .c30 svg > g,
+      .c30 svg path {
+        fill: #32324d;
+      }
+
+      .c13 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c13:focus {
+        outline: none;
+      }
+
+      .c13[aria-disabled='true'] {
+        cursor: not-allowed;
+      }
+
+      .c16 {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .c18 {
+        padding-left: 12px;
+      }
+
+      .c9 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c11 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c14 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c17 {
+        color: #666687;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c10 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c12 {
+        position: relative;
+        border: 1px solid #dcdce4;
+        padding-right: 12px;
+        border-radius: 4px;
+        background: #ffffff;
+        overflow: hidden;
+        min-height: 2rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c12:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c19 {
+        background: transparent;
+        border: none;
+        position: relative;
+        z-index: 1;
+      }
+
+      .c19 svg {
+        height: 0.6875rem;
+        width: 0.6875rem;
+      }
+
+      .c19 svg path {
+        fill: #666687;
+      }
+
+      .c20 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        background: none;
+        border: none;
+      }
+
+      .c20 svg {
+        width: 0.375rem;
+      }
+
+      .c15 {
+        width: 100%;
+      }
+
+      .c7 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c36 {
+        -webkit-align-items: flex-end;
+        -webkit-box-align: flex-end;
+        -ms-flex-align: flex-end;
+        align-items: flex-end;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: end;
+        -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+        justify-content: flex-end;
+      }
+
       <div
-        class="c0"
+        class="c0 c1"
         spacing="1"
       >
         <div
-          class="c1 c2"
+          class="c2 c3"
           spacing="1"
         >
           <span
-            class="c3"
+            class="c4"
           >
             hello world
           </span>
         </div>
         <div
-          class="c4"
+          class="c5"
         >
           <div
-            class="c5"
+            class="c6"
           >
             <div
-              class="c6"
+              class="c7"
             >
               <div
-                class="c7"
+                class="c8"
               >
                 <div>
                   <div
-                    class="c8"
+                    class="c9 c10"
                   >
                     <div
-                      class="c9 c10"
+                      class="c11 c12"
                     >
                       <button
                         aria-disabled="false"
                         aria-expanded="false"
                         aria-haspopup="listbox"
                         aria-labelledby="selectTitle-label selectTitle-content"
-                        class="c11"
+                        class="c13"
                         id="selectTitle"
                         type="button"
                       />
                       <div
-                        class="c12 c13"
+                        class="c14 c15"
                       >
                         <div
-                          class="c9"
+                          class="c11"
                         >
                           <div
-                            class="c14"
+                            class="c16"
                           >
                             <span
-                              class="c15"
+                              class="c17"
                               id="selectTitle-content"
                             >
                               Add a title
@@ -1090,11 +1098,11 @@ describe('Wysiwyg render and actions buttons', () => {
                           </div>
                         </div>
                         <div
-                          class="c9"
+                          class="c11"
                         >
                           <button
                             aria-hidden="true"
-                            class="c16 c17 c18"
+                            class="c18 c19 c20"
                             tabindex="-1"
                             type="button"
                           >
@@ -1119,13 +1127,13 @@ describe('Wysiwyg render and actions buttons', () => {
                   </div>
                 </div>
                 <div
-                  class="c19 c20 c21"
+                  class="c21 c22 c23"
                 >
                   <span>
                     <button
                       aria-disabled="false"
                       aria-labelledby="tooltip-1"
-                      class="c22 c23 c24 c25"
+                      class="c24 c25 c26 c27"
                       id="Bold"
                       name="Bold"
                       tabindex="0"
@@ -1151,7 +1159,7 @@ describe('Wysiwyg render and actions buttons', () => {
                     <button
                       aria-disabled="false"
                       aria-labelledby="tooltip-3"
-                      class="c22 c23 c24 c25"
+                      class="c24 c25 c26 c27"
                       id="Italic"
                       name="Italic"
                       tabindex="0"
@@ -1177,7 +1185,7 @@ describe('Wysiwyg render and actions buttons', () => {
                     <button
                       aria-disabled="false"
                       aria-labelledby="tooltip-5"
-                      class="c22 c23 c24 c25"
+                      class="c24 c25 c26 c27"
                       id="Underline"
                       name="Underline"
                       tabindex="0"
@@ -1202,7 +1210,7 @@ describe('Wysiwyg render and actions buttons', () => {
                   <button
                     aria-disabled="false"
                     aria-labelledby="tooltip-7"
-                    class="c22 c23 c24 c26"
+                    class="c24 c25 c26 c28"
                     id="more"
                     tabindex="0"
                     type="button"
@@ -1224,12 +1232,12 @@ describe('Wysiwyg render and actions buttons', () => {
               </div>
               <button
                 aria-disabled="false"
-                class="c27 c28"
+                class="c29 c30"
                 id="preview"
                 type="button"
               >
                 <span
-                  class="c29 c30"
+                  class="c31 c32"
                 >
                   Preview mode
                 </span>
@@ -1237,10 +1245,10 @@ describe('Wysiwyg render and actions buttons', () => {
             </div>
           </div>
           <div
-            class="c31"
+            class="c33"
           >
             <div
-              class="c32"
+              class="c34"
             >
               <textarea
                 style="display: none;"
@@ -1346,19 +1354,19 @@ describe('Wysiwyg render and actions buttons', () => {
             </div>
           </div>
           <div
-            class="c33"
+            class="c35"
           >
             <div
-              class="c34"
+              class="c36"
             >
               <button
                 aria-disabled="false"
-                class="c35 c36"
+                class="c37 c38"
                 id="expand"
                 type="button"
               >
                 <span
-                  class="c37"
+                  class="c39"
                 >
                   Expand
                 </span>

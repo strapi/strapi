@@ -33,60 +33,6 @@ describe('Application page', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c10 {
-        background: #ffffff;
-        padding-top: 32px;
-        padding-right: 24px;
-        padding-bottom: 32px;
-        padding-left: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c22 {
-        padding-top: 4px;
-      }
-
-      .c11 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c11 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c11 > * + * {
-        margin-top: 20px;
-      }
-
-      .c12 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c16 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
-      .c17 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c1 {
         padding-bottom: 56px;
       }
@@ -114,6 +60,10 @@ describe('Application page', () => {
       }
 
       .c5 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -125,13 +75,13 @@ describe('Application page', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c6 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -139,10 +89,6 @@ describe('Application page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c7 {
@@ -162,32 +108,90 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c13 {
+      .c10 {
+        background: #ffffff;
+        padding-top: 32px;
+        padding-right: 24px;
+        padding-bottom: 32px;
+        padding-left: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c23 {
         padding-top: 4px;
       }
 
       .c14 {
+        padding-top: 4px;
+      }
+
+      .c15 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 0px;
       }
 
-      .c15 {
+      .c16 {
         grid-column: span 6;
         max-width: 100%;
       }
 
-      .c19 {
+      .c13 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c17 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c18 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c11 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c12 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c12 > * + * {
+        margin-top: 20px;
+      }
+
+      .c20 {
         color: #4945ff;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c20 {
+      .c21 {
         padding-left: 8px;
       }
 
-      .c18 {
+      .c19 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -202,15 +206,15 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c18 svg path {
+      .c19 svg path {
         fill: #4945ff;
       }
 
-      .c18 svg {
+      .c19 svg {
         font-size: 0.625rem;
       }
 
-      .c18:after {
+      .c19:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -225,11 +229,11 @@ describe('Application page', () => {
         border: 2px solid transparent;
       }
 
-      .c18:focus-visible {
+      .c19:focus-visible {
         outline: none;
       }
 
-      .c18:focus-visible:after {
+      .c19:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -240,7 +244,7 @@ describe('Application page', () => {
         border: 2px solid #4945ff;
       }
 
-      .c21 {
+      .c22 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -248,13 +252,13 @@ describe('Application page', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c15 {
+        .c16 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c15 {
+        .c16 {
           grid-column: span;
         }
       }
@@ -305,48 +309,48 @@ describe('Application page', () => {
                 class="c10"
               >
                 <div
-                  class="c11"
+                  class="c11 c12"
                   spacing="5"
                 >
                   <h3
-                    class="c12"
+                    class="c13"
                   >
                     Details
                   </h3>
                   <div
-                    class="c13 c14"
+                    class="c14 c15"
                   >
                     <div
-                      class="c15"
+                      class="c16"
                     >
                       <div
                         class=""
                       >
                         <span
-                          class="c16"
+                          class="c17"
                         >
                           strapi version
                         </span>
                         <p
-                          class="c17"
+                          class="c18"
                         >
                           v
                           4.0.0
                         </p>
                         <a
-                          class="c18"
+                          class="c19"
                           href="https://support.strapi.io/support/home"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c19"
+                            class="c20"
                           >
                             Get help
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c20 c21"
+                            class="c21 c22"
                           >
                             <svg
                               fill="none"
@@ -365,18 +369,18 @@ describe('Application page', () => {
                       </div>
                     </div>
                     <div
-                      class="c15"
+                      class="c16"
                     >
                       <div
                         class=""
                       >
                         <span
-                          class="c16"
+                          class="c17"
                         >
                           current plan
                         </span>
                         <p
-                          class="c17"
+                          class="c18"
                         >
                           Enterprise Edition
                         </p>
@@ -384,28 +388,28 @@ describe('Application page', () => {
                     </div>
                   </div>
                   <div
-                    class="c13 c14"
+                    class="c14 c15"
                   >
                     <div
-                      class="c15"
+                      class="c16"
                     >
                       <div
                         class=""
                       >
                         <a
-                          class="c18"
+                          class="c19"
                           href="https://github.com/strapi/strapi/releases/tag/v3.6.8"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c19"
+                            class="c20"
                           >
                             Upgrade your admin panel
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c20 c21"
+                            class="c21 c22"
                           >
                             <svg
                               fill="none"
@@ -424,25 +428,25 @@ describe('Application page', () => {
                       </div>
                     </div>
                     <div
-                      class="c15"
+                      class="c16"
                     >
                       <div
                         class=""
                       >
                         <a
-                          class="c18"
+                          class="c19"
                           href="https://strapi.io/pricing-self-hosted"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c19"
+                            class="c20"
                           >
                             See all pricing plans
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c20 c21"
+                            class="c21 c22"
                           >
                             <svg
                               fill="none"
@@ -462,15 +466,15 @@ describe('Application page', () => {
                     </div>
                   </div>
                   <div
-                    class="c22"
+                    class="c23"
                   >
                     <span
-                      class="c16"
+                      class="c17"
                     >
                       node version
                     </span>
                     <p
-                      class="c17"
+                      class="c18"
                     />
                   </div>
                 </div>

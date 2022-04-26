@@ -1,656 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditSettingsView renders and matches the snapshot 1`] = `
-.c19 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c37 {
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
-.c51 {
-  padding: 16px;
-  border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
-}
-
-.c62 {
-  overflow: hidden;
-  width: 100%;
-}
-
-.c16 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c13 {
-  padding-right: 8px;
-}
-
-.c10 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c10 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c10 svg > g,
-.c10 svg path {
-  fill: #ffffff;
-}
-
-.c10[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c10:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c10:focus-visible {
-  outline: none;
-}
-
-.c10:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c14 {
-  height: 100%;
-}
-
-.c11 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: none;
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c11 .c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c11 .c15 {
-  color: #ffffff;
-}
-
-.c11[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c11[aria-disabled='true'] .c15 {
-  color: #666687;
-}
-
-.c11[aria-disabled='true'] svg > g,
-.c11[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c11[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c11[aria-disabled='true']:active .c15 {
-  color: #666687;
-}
-
-.c11[aria-disabled='true']:active svg > g,
-.c11[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c11:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c11:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c11 svg > g,
-.c11 svg path {
-  fill: #ffffff;
-}
-
-.c69 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: none;
-  border: 1px solid #d9d8ff;
-  background: #f0f0ff;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.c69 .c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c69 .c15 {
-  color: #ffffff;
-}
-
-.c69[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c69[aria-disabled='true'] .c15 {
-  color: #666687;
-}
-
-.c69[aria-disabled='true'] svg > g,
-.c69[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c69[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c69[aria-disabled='true']:active .c15 {
-  color: #666687;
-}
-
-.c69[aria-disabled='true']:active svg > g,
-.c69[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c69:hover {
-  background-color: #ffffff;
-}
-
-.c69:active {
-  background-color: #ffffff;
-  border: 1px solid #4945ff;
-}
-
-.c69:active .c15 {
-  color: #4945ff;
-}
-
-.c69:active svg > g,
-.c69:active svg path {
-  fill: #4945ff;
-}
-
-.c69 .c15 {
-  color: #271fe0;
-}
-
-.c69 svg > g,
-.c69 svg path {
-  fill: #271fe0;
-}
-
-.c56 {
-  background: #f6f6f9;
-  border-radius: 4px;
-  border-color: #eaeaef;
-  border: 1px solid #eaeaef;
-  width: 100%;
-  min-height: 2rem;
-}
-
-.c59 {
-  padding-right: 12px;
-  padding-left: 12px;
-}
-
-.c63 {
-  padding-left: 12px;
-}
-
-.c42 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c54 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c57 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-}
-
-.c65 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c65 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c65 svg > g,
-.c65 svg path {
-  fill: #ffffff;
-}
-
-.c65[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c65:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c65:focus-visible {
-  outline: none;
-}
-
-.c65:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c66 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-  border: none;
-}
-
-.c66 svg > g,
-.c66 svg path {
-  fill: #8e8ea9;
-}
-
-.c66:hover svg > g,
-.c66:hover svg path {
-  fill: #666687;
-}
-
-.c66:active svg > g,
-.c66:active svg path {
-  fill: #a5a5ba;
-}
-
-.c66[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c66[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c28 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c28:focus {
-  outline: none;
-}
-
-.c28[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c31 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c33 {
-  padding-left: 12px;
-}
-
-.c26 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c29 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c25 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c32 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c36 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c24 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c24 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c24 > * + * {
-  margin-top: 4px;
-}
-
-.c27 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2.5rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c27:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c34 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c34 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c34 svg path {
-  fill: #666687;
-}
-
-.c35 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c35 svg {
-  width: 0.375rem;
-}
-
-.c30 {
-  width: 100%;
-}
-
-.c20 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c20 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c20 > * + * {
-  margin-top: 16px;
-}
-
-.c52 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c52 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c52 > * + * {
-  margin-top: 8px;
-}
-
-.c21 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c43 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c44 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c64 {
-  font-weight: 500;
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
 .c0:focus-visible {
   outline: none;
 }
@@ -673,6 +23,10 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
 }
 
 .c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -684,13 +38,13 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
+}
+
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c8 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -698,10 +52,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
 .c9 {
@@ -787,100 +137,18 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c22 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
-}
-
-.c40 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c23 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c41 {
-  grid-column: span 8;
-  max-width: 100%;
-}
-
-.c53 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c70 {
-  grid-column: span 4;
-  max-width: 100%;
-}
-
-.c38 {
-  background: #eaeaef;
-}
-
-.c39 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c67 {
-  background-color: transparent;
-}
-
-.c67 path {
-  fill: #666687;
-}
-
-.c55 {
-  position: relative;
-  padding-right: 4px;
-}
-
-.c68 {
-  position: relative;
-  padding-left: 4px;
-}
-
-.c61 {
-  height: 0.75rem;
-  width: 0.75rem;
-}
-
-.c61 path {
-  fill: #666687;
-}
-
-.c58 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  opacity: 1;
-}
-
-.c60 {
-  cursor: all-scroll;
-  border-right: 1px solid #dcdce4;
-}
-
-.c50 {
+.c16 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c48 {
+.c13 {
   padding-right: 8px;
 }
 
-.c45 {
+.c10 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -894,21 +162,21 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c45 svg {
+.c10 svg {
   height: 12px;
   width: 12px;
 }
 
-.c45 svg > g,
-.c45 svg path {
+.c10 svg > g,
+.c10 svg path {
   fill: #ffffff;
 }
 
-.c45[aria-disabled='true'] {
+.c10[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c45:after {
+.c10:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -923,11 +191,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c45:focus-visible {
+.c10:focus-visible {
   outline: none;
 }
 
-.c45:focus-visible:after {
+.c10:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -938,10 +206,738 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c46 {
+.c14 {
+  height: 100%;
+}
+
+.c11 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   padding: 8px 16px;
   background: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c11 .c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c11 .c15 {
+  color: #ffffff;
+}
+
+.c11[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c11[aria-disabled='true'] .c15 {
+  color: #666687;
+}
+
+.c11[aria-disabled='true'] svg > g,
+.c11[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c11[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c11[aria-disabled='true']:active .c15 {
+  color: #666687;
+}
+
+.c11[aria-disabled='true']:active svg > g,
+.c11[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c11:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c11:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c11 svg > g,
+.c11 svg path {
+  fill: #ffffff;
+}
+
+.c71 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+  border: 1px solid #d9d8ff;
+  background: #f0f0ff;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.c71 .c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c71 .c15 {
+  color: #ffffff;
+}
+
+.c71[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c71[aria-disabled='true'] .c15 {
+  color: #666687;
+}
+
+.c71[aria-disabled='true'] svg > g,
+.c71[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c71[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c71[aria-disabled='true']:active .c15 {
+  color: #666687;
+}
+
+.c71[aria-disabled='true']:active svg > g,
+.c71[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c71:hover {
+  background-color: #ffffff;
+}
+
+.c71:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+}
+
+.c71:active .c15 {
+  color: #4945ff;
+}
+
+.c71:active svg > g,
+.c71:active svg path {
+  fill: #4945ff;
+}
+
+.c71 .c15 {
+  color: #271fe0;
+}
+
+.c71 svg > g,
+.c71 svg path {
+  fill: #271fe0;
+}
+
+.c19 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c39 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.c53 {
+  padding: 16px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
+}
+
+.c64 {
+  overflow: hidden;
+  width: 100%;
+}
+
+.c22 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c45 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c46 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c66 {
+  font-weight: 500;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c23 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c42 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c24 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c43 {
+  grid-column: span 8;
+  max-width: 100%;
+}
+
+.c55 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c72 {
+  grid-column: span 4;
+  max-width: 100%;
+}
+
+.c30 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
   border: none;
+}
+
+.c30:focus {
+  outline: none;
+}
+
+.c30[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c33 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c35 {
+  padding-left: 12px;
+}
+
+.c25 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c28 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c31 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c27 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c34 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c38 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c26 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c26 > * + * {
+  margin-top: 4px;
+}
+
+.c29 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c29:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c36 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c36 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c36 svg path {
+  fill: #666687;
+}
+
+.c37 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c37 svg {
+  width: 0.375rem;
+}
+
+.c32 {
+  width: 100%;
+}
+
+.c20 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c21 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c21 > * + * {
+  margin-top: 16px;
+}
+
+.c54 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c54 > * + * {
+  margin-top: 8px;
+}
+
+.c40 {
+  background: #eaeaef;
+}
+
+.c41 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c58 {
+  background: #f6f6f9;
+  border-radius: 4px;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
+  width: 100%;
+  min-height: 2rem;
+}
+
+.c61 {
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
+.c65 {
+  padding-left: 12px;
+}
+
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c56 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c59 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c67 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c67 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c67 svg > g,
+.c67 svg path {
+  fill: #ffffff;
+}
+
+.c67[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c67:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c67:focus-visible {
+  outline: none;
+}
+
+.c67:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c68 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  border: none;
+}
+
+.c68 svg > g,
+.c68 svg path {
+  fill: #8e8ea9;
+}
+
+.c68:hover svg > g,
+.c68:hover svg path {
+  fill: #666687;
+}
+
+.c68:active svg > g,
+.c68:active svg path {
+  fill: #a5a5ba;
+}
+
+.c68[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c68[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c69 {
+  background-color: transparent;
+}
+
+.c69 path {
+  fill: #666687;
+}
+
+.c57 {
+  position: relative;
+  padding-right: 4px;
+}
+
+.c70 {
+  position: relative;
+  padding-left: 4px;
+}
+
+.c63 {
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+.c63 path {
+  fill: #666687;
+}
+
+.c60 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  opacity: 1;
+}
+
+.c62 {
+  cursor: all-scroll;
+  border-right: 1px solid #dcdce4;
+}
+
+.c52 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c50 {
+  padding-right: 8px;
+}
+
+.c47 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c47 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c47 svg > g,
+.c47 svg path {
+  fill: #ffffff;
+}
+
+.c47[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c47:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c47:focus-visible {
+  outline: none;
+}
+
+.c47:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c48 {
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
   border-radius: 4px;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
@@ -953,7 +949,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   text-decoration: none;
 }
 
-.c46 .c47 {
+.c48 .c49 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -964,127 +960,127 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c46 .c49 {
+.c48 .c51 {
   color: #ffffff;
 }
 
-.c46[aria-disabled='true'] {
+.c48[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c46[aria-disabled='true'] .c49 {
+.c48[aria-disabled='true'] .c51 {
   color: #666687;
 }
 
-.c46[aria-disabled='true'] svg > g,
-.c46[aria-disabled='true'] svg path {
+.c48[aria-disabled='true'] svg > g,
+.c48[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c46[aria-disabled='true']:active {
+.c48[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c46[aria-disabled='true']:active .c49 {
+.c48[aria-disabled='true']:active .c51 {
   color: #666687;
 }
 
-.c46[aria-disabled='true']:active svg > g,
-.c46[aria-disabled='true']:active svg path {
+.c48[aria-disabled='true']:active svg > g,
+.c48[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c46:hover {
+.c48:hover {
   background-color: #ffffff;
 }
 
-.c46:active {
+.c48:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c46:active .c49 {
+.c48:active .c51 {
   color: #4945ff;
 }
 
-.c46:active svg > g,
-.c46:active svg path {
+.c48:active svg > g,
+.c48:active svg path {
   fill: #4945ff;
 }
 
-.c46 .c49 {
+.c48 .c51 {
   color: #271fe0;
 }
 
-.c46 svg > g,
-.c46 svg path {
+.c48 svg > g,
+.c48 svg path {
   fill: #271fe0;
 }
 
-.c73 {
+.c75 {
   height: 0.75rem;
   width: 0.75rem;
 }
 
-.c73 path {
+.c75 path {
   fill: #666687;
 }
 
-.c71 {
+.c73 {
   opacity: 1;
 }
 
-.c72 {
+.c74 {
   cursor: all-scroll;
   border-right: 1px solid #dcdce4;
 }
 
 @media (max-width:68.75rem) {
-  .c23 {
+  .c24 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c23 {
+  .c24 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c41 {
+  .c43 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c41 {
+  .c43 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c53 {
+  .c55 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c53 {
+  .c55 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c70 {
+  .c72 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c70 {
+  .c72 {
     grid-column: span;
   }
 }
@@ -1191,41 +1187,41 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
         class="c19"
       >
         <div
-          class="c20"
+          class="c20 c21"
           spacing="4"
         >
           <h2
-            class="c21"
+            class="c22"
           >
             Settings
           </h2>
           <div
-            class="c22"
+            class="c23"
           >
             <div
-              class="c23"
+              class="c24"
             >
               <div
                 class=""
               >
                 <div>
                   <div
-                    class="c24"
+                    class="c25 c26"
                     spacing="1"
                   >
                     <span
-                      class="c25"
+                      class="c27"
                       for="select-1"
                       id="select-1-label"
                     >
                       <div
-                        class="c26"
+                        class="c28"
                       >
                         Entry title
                       </div>
                     </span>
                     <div
-                      class="c26 c27"
+                      class="c28 c29"
                     >
                       <button
                         aria-describedby="select-1-hint"
@@ -1233,21 +1229,21 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                         aria-expanded="false"
                         aria-haspopup="listbox"
                         aria-labelledby="select-1-label select-1-content"
-                        class="c28"
+                        class="c30"
                         id="select-1"
                         type="button"
                       />
                       <div
-                        class="c29 c30"
+                        class="c31 c32"
                       >
                         <div
-                          class="c26"
+                          class="c28"
                         >
                           <div
-                            class="c31"
+                            class="c33"
                           >
                             <span
-                              class="c32"
+                              class="c34"
                               id="select-1-content"
                             >
                               postal_code
@@ -1255,11 +1251,11 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                           </div>
                         </div>
                         <div
-                          class="c26"
+                          class="c28"
                         >
                           <button
                             aria-hidden="true"
-                            class="c33 c34 c35"
+                            class="c35 c36 c37"
                             tabindex="-1"
                             type="button"
                           >
@@ -1282,7 +1278,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                       </div>
                     </div>
                     <p
-                      class="c36"
+                      class="c38"
                       id="select-1-hint"
                     >
                       Set the display field of your entry
@@ -1293,39 +1289,39 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
             </div>
           </div>
           <div
-            class="c37"
+            class="c39"
           >
             <hr
-              class="c38 c39"
+              class="c40 c41"
             />
           </div>
           <h3
-            class="c21"
+            class="c22"
           >
             View
           </h3>
           <div
-            class="c40"
+            class="c42"
           >
             <div
-              class="c41"
+              class="c43"
             >
               <div
                 class=""
               >
                 <div
-                  class="c20"
+                  class="c20 c21"
                   spacing="4"
                 >
                   <div
-                    class="c42"
+                    class="c44"
                   >
                     <div>
                       <div
                         class=""
                       >
                         <span
-                          class="c43"
+                          class="c45"
                         >
                           Displayed fields
                         </span>
@@ -1334,7 +1330,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                         class=""
                       >
                         <span
-                          class="c44"
+                          class="c46"
                         >
                           Drag & drop the fields to build the layout
                         </span>
@@ -1343,13 +1339,13 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                     <div>
                       <a
                         aria-disabled="false"
-                        class="c45 c46"
+                        class="c47 c48"
                         href="/plugins/content-type-builder/content-types/api::address.address"
                         variant="secondary"
                       >
                         <div
                           aria-hidden="true"
-                          class="c47 c48"
+                          class="c49 c50"
                         >
                           <svg
                             fill="none"
@@ -1367,7 +1363,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                           </svg>
                         </div>
                         <span
-                          class="c49 c50"
+                          class="c51 c52"
                         >
                           Edit the content type
                         </span>
@@ -1375,36 +1371,36 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c51"
+                    class="c53"
                   >
                     <div
-                      class="c52"
+                      class="c20 c54"
                       spacing="2"
                     >
                       <div
-                        class="c22"
+                        class="c23"
                       >
                         <div
-                          class="c53"
+                          class="c55"
                         >
                           <div
                             class=""
                           >
                             <div
-                              class="c54 c55"
+                              class="c56 c57"
                             >
                               <div
-                                class="c56 c57 c58"
+                                class="c58 c59 c60"
                                 width="100%"
                               >
                                 <span
-                                  class="c59 c54 c60"
+                                  class="c61 c56 c62"
                                   draggable="true"
                                   tabindex="-1"
                                   type="button"
                                 >
                                   <svg
-                                    class="c61"
+                                    class="c63"
                                     fill="none"
                                     height="1em"
                                     viewBox="0 0 24 24"
@@ -1442,26 +1438,26 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                   </svg>
                                 </span>
                                 <div
-                                  class="c62"
+                                  class="c64"
                                   overflow="hidden"
                                   width="100%"
                                 >
                                   <div
-                                    class="c63 c42"
+                                    class="c65 c44"
                                   >
                                     <span
-                                      class="c64"
+                                      class="c66"
                                     >
                                       postal_code
                                     </span>
                                     <div
-                                      class="c54"
+                                      class="c56"
                                     >
                                       <span>
                                         <button
                                           aria-disabled="false"
                                           aria-labelledby="tooltip-1"
-                                          class="c65 c66 c67"
+                                          class="c67 c68 c69"
                                           tabindex="0"
                                           type="button"
                                         >
@@ -1485,7 +1481,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                         <button
                                           aria-disabled="false"
                                           aria-labelledby="tooltip-3"
-                                          class="c65 c66 c67"
+                                          class="c67 c68 c69"
                                           data-testid="delete-field"
                                           tabindex="0"
                                           type="button"
@@ -1512,26 +1508,26 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                           </div>
                         </div>
                         <div
-                          class="c53"
+                          class="c55"
                         >
                           <div
                             class=""
                           >
                             <div
-                              class="c54 c68"
+                              class="c56 c70"
                             >
                               <div
-                                class="c56 c57 c58"
+                                class="c58 c59 c60"
                                 width="100%"
                               >
                                 <span
-                                  class="c59 c54 c60"
+                                  class="c61 c56 c62"
                                   draggable="true"
                                   tabindex="-1"
                                   type="button"
                                 >
                                   <svg
-                                    class="c61"
+                                    class="c63"
                                     fill="none"
                                     height="1em"
                                     viewBox="0 0 24 24"
@@ -1569,26 +1565,26 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                   </svg>
                                 </span>
                                 <div
-                                  class="c62"
+                                  class="c64"
                                   overflow="hidden"
                                   width="100%"
                                 >
                                   <div
-                                    class="c63 c42"
+                                    class="c65 c44"
                                   >
                                     <span
-                                      class="c64"
+                                      class="c66"
                                     >
                                       city
                                     </span>
                                     <div
-                                      class="c54"
+                                      class="c56"
                                     >
                                       <span>
                                         <button
                                           aria-disabled="false"
                                           aria-labelledby="tooltip-5"
-                                          class="c65 c66 c67"
+                                          class="c67 c68 c69"
                                           tabindex="0"
                                           type="button"
                                         >
@@ -1612,7 +1608,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                         <button
                                           aria-disabled="false"
                                           aria-labelledby="tooltip-7"
-                                          class="c65 c66 c67"
+                                          class="c67 c68 c69"
                                           data-testid="delete-field"
                                           tabindex="0"
                                           type="button"
@@ -1645,7 +1641,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                           aria-disabled="true"
                           aria-expanded="false"
                           aria-haspopup="true"
-                          class="c10 c69"
+                          class="c10 c71"
                           data-testid="add-field"
                           disabled=""
                           label="Insert another field"
@@ -1681,13 +1677,13 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
               </div>
             </div>
             <div
-              class="c70"
+              class="c72"
             >
               <div
                 class=""
               >
                 <div
-                  class="c20"
+                  class="c20 c21"
                   spacing="4"
                 >
                   <div>
@@ -1695,7 +1691,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                       class=""
                     >
                       <span
-                        class="c43"
+                        class="c45"
                       >
                         Relational fields
                       </span>
@@ -1704,31 +1700,31 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                       class=""
                     >
                       <span
-                        class="c44"
+                        class="c46"
                       >
                         Drag & drop the fields to build the layout
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c51"
+                    class="c53"
                   >
                     <div
-                      class="c52"
+                      class="c20 c54"
                       spacing="2"
                     >
                       <div
-                        class="c56 c57 c71"
+                        class="c58 c59 c73"
                         width="100%"
                       >
                         <span
-                          class="c59 c54 c72"
+                          class="c61 c56 c74"
                           draggable="true"
                           tabindex="-1"
                           type="button"
                         >
                           <svg
-                            class="c73"
+                            class="c75"
                             fill="none"
                             height="1em"
                             viewBox="0 0 24 24"
@@ -1766,26 +1762,26 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                           </svg>
                         </span>
                         <div
-                          class="c62"
+                          class="c64"
                           overflow="hidden"
                           width="100%"
                         >
                           <div
-                            class="c63 c42"
+                            class="c65 c44"
                           >
                             <span
-                              class="c64"
+                              class="c66"
                             >
                               categories
                             </span>
                             <div
-                              class="c54"
+                              class="c56"
                             >
                               <span>
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-9"
-                                  class="c65 c66 c67"
+                                  class="c67 c68 c69"
                                   tabindex="0"
                                   type="button"
                                 >
@@ -1809,7 +1805,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                                 <button
                                   aria-disabled="false"
                                   aria-labelledby="tooltip-11"
-                                  class="c65 c66 c67"
+                                  class="c67 c68 c69"
                                   data-testid="delete-field"
                                   tabindex="0"
                                   type="button"
@@ -1838,7 +1834,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                           aria-disabled="true"
                           aria-expanded="false"
                           aria-haspopup="true"
-                          class="c10 c69"
+                          class="c10 c71"
                           data-testid="add-relation"
                           disabled=""
                           label="Insert another relational field"
@@ -1883,657 +1879,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
 
 exports[`EditSettingsView should add field 1`] = `
 <body>
-  .c19 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c37 {
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
-.c51 {
-  padding: 16px;
-  border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
-}
-
-.c62 {
-  overflow: hidden;
-  width: 100%;
-}
-
-.c16 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c13 {
-  padding-right: 8px;
-}
-
-.c10 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c10 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c10 svg > g,
-.c10 svg path {
-  fill: #ffffff;
-}
-
-.c10[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c10:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c10:focus-visible {
-  outline: none;
-}
-
-.c10:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c14 {
-  height: 100%;
-}
-
-.c11 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: none;
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c11 .c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c11 .c15 {
-  color: #ffffff;
-}
-
-.c11[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c11[aria-disabled='true'] .c15 {
-  color: #666687;
-}
-
-.c11[aria-disabled='true'] svg > g,
-.c11[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c11[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c11[aria-disabled='true']:active .c15 {
-  color: #666687;
-}
-
-.c11[aria-disabled='true']:active svg > g,
-.c11[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c11:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c11:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c11 svg > g,
-.c11 svg path {
-  fill: #ffffff;
-}
-
-.c69 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: none;
-  border: 1px solid #d9d8ff;
-  background: #f0f0ff;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.c69 .c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c69 .c15 {
-  color: #ffffff;
-}
-
-.c69[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c69[aria-disabled='true'] .c15 {
-  color: #666687;
-}
-
-.c69[aria-disabled='true'] svg > g,
-.c69[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c69[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c69[aria-disabled='true']:active .c15 {
-  color: #666687;
-}
-
-.c69[aria-disabled='true']:active svg > g,
-.c69[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c69:hover {
-  background-color: #ffffff;
-}
-
-.c69:active {
-  background-color: #ffffff;
-  border: 1px solid #4945ff;
-}
-
-.c69:active .c15 {
-  color: #4945ff;
-}
-
-.c69:active svg > g,
-.c69:active svg path {
-  fill: #4945ff;
-}
-
-.c69 .c15 {
-  color: #271fe0;
-}
-
-.c69 svg > g,
-.c69 svg path {
-  fill: #271fe0;
-}
-
-.c56 {
-  background: #f6f6f9;
-  border-radius: 4px;
-  border-color: #eaeaef;
-  border: 1px solid #eaeaef;
-  width: 100%;
-  min-height: 2rem;
-}
-
-.c59 {
-  padding-right: 12px;
-  padding-left: 12px;
-}
-
-.c63 {
-  padding-left: 12px;
-}
-
-.c42 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c54 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c57 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-}
-
-.c65 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c65 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c65 svg > g,
-.c65 svg path {
-  fill: #ffffff;
-}
-
-.c65[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c65:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c65:focus-visible {
-  outline: none;
-}
-
-.c65:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c66 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-  border: none;
-}
-
-.c66 svg > g,
-.c66 svg path {
-  fill: #8e8ea9;
-}
-
-.c66:hover svg > g,
-.c66:hover svg path {
-  fill: #666687;
-}
-
-.c66:active svg > g,
-.c66:active svg path {
-  fill: #a5a5ba;
-}
-
-.c66[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c66[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c28 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c28:focus {
-  outline: none;
-}
-
-.c28[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c31 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c33 {
-  padding-left: 12px;
-}
-
-.c26 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c29 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c25 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c32 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c36 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c24 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c24 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c24 > * + * {
-  margin-top: 4px;
-}
-
-.c27 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2.5rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c27:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c34 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c34 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c34 svg path {
-  fill: #666687;
-}
-
-.c35 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c35 svg {
-  width: 0.375rem;
-}
-
-.c30 {
-  width: 100%;
-}
-
-.c20 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c20 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c20 > * + * {
-  margin-top: 16px;
-}
-
-.c52 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c52 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c52 > * + * {
-  margin-top: 8px;
-}
-
-.c21 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c43 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c44 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c64 {
-  font-weight: 500;
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c0:focus-visible {
+  .c0:focus-visible {
   outline: none;
 }
 
@@ -2555,6 +1901,10 @@ exports[`EditSettingsView should add field 1`] = `
 }
 
 .c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2566,13 +1916,13 @@ exports[`EditSettingsView should add field 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
+}
+
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c8 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2580,10 +1930,6 @@ exports[`EditSettingsView should add field 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
 .c9 {
@@ -2669,100 +2015,18 @@ exports[`EditSettingsView should add field 1`] = `
   display: flex;
 }
 
-.c22 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
-}
-
-.c40 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c23 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c41 {
-  grid-column: span 8;
-  max-width: 100%;
-}
-
-.c53 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c70 {
-  grid-column: span 4;
-  max-width: 100%;
-}
-
-.c38 {
-  background: #eaeaef;
-}
-
-.c39 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c67 {
-  background-color: transparent;
-}
-
-.c67 path {
-  fill: #666687;
-}
-
-.c55 {
-  position: relative;
-  padding-right: 4px;
-}
-
-.c68 {
-  position: relative;
-  padding-left: 4px;
-}
-
-.c61 {
-  height: 0.75rem;
-  width: 0.75rem;
-}
-
-.c61 path {
-  fill: #666687;
-}
-
-.c58 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  opacity: 1;
-}
-
-.c60 {
-  cursor: all-scroll;
-  border-right: 1px solid #dcdce4;
-}
-
-.c50 {
+.c16 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c48 {
+.c13 {
   padding-right: 8px;
 }
 
-.c45 {
+.c10 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2776,21 +2040,21 @@ exports[`EditSettingsView should add field 1`] = `
   outline: none;
 }
 
-.c45 svg {
+.c10 svg {
   height: 12px;
   width: 12px;
 }
 
-.c45 svg > g,
-.c45 svg path {
+.c10 svg > g,
+.c10 svg path {
   fill: #ffffff;
 }
 
-.c45[aria-disabled='true'] {
+.c10[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c45:after {
+.c10:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2805,11 +2069,11 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c45:focus-visible {
+.c10:focus-visible {
   outline: none;
 }
 
-.c45:focus-visible:after {
+.c10:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2820,10 +2084,738 @@ exports[`EditSettingsView should add field 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c46 {
+.c14 {
+  height: 100%;
+}
+
+.c11 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   padding: 8px 16px;
   background: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c11 .c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c11 .c15 {
+  color: #ffffff;
+}
+
+.c11[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c11[aria-disabled='true'] .c15 {
+  color: #666687;
+}
+
+.c11[aria-disabled='true'] svg > g,
+.c11[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c11[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c11[aria-disabled='true']:active .c15 {
+  color: #666687;
+}
+
+.c11[aria-disabled='true']:active svg > g,
+.c11[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c11:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c11:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c11 svg > g,
+.c11 svg path {
+  fill: #ffffff;
+}
+
+.c71 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+  border: 1px solid #d9d8ff;
+  background: #f0f0ff;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.c71 .c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c71 .c15 {
+  color: #ffffff;
+}
+
+.c71[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c71[aria-disabled='true'] .c15 {
+  color: #666687;
+}
+
+.c71[aria-disabled='true'] svg > g,
+.c71[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c71[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c71[aria-disabled='true']:active .c15 {
+  color: #666687;
+}
+
+.c71[aria-disabled='true']:active svg > g,
+.c71[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c71:hover {
+  background-color: #ffffff;
+}
+
+.c71:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+}
+
+.c71:active .c15 {
+  color: #4945ff;
+}
+
+.c71:active svg > g,
+.c71:active svg path {
+  fill: #4945ff;
+}
+
+.c71 .c15 {
+  color: #271fe0;
+}
+
+.c71 svg > g,
+.c71 svg path {
+  fill: #271fe0;
+}
+
+.c19 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c39 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.c53 {
+  padding: 16px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
+}
+
+.c64 {
+  overflow: hidden;
+  width: 100%;
+}
+
+.c22 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c45 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c46 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c66 {
+  font-weight: 500;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c23 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c42 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c24 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c43 {
+  grid-column: span 8;
+  max-width: 100%;
+}
+
+.c55 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c72 {
+  grid-column: span 4;
+  max-width: 100%;
+}
+
+.c30 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
   border: none;
+}
+
+.c30:focus {
+  outline: none;
+}
+
+.c30[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c33 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c35 {
+  padding-left: 12px;
+}
+
+.c25 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c28 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c31 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c27 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c34 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c38 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c26 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c26 > * + * {
+  margin-top: 4px;
+}
+
+.c29 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c29:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c36 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c36 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c36 svg path {
+  fill: #666687;
+}
+
+.c37 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c37 svg {
+  width: 0.375rem;
+}
+
+.c32 {
+  width: 100%;
+}
+
+.c20 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c21 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c21 > * + * {
+  margin-top: 16px;
+}
+
+.c54 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c54 > * + * {
+  margin-top: 8px;
+}
+
+.c40 {
+  background: #eaeaef;
+}
+
+.c41 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c58 {
+  background: #f6f6f9;
+  border-radius: 4px;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
+  width: 100%;
+  min-height: 2rem;
+}
+
+.c61 {
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
+.c65 {
+  padding-left: 12px;
+}
+
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c56 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c59 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c67 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c67 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c67 svg > g,
+.c67 svg path {
+  fill: #ffffff;
+}
+
+.c67[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c67:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c67:focus-visible {
+  outline: none;
+}
+
+.c67:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c68 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  border: none;
+}
+
+.c68 svg > g,
+.c68 svg path {
+  fill: #8e8ea9;
+}
+
+.c68:hover svg > g,
+.c68:hover svg path {
+  fill: #666687;
+}
+
+.c68:active svg > g,
+.c68:active svg path {
+  fill: #a5a5ba;
+}
+
+.c68[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c68[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c69 {
+  background-color: transparent;
+}
+
+.c69 path {
+  fill: #666687;
+}
+
+.c57 {
+  position: relative;
+  padding-right: 4px;
+}
+
+.c70 {
+  position: relative;
+  padding-left: 4px;
+}
+
+.c63 {
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+.c63 path {
+  fill: #666687;
+}
+
+.c60 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  opacity: 1;
+}
+
+.c62 {
+  cursor: all-scroll;
+  border-right: 1px solid #dcdce4;
+}
+
+.c52 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c50 {
+  padding-right: 8px;
+}
+
+.c47 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c47 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c47 svg > g,
+.c47 svg path {
+  fill: #ffffff;
+}
+
+.c47[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c47:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c47:focus-visible {
+  outline: none;
+}
+
+.c47:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c48 {
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
   border-radius: 4px;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
@@ -2835,7 +2827,7 @@ exports[`EditSettingsView should add field 1`] = `
   text-decoration: none;
 }
 
-.c46 .c47 {
+.c48 .c49 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2846,127 +2838,127 @@ exports[`EditSettingsView should add field 1`] = `
   align-items: center;
 }
 
-.c46 .c49 {
+.c48 .c51 {
   color: #ffffff;
 }
 
-.c46[aria-disabled='true'] {
+.c48[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c46[aria-disabled='true'] .c49 {
+.c48[aria-disabled='true'] .c51 {
   color: #666687;
 }
 
-.c46[aria-disabled='true'] svg > g,
-.c46[aria-disabled='true'] svg path {
+.c48[aria-disabled='true'] svg > g,
+.c48[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c46[aria-disabled='true']:active {
+.c48[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c46[aria-disabled='true']:active .c49 {
+.c48[aria-disabled='true']:active .c51 {
   color: #666687;
 }
 
-.c46[aria-disabled='true']:active svg > g,
-.c46[aria-disabled='true']:active svg path {
+.c48[aria-disabled='true']:active svg > g,
+.c48[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c46:hover {
+.c48:hover {
   background-color: #ffffff;
 }
 
-.c46:active {
+.c48:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c46:active .c49 {
+.c48:active .c51 {
   color: #4945ff;
 }
 
-.c46:active svg > g,
-.c46:active svg path {
+.c48:active svg > g,
+.c48:active svg path {
   fill: #4945ff;
 }
 
-.c46 .c49 {
+.c48 .c51 {
   color: #271fe0;
 }
 
-.c46 svg > g,
-.c46 svg path {
+.c48 svg > g,
+.c48 svg path {
   fill: #271fe0;
 }
 
-.c73 {
+.c75 {
   height: 0.75rem;
   width: 0.75rem;
 }
 
-.c73 path {
+.c75 path {
   fill: #666687;
 }
 
-.c71 {
+.c73 {
   opacity: 1;
 }
 
-.c72 {
+.c74 {
   cursor: all-scroll;
   border-right: 1px solid #dcdce4;
 }
 
 @media (max-width:68.75rem) {
-  .c23 {
+  .c24 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c23 {
+  .c24 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c41 {
+  .c43 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c41 {
+  .c43 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c53 {
+  .c55 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c53 {
+  .c55 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c70 {
+  .c72 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c70 {
+  .c72 {
     grid-column: span;
   }
 }
@@ -3073,41 +3065,41 @@ exports[`EditSettingsView should add field 1`] = `
           class="c19"
         >
           <div
-            class="c20"
+            class="c20 c21"
             spacing="4"
           >
             <h2
-              class="c21"
+              class="c22"
             >
               Settings
             </h2>
             <div
-              class="c22"
+              class="c23"
             >
               <div
-                class="c23"
+                class="c24"
               >
                 <div
                   class=""
                 >
                   <div>
                     <div
-                      class="c24"
+                      class="c25 c26"
                       spacing="1"
                     >
                       <span
-                        class="c25"
+                        class="c27"
                         for="select-3"
                         id="select-3-label"
                       >
                         <div
-                          class="c26"
+                          class="c28"
                         >
                           Entry title
                         </div>
                       </span>
                       <div
-                        class="c26 c27"
+                        class="c28 c29"
                       >
                         <button
                           aria-describedby="select-3-hint"
@@ -3115,21 +3107,21 @@ exports[`EditSettingsView should add field 1`] = `
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           aria-labelledby="select-3-label select-3-content"
-                          class="c28"
+                          class="c30"
                           id="select-3"
                           type="button"
                         />
                         <div
-                          class="c29 c30"
+                          class="c31 c32"
                         >
                           <div
-                            class="c26"
+                            class="c28"
                           >
                             <div
-                              class="c31"
+                              class="c33"
                             >
                               <span
-                                class="c32"
+                                class="c34"
                                 id="select-3-content"
                               >
                                 postal_code
@@ -3137,11 +3129,11 @@ exports[`EditSettingsView should add field 1`] = `
                             </div>
                           </div>
                           <div
-                            class="c26"
+                            class="c28"
                           >
                             <button
                               aria-hidden="true"
-                              class="c33 c34 c35"
+                              class="c35 c36 c37"
                               tabindex="-1"
                               type="button"
                             >
@@ -3164,7 +3156,7 @@ exports[`EditSettingsView should add field 1`] = `
                         </div>
                       </div>
                       <p
-                        class="c36"
+                        class="c38"
                         id="select-3-hint"
                       >
                         Set the display field of your entry
@@ -3175,39 +3167,39 @@ exports[`EditSettingsView should add field 1`] = `
               </div>
             </div>
             <div
-              class="c37"
+              class="c39"
             >
               <hr
-                class="c38 c39"
+                class="c40 c41"
               />
             </div>
             <h3
-              class="c21"
+              class="c22"
             >
               View
             </h3>
             <div
-              class="c40"
+              class="c42"
             >
               <div
-                class="c41"
+                class="c43"
               >
                 <div
                   class=""
                 >
                   <div
-                    class="c20"
+                    class="c20 c21"
                     spacing="4"
                   >
                     <div
-                      class="c42"
+                      class="c44"
                     >
                       <div>
                         <div
                           class=""
                         >
                           <span
-                            class="c43"
+                            class="c45"
                           >
                             Displayed fields
                           </span>
@@ -3216,7 +3208,7 @@ exports[`EditSettingsView should add field 1`] = `
                           class=""
                         >
                           <span
-                            class="c44"
+                            class="c46"
                           >
                             Drag & drop the fields to build the layout
                           </span>
@@ -3225,13 +3217,13 @@ exports[`EditSettingsView should add field 1`] = `
                       <div>
                         <a
                           aria-disabled="false"
-                          class="c45 c46"
+                          class="c47 c48"
                           href="/plugins/content-type-builder/content-types/api::address.address"
                           variant="secondary"
                         >
                           <div
                             aria-hidden="true"
-                            class="c47 c48"
+                            class="c49 c50"
                           >
                             <svg
                               fill="none"
@@ -3249,7 +3241,7 @@ exports[`EditSettingsView should add field 1`] = `
                             </svg>
                           </div>
                           <span
-                            class="c49 c50"
+                            class="c51 c52"
                           >
                             Edit the content type
                           </span>
@@ -3257,36 +3249,36 @@ exports[`EditSettingsView should add field 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c51"
+                      class="c53"
                     >
                       <div
-                        class="c52"
+                        class="c20 c54"
                         spacing="2"
                       >
                         <div
-                          class="c22"
+                          class="c23"
                         >
                           <div
-                            class="c53"
+                            class="c55"
                           >
                             <div
                               class=""
                             >
                               <div
-                                class="c54 c55"
+                                class="c56 c57"
                               >
                                 <div
-                                  class="c56 c57 c58"
+                                  class="c58 c59 c60"
                                   width="100%"
                                 >
                                   <span
-                                    class="c59 c54 c60"
+                                    class="c61 c56 c62"
                                     draggable="true"
                                     tabindex="-1"
                                     type="button"
                                   >
                                     <svg
-                                      class="c61"
+                                      class="c63"
                                       fill="none"
                                       height="1em"
                                       viewBox="0 0 24 24"
@@ -3324,26 +3316,26 @@ exports[`EditSettingsView should add field 1`] = `
                                     </svg>
                                   </span>
                                   <div
-                                    class="c62"
+                                    class="c64"
                                     overflow="hidden"
                                     width="100%"
                                   >
                                     <div
-                                      class="c63 c42"
+                                      class="c65 c44"
                                     >
                                       <span
-                                        class="c64"
+                                        class="c66"
                                       >
                                         postal_code
                                       </span>
                                       <div
-                                        class="c54"
+                                        class="c56"
                                       >
                                         <span>
                                           <button
                                             aria-disabled="false"
                                             aria-labelledby="tooltip-25"
-                                            class="c65 c66 c67"
+                                            class="c67 c68 c69"
                                             tabindex="0"
                                             type="button"
                                           >
@@ -3367,7 +3359,7 @@ exports[`EditSettingsView should add field 1`] = `
                                           <button
                                             aria-disabled="false"
                                             aria-labelledby="tooltip-27"
-                                            class="c65 c66 c67"
+                                            class="c67 c68 c69"
                                             data-testid="delete-field"
                                             tabindex="0"
                                             type="button"
@@ -3394,26 +3386,26 @@ exports[`EditSettingsView should add field 1`] = `
                             </div>
                           </div>
                           <div
-                            class="c53"
+                            class="c55"
                           >
                             <div
                               class=""
                             >
                               <div
-                                class="c54 c68"
+                                class="c56 c70"
                               >
                                 <div
-                                  class="c56 c57 c58"
+                                  class="c58 c59 c60"
                                   width="100%"
                                 >
                                   <span
-                                    class="c59 c54 c60"
+                                    class="c61 c56 c62"
                                     draggable="true"
                                     tabindex="-1"
                                     type="button"
                                   >
                                     <svg
-                                      class="c61"
+                                      class="c63"
                                       fill="none"
                                       height="1em"
                                       viewBox="0 0 24 24"
@@ -3451,26 +3443,26 @@ exports[`EditSettingsView should add field 1`] = `
                                     </svg>
                                   </span>
                                   <div
-                                    class="c62"
+                                    class="c64"
                                     overflow="hidden"
                                     width="100%"
                                   >
                                     <div
-                                      class="c63 c42"
+                                      class="c65 c44"
                                     >
                                       <span
-                                        class="c64"
+                                        class="c66"
                                       >
                                         city
                                       </span>
                                       <div
-                                        class="c54"
+                                        class="c56"
                                       >
                                         <span>
                                           <button
                                             aria-disabled="false"
                                             aria-labelledby="tooltip-29"
-                                            class="c65 c66 c67"
+                                            class="c67 c68 c69"
                                             tabindex="0"
                                             type="button"
                                           >
@@ -3494,7 +3486,7 @@ exports[`EditSettingsView should add field 1`] = `
                                           <button
                                             aria-disabled="false"
                                             aria-labelledby="tooltip-31"
-                                            class="c65 c66 c67"
+                                            class="c67 c68 c69"
                                             data-testid="delete-field"
                                             tabindex="0"
                                             type="button"
@@ -3527,7 +3519,7 @@ exports[`EditSettingsView should add field 1`] = `
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="true"
-                            class="c10 c69"
+                            class="c10 c71"
                             data-testid="add-field"
                             disabled=""
                             label="Insert another field"
@@ -3563,13 +3555,13 @@ exports[`EditSettingsView should add field 1`] = `
                 </div>
               </div>
               <div
-                class="c70"
+                class="c72"
               >
                 <div
                   class=""
                 >
                   <div
-                    class="c20"
+                    class="c20 c21"
                     spacing="4"
                   >
                     <div>
@@ -3577,7 +3569,7 @@ exports[`EditSettingsView should add field 1`] = `
                         class=""
                       >
                         <span
-                          class="c43"
+                          class="c45"
                         >
                           Relational fields
                         </span>
@@ -3586,31 +3578,31 @@ exports[`EditSettingsView should add field 1`] = `
                         class=""
                       >
                         <span
-                          class="c44"
+                          class="c46"
                         >
                           Drag & drop the fields to build the layout
                         </span>
                       </div>
                     </div>
                     <div
-                      class="c51"
+                      class="c53"
                     >
                       <div
-                        class="c52"
+                        class="c20 c54"
                         spacing="2"
                       >
                         <div
-                          class="c56 c57 c71"
+                          class="c58 c59 c73"
                           width="100%"
                         >
                           <span
-                            class="c59 c54 c72"
+                            class="c61 c56 c74"
                             draggable="true"
                             tabindex="-1"
                             type="button"
                           >
                             <svg
-                              class="c73"
+                              class="c75"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 24"
@@ -3648,26 +3640,26 @@ exports[`EditSettingsView should add field 1`] = `
                             </svg>
                           </span>
                           <div
-                            class="c62"
+                            class="c64"
                             overflow="hidden"
                             width="100%"
                           >
                             <div
-                              class="c63 c42"
+                              class="c65 c44"
                             >
                               <span
-                                class="c64"
+                                class="c66"
                               >
                                 categories
                               </span>
                               <div
-                                class="c54"
+                                class="c56"
                               >
                                 <span>
                                   <button
                                     aria-disabled="false"
                                     aria-labelledby="tooltip-33"
-                                    class="c65 c66 c67"
+                                    class="c67 c68 c69"
                                     tabindex="0"
                                     type="button"
                                   >
@@ -3691,7 +3683,7 @@ exports[`EditSettingsView should add field 1`] = `
                                   <button
                                     aria-disabled="false"
                                     aria-labelledby="tooltip-35"
-                                    class="c65 c66 c67"
+                                    class="c67 c68 c69"
                                     data-testid="delete-field"
                                     tabindex="0"
                                     type="button"
@@ -3720,7 +3712,7 @@ exports[`EditSettingsView should add field 1`] = `
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="true"
-                            class="c10 c69"
+                            class="c10 c71"
                             data-testid="add-relation"
                             disabled=""
                             label="Insert another relational field"
@@ -4227,7 +4219,7 @@ exports[`EditSettingsView should add field 1`] = `
 `;
 
 exports[`EditSettingsView should add relation 1`] = `
-.c74 {
+.c76 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -4237,675 +4229,6 @@ exports[`EditSettingsView should add relation 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
-}
-
-.c19 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c37 {
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
-.c51 {
-  padding: 16px;
-  border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
-}
-
-.c62 {
-  overflow: hidden;
-  width: 100%;
-}
-
-.c16 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c13 {
-  padding-right: 8px;
-}
-
-.c10 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c10 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c10 svg > g,
-.c10 svg path {
-  fill: #ffffff;
-}
-
-.c10[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c10:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c10:focus-visible {
-  outline: none;
-}
-
-.c10:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c14 {
-  height: 100%;
-}
-
-.c11 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: none;
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c11 .c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c11 .c15 {
-  color: #ffffff;
-}
-
-.c11[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c11[aria-disabled='true'] .c15 {
-  color: #666687;
-}
-
-.c11[aria-disabled='true'] svg > g,
-.c11[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c11[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c11[aria-disabled='true']:active .c15 {
-  color: #666687;
-}
-
-.c11[aria-disabled='true']:active svg > g,
-.c11[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c11:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c11:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c11 svg > g,
-.c11 svg path {
-  fill: #ffffff;
-}
-
-.c69 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: none;
-  border: 1px solid #d9d8ff;
-  background: #f0f0ff;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.c69 .c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c69 .c15 {
-  color: #ffffff;
-}
-
-.c69[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c69[aria-disabled='true'] .c15 {
-  color: #666687;
-}
-
-.c69[aria-disabled='true'] svg > g,
-.c69[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c69[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c69[aria-disabled='true']:active .c15 {
-  color: #666687;
-}
-
-.c69[aria-disabled='true']:active svg > g,
-.c69[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c69:hover {
-  background-color: #ffffff;
-}
-
-.c69:active {
-  background-color: #ffffff;
-  border: 1px solid #4945ff;
-}
-
-.c69:active .c15 {
-  color: #4945ff;
-}
-
-.c69:active svg > g,
-.c69:active svg path {
-  fill: #4945ff;
-}
-
-.c69 .c15 {
-  color: #271fe0;
-}
-
-.c69 svg > g,
-.c69 svg path {
-  fill: #271fe0;
-}
-
-.c56 {
-  background: #f6f6f9;
-  border-radius: 4px;
-  border-color: #eaeaef;
-  border: 1px solid #eaeaef;
-  width: 100%;
-  min-height: 2rem;
-}
-
-.c59 {
-  padding-right: 12px;
-  padding-left: 12px;
-}
-
-.c63 {
-  padding-left: 12px;
-}
-
-.c42 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c54 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c57 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-}
-
-.c75 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c77 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c76 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-.c65 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c65 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c65 svg > g,
-.c65 svg path {
-  fill: #ffffff;
-}
-
-.c65[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c65:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c65:focus-visible {
-  outline: none;
-}
-
-.c65:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c66 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-  border: none;
-}
-
-.c66 svg > g,
-.c66 svg path {
-  fill: #8e8ea9;
-}
-
-.c66:hover svg > g,
-.c66:hover svg path {
-  fill: #666687;
-}
-
-.c66:active svg > g,
-.c66:active svg path {
-  fill: #a5a5ba;
-}
-
-.c66[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c66[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c28 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c28:focus {
-  outline: none;
-}
-
-.c28[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c31 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c33 {
-  padding-left: 12px;
-}
-
-.c26 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c29 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c25 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c32 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c36 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c24 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c24 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c24 > * + * {
-  margin-top: 4px;
-}
-
-.c27 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2.5rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c27:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c34 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c34 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c34 svg path {
-  fill: #666687;
-}
-
-.c35 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c35 svg {
-  width: 0.375rem;
-}
-
-.c30 {
-  width: 100%;
-}
-
-.c20 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c20 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c20 > * + * {
-  margin-top: 16px;
-}
-
-.c52 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c52 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c52 > * + * {
-  margin-top: 8px;
-}
-
-.c21 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c43 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c44 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c64 {
-  font-weight: 500;
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
 }
 
 .c0:focus-visible {
@@ -4930,6 +4253,10 @@ exports[`EditSettingsView should add relation 1`] = `
 }
 
 .c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -4941,13 +4268,13 @@ exports[`EditSettingsView should add relation 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
+}
+
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c8 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -4955,10 +4282,6 @@ exports[`EditSettingsView should add relation 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
 .c9 {
@@ -5044,100 +4367,18 @@ exports[`EditSettingsView should add relation 1`] = `
   display: flex;
 }
 
-.c22 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
-}
-
-.c40 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c23 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c41 {
-  grid-column: span 8;
-  max-width: 100%;
-}
-
-.c53 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c70 {
-  grid-column: span 4;
-  max-width: 100%;
-}
-
-.c38 {
-  background: #eaeaef;
-}
-
-.c39 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c67 {
-  background-color: transparent;
-}
-
-.c67 path {
-  fill: #666687;
-}
-
-.c55 {
-  position: relative;
-  padding-right: 4px;
-}
-
-.c68 {
-  position: relative;
-  padding-left: 4px;
-}
-
-.c61 {
-  height: 0.75rem;
-  width: 0.75rem;
-}
-
-.c61 path {
-  fill: #666687;
-}
-
-.c58 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  opacity: 1;
-}
-
-.c60 {
-  cursor: all-scroll;
-  border-right: 1px solid #dcdce4;
-}
-
-.c50 {
+.c16 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c48 {
+.c13 {
   padding-right: 8px;
 }
 
-.c45 {
+.c10 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -5151,21 +4392,21 @@ exports[`EditSettingsView should add relation 1`] = `
   outline: none;
 }
 
-.c45 svg {
+.c10 svg {
   height: 12px;
   width: 12px;
 }
 
-.c45 svg > g,
-.c45 svg path {
+.c10 svg > g,
+.c10 svg path {
   fill: #ffffff;
 }
 
-.c45[aria-disabled='true'] {
+.c10[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c45:after {
+.c10:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -5180,11 +4421,11 @@ exports[`EditSettingsView should add relation 1`] = `
   border: 2px solid transparent;
 }
 
-.c45:focus-visible {
+.c10:focus-visible {
   outline: none;
 }
 
-.c45:focus-visible:after {
+.c10:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -5195,10 +4436,757 @@ exports[`EditSettingsView should add relation 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c46 {
+.c14 {
+  height: 100%;
+}
+
+.c11 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   padding: 8px 16px;
   background: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c11 .c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c11 .c15 {
+  color: #ffffff;
+}
+
+.c11[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c11[aria-disabled='true'] .c15 {
+  color: #666687;
+}
+
+.c11[aria-disabled='true'] svg > g,
+.c11[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c11[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c11[aria-disabled='true']:active .c15 {
+  color: #666687;
+}
+
+.c11[aria-disabled='true']:active svg > g,
+.c11[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c11:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c11:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c11 svg > g,
+.c11 svg path {
+  fill: #ffffff;
+}
+
+.c71 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+  border: 1px solid #d9d8ff;
+  background: #f0f0ff;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.c71 .c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c71 .c15 {
+  color: #ffffff;
+}
+
+.c71[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c71[aria-disabled='true'] .c15 {
+  color: #666687;
+}
+
+.c71[aria-disabled='true'] svg > g,
+.c71[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c71[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c71[aria-disabled='true']:active .c15 {
+  color: #666687;
+}
+
+.c71[aria-disabled='true']:active svg > g,
+.c71[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c71:hover {
+  background-color: #ffffff;
+}
+
+.c71:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+}
+
+.c71:active .c15 {
+  color: #4945ff;
+}
+
+.c71:active svg > g,
+.c71:active svg path {
+  fill: #4945ff;
+}
+
+.c71 .c15 {
+  color: #271fe0;
+}
+
+.c71 svg > g,
+.c71 svg path {
+  fill: #271fe0;
+}
+
+.c19 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c39 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.c53 {
+  padding: 16px;
+  border-radius: 4px;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
+}
+
+.c64 {
+  overflow: hidden;
+  width: 100%;
+}
+
+.c22 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c45 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c46 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c66 {
+  font-weight: 500;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c23 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c42 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c24 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c43 {
+  grid-column: span 8;
+  max-width: 100%;
+}
+
+.c55 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c72 {
+  grid-column: span 4;
+  max-width: 100%;
+}
+
+.c30 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
   border: none;
+}
+
+.c30:focus {
+  outline: none;
+}
+
+.c30[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c33 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c35 {
+  padding-left: 12px;
+}
+
+.c25 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c28 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c31 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c27 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c34 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c38 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c26 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c26 > * + * {
+  margin-top: 4px;
+}
+
+.c29 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2.5rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c29:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c36 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c36 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c36 svg path {
+  fill: #666687;
+}
+
+.c37 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c37 svg {
+  width: 0.375rem;
+}
+
+.c32 {
+  width: 100%;
+}
+
+.c20 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c21 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c21 > * + * {
+  margin-top: 16px;
+}
+
+.c54 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c54 > * + * {
+  margin-top: 8px;
+}
+
+.c40 {
+  background: #eaeaef;
+}
+
+.c41 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c58 {
+  background: #f6f6f9;
+  border-radius: 4px;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
+  width: 100%;
+  min-height: 2rem;
+}
+
+.c61 {
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
+.c65 {
+  padding-left: 12px;
+}
+
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c56 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c59 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c77 {
+  background: #212134;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.c79 {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c78 {
+  position: absolute;
+  z-index: 4;
+  display: none;
+}
+
+.c67 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c67 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c67 svg > g,
+.c67 svg path {
+  fill: #ffffff;
+}
+
+.c67[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c67:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c67:focus-visible {
+  outline: none;
+}
+
+.c67:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c68 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  border: none;
+}
+
+.c68 svg > g,
+.c68 svg path {
+  fill: #8e8ea9;
+}
+
+.c68:hover svg > g,
+.c68:hover svg path {
+  fill: #666687;
+}
+
+.c68:active svg > g,
+.c68:active svg path {
+  fill: #a5a5ba;
+}
+
+.c68[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c68[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c69 {
+  background-color: transparent;
+}
+
+.c69 path {
+  fill: #666687;
+}
+
+.c57 {
+  position: relative;
+  padding-right: 4px;
+}
+
+.c70 {
+  position: relative;
+  padding-left: 4px;
+}
+
+.c63 {
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+.c63 path {
+  fill: #666687;
+}
+
+.c60 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  opacity: 1;
+}
+
+.c62 {
+  cursor: all-scroll;
+  border-right: 1px solid #dcdce4;
+}
+
+.c52 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c50 {
+  padding-right: 8px;
+}
+
+.c47 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c47 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c47 svg > g,
+.c47 svg path {
+  fill: #ffffff;
+}
+
+.c47[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c47:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c47:focus-visible {
+  outline: none;
+}
+
+.c47:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c48 {
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
   border-radius: 4px;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
@@ -5210,7 +5198,7 @@ exports[`EditSettingsView should add relation 1`] = `
   text-decoration: none;
 }
 
-.c46 .c47 {
+.c48 .c49 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -5221,127 +5209,127 @@ exports[`EditSettingsView should add relation 1`] = `
   align-items: center;
 }
 
-.c46 .c49 {
+.c48 .c51 {
   color: #ffffff;
 }
 
-.c46[aria-disabled='true'] {
+.c48[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c46[aria-disabled='true'] .c49 {
+.c48[aria-disabled='true'] .c51 {
   color: #666687;
 }
 
-.c46[aria-disabled='true'] svg > g,
-.c46[aria-disabled='true'] svg path {
+.c48[aria-disabled='true'] svg > g,
+.c48[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c46[aria-disabled='true']:active {
+.c48[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c46[aria-disabled='true']:active .c49 {
+.c48[aria-disabled='true']:active .c51 {
   color: #666687;
 }
 
-.c46[aria-disabled='true']:active svg > g,
-.c46[aria-disabled='true']:active svg path {
+.c48[aria-disabled='true']:active svg > g,
+.c48[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c46:hover {
+.c48:hover {
   background-color: #ffffff;
 }
 
-.c46:active {
+.c48:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c46:active .c49 {
+.c48:active .c51 {
   color: #4945ff;
 }
 
-.c46:active svg > g,
-.c46:active svg path {
+.c48:active svg > g,
+.c48:active svg path {
   fill: #4945ff;
 }
 
-.c46 .c49 {
+.c48 .c51 {
   color: #271fe0;
 }
 
-.c46 svg > g,
-.c46 svg path {
+.c48 svg > g,
+.c48 svg path {
   fill: #271fe0;
 }
 
-.c73 {
+.c75 {
   height: 0.75rem;
   width: 0.75rem;
 }
 
-.c73 path {
+.c75 path {
   fill: #666687;
 }
 
-.c71 {
+.c73 {
   opacity: 1;
 }
 
-.c72 {
+.c74 {
   cursor: all-scroll;
   border-right: 1px solid #dcdce4;
 }
 
 @media (max-width:68.75rem) {
-  .c23 {
+  .c24 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c23 {
+  .c24 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c41 {
+  .c43 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c41 {
+  .c43 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c53 {
+  .c55 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c53 {
+  .c55 {
     grid-column: span;
   }
 }
 
 @media (max-width:68.75rem) {
-  .c70 {
+  .c72 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c70 {
+  .c72 {
     grid-column: span;
   }
 }
@@ -5449,41 +5437,41 @@ exports[`EditSettingsView should add relation 1`] = `
           class="c19"
         >
           <div
-            class="c20"
+            class="c20 c21"
             spacing="4"
           >
             <h2
-              class="c21"
+              class="c22"
             >
               Settings
             </h2>
             <div
-              class="c22"
+              class="c23"
             >
               <div
-                class="c23"
+                class="c24"
               >
                 <div
                   class=""
                 >
                   <div>
                     <div
-                      class="c24"
+                      class="c25 c26"
                       spacing="1"
                     >
                       <span
-                        class="c25"
+                        class="c27"
                         for="select-2"
                         id="select-2-label"
                       >
                         <div
-                          class="c26"
+                          class="c28"
                         >
                           Entry title
                         </div>
                       </span>
                       <div
-                        class="c26 c27"
+                        class="c28 c29"
                       >
                         <button
                           aria-describedby="select-2-hint"
@@ -5491,21 +5479,21 @@ exports[`EditSettingsView should add relation 1`] = `
                           aria-expanded="false"
                           aria-haspopup="listbox"
                           aria-labelledby="select-2-label select-2-content"
-                          class="c28"
+                          class="c30"
                           id="select-2"
                           type="button"
                         />
                         <div
-                          class="c29 c30"
+                          class="c31 c32"
                         >
                           <div
-                            class="c26"
+                            class="c28"
                           >
                             <div
-                              class="c31"
+                              class="c33"
                             >
                               <span
-                                class="c32"
+                                class="c34"
                                 id="select-2-content"
                               >
                                 postal_code
@@ -5513,11 +5501,11 @@ exports[`EditSettingsView should add relation 1`] = `
                             </div>
                           </div>
                           <div
-                            class="c26"
+                            class="c28"
                           >
                             <button
                               aria-hidden="true"
-                              class="c33 c34 c35"
+                              class="c35 c36 c37"
                               tabindex="-1"
                               type="button"
                             >
@@ -5540,7 +5528,7 @@ exports[`EditSettingsView should add relation 1`] = `
                         </div>
                       </div>
                       <p
-                        class="c36"
+                        class="c38"
                         id="select-2-hint"
                       >
                         Set the display field of your entry
@@ -5551,39 +5539,39 @@ exports[`EditSettingsView should add relation 1`] = `
               </div>
             </div>
             <div
-              class="c37"
+              class="c39"
             >
               <hr
-                class="c38 c39"
+                class="c40 c41"
               />
             </div>
             <h3
-              class="c21"
+              class="c22"
             >
               View
             </h3>
             <div
-              class="c40"
+              class="c42"
             >
               <div
-                class="c41"
+                class="c43"
               >
                 <div
                   class=""
                 >
                   <div
-                    class="c20"
+                    class="c20 c21"
                     spacing="4"
                   >
                     <div
-                      class="c42"
+                      class="c44"
                     >
                       <div>
                         <div
                           class=""
                         >
                           <span
-                            class="c43"
+                            class="c45"
                           >
                             Displayed fields
                           </span>
@@ -5592,7 +5580,7 @@ exports[`EditSettingsView should add relation 1`] = `
                           class=""
                         >
                           <span
-                            class="c44"
+                            class="c46"
                           >
                             Drag & drop the fields to build the layout
                           </span>
@@ -5601,13 +5589,13 @@ exports[`EditSettingsView should add relation 1`] = `
                       <div>
                         <a
                           aria-disabled="false"
-                          class="c45 c46"
+                          class="c47 c48"
                           href="/plugins/content-type-builder/content-types/api::address.address"
                           variant="secondary"
                         >
                           <div
                             aria-hidden="true"
-                            class="c47 c48"
+                            class="c49 c50"
                           >
                             <svg
                               fill="none"
@@ -5625,7 +5613,7 @@ exports[`EditSettingsView should add relation 1`] = `
                             </svg>
                           </div>
                           <span
-                            class="c49 c50"
+                            class="c51 c52"
                           >
                             Edit the content type
                           </span>
@@ -5633,36 +5621,36 @@ exports[`EditSettingsView should add relation 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c51"
+                      class="c53"
                     >
                       <div
-                        class="c52"
+                        class="c20 c54"
                         spacing="2"
                       >
                         <div
-                          class="c22"
+                          class="c23"
                         >
                           <div
-                            class="c53"
+                            class="c55"
                           >
                             <div
                               class=""
                             >
                               <div
-                                class="c54 c55"
+                                class="c56 c57"
                               >
                                 <div
-                                  class="c56 c57 c58"
+                                  class="c58 c59 c60"
                                   width="100%"
                                 >
                                   <span
-                                    class="c59 c54 c60"
+                                    class="c61 c56 c62"
                                     draggable="true"
                                     tabindex="-1"
                                     type="button"
                                   >
                                     <svg
-                                      class="c61"
+                                      class="c63"
                                       fill="none"
                                       height="1em"
                                       viewBox="0 0 24 24"
@@ -5700,26 +5688,26 @@ exports[`EditSettingsView should add relation 1`] = `
                                     </svg>
                                   </span>
                                   <div
-                                    class="c62"
+                                    class="c64"
                                     overflow="hidden"
                                     width="100%"
                                   >
                                     <div
-                                      class="c63 c42"
+                                      class="c65 c44"
                                     >
                                       <span
-                                        class="c64"
+                                        class="c66"
                                       >
                                         postal_code
                                       </span>
                                       <div
-                                        class="c54"
+                                        class="c56"
                                       >
                                         <span>
                                           <button
                                             aria-disabled="false"
                                             aria-labelledby="tooltip-13"
-                                            class="c65 c66 c67"
+                                            class="c67 c68 c69"
                                             tabindex="0"
                                             type="button"
                                           >
@@ -5743,7 +5731,7 @@ exports[`EditSettingsView should add relation 1`] = `
                                           <button
                                             aria-disabled="false"
                                             aria-labelledby="tooltip-15"
-                                            class="c65 c66 c67"
+                                            class="c67 c68 c69"
                                             data-testid="delete-field"
                                             tabindex="0"
                                             type="button"
@@ -5770,26 +5758,26 @@ exports[`EditSettingsView should add relation 1`] = `
                             </div>
                           </div>
                           <div
-                            class="c53"
+                            class="c55"
                           >
                             <div
                               class=""
                             >
                               <div
-                                class="c54 c68"
+                                class="c56 c70"
                               >
                                 <div
-                                  class="c56 c57 c58"
+                                  class="c58 c59 c60"
                                   width="100%"
                                 >
                                   <span
-                                    class="c59 c54 c60"
+                                    class="c61 c56 c62"
                                     draggable="true"
                                     tabindex="-1"
                                     type="button"
                                   >
                                     <svg
-                                      class="c61"
+                                      class="c63"
                                       fill="none"
                                       height="1em"
                                       viewBox="0 0 24 24"
@@ -5827,26 +5815,26 @@ exports[`EditSettingsView should add relation 1`] = `
                                     </svg>
                                   </span>
                                   <div
-                                    class="c62"
+                                    class="c64"
                                     overflow="hidden"
                                     width="100%"
                                   >
                                     <div
-                                      class="c63 c42"
+                                      class="c65 c44"
                                     >
                                       <span
-                                        class="c64"
+                                        class="c66"
                                       >
                                         city
                                       </span>
                                       <div
-                                        class="c54"
+                                        class="c56"
                                       >
                                         <span>
                                           <button
                                             aria-disabled="false"
                                             aria-labelledby="tooltip-17"
-                                            class="c65 c66 c67"
+                                            class="c67 c68 c69"
                                             tabindex="0"
                                             type="button"
                                           >
@@ -5870,7 +5858,7 @@ exports[`EditSettingsView should add relation 1`] = `
                                           <button
                                             aria-disabled="false"
                                             aria-labelledby="tooltip-19"
-                                            class="c65 c66 c67"
+                                            class="c67 c68 c69"
                                             data-testid="delete-field"
                                             tabindex="0"
                                             type="button"
@@ -5903,7 +5891,7 @@ exports[`EditSettingsView should add relation 1`] = `
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="true"
-                            class="c10 c69"
+                            class="c10 c71"
                             data-testid="add-field"
                             disabled=""
                             label="Insert another field"
@@ -5939,13 +5927,13 @@ exports[`EditSettingsView should add relation 1`] = `
                 </div>
               </div>
               <div
-                class="c70"
+                class="c72"
               >
                 <div
                   class=""
                 >
                   <div
-                    class="c20"
+                    class="c20 c21"
                     spacing="4"
                   >
                     <div>
@@ -5953,7 +5941,7 @@ exports[`EditSettingsView should add relation 1`] = `
                         class=""
                       >
                         <span
-                          class="c43"
+                          class="c45"
                         >
                           Relational fields
                         </span>
@@ -5962,31 +5950,31 @@ exports[`EditSettingsView should add relation 1`] = `
                         class=""
                       >
                         <span
-                          class="c44"
+                          class="c46"
                         >
                           Drag & drop the fields to build the layout
                         </span>
                       </div>
                     </div>
                     <div
-                      class="c51"
+                      class="c53"
                     >
                       <div
-                        class="c52"
+                        class="c20 c54"
                         spacing="2"
                       >
                         <div
-                          class="c56 c57 c71"
+                          class="c58 c59 c73"
                           width="100%"
                         >
                           <span
-                            class="c59 c54 c72"
+                            class="c61 c56 c74"
                             draggable="true"
                             tabindex="-1"
                             type="button"
                           >
                             <svg
-                              class="c73"
+                              class="c75"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 24"
@@ -6024,26 +6012,26 @@ exports[`EditSettingsView should add relation 1`] = `
                             </svg>
                           </span>
                           <div
-                            class="c62"
+                            class="c64"
                             overflow="hidden"
                             width="100%"
                           >
                             <div
-                              class="c63 c42"
+                              class="c65 c44"
                             >
                               <span
-                                class="c64"
+                                class="c66"
                               >
                                 categories
                               </span>
                               <div
-                                class="c54"
+                                class="c56"
                               >
                                 <span>
                                   <button
                                     aria-disabled="false"
                                     aria-labelledby="tooltip-21"
-                                    class="c65 c66 c67"
+                                    class="c67 c68 c69"
                                     tabindex="0"
                                     type="button"
                                   >
@@ -6067,7 +6055,7 @@ exports[`EditSettingsView should add relation 1`] = `
                                   <button
                                     aria-disabled="false"
                                     aria-labelledby="tooltip-23"
-                                    class="c65 c66 c67"
+                                    class="c67 c68 c69"
                                     data-testid="delete-field"
                                     tabindex="0"
                                     type="button"
@@ -6096,7 +6084,7 @@ exports[`EditSettingsView should add relation 1`] = `
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="true"
-                            class="c10 c69"
+                            class="c10 c71"
                             data-testid="add-relation"
                             disabled=""
                             label="Insert another relational field"
@@ -6138,7 +6126,7 @@ exports[`EditSettingsView should add relation 1`] = `
     </form>
   </main>
   <div
-    class="c74"
+    class="c76"
   >
     <p
       aria-live="polite"
@@ -6163,12 +6151,12 @@ exports[`EditSettingsView should add relation 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c75 c76"
+      class="c77 c78"
       id="tooltip-13"
       role="tooltip"
     >
       <p
-        class="c77"
+        class="c79"
       >
         Edit postal_code
       </p>
@@ -6178,12 +6166,12 @@ exports[`EditSettingsView should add relation 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c75 c76"
+      class="c77 c78"
       id="tooltip-15"
       role="tooltip"
     >
       <p
-        class="c77"
+        class="c79"
       >
         Delete postal_code
       </p>
@@ -6193,12 +6181,12 @@ exports[`EditSettingsView should add relation 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c75 c76"
+      class="c77 c78"
       id="tooltip-17"
       role="tooltip"
     >
       <p
-        class="c77"
+        class="c79"
       >
         Edit city
       </p>
@@ -6208,12 +6196,12 @@ exports[`EditSettingsView should add relation 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c75 c76"
+      class="c77 c78"
       id="tooltip-19"
       role="tooltip"
     >
       <p
-        class="c77"
+        class="c79"
       >
         Delete city
       </p>
@@ -6223,12 +6211,12 @@ exports[`EditSettingsView should add relation 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c75 c76"
+      class="c77 c78"
       id="tooltip-21"
       role="tooltip"
     >
       <p
-        class="c77"
+        class="c79"
       >
         Edit categories
       </p>
@@ -6238,12 +6226,12 @@ exports[`EditSettingsView should add relation 1`] = `
     data-react-portal="true"
   >
     <div
-      class="c75 c76"
+      class="c77 c78"
       id="tooltip-23"
       role="tooltip"
     >
       <p
-        class="c77"
+        class="c79"
       >
         Delete categories
       </p>

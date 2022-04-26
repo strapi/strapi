@@ -13,30 +13,8 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c0 {
-  padding-top: 16px;
-}
-
 .c14 {
   padding-left: 8px;
-}
-
-.c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  -webkit-align-items: flex-end;
-  -webkit-box-align: flex-end;
-  -ms-flex-align: flex-end;
-  align-items: flex-end;
 }
 
 .c2 {
@@ -376,6 +354,28 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   line-height: 1.43;
 }
 
+.c0 {
+  padding-top: 16px;
+}
+
+.c1 {
+  -webkit-align-items: flex-end;
+  -webkit-box-align: flex-end;
+  -ms-flex-align: flex-end;
+  align-items: flex-end;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
 <div>
   <div
     class="c0"
@@ -462,7 +462,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-ljMRFG"
+        class="sc-icMgfS"
       >
         <ul
           class="c16 c17"
