@@ -57,7 +57,7 @@ describe('Application page', () => {
     await waitFor(() => expect(screen.getByText('Logo')).toBeInTheDocument());
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c18 {
+      .c19 {
         background: #ffffff;
         padding-top: 24px;
         padding-right: 32px;
@@ -67,11 +67,11 @@ describe('Application page', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c30 {
+      .c31 {
         padding-top: 4px;
       }
 
-      .c43 {
+      .c45 {
         max-width: 40%;
         max-height: 40%;
       }
@@ -156,9 +156,7 @@ describe('Application page', () => {
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
         border: 1px solid #4945ff;
-        background: #4945ff;
       }
 
       .c9 .c10 {
@@ -219,7 +217,7 @@ describe('Application page', () => {
         fill: #ffffff;
       }
 
-      .c46 {
+      .c48 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -233,21 +231,21 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c46 svg {
+      .c48 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c46 svg > g,
-      .c46 svg path {
+      .c48 svg > g,
+      .c48 svg path {
         fill: #ffffff;
       }
 
-      .c46[aria-disabled='true'] {
+      .c48[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c46:after {
+      .c48:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -262,11 +260,11 @@ describe('Application page', () => {
         border: 2px solid transparent;
       }
 
-      .c46:focus-visible {
+      .c48:focus-visible {
         outline: none;
       }
 
-      .c46:focus-visible:after {
+      .c48:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -277,7 +275,7 @@ describe('Application page', () => {
         border: 2px solid #4945ff;
       }
 
-      .c47 {
+      .c49 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -294,30 +292,34 @@ describe('Application page', () => {
         width: 2rem;
       }
 
-      .c47 svg > g,
-      .c47 svg path {
+      .c49 svg > g,
+      .c49 svg path {
         fill: #8e8ea9;
       }
 
-      .c47:hover svg > g,
-      .c47:hover svg path {
+      .c49:hover svg > g,
+      .c49:hover svg path {
         fill: #666687;
       }
 
-      .c47:active svg > g,
-      .c47:active svg path {
+      .c49:active svg > g,
+      .c49:active svg path {
         fill: #a5a5ba;
       }
 
-      .c47[aria-disabled='true'] {
+      .c49[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c47[aria-disabled='true'] svg path {
+      .c49[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
       .c17 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -327,42 +329,32 @@ describe('Application page', () => {
         flex-direction: column;
       }
 
-      .c17 > * {
+      .c18 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c17 > * + * {
+      .c18 > * + * {
         margin-top: 24px;
       }
 
-      .c19 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c19 > * {
+      .c20 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c19 > * + * {
+      .c20 > * + * {
         margin-top: 20px;
       }
 
-      .c20 {
+      .c21 {
         color: #32324d;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
       }
 
-      .c24 {
+      .c25 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -370,7 +362,7 @@ describe('Application page', () => {
         text-transform: uppercase;
       }
 
-      .c25 {
+      .c26 {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -403,6 +395,10 @@ describe('Application page', () => {
       }
 
       .c5 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -414,13 +410,13 @@ describe('Application page', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c6 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -428,10 +424,6 @@ describe('Application page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c7 {
@@ -451,36 +443,36 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c21 {
+      .c22 {
         padding-top: 4px;
       }
 
-      .c31 {
+      .c32 {
         padding-top: 16px;
       }
 
-      .c22 {
+      .c23 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 0px;
       }
 
-      .c23 {
+      .c24 {
         grid-column: span 6;
         max-width: 100%;
       }
 
-      .c27 {
+      .c28 {
         color: #4945ff;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c28 {
+      .c29 {
         padding-left: 8px;
       }
 
-      .c26 {
+      .c27 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -495,15 +487,15 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c26 svg path {
+      .c27 svg path {
         fill: #4945ff;
       }
 
-      .c26 svg {
+      .c27 svg {
         font-size: 0.625rem;
       }
 
-      .c26:after {
+      .c27:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -518,11 +510,11 @@ describe('Application page', () => {
         border: 2px solid transparent;
       }
 
-      .c26:focus-visible {
+      .c27:focus-visible {
         outline: none;
       }
 
-      .c26:focus-visible:after {
+      .c27:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -533,14 +525,14 @@ describe('Application page', () => {
         border: 2px solid #4945ff;
       }
 
-      .c29 {
+      .c30 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
       }
 
-      .c35 {
+      .c37 {
         background: #f6f6f9;
         padding: 8px;
         border-radius: 4px;
@@ -548,40 +540,40 @@ describe('Application page', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c36 {
+      .c38 {
         position: relative;
       }
 
-      .c38 {
+      .c40 {
         padding-right: 8px;
         padding-left: 8px;
         width: 100%;
       }
 
-      .c40 {
+      .c42 {
         height: 124px;
       }
 
-      .c44 {
+      .c46 {
         position: absolute;
         bottom: 4px;
         width: 100%;
       }
 
-      .c48 {
+      .c50 {
         padding-top: 8px;
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c33 {
+      .c35 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c49 {
+      .c51 {
         color: #666687;
         display: block;
         white-space: nowrap;
@@ -591,13 +583,31 @@ describe('Application page', () => {
         line-height: 1.33;
       }
 
-      .c50 {
+      .c52 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c34 {
+      .c33 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c36 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -605,13 +615,13 @@ describe('Application page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c43 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c41 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -623,51 +633,37 @@ describe('Application page', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c37 {
+      .c39 {
         display: grid;
         grid-template-columns: auto 1fr auto;
         grid-template-areas: 'startAction slides endAction';
       }
 
-      .c39 {
+      .c41 {
         grid-area: slides;
       }
 
-      .c32 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c32 > * {
+      .c34 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c32 > * + * {
+      .c34 > * + * {
         margin-top: 4px;
       }
 
-      .c45 > * {
+      .c47 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c45 > * + * {
+      .c47 > * + * {
         margin-left: 4px;
       }
 
-      .c42 {
+      .c44 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -675,13 +671,13 @@ describe('Application page', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c23 {
+        .c24 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c23 {
+        .c24 {
           grid-column: span;
         }
       }
@@ -757,55 +753,55 @@ describe('Application page', () => {
               class="c16"
             >
               <div
-                class="c17"
+                class="c17 c18"
                 spacing="6"
               >
                 <div
-                  class="c18"
+                  class="c19"
                 >
                   <div
-                    class="c19"
+                    class="c17 c20"
                     spacing="5"
                   >
                     <h3
-                      class="c20"
+                      class="c21"
                     >
                       Details
                     </h3>
                     <div
-                      class="c21 c22"
+                      class="c22 c23"
                     >
                       <div
-                        class="c23"
+                        class="c24"
                       >
                         <div
                           class=""
                         >
                           <span
-                            class="c24"
+                            class="c25"
                           >
                             strapi version
                           </span>
                           <p
-                            class="c25"
+                            class="c26"
                           >
                             v
                             4.0.0
                           </p>
                           <a
-                            class="c26"
+                            class="c27"
                             href="https://support.strapi.io/support/home"
                             rel="noreferrer noopener"
                             target="_blank"
                           >
                             <span
-                              class="c27"
+                              class="c28"
                             >
                               Get help
                             </span>
                             <span
                               aria-hidden="true"
-                              class="c28 c29"
+                              class="c29 c30"
                             >
                               <svg
                                 fill="none"
@@ -824,18 +820,18 @@ describe('Application page', () => {
                         </div>
                       </div>
                       <div
-                        class="c23"
+                        class="c24"
                       >
                         <div
                           class=""
                         >
                           <span
-                            class="c24"
+                            class="c25"
                           >
                             current plan
                           </span>
                           <p
-                            class="c25"
+                            class="c26"
                           >
                             Enterprise Edition
                           </p>
@@ -843,28 +839,28 @@ describe('Application page', () => {
                       </div>
                     </div>
                     <div
-                      class="c21 c22"
+                      class="c22 c23"
                     >
                       <div
-                        class="c23"
+                        class="c24"
                       >
                         <div
                           class=""
                         >
                           <a
-                            class="c26"
+                            class="c27"
                             href="https://github.com/strapi/strapi/releases/tag/v3.6.8"
                             rel="noreferrer noopener"
                             target="_blank"
                           >
                             <span
-                              class="c27"
+                              class="c28"
                             >
                               Upgrade your admin panel
                             </span>
                             <span
                               aria-hidden="true"
-                              class="c28 c29"
+                              class="c29 c30"
                             >
                               <svg
                                 fill="none"
@@ -883,25 +879,25 @@ describe('Application page', () => {
                         </div>
                       </div>
                       <div
-                        class="c23"
+                        class="c24"
                       >
                         <div
                           class=""
                         >
                           <a
-                            class="c26"
+                            class="c27"
                             href="https://strapi.io/pricing-self-hosted"
                             rel="noreferrer noopener"
                             target="_blank"
                           >
                             <span
-                              class="c27"
+                              class="c28"
                             >
                               See all pricing plans
                             </span>
                             <span
                               aria-hidden="true"
-                              class="c28 c29"
+                              class="c29 c30"
                             >
                               <svg
                                 fill="none"
@@ -921,48 +917,48 @@ describe('Application page', () => {
                       </div>
                     </div>
                     <div
-                      class="c30"
+                      class="c31"
                     >
                       <span
-                        class="c24"
+                        class="c25"
                       >
                         node version
                       </span>
                       <p
-                        class="c25"
+                        class="c26"
                       />
                     </div>
                   </div>
                 </div>
                 <div>
                   <div
-                    class="c18"
+                    class="c19"
                   >
                     <h3
-                      class="c20"
+                      class="c21"
                     >
                       Customization
                     </h3>
                     <div
-                      class="c31 c22"
+                      class="c32 c23"
                     >
                       <div
-                        class="c23"
+                        class="c24"
                       >
                         <div
                           class=""
                         >
                           <div>
                             <div
-                              class="c32"
+                              class="c33 c34"
                               spacing="1"
                             >
                               <label
-                                class="c33"
+                                class="c35"
                                 for="carouselinput-1"
                               >
                                 <div
-                                  class="c34"
+                                  class="c36"
                                 >
                                   Logo
                                 </div>
@@ -972,34 +968,34 @@ describe('Application page', () => {
                                 id="carouselinput-1"
                               >
                                 <div
-                                  class="c35"
+                                  class="c37"
                                 >
                                   <section
                                     aria-label="Logo"
                                     aria-roledescription="carousel"
-                                    class="c36 c37"
+                                    class="c38 c39"
                                   >
                                     <div
                                       aria-live="polite"
-                                      class="c38 c39"
+                                      class="c40 c41"
                                       width="100%"
                                     >
                                       <div
                                         aria-label="Logo slide"
                                         aria-roledescription="slide"
-                                        class="c40 c41 c42"
+                                        class="c42 c43 c44"
                                         height="124px"
                                         role="group"
                                       >
                                         <img
                                           alt="Logo"
-                                          class="c43"
+                                          class="c45"
                                           src="http://localhost:1337/uploads/michka.svg"
                                         />
                                       </div>
                                     </div>
                                     <div
-                                      class="c44 c41 c45"
+                                      class="c46 c43 c47"
                                       spacing="1"
                                       width="100%"
                                     >
@@ -1007,7 +1003,7 @@ describe('Application page', () => {
                                         <button
                                           aria-disabled="false"
                                           aria-labelledby="tooltip-1"
-                                          class="c46 c47"
+                                          class="c48 c49"
                                           tabindex="0"
                                           type="button"
                                         >
@@ -1029,7 +1025,7 @@ describe('Application page', () => {
                                         <button
                                           aria-disabled="false"
                                           aria-labelledby="tooltip-3"
-                                          class="c46 c47"
+                                          class="c48 c49"
                                           tabindex="0"
                                           type="button"
                                         >
@@ -1052,16 +1048,16 @@ describe('Application page', () => {
                                     </div>
                                   </section>
                                   <div
-                                    class="c48"
+                                    class="c50"
                                   >
                                     <span>
                                       <div
                                         aria-labelledby="tooltip-2"
-                                        class="c41"
+                                        class="c43"
                                         tabindex="0"
                                       >
                                         <span
-                                          class="c49"
+                                          class="c51"
                                         >
                                           michka.svg
                                         </span>
@@ -1071,7 +1067,7 @@ describe('Application page', () => {
                                 </div>
                               </div>
                               <p
-                                class="c50"
+                                class="c52"
                                 id="carouselinput-1-hint"
                               >
                                 Change the admin panel logo (Max dimension: 750*750, Max file size: 100KB)
