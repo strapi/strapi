@@ -1070,7 +1070,7 @@ describe('Application page', () => {
                                 class="c52"
                                 id="carouselinput-1-hint"
                               >
-                                Change the admin panel logo (Max dimension: 750*750, Max file size: 100KB)
+                                Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
                               </p>
                             </div>
                           </div>

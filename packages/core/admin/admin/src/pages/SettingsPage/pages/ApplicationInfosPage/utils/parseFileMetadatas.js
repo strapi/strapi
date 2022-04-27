@@ -8,7 +8,7 @@ const FILE_FORMAT_ERROR_MESSAGE = {
 const FILE_SIZING_ERROR_MESSAGE = {
   id: 'Settings.application.customization.modal.upload.error-size',
   defaultMessage:
-    'The file uploaded is too large (max dimension: {dimension}*{dimension}, max file size: {size}KB)',
+    'The file uploaded is too large (max dimension: {dimension}x{dimension}, max file size: {size}KB)',
 };
 
 const getFileDimensions = file => {

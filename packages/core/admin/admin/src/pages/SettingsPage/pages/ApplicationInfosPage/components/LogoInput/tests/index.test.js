@@ -92,7 +92,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       await waitFor(() =>
         expect(
           screen.getByText(
-            'The file uploaded is too large (max dimension: 750*750, max file size: 100KB)'
+            'The file uploaded is too large (max dimension: 750x750, max file size: 100KB)'
           )
         ).toBeInTheDocument()
       );
@@ -116,7 +116,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       await waitFor(() =>
         expect(
           screen.getByText(
-            'The file uploaded is too large (max dimension: 750*750, max file size: 100KB)'
+            'The file uploaded is too large (max dimension: 750x750, max file size: 100KB)'
           )
         ).toBeInTheDocument()
       );
@@ -179,7 +179,9 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       const textInput = document.querySelector('input[name="logo-url"]');
 
       fireEvent.change(textInput, {
-        target: { value: 'https://thumbs.gfycat.com/AlertWarlikeBuzzard-size_restricted.gif' },
+        target: {
+          value: 'https://docs.strapi.io/assets/img/qsg-handson-restaurant_2.28faf048.gif',
+        },
       });
 
       fireEvent.click(screen.getByText('Next'));
@@ -202,7 +204,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       fireEvent.change(textInput, {
         target: {
           value:
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg',
+            'https://docs.strapi.io/assets/img/qsg-handson-part1-01-admin_panel_2.a1602906.png',
         },
       });
 
@@ -211,7 +213,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       await waitFor(() =>
         expect(
           screen.getByText(
-            'The file uploaded is too large (max dimension: 750*750, max file size: 100KB)'
+            'The file uploaded is too large (max dimension: 750x750, max file size: 100KB)'
           )
         ).toBeInTheDocument()
       );
@@ -228,7 +230,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       fireEvent.change(textInput, {
         target: {
           value:
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg',
+            'https://docs.strapi.io/assets/img/qsg-handson-part1-01-admin_panel_2.a1602906.png',
         },
       });
 
@@ -237,7 +239,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       await waitFor(() =>
         expect(
           screen.getByText(
-            'The file uploaded is too large (max dimension: 750*750, max file size: 100KB)'
+            'The file uploaded is too large (max dimension: 750x750, max file size: 100KB)'
           )
         ).toBeInTheDocument()
       );

@@ -35,12 +35,12 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) =
           {
             id: 'Settings.application.customization.carousel-hint',
             defaultMessage:
-              'Change the admin panel logo (Max dimension: {dimension}*{dimension}, Max file size: {size}KB)',
+              'Change the admin panel logo (Max dimension: {dimension}x{dimension}, Max file size: {size}KB)',
           },
           { size: SIZE, dimension: DIMENSION }
         )}
-        previousLabel="Previous slide"
-        nextLabel="Next slide"
+        previousLabel=""
+        nextLabel=""
         onNext={() => {}}
         onPrevious={() => {}}
         secondaryLabel={customLogo?.name || 'logo.png'}

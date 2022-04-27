@@ -356,7 +356,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
           class="c19"
           id="carouselinput-4-hint"
         >
-          Change the admin panel logo (Max dimension: 750*750, Max file size: 100KB)
+          Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
         </p>
       </div>
     </div>
@@ -1166,7 +1166,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
                               <span
                                 class="c33"
                               >
-                                Max dimension: 750*750, Max size: 100KB
+                                Max dimension: 750x750, Max size: 100KB
                               </span>
                             </div>
                           </div>
@@ -1567,7 +1567,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
           class="c19"
           id="carouselinput-49-hint"
         >
-          Change the admin panel logo (Max dimension: 750*750, Max file size: 100KB)
+          Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
         </p>
       </div>
     </div>
@@ -2815,7 +2815,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
           class="c19"
           id="carouselinput-1-hint"
         >
-          Change the admin panel logo (Max dimension: 750*750, Max file size: 100KB)
+          Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
         </p>
       </div>
     </div>

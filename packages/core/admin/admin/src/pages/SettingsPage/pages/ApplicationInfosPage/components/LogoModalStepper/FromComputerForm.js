@@ -135,7 +135,7 @@ const FromComputerForm = ({ setLocalImage, goTo, next, onClose }) => {
                         {
                           id: 'Settings.application.customization.modal.upload.file-validation',
                           defaultMessage:
-                            'Max dimension: {dimension}*{dimension}, Max size: {size}KB',
+                            'Max dimension: {dimension}x{dimension}, Max size: {size}KB',
                         },
                         { size: SIZE, dimension: DIMENSION }
                       )}
