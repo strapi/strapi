@@ -127,7 +127,7 @@
     "resolve-cwd": "3.0.0",
     "semver": "7.3.5",
     "statuses": "2.0.1",
-    "uuid": "^3.3.2"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "supertest": "^6.1.6"
