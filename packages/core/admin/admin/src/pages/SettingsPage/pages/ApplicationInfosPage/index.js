@@ -7,6 +7,7 @@ import {
   useFocusWhenNavigate,
   CheckPermissions,
   useNotification,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -28,6 +29,7 @@ const permissions = [{ action: 'admin::project-settings.update', subject: null }
 const ApplicationInfosPage = () => {
   const inputsRef = useRef();
   const toggleNotification = useNotification();
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
   useFocusWhenNavigate();
@@ -49,10 +51,17 @@ const ApplicationInfosPage = () => {
   });
 
   const handleSubmit = () => {
-    const data = inputsRef.current.getValues();
-    const formData = getFormData(data);
+    const inputValues = inputsRef.current.getValues();
+    const formData = getFormData(inputValues);
 
     submitMutation.mutate(formData, {
+      onSuccess: () => {
+        const { menuLogo } = inputValues;
+
+        if (menuLogo.rawFile) {
+          trackUsage('didChangeLogo');
+        }
+      },
       onError: () => {
         toggleNotification({
           type: 'warning',
