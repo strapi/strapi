@@ -11,26 +11,43 @@ import {
   ModalBody,
   ModalFooter,
 } from '@strapi/design-system/ModalLayout';
+import { FieldLabel } from '@strapi/design-system/Field';
+import { Stack } from '@strapi/design-system/Stack';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Form } from '@strapi/helper-plugin';
+import { Form, useNotification } from '@strapi/helper-plugin';
 
 import { getTrad } from '../../utils';
 import { useEditFolder } from '../../hooks/useEditFolder';
+import SelectTree from '../SelectTree';
 
 const folderSchema = yup.object({
   name: yup.string().required(),
-  parent: yup.string(),
+  parent: yup
+    .object({
+      label: yup.string(),
+      value: yup.number().nullable(true),
+    })
+    .nullable(true),
 });
 
 export const EditFolderDialog = ({ onClose, folder }) => {
   const submitButtonRef = useRef(null);
   const { formatMessage } = useIntl();
   const { editFolder, isLoading } = useEditFolder();
+  const toggleNotification = useNotification();
 
   const initialFormData = {
     ...folder,
+    parent: {
+      value: null,
+      label: formatMessage({
+        id: getTrad('form.input.label.folder-location-default-label'),
+        defaultMessage: 'Media Library',
+      }),
+      ...folder?.parent,
+    },
   };
 
   const handleSubmit = async (values, { setErrors }) => {
@@ -38,7 +55,15 @@ export const EditFolderDialog = ({ onClose, folder }) => {
       await editFolder({
         ...folder,
         ...values,
-        parent: values.parent ?? null,
+        parent: values.parent.value ?? null,
+      });
+
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: getTrad('modal.folder-notification-success'),
+          defaultMessage: 'Folder successfully created',
+        }),
       });
 
       onClose();
@@ -84,14 +109,14 @@ export const EditFolderDialog = ({ onClose, folder }) => {
           onSubmit={handleSubmit}
           initialValues={initialFormData}
         >
-          {({ values, errors, handleChange }) => (
+          {({ values, errors, handleChange, setFieldValue }) => (
             <Form noValidate>
               <Grid gap={4}>
                 <GridItem xs={12} col={6}>
                   <TextInput
                     label={formatMessage({
                       id: getTrad('form.input.label.folder-name'),
-                      defaultMessage: 'Folder name',
+                      defaultMessage: 'Name',
                     })}
                     name="name"
                     value={values.name}
@@ -101,16 +126,23 @@ export const EditFolderDialog = ({ onClose, folder }) => {
                 </GridItem>
 
                 <GridItem xs={12} col={6}>
-                  <TextInput
-                    label={formatMessage({
-                      id: getTrad('form.input.label.folder-location'),
-                      defaultMessage: 'Folder location',
-                    })}
-                    name="parent"
-                    value={values.parent}
-                    error={errors.parent}
-                    onChange={handleChange}
-                  />
+                  <Stack spacing={1}>
+                    <FieldLabel>
+                      {formatMessage({
+                        id: getTrad('form.input.label.folder-location'),
+                        defaultMessage: 'Location',
+                      })}
+                    </FieldLabel>
+
+                    <SelectTree
+                      options={[]}
+                      onChange={value => {
+                        setFieldValue('parent', value);
+                      }}
+                      defaultValue={values.parent}
+                      name="parent"
+                    />
+                  </Stack>
                 </GridItem>
               </Grid>
 
