@@ -2,7 +2,7 @@
 
 const { getService } = require('../utils');
 const { ACTIONS } = require('../constants');
-const findEntityAndCheckPermissions = require('./utils/find-entity-and-check-permissions');
+const { findEntityAndCheckPermissions } = require('./utils/find-entity-and-check-permissions');
 
 const fileModel = 'plugin::upload.file';
 
@@ -58,8 +58,11 @@ module.exports = {
       id
     );
 
-    await getService('upload').remove(file);
+    const [body] = await Promise.all([
+      pm.sanitizeOutput(file, { action: ACTIONS.read }),
+      getService('upload').remove(file),
+    ]);
 
-    ctx.body = await pm.sanitizeOutput(file, { action: ACTIONS.read });
+    ctx.body = body;
   },
 };

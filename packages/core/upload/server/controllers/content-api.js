@@ -1,18 +1,25 @@
 'use strict';
 
 const _ = require('lodash');
+const { omit, isArray, isPlainObject } = require('lodash/fp');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
-const validateUploadBody = require('./validation/upload');
+const validateUploadBody = require('./validation/content-api/upload');
 
 const { sanitize } = utils;
 const { ValidationError } = utils.errors;
+
+const removeFolderPath = data => {
+  if (isArray(data)) return data.map(omit('folderPath'));
+  if (isPlainObject(data)) return omit('folderPath', data);
+  return data;
+};
 
 const sanitizeOutput = (data, ctx) => {
   const schema = strapi.getModel('plugin::upload.file');
   const { auth } = ctx.state;
 
-  return sanitize.contentAPI.output(data, schema, { auth });
+  return sanitize.contentAPI.output(removeFolderPath(data), schema, { auth });
 };
 
 module.exports = {

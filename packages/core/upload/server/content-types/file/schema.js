@@ -95,7 +95,7 @@ module.exports = {
       target: 'plugin::upload.folder',
       inversedBy: 'files',
     },
-    path: {
+    folderPath: {
       type: 'string',
       min: 1,
       required: true,

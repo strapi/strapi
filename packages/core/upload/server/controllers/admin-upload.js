@@ -4,8 +4,8 @@ const _ = require('lodash');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const { ACTIONS } = require('../constants');
-const validateUploadBody = require('./validation/upload');
-const findEntityAndCheckPermissions = require('./utils/find-entity-and-check-permissions');
+const validateUploadBody = require('./validation/admin/upload');
+const { findEntityAndCheckPermissions } = require('./utils/find-entity-and-check-permissions');
 
 const fileModel = 'plugin::upload.file';
 
@@ -75,11 +75,11 @@ module.exports = {
       request: { files: { files } = {} },
     } = ctx;
 
-    if (id && (_.isEmpty(files) || files.size === 0)) {
-      return this.updateFileInfo(ctx);
-    }
-
     if (_.isEmpty(files) || files.size === 0) {
+      if (id) {
+        return this.updateFileInfo(ctx);
+      }
+
       throw new ApplicationError('Files are empty');
     }
 

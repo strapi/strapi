@@ -1,9 +1,8 @@
 'use strict';
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
-const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
-const { validateCreateFolder } = require('./validation/folder');
+const { validateCreateFolder, validateDeleteManyFolders } = require('./validation/admin/folder');
 
 const folderModel = 'plugin::upload.folder';
 
@@ -40,17 +39,6 @@ module.exports = {
 
     await validateCreateFolder(body);
 
-    const existingFolders = await strapi.entityService.findMany(folderModel, {
-      filters: {
-        parent: body.parent,
-        name: body.name,
-      },
-    });
-
-    if (existingFolders.length > 0) {
-      throw new ApplicationError('name already taken');
-    }
-
     const { setPathAndUID } = getService('folder');
 
     // TODO: wrap with a transaction
@@ -69,6 +57,20 @@ module.exports = {
 
     ctx.body = {
       data: await permissionsManager.sanitizeOutput(folder),
+    };
+  },
+  // deleteMany WIP
+  async deleteMany(ctx) {
+    const { body } = ctx.request;
+
+    await validateDeleteManyFolders(body);
+
+    const { deleteByIds } = getService('folder');
+
+    const deletedFolders = await deleteByIds(body.ids);
+
+    ctx.body = {
+      data: deletedFolders,
     };
   },
 };

@@ -11,10 +11,13 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useTracking, useAppInfos } from '@strapi/helper-plugin';
+import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
 
 const toggleNotification = jest.fn();
+
+jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -85,6 +88,10 @@ describe('Marketplace page', () => {
 
       .c53 {
         padding-left: 16px;
+      }
+
+      .c56 {
+        padding-top: 32px;
       }
 
       .c49 {
@@ -167,7 +174,7 @@ describe('Marketplace page', () => {
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
+        border: 1px solid #4945ff;
         border: 1px solid #d9d8ff;
         background: #f0f0ff;
       }
@@ -253,7 +260,24 @@ describe('Marketplace page', () => {
         height: 100%;
       }
 
+      .c57 {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c58 {
+        background: #f6ecfc;
+        padding: 12px;
+        border-radius: 4px;
+      }
+
       .c31 {
+        -webkit-align-items: normal;
+        -webkit-box-align: normal;
+        -ms-flex-align: normal;
+        align-items: normal;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -265,13 +289,13 @@ describe('Marketplace page', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: normal;
-        -webkit-box-align: normal;
-        -ms-flex-align: normal;
-        align-items: normal;
       }
 
       .c35 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -279,10 +303,6 @@ describe('Marketplace page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c50 {
@@ -297,8 +317,19 @@ describe('Marketplace page', () => {
         height: 12;
       }
 
+      .c64 {
+        color: #666687;
+        margin-left: 8px;
+        width: 12px;
+        height: 12px;
+      }
+
       .c51 path {
         fill: #328048;
+      }
+
+      .c65 path {
+        fill: #666687;
       }
 
       .c24 {
@@ -307,6 +338,10 @@ describe('Marketplace page', () => {
       }
 
       .c20 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -314,13 +349,13 @@ describe('Marketplace page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c22 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c22 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -332,10 +367,6 @@ describe('Marketplace page', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c19 {
@@ -348,8 +379,10 @@ describe('Marketplace page', () => {
       .c27 {
         border: none;
         border-radius: 4px;
+        padding-bottom: 0.65625rem;
         padding-left: 0;
         padding-right: 16px;
+        padding-top: 0.65625rem;
         color: #32324d;
         font-weight: 400;
         font-size: 0.875rem;
@@ -391,7 +424,6 @@ describe('Marketplace page', () => {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
-        height: 2.5rem;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -454,6 +486,10 @@ describe('Marketplace page', () => {
       }
 
       .c40 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -461,10 +497,25 @@ describe('Marketplace page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+      }
+
+      .c60 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c61 > * {
+        margin-top: 0;
+        margin-bottom: 0;
       }
 
       .c41 > * {
@@ -494,6 +545,26 @@ describe('Marketplace page', () => {
         color: #328048;
         font-size: 0.875rem;
         line-height: 1.43;
+      }
+
+      .c62 {
+        font-weight: 500;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c59 {
+        margin-right: 24px;
+      }
+
+      .c59 svg {
+        width: 2rem;
+        height: 2rem;
+      }
+
+      .c63 {
+        word-break: break-all;
       }
 
       .c28 {
@@ -534,6 +605,10 @@ describe('Marketplace page', () => {
       }
 
       .c5 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -545,13 +620,13 @@ describe('Marketplace page', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c6 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -559,10 +634,6 @@ describe('Marketplace page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c7 {
@@ -658,7 +729,7 @@ describe('Marketplace page', () => {
       .c9 {
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
+        border: 1px solid #4945ff;
         border-radius: 4px;
         border: 1px solid #dcdce4;
         background: #ffffff;
@@ -1496,6 +1567,74 @@ describe('Marketplace page', () => {
                   </div>
                 </div>
               </div>
+              <div
+                class="c56"
+              >
+                <a
+                  href="https://strapi.canny.io/plugin-requests"
+                  rel="noopener noreferrer nofollow"
+                  style="text-decoration: none;"
+                  target="_blank"
+                >
+                  <div
+                    class="c57 c35"
+                  >
+                    <div
+                      class="c58 c35 c59"
+                    >
+                      <svg
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 32 32"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M0 4a4 4 0 014-4h24a4 4 0 014 4v24a4 4 0 01-4 4H4a4 4 0 01-4-4V4z"
+                          fill="#AC73E6"
+                        />
+                        <path
+                          clip-rule="evenodd"
+                          d="M15.027 13.839c-3.19-.836-6.305-1.064-10.18-.608-1.215.152-1.063 1.975.076 2.203.304.836.456 2.355.912 3.267.987 2.279 5.622 1.975 7.369.835 1.14-.683 1.443-2.279 1.9-3.494.227-.684 1.595-.684 1.822 0 .38 1.215.76 2.81 1.9 3.494 1.747 1.14 6.381 1.444 7.369-.835.456-.912.607-2.431.911-3.267 1.14-.228 1.216-2.051.076-2.203-3.874-.456-6.989-.228-10.18.608-.455.075-1.519.075-1.975 0z"
+                          fill="#fff"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div
+                      class="c60 c61"
+                    >
+                      <div
+                        class="c35"
+                      >
+                        <span
+                          class="c62 c63"
+                        >
+                          Documentation
+                        </span>
+                        <svg
+                          class="c64 c65"
+                          fill="none"
+                          height="3"
+                          viewBox="0 0 24 24"
+                          width="3"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                            fill="#32324D"
+                          />
+                        </svg>
+                      </div>
+                      <span
+                        class="c37"
+                      >
+                        Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              </div>
             </div>
           </main>
         </div>
@@ -1515,8 +1654,8 @@ describe('Marketplace page', () => {
   it('should return search results matching the query', async () => {
     const { container } = render(App);
     const input = await getByPlaceholderText(container, 'Search for a plugin');
-    fireEvent.change(input, { target: { value: 'documentation' } });
-    const match = screen.getByText('Documentation');
+    fireEvent.change(input, { target: { value: 'comment' } });
+    const match = screen.getByText('Comments');
     const notMatch = screen.queryByText('Sentry');
 
     expect(match).toBeVisible();
@@ -1533,7 +1672,7 @@ describe('Marketplace page', () => {
     expect(noResult).toBeVisible();
   });
 
-  it('handles production environment', async () => {
+  it('handles production environment', () => {
     // Simulate production environment
     useAppInfos.mockImplementation(() => ({ autoReload: false }));
     const { queryByText } = render(App);
@@ -1547,9 +1686,25 @@ describe('Marketplace page', () => {
       },
       blockTransition: true,
     });
+
     expect(toggleNotification).toHaveBeenCalledTimes(1);
 
     // Should not show install buttons
     expect(queryByText(/copy install command/i)).not.toBeInTheDocument();
+  });
+
+  it('shows an online layout', () => {
+    render(App);
+    const offlineText = screen.queryByText('You are offline');
+
+    expect(offlineText).toEqual(null);
+  });
+
+  it('shows the offline layout', () => {
+    useNavigatorOnLine.mockReturnValueOnce(false);
+    render(App);
+    const offlineText = screen.getByText('You are offline');
+
+    expect(offlineText).toBeVisible();
   });
 });

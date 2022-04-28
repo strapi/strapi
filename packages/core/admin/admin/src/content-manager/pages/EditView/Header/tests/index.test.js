@@ -122,12 +122,10 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
         border: 1px solid #4945ff;
-        background: #4945ff;
       }
 
-      .c12 .sc-dwFVFH {
+      .c12 .sc-ezHhwS {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -186,6 +184,10 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       }
 
       .c9 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -193,10 +195,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c10 > * {
@@ -221,6 +219,10 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       }
 
       .c6 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -232,13 +234,13 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c7 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -246,10 +248,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c8 {

@@ -13,20 +13,24 @@ import {
   useAppInfos,
 } from '@strapi/helper-plugin';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Searchbar } from '@strapi/design-system/Searchbar';
 import { Box } from '@strapi/design-system/Box';
-import { LinkButton } from '@strapi/design-system/LinkButton';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
-import Upload from '@strapi/icons/Upload';
+import { Typography } from '@strapi/design-system/Typography';
+import { Flex } from '@strapi/design-system/Flex';
 
 import PluginCard from './components/PluginCard';
 import { EmptyPluginSearch } from './components/EmptyPluginSearch';
+import PageHeader from './components/PageHeader';
 import { fetchAppInformation } from './utils/api';
 import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 import adminPermissions from '../../permissions';
+import offlineCloud from '../../assets/images/icon_offline-cloud.svg';
+import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
+import MissingPluginBanner from './components/MissingPluginBanner';
 
 const matchSearch = (plugins, search) => {
   return matchSorter(plugins, search, {
@@ -48,6 +52,7 @@ const MarketPlacePage = () => {
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
   const { autoReload: isInDevelopmentMode } = useAppInfos();
+  const isOnline = useNavigatorOnLine();
 
   useFocusWhenNavigate();
 
@@ -116,6 +121,42 @@ const MarketPlacePage = () => {
     }
   }, [toggleNotification, isInDevelopmentMode]);
 
+  if (!isOnline) {
+    return (
+      <Layout>
+        <Main>
+          <PageHeader isOnline={isOnline} />
+          <Flex
+            width="100%"
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            style={{ paddingTop: '120px' }}
+          >
+            <Box paddingBottom={2}>
+              <Typography textColor="neutral700" variant="alpha">
+                {formatMessage({
+                  id: 'admin.pages.MarketPlacePage.offline.title',
+                  defaultMessage: 'You are offline',
+                })}
+              </Typography>
+            </Box>
+            <Box paddingBottom={6}>
+              <Typography textColor="neutral700" variant="epsilon">
+                {formatMessage({
+                  id: 'admin.pages.MarketPlacePage.offline.subtitle',
+                  defaultMessage:
+                    'You need to be connected to the Internet to access Strapi Market.',
+                })}
+              </Typography>
+            </Box>
+            <img src={offlineCloud} alt="offline" style={{ width: '88px', height: '88px' }} />
+          </Flex>
+        </Main>
+      </Layout>
+    );
+  }
+
   if (hasFailed) {
     return (
       <Layout>
@@ -150,29 +191,7 @@ const MarketPlacePage = () => {
             defaultMessage: 'Marketplace - Plugins',
           })}
         />
-        <HeaderLayout
-          title={formatMessage({
-            id: 'global.marketplace',
-            defaultMessage: 'Marketplace',
-          })}
-          subtitle={formatMessage({
-            id: 'admin.pages.MarketPlacePage.subtitle',
-            defaultMessage: 'Get more out of Strapi',
-          })}
-          primaryAction={
-            <LinkButton
-              startIcon={<Upload />}
-              variant="tertiary"
-              href="https://market.strapi.io/submit-plugin"
-              onClick={() => trackUsage('didSubmitPlugin')}
-            >
-              {formatMessage({
-                id: 'admin.pages.MarketPlacePage.submit.plugin.link',
-                defaultMessage: 'Submit your plugin',
-              })}
-            </LinkButton>
-          }
-        />
+        <PageHeader isOnline={isOnline} />
         <ContentLayout>
           <Box width="25%" paddingBottom={4}>
             <Searchbar
@@ -219,6 +238,9 @@ const MarketPlacePage = () => {
               ))}
             </Grid>
           )}
+          <Box paddingTop={7}>
+            <MissingPluginBanner />
+          </Box>
         </ContentLayout>
       </Main>
     </Layout>

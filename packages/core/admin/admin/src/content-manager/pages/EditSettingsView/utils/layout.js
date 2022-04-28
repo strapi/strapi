@@ -28,7 +28,13 @@ const formatLayout = arr => {
 
         return acc2;
       }, []);
-      const rowId = acc.length === 0 ? 0 : Math.max.apply(Math, acc.map(o => o.rowId)) + 1;
+      const rowId =
+        acc.length === 0
+          ? 0
+          : Math.max.apply(
+              Math,
+              acc.map(o => o.rowId)
+            ) + 1;
 
       const currentRowSize = getRowSize(currentRow);
 

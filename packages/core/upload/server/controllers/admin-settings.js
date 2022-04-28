@@ -2,7 +2,7 @@
 
 const { getService } = require('../utils');
 const { ACTIONS } = require('../constants');
-const validateSettings = require('./validation/settings');
+const validateSettings = require('./validation/admin/settings');
 
 const fileModel = 'plugin::upload.file';
 
