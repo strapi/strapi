@@ -210,6 +210,7 @@ export const MediaLibrary = () => {
         <UploadAssetDialog onClose={toggleUploadAssetDialog} trackedLocation="upload" />
       )}
 
+      {/* TODO: After the folder was created successfully, we need to set the current page to 1 */}
       {showEditFolderDialog && <EditFolderDialog onClose={toggleEditFolderDialog} />}
 
       {assetToEdit && (

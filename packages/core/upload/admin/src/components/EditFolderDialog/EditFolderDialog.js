@@ -20,6 +20,7 @@ import { Form, useNotification } from '@strapi/helper-plugin';
 
 import { getTrad } from '../../utils';
 import { useEditFolder } from '../../hooks/useEditFolder';
+import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
 
 const folderSchema = yup.object({
@@ -112,6 +113,30 @@ export const EditFolderDialog = ({ onClose, folder }) => {
           {({ values, errors, handleChange, setFieldValue }) => (
             <Form noValidate>
               <Grid gap={4}>
+                {folder && (
+                  <GridItem xs={12} col={12}>
+                    <ContextInfo
+                      blocks={[
+                        {
+                          label: formatMessage({
+                            id: getTrad('modal.folder.create.elements'),
+                            defaultMessage: 'Elements',
+                          }),
+                          value: folder.children.length,
+                        },
+
+                        {
+                          label: formatMessage({
+                            id: getTrad('modal.folder.create.creation-date'),
+                            defaultMessage: 'Creation Date',
+                          }),
+                          value: folder.createdAt,
+                        },
+                      ]}
+                    />
+                  </GridItem>
+                )}
+
                 <GridItem xs={12} col={6}>
                   <TextInput
                     label={formatMessage({
@@ -179,6 +204,8 @@ EditFolderDialog.defaultProps = {
 EditFolderDialog.propTypes = {
   folder: PropTypes.shape({
     name: PropTypes.string.isRequired,
+    children: PropTypes.array.isRequired,
+    createdAt: PropTypes.string.isRequired,
     parent: PropTypes.number,
   }),
   onClose: PropTypes.func.isRequired,
