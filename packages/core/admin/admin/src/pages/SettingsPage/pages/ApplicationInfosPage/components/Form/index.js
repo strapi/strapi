@@ -1,6 +1,7 @@
 import React, { useReducer, forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { useTracking } from '@strapi/helper-plugin';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
@@ -11,6 +12,7 @@ import init from './init';
 
 const Form = forwardRef(({ projectSettingsStored }, ref) => {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const {
     logos: { menu },
   } = useConfigurations();
@@ -26,6 +28,8 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
   };
 
   const handleResetMenuLogo = () => {
+    trackUsage('didClickResetLogo');
+
     dispatch({
       type: 'RESET_CUSTOM_MENU_LOGO',
     });
