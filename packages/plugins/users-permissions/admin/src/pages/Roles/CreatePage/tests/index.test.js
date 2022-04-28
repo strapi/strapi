@@ -791,7 +791,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c41:hover:not([aria-disabled='true']) .sc-fUCuFg {
+      .c41:hover:not([aria-disabled='true']) .sc-dSaQTq {
         color: #271fe0;
       }
 
