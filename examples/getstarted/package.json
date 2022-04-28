@@ -29,7 +29,7 @@
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.6.0",
-    "sqlite3": "5.0.2"
+    "sqlite3": "5.0.6"
   },
   "strapi": {
     "uuid": "getstarted"
