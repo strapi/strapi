@@ -71,10 +71,7 @@ async function copyAdmin(dest) {
 async function createCacheDir({ appDir, plugins }) {
   const cacheDir = path.resolve(appDir, '.cache');
 
-  const useTypeScript = await isUsingTypeScript(
-    path.join(appDir, 'src', 'admin'),
-    'tsconfig.json'
-  );
+  const useTypeScript = await isUsingTypeScript(path.join(appDir, 'src', 'admin'), 'tsconfig.json');
 
   const pluginsWithFront = Object.keys(plugins)
     .filter(pluginName => {
@@ -146,7 +143,7 @@ async function createTSConfigFile(dest) {
       noEmit: false,
       incremental: true,
     },
-    include: ['../../../src/admin/src/*', '../../../src/**/**/admin/src/*'],
+    include: ['../../../src/admin/*', '../../../src/**/**/admin/src/*'],
     exclude: ['node_modules', '**/*.test.js', '*.js'],
   };
 
