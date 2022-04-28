@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
-import { removeAssetRequest } from '../utils/removeAssetQuery';
+import { deleteRequest } from '../utils/deleteRequest';
 
 const bulkRemoveQuery = assetIds => {
-  const promises = assetIds.map(assetId => removeAssetRequest(assetId));
+  const promises = assetIds.map(assetId => deleteRequest('files', assetId));
 
   return Promise.all(promises);
 };

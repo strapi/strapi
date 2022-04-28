@@ -4,31 +4,28 @@ import { useNotification } from '@strapi/helper-plugin';
 import pluginId from '../pluginId';
 import { deleteRequest } from '../utils/deleteRequest';
 
-export const useRemoveAsset = onSuccess => {
+export const useRemoveFolder = () => {
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(assetId => deleteRequest('files', assetId), {
+  const mutation = useMutation(id => deleteRequest('folders', id), {
     onSuccess: () => {
-      queryClient.refetchQueries([pluginId, 'assets'], { active: true });
-      queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+      queryClient.refetchQueries([pluginId, 'folders'], { active: true });
 
       toggleNotification({
         type: 'success',
         message: {
           id: 'modal.remove.success-label',
-          defaultMessage: 'The asset has been successfully removed.',
+          defaultMessage: 'The folder has been successfully removed.',
         },
       });
-
-      onSuccess();
     },
     onError: error => {
       toggleNotification({ type: 'warning', message: error.message });
     },
   });
 
-  const removeAsset = assetId => mutation.mutate(assetId);
+  const removeFolder = id => mutation.mutate(id);
 
-  return { ...mutation, removeAsset };
+  return { ...mutation, removeFolder };
 };
