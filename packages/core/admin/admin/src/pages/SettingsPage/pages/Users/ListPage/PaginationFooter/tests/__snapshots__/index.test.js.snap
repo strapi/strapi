@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DynamicTable renders and matches the snapshot 1`] = `
-.c28 {
+.c29 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -17,11 +17,15 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   padding-top: 16px;
 }
 
-.c14 {
+.c15 {
   padding-left: 8px;
 }
 
 .c1 {
+  -webkit-align-items: flex-end;
+  -webkit-box-align: flex-end;
+  -ms-flex-align: flex-end;
+  align-items: flex-end;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -33,13 +37,13 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
-  -webkit-align-items: flex-end;
-  -webkit-box-align: flex-end;
-  -ms-flex-align: flex-end;
-  align-items: flex-end;
 }
 
 .c2 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -47,13 +51,13 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.c17 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c16 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -61,17 +65,13 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
-.c17 > * + * {
+.c18 > * + * {
   margin-left: 4px;
 }
 
-.c20 {
+.c21 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -83,24 +83,24 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c23 {
+.c24 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c26 {
+.c27 {
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c24 {
+.c25 {
   line-height: revert;
 }
 
-.c18 {
+.c19 {
   padding: 12px;
   border-radius: 4px;
   -webkit-text-decoration: none;
@@ -113,7 +113,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c18:after {
+.c19:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -128,55 +128,11 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c18:focus-visible {
+.c19:focus-visible {
   outline: none;
 }
 
-.c18:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c21 {
-  padding: 12px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  position: relative;
-  outline: none;
-}
-
-.c21:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c21:focus-visible {
-  outline: none;
-}
-
-.c21:focus-visible:after {
+.c19:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -188,50 +144,94 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 }
 
 .c22 {
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c22:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c22:focus-visible {
+  outline: none;
+}
+
+.c22:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c23 {
   color: #271fe0;
   background: #ffffff;
 }
 
-.c22:hover {
+.c23:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c25 {
+.c26 {
   color: #32324d;
 }
 
-.c25:hover {
+.c26:hover {
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c19 {
+.c20 {
   font-size: 0.7rem;
   pointer-events: none;
 }
 
-.c19 svg path {
+.c20 svg path {
   fill: #c0c0cf;
 }
 
-.c19:focus svg path,
-.c19:hover svg path {
+.c20:focus svg path,
+.c20:hover svg path {
   fill: #c0c0cf;
 }
 
-.c27 {
+.c28 {
   font-size: 0.7rem;
 }
 
-.c27 svg path {
+.c28 svg path {
   fill: #666687;
 }
 
-.c27:focus svg path,
-.c27:hover svg path {
+.c28:focus svg path,
+.c28:hover svg path {
   fill: #4a4a6a;
 }
 
-.c6 {
+.c7 {
   position: absolute;
   left: 0;
   right: 0;
@@ -242,24 +242,42 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c6:focus {
+.c7:focus {
   outline: none;
 }
 
-.c6[aria-disabled='true'] {
+.c7[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c9 {
+.c10 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c11 {
+.c12 {
   padding-left: 12px;
 }
 
-.c4 {
+.c3 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -267,13 +285,13 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.c8 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c7 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -285,13 +303,9 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
-.c10 {
+.c11 {
   color: #32324d;
   display: block;
   white-space: nowrap;
@@ -301,22 +315,12 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   line-height: 1.43;
 }
 
-.c3 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c3 > * {
+.c4 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c5 {
+.c6 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -332,28 +336,28 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c5:focus-within {
+.c6:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c12 {
+.c13 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c12 svg {
+.c13 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c12 svg path {
+.c13 svg path {
   fill: #666687;
 }
 
-.c13 {
+.c14 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -362,15 +366,15 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c13 svg {
+.c14 svg {
   width: 0.375rem;
 }
 
-.c8 {
+.c9 {
   width: 100%;
 }
 
-.c15 {
+.c16 {
   color: #666687;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -388,10 +392,10 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
       >
         <div>
           <div
-            class="c3"
+            class="c3 c4"
           >
             <div
-              class="c4 c5"
+              class="c5 c6"
             >
               <button
                 aria-disabled="false"
@@ -399,21 +403,21 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
                 aria-labelledby="select-1-label select-1-content"
-                class="c6"
+                class="c7"
                 id="select-1"
                 type="button"
               />
               <div
-                class="c7 c8"
+                class="c8 c9"
               >
                 <div
-                  class="c4"
+                  class="c5"
                 >
                   <div
-                    class="c9"
+                    class="c10"
                   >
                     <span
-                      class="c10"
+                      class="c11"
                       id="select-1-content"
                     >
                       10
@@ -421,11 +425,11 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c4"
+                  class="c5"
                 >
                   <button
                     aria-hidden="true"
-                    class="c11 c12 c13"
+                    class="c12 c13 c14"
                     tabindex="-1"
                     type="button"
                   >
@@ -450,10 +454,10 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
           </div>
         </div>
         <div
-          class="c14"
+          class="c15"
         >
           <label
-            class="c15"
+            class="c16"
             for="page-size"
           >
             Entries per page
@@ -462,21 +466,21 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-ljMRFG"
+        class="sc-icMgfS"
       >
         <ul
-          class="c16 c17"
+          class="c17 c18"
         >
           <li>
             <a
               aria-current="page"
               aria-disabled="true"
-              class="c18 c19 active"
+              class="c19 c20 active"
               href="/settings/user"
               tabindex="-1"
             >
               <div
-                class="c20"
+                class="c21"
               >
                 Go to previous page
               </div>
@@ -498,17 +502,17 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
           <li>
             <a
               aria-current="page"
-              class="c21 c22 active"
+              class="c22 c23 active"
               href="/settings/user?pageSize=10&page=1&sort=firstname"
             >
               <div
-                class="c20"
+                class="c21"
               >
                 Go to page 1
               </div>
               <span
                 aria-hidden="true"
-                class="c23 c24"
+                class="c24 c25"
               >
                 1
               </span>
@@ -517,17 +521,17 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
           <li>
             <a
               aria-current="page"
-              class="c18 c25 active"
+              class="c19 c26 active"
               href="/settings/user?pageSize=10&page=2&sort=firstname"
             >
               <div
-                class="c20"
+                class="c21"
               >
                 Go to page 2
               </div>
               <span
                 aria-hidden="true"
-                class="c26 c24"
+                class="c27 c25"
               >
                 2
               </span>
@@ -537,11 +541,11 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
             <a
               aria-current="page"
               aria-disabled="false"
-              class="c18 c27 active"
+              class="c19 c28 active"
               href="/settings/user?pageSize=10&page=2&sort=firstname"
             >
               <div
-                class="c20"
+                class="c21"
               >
                 Go to next page
               </div>
@@ -565,7 +569,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    class="c28"
+    class="c29"
   >
     <p
       aria-live="polite"

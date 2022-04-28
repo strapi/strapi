@@ -88,6 +88,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       }
 
       .c34 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -99,10 +103,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         -webkit-justify-content: end;
         -ms-flex-pack: end;
         justify-content: end;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c25 {
@@ -221,6 +221,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
       .c14 {
         overflow: hidden;
+        border: 1px solid #eaeaef;
       }
 
       .c18 {
@@ -286,6 +287,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       }
 
       .c22 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -293,10 +298,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c21 {
@@ -377,6 +378,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       }
 
       .c2 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -388,13 +393,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -402,10 +407,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c4 {
@@ -497,10 +498,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       .c6 {
         padding: 10px 16px;
         background: #4945ff;
-        border: none;
-        border-radius: 4px;
         border: 1px solid #4945ff;
-        background: #4945ff;
+        border-radius: 4px;
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
