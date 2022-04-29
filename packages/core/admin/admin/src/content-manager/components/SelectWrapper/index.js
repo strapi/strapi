@@ -7,7 +7,6 @@ import {
 import { useLocation } from 'react-router-dom';
 import { Link } from '@strapi/design-system/Link';
 import { Stack } from '@strapi/design-system/Stack';
-import { useTheme } from 'styled-components';
 import findIndex from 'lodash/findIndex';
 import get from 'lodash/get';
 import isArray from 'lodash/isArray';
@@ -21,12 +20,8 @@ import { getTrad } from '../../utils';
 import Label from './Label';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
-import ClearIndicator from './ClearIndicator';
-import DropdownIndicator from './DropdownIndicator';
-import IndicatorSeparator from './IndicatorSeparator';
 import Option from './Option';
 import { connect, select } from './utils';
-import getSelectStyles from './utils/getSelectStyles';
 
 const initialPaginationState = {
   contains: '',
@@ -76,7 +71,6 @@ function SelectWrapper({
     onRemoveRelation,
   } = useCMEditViewDataManager();
   const { pathname } = useLocation();
-  const theme = useTheme();
 
   const value = get(modifiedData, name, null);
   const [state, setState] = useState(initialPaginationState);
@@ -277,8 +271,6 @@ function SelectWrapper({
     return <NotAllowedInput intlLabel={intlLabel} labelAction={labelAction} />;
   }
 
-  const styles = getSelectStyles(theme);
-
   return (
     <Stack spacing={1}>
       <Label
@@ -292,9 +284,6 @@ function SelectWrapper({
       <Component
         addRelation={handleAddRelation}
         components={{
-          ClearIndicator,
-          DropdownIndicator,
-          IndicatorSeparator,
           Option,
         }}
         displayNavigationLink={shouldDisplayRelationLink}
@@ -314,7 +303,6 @@ function SelectWrapper({
         onRemove={onRemoveRelation}
         placeholder={placeholder}
         searchToPersist={searchToPersist}
-        styles={styles}
         targetModel={targetModel}
         value={value}
         description={description}

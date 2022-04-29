@@ -35,6 +35,10 @@ describe('ContentBox', () => {
       }
 
       .c1 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -42,13 +46,13 @@ describe('ContentBox', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c4 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -58,23 +62,23 @@ describe('ContentBox', () => {
         flex-direction: column;
       }
 
-      .c4 > * {
+      .c5 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c4 > * + * {
+      .c5 > * + * {
         margin-top: 4px;
       }
 
-      .c5 {
+      .c6 {
         font-weight: 500;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c7 {
+      .c8 {
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -89,7 +93,7 @@ describe('ContentBox', () => {
         height: 2rem;
       }
 
-      .c6 {
+      .c7 {
         word-break: break-all;
       }
 
@@ -100,20 +104,20 @@ describe('ContentBox', () => {
           class="c2 c1 c3"
         />
         <div
-          class="c4"
+          class="c4 c5"
           spacing="1"
         >
           <div
             class="c1"
           >
             <span
-              class="c5 c6"
+              class="c6 c7"
             >
               Code example
             </span>
           </div>
           <span
-            class="c7"
+            class="c8"
           >
             Learn by testing real project developed by the community
           </span>
