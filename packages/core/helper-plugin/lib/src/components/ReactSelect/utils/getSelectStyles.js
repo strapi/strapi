@@ -4,7 +4,6 @@ const getSelectStyles = theme => {
     container: base => ({
       ...base,
       background: theme.colors.neutral0,
-      fontFamily: 'Arial',
       lineHeight: 'normal',
     }),
     control: (base, state) => {
@@ -57,7 +56,7 @@ const getSelectStyles = theme => {
         border: `1px solid ${theme.colors.neutral200} !important`,
         boxShadow: 0,
         fontSize: '14px',
-        fontFamily: 'Arial',
+        position: 'absolute',
         zIndex: 2,
       };
     },

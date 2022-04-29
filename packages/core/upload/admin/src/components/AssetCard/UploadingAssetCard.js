@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
+
 import {
   Card,
   CardBody,
@@ -13,7 +15,8 @@ import {
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
-import { useIntl } from 'react-intl';
+import { useQueryParams } from '@strapi/helper-plugin';
+
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
 import { useUpload } from '../../hooks/useUpload';
@@ -29,7 +32,8 @@ const Extension = styled.span`
 `;
 
 export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploadedFiles }) => {
-  const { upload, cancel, error, progress, status } = useUpload(asset);
+  const [{ query }] = useQueryParams();
+  const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
 
   let badgeContent;
@@ -58,7 +62,8 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
 
   useEffect(() => {
     const uploadFile = async () => {
-      const files = await upload(asset);
+      const folderId = query?.filters?.folder;
+      const files = await upload(asset, folderId);
 
       if (addUploadedFiles) {
         addUploadedFiles(files);
