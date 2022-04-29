@@ -20,6 +20,9 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   let schemas = {};
   // Get all the route methods
   const routeMethods = routeInfo.routes.map((route) => route.method);
+  const hasLocalizationPath = routeInfo.routes.filter((route) =>
+    route.path.includes('localizations')
+  ).length;
 
   // When the route methods contain any post or put requests
   if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
@@ -33,6 +36,21 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       routeMethods.includes('POST') && requiredAttributes.length
         ? Object.assign({}, ...requiredAttributes)
         : attributes;
+
+    if (hasLocalizationPath) {
+      const localizationsRequestAttributes = {
+        ...requestAttributes,
+        locale: { type: 'string' },
+      };
+
+      schemas = {
+        ...schemas,
+        [`${pascalCase(uniqueName)}LocalizationRequest`]: {
+          type: 'object',
+          properties: cleanSchemaAttributes(localizationsRequestAttributes, { isRequest: true }),
+        },
+      };
+    }
 
     // Build the request schema
     schemas = {

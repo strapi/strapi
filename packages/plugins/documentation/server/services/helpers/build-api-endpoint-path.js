@@ -93,6 +93,7 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
   const paths = contentTypeRoutes.reduce((acc, route) => {
     // TODO: Find a more reliable way to determine list of entities vs a single entity
     const isListOfEntities = hasFindMethod(route.handler);
+    const isLocalizationPath = route.path.includes('localizations');
     const methodVerb = route.method.toLowerCase();
     const hasPathParams = route.path.includes('/:');
     const pathWithPrefix = getPathWithPrefix(routeInfo.prefix, route);
@@ -116,12 +117,13 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
     }
 
     if (['post', 'put'].includes(methodVerb)) {
+      const refName = isLocalizationPath ? 'LocalizationRequest' : 'Request';
       const requestBody = {
         required: true,
         content: {
           'application/json': {
             schema: {
-              $ref: `#/components/schemas/${pascalCase(uniqueName)}Request`,
+              $ref: `#/components/schemas/${pascalCase(uniqueName)}${refName}`,
             },
           },
         },
