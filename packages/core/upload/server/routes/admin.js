@@ -124,6 +124,22 @@ module.exports = {
       },
     },
     {
+      method: 'PUT',
+      path: '/folders/:id',
+      handler: 'admin-folder.update',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.read'],
+            },
+          },
+        ],
+      },
+    },
+    {
       method: 'GET',
       path: '/folder-structure',
       handler: 'admin-folder.getStructure',
