@@ -42,8 +42,6 @@ export const AssetList = ({
         {assets.map((asset, index) => {
           const isSelected = !!selectedAssets.find(currentAsset => currentAsset.id === asset.id);
 
-          console.log(selectedAssets, asset, isSelected);
-
           if (onReorderAsset) {
             return (
               <Draggable key={asset.id} index={index} moveItem={onReorderAsset} id={asset.id}>
