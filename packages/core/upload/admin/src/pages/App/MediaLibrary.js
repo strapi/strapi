@@ -49,12 +49,14 @@ export const MediaLibrary = () => {
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
 
+  const isFiltering = Boolean(query._q || query.filters);
+
   const { data: assetsData, isLoading: assetsLoading, error: assetsError } = useAssets({
     skipWhen: !canRead,
   });
 
   const { data: foldersData, isLoading: foldersIsLoading, errors: foldersError } = useFolders({
-    enabled: assetsData?.pagination?.page === 1,
+    enabled: assetsData?.pagination?.page === 1 && !isFiltering,
   });
 
   const handleChangeSort = value => {
@@ -75,7 +77,6 @@ export const MediaLibrary = () => {
   const assetCount = assetsData?.pagination?.total || 0;
 
   const isLoading = foldersIsLoading || isLoadingPermissions || assetsLoading;
-  const isFiltering = Boolean(query._q || query.filters);
 
   return (
     <Layout>
@@ -159,7 +160,7 @@ export const MediaLibrary = () => {
 
           {canRead && (
             <Stack spacing={8}>
-              {folders?.length > 0 && (
+              {folders?.length > 0 && !isFiltering && (
                 <FolderList
                   folders={folders}
                   onSelectFolder={selectOne}
@@ -178,10 +179,14 @@ export const MediaLibrary = () => {
                     onEditAsset={setAssetToEdit}
                     onSelectAsset={selectOne}
                     selectedAssets={selected.filter(({ type }) => type === 'asset')}
-                    title={formatMessage({
-                      id: getTrad('list.assets.title'),
-                      defaultMessage: 'Assets',
-                    })}
+                    title={
+                      !isFiltering &&
+                      assetsData?.pagination?.page === 1 &&
+                      formatMessage({
+                        id: getTrad('list.assets.title'),
+                        defaultMessage: 'Assets',
+                      })
+                    }
                   />
 
                   {assetsData?.pagination && (
