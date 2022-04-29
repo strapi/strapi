@@ -3394,19 +3394,19 @@
   dependencies:
     "@swc/core" "^1.2.172"
 
-"@swc-node/jest@1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@swc-node/jest/-/jest-1.5.0.tgz#6ad1310ecca9826e9ccbcaa58d4cb64f38f5df70"
-  integrity sha512-CVo+iqmnwh/D+tbv7xsg0SpQgXsIAv18Zh5PYh4ggCeqaJpmUEYElVTrulSR1kidiW6jW0FYCSjHN+BHN6j2VQ==
+"@swc-node/jest@1.5.1":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@swc-node/jest/-/jest-1.5.1.tgz#2c9b9689696abc2fdd0ce1a09dd2c7fa8db2b2ec"
+  integrity sha512-3kJhJQ9ljC7btH2v6JdSyH2vilCpRdTbRzt1fKOwfSLl4AHKuVQaTg1wJ5w+dbVVlJ0YpByoFpjyLCeju75uog==
   dependencies:
     "@node-rs/xxhash" "^1.2.0"
     "@swc-node/core" "^1.9.0"
-    "@swc-node/register" "^1.5.0"
+    "@swc-node/register" "^1.5.1"
 
-"@swc-node/register@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@swc-node/register/-/register-1.5.0.tgz#9552ebde06c3e271e5e2f39a92ec5c47e5a8b149"
-  integrity sha512-XGA1Va3trgXNEGXX8wWcfEMMn0oJe06v+DLbBCvMvf7UC1aouQcfE+hqoNWw4nmDj7f0svLzZe931ryiZ1W4aA==
+"@swc-node/register@^1.5.1":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@swc-node/register/-/register-1.5.1.tgz#8927783c1a53207ded076d8700270f7941aa0305"
+  integrity sha512-6IL5s4QShKGs08qAeNou3rDA3gbp2WHk6fo0XnJXQn/aC9k6FnVBbj/thGOIEDtgNhC/DKpZT8tCY1LpQnOZFg==
   dependencies:
     "@swc-node/core" "^1.9.0"
     "@swc-node/sourcemap-support" "^0.2.0"
@@ -3414,7 +3414,6 @@
     debug "^4.3.4"
     pirates "^4.0.5"
     tslib "^2.4.0"
-    typescript "^4.6.3"
 
 "@swc-node/sourcemap-support@^0.2.0":
   version "0.2.0"
@@ -17142,11 +17141,6 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
-
-typescript@^4.6.3:
-  version "4.6.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.6.3.tgz#eefeafa6afdd31d725584c67a0eaba80f6fc6c6c"
-  integrity sha512-yNIatDa5iaofVozS/uQJEl3JRWLKKGJKh6Yaiv0GLGSuhpFJe7P3SbHZ8/yjAHRQwKRoA6YZqlfjXWmVzoVSMw==
 
 uc.micro@^1.0.1, uc.micro@^1.0.5:
   version "1.0.6"
