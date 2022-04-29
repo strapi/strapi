@@ -139,5 +139,21 @@ module.exports = {
         ],
       },
     },
+    {
+      method: 'GET',
+      path: '/folder-structure',
+      handler: 'admin-folder.getStructure',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.read'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };

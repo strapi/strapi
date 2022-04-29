@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  collectionName: 'folders',
+  collectionName: 'upload_folders',
   info: {
     singularName: 'folder',
     pluralName: 'folders',
