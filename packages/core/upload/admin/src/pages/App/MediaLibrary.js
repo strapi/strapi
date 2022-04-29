@@ -108,15 +108,13 @@ export const MediaLibrary = () => {
             )
           }
           primaryAction={
-            canCreate ? (
+            canCreate && (
               <Button startIcon={<Plus />} onClick={toggleUploadAssetDialog}>
                 {formatMessage({
                   id: getTrad('header.actions.add-assets'),
                   defaultMessage: 'Add new assets',
                 })}
               </Button>
-            ) : (
-              undefined
             )
           }
         />

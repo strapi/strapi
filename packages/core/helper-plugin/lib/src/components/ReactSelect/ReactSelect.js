@@ -18,7 +18,6 @@ const ReactSelect = ({ components, styles, ...props }) => {
       {...props}
       components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, ...components }}
       styles={{ ...customStyles, ...styles }}
-      menuIsOpen
     />
   );
 };
