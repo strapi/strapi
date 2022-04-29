@@ -73,4 +73,14 @@ module.exports = {
       data: deletedFolders,
     };
   },
+
+  async getStructure(ctx) {
+    const { getStructure } = getService('folder');
+
+    const structure = await getStructure();
+
+    ctx.body = {
+      data: structure,
+    };
+  },
 };

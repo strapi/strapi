@@ -31,6 +31,14 @@ describe('Folder', () => {
   });
 
   afterAll(async () => {
+    await rq({
+      method: 'POST',
+      url: '/upload/folders/batch-delete',
+      body: {
+        ids: data.folders.map(f => f.id),
+      },
+    });
+
     await strapi.destroy();
     await builder.cleanup();
   });

@@ -17,13 +17,13 @@ const validateCreateFolderSchema = yup
       .required(),
     parent: yup.strapiID().nullable(),
   })
+  .noUnknown()
+  .required()
   .test('is-folder-unique', 'name already taken', async folder => {
     const { exists } = getService('folder');
     const doesExist = await exists({ parent: folder.parent || null, name: folder.name });
     return !doesExist;
-  })
-  .noUnknown()
-  .required();
+  });
 
 const validateDeleteManyFoldersSchema = yup
   .object()
