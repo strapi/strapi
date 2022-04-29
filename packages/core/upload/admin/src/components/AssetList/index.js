@@ -71,6 +71,14 @@ export const AssetList = ({
             />
           );
         })}
+
+        {/* TODO: Remove this when we have media queries */}
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
+        <div aria-hidden />
       </GridLayout>
     </KeyboardNavigable>
   );
