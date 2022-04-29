@@ -18,6 +18,9 @@ module.exports = async function({ file: filePath, strategy = 'replace' }) {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
+
+  if (isTSProject) await tsUtils.compile(appDir, { watch: false });
+
   const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
 
   const app = await strapi({ appDir, distDir }).load();
