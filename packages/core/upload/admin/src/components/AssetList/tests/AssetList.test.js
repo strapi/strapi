@@ -745,6 +745,24 @@ describe('MediaLibrary / AssetList', () => {
                 </div>
               </div>
             </article>
+            <div
+              aria-hidden="true"
+            />
+            <div
+              aria-hidden="true"
+            />
+            <div
+              aria-hidden="true"
+            />
+            <div
+              aria-hidden="true"
+            />
+            <div
+              aria-hidden="true"
+            />
+            <div
+              aria-hidden="true"
+            />
           </div>
         </div>
         <div
