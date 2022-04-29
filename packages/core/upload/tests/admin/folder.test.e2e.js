@@ -450,4 +450,190 @@ describe('Folder', () => {
       data.folders.push(...resFolders.body.results);
     });
   });
+
+  describe('update', () => {
+    test('rename a folder', async () => {
+      const folder = await createFolder('folder-name', null);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder.id}`,
+        body: {
+          name: 'new name',
+        },
+      });
+
+      expect(res.body.data).toMatchObject({
+        name: 'new name',
+        path: folder.path,
+      });
+      data.folders.push(res.body.data);
+    });
+
+    test('cannot rename a folder if duplicated', async () => {
+      const folder0 = await createFolder('folder-a-0', null);
+      const folder1 = await createFolder('folder-a-1', null);
+      await createFolder('folder-a-00', folder0.id);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder1.id}`,
+        body: {
+          name: 'folder-a-00',
+          parent: folder0.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('name already taken');
+    });
+
+    test('cannot move a folder to a folder that does not exist', async () => {
+      const folder = await createFolder('folder-b-0', null);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder.id}`,
+        body: {
+          parent: 9999,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('parent folder does not exist');
+    });
+
+    test('move a folder inside another folder', async () => {
+      const folder0 = await createFolder('folder-0', null);
+      const folder00 = await createFolder('folder-00', folder0.id);
+      const folder01 = await createFolder('folder-01', folder0.id);
+      const folder02 = await createFolder('folder-02', folder0.id);
+      const folder000 = await createFolder('folder-000', folder00.id);
+      const file000 = await createAFile(folder000.id);
+      const file02 = await createAFile(folder02.id);
+
+      // moving folder00 in folder01
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder00.id}`,
+        body: {
+          name: 'folder-00-new',
+          parent: folder01.id,
+        },
+      });
+
+      expect(res.body.data).toMatchObject({
+        name: 'folder-00-new',
+        path: `${folder01.path}/${folder00.uid}`,
+      });
+
+      const resFolders = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: {
+          filters: { id: { $in: map('id', [folder0, folder00, folder01, folder02, folder000]) } },
+          sort: 'id:asc',
+          populate: 'parent',
+        },
+      });
+
+      expect(resFolders.body.results[0]).toMatchObject({ path: folder0.path, parent: null });
+      expect(resFolders.body.results[1]).toMatchObject({
+        path: `${folder01.path}/${folder00.uid}`,
+        parent: { id: folder01.id },
+      });
+      expect(resFolders.body.results[2]).toMatchObject({
+        path: folder01.path,
+        parent: { id: folder0.id },
+      });
+      expect(resFolders.body.results[3]).toMatchObject({
+        path: folder02.path,
+        parent: { id: folder0.id },
+      });
+      expect(resFolders.body.results[4]).toMatchObject({
+        path: `${folder01.path}/${folder00.uid}/${folder000.uid}`,
+        parent: { id: folder00.id },
+      });
+
+      const resFiles = await rq({
+        method: 'GET',
+        url: '/upload/files',
+        qs: {
+          filters: { id: { $in: [file000.id, file02.id] } },
+          sort: 'id:asc',
+        },
+      });
+
+      expect(resFiles.body.results[0]).toMatchObject({
+        folderPath: `${folder01.path}/${folder00.uid}/${folder000.uid}`,
+      });
+      expect(resFiles.body.results[1]).toMatchObject({ folderPath: file02.folderPath });
+
+      data.folders.push(...resFolders.body.results);
+    });
+
+    test('move a folder to root level', async () => {
+      const folder0 = await createFolder('folder-test-0', null);
+      const folder00 = await createFolder('folder-test-00', folder0.id);
+      const folder02 = await createFolder('folder-test-02', folder0.id);
+      const folder000 = await createFolder('folder-test-000', folder00.id);
+      const file000 = await createAFile(folder000.id);
+      const file02 = await createAFile(folder02.id);
+
+      // moving folder00 in folder01
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder00.id}`,
+        body: {
+          name: 'folder-test-00-new',
+          parent: null,
+        },
+      });
+
+      expect(res.body.data).toMatchObject({
+        name: 'folder-test-00-new',
+        path: `/${folder00.uid}`,
+      });
+
+      const resFolders = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+        qs: {
+          filters: { id: { $in: map('id', [folder0, folder00, folder02, folder000]) } },
+          sort: 'id:asc',
+          populate: 'parent',
+        },
+      });
+
+      expect(resFolders.body.results[0]).toMatchObject({ path: folder0.path, parent: null });
+      expect(resFolders.body.results[1]).toMatchObject({
+        path: `/${folder00.uid}`,
+        parent: null,
+      });
+      expect(resFolders.body.results[2]).toMatchObject({
+        path: folder02.path,
+        parent: { id: folder0.id },
+      });
+      expect(resFolders.body.results[3]).toMatchObject({
+        path: `/${folder00.uid}/${folder000.uid}`,
+        parent: { id: folder00.id },
+      });
+
+      const resFiles = await rq({
+        method: 'GET',
+        url: '/upload/files',
+        qs: {
+          filters: { id: { $in: [file000.id, file02.id] } },
+          sort: 'id:asc',
+        },
+      });
+
+      expect(resFiles.body.results[0]).toMatchObject({
+        folderPath: `/${folder00.uid}/${folder000.uid}`,
+      });
+      expect(resFiles.body.results[1]).toMatchObject({ folderPath: file02.folderPath });
+
+      data.folders.push(...resFolders.body.results);
+    });
+  });
 });
