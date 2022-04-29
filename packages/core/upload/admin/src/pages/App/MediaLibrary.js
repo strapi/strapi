@@ -46,7 +46,7 @@ export const MediaLibrary = () => {
     canUpdate,
     canCopyLink,
     canDownload,
-    isLoading: isLoadingPermissions,
+    isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
@@ -57,7 +57,7 @@ export const MediaLibrary = () => {
     skipWhen: !canRead,
   });
 
-  const { data: foldersData, isLoading: foldersIsLoading, errors: foldersError } = useFolders({
+  const { data: foldersData, isLoading: foldersLoading, errors: foldersError } = useFolders({
     enabled: assetsData?.pagination?.page === 1 && !isFiltering,
   });
 
@@ -79,7 +79,7 @@ export const MediaLibrary = () => {
   const assetCount = assetsData?.pagination?.total || 0;
 
   const isNestedFolder = !!query?.filters?.folder;
-  const isLoading = foldersIsLoading || isLoadingPermissions || assetsLoading;
+  const isLoading = foldersLoading || permissionsLoading || assetsLoading;
 
   return (
     <Layout>
