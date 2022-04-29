@@ -311,7 +311,10 @@ describe('Folder', () => {
 
       const resFiles = await rq({
         method: 'GET',
-        url: '/upload/files?pagination[pageSize]=100',
+        url: '/upload/files',
+        qs: {
+          pageSize: 100,
+        },
       });
 
       const existingfilesIds = resFiles.body.results.map(f => f.id);
