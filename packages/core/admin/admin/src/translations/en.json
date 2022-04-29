@@ -317,6 +317,7 @@
   "app.components.LeftMenu.collapse": "Collapse the navbar",
   "app.components.LeftMenu.expand": "Expand the navbar",
   "app.components.LeftMenu.logout": "Logout",
+  "app.components.LeftMenu.logo.alt": "Application logo",
   "app.components.LeftMenu.navbrand.title": "Strapi Dashboard",
   "app.components.LeftMenu.navbrand.workplace": "Workplace",
   "app.components.LeftMenuFooter.help": "Help",

@@ -39,6 +39,8 @@ const LogoInput = ({ customLogo, defaultLogo, onChangeLogo, onResetMenuLogo }) =
           },
           { size: SIZE, dimension: DIMENSION }
         )}
+        // Carousel is used here for a single media,
+        // we don't need previous and next labels but these props are required
         previousLabel=""
         nextLabel=""
         onNext={() => {}}
