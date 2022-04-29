@@ -7,6 +7,7 @@ const pascalCase = require('./utils/pascal-case');
 const queryParams = require('./utils/query-params');
 const loopContentTypeNames = require('./utils/loop-content-type-names');
 const getApiResponses = require('./utils/get-api-responses');
+const hasFindMethod = require('./utils/has-find-method');
 
 /**
  * @description Parses a route with ':variable'
@@ -14,10 +15,10 @@ const getApiResponses = require('./utils/get-api-responses');
  * @param {string} routePath - The route's path property
  * @returns {string}
  */
-const parsePathWithVariables = routePath => {
+const parsePathWithVariables = (routePath) => {
   return pathToRegexp
     .parse(routePath)
-    .map(token => {
+    .map((token) => {
       if (_.isObject(token)) {
         return token.prefix + '{' + token.name + '}';
       }
@@ -34,11 +35,11 @@ const parsePathWithVariables = routePath => {
  *
  * @returns {object } Swagger path params object
  */
-const getPathParams = routePath => {
+const getPathParams = (routePath) => {
   return pathToRegexp
     .parse(routePath)
-    .filter(token => _.isObject(token))
-    .map(param => {
+    .filter((token) => _.isObject(token))
+    .map((param) => {
       return {
         name: param.name,
         in: 'path',
@@ -82,7 +83,7 @@ const getPathWithPrefix = (prefix, route) => {
  */
 const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
   // Get the routes for the current content type
-  const contentTypeRoutes = routeInfo.routes.filter(route => {
+  const contentTypeRoutes = routeInfo.routes.filter((route) => {
     return (
       route.path.includes(contentTypeInfo.pluralName) ||
       route.path.includes(contentTypeInfo.singularName)
@@ -91,7 +92,7 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
 
   const paths = contentTypeRoutes.reduce((acc, route) => {
     // TODO: Find a more reliable way to determine list of entities vs a single entity
-    const isListOfEntities = route.handler.split('.').pop() === 'find';
+    const isListOfEntities = hasFindMethod(route.handler);
     const methodVerb = route.method.toLowerCase();
     const hasPathParams = route.path.includes('/:');
     const pathWithPrefix = getPathWithPrefix(routeInfo.prefix, route);
@@ -144,7 +145,7 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
  *
  * @returns {object} Open API paths
  */
-const getAllPathsForContentType = apiInfo => {
+const getAllPathsForContentType = (apiInfo) => {
   let paths = {};
 
   const pathsObject = getPaths(apiInfo);
@@ -167,7 +168,7 @@ const getAllPathsForContentType = apiInfo => {
  *
  * @returns {object}
  */
-const buildApiEndpointPath = api => {
+const buildApiEndpointPath = (api) => {
   // A reusable loop for building paths and component schemas
   // Uses the api param to build a new set of params for each content type
   // Passes these new params to the function provided

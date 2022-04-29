@@ -3,6 +3,7 @@
 const cleanSchemaAttributes = require('./utils/clean-schema-attributes');
 const loopContentTypeNames = require('./utils/loop-content-type-names');
 const pascalCase = require('./utils/pascal-case');
+const hasFindMethod = require('./utils/has-find-method');
 
 /**
  * @decription Get all open api schema objects for a given content type
@@ -18,7 +19,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   // Store response and request schemas in an object
   let schemas = {};
   // Get all the route methods
-  const routeMethods = routeInfo.routes.map(route => route.method);
+  const routeMethods = routeInfo.routes.map((route) => route.method);
 
   // When the route methods contain any post or put requests
   if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
@@ -49,9 +50,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   }
 
   // Check for routes that need to return a list
-  const hasListOfEntities = routeInfo.routes.filter(
-    route => route.handler.split('.').pop() === 'find'
-  ).length;
+  const hasListOfEntities = routeInfo.routes.filter((route) => hasFindMethod(route.handler)).length;
 
   if (hasListOfEntities) {
     // Build the list response schema
@@ -107,7 +106,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   return schemas;
 };
 
-const buildComponentSchema = api => {
+const buildComponentSchema = (api) => {
   // A reusable loop for building paths and component schemas
   // Uses the api param to build a new set of params for each content type
   // Passes these new params to the function provided
