@@ -52,7 +52,7 @@ export const parseFileMetadatas = async file => {
   const fileDimensions = await getFileDimensions(file);
 
   const areDimensionsAuthorized =
-    fileDimensions.width < DIMENSION && fileDimensions.height < DIMENSION;
+    fileDimensions.width <= DIMENSION && fileDimensions.height <= DIMENSION;
 
   if (!areDimensionsAuthorized) {
     error = new Error('File sizing');
@@ -63,7 +63,7 @@ export const parseFileMetadatas = async file => {
 
   const asset = rawFileToAsset(file, fileDimensions);
 
-  const isSizeAuthorized = asset.size < SIZE;
+  const isSizeAuthorized = asset.size <= SIZE;
 
   if (!isSizeAuthorized) {
     error = new Error('File sizing');
