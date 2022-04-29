@@ -6,9 +6,11 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Flex } from '@strapi/design-system/Flex';
+import { IconButton } from '@strapi/design-system/IconButton';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { useQueryParams } from '@strapi/helper-plugin';
+import Pencil from '@strapi/icons/Pencil';
 
 import { FolderCard, FolderCardBody, FolderCardCheckbox, FolderCardLink } from '../FolderCard';
 import { GridColumnSize } from '../../constants';
@@ -22,7 +24,14 @@ const GridLayout = styled(Box)`
   grid-gap: ${({ theme }) => theme.spaces[4]};
 `;
 
-export const FolderList = ({ title, folders, size, onSelectFolder, selectedFolders }) => {
+export const FolderList = ({
+  title,
+  folders,
+  size,
+  onSelectFolder,
+  onEditFolder,
+  selectedFolders,
+}) => {
   const history = useHistory();
   const { pathname } = useLocation();
   const [{ query }] = useQueryParams();
@@ -59,6 +68,11 @@ export const FolderList = ({ title, folders, size, onSelectFolder, selectedFolde
                   onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
                 />
               }
+              cardActions={
+                <>
+                  <IconButton icon={<Pencil />} onClick={onEditFolder} />
+                </>
+              }
             >
               <FolderCardBody>
                 <FolderCardLink to={url}>
@@ -92,6 +106,7 @@ FolderList.propTypes = {
   folders: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   size: PropTypes.oneOf(['S', 'M']),
   selectedFolders: PropTypes.array,
+  onEditFolder: PropTypes.func.isRequired,
   onSelectFolder: PropTypes.func.isRequired,
   title: PropTypes.string,
 };

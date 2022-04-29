@@ -163,6 +163,8 @@ export const MediaLibrary = () => {
               {folders?.length > 0 && !isFiltering && (
                 <FolderList
                   folders={folders}
+                  /* TODO */
+                  onEditFolder={() => {}}
                   onSelectFolder={selectOne}
                   selectedFolders={selected.filter(({ type }) => type === 'folder')}
                   title={formatMessage({

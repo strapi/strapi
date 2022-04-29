@@ -83,11 +83,7 @@ export const FolderCard = ({
 
           {children}
 
-          {cardActions && (
-            <CardAction right={0} zIndex={100}>
-              {cardActions}
-            </CardAction>
-          )}
+          {cardActions && <CardAction right={4}>{cardActions}</CardAction>}
         </Stack>
       </Box>
     </FolderCardContext.Provider>
