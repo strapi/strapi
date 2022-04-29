@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
+import { stringify } from 'qs';
+import { useHistory, useLocation } from 'react-router-dom';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { useQueryParams } from '@strapi/helper-plugin';
 
 import { FolderCard, FolderCardBody, FolderCardCheckbox, FolderCardLink } from '../FolderCard';
 import { GridColumnSize } from '../../constants';
@@ -22,6 +24,8 @@ const GridLayout = styled(Box)`
 
 export const FolderList = ({ title, folders, size, onSelectFolder, selectedFolders }) => {
   const history = useHistory();
+  const { pathname } = useLocation();
+  const [{ query }] = useQueryParams();
 
   return (
     <KeyboardNavigable tagName="article">
@@ -38,8 +42,10 @@ export const FolderList = ({ title, folders, size, onSelectFolder, selectedFolde
           const isSelected = !!selectedFolders.find(
             currentFolder => currentFolder.id === folder.id
           );
-          // TODO: is there a better way to retrieve the plugin base URL?
-          const url = `/admin/plugins/upload?parent=${folder.id}`;
+          const url = `${pathname}?${stringify(
+            { ...query, filter: { folder: folder.id } },
+            { encode: false }
+          )}`;
 
           return (
             <FolderCard
@@ -55,7 +61,7 @@ export const FolderList = ({ title, folders, size, onSelectFolder, selectedFolde
               }
             >
               <FolderCardBody>
-                <FolderCardLink href={url}>
+                <FolderCardLink to={url}>
                   <Flex as="h2" direction="column" alignItems="start">
                     <Typography textColor="neutral800" variant="omega" fontWeight="semiBold">
                       {folder.name}
