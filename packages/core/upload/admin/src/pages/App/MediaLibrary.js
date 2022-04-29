@@ -13,7 +13,9 @@ import {
 import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
+import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Plus from '@strapi/icons/Plus';
+import { Link } from '@strapi/design-system/Link';
 import { Box } from '@strapi/design-system/Box';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { Stack } from '@strapi/design-system/Stack';
@@ -76,6 +78,7 @@ export const MediaLibrary = () => {
   const assets = assetsData?.results;
   const assetCount = assetsData?.pagination?.total || 0;
 
+  const isNestedFolder = !!query?.filters?.folder;
   const isLoading = foldersIsLoading || isLoadingPermissions || assetsLoading;
 
   return (
@@ -94,6 +97,16 @@ export const MediaLibrary = () => {
             },
             { numberAssets: assetCount, numberFolders: folderCount }
           )}
+          navigationAction={
+            isNestedFolder && (
+              <Link startIcon={<ArrowLeft />} to="/plugins/upload/">
+                {formatMessage({
+                  id: getTrad('header.actions.folder-level-up'),
+                  defaultMessage: 'Back',
+                })}
+              </Link>
+            )
+          }
           primaryAction={
             canCreate ? (
               <Button startIcon={<Plus />} onClick={toggleUploadAssetDialog}>
