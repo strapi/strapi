@@ -70,6 +70,7 @@ const sanitizeEntity = (dataSource, options) => {
 
       const baseOptions = {
         withPrivate,
+        withHidden,
         isOutput,
         includeFields: nextFields,
       };
@@ -107,6 +108,7 @@ const sanitizeEntity = (dataSource, options) => {
         sanitizeEntity(elem, {
           model: strapi.getModel(elem.__component),
           withPrivate,
+          withHidden,
           isOutput,
         })
       );
