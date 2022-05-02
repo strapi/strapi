@@ -51,12 +51,12 @@
     "resetPasswordToken": {
       "type": "string",
       "configurable": false,
-      "private": true,
+      "private": true
     },
     "registrationToken": {
       "type": "string",
       "configurable": false,
-      "private": true,
+      "private": true
     },
     "isActive": {
       "type": "boolean",
