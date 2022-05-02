@@ -1,7 +1,9 @@
 'use strict';
 
+const path = require('path');
 const _ = require('lodash');
 const inquirer = require('inquirer');
+const tsUtils = require('@strapi/typescript-utils');
 const strapi = require('../index');
 
 const promptQuestions = [
@@ -42,7 +44,12 @@ module.exports = async function(cmdOptions = {}) {
 };
 
 async function changePassword({ email, password }) {
-  const app = await strapi().load();
+  const appDir = process.cwd();
+
+  const isTSProject = await tsUtils.isUsingTypeScript(appDir);
+  const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
+
+  const app = await strapi({ appDir, distDir }).load();
 
   await app.admin.services.user.resetPasswordByEmail(email, password);
 

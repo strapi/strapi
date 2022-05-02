@@ -1,8 +1,10 @@
 'use strict';
 
+const path = require('path');
 const { yup } = require('@strapi/utils');
 const _ = require('lodash');
 const inquirer = require('inquirer');
+const tsUtils = require('@strapi/typescript-utils');
 const strapi = require('../index');
 
 const emailValidator = yup
@@ -90,7 +92,12 @@ module.exports = async function(cmdOptions = {}) {
 };
 
 async function createAdmin({ email, password, firstname, lastname }) {
-  const app = await strapi().load();
+  const appDir = process.cwd();
+
+  const isTSProject = await tsUtils.isUsingTypeScript(appDir);
+  const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
+
+  const app = await strapi({ appDir, distDir }).load();
 
   const user = await app.admin.services.user.exists({ email });
 

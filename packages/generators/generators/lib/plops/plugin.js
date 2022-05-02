@@ -1,7 +1,6 @@
 'use strict';
 
 const chalk = require('chalk');
-const tsUtils = require('@strapi/typescript-utils');
 
 const logInstructions = (pluginName, { language }) => {
   const maxLength = `    resolve: './src/plugins/${pluginName}'`.length;
@@ -38,10 +37,17 @@ module.exports = plop => {
         name: 'pluginName',
         message: 'Plugin name',
       },
+      {
+        type: 'list',
+        name: 'language',
+        message: 'Choose your preferred language',
+        choices: ['Javascript', 'Typescript'],
+        default: 'Javascript',
+      },
     ],
     actions(answers) {
-      const currentDir = process.cwd();
-      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
+      const isTypescript = answers.language === 'Typescript';
+      const language = isTypescript ? 'ts' : 'js';
 
       // TODO: Adds tsconfig & build command for TS plugins?
 
