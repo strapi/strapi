@@ -176,7 +176,7 @@ const shouldRemoveAttribute = (
 ) => {
   const isPassword = attribute.type === 'password';
   const isPrivate = isPrivateAttribute(model, key);
-  const isHidden = attribute.hidden === true;
+  const isHidden = _.get(model, ['config', 'attributes', key, 'hidden'], false);
 
   const shouldRemovePassword = isOutput;
   const shouldRemovePrivate = !withPrivate && isOutput;
