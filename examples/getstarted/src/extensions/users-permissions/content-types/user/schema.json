@@ -37,13 +37,11 @@
     "resetPasswordToken": {
       "type": "string",
       "configurable": false,
-      "hidden": true,
       "private": true
     },
     "confirmationToken": {
       "type": "string",
       "configurable": false,
-      "hidden": true,
       "private": true
     },
     "confirmed": {

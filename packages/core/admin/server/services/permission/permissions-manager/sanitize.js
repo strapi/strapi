@@ -14,6 +14,7 @@ const {
   uniq,
   intersection,
   pick,
+  getOr,
 } = require('lodash/fp');
 
 const { contentTypes, traverseEntity, sanitize, pipeAsync } = require('@strapi/utils');
@@ -119,8 +120,10 @@ module.exports = ({ action, ability, model }) => {
   /**
    * Visitor used to remove hidden fields from the admin API responses
    */
-  const omitHiddenFields = ({ key, attribute }, { remove }) => {
-    if (attribute.hidden) {
+  const omitHiddenFields = ({ key, schema }, { remove }) => {
+    const isHidden = getOr(false, ['config', 'attributes', key, 'hidden'], schema);
+
+    if (isHidden) {
       remove(key);
     }
   };
