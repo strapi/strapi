@@ -36,13 +36,11 @@
       "type": "string",
       "configurable": false,
       "private": true,
-      "hidden": true
     },
     "confirmationToken": {
       "type": "string",
       "configurable": false,
       "private": true,
-      "hidden": true
     },
     "confirmed": {
       "type": "boolean",
