@@ -72,7 +72,7 @@ module.exports = {
       model: folderModel,
     });
 
-    await validateUpdateFolder(body);
+    await validateUpdateFolder(id)(body);
 
     const { update } = getService('folder');
 
