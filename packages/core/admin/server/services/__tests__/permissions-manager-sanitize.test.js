@@ -40,13 +40,19 @@ const fooModel = {
   attributes: {
     a: {
       type: 'string',
-      hidden: true,
     },
     b: {
       type: 'password',
     },
     c: {
       type: 'string',
+    },
+  },
+  config: {
+    attributes: {
+      a: {
+        hidden: true,
+      },
     },
   },
 };
