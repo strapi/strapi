@@ -3,7 +3,7 @@
 const cleanSchemaAttributes = require('./utils/clean-schema-attributes');
 const loopContentTypeNames = require('./utils/loop-content-type-names');
 const pascalCase = require('./utils/pascal-case');
-const hasFindMethod = require('./utils/has-find-method');
+const { hasFindMethod } = require('./utils/routes');
 
 /**
  * @decription Get all open api schema objects for a given content type
@@ -67,9 +67,21 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     };
   }
 
+  if (hasLocalizationPath) {
+    schemas = {
+      ...schemas,
+      [`${pascalCase(uniqueName)}LocalizationResponse`]: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          ...cleanSchemaAttributes(attributes),
+        },
+      },
+    };
+  }
+
   // Check for routes that need to return a list
   const hasListOfEntities = routeInfo.routes.filter((route) => hasFindMethod(route.handler)).length;
-
   if (hasListOfEntities) {
     // Build the list response schema
     schemas = {

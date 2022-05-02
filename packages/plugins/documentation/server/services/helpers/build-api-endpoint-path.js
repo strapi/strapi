@@ -7,7 +7,7 @@ const pascalCase = require('./utils/pascal-case');
 const queryParams = require('./utils/query-params');
 const loopContentTypeNames = require('./utils/loop-content-type-names');
 const getApiResponses = require('./utils/get-api-responses');
-const hasFindMethod = require('./utils/has-find-method');
+const { hasFindMethod } = require('./utils/routes');
 
 /**
  * @description Parses a route with ':variable'
