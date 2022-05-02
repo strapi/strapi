@@ -470,7 +470,7 @@ describe('Folder', () => {
       data.folders.push(res.body.data);
     });
 
-    test('cannot rename a folder if duplicated', async () => {
+    test('cannot rename a folder if duplicated (with name)', async () => {
       const folder0 = await createFolder('folder-a-0', null);
       const folder1 = await createFolder('folder-a-1', null);
       await createFolder('folder-a-00', folder0.id);
@@ -485,11 +485,29 @@ describe('Folder', () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe('name already taken');
+      expect(res.body.error.message).toBe('folder already exists');
+    });
+
+    test('cannot rename a folder if duplicated (without name)', async () => {
+      const folder0 = await createFolder('folder-b-0', null);
+      const folder1 = await createFolder('folder-b-samename', null);
+      await createFolder('folder-b-samename', folder0.id);
+      data.folders.push(folder0, folder1);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder1.id}`,
+        body: {
+          parent: folder0.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('folder already exists');
     });
 
     test('cannot move a folder to a folder that does not exist', async () => {
-      const folder = await createFolder('folder-b-0', null);
+      const folder = await createFolder('folder-c-0', null);
 
       const res = await rq({
         method: 'PUT',
