@@ -349,7 +349,8 @@ describe('Folder', () => {
     test('cannot rename a folder if duplicated', async () => {
       const folder0 = await createFolder('folder-a-0', null);
       const folder1 = await createFolder('folder-a-1', null);
-      await createFolder('folder-a-00', folder0.id);
+      const folder00 = await createFolder('folder-a-00', folder0.id);
+      data.folders.push(folder0, folder1, folder00);
 
       const res = await rq({
         method: 'PUT',
@@ -366,6 +367,7 @@ describe('Folder', () => {
 
     test('cannot move a folder to a folder that does not exist', async () => {
       const folder = await createFolder('folder-b-0', null);
+      data.folders.push(folder);
 
       const res = await rq({
         method: 'PUT',
