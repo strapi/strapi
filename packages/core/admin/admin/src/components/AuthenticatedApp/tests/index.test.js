@@ -32,7 +32,6 @@ jest.mock('../utils/api', () => ({
   fetchStrapiLatestRelease: jest.fn(),
   fetchAppInfo: jest.fn(),
   fetchCurrentUserPermissions: jest.fn(),
-  // fetchUserRoles: jest.fn(() => [{ code: 'strapi-super-admin' }]),
   fetchUserRoles: jest.fn(),
 }));
 
