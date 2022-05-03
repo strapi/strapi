@@ -97,6 +97,6 @@ module.exports = async function optInTelemetry() {
   }
 
   await sendEvent(updatedPackageJSON.strapi.uuid);
-  console.log(`${chalk.green('Successfully opted in to Strapi telemetry')}`);
+  console.log(`${chalk.green('Successfully opted into and enabled Strapi telemetry')}`);
   process.exit(0);
 };
