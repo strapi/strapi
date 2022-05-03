@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 /**
- * Upload files and like them to an entity
+ * Upload files and link them to an entity
  * @param {string} uid model uid
  * @param {object} entity entity created
  * @param {object} files files to upload

@@ -100,8 +100,17 @@ module.exports = {
       request: { body, files: { files } = {} },
     } = ctx;
 
+    const data = await validateUploadBody(body);
+
+    const apiUploadFolderService = getService('api-upload-folder');
+
+    const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+    data.fileInfo = data.fileInfo || {};
+    data.fileInfo = Array.isArray(data.fileInfo) ? data.fileInfo : [data.fileInfo];
+    data.fileInfo.forEach(fileInfo => (fileInfo.folder = apiUploadFolder.id));
+
     const uploadedFiles = await getService('upload').upload({
-      data: await validateUploadBody(body),
+      data,
       files,
     });
 
@@ -114,11 +123,11 @@ module.exports = {
       request: { files: { files } = {} },
     } = ctx;
 
-    if (id && (_.isEmpty(files) || files.size === 0)) {
-      return this.updateFileInfo(ctx);
-    }
-
     if (_.isEmpty(files) || files.size === 0) {
+      if (id) {
+        return this.updateFileInfo(ctx);
+      }
+
       throw new ValidationError('Files are empty');
     }
 
