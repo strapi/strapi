@@ -34,7 +34,14 @@ class JSONField extends Field {
   }
 
   fromDB(value) {
-    if (typeof value === 'string') return JSON.parse(value);
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch (e) {
+        // A string is still valid JSON even if it can't be parsed to an object
+        return value
+      }
+    }
     return value;
   }
 }
