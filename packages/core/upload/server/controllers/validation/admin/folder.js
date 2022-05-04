@@ -15,7 +15,12 @@ const validateCreateFolderSchema = yup
       .min(1)
       .matches(NO_SLASH_REGEX, 'name cannot contain slashes')
       .matches(NO_SPACES_AROUND, 'name cannot start or end with a whitespace')
-      .required(),
+      .required()
+      .test('is-folder-unique', 'name already taken', async function(name) {
+        const { exists } = getService('folder');
+        const doesExist = await exists({ parent: this.parent.parent || null, name });
+        return !doesExist;
+      }),
     parent: yup
       .strapiID()
       .nullable()
@@ -30,12 +35,7 @@ const validateCreateFolderSchema = yup
       }),
   })
   .noUnknown()
-  .required()
-  .test('is-folder-unique', 'name already taken', async folder => {
-    const { exists } = getService('folder');
-    const doesExist = await exists({ parent: folder.parent || null, name: folder.name });
-    return !doesExist;
-  });
+  .required();
 
 module.exports = {
   validateCreateFolder: validateYupSchema(validateCreateFolderSchema),
