@@ -177,6 +177,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
                       }}
                       defaultValue={values.parent}
                       name="parent"
+                      menuPortalTarget={document.querySelector('body')}
                     />
                   </Stack>
                 </GridItem>
