@@ -37,9 +37,9 @@ describe('Folder structure', () => {
   afterAll(async () => {
     await rq({
       method: 'POST',
-      url: '/upload/folders/batch-delete',
+      url: '/upload/actions/bulk-delete',
       body: {
-        ids: data.folders.map(f => f.id),
+        folderIds: data.folders.map(f => f.id),
       },
     });
 

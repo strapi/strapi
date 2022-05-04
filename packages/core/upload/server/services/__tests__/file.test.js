@@ -1,6 +1,6 @@
 'use strict';
 
-const { getFolderPath } = require('../file');
+const { getFolderPath, deleteByIds } = require('../file');
 
 const folderPath = '/9bc2352b-e29b-4ba3-810f-7b91033222de';
 
@@ -22,6 +22,36 @@ describe('file', () => {
       const result = await getFolderPath(...args);
 
       expect(result).toBe(expectedResult);
+    });
+  });
+
+  describe('deleteByIds', () => {
+    test('Delete 2 files', async () => {
+      const remove = jest.fn();
+
+      global.strapi = {
+        plugins: {
+          upload: {
+            services: {
+              upload: {
+                remove,
+              },
+            },
+          },
+        },
+        db: {
+          query: () => ({
+            findMany: jest.fn(() => [{ id: 1 }, { id: 2 }]),
+          }),
+        },
+      };
+
+      const res = await deleteByIds([1, 2]);
+
+      expect(res).toMatchObject([{ id: 1 }, { id: 2 }]);
+      expect(remove).toHaveBeenCalledTimes(2);
+      expect(remove).toHaveBeenNthCalledWith(1, { id: 1 });
+      expect(remove).toHaveBeenCalledTimes(2, { id: 2 });
     });
   });
 });

@@ -124,9 +124,9 @@ module.exports = {
       },
     },
     {
-      method: 'POST',
-      path: '/folders/batch-delete',
-      handler: 'admin-folder.deleteMany',
+      method: 'GET',
+      path: '/folder-structure',
+      handler: 'admin-folder.getStructure',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
@@ -140,9 +140,9 @@ module.exports = {
       },
     },
     {
-      method: 'GET',
-      path: '/folder-structure',
-      handler: 'admin-folder.getStructure',
+      method: 'POST',
+      path: '/actions/bulk-delete',
+      handler: 'admin-folder-file.deleteMany',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
