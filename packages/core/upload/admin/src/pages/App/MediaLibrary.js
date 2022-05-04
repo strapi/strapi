@@ -29,6 +29,7 @@ import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
 import { EmptyAssets } from '../../components/EmptyAssets';
+import { useFolderStructure } from '../../hooks/useFolderStructure';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -45,12 +46,14 @@ export const MediaLibrary = () => {
     canDownload,
     isLoading: isLoadingPermissions,
   } = useMediaLibraryPermissions();
+  const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
 
-  const { formatMessage } = useIntl();
   const { data, isLoading, error } = useAssets({
     skipWhen: !canRead,
   });
+
+  const { data: folderStructure } = useFolderStructure();
 
   const handleChangeSort = value => {
     setQuery({ sort: value });
@@ -211,7 +214,9 @@ export const MediaLibrary = () => {
       )}
 
       {/* TODO: After the folder was created successfully, we need to set the current page to 1 */}
-      {showEditFolderDialog && <EditFolderDialog onClose={toggleEditFolderDialog} />}
+      {showEditFolderDialog && (
+        <EditFolderDialog onClose={toggleEditFolderDialog} folderStructure={folderStructure} />
+      )}
 
       {assetToEdit && (
         <EditAssetDialog

@@ -33,20 +33,31 @@ const folderSchema = yup.object({
     .nullable(true),
 });
 
-export const EditFolderDialog = ({ onClose, folder }) => {
+export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolderStructure }) => {
   const submitButtonRef = useRef(null);
   const { formatMessage } = useIntl();
   const { editFolder, isLoading } = useEditFolder();
   const toggleNotification = useNotification();
+  const rootFolder = {
+    value: null,
+    label: formatMessage({
+      id: getTrad('form.input.label.folder-location-default-label'),
+      defaultMessage: 'Media Library',
+    }),
+    children: [],
+  };
+
+  const folderStructure = [
+    {
+      ...rootFolder,
+      children: remoteFolderStructure,
+    },
+  ];
 
   const initialFormData = {
     ...folder,
     parent: {
-      value: null,
-      label: formatMessage({
-        id: getTrad('form.input.label.folder-location-default-label'),
-        defaultMessage: 'Media Library',
-      }),
+      ...rootFolder,
       ...folder?.parent,
     },
   };
@@ -160,7 +171,7 @@ export const EditFolderDialog = ({ onClose, folder }) => {
                     </FieldLabel>
 
                     <SelectTree
-                      options={[]}
+                      options={folderStructure}
                       onChange={value => {
                         setFieldValue('parent', value);
                       }}
@@ -208,5 +219,7 @@ EditFolderDialog.propTypes = {
     createdAt: PropTypes.string.isRequired,
     parent: PropTypes.number,
   }),
+  // TODO: describe shape
+  folderStructure: PropTypes.array.isRequired,
   onClose: PropTypes.func.isRequired,
 };
