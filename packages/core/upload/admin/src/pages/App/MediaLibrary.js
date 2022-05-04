@@ -64,7 +64,19 @@ export const MediaLibrary = () => {
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState('id', []);
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
-  const toggleEditFolderDialog = () => setShowEditFolderDialog(prev => !prev);
+  const toggleEditFolderDialog = ({ created = false } = {}) => {
+    // folders are only displayed on the first page, therefore
+    // we have to navigate the user to that page, in case a folder
+    // was created successfully in order for them to see it
+    if (created && query?.page !== '1') {
+      setQuery({
+        ...query,
+        page: 1,
+      });
+    }
+
+    setShowEditFolderDialog(prev => !prev);
+  };
 
   useFocusWhenNavigate();
 
@@ -213,7 +225,6 @@ export const MediaLibrary = () => {
         <UploadAssetDialog onClose={toggleUploadAssetDialog} trackedLocation="upload" />
       )}
 
-      {/* TODO: After the folder was created successfully, we need to set the current page to 1 */}
       {showEditFolderDialog && (
         <EditFolderDialog onClose={toggleEditFolderDialog} folderStructure={folderStructure} />
       )}

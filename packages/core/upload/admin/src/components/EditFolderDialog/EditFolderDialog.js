@@ -78,7 +78,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
         }),
       });
 
-      onClose();
+      onClose({ created: true });
     } catch (err) {
       let errors = {};
 
