@@ -225,6 +225,16 @@ const createHelpers = db => {
   };
 
   /**
+   * Renames a column in a table
+   * @param {Knex.TableBuilder} tableBuilder 
+   * @param {String} columnFrom
+   * @param {String} columnTo
+   */
+  const renameColumn = (tableBuilder, columnFrom, columnTo) => {
+    return tableBuilder.renameColumn(columnFrom, columnTo)
+  }
+
+  /**
    * Drops a column from a table
    * @param {Knex.TableBuilder} tableBuilder
    * @param {Column} column
@@ -285,6 +295,11 @@ const createHelpers = db => {
       for (const removedColumn of table.columns.removed) {
         debug(`Dropping column ${removedColumn.name}`);
         dropColumn(tableBuilder, removedColumn);
+      }
+
+      //rename columns
+      for (const renamedColumn of table.columns.renamed) {
+        renameColumn(tableBuilder, renamedColumn.name, renamedColumn.renameTo)
       }
 
       // Update existing columns / foreign keys / indexes

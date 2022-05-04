@@ -21,10 +21,10 @@ const helpers = {
   },
 
   hasColumn(table, columnName) {
-    return table.columns.findIndex(column => column.name === columnName) !== -1;
+    return table.columns.findIndex(column => _.snakeCase(column.name) === columnName) !== -1;
   },
   findColumn(table, columnName) {
-    return table.columns.find(column => column.name === columnName);
+    return table.columns.find(column => _.snakeCase(column.name) === columnName);
   },
 
   hasIndex(table, columnName) {
@@ -174,6 +174,7 @@ module.exports = db => {
     const updatedColumns = [];
     const unchangedColumns = [];
     const removedColumns = [];
+    const renamedColumns = [];
 
     for (const destColumn of destTable.columns) {
       if (!helpers.hasColumn(srcTable, destColumn.name)) {
@@ -184,6 +185,10 @@ module.exports = db => {
       const srcColumn = helpers.findColumn(srcTable, destColumn.name);
       const { status, diff } = diffColumns(srcColumn, destColumn);
 
+      if(srcColumn && destColumn && srcColumn.name !== destColumn.name) {
+        renamedColumns.push({...srcColumn, renameTo: destColumn.name})
+      }
+
       if (status === statuses.CHANGED) {
         updatedColumns.push(diff);
       } else {
@@ -192,7 +197,7 @@ module.exports = db => {
     }
 
     for (const srcColumn of srcTable.columns) {
-      if (!helpers.hasColumn(destTable, srcColumn.name)) {
+      if (!helpers.hasColumn(destTable, _.snakeCase(srcColumn.name))) {
         removedColumns.push(srcColumn);
       }
     }
@@ -206,6 +211,7 @@ module.exports = db => {
         updated: updatedColumns,
         unchanged: unchangedColumns,
         removed: removedColumns,
+        renamed: renamedColumns, 
       },
     };
   };
