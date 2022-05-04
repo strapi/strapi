@@ -1,0 +1,94 @@
+import React from 'react';
+import { QueryClientProvider, QueryClient } from 'react-query';
+import { renderHook, act } from '@testing-library/react-hooks';
+
+import { axiosInstance } from '../../utils';
+import { useFolderStructure } from '../useFolderStructure';
+
+jest.mock('../../utils', () => ({
+  ...jest.requireActual('../../utils'),
+  axiosInstance: {
+    get: jest.fn().mockResolvedValue({
+      data: {
+        data: [
+          {
+            id: 1,
+            name: '1',
+            children: [],
+          },
+
+          {
+            id: 2,
+            name: '2',
+            children: [
+              {
+                id: 21,
+                name: '21',
+                children: [],
+              },
+            ],
+          },
+        ],
+      },
+    }),
+  },
+}));
+
+const client = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+// eslint-disable-next-line react/prop-types
+function ComponentFixture({ children }) {
+  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+}
+
+function setup(...args) {
+  return new Promise(resolve => {
+    act(() => {
+      resolve(renderHook(() => useFolderStructure(...args), { wrapper: ComponentFixture }));
+    });
+  });
+}
+
+describe('useFolderStructure', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('fetches data from the right URL', async () => {
+    await setup();
+
+    expect(axiosInstance.get).toBeCalledWith('/upload/folder-structure');
+  });
+
+  test('transforms the required object keys', async () => {
+    const { result, waitFor } = await setup({});
+
+    await waitFor(() => result.current.isSuccess);
+
+    expect(result.current.data).toStrictEqual([
+      {
+        value: 1,
+        label: '1',
+        children: [],
+      },
+
+      {
+        value: 2,
+        label: '2',
+        children: [
+          {
+            value: 21,
+            label: '21',
+            children: [],
+          },
+        ],
+      },
+    ]);
+  });
+});
