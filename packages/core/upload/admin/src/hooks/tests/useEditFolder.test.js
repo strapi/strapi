@@ -25,7 +25,7 @@ console.error = jest.fn().mockImplementation();
 jest.mock('../../utils', () => ({
   ...jest.requireActual('../../utils'),
   axiosInstance: {
-    get: jest.fn().mockResolvedValue(),
+    put: jest.fn().mockResolvedValue({ name: 'folder-created' }),
     post: jest.fn().mockResolvedValue({ name: 'folder-created' }),
   },
 }));
