@@ -51,14 +51,8 @@ Object {
 <body>
     <div>
       <div
-        class=" css-npt6n7-container"
+        class=" css-1tkrshn-container"
       >
-        <span
-          aria-atomic="false"
-          aria-live="polite"
-          aria-relevant="additions text"
-          class="css-1f43avz-a11yText-A11yText"
-        />
         <div
           class=" css-1sb7bue-control"
         >
@@ -144,14 +138,8 @@ Object {
   </body>,
   "container": <div>
     <div
-      class=" css-npt6n7-container"
+      class=" css-1tkrshn-container"
     >
-      <span
-        aria-atomic="false"
-        aria-live="polite"
-        aria-relevant="additions text"
-        class="css-1f43avz-a11yText-A11yText"
-      />
       <div
         class=" css-1sb7bue-control"
       >
