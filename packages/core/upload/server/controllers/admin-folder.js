@@ -2,7 +2,7 @@
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
-const { validateCreateFolder, validateDeleteManyFolders } = require('./validation/admin/folder');
+const { validateCreateFolder } = require('./validation/admin/folder');
 
 const folderModel = 'plugin::upload.folder';
 
@@ -59,18 +59,14 @@ module.exports = {
       data: await permissionsManager.sanitizeOutput(folder),
     };
   },
-  // deleteMany WIP
-  async deleteMany(ctx) {
-    const { body } = ctx.request;
 
-    await validateDeleteManyFolders(body);
+  async getStructure(ctx) {
+    const { getStructure } = getService('folder');
 
-    const { deleteByIds } = getService('folder');
-
-    const deletedFolders = await deleteByIds(body.ids);
+    const structure = await getStructure();
 
     ctx.body = {
-      data: deletedFolders,
+      data: structure,
     };
   },
 };

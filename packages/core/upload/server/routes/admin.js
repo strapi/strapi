@@ -124,9 +124,25 @@ module.exports = {
       },
     },
     {
+      method: 'GET',
+      path: '/folder-structure',
+      handler: 'admin-folder.getStructure',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.read'],
+            },
+          },
+        ],
+      },
+    },
+    {
       method: 'POST',
-      path: '/folders/batch-delete',
-      handler: 'admin-folder.deleteMany',
+      path: '/actions/bulk-delete',
+      handler: 'admin-folder-file.deleteMany',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',

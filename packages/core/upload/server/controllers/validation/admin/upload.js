@@ -16,7 +16,9 @@ const fileInfoSchema = yup.object({
         return true;
       }
 
-      return getService('folder').exists({ id: folderId });
+      const exists = await getService('folder').exists({ id: folderId });
+
+      return exists;
     }),
 });
 
