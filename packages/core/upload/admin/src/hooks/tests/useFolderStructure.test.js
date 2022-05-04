@@ -61,15 +61,17 @@ describe('useFolderStructure', () => {
   });
 
   test('fetches data from the right URL', async () => {
-    await setup();
+    const { waitForNextUpdate } = await setup();
+
+    await waitForNextUpdate();
 
     expect(axiosInstance.get).toBeCalledWith('/upload/folder-structure');
   });
 
   test('transforms the required object keys', async () => {
-    const { result, waitFor } = await setup({});
+    const { result, waitForNextUpdate } = await setup({});
 
-    await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
 
     expect(result.current.data).toStrictEqual([
       {
