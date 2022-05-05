@@ -62,7 +62,7 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
 
   useEffect(() => {
     const uploadFile = async () => {
-      const folderId = query?.filters?.folder;
+      const folderId = query?.folder;
       const files = await upload(asset, folderId);
 
       if (addUploadedFiles) {
