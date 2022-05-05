@@ -55,12 +55,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
     },
   ];
 
-  const initialFormData = {
-    ...folder,
-    parent: {
-      ...rootFolder,
-    },
-  };
+  const initialFormData = Object.assign({}, folder, { parent: folder?.parent ?? rootFolder });
 
   const handleSubmit = async (values, { setErrors }) => {
     try {
