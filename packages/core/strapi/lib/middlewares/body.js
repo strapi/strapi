@@ -3,11 +3,22 @@
 const fse = require('fs-extra');
 const { defaultsDeep, get } = require('lodash/fp');
 const body = require('koa-body');
+const mime = require('mime-types');
 
 const defaults = {
   multipart: true,
   patchKoa: true,
 };
+
+function ensureType(file) {
+  if (!file.type) {
+    file.type = mime.lookup(file.name);
+  }
+}
+
+function getFiles(ctx) {
+  return get('request.files.files', ctx);
+}
 
 /**
  * @type {import('./').MiddlewareFactory}
@@ -18,21 +29,34 @@ module.exports = config => {
   return async (ctx, next) => {
     // TODO: find a better way later
     if (ctx.url === '/graphql') {
-      return next();
-    }
+      await next();
+    } else {
+      try {
+        await body({ patchKoa: true, ...bodyConfig })(ctx, () => {});
 
-    try {
-      await body({ patchKoa: true, ...bodyConfig })(ctx, next);
-    } catch (e) {
-      if ((e || {}).message && e.message.includes('maxFileSize exceeded')) {
-        return ctx.payloadTooLarge('FileTooBig');
+        const files = getFiles(ctx);
+
+        if (files) {
+          if (Array.isArray(files)) {
+            files.forEach(ensureType);
+          } else {
+            ensureType(files);
+          }
+        }
+
+        await next();
+      } catch (e) {
+        if ((e || {}).message && e.message.includes('maxFileSize exceeded')) {
+          return ctx.payloadTooLarge('FileTooBig');
+        }
+
+        throw e;
       }
-
-      throw e;
     }
+
+    const files = getFiles(ctx);
 
     // clean any file that was uploaded
-    const files = get('request.files.files', ctx);
     if (files) {
       if (Array.isArray(files)) {
         // not awaiting to not slow the request
