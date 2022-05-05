@@ -59,31 +59,30 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
     ...folder,
     parent: {
       ...rootFolder,
-      ...folder?.parent,
+      ...{
+        value: folder?.parent?.id,
+        label: folder?.parent?.label,
+      },
     },
   };
 
   const handleSubmit = async (values, { setErrors }) => {
-    let errors = {};
-
     try {
-      if (isEmpty(errors)) {
-        await editFolder({
-          ...folder,
-          ...values,
-          parent: values.parent.value ?? null,
-        });
+      await editFolder({
+        ...folder,
+        ...values,
+        parent: values.parent.value ?? null,
+      });
 
-        toggleNotification({
-          type: 'success',
-          message: formatMessage({
-            id: getTrad('modal.folder-notification-success'),
-            defaultMessage: 'Folder successfully created',
-          }),
-        });
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: getTrad('modal.folder-notification-success'),
+          defaultMessage: 'Folder successfully created',
+        }),
+      });
 
-        onClose({ created: true });
-      }
+      onClose({ created: true });
     } catch (err) {
       const errors = getAPIInnerErrors(err, { getTrad });
       const formikErrors = Object.entries(errors).reduce((acc, [key, error]) => {
