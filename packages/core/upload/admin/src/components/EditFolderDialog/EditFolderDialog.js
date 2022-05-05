@@ -19,7 +19,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Form, useNotification, getAPIInnerErrors, useQueryParams } from '@strapi/helper-plugin';
 
-import { getTrad } from '../../utils';
+import { getTrad, findRecursiveFolderByValue } from '../../utils';
 import { useEditFolder } from '../../hooks/useEditFolder';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
@@ -34,51 +34,23 @@ const folderSchema = yup.object({
     .nullable(true),
 });
 
-function findByValue(data, value) {
-  let result;
-
-  function iter(a) {
-    if (a.value === value) {
-      result = a;
-
-      return true;
-    }
-
-    return Array.isArray(a.children) && a.children.some(iter);
-  }
-
-  data.some(iter);
-
-  return result;
-}
-
-export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolderStructure }) => {
+export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
   const submitButtonRef = useRef(null);
   const { formatMessage, formatDate } = useIntl();
   const { editFolder, isLoading } = useEditFolder();
   const toggleNotification = useNotification();
   const [{ query }] = useQueryParams();
-  const rootFolder = {
-    value: null,
-    label: formatMessage({
-      id: getTrad('form.input.label.folder-location-default-label'),
-      defaultMessage: 'Media Library',
-    }),
-    children: [],
-  };
 
-  const folderStructure = [
-    {
-      ...rootFolder,
-      children: remoteFolderStructure,
-    },
-  ];
-
-  const activeFolderId = parseInt(folder?.parent?.id ?? query?.folder ?? rootFolder.value, 10);
+  const activeFolderId = parseInt(
+    folder?.parent?.id ?? query?.folder ?? folderStructure[0].value,
+    10
+  );
   const initialFormData = Object.assign({}, folder, {
     parent: {
       value: activeFolderId,
-      label: findByValue(folderStructure, activeFolderId)?.label ?? rootFolder.label,
+      label:
+        findRecursiveFolderByValue(folderStructure, activeFolderId)?.label ??
+        folderStructure[0].label,
     },
   });
 

@@ -302,6 +302,7 @@ export const MediaLibrary = () => {
           canUpdate={canUpdate}
           canCopyLink={canCopyLink}
           canDownload={canDownload}
+          folderStructure={folderStructure}
           trackedLocation="upload"
         />
       )}

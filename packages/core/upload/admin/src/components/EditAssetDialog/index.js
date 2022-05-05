@@ -27,7 +27,7 @@ import * as yup from 'yup';
 
 import { PreviewBox } from './PreviewBox';
 import { ContextInfo } from '../ContextInfo';
-import { getTrad } from '../../utils';
+import { getTrad, findRecursiveFolderByValue } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { ReplaceMediaButton } from './ReplaceMediaButton';
@@ -47,6 +47,7 @@ export const EditAssetDialog = ({
   canCopyLink,
   canDownload,
   trackedLocation,
+  folderStructure,
 }) => {
   const { formatMessage, formatDate } = useIntl();
   const submitButtonRef = useRef(null);
@@ -94,17 +95,20 @@ export const EditAssetDialog = ({
     }
   };
 
+  const activeFolderId = asset?.folder?.id;
   const initialFormData = {
     name: asset.name,
     alternativeText: asset.alternativeText || '',
     caption: asset.caption || '',
     parent: {
-      value: null,
-      // TODO
-      label: 'Media Library',
-      ...asset?.folder?.parent,
+      value: activeFolderId ?? null,
+      label:
+        findRecursiveFolderByValue(folderStructure, activeFolderId)?.label ??
+        folderStructure[0].label,
     },
   };
+
+  console.log(asset);
 
   const handleClose = values => {
     if (!isEqual(initialFormData, values)) {
@@ -225,7 +229,7 @@ export const EditAssetDialog = ({
                     />
 
                     <Stack spacing={1}>
-                      <FieldLabel>
+                      <FieldLabel for="asset-folder">
                         {formatMessage({
                           id: getTrad('form.input.label.file-location'),
                           defaultMessage: 'Location',
@@ -235,10 +239,18 @@ export const EditAssetDialog = ({
                       <SelectTree
                         name="parent"
                         defaultValue={values.parent}
-                        options={[]}
+                        options={folderStructure}
                         onChange={value => {
                           setFieldValue('parent', value);
                         }}
+                        menuPortalTarget={document.querySelector('body')}
+                        inputId="asset-folder"
+                        {...(errors.parent
+                          ? {
+                              'aria-errormessage': 'folder-parent-error',
+                              'aria-invalid': true,
+                            }
+                          : {})}
                       />
                     </Stack>
                   </Stack>
@@ -298,5 +310,6 @@ EditAssetDialog.propTypes = {
   canCopyLink: PropTypes.bool.isRequired,
   canDownload: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  folderStructure: PropTypes.array.isRequired,
   trackedLocation: PropTypes.string,
 };
