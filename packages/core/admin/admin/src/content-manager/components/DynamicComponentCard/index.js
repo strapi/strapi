@@ -29,7 +29,7 @@ DynamicComponentCard.defaultProps = {
   children: null,
   friendlyName: '',
   onClick: () => {},
-  icon: 'smile',
+  icon: 'dice-d6',
 };
 
 DynamicComponentCard.propTypes = {
