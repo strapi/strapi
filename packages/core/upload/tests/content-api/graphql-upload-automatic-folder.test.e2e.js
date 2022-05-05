@@ -21,7 +21,7 @@ describe('Uploads folder (GraphQL)', () => {
 
   afterAll(async () => {
     // delete all folders
-    const res = await rq({
+    const res = await rqAdmin({
       method: 'GET',
       url: '/upload/folders?pagination[pageSize]=100',
     });

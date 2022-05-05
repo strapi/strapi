@@ -315,6 +315,57 @@ describe('Folder', () => {
       expect(res.body.error.message).toBe('parent folder does not exist');
     });
 
+    test('cannot move a folder inside itself (0 level)', async () => {
+      const folder = await createFolder('folder-d-0', null);
+      data.folders.push(folder);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder.id}`,
+        body: {
+          parent: folder.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('folder cannot be moved inside itself');
+    });
+
+    test('cannot move a folder inside itself (1 level)', async () => {
+      const folder0 = await createFolder('folder-e-0', null);
+      const folder00 = await createFolder('folder-e-00', folder0.id);
+      data.folders.push(folder0, folder00);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder0.id}`,
+        body: {
+          parent: folder00.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('folder cannot be moved inside itself');
+    });
+
+    test('cannot move a folder inside itself (2 levels)', async () => {
+      const folder0 = await createFolder('folder-f-0', null);
+      const folder00 = await createFolder('folder-f-00', folder0.id);
+      const folder000 = await createFolder('folder-f-000', folder00.id);
+      data.folders.push(folder0, folder00, folder000);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder0.id}`,
+        body: {
+          parent: folder000.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('folder cannot be moved inside itself');
+    });
+
     test('move a folder inside another folder', async () => {
       const folder0 = await createFolder('folder-0', null);
       const folder00 = await createFolder('folder-00', folder0.id);
