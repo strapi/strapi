@@ -95,7 +95,7 @@ module.exports = ({
           },
         },
         {
-          test: /\.m?js$/,
+          test: /\.m?jsx?$/,
           include: cacheDir,
           oneOf: [
             // Use babel-loader for files that distinct the ee and ce code
@@ -162,7 +162,7 @@ module.exports = ({
           ],
         },
         {
-          test: /\.m?js$/,
+          test: /\.m?jsx?$/,
           include: pluginsPath,
           use: {
             loader: require.resolve('esbuild-loader'),
