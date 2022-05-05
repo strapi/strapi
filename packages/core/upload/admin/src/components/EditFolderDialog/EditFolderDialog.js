@@ -54,7 +54,7 @@ function findByValue(data, value) {
 
 export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolderStructure }) => {
   const submitButtonRef = useRef(null);
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatDate } = useIntl();
   const { editFolder, isLoading } = useEditFolder();
   const toggleNotification = useNotification();
   const [{ query }] = useQueryParams();
@@ -164,7 +164,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
                             id: getTrad('modal.folder.create.creation-date'),
                             defaultMessage: 'Creation Date',
                           }),
-                          value: folder.createdAt,
+                          value: formatDate(new Date(folder.createdAt)),
                         },
                       ]}
                     />
