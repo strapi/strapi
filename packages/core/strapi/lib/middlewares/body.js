@@ -10,9 +10,9 @@ const defaults = {
   patchKoa: true,
 };
 
-function ensureType(file) {
+function ensureFileMimeType(file) {
   if (!file.type) {
-    file.type = mime.lookup(file.name);
+    file.type = mime.lookup(file.name) || 'application/octet-stream';
   }
 }
 
@@ -36,11 +36,15 @@ module.exports = config => {
 
         const files = getFiles(ctx);
 
+        /**
+         * in case the mime-type wasn't sent, Strapi tries to guess it
+         * from the file extension, to avoid a corrupt database state
+         */
         if (files) {
           if (Array.isArray(files)) {
-            files.forEach(ensureType);
+            files.forEach(ensureFileMimeType);
           } else {
-            ensureType(files);
+            ensureFileMimeType(files);
           }
         }
 

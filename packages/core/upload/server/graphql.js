@@ -49,7 +49,11 @@ module.exports = ({ strapi }) => {
     const currentFile = uploadService.formatFileInfo(
       {
         filename,
-        type: mimetype || mime.lookup(filename),
+        /**
+         * in case the mime-type wasn't sent, Strapi tries to guess it
+         * from the file extension, to avoid a corrupt database state
+         */
+        type: mimetype || mime.lookup(filename) || 'application/octet-stream',
         size: await getStreamSize(createReadStream()),
       },
       extraInfo || {},
@@ -144,16 +148,16 @@ module.exports = ({ strapi }) => {
               const { files: uploads, ...metas } = args;
 
               const files = await Promise.all(
-                uploads.map((upload) => formatFile(upload, {}, { ...metas, tmpWorkingDirectory }))
+                uploads.map(upload => formatFile(upload, {}, { ...metas, tmpWorkingDirectory }))
               );
 
               const uploadService = getUploadService('upload');
 
               const uploadedFiles = await Promise.all(
-                files.map((file) => uploadService.uploadFileAndPersist(file, {}))
+                files.map(file => uploadService.uploadFileAndPersist(file, {}))
               );
 
-              sanitizedEntities = uploadedFiles.map((file) =>
+              sanitizedEntities = uploadedFiles.map(file =>
                 toEntityResponse(file, { args, resourceUID: fileTypeName })
               );
             } finally {
