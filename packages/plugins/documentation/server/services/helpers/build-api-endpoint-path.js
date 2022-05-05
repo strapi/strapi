@@ -7,7 +7,7 @@ const pascalCase = require('./utils/pascal-case');
 const queryParams = require('./utils/query-params');
 const loopContentTypeNames = require('./utils/loop-content-type-names');
 const getApiResponses = require('./utils/get-api-responses');
-const { hasFindMethod } = require('./utils/routes');
+const { hasFindMethod, isLocalizedPath } = require('./utils/routes');
 
 /**
  * @description Parses a route with ':variable'
@@ -93,12 +93,17 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
   const paths = contentTypeRoutes.reduce((acc, route) => {
     // TODO: Find a more reliable way to determine list of entities vs a single entity
     const isListOfEntities = hasFindMethod(route.handler);
-    const isLocalizationPath = route.path.includes('localizations');
+    const isLocalizationPath = isLocalizedPath(route.path);
     const methodVerb = route.method.toLowerCase();
     const hasPathParams = route.path.includes('/:');
     const pathWithPrefix = getPathWithPrefix(routeInfo.prefix, route);
     const routePath = hasPathParams ? parsePathWithVariables(pathWithPrefix) : pathWithPrefix;
-    const { responses } = getApiResponses(uniqueName, route, isListOfEntities);
+    const { responses } = getApiResponses({
+      uniqueName,
+      route,
+      isListOfEntities,
+      isLocalizationPath,
+    });
 
     const swaggerConfig = {
       responses,

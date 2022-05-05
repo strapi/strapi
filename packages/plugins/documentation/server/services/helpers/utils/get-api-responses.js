@@ -11,7 +11,12 @@ const pascalCase = require('./pascal-case');
  *
  * @returns The Swagger responses
  */
-const getApiResponse = (name, route, isListOfEntities = false) => {
+const getApiResponse = ({
+  uniqueName,
+  route,
+  isListOfEntities = false,
+  isLocalizationPath = false,
+}) => {
   const getSchema = () => {
     if (route.method === 'DELETE') {
       return {
@@ -20,18 +25,22 @@ const getApiResponse = (name, route, isListOfEntities = false) => {
       };
     }
 
-    if (isListOfEntities) {
-      return { $ref: `#/components/schemas/${pascalCase(name)}ListResponse` };
+    if (isLocalizationPath) {
+      return { $ref: `#/components/schemas/${pascalCase(uniqueName)}LocalizationResponse` };
     }
 
-    return { $ref: `#/components/schemas/${pascalCase(name)}Response` };
+    if (isListOfEntities) {
+      return { $ref: `#/components/schemas/${pascalCase(uniqueName)}ListResponse` };
+    }
+
+    return { $ref: `#/components/schemas/${pascalCase(uniqueName)}Response` };
   };
 
   const schema = getSchema();
 
   return {
     responses: {
-      '200': {
+      200: {
         description: 'OK',
         content: {
           'application/json': {
@@ -39,7 +48,7 @@ const getApiResponse = (name, route, isListOfEntities = false) => {
           },
         },
       },
-      '400': {
+      400: {
         description: 'Bad Request',
         content: {
           'application/json': {
@@ -49,7 +58,7 @@ const getApiResponse = (name, route, isListOfEntities = false) => {
           },
         },
       },
-      '401': {
+      401: {
         description: 'Unauthorized',
         content: {
           'application/json': {
@@ -59,7 +68,7 @@ const getApiResponse = (name, route, isListOfEntities = false) => {
           },
         },
       },
-      '403': {
+      403: {
         description: 'Forbidden',
         content: {
           'application/json': {
@@ -69,7 +78,7 @@ const getApiResponse = (name, route, isListOfEntities = false) => {
           },
         },
       },
-      '404': {
+      404: {
         description: 'Not Found',
         content: {
           'application/json': {
@@ -79,7 +88,7 @@ const getApiResponse = (name, route, isListOfEntities = false) => {
           },
         },
       },
-      '500': {
+      500: {
         description: 'Internal Server Error',
         content: {
           'application/json': {

@@ -113,7 +113,7 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
         break;
       }
       case 'dynamiczone': {
-        const components = attribute.components.map(component => {
+        const components = attribute.components.map((component) => {
           const componentAttributes = strapi.components[component].attributes;
           return {
             type: 'object',
@@ -166,6 +166,14 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
           };
 
           attributesCopy[prop] = isListOfEntities ? { type: 'array', items: oneOfType } : oneOfType;
+          break;
+        }
+
+        if (prop === 'localizations') {
+          attributesCopy[prop] = {
+            type: 'array',
+            items: { type: 'object', properties: {} },
+          };
           break;
         }
 

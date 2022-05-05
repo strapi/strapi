@@ -1,9 +1,10 @@
 'use strict';
+const _ = require('lodash');
 
 const cleanSchemaAttributes = require('./utils/clean-schema-attributes');
 const loopContentTypeNames = require('./utils/loop-content-type-names');
 const pascalCase = require('./utils/pascal-case');
-const { hasFindMethod } = require('./utils/routes');
+const { hasFindMethod, isLocalizedPath } = require('./utils/routes');
 
 /**
  * @decription Get all open api schema objects for a given content type
@@ -20,13 +21,24 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   let schemas = {};
   // Get all the route methods
   const routeMethods = routeInfo.routes.map((route) => route.method);
+  // Check for localized paths
   const hasLocalizationPath = routeInfo.routes.filter((route) =>
-    route.path.includes('localizations')
+    isLocalizedPath(route.path)
   ).length;
-
   // When the route methods contain any post or put requests
   if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
-    const requiredAttributes = Object.entries(attributes)
+    const attributesToOmit = [
+      'createdAt',
+      'updatedAt',
+      'publishedAt',
+      'publishedBy',
+      'updatedBy',
+      'createdBy',
+      'localizations',
+    ];
+    const attributesForRequest = _.omit(attributes, attributesToOmit);
+
+    const requiredAttributes = Object.entries(attributesForRequest)
       .filter(([, attribute]) => attribute.required)
       .map(([attributeName, attribute]) => {
         return { [attributeName]: attribute };
@@ -35,19 +47,14 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     const requestAttributes =
       routeMethods.includes('POST') && requiredAttributes.length
         ? Object.assign({}, ...requiredAttributes)
-        : attributes;
+        : attributesForRequest;
 
     if (hasLocalizationPath) {
-      const localizationsRequestAttributes = {
-        ...requestAttributes,
-        locale: { type: 'string' },
-      };
-
       schemas = {
         ...schemas,
         [`${pascalCase(uniqueName)}LocalizationRequest`]: {
           type: 'object',
-          properties: cleanSchemaAttributes(localizationsRequestAttributes, { isRequest: true }),
+          properties: cleanSchemaAttributes(requestAttributes, { isRequest: true }),
         },
       };
     }
