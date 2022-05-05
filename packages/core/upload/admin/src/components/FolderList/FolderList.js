@@ -52,7 +52,7 @@ export const FolderList = ({
             currentFolder => currentFolder.id === folder.id
           );
           const url = `${pathname}?${stringify(
-            { ...query, filters: { folder: folder.id } },
+            { ...query, folder: folder.id },
             { encode: false }
           )}`;
 

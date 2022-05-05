@@ -17,7 +17,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Form, useNotification, getAPIInnerErrors } from '@strapi/helper-plugin';
+import { Form, useNotification, getAPIInnerErrors, useQueryParams } from '@strapi/helper-plugin';
 
 import { getTrad } from '../../utils';
 import { useEditFolder } from '../../hooks/useEditFolder';
@@ -34,11 +34,30 @@ const folderSchema = yup.object({
     .nullable(true),
 });
 
+function findByValue(data, value) {
+  let result;
+
+  function iter(a) {
+    if (a.value === value) {
+      result = a;
+
+      return true;
+    }
+
+    return Array.isArray(a.children) && a.children.some(iter);
+  }
+
+  data.some(iter);
+
+  return result;
+}
+
 export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolderStructure }) => {
   const submitButtonRef = useRef(null);
   const { formatMessage } = useIntl();
   const { editFolder, isLoading } = useEditFolder();
   const toggleNotification = useNotification();
+  const [{ query }] = useQueryParams();
   const rootFolder = {
     value: null,
     label: formatMessage({
@@ -55,7 +74,13 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
     },
   ];
 
-  const initialFormData = Object.assign({}, folder, { parent: folder?.parent ?? rootFolder });
+  const activeFolderId = parseInt(folder?.parent?.id ?? query?.folder ?? rootFolder.value, 10);
+  const initialFormData = Object.assign({}, folder, {
+    parent: {
+      value: activeFolderId,
+      label: findByValue(folderStructure, activeFolderId)?.label ?? rootFolder.label,
+    },
+  });
 
   const handleSubmit = async (values, { setErrors }) => {
     try {

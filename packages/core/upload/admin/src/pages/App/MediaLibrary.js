@@ -106,7 +106,7 @@ export const MediaLibrary = () => {
   const assets = assetsData?.results;
   const assetCount = assetsData?.pagination?.total || 0;
 
-  const isNestedFolder = !!query?.filters?.folder;
+  const isNestedFolder = !!query?.folder;
   const isLoading = foldersLoading || permissionsLoading || assetsLoading;
 
   return (
