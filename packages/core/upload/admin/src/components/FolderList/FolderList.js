@@ -70,7 +70,7 @@ export const FolderList = ({
               }
               cardActions={
                 <>
-                  <IconButton icon={<Pencil />} onClick={onEditFolder} />
+                  <IconButton icon={<Pencil />} onClick={() => onEditFolder(folder)} />
                 </>
               }
             >

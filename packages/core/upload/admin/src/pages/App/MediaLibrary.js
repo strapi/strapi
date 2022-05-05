@@ -64,13 +64,10 @@ export const MediaLibrary = () => {
 
   const { data: folderStructure } = useFolderStructure();
 
-  const handleChangeSort = value => {
-    setQuery({ sort: value });
-  };
-
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
+  const [folderToEdit, setFolderToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState(['type', 'id'], []);
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
   const toggleEditFolderDialog = ({ created = false } = {}) => {
@@ -85,6 +82,20 @@ export const MediaLibrary = () => {
     }
 
     setShowEditFolderDialog(prev => !prev);
+  };
+
+  const handleChangeSort = value => {
+    setQuery({ sort: value });
+  };
+
+  const handleEditFolder = folder => {
+    setFolderToEdit(folder);
+    setShowEditFolderDialog(true);
+  };
+
+  const handleEditFolderClose = payload => {
+    setFolderToEdit(null);
+    toggleEditFolderDialog(payload);
   };
 
   useFocusWhenNavigate();
@@ -200,8 +211,7 @@ export const MediaLibrary = () => {
               {folders?.length > 0 && !isFiltering && (
                 <FolderList
                   folders={folders}
-                  /* TODO */
-                  onEditFolder={() => {}}
+                  onEditFolder={handleEditFolder}
                   onSelectFolder={selectOne}
                   selectedFolders={selected.filter(({ type }) => type === 'folder')}
                   title={formatMessage({
@@ -278,7 +288,11 @@ export const MediaLibrary = () => {
       )}
 
       {showEditFolderDialog && (
-        <EditFolderDialog onClose={toggleEditFolderDialog} folderStructure={folderStructure} />
+        <EditFolderDialog
+          onClose={handleEditFolderClose}
+          folderStructure={folderStructure}
+          folder={folderToEdit}
+        />
       )}
 
       {assetToEdit && (

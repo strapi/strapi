@@ -21,7 +21,7 @@ export const useFolderStructure = ({ enabled = true } = {}) => {
   };
 
   const { data, error, isLoading } = useQuery(
-    [pluginId, 'folders', 'structure'],
+    [pluginId, 'folder', 'structure'],
     fetchFolderStructure,
     {
       enabled,

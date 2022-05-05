@@ -122,7 +122,16 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
                             id: getTrad('modal.folder.create.elements'),
                             defaultMessage: 'Elements',
                           }),
-                          value: folder.children.length,
+                          value: formatMessage(
+                            {
+                              id: getTrad('modal.folder.elements.count'),
+                              defaultMessage: '{assetCount} assets, {folderCount} folders',
+                            },
+                            {
+                              assetCount: folder?.files?.count ?? 0,
+                              folderCount: folder?.children?.length ?? 0,
+                            }
+                          ),
                         },
 
                         {
@@ -225,6 +234,9 @@ EditFolderDialog.propTypes = {
     name: PropTypes.string.isRequired,
     children: PropTypes.array.isRequired,
     createdAt: PropTypes.string.isRequired,
+    files: PropTypes.shape({
+      count: PropTypes.number.isRequired,
+    }).isRequired,
     parent: PropTypes.number,
   }),
   // TODO: describe shape

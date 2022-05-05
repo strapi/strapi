@@ -18,7 +18,7 @@ export const useEditFolder = () => {
   const mutation = useMutation(({ folder }) => editFolderRequest(folder), {
     onSuccess: () => {
       queryClient.refetchQueries([pluginId, 'folder'], { active: true });
-      queryClient.refetchQueries([pluginId, 'folders', 'structure'], { active: true });
+      queryClient.refetchQueries([pluginId, 'folder', 'structure'], { active: true });
     },
     onError: reason => {
       toggleNotification({ type: 'warning', message: reason.message });
