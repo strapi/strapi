@@ -25,7 +25,7 @@ console.error = jest.fn().mockImplementation();
 jest.mock('../../utils', () => ({
   ...jest.requireActual('../../utils'),
   axiosInstance: {
-    put: jest.fn().mockResolvedValue({ name: 'folder-created' }),
+    put: jest.fn().mockResolvedValue({ name: 'folder-edited' }),
     post: jest.fn().mockResolvedValue({ name: 'folder-created' }),
   },
 }));
@@ -84,7 +84,7 @@ describe('useEditFolder', () => {
     jest.clearAllMocks();
   });
 
-  test('calls the proper endpoint when creating a folder', async () => {
+  test('calls the proper endpoint when creating a folder (post)', async () => {
     const {
       result: { current },
     } = await setup();
@@ -95,6 +95,19 @@ describe('useEditFolder', () => {
     });
 
     expect(axiosInstance.post).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
+  });
+
+  test('calls the proper endpoint when creating a folder (put)', async () => {
+    const {
+      result: { current },
+    } = await setup();
+    const { editFolder } = current;
+
+    await act(async () => {
+      await editFolder(FOLDER_EDIT_FIXTURE);
+    });
+
+    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
   });
 
   test('calls the proper endpoint when editing a folder', async () => {
@@ -144,7 +157,7 @@ describe('useEditFolder', () => {
   });
 
   test('calls toggleNotification in case of an error', async () => {
-    axiosInstance.post.mockRejectedValue({ message: 'err-test' });
+    axiosInstance.put.mockRejectedValue({ message: 'err-test' });
 
     const toggleNotification = useNotification();
     const {
