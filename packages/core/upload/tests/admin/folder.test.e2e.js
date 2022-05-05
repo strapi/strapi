@@ -188,6 +188,34 @@ describe('Folder', () => {
   });
 
   describe('read', () => {
+    test('Can read a folder', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: `/upload/folders/${data.folders[0].id}`,
+      });
+
+      expect(res.body.data).toMatchObject({
+        ...pick(['id', 'name', 'uid', 'path', 'createAt', 'updatedAt'], data.folders[0]),
+        children: {
+          count: expect.anything(),
+        },
+        files: {
+          count: expect.anything(),
+        },
+        createdBy: expect.anything(),
+        updatedBy: expect.anything(),
+      });
+    });
+
+    test('Return 404 when folder does not exist', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/upload/folders/99999',
+      });
+
+      expect(res.status).toBe(404);
+    });
+
     test('Can read folders', async () => {
       const res = await rq({
         method: 'GET',
@@ -205,38 +233,12 @@ describe('Folder', () => {
           {
             ...data.folders[0],
             children: { count: 1 },
-            createdBy: {
-              firstname: expect.anything(),
-              id: expect.anything(),
-              lastname: expect.anything(),
-              username: null,
-            },
             files: { count: 0 },
-            parent: null,
-            updatedBy: {
-              firstname: expect.anything(),
-              id: expect.anything(),
-              lastname: expect.anything(),
-              username: null,
-            },
           },
           {
             ...data.folders[1],
             children: { count: 0 },
-            createdBy: {
-              firstname: expect.anything(),
-              id: expect.anything(),
-              lastname: expect.anything(),
-              username: null,
-            },
             files: { count: 0 },
-            parent: pick(['createdAt', 'id', 'name', 'path', 'uid', 'updatedAt'], data.folders[0]),
-            updatedBy: {
-              firstname: expect.anything(),
-              id: expect.anything(),
-              lastname: expect.anything(),
-              username: null,
-            },
           },
         ])
       );
@@ -396,7 +398,7 @@ describe('Folder', () => {
         qs: {
           filters: { id: { $in: map('id', [folder0, folder00, folder01, folder02, folder000]) } },
           sort: 'id:asc',
-          populate: 'parent',
+          populate: { parent: '*' },
         },
       });
 
@@ -464,7 +466,7 @@ describe('Folder', () => {
         qs: {
           filters: { id: { $in: map('id', [folder0, folder00, folder02, folder000]) } },
           sort: 'id:asc',
-          populate: 'parent',
+          populate: { parent: '*' },
         },
       });
 
