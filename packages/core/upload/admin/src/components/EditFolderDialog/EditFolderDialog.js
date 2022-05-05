@@ -59,10 +59,6 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
     ...folder,
     parent: {
       ...rootFolder,
-      ...{
-        value: folder?.parent?.id,
-        label: folder?.parent?.label,
-      },
     },
   };
 
