@@ -15,7 +15,11 @@ module.exports = async () => {
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
 
-  if (isTSProject) await tsUtils.compile(appDir, { watch: false });
+  if (isTSProject)
+    await tsUtils.compile(appDir, {
+      watch: false,
+      configOptions: { options: { incremental: true } },
+    });
 
   const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
 
