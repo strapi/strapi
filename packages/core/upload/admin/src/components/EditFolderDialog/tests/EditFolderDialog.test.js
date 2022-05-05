@@ -1,13 +1,18 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
-import { render, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, fireEvent, act, waitFor, screen } from '@testing-library/react';
 import { NotificationsProvider } from '@strapi/helper-plugin';
 import { QueryClientProvider, QueryClient } from 'react-query';
 
 import { EditFolderDialog } from '../EditFolderDialog';
 
 console.error = jest.fn();
+
+jest.mock('../../../utils/axiosInstance', () => ({
+  ...jest.requireActual('../../../utils/axiosInstance'),
+  put: jest.fn().mockImplementation({}),
+}));
 
 jest.mock('../../../hooks/useEditFolder', () => ({
   ...jest.requireActual('../../../hooks/useEditFolder'),
@@ -93,12 +98,26 @@ describe('EditFolderDialog', () => {
     });
 
     await waitFor(() => expect(spy).toBeCalledTimes(1));
+
+    expect(spy).toBeCalledWith({ created: true });
   });
 
-  test('set default form values', () => {
-    const { container } = setup({ folder: { name: 'default folder name', parent: 1 } });
+  test('set default form values', async () => {
+    const spy = jest.fn();
+    const folder = {
+      id: 1,
+      name: 'default folder name',
+      children: [],
+      parent: { id: 1, label: 'Some parent' },
+    };
+    const folderStructure = [{ value: 1, label: 'Some parent' }];
+    const { container } = setup({ folder, folderStructure, onClose: spy });
 
-    expect(getInput(container, 'name').value).toBe('default folder name');
-    expect(getInput(container, 'parent').value).toBe('1');
+    act(() => {
+      fireEvent.click(getButton(container, 'submit'));
+    });
+
+    expect(getInput(container, 'name').value).toBe(folder.name);
+    expect(screen.getByText('Some parent')).toBeInTheDocument();
   });
 });
