@@ -42,10 +42,11 @@ describe('Uploads folder', () => {
 
   afterAll(async () => {
     // delete all folders
-    const res = await rq({
+    const res = await rqAdmin({
       method: 'GET',
       url: '/upload/folders?pagination[pageSize]=100',
     });
+
     await rqAdmin({
       method: 'POST',
       url: '/upload/actions/bulk-delete',
