@@ -113,6 +113,12 @@ module.exports = async ({ provider, access_token, query, providers }) => {
     case 'twitter': {
       const twitter = purest({
         provider: 'twitter',
+        defaults: {
+          oauth: {
+            consumer_key: providers.twitter.key,
+            consumer_secret: providers.twitter.secret
+          }
+        }
       });
 
       return twitter
