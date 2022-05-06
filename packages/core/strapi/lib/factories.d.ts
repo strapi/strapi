@@ -9,8 +9,8 @@ type ServiceConfig = Service;
 
 type HandlerConfig = {
   auth: false | { scope: string[] };
-  policies: Array<string | Policy>;
-  middlewares: Array<string | Middleware>;
+  policies: Array<string | { name: string; config: any } | Policy>;
+  middlewares: Array<string | { name: string; config: any } | Middleware>;
 };
 
 type SingleTypeRouterConfig = {
