@@ -8,4 +8,7 @@ module.exports = {
   core: {
     builder: 'webpack5',
   },
+  typescript: {
+    reactDocgen: false,
+  },
 };
