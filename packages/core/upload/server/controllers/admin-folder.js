@@ -2,7 +2,7 @@
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
-const { validateCreateFolder } = require('./validation/admin/folder');
+const { validateCreateFolder, validateUpdateFolder } = require('./validation/admin/folder');
 
 const folderModel = 'plugin::upload.folder';
 
@@ -57,6 +57,29 @@ module.exports = {
 
     ctx.body = {
       data: await permissionsManager.sanitizeOutput(folder),
+    };
+  },
+
+  async update(ctx) {
+    const { user } = ctx.state;
+    const {
+      body,
+      params: { id },
+    } = ctx.request;
+
+    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: folderModel,
+    });
+
+    await validateUpdateFolder(body);
+
+    const { update } = getService('folder');
+
+    const updatedFolder = await update(id, body, { user });
+
+    ctx.body = {
+      data: await permissionsManager.sanitizeOutput(updatedFolder),
     };
   },
 
