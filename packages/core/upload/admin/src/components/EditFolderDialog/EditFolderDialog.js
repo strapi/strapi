@@ -2,6 +2,7 @@ import * as yup from 'yup';
 import { Formik } from 'formik';
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
+import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -16,7 +17,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Form, useNotification } from '@strapi/helper-plugin';
+import { Form, useNotification, getAPIInnerErrors } from '@strapi/helper-plugin';
 
 import { getTrad } from '../../utils';
 import { useEditFolder } from '../../hooks/useEditFolder';
@@ -63,39 +64,37 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
   };
 
   const handleSubmit = async (values, { setErrors }) => {
+    let errors = {};
+
     try {
-      await editFolder({
-        ...folder,
-        ...values,
-        parent: values.parent.value ?? null,
-      });
+      if (isEmpty(errors)) {
+        await editFolder({
+          ...folder,
+          ...values,
+          parent: values.parent.value ?? null,
+        });
 
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({
-          id: getTrad('modal.folder-notification-success'),
-          defaultMessage: 'Folder successfully created',
-        }),
-      });
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: getTrad('modal.folder-notification-success'),
+            defaultMessage: 'Folder successfully created',
+          }),
+        });
 
-      onClose({ created: true });
-    } catch (err) {
-      let errors = {};
-
-      // TODO: use getAPIInnerError ?
-      const res = err.response.data.error;
-
-      // TODO: needs to be refactored in the backend
-      if (res.message === 'name already taken') {
-        errors.name = 'Has to be unique';
+        onClose({ created: true });
       }
+    } catch (err) {
+      const errors = getAPIInnerErrors(err, { getTrad });
+      const formikErrors = Object.entries(errors).reduce((acc, [key, error]) => {
+        acc[key] = error.defaultMessage;
 
-      setErrors(errors);
+        return acc;
+      }, {});
 
-      /* TODO: it can fail because of several reasons
-        - can not move a folder into itself or its children
-        - network & appliction errors
-      */
+      if (!isEmpty(formikErrors)) {
+        setErrors(formikErrors);
+      }
     }
   };
 
