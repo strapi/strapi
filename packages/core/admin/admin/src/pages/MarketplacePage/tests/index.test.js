@@ -174,7 +174,7 @@ describe('Marketplace page', () => {
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
+        border: 1px solid #4945ff;
         border: 1px solid #d9d8ff;
         background: #f0f0ff;
       }
@@ -252,9 +252,9 @@ describe('Marketplace page', () => {
       .c30 {
         background: #ffffff;
         padding-top: 16px;
-        padding-right: 24px;
+        padding-right: 16px;
         padding-bottom: 16px;
-        padding-left: 24px;
+        padding-left: 16px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
         height: 100%;
@@ -274,6 +274,10 @@ describe('Marketplace page', () => {
       }
 
       .c31 {
+        -webkit-align-items: normal;
+        -webkit-box-align: normal;
+        -ms-flex-align: normal;
+        align-items: normal;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -285,13 +289,13 @@ describe('Marketplace page', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: normal;
-        -webkit-box-align: normal;
-        -ms-flex-align: normal;
-        align-items: normal;
       }
 
       .c35 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -299,10 +303,6 @@ describe('Marketplace page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c50 {
@@ -317,7 +317,7 @@ describe('Marketplace page', () => {
         height: 12;
       }
 
-      .c63 {
+      .c64 {
         color: #666687;
         margin-left: 8px;
         width: 12px;
@@ -328,7 +328,7 @@ describe('Marketplace page', () => {
         fill: #328048;
       }
 
-      .c64 path {
+      .c65 path {
         fill: #666687;
       }
 
@@ -338,6 +338,10 @@ describe('Marketplace page', () => {
       }
 
       .c20 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -345,13 +349,13 @@ describe('Marketplace page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c22 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c22 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -363,10 +367,6 @@ describe('Marketplace page', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c19 {
@@ -379,8 +379,10 @@ describe('Marketplace page', () => {
       .c27 {
         border: none;
         border-radius: 4px;
+        padding-bottom: 0.65625rem;
         padding-left: 0;
         padding-right: 16px;
+        padding-top: 0.65625rem;
         color: #32324d;
         font-weight: 400;
         font-size: 0.875rem;
@@ -422,7 +424,6 @@ describe('Marketplace page', () => {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
-        height: 2.5rem;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -485,6 +486,10 @@ describe('Marketplace page', () => {
       }
 
       .c40 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -492,13 +497,13 @@ describe('Marketplace page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c60 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -508,7 +513,7 @@ describe('Marketplace page', () => {
         flex-direction: column;
       }
 
-      .c60 > * {
+      .c61 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
@@ -542,7 +547,7 @@ describe('Marketplace page', () => {
         line-height: 1.43;
       }
 
-      .c61 {
+      .c62 {
         font-weight: 500;
         color: #32324d;
         font-size: 0.75rem;
@@ -558,7 +563,7 @@ describe('Marketplace page', () => {
         height: 2rem;
       }
 
-      .c62 {
+      .c63 {
         word-break: break-all;
       }
 
@@ -600,6 +605,10 @@ describe('Marketplace page', () => {
       }
 
       .c5 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -611,13 +620,13 @@ describe('Marketplace page', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c6 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -625,10 +634,6 @@ describe('Marketplace page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c7 {
@@ -724,7 +729,7 @@ describe('Marketplace page', () => {
       .c9 {
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
+        border: 1px solid #4945ff;
         border-radius: 4px;
         border: 1px solid #dcdce4;
         background: #ffffff;
@@ -1597,18 +1602,18 @@ describe('Marketplace page', () => {
                       </svg>
                     </div>
                     <div
-                      class="c60"
+                      class="c60 c61"
                     >
                       <div
                         class="c35"
                       >
                         <span
-                          class="c61 c62"
+                          class="c62 c63"
                         >
                           Documentation
                         </span>
                         <svg
-                          class="c63 c64"
+                          class="c64 c65"
                           fill="none"
                           height="3"
                           viewBox="0 0 24 24"

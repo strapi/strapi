@@ -122,6 +122,10 @@ describe('Admin | containers | ListView', () => {
       }
 
       .c35 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -129,10 +133,6 @@ describe('Admin | containers | ListView', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c43 {
@@ -235,6 +235,10 @@ describe('Admin | containers | ListView', () => {
       }
 
       .c41 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -242,10 +246,6 @@ describe('Admin | containers | ListView', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c42 > * {
@@ -295,6 +295,7 @@ describe('Admin | containers | ListView', () => {
 
       .c17 {
         overflow: hidden;
+        border: 1px solid #eaeaef;
       }
 
       .c21 {
@@ -360,6 +361,10 @@ describe('Admin | containers | ListView', () => {
       }
 
       .c25 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -367,10 +372,6 @@ describe('Admin | containers | ListView', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c24 {
@@ -495,6 +496,10 @@ describe('Admin | containers | ListView', () => {
       }
 
       .c5 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -506,13 +511,13 @@ describe('Admin | containers | ListView', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c6 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -520,10 +525,6 @@ describe('Admin | containers | ListView', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c7 {
@@ -550,6 +551,10 @@ describe('Admin | containers | ListView', () => {
       }
 
       .c37 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -557,10 +562,6 @@ describe('Admin | containers | ListView', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c39 {
@@ -681,10 +682,8 @@ describe('Admin | containers | ListView', () => {
       .c9 {
         padding: 10px 16px;
         background: #4945ff;
-        border: none;
-        border-radius: 4px;
         border: 1px solid #4945ff;
-        background: #4945ff;
+        border-radius: 4px;
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;

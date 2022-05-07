@@ -46,9 +46,9 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode
       direction="column"
       justifyContent="space-between"
       paddingTop={4}
-      paddingRight={6}
+      paddingRight={4}
       paddingBottom={4}
-      paddingLeft={6}
+      paddingLeft={4}
       hasRadius
       background="neutral0"
       shadow="tableShadow"
