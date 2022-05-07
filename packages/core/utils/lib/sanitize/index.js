@@ -29,10 +29,9 @@ module.exports = {
       }
 
       // Apply sanitizers from registry if exists
-      const sanitizersRegistry = strapi.container.get('sanitizers').get('content-api.input');
-      if (Array.isArray(sanitizersRegistry)) {
-        sanitizersRegistry.forEach(sanitizer => transforms.push(sanitizer(schema)));
-      }
+      strapi.sanitizers
+        .get('content-api.input')
+        .forEach(sanitizer => transforms.push(sanitizer(schema)));
 
       return pipeAsync(...transforms)(data);
     },
@@ -49,10 +48,9 @@ module.exports = {
       }
 
       // Apply sanitizers from registry if exists
-      const sanitizersRegistry = strapi.container.get('sanitizers').get('content-api.output');
-      if (Array.isArray(sanitizersRegistry)) {
-        sanitizersRegistry.forEach(sanitizer => transforms.push(sanitizer(schema)));
-      }
+      strapi.sanitizers
+        .get('content-api.output')
+        .forEach(sanitizer => transforms.push(sanitizer(schema)));
 
       return pipeAsync(...transforms)(data);
     },

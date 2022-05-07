@@ -310,6 +310,10 @@ class Strapi {
     this.app = await loaders.loadSrcIndex(this);
   }
 
+  async loadSanitizers() {
+    await loaders.loadSanitizers(this);
+  }
+
   registerInternalHooks() {
     this.container.get('hooks').set('strapi::content-types.beforeSync', createAsyncParallelHook());
     this.container.get('hooks').set('strapi::content-types.afterSync', createAsyncParallelHook());
@@ -321,6 +325,7 @@ class Strapi {
   async register() {
     await Promise.all([
       this.loadApp(),
+      this.loadSanitizers(),
       this.loadPlugins(),
       this.loadAdmin(),
       this.loadAPIs(),

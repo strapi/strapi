@@ -5,7 +5,7 @@ const sanitizers = require('./utils/sanitize/sanitizers');
 
 module.exports = ({ strapi }) => {
   strapi.container.get('auth').register('content-api', authStrategy);
-  strapi.container.get('sanitizers').add('content-api.output', sanitizers.defaultSanitizeOutput);
+  strapi.sanitizers.add('content-api.output', sanitizers.defaultSanitizeOutput);
 
   if (strapi.plugin('graphql')) {
     require('./graphql')({ strapi });
