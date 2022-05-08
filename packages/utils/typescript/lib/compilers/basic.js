@@ -10,8 +10,11 @@ module.exports = {
   /**
    * Default TS -> JS Compilation for Strapi
    * @param {string} tsConfigPath
+   * @param {Object} configOptions
+   * @param {Array.<string>} configOptions.fileNames
+   * @param {Object} configOptions.options
    */
-  run(tsConfigPath, configOptions) {
+  run(tsConfigPath, configOptions = {}) {
     // Parse the tsconfig.json file & resolve the configuration options
     const { fileNames, options, projectReferences } = resolveConfigOptions(tsConfigPath);
 
