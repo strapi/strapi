@@ -243,10 +243,7 @@ module.exports = context => {
   };
 
   const isNotDisabled = contentType => attributeName => {
-    return extension
-      .shadowCRUD(contentType.uid)
-      .field(attributeName)
-      .hasOutputEnabled();
+    return extension.shadowCRUD(contentType.uid).field(attributeName).hasOutputEnabled();
   };
 
   return {

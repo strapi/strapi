@@ -9,10 +9,7 @@ module.exports = ({ strapi }) => {
    * @return {boolean}
    */
   const isStrapiScalar = attribute => {
-    return strapi
-      .plugin('graphql')
-      .service('constants')
-      .STRAPI_SCALARS.includes(attribute.type);
+    return strapi.plugin('graphql').service('constants').STRAPI_SCALARS.includes(attribute.type);
   };
 
   /**
@@ -21,10 +18,7 @@ module.exports = ({ strapi }) => {
    * @return {boolean}
    */
   const isGraphQLScalar = attribute => {
-    return strapi
-      .plugin('graphql')
-      .service('constants')
-      .GRAPHQL_SCALARS.includes(attribute.type);
+    return strapi.plugin('graphql').service('constants').GRAPHQL_SCALARS.includes(attribute.type);
   };
 
   /**

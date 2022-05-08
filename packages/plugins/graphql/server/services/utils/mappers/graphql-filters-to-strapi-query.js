@@ -42,7 +42,7 @@ module.exports = ({ strapi }) => {
      * @return {object | object[]}
      */
     graphQLFiltersToStrapiQuery(filters, contentType = {}) {
-      const { isStrapiScalar, isMedia, isRelation } = getService('utils').attributes;
+      const { isStrapiScalar, isMedia, isRelation, isComponent } = getService('utils').attributes;
       const { operators } = getService('builders').filters;
 
       const ROOT_LEVEL_OPERATORS = [operators.and, operators.or, operators.not];
@@ -68,13 +68,19 @@ module.exports = ({ strapi }) => {
 
       for (const [key, value] of Object.entries(filters)) {
         // If the key is an attribute, update the value
-        if (isAttribute(key)) {
+        if (isAttribute(key) || isComponent(attributes[key])) {
           const attribute = attributes[key];
-
           // If it's a scalar attribute
           if (virtualScalarAttributes.includes(key) || isStrapiScalar(attribute)) {
             // Replace (recursively) every GraphQL scalar operator with the associated Strapi operator
             resultMap[key] = recursivelyReplaceScalarOperators(value);
+          } else if (isComponent(attribute)) {
+            const replacedScalarOperators = recursivelyReplaceScalarOperators(value);
+
+            // If we're filtering on a Repeatable component, flatten the result
+            resultMap[key] = Array.isArray(replacedScalarOperators)
+              ? replacedScalarOperators[0]
+              : replacedScalarOperators;
           }
 
           // If it's a deep filter on a relation
