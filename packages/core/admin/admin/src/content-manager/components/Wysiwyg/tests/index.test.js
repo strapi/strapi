@@ -1258,18 +1258,6 @@ describe('Wysiwyg render and actions buttons', () => {
                 translate="no"
               >
                 <div
-                  style="overflow: hidden; position: relative; width: 3px; height: 0px;"
-                >
-                  <textarea
-                    aria-label="Editor"
-                    autocapitalize="off"
-                    autocorrect="off"
-                    spellcheck="false"
-                    style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; min-height: 1em; outline: none;"
-                    tabindex="0"
-                  />
-                </div>
-                <div
                   class="CodeMirror-vscrollbar"
                   cm-not-content="true"
                   tabindex="-1"
@@ -1335,8 +1323,13 @@ describe('Wysiwyg render and actions buttons', () => {
                             class="CodeMirror-cursors"
                           />
                           <div
+                            aria-label="Editor"
+                            autocapitalize="off"
+                            autocorrect="off"
                             class="CodeMirror-code"
                             role="presentation"
+                            spellcheck="true"
+                            tabindex="0"
                           />
                         </div>
                       </div>

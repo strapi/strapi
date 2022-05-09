@@ -252,9 +252,9 @@ describe('Marketplace page', () => {
       .c30 {
         background: #ffffff;
         padding-top: 16px;
-        padding-right: 24px;
+        padding-right: 16px;
         padding-bottom: 16px;
-        padding-left: 24px;
+        padding-left: 16px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
         height: 100%;
