@@ -12,7 +12,13 @@ const {
 const { ID_ATTRIBUTE } = constants;
 
 const sanitizeEntity = (dataSource, options) => {
-  const { model, withPrivate = false, isOutput = true, includeFields = null } = options;
+  const {
+    model,
+    withHidden = true,
+    withPrivate = false,
+    isOutput = true,
+    includeFields = null,
+  } = options;
 
   if (typeof dataSource !== 'object' || _.isNil(dataSource)) {
     return dataSource;
@@ -43,7 +49,7 @@ const sanitizeEntity = (dataSource, options) => {
     const attribute = attributes[key];
     const allowedFieldsHasKey = allowedFields.includes(key);
 
-    if (shouldRemoveAttribute(model, key, attribute, { withPrivate, isOutput })) {
+    if (shouldRemoveAttribute(model, key, attribute, { withHidden, withPrivate, isOutput })) {
       return acc;
     }
 
@@ -64,6 +70,7 @@ const sanitizeEntity = (dataSource, options) => {
 
       const baseOptions = {
         withPrivate,
+        withHidden,
         isOutput,
         includeFields: nextFields,
       };
@@ -101,6 +108,7 @@ const sanitizeEntity = (dataSource, options) => {
         sanitizeEntity(elem, {
           model: strapi.getModel(elem.__component),
           withPrivate,
+          withHidden,
           isOutput,
         })
       );
@@ -162,14 +170,25 @@ const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
   return [nextFields, isAllowed];
 };
 
-const shouldRemoveAttribute = (model, key, attribute = {}, { withPrivate, isOutput }) => {
+const shouldRemoveAttribute = (
+  model,
+  key,
+  attribute = {},
+  { withPrivate, withHidden, isOutput }
+) => {
   const isPassword = attribute.type === 'password';
   const isPrivate = isPrivateAttribute(model, key);
+  const isHidden = _.get(model, ['config', 'attributes', key, 'hidden'], false);
 
   const shouldRemovePassword = isOutput;
   const shouldRemovePrivate = !withPrivate && isOutput;
+  const shouldRemoveHidden = !withHidden;
 
-  return !!((isPassword && shouldRemovePassword) || (isPrivate && shouldRemovePrivate));
+  return !!(
+    (isPassword && shouldRemovePassword) ||
+    (isPrivate && shouldRemovePrivate) ||
+    (isHidden && shouldRemoveHidden)
+  );
 };
 
 module.exports = sanitizeEntity;

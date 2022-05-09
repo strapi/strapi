@@ -57,6 +57,7 @@ module.exports = ({ ability, action, model }) => ({
       subject = this.toSubject(data),
       action: actionOverride = action,
       withPrivate = true,
+      withHidden = false,
       isOutput = true,
     } = options;
 
@@ -74,6 +75,7 @@ module.exports = ({ ability, action, model }) => ({
       model: strapi.getModel(model),
       includeFields: shouldIncludeAllFields ? null : permittedFields,
       withPrivate,
+      withHidden,
       isOutput,
     });
 
