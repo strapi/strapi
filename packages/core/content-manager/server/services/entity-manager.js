@@ -1,6 +1,7 @@
 'use strict';
 
 const { assoc, has, prop, omit } = require('lodash/fp');
+const merge = require('lodash/merge');
 const strapiUtils = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 
@@ -39,13 +40,15 @@ const findCreatorRoles = entity => {
   return [];
 };
 
+const deepMerge = (oldData, newData) => (oldData ? merge(oldData, newData) : newData);
+
 // TODO: define when we use this one vs basic populate
 const getDeepPopulate = (uid, populate, depth = 0) => {
   if (populate) {
     return populate;
   }
 
-  if (depth > 2) {
+  if (depth > 10) {
     return {};
   }
 
@@ -71,7 +74,7 @@ const getDeepPopulate = (uid, populate, depth = 0) => {
     if (attribute.type === 'dynamiczone') {
       populateAcc[attributeName] = {
         populate: (attribute.components || []).reduce((acc, componentUID) => {
-          return Object.assign(acc, getDeepPopulate(componentUID, null, depth + 1));
+          return deepMerge(acc, getDeepPopulate(componentUID, null, depth + 1));
         }, {}),
       };
     }
