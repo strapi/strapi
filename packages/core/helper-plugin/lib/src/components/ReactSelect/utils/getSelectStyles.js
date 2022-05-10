@@ -4,7 +4,6 @@ const getSelectStyles = theme => {
     container: base => ({
       ...base,
       background: theme.colors.neutral0,
-      fontFamily: 'Arial',
       lineHeight: 'normal',
     }),
     control: (base, state) => {
@@ -67,6 +66,10 @@ const getSelectStyles = theme => {
       paddingTop: theme.spaces[1],
       paddingRight: theme.spaces[1],
       paddingBottom: theme.spaces[1],
+    }),
+    menuPortal: base => ({
+      ...base,
+      zIndex: 100,
     }),
     option: (base, state) => {
       let backgroundColor = base.backgroundColor;

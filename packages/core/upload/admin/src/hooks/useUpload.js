@@ -42,8 +42,8 @@ export const useUpload = () => {
 
   const mutation = useMutation(asset => uploadAsset(asset, tokenRef.current, setProgress), {
     onSuccess: () => {
-      queryClient.refetchQueries(['assets'], { active: true });
-      queryClient.refetchQueries(['asset-count'], { active: true });
+      queryClient.refetchQueries([pluginId, 'assets'], { active: true });
+      queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
     },
   });
 

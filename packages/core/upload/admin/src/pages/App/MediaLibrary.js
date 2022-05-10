@@ -15,8 +15,10 @@ import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
 import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
+import { Stack } from '@strapi/design-system/Stack';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
+import { EditFolderDialog } from '../../components/EditFolderDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
 import { AssetList } from '../../components/AssetList';
 import SortPicker from '../../components/SortPicker';
@@ -27,6 +29,7 @@ import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
 import { EmptyAssets } from '../../components/EmptyAssets';
+import { useFolderStructure } from '../../hooks/useFolderStructure';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -43,21 +46,37 @@ export const MediaLibrary = () => {
     canDownload,
     isLoading: isLoadingPermissions,
   } = useMediaLibraryPermissions();
+  const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
 
-  const { formatMessage } = useIntl();
   const { data, isLoading, error } = useAssets({
     skipWhen: !canRead,
   });
 
-  const handleChangeSort = (value) => {
+  const { data: folderStructure } = useFolderStructure();
+
+  const handleChangeSort = value => {
     setQuery({ sort: value });
   };
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
+  const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState('id', []);
-  const toggleUploadAssetDialog = () => setShowUploadAssetDialog((prev) => !prev);
+  const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
+  const toggleEditFolderDialog = ({ created = false } = {}) => {
+    // folders are only displayed on the first page, therefore
+    // we have to navigate the user to that page, in case a folder
+    // was created successfully in order for them to see it
+    if (created && query?.page !== '1') {
+      setQuery({
+        ...query,
+        page: 1,
+      });
+    }
+
+    setShowEditFolderDialog(prev => !prev);
+  };
 
   useFocusWhenNavigate();
 
@@ -84,14 +103,23 @@ export const MediaLibrary = () => {
             { numberAssets: assetCount, numberFolders: folderCount }
           )}
           primaryAction={
-            canCreate ? (
-              <Button startIcon={<Plus />} onClick={toggleUploadAssetDialog}>
+            <Stack horizontal spacing={2}>
+              <Button startIcon={<Plus />} variant="secondary" onClick={toggleEditFolderDialog}>
                 {formatMessage({
-                  id: getTrad('header.actions.add-assets'),
-                  defaultMessage: 'Add new assets',
+                  id: getTrad('header.actions.add-folder'),
+                  defaultMessage: 'Add new folder',
                 })}
               </Button>
-            ) : undefined
+
+              {canCreate && (
+                <Button startIcon={<Plus />} onClick={toggleUploadAssetDialog}>
+                  {formatMessage({
+                    id: getTrad('header.actions.add-assets'),
+                    defaultMessage: 'Add new assets',
+                  })}
+                </Button>
+              )}
+            </Stack>
           }
         />
 
@@ -146,7 +174,8 @@ export const MediaLibrary = () => {
           {canRead && assets && assets.length === 0 && (
             <EmptyAssets
               action={
-                canCreate && !isFiltering ? (
+                canCreate &&
+                !isFiltering && (
                   <Button
                     variant="secondary"
                     startIcon={<Plus />}
@@ -157,7 +186,7 @@ export const MediaLibrary = () => {
                       defaultMessage: 'Add new assets',
                     })}
                   </Button>
-                ) : undefined
+                )
               }
               content={
                 // eslint-disable-next-line no-nested-ternary
@@ -195,6 +224,11 @@ export const MediaLibrary = () => {
       {showUploadAssetDialog && (
         <UploadAssetDialog onClose={toggleUploadAssetDialog} trackedLocation="upload" />
       )}
+
+      {showEditFolderDialog && (
+        <EditFolderDialog onClose={toggleEditFolderDialog} folderStructure={folderStructure} />
+      )}
+
       {assetToEdit && (
         <EditAssetDialog
           onClose={() => setAssetToEdit(undefined)}

@@ -56,7 +56,7 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ..
 };
 
 const OptionShape = PropTypes.shape({
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   label: PropTypes.string.isRequired,
   children: PropTypes.array,
 });
@@ -74,7 +74,7 @@ SelectTree.defaultProps = {
 
 SelectTree.propTypes = {
   defaultValue: PropTypes.shape({
-    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   }),
   maxDisplayDepth: PropTypes.number,
   options: PropTypes.arrayOf(OptionShape).isRequired,
