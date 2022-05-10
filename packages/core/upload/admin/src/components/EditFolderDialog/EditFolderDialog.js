@@ -152,7 +152,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
 
                 <GridItem xs={12} col={6}>
                   <Stack spacing={1}>
-                    <FieldLabel>
+                    <FieldLabel for="folder-parent">
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
                         defaultMessage: 'Location',
@@ -167,7 +167,25 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
                       defaultValue={values.parent}
                       name="parent"
                       menuPortalTarget={document.querySelector('body')}
+                      inputId="folder-parent"
+                      {...(errors.parent
+                        ? {
+                            'aria-errormessage': 'folder-parent-error',
+                            'aria-invalid': true,
+                          }
+                        : {})}
                     />
+
+                    {errors.parent && (
+                      <Typography
+                        variant="pi"
+                        as="p"
+                        id="folder-parent-error"
+                        textColor="danger600"
+                      >
+                        {errors.parent}
+                      </Typography>
+                    )}
                   </Stack>
                 </GridItem>
               </Grid>
