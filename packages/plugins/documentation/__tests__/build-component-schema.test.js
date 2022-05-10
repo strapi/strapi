@@ -1,12 +1,16 @@
 'use strict';
 
+const _ = require('lodash');
 const buildComponentSchema = require('../server/services/helpers/build-component-schema');
 const strapi = require('../__mocks__/strapi');
 
 describe('Build Component Schema', () => {
-  it('builds the Response schema', () => {
-    global.strapi = strapi;
+  beforeEach(() => {
+    // Reset the mocked strapi instance
+    global.strapi = _.cloneDeep(strapi);
+  });
 
+  it('builds the Response schema', () => {
     const apiMocks = [
       {
         name: 'users-permissions',
@@ -16,7 +20,7 @@ describe('Build Component Schema', () => {
       { name: 'restaurant', getter: 'api', ctNames: ['restaurant'] },
     ];
 
-    let schemas;
+    let schemas = {};
     for (const mock of apiMocks) {
       schemas = {
         ...schemas,
@@ -49,25 +53,12 @@ describe('Build Component Schema', () => {
   });
 
   it('builds the ResponseList schema', () => {
-    global.strapi = {
-      ...strapi,
-      plugins: {
-        'users-permissions': {
-          ...strapi.plugins['users-permissions'],
-          routes: {
-            'content-api': { routes: [{ method: 'GET', path: '/test', handler: 'test.find' }] },
-          },
-        },
-      },
-      api: {
-        restaurant: {
-          ...strapi.api.restaurant,
-          routes: {
-            restaurant: { routes: [{ method: 'GET', path: '/test', handler: 'test.find' }] },
-          },
-        },
-      },
-    };
+    global.strapi.plugins['users-permissions'].routes['content-api'].routes = [
+      { method: 'GET', path: '/test', handler: 'test.find' },
+    ];
+    global.strapi.api.restaurant.routes.restaurant.routes = [
+      { method: 'GET', path: '/test', handler: 'test.find' },
+    ];
 
     const apiMocks = [
       {
@@ -78,7 +69,7 @@ describe('Build Component Schema', () => {
       { name: 'restaurant', getter: 'api', ctNames: ['restaurant'] },
     ];
 
-    let schemas;
+    let schemas = {};
     for (const mock of apiMocks) {
       schemas = {
         ...schemas,
@@ -126,25 +117,12 @@ describe('Build Component Schema', () => {
   });
 
   it('builds the Request schema', () => {
-    global.strapi = {
-      ...strapi,
-      plugins: {
-        'users-permissions': {
-          ...strapi.plugins['users-permissions'],
-          routes: {
-            'content-api': { routes: [{ method: 'POST', path: '/test', handler: 'test.create' }] },
-          },
-        },
-      },
-      api: {
-        restaurant: {
-          ...strapi.api.restaurant,
-          routes: {
-            restaurant: { routes: [{ method: 'POST', path: '/test', handler: 'test.create' }] },
-          },
-        },
-      },
-    };
+    global.strapi.plugins['users-permissions'].routes['content-api'].routes = [
+      { method: 'POST', path: '/test', handler: 'test.create' },
+    ];
+    global.strapi.api.restaurant.routes.restaurant.routes = [
+      { method: 'POST', path: '/test', handler: 'test.create' },
+    ];
 
     const apiMocks = [
       {
@@ -155,7 +133,7 @@ describe('Build Component Schema', () => {
       { name: 'restaurant', getter: 'api', ctNames: ['restaurant'] },
     ];
 
-    let schemas;
+    let schemas = {};
     for (const mock of apiMocks) {
       schemas = {
         ...schemas,
@@ -185,25 +163,12 @@ describe('Build Component Schema', () => {
   });
 
   it('builds the LocalizationResponse schema', () => {
-    global.strapi = {
-      ...strapi,
-      plugins: {
-        'users-permissions': {
-          ...strapi.plugins['users-permissions'],
-          routes: {
-            'content-api': { routes: [{ method: 'GET', path: '/localizations', handler: 'test' }] },
-          },
-        },
-      },
-      api: {
-        restaurant: {
-          ...strapi.api.restaurant,
-          routes: {
-            restaurant: { routes: [{ method: 'GET', path: '/localizations', handler: 'test' }] },
-          },
-        },
-      },
-    };
+    global.strapi.plugins['users-permissions'].routes['content-api'].routes = [
+      { method: 'GET', path: '/localizations', handler: 'test' },
+    ];
+    global.strapi.api.restaurant.routes.restaurant.routes = [
+      { method: 'GET', path: '/localizations', handler: 'test' },
+    ];
 
     const apiMocks = [
       {
@@ -214,7 +179,7 @@ describe('Build Component Schema', () => {
       { name: 'restaurant', getter: 'api', ctNames: ['restaurant'] },
     ];
 
-    let schemas;
+    let schemas = {};
     for (const mock of apiMocks) {
       schemas = {
         ...schemas,
@@ -242,27 +207,12 @@ describe('Build Component Schema', () => {
   });
 
   it('builds the LocalizationRequest schema', () => {
-    global.strapi = {
-      ...strapi,
-      plugins: {
-        'users-permissions': {
-          ...strapi.plugins['users-permissions'],
-          routes: {
-            'content-api': {
-              routes: [{ method: 'POST', path: '/localizations', handler: 'test' }],
-            },
-          },
-        },
-      },
-      api: {
-        restaurant: {
-          ...strapi.api.restaurant,
-          routes: {
-            restaurant: { routes: [{ method: 'POST', path: '/localizations', handler: 'test' }] },
-          },
-        },
-      },
-    };
+    global.strapi.plugins['users-permissions'].routes['content-api'].routes = [
+      { method: 'POST', path: '/localizations', handler: 'test' },
+    ];
+    global.strapi.api.restaurant.routes.restaurant.routes = [
+      { method: 'POST', path: '/localizations', handler: 'test' },
+    ];
 
     const apiMocks = [
       {
@@ -273,7 +223,7 @@ describe('Build Component Schema', () => {
       { name: 'restaurant', getter: 'api', ctNames: ['restaurant'] },
     ];
 
-    let schemas;
+    let schemas = {};
     for (const mock of apiMocks) {
       schemas = {
         ...schemas,
@@ -298,7 +248,6 @@ describe('Build Component Schema', () => {
   });
 
   it('creates the correct name given multiple content types', () => {
-    global.strapi = strapi;
     const apiMock = {
       name: 'users-permissions',
       getter: 'plugin',
