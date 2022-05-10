@@ -24,7 +24,7 @@ describe('Build Component Schema', () => {
       };
     }
 
-    const schemaLength = Object.keys(schemas).length;
+    const schemaNames = Object.keys(schemas);
     const [pluginResponseName, apiResponseName] = Object.keys(schemas);
     const [pluginResponseValue, apiResponseValue] = Object.values(schemas);
 
@@ -41,7 +41,7 @@ describe('Build Component Schema', () => {
       },
     };
 
-    expect(schemaLength).toBe(2);
+    expect(schemaNames.length).toBe(2);
     expect(pluginResponseName).toBe('UsersPermissionsRoleResponse');
     expect(apiResponseName).toBe('RestaurantResponse');
     expect(pluginResponseValue).toStrictEqual(expectedShape);
@@ -86,7 +86,6 @@ describe('Build Component Schema', () => {
       };
     }
 
-    const schemaLength = Object.keys(schemas).length;
     const schemaNames = Object.keys(schemas);
     const pluginListResponseValue = schemas['UsersPermissionsRoleListResponse'];
     const apiListResponseValue = schemas['RestaurantListResponse'];
@@ -119,7 +118,7 @@ describe('Build Component Schema', () => {
       },
     };
 
-    expect(schemaLength).toBe(4);
+    expect(schemaNames.length).toBe(4);
     expect(schemaNames.includes('UsersPermissionsRoleListResponse')).toBe(true);
     expect(schemaNames.includes('RestaurantListResponse')).toBe(true);
     expect(pluginListResponseValue).toStrictEqual(expectedShape);
@@ -164,7 +163,6 @@ describe('Build Component Schema', () => {
       };
     }
 
-    const schemaLength = Object.keys(schemas).length;
     const schemaNames = Object.keys(schemas);
     const pluginListResponseValue = schemas['UsersPermissionsRoleRequest'];
     const apiListResponseValue = schemas['RestaurantRequest'];
@@ -179,7 +177,7 @@ describe('Build Component Schema', () => {
       },
     };
 
-    expect(schemaLength).toBe(4);
+    expect(schemaNames.length).toBe(4);
     expect(schemaNames.includes('UsersPermissionsRoleRequest')).toBe(true);
     expect(schemaNames.includes('RestaurantRequest')).toBe(true);
     expect(pluginListResponseValue).toStrictEqual(expectedShape);
@@ -224,7 +222,6 @@ describe('Build Component Schema', () => {
       };
     }
 
-    const schemaLength = Object.keys(schemas).length;
     const schemaNames = Object.keys(schemas);
     const pluginListResponseValue = schemas['UsersPermissionsRoleLocalizationResponse'];
     const apiListResponseValue = schemas['RestaurantLocalizationResponse'];
@@ -237,7 +234,7 @@ describe('Build Component Schema', () => {
       },
     };
 
-    expect(schemaLength).toBe(4);
+    expect(schemaNames.length).toBe(4);
     expect(schemaNames.includes('UsersPermissionsRoleLocalizationResponse')).toBe(true);
     expect(schemaNames.includes('RestaurantLocalizationResponse')).toBe(true);
     expect(pluginListResponseValue).toStrictEqual(expectedShape);
@@ -284,7 +281,6 @@ describe('Build Component Schema', () => {
       };
     }
 
-    const schemaLength = Object.keys(schemas).length;
     const schemaNames = Object.keys(schemas);
     const pluginListResponseValue = schemas['UsersPermissionsRoleLocalizationRequest'];
     const apiListResponseValue = schemas['RestaurantLocalizationRequest'];
@@ -294,7 +290,7 @@ describe('Build Component Schema', () => {
       properties: { test: { type: 'string' } },
     };
 
-    expect(schemaLength).toBe(8);
+    expect(schemaNames.length).toBe(8);
     expect(schemaNames.includes('UsersPermissionsRoleLocalizationRequest')).toBe(true);
     expect(schemaNames.includes('RestaurantLocalizationRequest')).toBe(true);
     expect(pluginListResponseValue).toStrictEqual(expectedShape);
