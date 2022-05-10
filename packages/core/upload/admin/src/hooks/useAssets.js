@@ -2,6 +2,8 @@ import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+
+import pluginId from '../pluginId';
 import { axiosInstance, getRequestUrl } from '../utils';
 
 export const useAssets = ({ skipWhen }) => {
@@ -33,7 +35,7 @@ export const useAssets = ({ skipWhen }) => {
     }
   };
 
-  const { data, error, isLoading } = useQuery([`assets`, rawQuery], getAssets, {
+  const { data, error, isLoading } = useQuery([pluginId, `assets`, rawQuery], getAssets, {
     enabled: !skipWhen,
     staleTime: 0,
     cacheTime: 0,

@@ -17,9 +17,10 @@ import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Plus from '@strapi/icons/Plus';
 import { Link } from '@strapi/design-system/Link';
 import { Box } from '@strapi/design-system/Box';
-import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { Stack } from '@strapi/design-system/Stack';
+import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
+import { EditFolderDialog } from '../../components/EditFolderDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
 import { AssetList } from '../../components/AssetList';
 import { FolderList } from '../../components/FolderList';
@@ -32,6 +33,7 @@ import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
 import { EmptyAssets } from '../../components/EmptyAssets';
+import { useFolderStructure } from '../../hooks/useFolderStructure';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -48,9 +50,8 @@ export const MediaLibrary = () => {
     canDownload,
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
-  const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
-
+  const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
 
   const { data: assetsData, isLoading: assetsLoading, error: assetsError } = useAssets({
@@ -61,14 +62,30 @@ export const MediaLibrary = () => {
     enabled: assetsData?.pagination?.page === 1 && !isFiltering,
   });
 
+  const { data: folderStructure } = useFolderStructure();
+
   const handleChangeSort = value => {
     setQuery({ sort: value });
   };
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
+  const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState(['type', 'id'], []);
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
+  const toggleEditFolderDialog = ({ created = false } = {}) => {
+    // folders are only displayed on the first page, therefore
+    // we have to navigate the user to that page, in case a folder
+    // was created successfully in order for them to see it
+    if (created && query?.page !== '1') {
+      setQuery({
+        ...query,
+        page: 1,
+      });
+    }
+
+    setShowEditFolderDialog(prev => !prev);
+  };
 
   useFocusWhenNavigate();
 
@@ -109,12 +126,21 @@ export const MediaLibrary = () => {
           }
           primaryAction={
             canCreate && (
-              <Button startIcon={<Plus />} onClick={toggleUploadAssetDialog}>
-                {formatMessage({
-                  id: getTrad('header.actions.add-assets'),
-                  defaultMessage: 'Add new assets',
-                })}
-              </Button>
+              <Stack horizontal spacing={2}>
+                <Button startIcon={<Plus />} variant="secondary" onClick={toggleEditFolderDialog}>
+                  {formatMessage({
+                    id: getTrad('header.actions.add-folder'),
+                    defaultMessage: 'Add new folder',
+                  })}
+                </Button>
+
+                <Button startIcon={<Plus />} onClick={toggleUploadAssetDialog}>
+                  {formatMessage({
+                    id: getTrad('header.actions.add-assets'),
+                    defaultMessage: 'Add new assets',
+                  })}
+                </Button>
+              </Stack>
             )
           }
         />
@@ -249,6 +275,10 @@ export const MediaLibrary = () => {
 
       {showUploadAssetDialog && (
         <UploadAssetDialog onClose={toggleUploadAssetDialog} trackedLocation="upload" />
+      )}
+
+      {showEditFolderDialog && (
+        <EditFolderDialog onClose={toggleEditFolderDialog} folderStructure={folderStructure} />
       )}
 
       {assetToEdit && (

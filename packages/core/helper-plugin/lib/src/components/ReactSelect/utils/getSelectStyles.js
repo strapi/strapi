@@ -66,6 +66,10 @@ const getSelectStyles = theme => {
       paddingRight: theme.spaces[1],
       paddingBottom: theme.spaces[1],
     }),
+    menuPortal: base => ({
+      ...base,
+      zIndex: 100,
+    }),
     option: (base, state) => {
       let backgroundColor = base.backgroundColor;
 
