@@ -59,8 +59,8 @@ export const FolderList = ({
           return (
             <FolderCard
               ariaLabel={folder.name}
-              id="folder"
-              key={`folder-${folder.uuid}`}
+              id={`folder-${folder.uid}`}
+              key={`folder-${folder.uid}`}
               onDoubleClick={() => history.push(url)}
               startAction={
                 <FolderCardCheckbox
