@@ -66,10 +66,6 @@ describe('InternalErrorPage', () => {
         height: 5.5rem;
       }
 
-      .c0:focus-visible {
-        outline: none;
-      }
-
       .c16 {
         font-weight: 600;
         color: #32324d;
@@ -222,6 +218,10 @@ describe('InternalErrorPage', () => {
       .c14 svg > g,
       .c14 svg path {
         fill: #271fe0;
+      }
+
+      .c0:focus-visible {
+        outline: none;
       }
 
       .c1 {

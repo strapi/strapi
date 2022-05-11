@@ -15,8 +15,8 @@ import { Box } from '@strapi/design-system/Box';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
-import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
+import { Link } from '@strapi/design-system/v2/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import Check from '@strapi/icons/Check';
 import { useConfigurations } from '../../../../hooks';
@@ -121,6 +121,7 @@ const ApplicationInfosPage = () => {
                           ? 'https://discord.strapi.io'
                           : 'https://support.strapi.io/support/home'
                       }
+                      isExternal
                       endIcon={<ExternalLink />}
                     >
                       {formatMessage({
@@ -152,6 +153,7 @@ const ApplicationInfosPage = () => {
                     {shouldUpdateStrapi && (
                       <Link
                         href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
+                        isExternal
                         endIcon={<ExternalLink />}
                       >
                         {formatMessage({
@@ -162,7 +164,11 @@ const ApplicationInfosPage = () => {
                     )}
                   </GridItem>
                   <GridItem col={6} s={12}>
-                    <Link href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
+                    <Link
+                      href="https://strapi.io/pricing-self-hosted"
+                      isExternal
+                      endIcon={<ExternalLink />}
+                    >
                       {formatMessage({
                         id: 'Settings.application.link-pricing',
                         defaultMessage: 'See all pricing plans',
