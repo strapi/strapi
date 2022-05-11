@@ -13,20 +13,10 @@ import getTrad from '../../../utils/getTrad';
 export const BulkDeleteButton = ({ selected, onSuccess }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const { isLoading: isLoadingAssets, remove: removeAssets } = useBulkRemove('assets');
-  const { isLoading: isLoadingFolders, remove: removeFolders } = useBulkRemove('folders');
-
-  const isLoading = isLoadingAssets || isLoadingFolders;
+  const { isLoading, remove } = useBulkRemove();
 
   const handleConfirmRemove = async () => {
-    const assets = selected.filter(({ type }) => type === 'asset');
-    const folders = selected.filter(({ type }) => type === 'folder');
-
-    await Promise.all([
-      assets.length > 0 && removeAssets(assets.map(({ asset: { id } }) => id)),
-      folders.length > 0 && removeFolders(folders.map(({ folder: { id } }) => id)),
-    ]);
-
+    await remove(selected);
     onSuccess();
   };
 

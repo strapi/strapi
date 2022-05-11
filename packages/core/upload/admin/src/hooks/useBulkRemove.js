@@ -2,25 +2,43 @@ import { useMutation, useQueryClient } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
 
 import pluginId from '../pluginId';
-import { deleteRequest } from '../utils/deleteRequest';
+import { axiosInstance, getRequestUrl } from '../utils';
 
-export const useBulkRemove = type => {
+export const useBulkRemove = () => {
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
+  const url = getRequestUrl('actions/bulk-delete');
 
-  const bulkRemoveQuery = ids => {
-    const promises = ids.map(id => deleteRequest('files', id));
+  const bulkRemoveQuery = filesAndFolders => {
+    const payload = filesAndFolders.reduce((acc, selected) => {
+      const { id, type } = selected;
+      const key = type === 'asset' ? 'fileIds' : 'folderIds';
 
-    return Promise.all(promises);
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+
+      acc[key].push(id);
+
+      return acc;
+    }, {});
+
+    return axiosInstance.post(url, payload);
   };
 
   const mutation = useMutation(bulkRemoveQuery, {
-    onSuccess: () => {
-      if (type === 'folders') {
-        queryClient.refetchQueries([pluginId, 'folders'], { active: true });
-      } else if (type === 'assets') {
+    onSuccess: res => {
+      const {
+        data: { data },
+      } = res;
+
+      if (data?.files?.length > 0) {
         queryClient.refetchQueries([pluginId, 'assets'], { active: true });
         queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+      }
+
+      if (data?.folders?.length > 0) {
+        queryClient.refetchQueries([pluginId, 'folders'], { active: true });
       }
 
       toggleNotification({
