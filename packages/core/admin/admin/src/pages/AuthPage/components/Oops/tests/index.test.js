@@ -57,6 +57,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
       }
 
       .c0 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -68,13 +72,13 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         -webkit-justify-content: flex-end;
         -ms-flex-pack: end;
         justify-content: flex-end;
+      }
+
+      .c13 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c13 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -82,13 +86,13 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c20 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c20 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -100,10 +104,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c17 {
@@ -117,10 +117,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
-      }
-
-      .c10:focus-visible {
-        outline: none;
       }
 
       .c22 {
@@ -180,6 +176,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
+      }
+
+      .c10:focus-visible {
+        outline: none;
       }
 
       .c5 {
@@ -258,7 +258,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
+        border: 1px solid #4945ff;
         border: 1px solid transparent;
         background: transparent;
       }

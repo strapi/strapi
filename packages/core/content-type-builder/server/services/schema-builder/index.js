@@ -25,6 +25,7 @@ module.exports = function createBuilder() {
       filename: compo.__filename__,
       dir: join(strapi.dirs.app.components, compo.category),
       schema: compo.__schema__,
+      config: compo.config,
     };
   });
 
@@ -52,6 +53,7 @@ module.exports = function createBuilder() {
       filename: 'schema.json',
       dir,
       schema: contentType.__schema__,
+      config: contentType.config,
     };
   });
 

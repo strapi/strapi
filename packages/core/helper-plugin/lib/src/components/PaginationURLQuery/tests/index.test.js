@@ -38,6 +38,10 @@ describe('<PaginationURLQuery />', () => {
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -45,10 +49,6 @@ describe('<PaginationURLQuery />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c1 > * + * {
@@ -190,7 +190,7 @@ describe('<PaginationURLQuery />', () => {
 
       <nav
         aria-label="pagination"
-        class="sc-iukxot"
+        class="sc-eBTqsU"
       >
         <ul
           class="c0 c1"
