@@ -8,4 +8,5 @@ module.exports = {
   loadPolicies: require('./policies'),
   loadPlugins: require('./plugins'),
   loadAdmin: require('./admin'),
+  loadSanitizers: require('./sanitizers'),
 };
