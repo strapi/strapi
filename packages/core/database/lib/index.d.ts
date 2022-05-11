@@ -2,16 +2,37 @@ import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvideer } from './schema';
 
-type BooleanWhere<T> = {
+type LogicOperators<T> = {
   $and?: WhereParams<T>[];
   $or?: WhereParams<T>[];
   $not?: WhereParams<T>;
-};
+}
 
-type WhereParams<T> = {
-  [K in keyof T]?: T[K];
+type AttributeOperators<T, K extends keyof T> = {
+  $eq?: T[K];
+  $ne?: T[K];
+  $in?: T[K][];
+  $notIn?: T[K][];
+  $lt?: T[K];
+  $lte?: T[K];
+  $gt?: T[K];
+  $gte?: T[K];
+  $between?: [T[K], T[K]];
+  $contains?: T[K];
+  $notContains?: T[K];
+  $containsi?: T[K];
+  $notContainsi?: T[K];
+  $startsWith?: T[K];
+  $endsWith?: T[K];
+  $null?: boolean;
+  $notNull?: boolean;
+  $not?: WhereParams<T> | AttributeOperators<T, K>;
+}
+
+export type WhereParams<T> = {
+  [K in keyof T]?: T[K] | T[K][] | AttributeOperators<T, K>;
 } &
-  BooleanWhere<T>;
+  LogicOperators<T>;
 
 type Sortables<T> = {
   // check sortable
