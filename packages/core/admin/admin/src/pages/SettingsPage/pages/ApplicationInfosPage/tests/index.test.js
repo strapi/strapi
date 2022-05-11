@@ -43,7 +43,7 @@ describe('Application page', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c23 {
+      .c24 {
         padding-top: 4px;
       }
 
@@ -89,6 +89,80 @@ describe('Application page', () => {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
+      }
+
+      .c21 {
+        color: #4945ff;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c22 {
+        padding-left: 8px;
+      }
+
+      .c19 {
+        cursor: pointer;
+      }
+
+      .c20 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c20 svg path {
+        fill: #4945ff;
+      }
+
+      .c20 svg {
+        font-size: 0.625rem;
+      }
+
+      .c20:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c20:focus-visible {
+        outline: none;
+      }
+
+      .c20:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c23 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
       }
 
       .c1 {
@@ -181,76 +255,6 @@ describe('Application page', () => {
         max-width: 100%;
       }
 
-      .c20 {
-        color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c21 {
-        padding-left: 8px;
-      }
-
-      .c19 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        position: relative;
-        outline: none;
-      }
-
-      .c19 svg path {
-        fill: #4945ff;
-      }
-
-      .c19 svg {
-        font-size: 0.625rem;
-      }
-
-      .c19:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c19:focus-visible {
-        outline: none;
-      }
-
-      .c19:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c22 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-      }
-
       @media (max-width:68.75rem) {
         .c16 {
           grid-column: span 12;
@@ -338,19 +342,19 @@ describe('Application page', () => {
                           4.0.0
                         </p>
                         <a
-                          class="c19"
+                          class="c19 c20"
                           href="https://support.strapi.io/support/home"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c20"
+                            class="c21"
                           >
                             Get help
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c22 c23"
                           >
                             <svg
                               fill="none"
@@ -397,19 +401,19 @@ describe('Application page', () => {
                         class=""
                       >
                         <a
-                          class="c19"
+                          class="c19 c20"
                           href="https://github.com/strapi/strapi/releases/tag/v3.6.8"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c20"
+                            class="c21"
                           >
                             Upgrade your admin panel
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c22 c23"
                           >
                             <svg
                               fill="none"
@@ -434,19 +438,19 @@ describe('Application page', () => {
                         class=""
                       >
                         <a
-                          class="c19"
+                          class="c19 c20"
                           href="https://strapi.io/pricing-self-hosted"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c20"
+                            class="c21"
                           >
                             See all pricing plans
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c21 c22"
+                            class="c22 c23"
                           >
                             <svg
                               fill="none"
@@ -466,7 +470,7 @@ describe('Application page', () => {
                     </div>
                   </div>
                   <div
-                    class="c23"
+                    class="c24"
                   >
                     <span
                       class="c17"
