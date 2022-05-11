@@ -26,6 +26,11 @@ export interface Strapi {
   readonly auth: unknown;
 
   /**
+   * Getter for the Strapi sanitizers container
+   */
+  readonly sanitizers: unknown;
+
+  /**
    * Getter for the Strapi services container
    *
    * It returns all the registered services
