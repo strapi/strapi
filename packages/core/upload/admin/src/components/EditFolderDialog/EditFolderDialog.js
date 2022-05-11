@@ -21,6 +21,7 @@ import { Form, useNotification, getAPIInnerErrors, useQueryParams } from '@strap
 
 import { getTrad, findRecursiveFolderByValue } from '../../utils';
 import { useEditFolder } from '../../hooks/useEditFolder';
+import { useBulkRemove } from '../../hooks/useBulkRemove';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
 
@@ -38,9 +39,10 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
   const submitButtonRef = useRef(null);
   const { formatMessage, formatDate } = useIntl();
   const { editFolder, isLoading } = useEditFolder();
+  const { remove } = useBulkRemove();
   const toggleNotification = useNotification();
   const [{ query }] = useQueryParams();
-
+  const isEditing = !!folder;
   const activeFolderId = folder?.parent?.id ?? query?.folder ?? folderStructure[0].value;
 
   const initialFormData = Object.assign({}, folder, {
@@ -62,10 +64,15 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
 
       toggleNotification({
         type: 'success',
-        message: formatMessage({
-          id: getTrad('modal.folder-notification-success'),
-          defaultMessage: 'Folder successfully created',
-        }),
+        message: isEditing
+          ? formatMessage({
+              id: getTrad('modal.folder-notification-edited-success'),
+              defaultMessage: 'Folder successfully edited',
+            })
+          : formatMessage({
+              id: getTrad('modal.folder-notification-created-success'),
+              defaultMessage: 'Folder successfully created',
+            }),
       });
 
       onClose({ created: true });
@@ -87,14 +94,27 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
     onClose();
   };
 
+  const handleDelete = async event => {
+    event.preventDefault();
+
+    await remove([folder]);
+
+    onClose();
+  };
+
   return (
     <ModalLayout onClose={handleClose} labelledBy="title">
       <ModalHeader>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-          {formatMessage({
-            id: getTrad('modal.folder.create.title'),
-            defaultMessage: 'Add new folder',
-          })}
+          {isEditing
+            ? formatMessage({
+                id: getTrad('modal.folder.edit.title'),
+                defaultMessage: 'Edit folder',
+              })
+            : formatMessage({
+                id: getTrad('modal.folder.create.title'),
+                defaultMessage: 'Add new folder',
+              })}
         </Typography>
       </ModalHeader>
 
@@ -108,7 +128,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
           {({ values, errors, handleChange, setFieldValue }) => (
             <Form noValidate>
               <Grid gap={4}>
-                {folder && (
+                {isEditing && (
                   <GridItem xs={12} col={12}>
                     <ContextInfo
                       blocks={[
@@ -211,9 +231,24 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
           </Button>
         }
         endActions={
-          <Button onClick={() => submitButtonRef.current.click()} name="submit" loading={isLoading}>
-            {formatMessage({ id: 'modal.folder.create.submit', defaultMessage: 'Create' })}
-          </Button>
+          <Stack horizontal spacing={2}>
+            {isEditing && (
+              <Button type="button" variant="danger-light" onClick={handleDelete} name="delete">
+                {formatMessage({
+                  id: 'modal.folder.create.delete',
+                  defaultMessage: 'Delete folder',
+                })}
+              </Button>
+            )}
+
+            <Button
+              onClick={() => submitButtonRef.current.click()}
+              name="submit"
+              loading={isLoading}
+            >
+              {formatMessage({ id: 'modal.folder.create.submit', defaultMessage: 'Create' })}
+            </Button>
+          </Stack>
         }
       />
     </ModalLayout>
@@ -226,6 +261,7 @@ EditFolderDialog.defaultProps = {
 
 EditFolderDialog.propTypes = {
   folder: PropTypes.shape({
+    id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     children: PropTypes.array.isRequired,
     createdAt: PropTypes.string.isRequired,
