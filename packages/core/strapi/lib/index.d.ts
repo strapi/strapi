@@ -10,7 +10,7 @@ export type { Core };
 export type Strapi = Core.Strapi;
 
 declare global {
-  interface ContentTypes {}
+  interface AllTypes {}
 }
 
 declare global {
