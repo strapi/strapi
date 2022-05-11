@@ -1,10 +1,10 @@
 import { Service } from './core-api/service';
-import { Controller } from './core-api/controller';
+import { Controller, GenericController } from './core-api/controller';
 import { Middleware } from './middlewares';
 import { Policy } from './core/registries/policies';
 import { Strapi } from '@strapi/strapi'
 
-type ControllerConfig = Controller;
+type ControllerConfig<T extends Controller = Controller> = T;
 
 type ServiceConfig = Service;
 
@@ -44,8 +44,9 @@ interface Router {
   routes: Route[];
 }
 
-type Callback = (params:{strapi:Strapi}) => any;
+type ControllerCallback <T extends GenericController = GenericController> = (params:{strapi:Strapi}) => T;
+type ServiceCallback <T extends Service = Sevice> = (params:{strapi:Strapi}) => T
 
 export function createCoreRouter(uid: string, cfg?: RouterConfig = {}): () => Router;
-export function createCoreController(uid: string, cfg?: ControllerConfig | Callback = {}): () => Controller;
-export function createCoreService(uid: string, cfg?: ServiceConfig | Callback = {}): () => Service;
+export function createCoreController<T extends GenericController = GenericController>(uid: string, cfg?: ControllerCallback<T> | T = {}): () => T & Controller;
+export function createCoreService<T extends Service = Service>(uid: string, cfg?: ServiceCallback<T> | T = {}): () => T ;
