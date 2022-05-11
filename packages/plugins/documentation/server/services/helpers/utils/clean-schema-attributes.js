@@ -4,13 +4,12 @@ const _ = require('lodash');
 const getSchemaData = require('./get-schema-data');
 
 /**
- * @description - Converts types found on attributes to OpenAPI specific data types
+ * @description - Converts types found on attributes to OpenAPI acceptable data types
  *
  * @param {object} attributes - The attributes found on a contentType
  * @param {{ typeMap: Map, isRequest: boolean }} opts
  * @returns Attributes using OpenAPI acceptable data types
  */
-
 const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = false } = {}) => {
   const attributesCopy = _.cloneDeep(attributes);
 
@@ -114,7 +113,7 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
         break;
       }
       case 'dynamiczone': {
-        const components = attribute.components.map(component => {
+        const components = attribute.components.map((component) => {
           const componentAttributes = strapi.components[component].attributes;
           return {
             type: 'object',
@@ -167,6 +166,14 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
           };
 
           attributesCopy[prop] = isListOfEntities ? { type: 'array', items: oneOfType } : oneOfType;
+          break;
+        }
+
+        if (prop === 'localizations') {
+          attributesCopy[prop] = {
+            type: 'array',
+            items: { type: 'object', properties: {} },
+          };
           break;
         }
 
