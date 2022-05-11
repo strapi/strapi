@@ -43,14 +43,14 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
   const toggleNotification = useNotification();
   const [{ query }] = useQueryParams();
   const isEditing = !!folder;
-  const activeFolderId = folder?.parent?.id ?? query?.folder ?? folderStructure[0].value;
+  const activeFolderId = folder?.parent?.id ?? query?.folder;
 
   const initialFormData = Object.assign({}, folder, {
     parent: {
-      value: parseInt(activeFolderId, 10),
-      label:
-        findRecursiveFolderByValue(folderStructure, parseInt(activeFolderId, 10))?.label ??
-        folderStructure[0].label,
+      value: activeFolderId ? parseInt(activeFolderId, 10) : folderStructure[0].value,
+      label: activeFolderId
+        ? findRecursiveFolderByValue(folderStructure, parseInt(activeFolderId, 10))?.label
+        : folderStructure[0].label,
     },
   });
 
