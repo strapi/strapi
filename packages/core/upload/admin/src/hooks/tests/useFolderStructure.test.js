@@ -1,6 +1,7 @@
 import React from 'react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
+import { IntlProvider } from 'react-intl';
 
 import { axiosInstance } from '../../utils';
 import { useFolderStructure } from '../useFolderStructure';
@@ -44,7 +45,13 @@ const client = new QueryClient({
 
 // eslint-disable-next-line react/prop-types
 function ComponentFixture({ children }) {
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={client}>
+      <IntlProvider locale="en" messages={{}}>
+        {children}
+      </IntlProvider>
+    </QueryClientProvider>
+  );
 }
 
 function setup(...args) {
@@ -56,10 +63,6 @@ function setup(...args) {
 }
 
 describe('useFolderStructure', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   test('fetches data from the right URL', async () => {
     const { waitForNextUpdate } = await setup();
 
@@ -75,19 +78,25 @@ describe('useFolderStructure', () => {
 
     expect(result.current.data).toStrictEqual([
       {
-        value: 1,
-        label: '1',
-        children: [],
-      },
-
-      {
-        value: 2,
-        label: '2',
+        label: 'Media Library',
+        value: null,
         children: [
           {
-            value: 21,
-            label: '21',
+            value: 1,
+            label: '1',
             children: [],
+          },
+
+          {
+            value: 2,
+            label: '2',
+            children: [
+              {
+                value: 21,
+                label: '21',
+                children: [],
+              },
+            ],
           },
         ],
       },

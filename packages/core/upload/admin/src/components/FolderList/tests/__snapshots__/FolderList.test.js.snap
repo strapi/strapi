@@ -383,7 +383,7 @@ exports[`FolderList does select selected folders 1`] = `
       <h2
         class="c1"
       >
-        List title
+        List title with selected items
       </h2>
     </div>
     <div
