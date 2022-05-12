@@ -16,8 +16,9 @@ export const useFolders = ({ enabled = true }) => {
 
   const fetchFolders = async () => {
     try {
+      const { folder, ...paramsExceptFolder } = query;
       const params = {
-        ...query,
+        ...paramsExceptFolder,
         filters: {
           parent: {
             id: query?.folder ?? {

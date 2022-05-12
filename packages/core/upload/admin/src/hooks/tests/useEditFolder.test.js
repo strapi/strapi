@@ -150,7 +150,7 @@ describe('useEditFolder', () => {
     });
 
     await waitFor(() =>
-      expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'folder'], {
+      expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'folders'], {
         active: true,
       })
     );
