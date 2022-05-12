@@ -108,8 +108,6 @@ export const EditAssetDialog = ({
     },
   };
 
-  console.log(asset);
-
   const handleClose = values => {
     if (!isEqual(initialFormData, values)) {
       handleConfirmClose();

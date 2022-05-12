@@ -16,9 +16,8 @@ export const useAssets = ({ skipWhen }) => {
 
   const getAssets = async () => {
     try {
-      const { folder, ...paramsExceptFolder } = query;
       const params = {
-        ...paramsExceptFolder,
+        ...query,
         filters: {
           folder: {
             id: query?.folder ?? {
