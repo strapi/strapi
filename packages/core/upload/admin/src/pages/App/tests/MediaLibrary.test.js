@@ -126,6 +126,7 @@ jest.mock('react-intl', () => ({
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      retry: false,
       refetchOnWindowFocus: false,
     },
   },
@@ -157,7 +158,7 @@ describe('Media library homepage', () => {
 
   describe('loading state', () => {
     it('shows a loader when resolving the permissions', () => {
-      useMediaLibraryPermissions.mockReturnValue({ isLoading: true });
+      useMediaLibraryPermissions.mockReturnValueOnce({ isLoading: true });
 
       renderML();
 
@@ -166,7 +167,7 @@ describe('Media library homepage', () => {
     });
 
     it('shows a loader while resolving assets', () => {
-      useAssets.mockReturnValue({ isLoading: true });
+      useAssets.mockReturnValueOnce({ isLoading: true });
 
       renderML();
 
@@ -175,7 +176,7 @@ describe('Media library homepage', () => {
     });
 
     it('shows a loader while resolving folders', () => {
-      useFolders.mockReturnValue({ isLoading: true });
+      useFolders.mockReturnValueOnce({ isLoading: true });
 
       renderML();
 
@@ -184,7 +185,7 @@ describe('Media library homepage', () => {
     });
 
     it('shows a loader while resolving the folder structure', () => {
-      useFolderStructure.mockReturnValue({ isLoading: true });
+      useFolderStructure.mockReturnValueOnce({ isLoading: true });
 
       renderML();
 
@@ -202,11 +203,9 @@ describe('Media library homepage', () => {
       });
 
       it('hides the filters dropdown when the user is not allowed to read', () => {
-        useMediaLibraryPermissions.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValueOnce({
           isLoading: false,
           canRead: false,
-          canCreate: true,
-          canUpdate: false,
         });
 
         renderML();
@@ -223,16 +222,37 @@ describe('Media library homepage', () => {
       });
 
       it('hides the sort by dropdown when the user is not allowed to read', () => {
-        useMediaLibraryPermissions.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValueOnce({
           isLoading: false,
           canRead: false,
-          canCreate: true,
-          canUpdate: false,
         });
 
         renderML();
 
         expect(screen.queryByText('Sort by')).not.toBeInTheDocument();
+      });
+
+      [
+        ['Most recent uploads', 'createdAt:DESC'],
+        ['Oldest uploads', 'createdAt:ASC'],
+        ['Alphabetical order (A to Z)', 'name:ASC'],
+        ['Reverse alphabetical order (Z to A)', 'name:DESC'],
+        ['Most recent updates', 'updatedAt:DESC'],
+        ['Oldest updates', 'updatedAt:ASC'],
+      ].forEach(([label, sortKey]) => {
+        it(`modifies the URL with the according params: ${label} ${sortKey}`, async () => {
+          const setQueryMock = jest.fn();
+          useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: {} }, setQueryMock]);
+
+          renderML();
+
+          fireEvent.mouseDown(screen.getByText('Sort by'));
+          await waitFor(() => expect(screen.getByText(label)).toBeInTheDocument());
+          fireEvent.mouseDown(screen.getByText(label));
+          await waitFor(() => expect(screen.queryByText(label)).not.toBeInTheDocument());
+
+          expect(setQueryMock).toBeCalledWith({ sort: sortKey });
+        });
       });
     });
 
@@ -259,9 +279,8 @@ describe('Media library homepage', () => {
 
     describe('create asset', () => {
       it('hides the "Upload new asset" button when the user does not have the permissions to', async () => {
-        useMediaLibraryPermissions.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValueOnce({
           isLoading: false,
-          canRead: true,
           canCreate: false,
         });
 
@@ -271,7 +290,7 @@ describe('Media library homepage', () => {
       });
 
       it('shows the "Upload assets" button when the user does have the permissions to', async () => {
-        useMediaLibraryPermissions.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValueOnce({
           isLoading: false,
           canRead: true,
           canCreate: true,
@@ -283,98 +302,32 @@ describe('Media library homepage', () => {
       });
     });
 
-    describe('Sort by', () => {
-      [
-        ['Most recent uploads', 'createdAt:DESC'],
-        ['Oldest uploads', 'createdAt:ASC'],
-        ['Alphabetical order (A to Z)', 'name:ASC'],
-        ['Reverse alphabetical order (Z to A)', 'name:DESC'],
-        ['Most recent updates', 'updatedAt:DESC'],
-        ['Oldest updates', 'updatedAt:ASC'],
-      ].forEach(([label, sortKey]) => {
-        it('modifies the URL with the according params', async () => {
-          const setQueryMock = jest.fn();
-          useQueryParams.mockReturnValue([{ rawQuery: '', query: {} }, setQueryMock]);
+    describe('create folder', () => {
+      it('shows the create button if the user has create permissions', () => {
+        renderML();
 
-          renderML();
+        expect(screen.getByText('header.actions.add-folder')).toBeInTheDocument();
+      });
 
-          fireEvent.mouseDown(screen.getByText('Sort by'));
-          await waitFor(() => expect(screen.getByText(label)).toBeInTheDocument());
-          fireEvent.mouseDown(screen.getByText(label));
-          await waitFor(() => expect(screen.queryByText(label)).not.toBeInTheDocument());
-
-          expect(setQueryMock).toBeCalledWith({ sort: sortKey });
+      it('hides the create button if the user does not have create permissions', () => {
+        useMediaLibraryPermissions.mockReturnValueOnce({
+          isLoading: false,
+          canCreate: false,
         });
+
+        renderML();
+
+        expect(screen.queryByText('header.actions.add-folder')).not.toBeInTheDocument();
       });
     });
   });
 
   describe('content', () => {
     describe('empty state', () => {
-      it('shows an empty state when there are no assets and the user is allowed to read', async () => {
-        useAssets.mockReturnValue({ data: { results: [] } });
-
+      it('displays folders', async () => {
         renderML();
 
-        await waitFor(() =>
-          expect(screen.getByText('Upload your first assets...')).toBeInTheDocument()
-        );
-      });
-
-      it('shows an empty state when there are no assets and that there s a search', async () => {
-        useQueryParams.mockReturnValue([{ rawQuery: '', query: { _q: 'hello-moto' } }, jest.fn()]);
-        useAssets.mockReturnValue({ data: { results: [] } });
-
-        renderML();
-
-        await waitFor(() =>
-          expect(
-            screen.getByText('There are no assets with the applied filters')
-          ).toBeInTheDocument()
-        );
-      });
-
-      it('shows a specific empty state when the user is not allowed to see the content', async () => {
-        useMediaLibraryPermissions.mockReturnValue({
-          isLoading: false,
-          canRead: false,
-        });
-
-        renderML();
-
-        await waitFor(() =>
-          expect(
-            screen.getByText(`app.components.EmptyStateLayout.content-permissions`)
-          ).toBeInTheDocument()
-        );
-      });
-
-      it('shows a specific empty state when the user can read but not create', async () => {
-        useMediaLibraryPermissions.mockReturnValue({
-          isLoading: false,
-          canRead: true,
-          canCreate: false,
-        });
-
-        renderML();
-
-        await waitFor(() =>
-          expect(screen.queryByText('Upload your first assets...')).not.toBeInTheDocument()
-        );
-      });
-    });
-
-    describe('content resolved', () => {
-      it('shows an asset when the data resolves', async () => {
-        renderML();
-
-        await waitFor(() => expect(screen.getByText('3874873.jpg')).toBeInTheDocument());
-
-        expect(
-          screen.getByText((_, element) => element.textContent === 'jpg - 400✕400')
-        ).toBeInTheDocument();
-        expect(screen.getByText('Image')).toBeInTheDocument();
-        expect(screen.getByLabelText('Edit')).toBeInTheDocument();
+        await waitFor(() => expect(screen.getByText('Folder 1')).toBeInTheDocument());
       });
     });
   });
