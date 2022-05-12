@@ -19,7 +19,11 @@ export const useAssets = ({ skipWhen }) => {
       const params = {
         ...query,
         filters: {
-          folder: query?.folder,
+          folder: {
+            id: query?.folder ?? {
+              $null: true,
+            },
+          },
         },
       };
       const { data } = await axiosInstance.get(`${dataRequestURL}?${stringify(params)}`);

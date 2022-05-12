@@ -19,7 +19,11 @@ export const useFolders = ({ enabled = true }) => {
       const params = {
         ...query,
         filters: {
-          parent: query?.folder,
+          parent: {
+            id: query?.folder ?? {
+              $null: true,
+            },
+          },
         },
       };
       const { data } = await axiosInstance.get(`${dataRequestURL}?${stringify(params)}`);
