@@ -81,8 +81,13 @@ const optimize = async file => {
 
   const newFile = { ...file };
 
-  const { width, height, size, format } = await getMetadata(newFile);
+  try {
+    const { width, height, size, format } = await getMetadata(newFile);
+  } catch(e) {
+    console.error("Image upload failed with error: ", e);
+  }
 
+  
   if (sizeOptimization || autoOrientation) {
     const transformer = sharp();
     transformer[format]({ quality: sizeOptimization ? 80 : 100 });
