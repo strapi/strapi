@@ -54,7 +54,7 @@ export const MediaLibrary = () => {
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
 
-  const { data: assetsData, isLoading: assetsLoading, error: assetsError } = useAssets({
+  const { data: assetsData, isLoading: assetsLoading, errors: assetsError } = useAssets({
     skipWhen: !canRead,
   });
 
@@ -62,7 +62,7 @@ export const MediaLibrary = () => {
     enabled: assetsData?.pagination?.page === 1 && !isFiltering,
   });
 
-  const { data: folderStructure } = useFolderStructure();
+  const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure();
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
@@ -107,7 +107,8 @@ export const MediaLibrary = () => {
   const assetCount = assetsData?.pagination?.total || 0;
 
   const isNestedFolder = !!query?.folder;
-  const isLoading = foldersLoading || permissionsLoading || assetsLoading;
+  const isLoading =
+    foldersLoading || folderStructureIsLoading || permissionsLoading || assetsLoading;
 
   return (
     <Layout>

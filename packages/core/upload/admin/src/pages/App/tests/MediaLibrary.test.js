@@ -2,27 +2,107 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
-import { useRBAC, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
-import { rest } from 'msw';
 
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useFolderStructure } from '../../../hooks/useFolderStructure';
+import { useFolders } from '../../../hooks/useFolders';
+import { useAssets } from '../../../hooks/useAssets';
 import { MediaLibrary } from '../MediaLibrary';
 import en from '../../../translations/en.json';
-import server from './server';
-import { assetResultMock } from './asset.mock';
+
+jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
+  useMediaLibraryPermissions: jest.fn().mockReturnValue({
+    isLoading: false,
+    canRead: true,
+    canCreate: true,
+    canUpdate: true,
+    canCopyLink: true,
+    canDownload: true,
+  }),
+}));
 
 jest.mock('../../../hooks/useFolderStructure', () => ({
-  useFolderStructure: jest.fn().mockResolvedValue({
-    value: null,
-    label: 'Media Library',
-    children: [],
+  useFolderStructure: jest.fn().mockReturnValue({
+    isLoading: false,
+    error: null,
+    data: {
+      results: {
+        value: null,
+        label: 'Media Library',
+        children: [],
+      },
+    },
   }),
 }));
 
 jest.mock('../../../hooks/useFolders', () => ({
-  useFolders: jest.fn().mockResolvedValue({
-    id: 1,
-    name: 'Folder 1',
+  useFolders: jest.fn().mockReturnValue({
+    isLoading: false,
+    error: null,
+    data: {
+      results: [
+        {
+          id: 1,
+          name: 'Folder 1',
+          children: {
+            count: 1,
+          },
+          files: {
+            count: 1,
+          },
+        },
+      ],
+    },
+  }),
+}));
+
+jest.mock('../../../hooks/useAssets', () => ({
+  useAssets: jest.fn().mockReturnValue({
+    isLoading: false,
+    error: null,
+    data: {
+      pagination: {
+        pageCount: 1,
+        page: 1,
+        pageSize: 10,
+        total: 1,
+      },
+      results: [
+        {
+          id: 77,
+          name: '3874873.jpg',
+          alternativeText: null,
+          caption: null,
+          width: 400,
+          height: 400,
+          formats: {
+            thumbnail: {
+              name: 'thumbnail_3874873.jpg',
+              hash: 'thumbnail_3874873_b5818bb250',
+              ext: '.jpg',
+              mime: 'image/jpeg',
+              width: 156,
+              height: 156,
+              size: 3.97,
+              path: null,
+              url: '/uploads/thumbnail_3874873_b5818bb250.jpg',
+            },
+          },
+          hash: '3874873_b5818bb250',
+          ext: '.jpg',
+          mime: 'image/jpeg',
+          size: 11.79,
+          url: '/uploads/3874873_b5818bb250.jpg',
+          previewUrl: null,
+          provider: 'local',
+          provider_metadata: null,
+          createdAt: '2021-10-18T08:04:56.326Z',
+          updatedAt: '2021-10-18T08:04:56.326Z',
+        },
+      ],
+    },
   }),
 }));
 
@@ -30,7 +110,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useRBAC: jest.fn(),
   useNotification: jest.fn(() => jest.fn()),
-  useQueryParams: jest.fn(),
+  useQueryParams: jest.fn().mockReturnValue([{ query: {}, rawQuery: '' }, jest.fn()]),
 }));
 
 jest.mock('../../../utils', () => ({
@@ -63,29 +143,9 @@ const renderML = () =>
   );
 
 describe('Media library homepage', () => {
-  beforeAll(() => server.listen());
-
-  beforeEach(() => {
-    useRBAC.mockReturnValue({
-      isLoading: false,
-      allowedActions: {
-        canRead: true,
-        canCreate: true,
-        canUpdate: true,
-        canCopyLink: true,
-        canDownload: true,
-      },
-    });
-
-    useQueryParams.mockReturnValue([{ rawQuery: 'some-url', query: {} }, jest.fn()]);
-  });
-
   afterEach(() => {
-    server.resetHandlers();
     jest.clearAllMocks();
   });
-
-  afterAll(() => server.close());
 
   describe('navigation', () => {
     it('focuses the title when mounting the component', () => {
@@ -97,7 +157,7 @@ describe('Media library homepage', () => {
 
   describe('loading state', () => {
     it('shows a loader when resolving the permissions', () => {
-      useRBAC.mockReturnValue({ isLoading: true, allowedActions: {} });
+      useMediaLibraryPermissions.mockReturnValue({ isLoading: true });
 
       renderML();
 
@@ -105,7 +165,27 @@ describe('Media library homepage', () => {
       expect(screen.getByText('Loading content.')).toBeInTheDocument();
     });
 
-    it('shows a loader when resolving the assets', () => {
+    it('shows a loader while resolving assets', () => {
+      useAssets.mockReturnValue({ isLoading: true });
+
+      renderML();
+
+      expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('true');
+      expect(screen.getByText('Loading content.')).toBeInTheDocument();
+    });
+
+    it('shows a loader while resolving folders', () => {
+      useFolders.mockReturnValue({ isLoading: true });
+
+      renderML();
+
+      expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('true');
+      expect(screen.getByText('Loading content.')).toBeInTheDocument();
+    });
+
+    it('shows a loader while resolving the folder structure', () => {
+      useFolderStructure.mockReturnValue({ isLoading: true });
+
       renderML();
 
       expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('true');
@@ -122,13 +202,11 @@ describe('Media library homepage', () => {
       });
 
       it('hides the filters dropdown when the user is not allowed to read', () => {
-        useRBAC.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValue({
           isLoading: false,
-          allowedActions: {
-            canRead: false,
-            canCreate: true,
-            canUpdate: false,
-          },
+          canRead: false,
+          canCreate: true,
+          canUpdate: false,
         });
 
         renderML();
@@ -145,13 +223,11 @@ describe('Media library homepage', () => {
       });
 
       it('hides the sort by dropdown when the user is not allowed to read', () => {
-        useRBAC.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValue({
           isLoading: false,
-          allowedActions: {
-            canRead: false,
-            canCreate: true,
-            canUpdate: false,
-          },
+          canRead: false,
+          canCreate: true,
+          canUpdate: false,
         });
 
         renderML();
@@ -168,13 +244,11 @@ describe('Media library homepage', () => {
       });
 
       it('hides the select all button when the user is not allowed to update', () => {
-        useRBAC.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValue({
           isLoading: false,
-          allowedActions: {
-            canRead: true,
-            canCreate: true,
-            canUpdate: false,
-          },
+          canRead: true,
+          canCreate: true,
+          canUpdate: false,
         });
 
         renderML();
@@ -185,12 +259,10 @@ describe('Media library homepage', () => {
 
     describe('create asset', () => {
       it('hides the "Upload new asset" button when the user does not have the permissions to', async () => {
-        useRBAC.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValue({
           isLoading: false,
-          allowedActions: {
-            canRead: true,
-            canCreate: false,
-          },
+          canRead: true,
+          canCreate: false,
         });
 
         renderML();
@@ -199,12 +271,10 @@ describe('Media library homepage', () => {
       });
 
       it('shows the "Upload assets" button when the user does have the permissions to', async () => {
-        useRBAC.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValue({
           isLoading: false,
-          allowedActions: {
-            canRead: true,
-            canCreate: true,
-          },
+          canRead: true,
+          canCreate: true,
         });
 
         renderML();
@@ -242,17 +312,18 @@ describe('Media library homepage', () => {
   describe('content', () => {
     describe('empty state', () => {
       it('shows an empty state when there are no assets and the user is allowed to read', async () => {
+        useAssets.mockReturnValue({ data: { results: [] } });
+
         renderML();
 
         await waitFor(() =>
           expect(screen.getByText('Upload your first assets...')).toBeInTheDocument()
         );
-
-        expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
       });
 
       it('shows an empty state when there are no assets and that there s a search', async () => {
-        useQueryParams.mockReturnValue([{ rawQuery: '', query: { _q: 'hello-moto' } }]);
+        useQueryParams.mockReturnValue([{ rawQuery: '', query: { _q: 'hello-moto' } }, jest.fn()]);
+        useAssets.mockReturnValue({ data: { results: [] } });
 
         renderML();
 
@@ -261,30 +332,12 @@ describe('Media library homepage', () => {
             screen.getByText('There are no assets with the applied filters')
           ).toBeInTheDocument()
         );
-
-        expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
-      });
-
-      it('shows an empty state when there are no assets and that there s a filter', async () => {
-        useQueryParams.mockReturnValue([{ rawQuery: '', query: { filters: [{ key: 'value' }] } }]);
-
-        renderML();
-
-        await waitFor(() =>
-          expect(
-            screen.getByText('There are no assets with the applied filters')
-          ).toBeInTheDocument()
-        );
-
-        expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
       });
 
       it('shows a specific empty state when the user is not allowed to see the content', async () => {
-        useRBAC.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValue({
           isLoading: false,
-          allowedActions: {
-            canRead: false,
-          },
+          canRead: false,
         });
 
         renderML();
@@ -294,37 +347,24 @@ describe('Media library homepage', () => {
             screen.getByText(`app.components.EmptyStateLayout.content-permissions`)
           ).toBeInTheDocument()
         );
-
-        expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
       });
 
       it('shows a specific empty state when the user can read but not create', async () => {
-        useRBAC.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValue({
           isLoading: false,
-          allowedActions: {
-            canRead: true,
-            canCreate: false,
-          },
+          canRead: true,
+          canCreate: false,
         });
 
         renderML();
 
         await waitFor(() =>
-          expect(screen.getByText(`The asset list is empty.`)).toBeInTheDocument()
-        );
-        await waitFor(() =>
           expect(screen.queryByText('Upload your first assets...')).not.toBeInTheDocument()
         );
-
-        expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('false');
       });
     });
 
     describe('content resolved', () => {
-      beforeEach(() => {
-        server.use(rest.get('*/upload/files*', (req, res, ctx) => res(ctx.json(assetResultMock))));
-      });
-
       it('shows an asset when the data resolves', async () => {
         renderML();
 
