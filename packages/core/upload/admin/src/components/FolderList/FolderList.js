@@ -111,6 +111,7 @@ FolderList.defaultProps = {
 };
 
 FolderList.propTypes = {
+  // TODO: describe shape
   folders: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   size: PropTypes.oneOf(['S', 'M']),
   selectedFolders: PropTypes.array,
