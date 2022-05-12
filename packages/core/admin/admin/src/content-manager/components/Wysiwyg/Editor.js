@@ -32,6 +32,8 @@ const Editor = ({
       readOnly: false,
       smartIndent: false,
       placeholder,
+      spellcheck: true,
+      inputStyle: 'contenteditable',
     });
 
     CodeMirror.commands.newlineAndIndentContinueMarkdownList = newlineAndIndentContinueMarkdownList;

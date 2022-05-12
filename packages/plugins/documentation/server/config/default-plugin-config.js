@@ -21,7 +21,7 @@ module.exports = {
     path: '/documentation',
     showGeneratedFiles: true,
     generateDefaultResponse: true,
-    plugins: ['email', 'upload'],
+    plugins: ['email', 'upload', 'users-permissions'],
   },
   servers: [],
   externalDocs: {
@@ -39,6 +39,35 @@ module.exports = {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
+      },
+    },
+    schemas: {
+      Error: {
+        type: 'object',
+        required: ['error'],
+        properties: {
+          data: {
+            nullable: true,
+            oneOf: [{ type: 'object' }, { type: 'array' }],
+          },
+          error: {
+            type: 'object',
+            properties: {
+              status: {
+                type: 'integer',
+              },
+              name: {
+                type: 'string',
+              },
+              message: {
+                type: 'string',
+              },
+              details: {
+                type: 'object',
+              },
+            },
+          },
+        },
       },
     },
   },
