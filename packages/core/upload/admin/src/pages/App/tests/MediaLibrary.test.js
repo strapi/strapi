@@ -5,10 +5,26 @@ import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library
 import { useRBAC, useQueryParams } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { rest } from 'msw';
+
 import { MediaLibrary } from '../MediaLibrary';
 import en from '../../../translations/en.json';
 import server from './server';
 import { assetResultMock } from './asset.mock';
+
+jest.mock('../../../hooks/useFolderStructure', () => ({
+  useFolderStructure: jest.fn().mockResolvedValue({
+    value: null,
+    label: 'Media Library',
+    children: [],
+  }),
+}));
+
+jest.mock('../../../hooks/useFolders', () => ({
+  useFolders: jest.fn().mockResolvedValue({
+    id: 1,
+    name: 'Folder 1',
+  }),
+}));
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
