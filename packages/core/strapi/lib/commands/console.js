@@ -12,9 +12,11 @@ module.exports = async () => {
   // Now load up the Strapi framework for real.
   const appDir = process.cwd();
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-  const compiledDirectoryPath = isTSProject ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options?.outDir : undefined
+  const compiledDirectoryPath = isTSProject
+    ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options.outDir
+    : undefined;
 
-  if (isTSProject) 
+  if (isTSProject)
     await tsUtils.compile(appDir, {
       watch: false,
       configOptions: { options: { incremental: true } },

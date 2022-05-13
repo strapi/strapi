@@ -16,8 +16,10 @@ module.exports = async function({ file: filePath, pretty }) {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-  const compiledDirectoryPath = isTSProject ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options?.outDir : null
-  if (isTSProject) 
+  const compiledDirectoryPath = isTSProject
+    ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options.outDir
+    : null;
+  if (isTSProject)
     await tsUtils.compile(appDir, {
       watch: false,
       configOptions: { options: { incremental: true } },

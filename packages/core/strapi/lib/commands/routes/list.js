@@ -11,7 +11,9 @@ module.exports = async function() {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-  const compiledDirectoryPath = isTSProject ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options?.outDir : null
+  const compiledDirectoryPath = isTSProject
+    ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options.outDir
+    : null;
 
   if (isTSProject)
     await tsUtils.compile(appDir, {

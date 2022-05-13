@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const strapiAdmin = require('@strapi/admin');
 const tsUtils = require('@strapi/typescript-utils');
 const { getConfigUrls, getAbsoluteServerUrl } = require('@strapi/utils');
@@ -13,7 +12,9 @@ module.exports = async function({ browser }) {
   const currentDirectory = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(currentDirectory);
-  const compiledDirectoryPath = isTSProject ? tsUtils.resolveConfigOptions(`${currentDirectory}/tsconfig.json`).options?.outDir : null
+  const compiledDirectoryPath = isTSProject
+    ? tsUtils.resolveConfigOptions(`${currentDirectory}/tsconfig.json`).options.outDir
+    : null;
   const buildDestDir = isTSProject ? compiledDirectoryPath : currentDirectory;
 
   const strapiInstance = strapi({

@@ -11,7 +11,9 @@ module.exports = async ({ optimization, forceBuild = true }) => {
   const srcDir = process.cwd();
 
   const useTypeScriptServer = await tsUtils.isUsingTypeScript(srcDir);
-  const compiledDirectoryPath = useTypeScriptServer ? tsUtils.resolveConfigOptions(`${srcDir}/tsconfig.json`).options?.outDir : null
+  const compiledDirectoryPath = useTypeScriptServer
+    ? tsUtils.resolveConfigOptions(`${srcDir}/tsconfig.json`).options.outDir
+    : null;
 
   // Typescript
   if (useTypeScriptServer) {
