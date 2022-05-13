@@ -124,10 +124,16 @@ module.exports = {
 
     strapi.telemetry.send('didCreateFirstAdmin');
 
+    const sanitizedUser = getService('user').sanitizeUser(user);
+
+    // Note: We need to assign manually the registrationToken to the
+    // final user payload so that it's not removed in the sanitation process.
+    Object.assign(sanitizedUser, { registrationToken: user.registrationToken });
+
     ctx.body = {
       data: {
         token: getService('token').createJwtToken(user),
-        user: getService('user').sanitizeUser(user),
+        user: sanitizedUser,
       },
     };
   },
