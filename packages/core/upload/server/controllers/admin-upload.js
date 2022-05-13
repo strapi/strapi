@@ -3,11 +3,9 @@
 const _ = require('lodash');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
-const { ACTIONS } = require('../constants');
+const { ACTIONS, FILE_MODEL_UID } = require('../constants');
 const validateUploadBody = require('./validation/admin/upload');
 const { findEntityAndCheckPermissions } = require('./utils/find-entity-and-check-permissions');
-
-const fileModel = 'plugin::upload.file';
 
 module.exports = {
   async updateFileInfo(ctx) {
@@ -18,7 +16,12 @@ module.exports = {
     } = ctx;
 
     const uploadService = getService('upload');
-    const { pm } = await findEntityAndCheckPermissions(userAbility, ACTIONS.update, fileModel, id);
+    const { pm } = await findEntityAndCheckPermissions(
+      userAbility,
+      ACTIONS.update,
+      FILE_MODEL_UID,
+      id
+    );
 
     const data = await validateUploadBody(body);
     const file = await uploadService.updateFileInfo(id, data.fileInfo, { user });
@@ -34,7 +37,12 @@ module.exports = {
     } = ctx;
 
     const uploadService = getService('upload');
-    const { pm } = await findEntityAndCheckPermissions(userAbility, ACTIONS.update, fileModel, id);
+    const { pm } = await findEntityAndCheckPermissions(
+      userAbility,
+      ACTIONS.update,
+      FILE_MODEL_UID,
+      id
+    );
 
     if (Array.isArray(files)) {
       throw new ApplicationError('Cannot replace a file with multiple ones');
@@ -56,7 +64,7 @@ module.exports = {
     const pm = strapi.admin.services.permission.createPermissionsManager({
       ability: userAbility,
       action: ACTIONS.create,
-      model: fileModel,
+      model: FILE_MODEL_UID,
     });
 
     if (!pm.isAllowed) {

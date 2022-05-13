@@ -2,9 +2,8 @@
 
 const { intersection, map, isEmpty } = require('lodash/fp');
 const { yup, validateYupSchema } = require('@strapi/utils');
+const { FOLDER_MODEL_UID } = require('../../../constants');
 const { folderExists } = require('./utils');
-
-const folderModel = 'plugin::upload.folder';
 
 const validateDeleteManyFoldersFilesSchema = yup
   .object()
@@ -34,12 +33,12 @@ const validateDuplicatesMoveManyFoldersFilesSchema = yup
     const { folderIds, destinationFolderId } = value;
     if (isEmpty(folderIds)) return true;
 
-    const folders = await strapi.entityService.findMany(folderModel, {
+    const folders = await strapi.entityService.findMany(FOLDER_MODEL_UID, {
       fields: ['name'],
       filters: { id: { $in: folderIds } },
     });
     // TODO: handle when parent is null
-    const existingFolders = await strapi.entityService.findMany(folderModel, {
+    const existingFolders = await strapi.entityService.findMany(FOLDER_MODEL_UID, {
       fields: ['name'],
       filters: { parent: { id: destinationFolderId } },
     });
@@ -55,31 +54,39 @@ const validateDuplicatesMoveManyFoldersFilesSchema = yup
 
 const validateMoveFoldersNotInsideThemselvesSchema = yup
   .object()
-  .test('dont-move-inside-self', 'folders cannot be moved inside themselves', async function(
-    value
-  ) {
-    const { folderIds, destinationFolderId } = value;
-    if (destinationFolderId === null || isEmpty(folderIds)) return true;
+  .test(
+    'dont-move-inside-self',
+    'folders cannot be moved inside themselves or one of its children',
+    async function(value) {
+      const { folderIds, destinationFolderId } = value;
+      if (destinationFolderId === null || isEmpty(folderIds)) return true;
 
-    const destinationFolder = await strapi.entityService.findOne(folderModel, destinationFolderId, {
-      fields: ['path'],
-    });
-    const folders = await strapi.entityService.findMany(folderModel, {
-      fields: ['name', 'path'],
-      filters: { id: { $in: folderIds } },
-    });
-
-    const unmovableFoldersNames = folders
-      .filter(folder => destinationFolder.path.startsWith(folder.path))
-      .map(f => f.name);
-    if (unmovableFoldersNames.length > 0) {
-      return this.createError({
-        message: `folders cannot be moved inside themselves: ${unmovableFoldersNames.join(', ')}`,
+      const destinationFolder = await strapi.entityService.findOne(
+        FOLDER_MODEL_UID,
+        destinationFolderId,
+        {
+          fields: ['path'],
+        }
+      );
+      const folders = await strapi.entityService.findMany(FOLDER_MODEL_UID, {
+        fields: ['name', 'path'],
+        filters: { id: { $in: folderIds } },
       });
-    }
 
-    return true;
-  });
+      const unmovableFoldersNames = folders
+        .filter(folder => destinationFolder.path.startsWith(folder.path))
+        .map(f => f.name);
+      if (unmovableFoldersNames.length > 0) {
+        return this.createError({
+          message: `folders cannot be moved inside themselves or one of its children: ${unmovableFoldersNames.join(
+            ', '
+          )}`,
+        });
+      }
+
+      return true;
+    }
+  );
 
 module.exports = {
   validateDeleteManyFoldersFiles: validateYupSchema(validateDeleteManyFoldersFilesSchema),

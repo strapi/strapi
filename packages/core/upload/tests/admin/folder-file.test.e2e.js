@@ -374,7 +374,9 @@ describe('Bulk actions fot folders & files', () => {
         },
       });
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe('folders cannot be moved inside themselves: folder-d-1');
+      expect(res.body.error.message).toBe(
+        'folders cannot be moved inside themselves or one of its children: folder-d-1'
+      );
     });
 
     test('Cannot move a folder inside itself (1 level)', async () => {
@@ -391,7 +393,9 @@ describe('Bulk actions fot folders & files', () => {
         },
       });
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe('folders cannot be moved inside themselves: folder-e-1');
+      expect(res.body.error.message).toBe(
+        'folders cannot be moved inside themselves or one of its children: folder-e-1'
+      );
     });
 
     test('Cannot move a folder inside itself (2 levels)', async () => {
@@ -409,7 +413,9 @@ describe('Bulk actions fot folders & files', () => {
         },
       });
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe('folders cannot be moved inside themselves: folder-f-1');
+      expect(res.body.error.message).toBe(
+        'folders cannot be moved inside themselves or one of its children: folder-f-1'
+      );
     });
 
     test('Cannot move a folder if it creates a duplicate', async () => {

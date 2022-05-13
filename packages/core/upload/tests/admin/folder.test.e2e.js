@@ -126,7 +126,7 @@ describe('Folder', () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe('folder already exists');
+      expect(res.body.error.message).toBe('A folder with this name already exists');
     });
 
     test('Cannot create a folder with duplicated name inside a folder', async () => {
@@ -140,7 +140,7 @@ describe('Folder', () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe('folder already exists');
+      expect(res.body.error.message).toBe('A folder with this name already exists');
     });
 
     test('Cannot create a folder inside a folder that does not exist', async () => {
@@ -280,7 +280,7 @@ describe('Folder', () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe('folder already exists');
+      expect(res.body.error.message).toBe('A folder with this name already exists');
     });
 
     test('cannot move a folder if duplicated', async () => {
@@ -298,7 +298,7 @@ describe('Folder', () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe('folder already exists');
+      expect(res.body.error.message).toBe('A folder with this name already exists');
     });
 
     test('cannot move a folder to a folder that does not exist', async () => {

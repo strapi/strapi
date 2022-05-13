@@ -1,14 +1,11 @@
 'use strict';
 
 const { getService } = require('../utils');
-const { ACTIONS } = require('../constants');
+const { ACTIONS, FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 const {
   validateDeleteManyFoldersFiles,
   validateMoveManyFoldersFiles,
 } = require('./validation/admin/folder-file');
-
-const folderModel = 'plugin::upload.folder';
-const fileModel = 'plugin::upload.file';
 
 module.exports = {
   async deleteMany(ctx) {
@@ -19,13 +16,13 @@ module.exports = {
 
     const pmFolder = strapi.admin.services.permission.createPermissionsManager({
       ability: ctx.state.userAbility,
-      model: folderModel,
+      model: FOLDER_MODEL_UID,
     });
 
     const pmFile = strapi.admin.services.permission.createPermissionsManager({
       ability: userAbility,
       action: ACTIONS.read,
-      model: fileModel,
+      model: FILE_MODEL_UID,
     });
 
     await validateDeleteManyFoldersFiles(body);
@@ -51,13 +48,13 @@ module.exports = {
 
     const pmFolder = strapi.admin.services.permission.createPermissionsManager({
       ability: ctx.state.userAbility,
-      model: folderModel,
+      model: FOLDER_MODEL_UID,
     });
 
     const pmFile = strapi.admin.services.permission.createPermissionsManager({
       ability: userAbility,
       action: ACTIONS.read,
-      model: fileModel,
+      model: FILE_MODEL_UID,
     });
 
     await validateMoveManyFoldersFiles(body);

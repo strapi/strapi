@@ -11,4 +11,6 @@ const ACTIONS = {
 
 module.exports = {
   ACTIONS,
+  FOLDER_MODEL_UID: 'plugin::upload.folder',
+  FILE_MODEL_UID: 'plugin::upload.file',
 };

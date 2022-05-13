@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Lifecycle callbacks for the `File` model.
- */
+const { FOLDER_MODEL_UID } = require('../../constants');
 
 module.exports = {
   collectionName: 'files',
@@ -92,7 +90,7 @@ module.exports = {
     folder: {
       type: 'relation',
       relation: 'manyToOne',
-      target: 'plugin::upload.folder',
+      target: FOLDER_MODEL_UID,
       inversedBy: 'files',
     },
     folderPath: {
