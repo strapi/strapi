@@ -17,6 +17,12 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
       let cleanedData;
 
       switch (attrType) {
+        case 'uid':
+        case 'email':
+        case 'text':
+        case 'string':
+          cleanedData = value || null;
+          break;
         case 'json':
           cleanedData = JSON.parse(value);
           break;
