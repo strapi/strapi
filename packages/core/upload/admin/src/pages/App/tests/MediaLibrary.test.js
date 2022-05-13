@@ -12,6 +12,47 @@ import { useAssets } from '../../../hooks/useAssets';
 import { MediaLibrary } from '../MediaLibrary';
 import en from '../../../translations/en.json';
 
+const FIXTURE_ASSET_PAGINATION = {
+  pageCount: 1,
+  page: 1,
+  pageSize: 10,
+  total: 1,
+};
+
+const FIXTURE_ASSETS = [
+  {
+    id: 77,
+    name: '3874873.jpg',
+    alternativeText: null,
+    caption: null,
+    width: 400,
+    height: 400,
+    formats: {
+      thumbnail: {
+        name: 'thumbnail_3874873.jpg',
+        hash: 'thumbnail_3874873_b5818bb250',
+        ext: '.jpg',
+        mime: 'image/jpeg',
+        width: 156,
+        height: 156,
+        size: 3.97,
+        path: null,
+        url: '/uploads/thumbnail_3874873_b5818bb250.jpg',
+      },
+    },
+    hash: '3874873_b5818bb250',
+    ext: '.jpg',
+    mime: 'image/jpeg',
+    size: 11.79,
+    url: '/uploads/3874873_b5818bb250.jpg',
+    previewUrl: null,
+    provider: 'local',
+    provider_metadata: null,
+    createdAt: '2021-10-18T08:04:56.326Z',
+    updatedAt: '2021-10-18T08:04:56.326Z',
+  },
+];
+
 jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
   useMediaLibraryPermissions: jest.fn().mockReturnValue({
     isLoading: false,
@@ -320,15 +361,150 @@ describe('Media library homepage', () => {
         expect(screen.queryByText('header.actions.add-folder')).not.toBeInTheDocument();
       });
     });
+
+    describe('back', () => {
+      it('does not render a back button at the root level of the media library', () => {
+        renderML();
+
+        expect(screen.queryByText('header.actions.folder-level-up')).not.toBeInTheDocument();
+      });
+
+      it('does render a back button at a nested level of the media library', () => {
+        useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { folder: 1 } }, jest.fn()]);
+
+        renderML();
+
+        expect(screen.queryByText('header.actions.folder-level-up')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('content', () => {
-    describe('empty state', () => {
-      it('displays folders', async () => {
-        renderML();
+    it('displays folders', async () => {
+      renderML();
 
-        await waitFor(() => expect(screen.getByText('Folder 1')).toBeInTheDocument());
+      expect(screen.queryByText('list.folders.title')).toBeInTheDocument();
+      expect(screen.getByText('Folder 1')).toBeInTheDocument();
+    });
+
+    it('does not display folders if the user does not have read permissions', async () => {
+      useMediaLibraryPermissions.mockReturnValueOnce({
+        isLoading: false,
+        canRead: false,
       });
+
+      renderML();
+
+      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
+      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+    });
+
+    it('does not display folders if a search is performed', async () => {
+      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
+
+      renderML();
+
+      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
+      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+    });
+
+    it('does not display folders if the media library is being filtered', async () => {
+      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { filters: 'true' } }, jest.fn()]);
+
+      renderML();
+
+      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
+      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+    });
+
+    it('does not display folders if the current page !== 1', async () => {
+      useAssets.mockReturnValueOnce({
+        isLoading: false,
+        data: {
+          pagination: {
+            ...FIXTURE_ASSET_PAGINATION,
+            pageCount: 2,
+            page: 2,
+            total: 2,
+          },
+          results: FIXTURE_ASSETS,
+        },
+      });
+      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
+
+      renderML();
+
+      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
+      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+    });
+
+    it('displays assets', async () => {
+      renderML();
+
+      expect(screen.getByText('3874873.jpg')).toBeInTheDocument();
+    });
+
+    it('does not display assets if the user does not have read permissions', async () => {
+      useMediaLibraryPermissions.mockReturnValueOnce({
+        isLoading: false,
+        canRead: false,
+      });
+
+      renderML();
+
+      expect(screen.queryByText('3874873.jpg')).not.toBeInTheDocument();
+    });
+
+    it('does display empty assets action, if there are no assets', () => {
+      useAssets.mockReturnValueOnce({
+        isLoading: false,
+        data: {
+          pagination: FIXTURE_ASSET_PAGINATION,
+          results: [],
+        },
+      });
+
+      renderML();
+
+      expect(screen.queryByText('Upload your first assets...')).toBeInTheDocument();
+    });
+
+    it('does not display empty assets action, if there are no assets and the user does not have create permissions', () => {
+      useMediaLibraryPermissions.mockReturnValueOnce({
+        isLoading: false,
+        canCreate: false,
+      });
+      useAssets.mockReturnValueOnce({
+        isLoading: false,
+        error: null,
+        data: {
+          pagination: FIXTURE_ASSET_PAGINATION,
+          results: FIXTURE_ASSETS,
+        },
+      });
+
+      renderML();
+
+      expect(screen.queryByText('header.actions.add-assets')).not.toBeInTheDocument();
+    });
+
+    it('does not display empty assets action, if there are no assets or the user is currently filtering', () => {
+      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { filters: 'true' } }, jest.fn()]);
+      useAssets.mockReturnValueOnce({
+        isLoading: false,
+        error: null,
+        data: {
+          pagination: FIXTURE_ASSET_PAGINATION,
+          results: [],
+        },
+      });
+
+      renderML();
+
+      expect(
+        screen.queryByText('There are no assets with the applied filters')
+      ).toBeInTheDocument();
+      expect(screen.queryByText('header.actions.add-assets')).not.toBeInTheDocument();
     });
   });
 });
