@@ -1,7 +1,6 @@
 'use strict';
 
 const REPL = require('repl');
-const path = require('path');
 const tsUtils = require('@strapi/typescript-utils');
 
 const strapi = require('../index');
@@ -12,16 +11,16 @@ const strapi = require('../index');
 module.exports = async () => {
   // Now load up the Strapi framework for real.
   const appDir = process.cwd();
-
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
+  const compiledDirectoryPath = isTSProject ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options?.outDir : undefined
 
-  if (isTSProject)
+  if (isTSProject) 
     await tsUtils.compile(appDir, {
       watch: false,
       configOptions: { options: { incremental: true } },
     });
 
-  const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
+  const distDir = isTSProject ? compiledDirectoryPath : appDir;
 
   const app = await strapi({ appDir, distDir }).load();
 

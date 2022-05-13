@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const CLITable = require('cli-table3');
 const chalk = require('chalk');
 const { toUpper } = require('lodash/fp');
@@ -12,7 +11,15 @@ module.exports = async function() {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-  const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
+  const compiledDirectoryPath = isTSProject ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options?.outDir : null
+
+  if (isTSProject)
+    await tsUtils.compile(appDir, {
+      watch: false,
+      configOptions: { options: { incremental: true } },
+    });
+
+  const distDir = isTSProject ? compiledDirectoryPath : appDir;
 
   const app = await strapi({ appDir, distDir }).load();
 

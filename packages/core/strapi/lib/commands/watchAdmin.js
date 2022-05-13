@@ -13,7 +13,8 @@ module.exports = async function({ browser }) {
   const currentDirectory = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(currentDirectory);
-  const buildDestDir = isTSProject ? path.join(currentDirectory, 'dist') : currentDirectory;
+  const compiledDirectoryPath = isTSProject ? tsUtils.resolveConfigOptions(`${currentDirectory}/tsconfig.json`).options?.outDir : null
+  const buildDestDir = isTSProject ? compiledDirectoryPath : currentDirectory;
 
   const strapiInstance = strapi({
     distDir: buildDestDir,

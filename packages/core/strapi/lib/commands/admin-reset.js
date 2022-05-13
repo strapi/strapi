@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const _ = require('lodash');
 const inquirer = require('inquirer');
 const tsUtils = require('@strapi/typescript-utils');
@@ -47,6 +46,7 @@ async function changePassword({ email, password }) {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
+  const compiledDirectoryPath = isTSProject ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options?.outDir : null
 
   if (isTSProject)
     await tsUtils.compile(appDir, {
@@ -54,7 +54,7 @@ async function changePassword({ email, password }) {
       configOptions: { options: { incremental: true } },
     });
 
-  const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
+  const distDir = isTSProject ? compiledDirectoryPath : appDir;
 
   const app = await strapi({ appDir, distDir }).load();
 

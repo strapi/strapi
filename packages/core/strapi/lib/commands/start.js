@@ -8,7 +8,8 @@ const strapi = require('../index');
 module.exports = async specifiedDir => {
     const appDir = process.cwd();
     const isTSProject = await tsUtils.isUsingTypeScript(appDir)
-    const distDir = isTSProject && !specifiedDir ? 'dist' : specifiedDir;
+    const compiledDirectoryPath = isTSProject ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options?.outDir : null
+    const distDir = isTSProject && !specifiedDir ? compiledDirectoryPath : specifiedDir;
 
     strapi({ distDir }).start()
 };
