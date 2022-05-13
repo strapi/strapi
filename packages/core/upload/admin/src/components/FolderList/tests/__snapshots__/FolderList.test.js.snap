@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderList does select selected folders 1`] = `
-.c26 {
+.c27 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -40,6 +40,8 @@ exports[`FolderList does select selected folders 1`] = `
 .c12 {
   position: relative;
   z-index: 3;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .c13 {
@@ -70,7 +72,7 @@ exports[`FolderList does select selected folders 1`] = `
   flex-direction: column;
 }
 
-.c24 {
+.c25 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -84,21 +86,21 @@ exports[`FolderList does select selected folders 1`] = `
   outline: none;
 }
 
-.c24 svg {
+.c25 svg {
   height: 12px;
   width: 12px;
 }
 
-.c24 svg > g,
-.c24 svg path {
+.c25 svg > g,
+.c25 svg path {
   fill: #ffffff;
 }
 
-.c24[aria-disabled='true'] {
+.c25[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c24:after {
+.c25:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -113,11 +115,11 @@ exports[`FolderList does select selected folders 1`] = `
   border: 2px solid transparent;
 }
 
-.c24:focus-visible {
+.c25:focus-visible {
   outline: none;
 }
 
-.c24:focus-visible:after {
+.c25:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -128,7 +130,7 @@ exports[`FolderList does select selected folders 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c25 {
+.c26 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -145,26 +147,26 @@ exports[`FolderList does select selected folders 1`] = `
   width: 2rem;
 }
 
-.c25 svg > g,
-.c25 svg path {
+.c26 svg > g,
+.c26 svg path {
   fill: #8e8ea9;
 }
 
-.c25:hover svg > g,
-.c25:hover svg path {
+.c26:hover svg > g,
+.c26:hover svg path {
   fill: #666687;
 }
 
-.c25:active svg > g,
-.c25:active svg path {
+.c26:active svg > g,
+.c26:active svg path {
   fill: #a5a5ba;
 }
 
-.c25[aria-disabled='true'] {
+.c26[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c25[aria-disabled='true'] svg path {
+.c26[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -179,17 +181,21 @@ exports[`FolderList does select selected folders 1`] = `
 .c17 {
   font-weight: 500;
   color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c19 {
+.c20 {
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c18 {
+.c19 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -304,11 +310,11 @@ exports[`FolderList does select selected folders 1`] = `
   margin-left: 12px;
 }
 
-.c20 {
+.c21 {
   right: 16px;
 }
 
-.c21 {
+.c22 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -322,16 +328,16 @@ exports[`FolderList does select selected folders 1`] = `
   flex-direction: row;
 }
 
-.c22 > * {
+.c23 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c22 > * + * {
+.c23 > * + * {
   margin-left: 8px;
 }
 
-.c23 {
+.c24 {
   position: absolute;
   top: 12px;
 }
@@ -363,6 +369,7 @@ exports[`FolderList does select selected folders 1`] = `
 }
 
 .c15 {
+  max-width: 100%;
   -webkit-text-decoration: none;
   text-decoration: none;
 }
@@ -371,6 +378,10 @@ exports[`FolderList does select selected folders 1`] = `
   display: grid;
   grid-template-columns: repeat( auto-fit, minmax(250px,1fr) );
   grid-gap: 16px;
+}
+
+.c18 {
+  max-width: 100%;
 }
 
 <div>
@@ -434,6 +445,7 @@ exports[`FolderList does select selected folders 1`] = `
           <div
             class="c12 c13 c14"
             id="folder-1-3-title"
+            overflow="hidden"
           >
             <a
               aria-current="page"
@@ -444,17 +456,17 @@ exports[`FolderList does select selected folders 1`] = `
                 class="c16"
               >
                 <span
-                  class="c17"
+                  class="c17 c18"
                 >
                   Folder 1
                   <div
-                    class="c18"
+                    class="c19"
                   >
                     :
                   </div>
                 </span>
                 <span
-                  class="c19"
+                  class="c20"
                 >
                   1
                    folder, 
@@ -465,12 +477,12 @@ exports[`FolderList does select selected folders 1`] = `
             </a>
           </div>
           <div
-            class="c20 c21 c22 c23"
+            class="c21 c22 c23 c24"
             spacing="2"
           >
             <button
               aria-disabled="false"
-              class="c24 c25"
+              class="c25 c26"
               type="button"
             >
               <svg
@@ -536,6 +548,7 @@ exports[`FolderList does select selected folders 1`] = `
           <div
             class="c12 c13 c14"
             id="folder-2-4-title"
+            overflow="hidden"
           >
             <a
               aria-current="page"
@@ -546,17 +559,17 @@ exports[`FolderList does select selected folders 1`] = `
                 class="c16"
               >
                 <span
-                  class="c17"
+                  class="c17 c18"
                 >
                   Folder 2
                   <div
-                    class="c18"
+                    class="c19"
                   >
                     :
                   </div>
                 </span>
                 <span
-                  class="c19"
+                  class="c20"
                 >
                   11
                    folder, 
@@ -567,12 +580,12 @@ exports[`FolderList does select selected folders 1`] = `
             </a>
           </div>
           <div
-            class="c20 c21 c22 c23"
+            class="c21 c22 c23 c24"
             spacing="2"
           >
             <button
               aria-disabled="false"
-              class="c24 c25"
+              class="c25 c26"
               type="button"
             >
               <svg
@@ -614,7 +627,7 @@ exports[`FolderList does select selected folders 1`] = `
     </div>
   </div>
   <div
-    class="c26"
+    class="c27"
   >
     <p
       aria-live="polite"
@@ -639,7 +652,7 @@ exports[`FolderList does select selected folders 1`] = `
 `;
 
 exports[`FolderList renders 1`] = `
-.c26 {
+.c27 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -678,6 +691,8 @@ exports[`FolderList renders 1`] = `
 .c12 {
   position: relative;
   z-index: 3;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .c13 {
@@ -708,7 +723,7 @@ exports[`FolderList renders 1`] = `
   flex-direction: column;
 }
 
-.c24 {
+.c25 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -722,21 +737,21 @@ exports[`FolderList renders 1`] = `
   outline: none;
 }
 
-.c24 svg {
+.c25 svg {
   height: 12px;
   width: 12px;
 }
 
-.c24 svg > g,
-.c24 svg path {
+.c25 svg > g,
+.c25 svg path {
   fill: #ffffff;
 }
 
-.c24[aria-disabled='true'] {
+.c25[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c24:after {
+.c25:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -751,11 +766,11 @@ exports[`FolderList renders 1`] = `
   border: 2px solid transparent;
 }
 
-.c24:focus-visible {
+.c25:focus-visible {
   outline: none;
 }
 
-.c24:focus-visible:after {
+.c25:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -766,7 +781,7 @@ exports[`FolderList renders 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c25 {
+.c26 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -783,26 +798,26 @@ exports[`FolderList renders 1`] = `
   width: 2rem;
 }
 
-.c25 svg > g,
-.c25 svg path {
+.c26 svg > g,
+.c26 svg path {
   fill: #8e8ea9;
 }
 
-.c25:hover svg > g,
-.c25:hover svg path {
+.c26:hover svg > g,
+.c26:hover svg path {
   fill: #666687;
 }
 
-.c25:active svg > g,
-.c25:active svg path {
+.c26:active svg > g,
+.c26:active svg path {
   fill: #a5a5ba;
 }
 
-.c25[aria-disabled='true'] {
+.c26[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c25[aria-disabled='true'] svg path {
+.c26[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -817,17 +832,21 @@ exports[`FolderList renders 1`] = `
 .c17 {
   font-weight: 500;
   color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c19 {
+.c20 {
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c18 {
+.c19 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -942,11 +961,11 @@ exports[`FolderList renders 1`] = `
   margin-left: 12px;
 }
 
-.c20 {
+.c21 {
   right: 16px;
 }
 
-.c21 {
+.c22 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -960,16 +979,16 @@ exports[`FolderList renders 1`] = `
   flex-direction: row;
 }
 
-.c22 > * {
+.c23 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c22 > * + * {
+.c23 > * + * {
   margin-left: 8px;
 }
 
-.c23 {
+.c24 {
   position: absolute;
   top: 12px;
 }
@@ -1001,6 +1020,7 @@ exports[`FolderList renders 1`] = `
 }
 
 .c15 {
+  max-width: 100%;
   -webkit-text-decoration: none;
   text-decoration: none;
 }
@@ -1009,6 +1029,10 @@ exports[`FolderList renders 1`] = `
   display: grid;
   grid-template-columns: repeat( auto-fit, minmax(250px,1fr) );
   grid-gap: 16px;
+}
+
+.c18 {
+  max-width: 100%;
 }
 
 <div>
@@ -1071,6 +1095,7 @@ exports[`FolderList renders 1`] = `
           <div
             class="c12 c13 c14"
             id="folder-1-1-title"
+            overflow="hidden"
           >
             <a
               aria-current="page"
@@ -1081,17 +1106,17 @@ exports[`FolderList renders 1`] = `
                 class="c16"
               >
                 <span
-                  class="c17"
+                  class="c17 c18"
                 >
                   Folder 1
                   <div
-                    class="c18"
+                    class="c19"
                   >
                     :
                   </div>
                 </span>
                 <span
-                  class="c19"
+                  class="c20"
                 >
                   1
                    folder, 
@@ -1102,12 +1127,12 @@ exports[`FolderList renders 1`] = `
             </a>
           </div>
           <div
-            class="c20 c21 c22 c23"
+            class="c21 c22 c23 c24"
             spacing="2"
           >
             <button
               aria-disabled="false"
-              class="c24 c25"
+              class="c25 c26"
               type="button"
             >
               <svg
@@ -1172,6 +1197,7 @@ exports[`FolderList renders 1`] = `
           <div
             class="c12 c13 c14"
             id="folder-2-2-title"
+            overflow="hidden"
           >
             <a
               aria-current="page"
@@ -1182,17 +1208,17 @@ exports[`FolderList renders 1`] = `
                 class="c16"
               >
                 <span
-                  class="c17"
+                  class="c17 c18"
                 >
                   Folder 2
                   <div
-                    class="c18"
+                    class="c19"
                   >
                     :
                   </div>
                 </span>
                 <span
-                  class="c19"
+                  class="c20"
                 >
                   11
                    folder, 
@@ -1203,12 +1229,12 @@ exports[`FolderList renders 1`] = `
             </a>
           </div>
           <div
-            class="c20 c21 c22 c23"
+            class="c21 c22 c23 c24"
             spacing="2"
           >
             <button
               aria-disabled="false"
-              class="c24 c25"
+              class="c25 c26"
               type="button"
             >
               <svg
@@ -1250,7 +1276,7 @@ exports[`FolderList renders 1`] = `
     </div>
   </div>
   <div
-    class="c26"
+    class="c27"
   >
     <p
       aria-live="polite"
