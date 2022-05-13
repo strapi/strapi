@@ -27,7 +27,7 @@ import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
-import { getTrad } from '../../utils';
+import { getTrad, getRequestUrl } from '../../utils';
 import { Filters } from './components/Filters';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
@@ -128,7 +128,8 @@ export const MediaLibrary = () => {
           )}
           navigationAction={
             isNestedFolder && (
-              <Link startIcon={<ArrowLeft />} to="/plugins/upload/">
+              // TODO: this is a placeholder for now
+              <Link startIcon={<ArrowLeft />} to={getRequestUrl('')}>
                 {formatMessage({
                   id: getTrad('header.actions.folder-level-up'),
                   defaultMessage: 'Back',
