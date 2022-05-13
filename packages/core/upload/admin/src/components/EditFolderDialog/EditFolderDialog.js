@@ -35,7 +35,7 @@ const folderSchema = yup.object({
     .nullable(true),
 });
 
-export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
+export const EditFolderDialog = ({ onClose, folder, folderStructure, canUpdate }) => {
   const submitButtonRef = useRef(null);
   const { formatMessage, formatDate } = useIntl();
   const { editFolder, isLoading } = useEditFolder();
@@ -44,6 +44,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
   const [{ query }] = useQueryParams();
   const isEditing = !!folder;
   const activeFolderId = folder?.parent?.id ?? query?.folder;
+  const formDisabled = !canUpdate;
 
   const initialFormData = Object.assign({}, folder, {
     parent: {
@@ -171,6 +172,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
                     value={values.name}
                     error={errors.name}
                     onChange={handleChange}
+                    disabled={formDisabled}
                   />
                 </GridItem>
 
@@ -192,6 +194,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
                       name="parent"
                       menuPortalTarget={document.querySelector('body')}
                       inputId="folder-parent"
+                      disabled={formDisabled}
                       {...(errors.parent
                         ? {
                             'aria-errormessage': 'folder-parent-error',
@@ -232,7 +235,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
         }
         endActions={
           <Stack horizontal spacing={2}>
-            {isEditing && (
+            {isEditing && canUpdate && (
               <Button type="button" variant="danger-light" onClick={handleDelete} name="delete">
                 {formatMessage({
                   id: 'modal.folder.create.delete',
@@ -245,6 +248,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
               onClick={() => submitButtonRef.current.click()}
               name="submit"
               loading={isLoading}
+              disabled={formDisabled}
             >
               {formatMessage({ id: 'modal.folder.create.submit', defaultMessage: 'Create' })}
             </Button>
@@ -257,6 +261,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure }) => {
 
 EditFolderDialog.defaultProps = {
   folder: undefined,
+  canUpdate: false,
 };
 
 EditFolderDialog.propTypes = {
@@ -270,7 +275,7 @@ EditFolderDialog.propTypes = {
     }).isRequired,
     parent: PropTypes.number,
   }),
-  // TODO: describe shape
   folderStructure: PropTypes.array.isRequired,
   onClose: PropTypes.func.isRequired,
+  canUpdate: PropTypes.bool,
 };

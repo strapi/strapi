@@ -44,12 +44,17 @@ const client = new QueryClient({
 });
 
 function ComponentFixture(props) {
+  const nextProps = {
+    canUpdate: true,
+    ...props,
+  };
+
   return (
     <QueryClientProvider client={client}>
       <IntlProvider locale="en" messages={{}}>
         <ThemeProvider theme={lightTheme}>
           <NotificationsProvider toggleNotification={() => {}}>
-            <EditFolderDialog {...props} />
+            <EditFolderDialog {...nextProps} />
           </NotificationsProvider>
         </ThemeProvider>
       </IntlProvider>

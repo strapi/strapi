@@ -293,6 +293,7 @@ export const MediaLibrary = () => {
           onClose={handleEditFolderClose}
           folderStructure={folderStructure}
           folder={folderToEdit}
+          canUpdate={canUpdate}
         />
       )}
 
