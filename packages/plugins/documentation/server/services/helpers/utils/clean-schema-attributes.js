@@ -113,7 +113,7 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
         break;
       }
       case 'dynamiczone': {
-        const components = attribute.components.map((component) => {
+        const components = attribute.components.map(component => {
           const componentAttributes = strapi.components[component].attributes;
           return {
             type: 'object',

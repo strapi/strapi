@@ -12,6 +12,7 @@ import {
   request,
   useNotification,
   TrackingContext,
+  prefixFileUrlWithBackendUrl,
 } from '@strapi/helper-plugin';
 import { SkipToContent } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
@@ -22,6 +23,7 @@ import NotFoundPage from '../NotFoundPage';
 import UseCasePage from '../UseCasePage';
 import { getUID } from './utils';
 import routes from './utils/routes';
+import { useConfigurations } from '../../hooks';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
@@ -29,6 +31,7 @@ const AuthenticatedApp = lazy(() =>
 
 function App() {
   const toggleNotification = useNotification();
+  const { updateProjectSettings } = useConfigurations();
   const { formatMessage } = useIntl();
   const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
 
@@ -66,8 +69,10 @@ function App() {
     const getData = async () => {
       try {
         const {
-          data: { hasAdmin, uuid },
+          data: { hasAdmin, uuid, menuLogo },
         } = await request('/admin/init', { method: 'GET' });
+
+        updateProjectSettings({ menuLogo: prefixFileUrlWithBackendUrl(menuLogo) });
 
         if (uuid) {
           try {
@@ -99,7 +104,7 @@ function App() {
     };
 
     getData();
-  }, [toggleNotification]);
+  }, [toggleNotification, updateProjectSettings]);
 
   const setHasAdmin = hasAdmin => setState(prev => ({ ...prev, hasAdmin }));
 

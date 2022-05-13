@@ -6,6 +6,7 @@ import * as metrics from '../services/metrics';
 import * as token from '../services/token';
 import * as auth from '../services/auth';
 import * as apiToken from '../services/api-token';
+import * as projectSettings from '../services/project-settings';
 
 type S = {
   role: typeof role;
@@ -16,6 +17,7 @@ type S = {
   auth: typeof auth;
   metrics: typeof metrics;
   'api-token': typeof apiToken;
+  'project-settings': typeof projectSettings;
 };
 
 export function getService<T extends keyof S>(name: T): S[T];
