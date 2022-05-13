@@ -1096,6 +1096,10 @@
     "name":"Kwasio (Cameroon) (nmg-CM)"
   },
   {
+    "code":"ky",
+    "name":"Kyrgyz (ky)"
+  },
+  {
     "code":"lag",
     "name":"Langi (lag)"
   },
@@ -1258,6 +1262,10 @@
   {
     "code":"mer-KE",
     "name":"Meru (Kenya) (mer-KE)"
+  },
+  {
+    "code":"mn",
+    "name":"Mongolian (mn)"
   },
   {
     "code":"mfe",
@@ -1514,6 +1522,10 @@
   {
     "code":"sbp-TZ",
     "name":"Sangu (Tanzania) (sbp-TZ)"
+  },
+  {
+    "code":"sa",
+    "name":"Sanskrit (sa)"
   },
   {
     "code":"seh",
@@ -1786,6 +1798,10 @@
   {
     "code":"dav-KE",
     "name":"Taita (Kenya) (dav-KE)"
+  },
+  {
+    "code":"tg",
+    "name":"Tajik (tg)"
   },
   {
     "code":"ta",

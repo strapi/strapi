@@ -6,5 +6,4 @@ module.exports = {
   forgotPassword: {
     emailTemplate: forgotPasswordTemplate,
   },
-  apiToken: require('./api-token'),
 };

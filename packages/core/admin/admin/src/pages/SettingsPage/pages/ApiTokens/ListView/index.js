@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
@@ -9,11 +9,12 @@ import {
   NoContent,
   DynamicTable,
   useTracking,
+  useGuidedTour,
+  LinkButton,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
-import { LinkButton } from '@strapi/design-system/LinkButton';
 import Plus from '@strapi/icons/Plus';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
@@ -33,6 +34,14 @@ const ApiTokenListView = () => {
   } = useRBAC(adminPermissions.settings['api-tokens']);
   const { push } = useHistory();
   const { trackUsage } = useTracking();
+  const { startSection } = useGuidedTour();
+  const startSectionRef = useRef(startSection);
+
+  useEffect(() => {
+    if (startSectionRef.current) {
+      startSectionRef.current('apiTokens');
+    }
+  }, []);
 
   useEffect(() => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });

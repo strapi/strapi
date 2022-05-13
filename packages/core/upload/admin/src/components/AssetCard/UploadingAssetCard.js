@@ -44,6 +44,11 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
       id: getTrad('settings.section.video.label'),
       defaultMessage: 'Video',
     });
+  } else if (asset.type === AssetType.Audio) {
+    badgeContent = formatMessage({
+      id: getTrad('settings.section.audio.label'),
+      defaultMessage: 'Audio',
+    });
   } else {
     badgeContent = formatMessage({
       id: getTrad('settings.section.doc.label'),
@@ -74,7 +79,7 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
   };
 
   return (
-    <Stack size={1}>
+    <Stack spacing={1}>
       <Card borderColor={error ? 'danger600' : undefined}>
         <CardHeader>
           <UploadProgressWrapper>

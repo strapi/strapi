@@ -6,8 +6,9 @@ import {
   useTracking,
   useNotification,
   useQueryParams,
-  formatComponentData,
+  formatContentTypeData,
   contentManagementUtilRemoveFieldsFromData,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -34,6 +35,7 @@ import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
   const toggleNotification = useNotification();
+  const { setCurrentStep } = useGuidedTour();
   const { trackUsage } = useTracking();
   const { push, replace } = useHistory();
   const [{ rawQuery }] = useQueryParams();
@@ -86,7 +88,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       allLayoutDataRef.current.components
     );
 
-    return formatComponentData(
+    return formatContentTypeData(
       cleaned,
       allLayoutDataRef.current.contentType,
       allLayoutDataRef.current.components
@@ -101,7 +103,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         allLayoutData.components
       );
 
-      acc[current] = formatComponentData(
+      acc[current] = formatContentTypeData(
         defaultComponentForm,
         allLayoutData.components[current],
         allLayoutData.components
@@ -115,7 +117,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       allLayoutData.components
     );
 
-    const contentTypeDataStructureFormatted = formatComponentData(
+    const contentTypeDataStructureFormatted = formatContentTypeData(
       contentTypeDataStructure,
       allLayoutData.contentType,
       allLayoutData.components
@@ -201,8 +203,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const displayErrors = useCallback(
     err => {
       const errorPayload = err.response.data;
-      console.error(errorPayload);
-
       let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
 
       // TODO handle errors correctly when back-end ready
@@ -263,18 +263,33 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
           message: { id: getTrad('success.record.save') },
         });
 
+        setCurrentStep('contentManager.success');
+
         dispatch(submitSucceeded(cleanReceivedData(data)));
         // Enable navigation and remove loaders
         dispatch(setStatus('resolved'));
 
         replace(`/content-manager/collectionType/${slug}/${data.id}${rawQuery}`);
+
+        return Promise.resolve(data);
       } catch (err) {
-        trackUsageRef.current('didNotCreateEntry', { error: err, trackerProperty });
         displayErrors(err);
+        trackUsageRef.current('didNotCreateEntry', { error: err, trackerProperty });
         dispatch(setStatus('resolved'));
+
+        return Promise.reject(err);
       }
     },
-    [cleanReceivedData, displayErrors, replace, slug, dispatch, rawQuery, toggleNotification]
+    [
+      cleanReceivedData,
+      displayErrors,
+      replace,
+      slug,
+      dispatch,
+      rawQuery,
+      toggleNotification,
+      setCurrentStep,
+    ]
   );
 
   const onPublish = useCallback(async () => {
@@ -295,9 +310,13 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         type: 'success',
         message: { id: getTrad('success.record.publish') },
       });
+
+      return Promise.resolve(data);
     } catch (err) {
       displayErrors(err);
       dispatch(setStatus('resolved'));
+
+      return Promise.reject(err);
     }
   }, [cleanReceivedData, displayErrors, id, slug, dispatch, toggleNotification]);
 
@@ -321,11 +340,15 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
         dispatch(setStatus('resolved'));
+
+        return Promise.resolve(data);
       } catch (err) {
         trackUsageRef.current('didNotEditEntry', { error: err, trackerProperty });
         displayErrors(err);
 
         dispatch(setStatus('resolved'));
+
+        return Promise.reject(err);
       }
     },
     [cleanReceivedData, displayErrors, slug, id, dispatch, toggleNotification]
@@ -349,9 +372,13 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
       dispatch(submitSucceeded(cleanReceivedData(data)));
       dispatch(setStatus('resolved'));
+
+      return Promise.resolve(data);
     } catch (err) {
       dispatch(setStatus('resolved'));
       displayErrors(err);
+
+      return Promise.reject(err);
     }
   }, [cleanReceivedData, displayErrors, id, slug, dispatch, toggleNotification]);
 

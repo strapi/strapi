@@ -21,10 +21,10 @@ module.exports = {
     ctx.send({ ok: true });
   },
 
-  async getRole(ctx) {
+  async findOne(ctx) {
     const { id } = ctx.params;
 
-    const role = await getService('role').getRole(id);
+    const role = await getService('role').findOne(id);
 
     if (!role) {
       return ctx.notFound();
@@ -33,8 +33,8 @@ module.exports = {
     ctx.send({ role });
   },
 
-  async getRoles(ctx) {
-    const roles = await getService('role').getRoles();
+  async find(ctx) {
+    const roles = await getService('role').find();
 
     ctx.send({ roles });
   },

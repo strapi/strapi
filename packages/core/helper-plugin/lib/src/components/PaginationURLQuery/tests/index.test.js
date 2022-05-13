@@ -38,6 +38,10 @@ describe('<PaginationURLQuery />', () => {
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -45,10 +49,6 @@ describe('<PaginationURLQuery />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c1 > * + * {
@@ -190,7 +190,7 @@ describe('<PaginationURLQuery />', () => {
 
       <nav
         aria-label="pagination"
-        class="sc-lhMiDA"
+        class="sc-eBTqsU"
       >
         <ul
           class="c0 c1"
@@ -264,7 +264,7 @@ describe('<PaginationURLQuery />', () => {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M.12 1.88L6.227 8 .12 14.12 2 16l8-8-8-8L.12 1.88z"
+                  d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
                   fill="#32324D"
                 />
               </svg>

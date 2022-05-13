@@ -1,14 +1,14 @@
 'use strict';
 
 const path = require('path');
-const { readFile, rm, stat } = require('fs-extra');
+const { readFile, remove, stat } = require('fs-extra');
 const strapiGenerators = require('../../index');
 
 describe('Content Type Generator', () => {
   const outputDirectory = path.join(__dirname, 'output');
 
   afterEach(async () => {
-    await rm(outputDirectory, { recursive: true, force: true });
+    await remove(outputDirectory);
   });
 
   test('it generates the schema', async () => {

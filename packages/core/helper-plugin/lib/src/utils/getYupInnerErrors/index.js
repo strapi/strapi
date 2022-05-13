@@ -8,7 +8,10 @@ const getYupInnerErrors = error => {
         .join('.')
         .split(']')
         .join('')
-    ] = { id: curr.message };
+    ] = {
+      id: curr.message,
+      defaultMessage: curr.message,
+    };
 
     return acc;
   }, {});
