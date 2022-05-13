@@ -24,6 +24,15 @@ const GridLayout = styled(Box)`
   grid-gap: ${({ theme }) => theme.spaces[4]};
 `;
 
+const CardTitle = styled(Typography).attrs({
+  ellipsis: true,
+  fontWeight: 'semiBold',
+  textColor: 'neutral800',
+  variant: 'omega',
+})`
+  max-width: 100%;
+`;
+
 export const FolderList = ({
   title,
   folders,
@@ -77,10 +86,10 @@ export const FolderList = ({
               <FolderCardBody>
                 <FolderCardLink to={url}>
                   <Flex as="h2" direction="column" alignItems="start">
-                    <Typography textColor="neutral800" variant="omega" fontWeight="semiBold">
+                    <CardTitle>
                       {folder.name}
                       <VisuallyHidden>:</VisuallyHidden>
-                    </Typography>
+                    </CardTitle>
 
                     <Typography as="span" textColor="neutral600" variant="pi">
                       {folder.children.count} folder, {folder.files.count} assets
