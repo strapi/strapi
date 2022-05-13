@@ -202,8 +202,6 @@ describe('Folder', () => {
         files: {
           count: expect.anything(),
         },
-        createdBy: expect.anything(),
-        updatedBy: expect.anything(),
       });
     });
 
