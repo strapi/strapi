@@ -35,7 +35,7 @@ const createAFile = async (parent = null) => {
   return res.body[0];
 };
 
-describe('Bulk actions fot folders & files', () => {
+describe('Bulk actions for folders & files', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
