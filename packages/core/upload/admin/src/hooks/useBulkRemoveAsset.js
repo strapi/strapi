@@ -1,9 +1,11 @@
 import { useMutation, useQueryClient } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
-import { removeAssetRequest } from '../utils/removeAssetQuery';
+
+import { deleteRequest } from '../utils/deleteRequest';
+import pluginId from '../pluginId';
 
 const bulkRemoveQuery = assetIds => {
-  const promises = assetIds.map(assetId => removeAssetRequest(assetId));
+  const promises = assetIds.map(assetId => deleteRequest('files', assetId));
 
   return Promise.all(promises);
 };
@@ -15,8 +17,8 @@ export const useBulkRemoveAsset = () => {
   const mutation = useMutation(bulkRemoveQuery, {
     onSuccess: () => {
       // Coupled with the cache of useAssets
-      queryClient.refetchQueries(['assets'], { active: true });
-      queryClient.refetchQueries(['asset-count'], { active: true });
+      queryClient.refetchQueries([pluginId, 'assets'], { active: true });
+      queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
 
       toggleNotification({
         type: 'success',

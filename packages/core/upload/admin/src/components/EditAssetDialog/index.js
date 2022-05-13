@@ -24,7 +24,7 @@ import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import { PreviewBox } from './PreviewBox';
-import { AssetMeta } from './AssetMeta';
+import { ContextInfo } from '../ContextInfo';
 import { getTrad } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 import { useEditAsset } from '../../hooks/useEditAsset';
@@ -138,13 +138,41 @@ export const EditAssetDialog = ({
               <GridItem xs={12} col={6}>
                 <Form noValidate>
                   <Stack spacing={3}>
-                    <AssetMeta
-                      size={formatBytes(asset.size)}
-                      dimension={
-                        asset.height && asset.width ? `${asset.width}✕${asset.height}` : ''
-                      }
-                      date={formatDate(new Date(asset.createdAt))}
-                      extension={getFileExtension(asset.ext)}
+                    <ContextInfo
+                      blocks={[
+                        {
+                          label: formatMessage({
+                            id: getTrad('modal.file-details.size'),
+                            defaultMessage: 'Size',
+                          }),
+                          value: formatBytes(asset.size),
+                        },
+
+                        {
+                          label: formatMessage({
+                            id: getTrad('modal.file-details.dimensions'),
+                            defaultMessage: 'Dimensions',
+                          }),
+                          value:
+                            asset.height && asset.width ? `${asset.width}✕${asset.height}` : null,
+                        },
+
+                        {
+                          label: formatMessage({
+                            id: getTrad('modal.file-details.date'),
+                            defaultMessage: 'Date',
+                          }),
+                          value: formatDate(new Date(asset.createdAt)),
+                        },
+
+                        {
+                          label: formatMessage({
+                            id: getTrad('modal.file-details.extension'),
+                            defaultMessage: 'Extension',
+                          }),
+                          value: getFileExtension(asset.ext),
+                        },
+                      ]}
                     />
 
                     <TextInput

@@ -45,7 +45,7 @@ module.exports = ({ strapi }) => {
   const formatFile = async (upload, extraInfo, metas) => {
     const uploadService = getUploadService('upload');
     const { filename, mimetype, createReadStream } = await upload;
-    const currentFile = uploadService.formatFileInfo(
+    const currentFile = await uploadService.formatFileInfo(
       {
         filename,
         type: mimetype,

@@ -1,19 +1,25 @@
 'use strict';
 
 const _ = require('lodash');
+const { omit, isArray, isPlainObject } = require('lodash/fp');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
-const validateSettings = require('./validation/settings');
-const validateUploadBody = require('./validation/upload');
+const validateUploadBody = require('./validation/content-api/upload');
 
 const { sanitize } = utils;
 const { ValidationError } = utils.errors;
+
+const removeFolderPath = data => {
+  if (isArray(data)) return data.map(omit('folderPath'));
+  if (isPlainObject(data)) return omit('folderPath', data);
+  return data;
+};
 
 const sanitizeOutput = (data, ctx) => {
   const schema = strapi.getModel('plugin::upload.file');
   const { auth } = ctx.state;
 
-  return sanitize.contentAPI.output(data, schema, { auth });
+  return sanitize.contentAPI.output(removeFolderPath(data), schema, { auth });
 };
 
 module.exports = {
@@ -55,24 +61,6 @@ module.exports = {
     await getService('upload').remove(file);
 
     ctx.body = await sanitizeOutput(file, ctx);
-  },
-
-  async updateSettings(ctx) {
-    const {
-      request: { body },
-    } = ctx;
-
-    const data = await validateSettings(body);
-
-    await getService('upload').setSettings(data);
-
-    ctx.body = { data };
-  },
-
-  async getSettings(ctx) {
-    const data = await getService('upload').getSettings();
-
-    ctx.body = { data };
   },
 
   async updateFileInfo(ctx) {
@@ -134,16 +122,5 @@ module.exports = {
     }
 
     await (id ? this.replaceFile : this.uploadFiles)(ctx);
-  },
-
-  async search(ctx) {
-    const { id } = ctx.params;
-    const entries = await strapi.query('plugin::upload.file').findMany({
-      where: {
-        $or: [{ hash: { $contains: id } }, { name: { $contains: id } }],
-      },
-    });
-
-    ctx.body = await sanitizeOutput(entries, ctx);
   },
 };

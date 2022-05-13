@@ -56,5 +56,9 @@ export default function hasContent(type, content, metadatas, fieldSchema) {
     return isNumber(content);
   }
 
+  if (type === 'boolean') {
+    return content !== null;
+  }
+
   return !isEmpty(content);
 }
