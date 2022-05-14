@@ -154,7 +154,7 @@ const createEntityManager = db => {
       return result;
     },
 
-    async create(uid, params) {
+    async create(uid, params = {}) {
       const states = await db.lifecycles.run('beforeCreate', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -188,7 +188,7 @@ const createEntityManager = db => {
     },
 
     // TODO: where do we handle relation processing for many queries ?
-    async createMany(uid, params) {
+    async createMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeCreateMany', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -215,7 +215,7 @@ const createEntityManager = db => {
       return result;
     },
 
-    async update(uid, params) {
+    async update(uid, params = {}) {
       const states = await db.lifecycles.run('beforeUpdate', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -265,7 +265,7 @@ const createEntityManager = db => {
     },
 
     // TODO: where do we handle relation processing for many queries ?
-    async updateMany(uid, params) {
+    async updateMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeUpdateMany', uid, { params });
 
       const metadata = db.metadata.get(uid);
@@ -289,7 +289,7 @@ const createEntityManager = db => {
       return result;
     },
 
-    async delete(uid, params) {
+    async delete(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDelete', uid, { params });
 
       const { where, select, populate } = params;
@@ -324,7 +324,7 @@ const createEntityManager = db => {
     },
 
     // TODO: where do we handle relation processing for many queries ?
-    async deleteMany(uid, params) {
+    async deleteMany(uid, params = {}) {
       const states = await db.lifecycles.run('beforeDeleteMany', uid, { params });
 
       const { where } = params;
