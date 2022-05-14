@@ -11,13 +11,15 @@ const wrapTransaction = db => fn => () =>
 
 // TODO: check multiple commands in one sql statement
 const migrationResolver = ({ name, path, context }) => {
+  const { db } = context;
+
   // if sql file run with knex raw
   if (path.match(/\.sql$/)) {
     const sql = fse.readFileSync(path, 'utf8');
 
     return {
       name,
-      up: knex => knex.raw(sql),
+      up: wrapTransaction(db)(knex => knex.raw(sql)),
       down() {},
     };
   }
@@ -26,8 +28,8 @@ const migrationResolver = ({ name, path, context }) => {
   const migration = require(path);
   return {
     name,
-    up: wrapTransaction(context.db)(migration.up),
-    down: wrapTransaction(context.db)(migration.down),
+    up: wrapTransaction(db)(migration.up),
+    down: wrapTransaction(db)(migration.down),
   };
 };
 
@@ -40,7 +42,7 @@ const createUmzugProvider = db => {
     storage: createStorage({ db, tableName: 'strapi_migrations' }),
     context: { db },
     migrations: {
-      glob: path.join(migrationDir, '*.+(js|sql)').replace(/\\/g, '/'),
+      glob: ['*.{js,sql}', { cwd: migrationDir }],
       resolve: migrationResolver,
     },
   });
