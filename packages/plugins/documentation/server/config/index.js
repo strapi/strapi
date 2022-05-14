@@ -1,7 +1,7 @@
 'use strict';
 
-const defaultDocumentationConfig = require('./default-config');
+const defaultPluginConfig = require('./default-plugin-config');
 
 module.exports = {
-  default: defaultDocumentationConfig,
+  default: defaultPluginConfig,
 };

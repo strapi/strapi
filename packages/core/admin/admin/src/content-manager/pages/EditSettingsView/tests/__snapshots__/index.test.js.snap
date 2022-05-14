@@ -647,72 +647,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   line-height: 1.43;
 }
 
-.c0:focus-visible {
-  outline: none;
-}
-
-.c1 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
-}
-
-.c2 {
-  padding-bottom: 8px;
-}
-
-.c18 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c7 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c9 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-}
-
-.c17 {
-  color: #666687;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
 .c6 {
   color: #4945ff;
   font-size: 0.75rem;
@@ -781,88 +715,6 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c23 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
-}
-
-.c42 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c24 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c43 {
-  grid-column: span 8;
-  max-width: 100%;
-}
-
-.c55 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c72 {
-  grid-column: span 4;
-  max-width: 100%;
-}
-
-.c40 {
-  background: #eaeaef;
-}
-
-.c41 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c69 {
-  background-color: transparent;
-}
-
-.c69 path {
-  fill: #666687;
-}
-
-.c57 {
-  position: relative;
-  padding-right: 4px;
-}
-
-.c70 {
-  position: relative;
-  padding-left: 4px;
-}
-
-.c63 {
-  height: 0.75rem;
-  width: 0.75rem;
-}
-
-.c63 path {
-  fill: #666687;
-}
-
-.c60 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  opacity: 1;
-}
-
-.c62 {
-  cursor: all-scroll;
-  border-right: 1px solid #dcdce4;
 }
 
 .c52 {
@@ -1017,6 +869,154 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
 .c48 svg > g,
 .c48 svg path {
   fill: #271fe0;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c1 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c2 {
+  padding-bottom: 8px;
+}
+
+.c18 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c8 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c9 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.c17 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c23 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c42 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c24 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c43 {
+  grid-column: span 8;
+  max-width: 100%;
+}
+
+.c55 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c72 {
+  grid-column: span 4;
+  max-width: 100%;
+}
+
+.c40 {
+  background: #eaeaef;
+}
+
+.c41 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c69 {
+  background-color: transparent;
+}
+
+.c69 path {
+  fill: #666687;
+}
+
+.c57 {
+  position: relative;
+  padding-right: 4px;
+}
+
+.c70 {
+  position: relative;
+  padding-left: 4px;
+}
+
+.c63 {
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+.c63 path {
+  fill: #666687;
+}
+
+.c60 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  opacity: 1;
+}
+
+.c62 {
+  cursor: all-scroll;
+  border-right: 1px solid #dcdce4;
 }
 
 .c75 {
@@ -2525,72 +2525,6 @@ exports[`EditSettingsView should add field 1`] = `
   line-height: 1.43;
 }
 
-.c0:focus-visible {
-  outline: none;
-}
-
-.c1 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
-}
-
-.c2 {
-  padding-bottom: 8px;
-}
-
-.c18 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c7 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c9 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-}
-
-.c17 {
-  color: #666687;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
 .c6 {
   color: #4945ff;
   font-size: 0.75rem;
@@ -2659,88 +2593,6 @@ exports[`EditSettingsView should add field 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c23 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
-}
-
-.c42 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c24 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c43 {
-  grid-column: span 8;
-  max-width: 100%;
-}
-
-.c55 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c72 {
-  grid-column: span 4;
-  max-width: 100%;
-}
-
-.c40 {
-  background: #eaeaef;
-}
-
-.c41 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c69 {
-  background-color: transparent;
-}
-
-.c69 path {
-  fill: #666687;
-}
-
-.c57 {
-  position: relative;
-  padding-right: 4px;
-}
-
-.c70 {
-  position: relative;
-  padding-left: 4px;
-}
-
-.c63 {
-  height: 0.75rem;
-  width: 0.75rem;
-}
-
-.c63 path {
-  fill: #666687;
-}
-
-.c60 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  opacity: 1;
-}
-
-.c62 {
-  cursor: all-scroll;
-  border-right: 1px solid #dcdce4;
 }
 
 .c52 {
@@ -2895,6 +2747,154 @@ exports[`EditSettingsView should add field 1`] = `
 .c48 svg > g,
 .c48 svg path {
   fill: #271fe0;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c1 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c2 {
+  padding-bottom: 8px;
+}
+
+.c18 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c8 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c9 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.c17 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c23 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c42 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c24 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c43 {
+  grid-column: span 8;
+  max-width: 100%;
+}
+
+.c55 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c72 {
+  grid-column: span 4;
+  max-width: 100%;
+}
+
+.c40 {
+  background: #eaeaef;
+}
+
+.c41 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c69 {
+  background-color: transparent;
+}
+
+.c69 path {
+  fill: #666687;
+}
+
+.c57 {
+  position: relative;
+  padding-right: 4px;
+}
+
+.c70 {
+  position: relative;
+  padding-left: 4px;
+}
+
+.c63 {
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+.c63 path {
+  fill: #666687;
+}
+
+.c60 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  opacity: 1;
+}
+
+.c62 {
+  cursor: all-scroll;
+  border-right: 1px solid #dcdce4;
 }
 
 .c75 {
@@ -4896,72 +4896,6 @@ exports[`EditSettingsView should add relation 1`] = `
   line-height: 1.43;
 }
 
-.c0:focus-visible {
-  outline: none;
-}
-
-.c1 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
-}
-
-.c2 {
-  padding-bottom: 8px;
-}
-
-.c18 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c7 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c9 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-}
-
-.c17 {
-  color: #666687;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
 .c6 {
   color: #4945ff;
   font-size: 0.75rem;
@@ -5030,88 +4964,6 @@ exports[`EditSettingsView should add relation 1`] = `
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c23 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
-}
-
-.c42 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c24 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c43 {
-  grid-column: span 8;
-  max-width: 100%;
-}
-
-.c55 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c72 {
-  grid-column: span 4;
-  max-width: 100%;
-}
-
-.c40 {
-  background: #eaeaef;
-}
-
-.c41 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c69 {
-  background-color: transparent;
-}
-
-.c69 path {
-  fill: #666687;
-}
-
-.c57 {
-  position: relative;
-  padding-right: 4px;
-}
-
-.c70 {
-  position: relative;
-  padding-left: 4px;
-}
-
-.c63 {
-  height: 0.75rem;
-  width: 0.75rem;
-}
-
-.c63 path {
-  fill: #666687;
-}
-
-.c60 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  opacity: 1;
-}
-
-.c62 {
-  cursor: all-scroll;
-  border-right: 1px solid #dcdce4;
 }
 
 .c52 {
@@ -5266,6 +5118,154 @@ exports[`EditSettingsView should add relation 1`] = `
 .c48 svg > g,
 .c48 svg path {
   fill: #271fe0;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c1 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c2 {
+  padding-bottom: 8px;
+}
+
+.c18 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c8 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c9 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.c17 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c23 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c42 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c24 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c43 {
+  grid-column: span 8;
+  max-width: 100%;
+}
+
+.c55 {
+  grid-column: span 6;
+  max-width: 100%;
+}
+
+.c72 {
+  grid-column: span 4;
+  max-width: 100%;
+}
+
+.c40 {
+  background: #eaeaef;
+}
+
+.c41 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c69 {
+  background-color: transparent;
+}
+
+.c69 path {
+  fill: #666687;
+}
+
+.c57 {
+  position: relative;
+  padding-right: 4px;
+}
+
+.c70 {
+  position: relative;
+  padding-left: 4px;
+}
+
+.c63 {
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+.c63 path {
+  fill: #666687;
+}
+
+.c60 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  opacity: 1;
+}
+
+.c62 {
+  cursor: all-scroll;
+  border-right: 1px solid #dcdce4;
 }
 
 .c75 {
