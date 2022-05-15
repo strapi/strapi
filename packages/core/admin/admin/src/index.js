@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom';
+import { request } from '@strapi/helper-plugin';
 import { Components, Fields, Middlewares, Reducers } from './core/apis';
-import { axiosInstance } from './core/utils';
 import appCustomisations from './app';
 // eslint-disable-next-line import/extensions
 import plugins from './plugins';
@@ -32,7 +32,7 @@ const run = async () => {
       data: {
         data: { isEE, features },
       },
-    } = await axiosInstance.get('/admin/project-type');
+    } = await request('/admin/project-type', { method: 'GET' });
 
     window.strapi.isEE = isEE;
     window.strapi.features = {
