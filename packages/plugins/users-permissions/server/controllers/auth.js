@@ -56,7 +56,7 @@ module.exports = {
       }
 
       // Check if the user exists.
-      const user = await strapi.query('plugin::users-permissions.user').findOne({ where: query });
+      const user = await strapi.query('plugin::users-permissions.user').findOne({ where: query, populate: true });
 
       if (!user) {
         throw new ValidationError('Invalid identifier or password');
@@ -124,7 +124,7 @@ module.exports = {
     ) {
       const user = await strapi
         .query('plugin::users-permissions.user')
-        .findOne({ where: { resetPasswordToken: `${params.code}` } });
+        .findOne({ where: { resetPasswordToken: `${params.code}` }, populate: true });
 
       if (!user) {
         throw new ValidationError('Incorrect code provided');
@@ -321,6 +321,7 @@ module.exports = {
 
     const user = await strapi.query('plugin::users-permissions.user').findOne({
       where: { email: params.email },
+      populate: true,
     });
 
     if (user && user.provider === params.provider) {
