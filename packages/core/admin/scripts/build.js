@@ -24,7 +24,7 @@ const buildAdmin = async () => {
   const args = {
     entry,
     dest,
-    cacheDir: __dirname,
+    cacheDir: path.resolve(__dirname, '..'),
     pluginsPath: [path.resolve(__dirname, '../../../../packages')],
     env: 'production',
     optimize: true,
