@@ -51,7 +51,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       schemas = {
         ...schemas,
         [`${pascalCase(uniqueName)}LocalizationRequest`]: {
-          required: requiredAttributes,
+          required: [...requiredAttributes, 'locale'],
           type: 'object',
           properties: cleanSchemaAttributes(attributesForRequest, { isRequest: true }),
         },
