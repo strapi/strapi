@@ -13,22 +13,22 @@ export interface Strapi {
   /**
    * Getter for the Strapi enterprise edition configuration
    */
-  readonly EE: unknown;
+  readonly EE: any;
 
   /**
    * Getter for the Strapi configuration container
    */
-  readonly config: unknown;
+  readonly config: any;
 
   /**
    * Getter for the Strapi auth container
    */
-  readonly auth: unknown;
+  readonly auth: any;
 
   /**
    * Getter for the Strapi sanitizers container
    */
-  readonly sanitizers: unknown;
+  readonly sanitizers: any;
 
   /**
    * Getter for the Strapi services container
@@ -59,67 +59,67 @@ export interface Strapi {
    *
    * It returns all the registered content types
    */
-  readonly contentTypes: unknown;
+  readonly contentTypes: any;
 
   /**
    * Find a content type using its unique identifier
    */
-  contentType(uid: string): unknown;
+  contentType(uid: string): any;
 
   /**
    * Getter for the Strapi policies container
    *
    * It returns all the registered policies
    */
-  readonly policies: unknown;
+  readonly policies: any;
 
   /**
    * Find a policy using its name
    */
-  policy(name: string): unknown;
+  policy(name: string): any;
 
   /**
    * Getter for the Strapi middlewares container
    *
    * It returns all the registered middlewares
    */
-  readonly middlewares: unknown;
+  readonly middlewares: any;
 
   /**
    * Find a middleware using its name
    */
-  middleware(): unknown;
+  middleware(): any;
 
   /**
    * Getter for the Strapi plugins container
    *
    * It returns all the registered plugins
    */
-  readonly plugins: unknown;
+  readonly plugins: any;
 
   /**
    * Find a plugin using its name
    */
-  plugin(name: string): unknown;
+  plugin(name: string): any;
 
   /**
    * Getter for the Strapi hooks container
    *
    * It returns all the registered hooks
    */
-  readonly hooks: unknown;
+  readonly hooks: any;
 
   /**
    * Find a hook using its name
    */
-  hook(): unknown;
+  hook(): any;
 
   /**
    * Getter for the Strapi APIs container
    *
    * It returns all the registered APIs
    */
-  readonly api: unknown;
+  readonly api: any;
 
   /**
    * Strapi Register Lifecycle.
@@ -276,12 +276,12 @@ export interface Strapi {
   /**
    * Find a model (content-type, component) based on its unique identifier.
    */
-  getModel(uid: string): unknown;
+  getModel(uid: string): any;
 
   /**
    * Binds database queries for a specific model based on its unique identifier.
    */
-  query(uid: string): unknown;
+  query(uid: string): any;
 }
 
 export interface Lifecycles {
