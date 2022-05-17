@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-type Response <T=unknown> = T;
+type ControllerResponse <T=unknown> = T | Promise<T>;
 
 interface BaseController {
   transformResponse(data: object, meta: object): object;
@@ -9,17 +9,17 @@ interface BaseController {
 }
 
 export interface SingleTypeController extends BaseController {
-  find(ctx: Context): Promise<Response>| Response ;
-  update(ctx: Context): Promise<Response>| Response ;
-  delete(ctx: Context): Promise<Response>| Response ;
+  find(ctx: Context): ControllerResponse;
+  update(ctx: Context): ControllerResponse;
+  delete(ctx: Context): ControllerResponse;
 }
 
 export interface CollectionTypeController extends BaseController {
-  find(ctx: Context): Promise<Response> | Response;
-  findOne(ctx: Context): Promise<Response> | Response;
-  create(ctx: Context): Promise<Response> | Response;
-  update(ctx: Context): Promise<Response> | Response;
-  delete(ctx: Context): Promise<Response> | Response;
+  find(ctx: Context): ControllerResponse;
+  findOne(ctx: Context): ControllerResponse
+  create(ctx: Context): ControllerResponse;
+  update(ctx: Context): ControllerResponse;
+  delete(ctx: Context): ControllerResponse;
 }
 
 export type Controller = SingleTypeController | CollectionTypeController;
