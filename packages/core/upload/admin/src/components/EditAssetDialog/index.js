@@ -98,8 +98,8 @@ export const EditAssetDialog = ({
   const activeFolderId = asset?.folder?.id;
   const initialFormData = {
     name: asset.name,
-    alternativeText: asset.alternativeText || '',
-    caption: asset.caption || '',
+    alternativeText: asset.alternativeText ?? undefined,
+    caption: asset.caption ?? undefined,
     parent: {
       value: activeFolderId ?? null,
       label:

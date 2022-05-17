@@ -46,7 +46,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure, canUpdate }
   const activeFolderId = folder?.parent?.id ?? query?.folder;
   const formDisabled = !canUpdate;
   const initialFormData = {
-    name: folder?.name,
+    name: folder?.name ?? undefined,
     parent: {
       value: activeFolderId ? parseInt(activeFolderId, 10) : folderStructure[0].value,
       label: activeFolderId
