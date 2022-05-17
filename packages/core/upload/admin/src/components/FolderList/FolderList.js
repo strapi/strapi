@@ -77,11 +77,7 @@ export const FolderList = ({
                   onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
                 />
               }
-              cardActions={
-                <>
-                  <IconButton icon={<Pencil />} onClick={() => onEditFolder(folder)} />
-                </>
-              }
+              cardActions={<IconButton icon={<Pencil />} onClick={() => onEditFolder(folder)} />}
             >
               <FolderCardBody>
                 <FolderCardLink to={url}>
