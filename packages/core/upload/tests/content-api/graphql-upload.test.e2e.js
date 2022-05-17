@@ -298,7 +298,7 @@ describe('Upload plugin end to end tests', () => {
     });
   });
 
-  test('Delete a file that dont exist', async () => {
+  test('Delete a file that does not exist', async () => {
     const res = await rq({
       url: '/graphql',
       method: 'POST',

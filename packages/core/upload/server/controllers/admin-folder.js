@@ -1,6 +1,5 @@
 'use strict';
 
-const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
 const { FOLDER_MODEL_UID } = require('../constants');
 const { validateCreateFolder, validateUpdateFolder } = require('./validation/admin/folder');
@@ -37,20 +36,13 @@ module.exports = {
   },
   async create(ctx) {
     const { user } = ctx.state;
-    const { body, query } = ctx.request;
+    const { body } = ctx.request;
 
     await validateCreateFolder(body);
 
-    const { setPathAndUID } = getService('folder');
+    const folderService = getService('folder');
 
-    // TODO: wrap with a transaction
-    const enrichFolder = pipeAsync(setPathAndUID, setCreatorFields({ user }));
-    const enrichedFolder = await enrichFolder(body);
-
-    const folder = await strapi.entityService.create(FOLDER_MODEL_UID, {
-      ...query,
-      data: enrichedFolder,
-    });
+    const folder = await folderService.create(body, { user });
 
     const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
       ability: ctx.state.userAbility,
@@ -76,9 +68,9 @@ module.exports = {
 
     await validateUpdateFolder(id)(body);
 
-    const { update } = getService('folder');
+    const folderService = getService('folder');
 
-    const updatedFolder = await update(id, body, { user });
+    const updatedFolder = await folderService.update(id, body, { user });
 
     ctx.body = {
       data: await permissionsManager.sanitizeOutput(updatedFolder),

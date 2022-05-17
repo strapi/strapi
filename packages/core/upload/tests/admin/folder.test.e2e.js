@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { omit, pick, map } = require('lodash/fp');
+const { pick, map } = require('lodash/fp');
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
@@ -69,7 +69,7 @@ describe('Folder', () => {
     test('Can create a folder at root level', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder 1',
           parent: null,
@@ -84,17 +84,16 @@ describe('Folder', () => {
         path: expect.stringMatching(rootPathRegex),
         createdAt: expect.anything(),
         updatedAt: expect.anything(),
-        parent: null,
       });
       expect(res.body.data.uid).toBe(res.body.data.path.split('/').pop());
 
-      data.folders.push(omit('parent', res.body.data));
+      data.folders.push(res.body.data);
     });
 
     test('Can create a folder inside another folder', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder-2',
           parent: data.folders[0].id,
@@ -108,17 +107,16 @@ describe('Folder', () => {
         path: expect.stringMatching(getFolderPathRegex(data.folders[0].uid)),
         createdAt: expect.anything(),
         updatedAt: expect.anything(),
-        parent: data.folders[0],
       });
       expect(res.body.data.uid).toBe(res.body.data.path.split('/').pop());
 
-      data.folders.push(omit('parent', res.body.data));
+      data.folders.push(res.body.data);
     });
 
     test('Cannot create a folder with duplicated name at root level', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder 1',
           parent: null,
@@ -132,7 +130,7 @@ describe('Folder', () => {
     test('Cannot create a folder with duplicated name inside a folder', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder-2',
           parent: data.folders[0].id,
@@ -146,7 +144,7 @@ describe('Folder', () => {
     test('Cannot create a folder inside a folder that does not exist', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder-3',
           parent: 99999,
@@ -160,7 +158,7 @@ describe('Folder', () => {
     test('Cannot create a folder with name containing a slash', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder 1/2',
           parent: null,
@@ -176,7 +174,7 @@ describe('Folder', () => {
       async name => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/folders?populate=parent',
+          url: '/upload/folders',
           body: {
             name,
             parent: null,
@@ -315,6 +313,57 @@ describe('Folder', () => {
 
       expect(res.status).toBe(400);
       expect(res.body.error.message).toBe('parent folder does not exist');
+    });
+
+    test('cannot move a folder inside itself (0 level)', async () => {
+      const folder = await createFolder('folder-d-0', null);
+      data.folders.push(folder);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder.id}`,
+        body: {
+          parent: folder.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('folder cannot be moved inside itself');
+    });
+
+    test('cannot move a folder inside itself (1 level)', async () => {
+      const folder0 = await createFolder('folder-e-0', null);
+      const folder00 = await createFolder('folder-e-00', folder0.id);
+      data.folders.push(folder0, folder00);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder0.id}`,
+        body: {
+          parent: folder00.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('folder cannot be moved inside itself');
+    });
+
+    test('cannot move a folder inside itself (2 levels)', async () => {
+      const folder0 = await createFolder('folder-f-0', null);
+      const folder00 = await createFolder('folder-f-00', folder0.id);
+      const folder000 = await createFolder('folder-f-000', folder00.id);
+      data.folders.push(folder0, folder00, folder000);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder0.id}`,
+        body: {
+          parent: folder000.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('folder cannot be moved inside itself');
     });
 
     test('move a folder inside another folder', async () => {

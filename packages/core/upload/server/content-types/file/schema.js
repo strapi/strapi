@@ -92,11 +92,13 @@ module.exports = {
       relation: 'manyToOne',
       target: FOLDER_MODEL_UID,
       inversedBy: 'files',
+      private: true,
     },
     folderPath: {
       type: 'string',
       min: 1,
       required: true,
+      private: true,
     },
   },
 };
