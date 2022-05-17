@@ -78,7 +78,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads',
+          name: 'API Uploads',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -113,7 +113,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads',
+          name: 'API Uploads',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -136,7 +136,7 @@ describe('Uploads folder', () => {
         method: 'POST',
         url: '/upload/folders',
         body: {
-          name: 'Uploads',
+          name: 'API Uploads',
           parent: null,
         },
       });
@@ -158,7 +158,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads (1)',
+          name: 'API Uploads (1)',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -189,7 +189,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads (1)',
+          name: 'API Uploads (1)',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -225,7 +225,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads (1)',
+          name: 'API Uploads (1)',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -248,7 +248,7 @@ describe('Uploads folder', () => {
         method: 'POST',
         url: '/upload/folders',
         body: {
-          name: 'Uploads (1)',
+          name: 'API Uploads (1)',
           parent: null,
         },
       });
@@ -271,7 +271,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads (2)',
+          name: 'API Uploads (2)',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -316,7 +316,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads (2)',
+          name: 'API Uploads (2)',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -355,7 +355,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads (2)',
+          name: 'API Uploads (2)',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -378,7 +378,7 @@ describe('Uploads folder', () => {
         method: 'POST',
         url: '/upload/folders',
         body: {
-          name: 'Uploads (2)',
+          name: 'API Uploads (2)',
           parent: null,
         },
       });
@@ -403,7 +403,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads (3)',
+          name: 'API Uploads (3)',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,

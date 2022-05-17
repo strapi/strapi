@@ -2,9 +2,7 @@
 
 const { isNil, get } = require('lodash/fp');
 const { getService } = require('../utils');
-
-const folderModel = 'plugin::upload.folder';
-const API_UPLOAD_FOLDER_BASE_NAME = 'Uploads';
+const { FOLDER_MODEL_UID, API_UPLOAD_FOLDER_BASE_NAME } = require('../constants');
 
 const getStore = () => strapi.store({ type: 'plugin', name: 'upload', key: 'api-folder' });
 
@@ -15,7 +13,7 @@ const createApiUploadFolder = async () => {
   let exists = true;
   let index = 1;
   while (exists) {
-    exists = await folderService.exists({ name, parent: null }); // TODO: check if works
+    exists = await folderService.exists({ name, parent: null });
     if (exists) {
       name = `${API_UPLOAD_FOLDER_BASE_NAME} (${index})`;
       index += 1;
@@ -33,7 +31,7 @@ const getAPIUploadFolder = async () => {
   const storeValue = await getStore().get();
   const folderId = get('id', storeValue);
 
-  const folder = folderId ? await strapi.entityService.findOne(folderModel, folderId) : null;
+  const folder = folderId ? await strapi.entityService.findOne(FOLDER_MODEL_UID, folderId) : null;
 
   return isNil(folder) ? createApiUploadFolder() : folder;
 };

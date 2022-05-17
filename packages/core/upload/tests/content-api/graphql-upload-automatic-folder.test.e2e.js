@@ -65,7 +65,7 @@ describe('Uploads folder (GraphQL)', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads',
+          name: 'API Uploads',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -110,7 +110,7 @@ describe('Uploads folder (GraphQL)', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads',
+          name: 'API Uploads',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -133,7 +133,7 @@ describe('Uploads folder (GraphQL)', () => {
         method: 'POST',
         url: '/upload/folders',
         body: {
-          name: 'Uploads',
+          name: 'API Uploads',
           parent: null,
         },
       });
@@ -165,7 +165,7 @@ describe('Uploads folder (GraphQL)', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads (1)',
+          name: 'API Uploads (1)',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -205,7 +205,7 @@ describe('Uploads folder (GraphQL)', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads (1)',
+          name: 'API Uploads (1)',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -250,7 +250,7 @@ describe('Uploads folder (GraphQL)', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads (1)',
+          name: 'API Uploads (1)',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,
@@ -273,7 +273,7 @@ describe('Uploads folder (GraphQL)', () => {
         method: 'POST',
         url: '/upload/folders',
         body: {
-          name: 'Uploads (1)',
+          name: 'API Uploads (1)',
           parent: null,
         },
       });
@@ -305,7 +305,7 @@ describe('Uploads folder (GraphQL)', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'Uploads (2)',
+          name: 'API Uploads (2)',
           uid: expect.anything(),
         },
         folderPath: `/${file.folder.uid}`,

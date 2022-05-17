@@ -29,7 +29,7 @@ describe('Folder structure', () => {
     // delete all possibly existing folders
     const res = await rq({
       method: 'GET',
-      url: '/upload/folders?pagination[pageSize]=100',
+      url: '/upload/folders?pagination[pageSize]=-1',
     });
 
     await rq({

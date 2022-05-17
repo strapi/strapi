@@ -24,10 +24,10 @@ const setPathAndUID = async folder => {
 };
 
 const create = async (folderData, { user } = {}) => {
-  const { setPathAndUID } = getService('folder');
+  const folderService = getService('folder');
 
   // TODO: wrap with a transaction
-  let enrichedFolder = await setPathAndUID(folderData);
+  let enrichedFolder = await folderService.setPathAndUID(folderData);
   if (user) {
     enrichedFolder = await setCreatorFields({ user })(enrichedFolder);
   }
