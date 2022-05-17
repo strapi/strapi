@@ -3,7 +3,7 @@
 const WorkerQueue = require('../worker-queue');
 
 describe('WorkerQueue', () => {
-  test('Executes worker', () => {
+  test.skip('Executes worker', () => {
     const fn = jest.fn();
     const input = 1;
 
