@@ -16,16 +16,14 @@ module.exports = async function({ file: filePath, pretty }) {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-  const compiledDirectoryPath = isTSProject
-    ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options.outDir
-    : null;
+  const outDir = await tsUtils.resolveOutDir(appDir);
   if (isTSProject)
     await tsUtils.compile(appDir, {
       watch: false,
       configOptions: { options: { incremental: true } },
     });
 
-  const distDir = isTSProject ? compiledDirectoryPath : appDir;
+  const distDir = isTSProject ? outDir : appDir;
 
   const app = await strapi({ appDir, distDir }).load();
 

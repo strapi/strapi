@@ -22,10 +22,8 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-  const compiledDirectoryPath = isTSProject
-    ? tsUtils.resolveConfigOptions(`${appDir}/tsconfig.json`).options.outDir
-    : null;
-  const distDir = isTSProject ? compiledDirectoryPath : appDir;
+  const outDir = await tsUtils.resolveOutDir(appDir);
+  const distDir = isTSProject ? outDir : appDir;
 
   try {
     if (cluster.isMaster || cluster.isPrimary) {
