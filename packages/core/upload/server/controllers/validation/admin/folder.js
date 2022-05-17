@@ -22,14 +22,8 @@ const isNameUniqueInFolder = id =>
       }
     }
 
-  return exists;
-};
-
-const isNameUniqueInFolder = async function(name) {
-  const { exists } = getService('folder');
-  const doesExist = await exists({ parent: this.parent.parent || null, name });
-  return !doesExist;
-};
+    return exists;
+  };
 
 const validateCreateFolderSchema = yup
   .object()
