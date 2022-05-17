@@ -1,10 +1,8 @@
 'use strict';
 
 const { getService } = require('../utils');
-const { ACTIONS } = require('../constants');
+const { ACTIONS, FILE_MODEL_UID } = require('../constants');
 const { findEntityAndCheckPermissions } = require('./utils/find-entity-and-check-permissions');
-
-const fileModel = 'plugin::upload.file';
 
 module.exports = {
   async find(ctx) {
@@ -15,7 +13,7 @@ module.exports = {
     const pm = strapi.admin.services.permission.createPermissionsManager({
       ability: userAbility,
       action: ACTIONS.read,
-      model: fileModel,
+      model: FILE_MODEL_UID,
     });
 
     if (!pm.isAllowed) {
@@ -40,7 +38,7 @@ module.exports = {
     const { pm, file } = await findEntityAndCheckPermissions(
       userAbility,
       ACTIONS.read,
-      fileModel,
+      FILE_MODEL_UID,
       id
     );
 
@@ -54,7 +52,7 @@ module.exports = {
     const { pm, file } = await findEntityAndCheckPermissions(
       userAbility,
       ACTIONS.update,
-      fileModel,
+      FILE_MODEL_UID,
       id
     );
 

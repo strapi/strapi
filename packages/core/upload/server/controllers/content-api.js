@@ -4,6 +4,7 @@ const _ = require('lodash');
 const { omit, isArray, isPlainObject } = require('lodash/fp');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
+const { FILE_MODEL_UID } = require('../constants');
 const validateUploadBody = require('./validation/content-api/upload');
 
 const { sanitize } = utils;
@@ -16,7 +17,7 @@ const removeFolderPath = data => {
 };
 
 const sanitizeOutput = (data, ctx) => {
-  const schema = strapi.getModel('plugin::upload.file');
+  const schema = strapi.getModel(FILE_MODEL_UID);
   const { auth } = ctx.state;
 
   return sanitize.contentAPI.output(removeFolderPath(data), schema, { auth });

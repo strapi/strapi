@@ -1,5 +1,8 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
@@ -36,6 +39,16 @@ describe('Upload', () => {
     test('Rejects when no files are provided', async () => {
       const res = await rq({ method: 'POST', url: '/upload', formData: {} });
       expect(res.statusCode).toBe(400);
+    });
+
+    test('Can upload a file', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
+      });
+
+      expect(res.statusCode).toBe(200);
     });
   });
 

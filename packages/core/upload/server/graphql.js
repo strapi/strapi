@@ -3,6 +3,7 @@
 const path = require('path');
 const os = require('os');
 const fse = require('fs-extra');
+const { FILE_MODEL_UID } = require('./constants');
 const { getStreamSize } = require('./utils/file');
 
 const UPLOAD_MUTATION_NAME = 'upload';
@@ -28,7 +29,7 @@ module.exports = ({ strapi }) => {
   const { getTypeName, getEntityResponseName } = getGraphQLService('utils').naming;
   const { toEntityResponse } = getGraphQLService('format').returnTypes;
 
-  const fileModel = strapi.getModel('plugin::upload.file');
+  const fileModel = strapi.getModel(FILE_MODEL_UID);
   const fileTypeName = getTypeName(fileModel);
   const fileEntityResponseType = getEntityResponseName(fileModel);
 
