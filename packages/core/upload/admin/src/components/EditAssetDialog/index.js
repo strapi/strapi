@@ -227,7 +227,7 @@ export const EditAssetDialog = ({
                     />
 
                     <Stack spacing={1}>
-                      <FieldLabel for="asset-folder">
+                      <FieldLabel htmlFor="asset-folder">
                         {formatMessage({
                           id: getTrad('form.input.label.file-location'),
                           defaultMessage: 'Location',

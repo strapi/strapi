@@ -182,7 +182,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure, canUpdate }
 
                 <GridItem xs={12} col={6}>
                   <Stack spacing={1}>
-                    <FieldLabel for="folder-parent">
+                    <FieldLabel htmlFor="folder-parent">
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
                         defaultMessage: 'Location',
