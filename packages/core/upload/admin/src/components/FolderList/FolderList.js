@@ -6,6 +6,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Flex } from '@strapi/design-system/Flex';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
@@ -13,16 +14,6 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import Pencil from '@strapi/icons/Pencil';
 
 import { FolderCard, FolderCardBody, FolderCardCheckbox, FolderCardLink } from '../FolderCard';
-import { GridColumnSize } from '../../constants';
-
-const GridLayout = styled(Box)`
-  display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(${({ size }) => `${GridColumnSize[size]}px`}, 1fr)
-  );
-  grid-gap: ${({ theme }) => theme.spaces[4]};
-`;
 
 const CardTitle = styled(Typography).attrs({
   ellipsis: true,
@@ -55,7 +46,7 @@ export const FolderList = ({
         </Box>
       )}
 
-      <GridLayout size={size}>
+      <Grid gap={4}>
         {folders.map(folder => {
           const isSelected = !!selectedFolders.find(
             currentFolder => currentFolder.id === folder.id
@@ -66,45 +57,39 @@ export const FolderList = ({
           )}`;
 
           return (
-            <FolderCard
-              ariaLabel={folder.name}
-              id={`folder-${folder.uid}`}
-              key={`folder-${folder.uid}`}
-              onDoubleClick={() => history.push(url)}
-              startAction={
-                <FolderCardCheckbox
-                  value={isSelected}
-                  onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
-                />
-              }
-              cardActions={<IconButton icon={<Pencil />} onClick={() => onEditFolder(folder)} />}
-            >
-              <FolderCardBody>
-                <FolderCardLink to={url}>
-                  <Flex as="h2" direction="column" alignItems="start">
-                    <CardTitle>
-                      {folder.name}
-                      <VisuallyHidden>:</VisuallyHidden>
-                    </CardTitle>
+            <GridItem col={3} key={`folder-${folder.uid}`}>
+              <FolderCard
+                ariaLabel={folder.name}
+                id={`folder-${folder.uid}`}
+                onDoubleClick={() => history.push(url)}
+                startAction={
+                  <FolderCardCheckbox
+                    value={isSelected}
+                    onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
+                  />
+                }
+                cardActions={<IconButton icon={<Pencil />} onClick={() => onEditFolder(folder)} />}
+                size={size}
+              >
+                <FolderCardBody>
+                  <FolderCardLink to={url}>
+                    <Flex as="h2" direction="column" alignItems="start">
+                      <CardTitle>
+                        {folder.name}
+                        <VisuallyHidden>:</VisuallyHidden>
+                      </CardTitle>
 
-                    <Typography as="span" textColor="neutral600" variant="pi">
-                      {folder.children.count} folder, {folder.files.count} assets
-                    </Typography>
-                  </Flex>
-                </FolderCardLink>
-              </FolderCardBody>
-            </FolderCard>
+                      <Typography as="span" textColor="neutral600" variant="pi">
+                        {folder.children.count} folder, {folder.files.count} assets
+                      </Typography>
+                    </Flex>
+                  </FolderCardLink>
+                </FolderCardBody>
+              </FolderCard>
+            </GridItem>
           );
         })}
-
-        {/* TODO: Remove this when we have media queries */}
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
-      </GridLayout>
+      </Grid>
     </KeyboardNavigable>
   );
 };
