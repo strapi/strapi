@@ -107,15 +107,17 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure, canUpdate }
     <ModalLayout onClose={handleClose} labelledBy="title">
       <ModalHeader>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-          {isEditing
-            ? formatMessage({
-                id: getTrad('modal.folder.edit.title'),
-                defaultMessage: 'Edit folder',
-              })
-            : formatMessage({
-                id: getTrad('modal.folder.create.title'),
-                defaultMessage: 'Add new folder',
-              })}
+          {formatMessage(
+            isEditing
+              ? {
+                  id: getTrad('modal.folder.edit.title'),
+                  defaultMessage: 'Edit folder',
+                }
+              : {
+                  id: getTrad('modal.folder.create.title'),
+                  defaultMessage: 'Add new folder',
+                }
+          )}
         </Typography>
       </ModalHeader>
 
@@ -250,7 +252,11 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure, canUpdate }
               loading={isLoading}
               disabled={formDisabled}
             >
-              {formatMessage({ id: 'modal.folder.create.submit', defaultMessage: 'Create' })}
+              {formatMessage(
+                isEditing
+                  ? { id: 'modal.folder.edit.submit', defaultMessage: 'Save' }
+                  : { id: 'modal.folder.create.submit', defaultMessage: 'Create' }
+              )}
             </Button>
           </Stack>
         }
