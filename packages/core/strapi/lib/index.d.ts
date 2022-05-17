@@ -1,14 +1,13 @@
 import { Database } from '@strapi/database';
 import { EntityService } from './services/entity-service';
-import { Strapi as StrapiClass } from './Strapi';
 
+import * as Core from './types/strapi';
 export * as factories from './factories';
-export interface StrapiInterface extends StrapiClass {
-  query: Database['query'];
-  entityService: EntityService;
-}
 
-export type Strapi = StrapiInterface;
+export type { Core };
+
+// Alias to resolve the Strapi global type easily
+export type Strapi = Core.Strapi;
 
 declare global {
   interface AllTypes {}
