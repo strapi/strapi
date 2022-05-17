@@ -104,10 +104,16 @@ describe('useEditFolder', () => {
     const { editFolder } = current;
 
     await act(async () => {
-      await editFolder(FOLDER_EDIT_FIXTURE);
+      await editFolder(
+        {
+          name: FOLDER_EDIT_FIXTURE.name,
+          parent: FOLDER_EDIT_FIXTURE.parent,
+        },
+        FOLDER_EDIT_FIXTURE.id
+      );
     });
 
-    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
+    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders/2', expect.any(Object));
   });
 
   test('calls the proper endpoint when editing a folder', async () => {
@@ -117,7 +123,13 @@ describe('useEditFolder', () => {
     const { editFolder } = current;
 
     await act(async () => {
-      await editFolder(FOLDER_EDIT_FIXTURE);
+      await editFolder(
+        {
+          name: FOLDER_EDIT_FIXTURE.name,
+          parent: FOLDER_EDIT_FIXTURE.parent,
+        },
+        FOLDER_EDIT_FIXTURE.id
+      );
     });
 
     expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
@@ -131,7 +143,13 @@ describe('useEditFolder', () => {
     const { editFolder } = current;
 
     await act(async () => {
-      await editFolder(FOLDER_EDIT_FIXTURE);
+      await editFolder(
+        {
+          name: FOLDER_EDIT_FIXTURE.name,
+          parent: FOLDER_EDIT_FIXTURE.parent,
+        },
+        FOLDER_EDIT_FIXTURE.id
+      );
     });
 
     expect(toggleNotification).not.toHaveBeenCalled();
@@ -146,7 +164,13 @@ describe('useEditFolder', () => {
     const { editFolder } = current;
 
     await act(async () => {
-      await editFolder(FOLDER_EDIT_FIXTURE);
+      await editFolder(
+        {
+          name: FOLDER_EDIT_FIXTURE.name,
+          parent: FOLDER_EDIT_FIXTURE.parent,
+        },
+        FOLDER_EDIT_FIXTURE.id
+      );
     });
 
     await waitFor(() =>
@@ -168,7 +192,13 @@ describe('useEditFolder', () => {
 
     try {
       await act(async () => {
-        await editFolder(FOLDER_EDIT_FIXTURE);
+        await editFolder(
+          {
+            name: FOLDER_EDIT_FIXTURE.name,
+            parent: FOLDER_EDIT_FIXTURE.parent,
+          },
+          FOLDER_EDIT_FIXTURE.id
+        );
       });
     } catch (err) {
       // ...

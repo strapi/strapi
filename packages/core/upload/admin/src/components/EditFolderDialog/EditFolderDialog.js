@@ -45,23 +45,25 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure, canUpdate }
   const isEditing = !!folder;
   const activeFolderId = folder?.parent?.id ?? query?.folder;
   const formDisabled = !canUpdate;
-
-  const initialFormData = Object.assign({}, folder, {
+  const initialFormData = {
+    name: folder?.name,
     parent: {
       value: activeFolderId ? parseInt(activeFolderId, 10) : folderStructure[0].value,
       label: activeFolderId
         ? findRecursiveFolderByValue(folderStructure, parseInt(activeFolderId, 10))?.label
         : folderStructure[0].label,
     },
-  });
+  };
 
   const handleSubmit = async (values, { setErrors }) => {
     try {
-      await editFolder({
-        ...folder,
-        ...values,
-        parent: values.parent.value ?? null,
-      });
+      await editFolder(
+        {
+          ...values,
+          parent: values.parent.value ?? null,
+        },
+        folder?.id
+      );
 
       toggleNotification({
         type: 'success',
