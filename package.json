@@ -68,7 +68,8 @@
     ]
   },
   "dependencies": {
-    "@babel/polyfill": "7.12.1"
+    "@babel/polyfill": "7.12.1",
+    "jest-environment-jsdom": "28.1.0"
   },
   "devDependencies": {
     "@swc-node/jest": "1.5.0",
