@@ -38,10 +38,15 @@ const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 const { destroyOnSignal } = require('./utils/signals');
+const sanitizersRegistry = require('./core/registries/sanitizers');
 
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
 
+/**
+ * A map of all the available Strapi lifecycles
+ * @type {import('@strapi/strapi').Core.Lifecycles}
+ */
 const LIFECYCLES = {
   REGISTER: 'register',
   BOOTSTRAP: 'bootstrap',
@@ -68,6 +73,7 @@ const resolveWorkingDirectories = opts => {
   return { app: appDir, dist: distDir };
 };
 
+/** @implements {import('@strapi/strapi').Strapi} */
 class Strapi {
   constructor(opts = {}) {
     destroyOnSignal(this);
@@ -92,6 +98,7 @@ class Strapi {
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
+    this.container.register('sanitizers', sanitizersRegistry(this));
 
     // Create a mapping of every useful directory (for the app, dist and static directories)
     this.dirs = utils.getDirs(rootDirs, { strapi: this });
@@ -188,6 +195,10 @@ class Strapi {
 
   get auth() {
     return this.container.get('auth');
+  }
+
+  get sanitizers() {
+    return this.container.get('sanitizers');
   }
 
   async start() {
@@ -337,6 +348,10 @@ class Strapi {
     this.app = await loaders.loadSrcIndex(this);
   }
 
+  async loadSanitizers() {
+    await loaders.loadSanitizers(this);
+  }
+
   registerInternalHooks() {
     this.container.get('hooks').set('strapi::content-types.beforeSync', createAsyncParallelHook());
     this.container.get('hooks').set('strapi::content-types.afterSync', createAsyncParallelHook());
@@ -348,6 +363,7 @@ class Strapi {
   async register() {
     await Promise.all([
       this.loadApp(),
+      this.loadSanitizers(),
       this.loadPlugins(),
       this.loadAdmin(),
       this.loadAPIs(),
