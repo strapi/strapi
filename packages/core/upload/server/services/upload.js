@@ -380,12 +380,16 @@ module.exports = ({ strapi }) => ({
 
     const arr = Array.isArray(files) ? files : [files];
 
+    const apiUploadFolderService = getService('api-upload-folder');
+
+    const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+
     try {
       const enhancedFiles = await Promise.all(
         arr.map(file => {
           return this.enhanceFile(
             file,
-            {},
+            { folder: apiUploadFolder.id },
             {
               refId: id,
               ref: model,

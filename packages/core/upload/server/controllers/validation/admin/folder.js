@@ -1,6 +1,6 @@
 'use strict';
 
-const { isUndefined, get } = require('lodash/fp');
+const { isUndefined, get, isNil } = require('lodash/fp');
 const { yup, validateYupSchema } = require('@strapi/utils');
 const { getService } = require('../../../utils');
 const { FOLDER_MODEL_UID } = require('../../../constants');
@@ -60,7 +60,24 @@ const validateUpdateFolderSchema = id =>
       parent: yup
         .strapiID()
         .nullable()
-        .test('folder-exists', 'parent folder does not exist', folderExists),
+        .test('folder-exists', 'parent folder does not exist', folderExists)
+        .test('dont-move-inside-self', 'folder cannot be moved inside itself', async function(
+          parent
+        ) {
+          if (isNil(parent)) return true;
+
+          const destinationFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, parent, {
+            fields: ['path'],
+          });
+
+          const currentFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, id, {
+            fields: ['path'],
+          });
+
+          if (!destinationFolder || !currentFolder) return true;
+
+          return !destinationFolder.path.startsWith(currentFolder.path);
+        }),
     })
     .noUnknown()
     .required();

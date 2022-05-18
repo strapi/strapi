@@ -23,6 +23,20 @@ const setPathAndUID = async folder => {
   });
 };
 
+const create = async (folderData, { user } = {}) => {
+  const folderService = getService('folder');
+
+  // TODO: wrap with a transaction
+  let enrichedFolder = await folderService.setPathAndUID(folderData);
+  if (user) {
+    enrichedFolder = await setCreatorFields({ user })(enrichedFolder);
+  }
+
+  const folder = await strapi.entityService.create(FOLDER_MODEL_UID, { data: enrichedFolder });
+
+  return folder;
+};
+
 /**
  * Recursively delete folders and included files
  * @param ids ids of the folders to delete
@@ -157,6 +171,7 @@ const getStructure = async () => {
 };
 
 module.exports = {
+  create,
   exists,
   deleteByIds,
   update,
