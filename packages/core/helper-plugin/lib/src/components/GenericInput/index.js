@@ -271,7 +271,13 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={onChange}
+          onChange={event => {
+            if (event.target.value === '') {
+              onChange({ target: { name, value: null, type } });
+            } else {
+              onChange({ target: { name, value: event.target.value, type } });
+            }
+          }}
           placeholder={formattedPlaceholder}
           required={required}
           type="email"
@@ -292,7 +298,13 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={onChange}
+          onChange={event => {
+            if (event.target.value === '') {
+              onChange({ target: { name, value: null, type } });
+            } else {
+              onChange({ target: { name, value: event.target.value, type } });
+            }
+          }}
           placeholder={formattedPlaceholder}
           required={required}
           type="text"

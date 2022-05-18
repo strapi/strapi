@@ -17,12 +17,6 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
       let cleanedData;
 
       switch (attrType) {
-        case 'uid':
-        case 'email':
-        case 'text':
-        case 'string':
-          cleanedData = value || null;
-          break;
         case 'json':
           cleanedData = JSON.parse(value);
           break;
@@ -63,6 +57,7 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
           } else {
             cleanedData = value ? recursiveCleanData(value, componentsSchema[component]) : value;
           }
+
           break;
         case 'dynamiczone':
           cleanedData = value.map(componentData => {
