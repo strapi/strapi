@@ -1,10 +1,8 @@
 'use strict';
 
 const { getService } = require('../utils');
-const { ACTIONS } = require('../constants');
+const { ACTIONS, FILE_MODEL_UID } = require('../constants');
 const validateSettings = require('./validation/admin/settings');
-
-const fileModel = 'plugin::upload.file';
 
 module.exports = {
   async updateSettings(ctx) {
@@ -13,7 +11,7 @@ module.exports = {
       state: { userAbility },
     } = ctx;
 
-    if (userAbility.cannot(ACTIONS.readSettings, fileModel)) {
+    if (userAbility.cannot(ACTIONS.readSettings, FILE_MODEL_UID)) {
       return ctx.forbidden();
     }
 
@@ -29,7 +27,7 @@ module.exports = {
       state: { userAbility },
     } = ctx;
 
-    if (userAbility.cannot(ACTIONS.readSettings, fileModel)) {
+    if (userAbility.cannot(ACTIONS.readSettings, FILE_MODEL_UID)) {
       return ctx.forbidden();
     }
 

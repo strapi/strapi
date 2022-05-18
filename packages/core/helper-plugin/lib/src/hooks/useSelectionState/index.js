@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
-export const useSelectionState = (key, initialValue) => {
+export const useSelectionState = (keys, initialValue) => {
   const [selections, setSelections] = useState(initialValue);
 
   const selectOne = selection => {
-    const index = selections.findIndex(
-      currentSelection => currentSelection[key] === selection[key]
+    const index = selections.findIndex(currentSelection =>
+      keys.every(key => currentSelection[key] === selection[key])
     );
 
     if (index > -1) {

@@ -1,25 +1,19 @@
 'use strict';
 
 const _ = require('lodash');
-const { omit, isArray, isPlainObject } = require('lodash/fp');
 const utils = require('@strapi/utils');
 const { getService } = require('../utils');
+const { FILE_MODEL_UID } = require('../constants');
 const validateUploadBody = require('./validation/content-api/upload');
 
 const { sanitize } = utils;
 const { ValidationError } = utils.errors;
 
-const removeFolderPath = data => {
-  if (isArray(data)) return data.map(omit('folderPath'));
-  if (isPlainObject(data)) return omit('folderPath', data);
-  return data;
-};
-
 const sanitizeOutput = (data, ctx) => {
-  const schema = strapi.getModel('plugin::upload.file');
+  const schema = strapi.getModel(FILE_MODEL_UID);
   const { auth } = ctx.state;
 
-  return sanitize.contentAPI.output(removeFolderPath(data), schema, { auth });
+  return sanitize.contentAPI.output(data, schema, { auth });
 };
 
 module.exports = {
@@ -99,8 +93,17 @@ module.exports = {
       request: { body, files: { files } = {} },
     } = ctx;
 
+    const data = await validateUploadBody(body);
+
+    const apiUploadFolderService = getService('api-upload-folder');
+
+    const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+    data.fileInfo = data.fileInfo || {};
+    data.fileInfo = Array.isArray(data.fileInfo) ? data.fileInfo : [data.fileInfo];
+    data.fileInfo.forEach(fileInfo => (fileInfo.folder = apiUploadFolder.id));
+
     const uploadedFiles = await getService('upload').upload({
-      data: await validateUploadBody(body),
+      data,
       files,
     });
 
@@ -113,11 +116,11 @@ module.exports = {
       request: { files: { files } = {} },
     } = ctx;
 
-    if (id && (_.isEmpty(files) || files.size === 0)) {
-      return this.updateFileInfo(ctx);
-    }
-
     if (_.isEmpty(files) || files.size === 0) {
+      if (id) {
+        return this.updateFileInfo(ctx);
+      }
+
       throw new ValidationError('Files are empty');
     }
 

@@ -1,3 +1,4 @@
+import { stringify } from 'qs';
 import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { useNotification, useQueryParams } from '@strapi/helper-plugin';
@@ -10,12 +11,26 @@ export const useFolders = ({ enabled = true }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
-  const [{ rawQuery }] = useQueryParams();
+  const [{ rawQuery, query }] = useQueryParams();
   const dataRequestURL = getRequestUrl('folders');
 
   const fetchFolders = async () => {
     try {
-      const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery}`);
+      const { folder, ...paramsExceptFolder } = query;
+      const params = {
+        ...paramsExceptFolder,
+        pagination: {
+          pageSize: -1,
+        },
+        filters: {
+          parent: {
+            id: query?.folder ?? {
+              $null: true,
+            },
+          },
+        },
+      };
+      const { data } = await axiosInstance.get(`${dataRequestURL}?${stringify(params)}`);
 
       notifyStatus(
         formatMessage({

@@ -1,3 +1,4 @@
+import { stringify } from 'qs';
 import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { useNotification } from '@strapi/helper-plugin';
@@ -6,7 +7,7 @@ import { useIntl } from 'react-intl';
 import pluginId from '../pluginId';
 import { axiosInstance, getRequestUrl } from '../utils';
 
-export const useAssets = ({ skipWhen, rawQuery }) => {
+export const useAssets = ({ skipWhen, query, rawQuery }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
@@ -14,7 +15,18 @@ export const useAssets = ({ skipWhen, rawQuery }) => {
 
   const getAssets = async () => {
     try {
-      const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery}`);
+      const { folder, ...paramsExceptFolder } = query;
+      const params = {
+        ...paramsExceptFolder,
+        filters: {
+          folder: {
+            id: query?.folder ?? {
+              $null: true,
+            },
+          },
+        },
+      };
+      const { data } = await axiosInstance.get(`${dataRequestURL}?${stringify(params)}`);
 
       notifyStatus(
         formatMessage({

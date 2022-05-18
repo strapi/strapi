@@ -22,6 +22,7 @@ const { NotFoundError } = require('@strapi/utils').errors;
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
+const { FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
 const { bytesToKbytes } = require('../utils/file');
 
@@ -57,7 +58,7 @@ const createAndAssignTmpWorkingDirectoryToFiles = async files => {
 
 module.exports = ({ strapi }) => ({
   async emitEvent(event, data) {
-    const modelDef = strapi.getModel('plugin::upload.file');
+    const modelDef = strapi.getModel(FILE_MODEL_UID);
     const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, data);
 
     strapi.eventHub.emit(event, { media: sanitizedData });
@@ -312,7 +313,7 @@ module.exports = ({ strapi }) => ({
     }
     sendMediaMetrics(fileValues);
 
-    const res = await strapi.entityService.update('plugin::upload.file', id, { data: fileValues });
+    const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
 
     await this.emitEvent(MEDIA_UPDATE, res);
 
@@ -327,7 +328,7 @@ module.exports = ({ strapi }) => ({
     }
     sendMediaMetrics(fileValues);
 
-    const res = await strapi.query('plugin::upload.file').create({ data: fileValues });
+    const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
 
     await this.emitEvent(MEDIA_CREATE, res);
 
@@ -335,15 +336,15 @@ module.exports = ({ strapi }) => ({
   },
 
   findOne(id, populate) {
-    return strapi.entityService.findOne('plugin::upload.file', id, { populate });
+    return strapi.entityService.findOne(FILE_MODEL_UID, id, { populate });
   },
 
   findMany(query) {
-    return strapi.entityService.findMany('plugin::upload.file', query);
+    return strapi.entityService.findMany(FILE_MODEL_UID, query);
   },
 
   findPage(query) {
-    return strapi.entityService.findPage('plugin::upload.file', query);
+    return strapi.entityService.findPage(FILE_MODEL_UID, query);
   },
 
   async remove(file) {
@@ -362,13 +363,13 @@ module.exports = ({ strapi }) => ({
       }
     }
 
-    const media = await strapi.query('plugin::upload.file').findOne({
+    const media = await strapi.query(FILE_MODEL_UID).findOne({
       where: { id: file.id },
     });
 
     await this.emitEvent(MEDIA_DELETE, media);
 
-    return strapi.query('plugin::upload.file').delete({ where: { id: file.id } });
+    return strapi.query(FILE_MODEL_UID).delete({ where: { id: file.id } });
   },
 
   async uploadToEntity(params, files) {
@@ -379,12 +380,16 @@ module.exports = ({ strapi }) => ({
 
     const arr = Array.isArray(files) ? files : [files];
 
+    const apiUploadFolderService = getService('api-upload-folder');
+
+    const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+
     try {
       const enhancedFiles = await Promise.all(
         arr.map(file => {
           return this.enhanceFile(
             file,
-            {},
+            { folder: apiUploadFolder.id },
             {
               refId: id,
               ref: model,

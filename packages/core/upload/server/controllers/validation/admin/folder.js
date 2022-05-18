@@ -1,27 +1,30 @@
 'use strict';
 
+const { isUndefined, get, isNil } = require('lodash/fp');
 const { yup, validateYupSchema } = require('@strapi/utils');
-const { isNil } = require('lodash/fp');
 const { getService } = require('../../../utils');
+const { FOLDER_MODEL_UID } = require('../../../constants');
+const { folderExists } = require('./utils');
 
 const NO_SLASH_REGEX = /^[^/]+$/;
 const NO_SPACES_AROUND = /^(?! ).+(?<! )$/;
 
-const folderExists = async folderId => {
-  if (isNil(folderId)) {
-    return true;
-  }
+const isNameUniqueInFolder = id =>
+  async function(name) {
+    const { exists } = getService('folder');
+    const filters = { name, parent: this.parent.parent || null };
+    if (id) {
+      filters.id = { $ne: id };
 
-  const exists = await getService('folder').exists({ id: folderId });
+      if (isUndefined(name)) {
+        const existingFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, id);
+        filters.name = get('name', existingFolder);
+      }
+    }
 
-  return exists;
-};
-
-const isNameUniqueInFolder = async function(name) {
-  const { exists } = getService('folder');
-  const doesExist = await exists({ parent: this.parent.parent || null, name });
-  return !doesExist;
-};
+    const doesExist = await exists(filters);
+    return !doesExist;
+  };
 
 const validateCreateFolderSchema = yup
   .object()
@@ -32,7 +35,7 @@ const validateCreateFolderSchema = yup
       .matches(NO_SLASH_REGEX, 'name cannot contain slashes')
       .matches(NO_SPACES_AROUND, 'name cannot start or end with a whitespace')
       .required()
-      .test('is-folder-unique', 'name already taken', isNameUniqueInFolder),
+      .test('is-folder-unique', 'A folder with this name already exists', isNameUniqueInFolder()),
     parent: yup
       .strapiID()
       .nullable()
@@ -41,24 +44,46 @@ const validateCreateFolderSchema = yup
   .noUnknown()
   .required();
 
-const validateUpdateFolderSchema = yup
-  .object()
-  .shape({
-    name: yup
-      .string()
-      .min(1)
-      .matches(NO_SLASH_REGEX, 'name cannot contain slashes')
-      .matches(NO_SPACES_AROUND, 'name cannot start or end with a whitespace')
-      .test('is-folder-unique', 'name already taken', isNameUniqueInFolder),
-    parent: yup
-      .strapiID()
-      .nullable()
-      .test('folder-exists', 'parent folder does not exist', folderExists),
-  })
-  .noUnknown()
-  .required();
+const validateUpdateFolderSchema = id =>
+  yup
+    .object()
+    .shape({
+      name: yup
+        .string()
+        .min(1)
+        .matches(NO_SLASH_REGEX, 'name cannot contain slashes')
+        .matches(NO_SPACES_AROUND, 'name cannot start or end with a whitespace')
+        .test(
+          'is-folder-unique',
+          'A folder with this name already exists',
+          isNameUniqueInFolder(id)
+        ),
+      parent: yup
+        .strapiID()
+        .nullable()
+        .test('folder-exists', 'parent folder does not exist', folderExists)
+        .test('dont-move-inside-self', 'folder cannot be moved inside itself', async function(
+          parent
+        ) {
+          if (isNil(parent)) return true;
+
+          const destinationFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, parent, {
+            fields: ['path'],
+          });
+
+          const currentFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, id, {
+            fields: ['path'],
+          });
+
+          if (!destinationFolder || !currentFolder) return true;
+
+          return !destinationFolder.path.startsWith(currentFolder.path);
+        }),
+    })
+    .noUnknown()
+    .required();
 
 module.exports = {
   validateCreateFolder: validateYupSchema(validateCreateFolderSchema),
-  validateUpdateFolder: validateYupSchema(validateUpdateFolderSchema),
+  validateUpdateFolder: id => validateYupSchema(validateUpdateFolderSchema(id)),
 };

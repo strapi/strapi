@@ -4,6 +4,7 @@ import styled from 'styled-components';
 
 import { pxToRem } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
+import { CardAction } from '@strapi/design-system/Card';
 import { Stack } from '@strapi/design-system/Stack';
 import Folder from '@strapi/icons/Folder';
 
@@ -30,7 +31,15 @@ const StyledFolder = styled(Folder)`
   }
 `;
 
-export const FolderCard = ({ children, id, startAction, ariaLabel, onDoubleClick, ...props }) => {
+export const FolderCard = ({
+  children,
+  id,
+  startAction,
+  cardActions,
+  ariaLabel,
+  onDoubleClick,
+  ...props
+}) => {
   const generatedId = useId(id);
 
   return (
@@ -38,7 +47,7 @@ export const FolderCard = ({ children, id, startAction, ariaLabel, onDoubleClick
       <Box position="relative" {...props}>
         <FauxClickWrapper
           type="button"
-          onClick={(event) => event.preventDefault()}
+          onClick={event => event.preventDefault()}
           onDoubleClick={onDoubleClick}
           zIndex={1}
           tabIndex={-1}
@@ -73,6 +82,8 @@ export const FolderCard = ({ children, id, startAction, ariaLabel, onDoubleClick
           </Box>
 
           {children}
+
+          {cardActions && <CardAction right={4}>{cardActions}</CardAction>}
         </Stack>
       </Box>
     </FolderCardContext.Provider>
@@ -89,4 +100,5 @@ FolderCard.propTypes = {
   id: PropTypes.string,
   onDoubleClick: PropTypes.func.isRequired,
   startAction: PropTypes.element.isRequired,
+  cardActions: PropTypes.element.isRequired,
 };

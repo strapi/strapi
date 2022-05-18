@@ -42,7 +42,7 @@ const getSelectStyles = theme => {
       };
     },
     indicatorContainer: base => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
-    input: base => ({ ...base, margin: 0, padding: 0 }),
+    input: base => ({ ...base, margin: 0, padding: 0, color: theme.colors.neutral800 }),
     menu: base => {
       return {
         ...base,
@@ -56,7 +56,6 @@ const getSelectStyles = theme => {
         border: `1px solid ${theme.colors.neutral200} !important`,
         boxShadow: 0,
         fontSize: '14px',
-        fontFamily: 'Arial',
         zIndex: 2,
       };
     },

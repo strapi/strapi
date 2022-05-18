@@ -1,5 +1,7 @@
 'use strict';
 
+const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../../constants');
+
 module.exports = {
   collectionName: 'upload_folders',
   info: {
@@ -30,19 +32,19 @@ module.exports = {
     parent: {
       type: 'relation',
       relation: 'manyToOne',
-      target: 'plugin::upload.folder',
+      target: FOLDER_MODEL_UID,
       inversedBy: 'children',
     },
     children: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'plugin::upload.folder',
+      target: FOLDER_MODEL_UID,
       mappedBy: 'parent',
     },
     files: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'plugin::upload.file',
+      target: FILE_MODEL_UID,
       mappedBy: 'folder',
     },
     path: {

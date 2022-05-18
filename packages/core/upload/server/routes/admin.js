@@ -171,5 +171,21 @@ module.exports = {
         ],
       },
     },
+    {
+      method: 'POST',
+      path: '/actions/bulk-move',
+      handler: 'admin-folder-file.moveMany',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.read'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };

@@ -26,6 +26,20 @@ describe('Folder structure', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
+    // delete all possibly existing folders
+    const res = await rq({
+      method: 'GET',
+      url: '/upload/folders?pagination[pageSize]=-1',
+    });
+
+    await rq({
+      method: 'POST',
+      url: '/upload/actions/bulk-delete',
+      body: {
+        folderIds: res.body.results.map(f => f.id),
+      },
+    });
+
     const rootFolder1 = await createFolder('folder1');
     const rootFolder2 = await createFolder('folder2');
     const nestedFolder1a = await createFolder('folder1A', rootFolder1.id);

@@ -22,6 +22,19 @@ jest.mock('../../../hooks/useEditFolder', () => ({
   }),
 }));
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useQueryParams: jest.fn().mockReturnValue([{ query: {} }]),
+}));
+
+const FIXTURE_FOLDER_STRUCTURE = [
+  {
+    value: null,
+    label: 'Media Library',
+    children: [],
+  },
+];
+
 const client = new QueryClient({
   defaultOptions: {
     queries: {
@@ -31,12 +44,17 @@ const client = new QueryClient({
 });
 
 function ComponentFixture(props) {
+  const nextProps = {
+    canUpdate: true,
+    ...props,
+  };
+
   return (
     <QueryClientProvider client={client}>
       <IntlProvider locale="en" messages={{}}>
         <ThemeProvider theme={lightTheme}>
           <NotificationsProvider toggleNotification={() => {}}>
-            <EditFolderDialog {...props} />
+            <EditFolderDialog {...nextProps} />
           </NotificationsProvider>
         </ThemeProvider>
       </IntlProvider>
@@ -46,6 +64,7 @@ function ComponentFixture(props) {
 
 function setup(props) {
   const FIXTURE_PROPS = {
+    folderStructure: FIXTURE_FOLDER_STRUCTURE,
     onClose: jest.fn(),
     ...props,
   };

@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { omit, pick, map } = require('lodash/fp');
+const { pick, map } = require('lodash/fp');
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
@@ -69,7 +69,7 @@ describe('Folder', () => {
     test('Can create a folder at root level', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder 1',
           parent: null,
@@ -84,17 +84,16 @@ describe('Folder', () => {
         path: expect.stringMatching(rootPathRegex),
         createdAt: expect.anything(),
         updatedAt: expect.anything(),
-        parent: null,
       });
       expect(res.body.data.uid).toBe(res.body.data.path.split('/').pop());
 
-      data.folders.push(omit('parent', res.body.data));
+      data.folders.push(res.body.data);
     });
 
     test('Can create a folder inside another folder', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder-2',
           parent: data.folders[0].id,
@@ -108,17 +107,16 @@ describe('Folder', () => {
         path: expect.stringMatching(getFolderPathRegex(data.folders[0].uid)),
         createdAt: expect.anything(),
         updatedAt: expect.anything(),
-        parent: data.folders[0],
       });
       expect(res.body.data.uid).toBe(res.body.data.path.split('/').pop());
 
-      data.folders.push(omit('parent', res.body.data));
+      data.folders.push(res.body.data);
     });
 
     test('Cannot create a folder with duplicated name at root level', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder 1',
           parent: null,
@@ -126,13 +124,13 @@ describe('Folder', () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe('name already taken');
+      expect(res.body.error.message).toBe('A folder with this name already exists');
     });
 
     test('Cannot create a folder with duplicated name inside a folder', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder-2',
           parent: data.folders[0].id,
@@ -140,13 +138,13 @@ describe('Folder', () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe('name already taken');
+      expect(res.body.error.message).toBe('A folder with this name already exists');
     });
 
     test('Cannot create a folder inside a folder that does not exist', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder-3',
           parent: 99999,
@@ -160,7 +158,7 @@ describe('Folder', () => {
     test('Cannot create a folder with name containing a slash', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/upload/folders?populate=parent',
+        url: '/upload/folders',
         body: {
           name: 'folder 1/2',
           parent: null,
@@ -176,7 +174,7 @@ describe('Folder', () => {
       async name => {
         const res = await rq({
           method: 'POST',
-          url: '/upload/folders?populate=parent',
+          url: '/upload/folders',
           body: {
             name,
             parent: null,
@@ -245,88 +243,6 @@ describe('Folder', () => {
     });
   });
 
-  describe('delete', () => {
-    test('Can delete folders and belonging files', async () => {
-      const folder1 = await createFolder('folder1', null);
-      const folder1a = await createFolder('folder1a', folder1.id);
-      const folder1b = await createFolder('folder1b', folder1.id);
-      const folder1a1 = await createFolder('folder1a1', folder1a.id);
-      const file1 = await createAFile(null);
-      const file1b = await createAFile(folder1b.id);
-      const file1a = await createAFile(folder1a.id);
-      const file1a1 = await createAFile(folder1a1.id);
-
-      const res = await rq({
-        method: 'POST',
-        url: '/upload/actions/bulk-delete',
-        body: {
-          fileIds: [file1.id],
-          folderIds: [folder1a.id],
-        },
-      });
-
-      expect(res.body.data).toMatchObject({
-        files: [
-          {
-            alternativeText: null,
-            caption: null,
-            createdAt: expect.anything(),
-            ext: '.jpg',
-            folderPath: '/',
-            formats: null,
-            hash: expect.anything(),
-            height: 20,
-            id: file1.id,
-            mime: 'image/jpeg',
-            name: 'rec.jpg',
-            previewUrl: null,
-            provider: 'local',
-            provider_metadata: null,
-            size: 0.27,
-            updatedAt: expect.anything(),
-            url: expect.anything(),
-            width: 20,
-          },
-        ],
-        folders: [
-          {
-            id: folder1a.id,
-            name: 'folder1a',
-            path: expect.anything(),
-            uid: expect.anything(),
-            createdAt: expect.anything(),
-            updatedAt: expect.anything(),
-          },
-        ],
-      });
-
-      const resFolder = await rq({
-        method: 'GET',
-        url: '/upload/folders?pagination[pageSize]=100',
-      });
-
-      const existingfoldersIds = resFolder.body.results.map(f => f.id);
-      expect(existingfoldersIds).toEqual(expect.not.arrayContaining([folder1a.id, folder1a1.id]));
-      expect(existingfoldersIds).toEqual(expect.arrayContaining([folder1.id, folder1b.id]));
-
-      const resFiles = await rq({
-        method: 'GET',
-        url: '/upload/files',
-        qs: {
-          pageSize: 100,
-        },
-      });
-
-      const existingfilesIds = resFiles.body.results.map(f => f.id);
-      expect(existingfilesIds).toEqual(
-        expect.not.arrayContaining([file1.id, file1a.id, file1a1.id])
-      );
-      expect(existingfilesIds).toEqual(expect.arrayContaining([file1b.id]));
-
-      data.folders.push(folder1, folder1b);
-    });
-  });
-
   describe('update', () => {
     test('rename a folder', async () => {
       const folder = await createFolder('folder-name', null);
@@ -346,7 +262,7 @@ describe('Folder', () => {
       data.folders.push(res.body.data);
     });
 
-    test('cannot rename a folder if duplicated', async () => {
+    test('cannot move and rename a folder if duplicated', async () => {
       const folder0 = await createFolder('folder-a-0', null);
       const folder1 = await createFolder('folder-a-1', null);
       const folder00 = await createFolder('folder-a-00', folder0.id);
@@ -362,11 +278,29 @@ describe('Folder', () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.error.message).toBe('name already taken');
+      expect(res.body.error.message).toBe('A folder with this name already exists');
+    });
+
+    test('cannot move a folder if duplicated', async () => {
+      const folder0 = await createFolder('folder-b-0', null);
+      const folder1 = await createFolder('folder-b-samename', null);
+      await createFolder('folder-b-samename', folder0.id);
+      data.folders.push(folder0, folder1);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder1.id}`,
+        body: {
+          parent: folder0.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('A folder with this name already exists');
     });
 
     test('cannot move a folder to a folder that does not exist', async () => {
-      const folder = await createFolder('folder-b-0', null);
+      const folder = await createFolder('folder-c-0', null);
       data.folders.push(folder);
 
       const res = await rq({
@@ -379,6 +313,57 @@ describe('Folder', () => {
 
       expect(res.status).toBe(400);
       expect(res.body.error.message).toBe('parent folder does not exist');
+    });
+
+    test('cannot move a folder inside itself (0 level)', async () => {
+      const folder = await createFolder('folder-d-0', null);
+      data.folders.push(folder);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder.id}`,
+        body: {
+          parent: folder.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('folder cannot be moved inside itself');
+    });
+
+    test('cannot move a folder inside itself (1 level)', async () => {
+      const folder0 = await createFolder('folder-e-0', null);
+      const folder00 = await createFolder('folder-e-00', folder0.id);
+      data.folders.push(folder0, folder00);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder0.id}`,
+        body: {
+          parent: folder00.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('folder cannot be moved inside itself');
+    });
+
+    test('cannot move a folder inside itself (2 levels)', async () => {
+      const folder0 = await createFolder('folder-f-0', null);
+      const folder00 = await createFolder('folder-f-00', folder0.id);
+      const folder000 = await createFolder('folder-f-000', folder00.id);
+      data.folders.push(folder0, folder00, folder000);
+
+      const res = await rq({
+        method: 'PUT',
+        url: `/upload/folders/${folder0.id}`,
+        body: {
+          parent: folder000.id,
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('folder cannot be moved inside itself');
     });
 
     test('move a folder inside another folder', async () => {
