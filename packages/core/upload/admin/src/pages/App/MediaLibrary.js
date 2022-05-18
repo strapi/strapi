@@ -29,7 +29,7 @@ import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
-import { getTrad, findRecursiveParentFolderId } from '../../utils';
+import { getTrad, findRecursiveParentFolderId, findRecursiveFolderByValue } from '../../utils';
 import { Filters } from './components/Filters';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
@@ -66,18 +66,6 @@ export const MediaLibrary = () => {
   });
 
   const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure();
-
-  const parentFolderId =
-    query.folder &&
-    !folderStructureIsLoading &&
-    findRecursiveParentFolderId(folderStructure[0], query.folder);
-
-  const backQuery = parentFolderId
-    ? stringify({ ...query, folder: parentFolderId }, { encode: false })
-    : stringify(
-        { sort: query.sort, page: query.page, pageSize: query.pageSize },
-        { encode: false }
-      );
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
@@ -120,19 +108,32 @@ export const MediaLibrary = () => {
 
   const assets = assetsData?.results;
   const assetCount = assets?.length ?? 0;
-
   const isNestedFolder = !!query?.folder;
+
   const isLoading =
     foldersLoading || folderStructureIsLoading || permissionsLoading || assetsLoading;
+  const isFolder = !isLoading && query.folder;
+
+  const parentFolderId = isFolder && findRecursiveParentFolderId(folderStructure[0], query.folder);
+  const backQuery = parentFolderId
+    ? stringify({ ...query, folder: parentFolderId }, { encode: false })
+    : stringify(
+        { sort: query.sort, page: query.page, pageSize: query.pageSize },
+        { encode: false }
+      );
+
+  const currentFolder =
+    isFolder && findRecursiveFolderByValue(folderStructure, Number(query.folder));
+  const folderLabel = currentFolder && currentFolder.label;
 
   return (
     <Layout>
       <Main aria-busy={isLoading}>
         <HeaderLayout
-          title={formatMessage({
+          title={`${formatMessage({
             id: getTrad('plugin.name'),
-            defaultMessage: 'Media Library',
-          })}
+            defaultMessage: `Media Library`,
+          })}${folderLabel ? ` - ${folderLabel}` : ''}`}
           subtitle={formatMessage(
             {
               id: getTrad('header.content.assets'),
