@@ -68,13 +68,13 @@ jest.mock('../../../hooks/useFolderStructure', () => ({
   useFolderStructure: jest.fn().mockReturnValue({
     isLoading: false,
     error: null,
-    data: {
-      results: {
+    data: [
+      {
         value: null,
         label: 'Media Library',
         children: [],
       },
-    },
+    ],
   }),
 }));
 
@@ -370,7 +370,30 @@ describe('Media library homepage', () => {
       });
 
       it('does render a back button at a nested level of the media library', () => {
-        useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { folder: 1 } }, jest.fn()]);
+        useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { folder: 2 } }, jest.fn()]);
+        useFolderStructure.mockReturnValueOnce({
+          isLoading: false,
+          error: null,
+          data: [
+            {
+              value: null,
+              label: 'Media Library',
+              children: [
+                {
+                  value: 1,
+                  label: 'Cats',
+                  children: [
+                    {
+                      value: 2,
+                      label: 'Michka',
+                      children: [],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        });
 
         renderML();
 

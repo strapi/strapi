@@ -1,6 +1,8 @@
 import React, { useState } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+import { stringify } from 'qs';
+import { useLocation } from 'react-router-dom';
 import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
@@ -27,7 +29,7 @@ import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
-import { getTrad, getRequestUrl } from '../../utils';
+import { getTrad, findRecursiveParentFolderId } from '../../utils';
 import { Filters } from './components/Filters';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
@@ -51,6 +53,7 @@ export const MediaLibrary = () => {
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
   const { formatMessage } = useIntl();
+  const { pathname } = useLocation();
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
 
@@ -63,6 +66,18 @@ export const MediaLibrary = () => {
   });
 
   const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure();
+
+  const parentFolderId =
+    query.folder &&
+    !folderStructureIsLoading &&
+    findRecursiveParentFolderId(folderStructure[0], query.folder);
+
+  const backQuery = parentFolderId
+    ? stringify({ ...query, folder: parentFolderId }, { encode: false })
+    : stringify(
+        { sort: query.sort, page: query.page, pageSize: query.pageSize },
+        { encode: false }
+      );
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
@@ -128,8 +143,7 @@ export const MediaLibrary = () => {
           )}
           navigationAction={
             isNestedFolder && (
-              // TODO: this is a placeholder for now
-              <Link startIcon={<ArrowLeft />} to={getRequestUrl('')}>
+              <Link startIcon={<ArrowLeft />} to={`${pathname}?${backQuery}`}>
                 {formatMessage({
                   id: getTrad('header.actions.folder-level-up'),
                   defaultMessage: 'Back',
