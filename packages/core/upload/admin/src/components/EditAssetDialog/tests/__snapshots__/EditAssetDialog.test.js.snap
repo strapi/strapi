@@ -1422,7 +1422,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 Media Library
                               </div>
                               <div
-                                class="css-reu10z-Input"
+                                class="css-fph3ax-Input"
                               >
                                 <div
                                   class=""

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderList does select selected folders 1`] = `
-.c27 {
+.c28 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -18,16 +18,16 @@ exports[`FolderList does select selected folders 1`] = `
   padding-bottom: 8px;
 }
 
-.c3 {
+.c4 {
   position: relative;
 }
 
-.c8 {
+.c9 {
   position: relative;
   z-index: 2;
 }
 
-.c10 {
+.c11 {
   background: #eaf5ff;
   color: #66b7f1;
   padding-top: 8px;
@@ -37,14 +37,14 @@ exports[`FolderList does select selected folders 1`] = `
   border-radius: 4px;
 }
 
-.c12 {
+.c13 {
   position: relative;
   z-index: 3;
   overflow: hidden;
   max-width: 100%;
 }
 
-.c13 {
+.c14 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
@@ -58,7 +58,7 @@ exports[`FolderList does select selected folders 1`] = `
   flex-direction: column;
 }
 
-.c16 {
+.c17 {
   -webkit-align-items: start;
   -webkit-box-align: start;
   -ms-flex-align: start;
@@ -72,7 +72,18 @@ exports[`FolderList does select selected folders 1`] = `
   flex-direction: column;
 }
 
-.c25 {
+.c2 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c3 {
+  grid-column: span 3;
+  max-width: 100%;
+}
+
+.c26 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -86,21 +97,21 @@ exports[`FolderList does select selected folders 1`] = `
   outline: none;
 }
 
-.c25 svg {
+.c26 svg {
   height: 12px;
   width: 12px;
 }
 
-.c25 svg > g,
-.c25 svg path {
+.c26 svg > g,
+.c26 svg path {
   fill: #ffffff;
 }
 
-.c25[aria-disabled='true'] {
+.c26[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c25:after {
+.c26:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -115,11 +126,11 @@ exports[`FolderList does select selected folders 1`] = `
   border: 2px solid transparent;
 }
 
-.c25:focus-visible {
+.c26:focus-visible {
   outline: none;
 }
 
-.c25:focus-visible:after {
+.c26:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -130,7 +141,7 @@ exports[`FolderList does select selected folders 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c26 {
+.c27 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -147,26 +158,26 @@ exports[`FolderList does select selected folders 1`] = `
   width: 2rem;
 }
 
-.c26 svg > g,
-.c26 svg path {
+.c27 svg > g,
+.c27 svg path {
   fill: #8e8ea9;
 }
 
-.c26:hover svg > g,
-.c26:hover svg path {
+.c27:hover svg > g,
+.c27:hover svg path {
   fill: #666687;
 }
 
-.c26:active svg > g,
-.c26:active svg path {
+.c27:active svg > g,
+.c27:active svg path {
   fill: #a5a5ba;
 }
 
-.c26[aria-disabled='true'] {
+.c27[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c26[aria-disabled='true'] svg path {
+.c27[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -178,7 +189,7 @@ exports[`FolderList does select selected folders 1`] = `
   line-height: 1.25;
 }
 
-.c17 {
+.c18 {
   font-weight: 500;
   color: #32324d;
   display: block;
@@ -189,13 +200,13 @@ exports[`FolderList does select selected folders 1`] = `
   line-height: 1.43;
 }
 
-.c20 {
+.c21 {
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c19 {
+.c20 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -207,7 +218,7 @@ exports[`FolderList does select selected folders 1`] = `
   width: 1px;
 }
 
-.c9 {
+.c10 {
   margin: 0;
   height: 18px;
   min-width: 18px;
@@ -218,12 +229,12 @@ exports[`FolderList does select selected folders 1`] = `
   cursor: pointer;
 }
 
-.c9:checked {
+.c10:checked {
   background-color: #4945ff;
   border: 1px solid #4945ff;
 }
 
-.c9:checked:after {
+.c10:checked:after {
   content: '';
   display: block;
   position: relative;
@@ -237,21 +248,21 @@ exports[`FolderList does select selected folders 1`] = `
   transform: translateX(-50%) translateY(-50%);
 }
 
-.c9:checked:disabled:after {
+.c10:checked:disabled:after {
   background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
 }
 
-.c9:disabled {
+.c10:disabled {
   background-color: #dcdce4;
   border: 1px solid #c0c0cf;
 }
 
-.c9:indeterminate {
+.c10:indeterminate {
   background-color: #4945ff;
   border: 1px solid #4945ff;
 }
 
-.c9:indeterminate:after {
+.c10:indeterminate:after {
   content: '';
   display: block;
   position: relative;
@@ -266,16 +277,16 @@ exports[`FolderList does select selected folders 1`] = `
   transform: translateX(-50%) translateY(-50%);
 }
 
-.c9:indeterminate:disabled {
+.c10:indeterminate:disabled {
   background-color: #dcdce4;
   border: 1px solid #c0c0cf;
 }
 
-.c9:indeterminate:disabled:after {
+.c10:indeterminate:disabled:after {
   background-color: #8e8ea9;
 }
 
-.c5 {
+.c6 {
   background: #ffffff;
   padding-top: 12px;
   padding-right: 16px;
@@ -287,7 +298,7 @@ exports[`FolderList does select selected folders 1`] = `
   cursor: pointer;
 }
 
-.c6 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -301,20 +312,20 @@ exports[`FolderList does select selected folders 1`] = `
   flex-direction: row;
 }
 
-.c7 > * {
+.c8 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c7 > * + * {
+.c8 > * + * {
   margin-left: 12px;
 }
 
-.c21 {
+.c22 {
   right: 16px;
 }
 
-.c22 {
+.c23 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -328,21 +339,21 @@ exports[`FolderList does select selected folders 1`] = `
   flex-direction: row;
 }
 
-.c23 > * {
+.c24 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c23 > * + * {
+.c24 > * + * {
   margin-left: 8px;
 }
 
-.c24 {
+.c25 {
   position: absolute;
   top: 12px;
 }
 
-.c4 {
+.c5 {
   height: 100%;
   left: 0;
   position: absolute;
@@ -351,37 +362,43 @@ exports[`FolderList does select selected folders 1`] = `
   width: 100%;
 }
 
-.c4:hover,
-.c4:focus {
+.c5:hover,
+.c5:focus {
   -webkit-text-decoration: none;
   text-decoration: none;
 }
 
-.c11 path {
+.c12 path {
   fill: currentColor;
 }
 
-.c14 {
+.c15 {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
 }
 
-.c15 {
+.c16 {
   max-width: 100%;
   -webkit-text-decoration: none;
   text-decoration: none;
 }
 
-.c2 {
-  display: grid;
-  grid-template-columns: repeat( auto-fit, minmax(250px,1fr) );
-  grid-gap: 16px;
+.c19 {
+  max-width: 100%;
 }
 
-.c18 {
-  max-width: 100%;
+@media (max-width:68.75rem) {
+  .c3 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c3 {
+    grid-column: span;
+  }
 }
 
 <div>
@@ -403,231 +420,229 @@ exports[`FolderList does select selected folders 1`] = `
       <div
         class="c3"
       >
-        <button
-          aria-hidden="true"
-          aria-label="Folder 1"
-          class="c4"
-          tabindex="-1"
-          type="button"
-        />
         <div
-          class="c5 c6 c7"
-          cursor="pointer"
-          spacing="3"
+          class=""
         >
           <div
-            class="c8"
-          >
-            <input
-              aria-labelledby="folder-1-3-title"
-              checked=""
-              class="c9"
-              type="checkbox"
-            />
-          </div>
-          <div
-            class="c10"
-          >
-            <svg
-              class="c11"
-              fill="none"
-              height="1.125rem"
-              viewBox="0 0 24 24"
-              width="1.25rem"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-          <div
-            class="c12 c13 c14"
-            id="folder-1-3-title"
-            overflow="hidden"
-          >
-            <a
-              aria-current="page"
-              class="c15 active"
-              href="/?folder=1"
-            >
-              <h2
-                class="c16"
-              >
-                <span
-                  class="c17 c18"
-                >
-                  Folder 1
-                  <div
-                    class="c19"
-                  >
-                    :
-                  </div>
-                </span>
-                <span
-                  class="c20"
-                >
-                  1
-                   folder, 
-                  1
-                   assets
-                </span>
-              </h2>
-            </a>
-          </div>
-          <div
-            class="c21 c22 c23 c24"
-            spacing="2"
+            class="c4"
           >
             <button
-              aria-disabled="false"
-              class="c25 c26"
+              aria-hidden="true"
+              aria-label="Folder 1"
+              class="c5"
+              tabindex="-1"
               type="button"
+            />
+            <div
+              class="c6 c7 c8"
+              cursor="pointer"
+              spacing="3"
             >
-              <svg
-                fill="none"
-                height="1em"
-                viewBox="0 0 24 24"
-                width="1em"
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="c9"
               >
-                <path
-                  clip-rule="evenodd"
-                  d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                  fill="#212134"
-                  fill-rule="evenodd"
+                <input
+                  aria-labelledby="folder-1-3-title"
+                  checked=""
+                  class="c10"
+                  type="checkbox"
                 />
-              </svg>
-            </button>
+              </div>
+              <div
+                class="c11"
+              >
+                <svg
+                  class="c12"
+                  fill="none"
+                  height="1.125rem"
+                  viewBox="0 0 24 24"
+                  width="1.25rem"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
+                    fill="#212134"
+                  />
+                </svg>
+              </div>
+              <div
+                class="c13 c14 c15"
+                id="folder-1-3-title"
+                overflow="hidden"
+              >
+                <a
+                  aria-current="page"
+                  class="c16 active"
+                  href="/?folder=1"
+                >
+                  <h2
+                    class="c17"
+                  >
+                    <span
+                      class="c18 c19"
+                    >
+                      Folder 1
+                      <div
+                        class="c20"
+                      >
+                        :
+                      </div>
+                    </span>
+                    <span
+                      class="c21"
+                    >
+                      1
+                       folder, 
+                      1
+                       assets
+                    </span>
+                  </h2>
+                </a>
+              </div>
+              <div
+                class="c22 c23 c24 c25"
+                spacing="2"
+              >
+                <button
+                  aria-disabled="false"
+                  class="c26 c27"
+                  type="button"
+                >
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                      fill="#212134"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div
         class="c3"
       >
-        <button
-          aria-hidden="true"
-          aria-label="Folder 2"
-          class="c4"
-          tabindex="-1"
-          type="button"
-        />
         <div
-          class="c5 c6 c7"
-          cursor="pointer"
-          spacing="3"
+          class=""
         >
           <div
-            class="c8"
-          >
-            <input
-              aria-labelledby="folder-2-4-title"
-              checked=""
-              class="c9"
-              type="checkbox"
-            />
-          </div>
-          <div
-            class="c10"
-          >
-            <svg
-              class="c11"
-              fill="none"
-              height="1.125rem"
-              viewBox="0 0 24 24"
-              width="1.25rem"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-          <div
-            class="c12 c13 c14"
-            id="folder-2-4-title"
-            overflow="hidden"
-          >
-            <a
-              aria-current="page"
-              class="c15 active"
-              href="/?folder=2"
-            >
-              <h2
-                class="c16"
-              >
-                <span
-                  class="c17 c18"
-                >
-                  Folder 2
-                  <div
-                    class="c19"
-                  >
-                    :
-                  </div>
-                </span>
-                <span
-                  class="c20"
-                >
-                  11
-                   folder, 
-                  12
-                   assets
-                </span>
-              </h2>
-            </a>
-          </div>
-          <div
-            class="c21 c22 c23 c24"
-            spacing="2"
+            class="c4"
           >
             <button
-              aria-disabled="false"
-              class="c25 c26"
+              aria-hidden="true"
+              aria-label="Folder 2"
+              class="c5"
+              tabindex="-1"
               type="button"
+            />
+            <div
+              class="c6 c7 c8"
+              cursor="pointer"
+              spacing="3"
             >
-              <svg
-                fill="none"
-                height="1em"
-                viewBox="0 0 24 24"
-                width="1em"
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="c9"
               >
-                <path
-                  clip-rule="evenodd"
-                  d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                  fill="#212134"
-                  fill-rule="evenodd"
+                <input
+                  aria-labelledby="folder-2-4-title"
+                  checked=""
+                  class="c10"
+                  type="checkbox"
                 />
-              </svg>
-            </button>
+              </div>
+              <div
+                class="c11"
+              >
+                <svg
+                  class="c12"
+                  fill="none"
+                  height="1.125rem"
+                  viewBox="0 0 24 24"
+                  width="1.25rem"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
+                    fill="#212134"
+                  />
+                </svg>
+              </div>
+              <div
+                class="c13 c14 c15"
+                id="folder-2-4-title"
+                overflow="hidden"
+              >
+                <a
+                  aria-current="page"
+                  class="c16 active"
+                  href="/?folder=2"
+                >
+                  <h2
+                    class="c17"
+                  >
+                    <span
+                      class="c18 c19"
+                    >
+                      Folder 2
+                      <div
+                        class="c20"
+                      >
+                        :
+                      </div>
+                    </span>
+                    <span
+                      class="c21"
+                    >
+                      11
+                       folder, 
+                      12
+                       assets
+                    </span>
+                  </h2>
+                </a>
+              </div>
+              <div
+                class="c22 c23 c24 c25"
+                spacing="2"
+              >
+                <button
+                  aria-disabled="false"
+                  class="c26 c27"
+                  type="button"
+                >
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                      fill="#212134"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div
-        aria-hidden="true"
-      />
-      <div
-        aria-hidden="true"
-      />
-      <div
-        aria-hidden="true"
-      />
-      <div
-        aria-hidden="true"
-      />
-      <div
-        aria-hidden="true"
-      />
-      <div
-        aria-hidden="true"
-      />
     </div>
   </div>
   <div
-    class="c27"
+    class="c28"
   >
     <p
       aria-live="polite"
@@ -652,7 +667,7 @@ exports[`FolderList does select selected folders 1`] = `
 `;
 
 exports[`FolderList renders 1`] = `
-.c27 {
+.c28 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -669,16 +684,16 @@ exports[`FolderList renders 1`] = `
   padding-bottom: 8px;
 }
 
-.c3 {
+.c4 {
   position: relative;
 }
 
-.c8 {
+.c9 {
   position: relative;
   z-index: 2;
 }
 
-.c10 {
+.c11 {
   background: #eaf5ff;
   color: #66b7f1;
   padding-top: 8px;
@@ -688,14 +703,14 @@ exports[`FolderList renders 1`] = `
   border-radius: 4px;
 }
 
-.c12 {
+.c13 {
   position: relative;
   z-index: 3;
   overflow: hidden;
   max-width: 100%;
 }
 
-.c13 {
+.c14 {
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
@@ -709,7 +724,7 @@ exports[`FolderList renders 1`] = `
   flex-direction: column;
 }
 
-.c16 {
+.c17 {
   -webkit-align-items: start;
   -webkit-box-align: start;
   -ms-flex-align: start;
@@ -723,7 +738,18 @@ exports[`FolderList renders 1`] = `
   flex-direction: column;
 }
 
-.c25 {
+.c2 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c3 {
+  grid-column: span 3;
+  max-width: 100%;
+}
+
+.c26 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -737,21 +763,21 @@ exports[`FolderList renders 1`] = `
   outline: none;
 }
 
-.c25 svg {
+.c26 svg {
   height: 12px;
   width: 12px;
 }
 
-.c25 svg > g,
-.c25 svg path {
+.c26 svg > g,
+.c26 svg path {
   fill: #ffffff;
 }
 
-.c25[aria-disabled='true'] {
+.c26[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c25:after {
+.c26:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -766,11 +792,11 @@ exports[`FolderList renders 1`] = `
   border: 2px solid transparent;
 }
 
-.c25:focus-visible {
+.c26:focus-visible {
   outline: none;
 }
 
-.c25:focus-visible:after {
+.c26:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -781,7 +807,7 @@ exports[`FolderList renders 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c26 {
+.c27 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -798,26 +824,26 @@ exports[`FolderList renders 1`] = `
   width: 2rem;
 }
 
-.c26 svg > g,
-.c26 svg path {
+.c27 svg > g,
+.c27 svg path {
   fill: #8e8ea9;
 }
 
-.c26:hover svg > g,
-.c26:hover svg path {
+.c27:hover svg > g,
+.c27:hover svg path {
   fill: #666687;
 }
 
-.c26:active svg > g,
-.c26:active svg path {
+.c27:active svg > g,
+.c27:active svg path {
   fill: #a5a5ba;
 }
 
-.c26[aria-disabled='true'] {
+.c27[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c26[aria-disabled='true'] svg path {
+.c27[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
@@ -829,7 +855,7 @@ exports[`FolderList renders 1`] = `
   line-height: 1.25;
 }
 
-.c17 {
+.c18 {
   font-weight: 500;
   color: #32324d;
   display: block;
@@ -840,13 +866,13 @@ exports[`FolderList renders 1`] = `
   line-height: 1.43;
 }
 
-.c20 {
+.c21 {
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c19 {
+.c20 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -858,7 +884,7 @@ exports[`FolderList renders 1`] = `
   width: 1px;
 }
 
-.c9 {
+.c10 {
   margin: 0;
   height: 18px;
   min-width: 18px;
@@ -869,12 +895,12 @@ exports[`FolderList renders 1`] = `
   cursor: pointer;
 }
 
-.c9:checked {
+.c10:checked {
   background-color: #4945ff;
   border: 1px solid #4945ff;
 }
 
-.c9:checked:after {
+.c10:checked:after {
   content: '';
   display: block;
   position: relative;
@@ -888,21 +914,21 @@ exports[`FolderList renders 1`] = `
   transform: translateX(-50%) translateY(-50%);
 }
 
-.c9:checked:disabled:after {
+.c10:checked:disabled:after {
   background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
 }
 
-.c9:disabled {
+.c10:disabled {
   background-color: #dcdce4;
   border: 1px solid #c0c0cf;
 }
 
-.c9:indeterminate {
+.c10:indeterminate {
   background-color: #4945ff;
   border: 1px solid #4945ff;
 }
 
-.c9:indeterminate:after {
+.c10:indeterminate:after {
   content: '';
   display: block;
   position: relative;
@@ -917,16 +943,16 @@ exports[`FolderList renders 1`] = `
   transform: translateX(-50%) translateY(-50%);
 }
 
-.c9:indeterminate:disabled {
+.c10:indeterminate:disabled {
   background-color: #dcdce4;
   border: 1px solid #c0c0cf;
 }
 
-.c9:indeterminate:disabled:after {
+.c10:indeterminate:disabled:after {
   background-color: #8e8ea9;
 }
 
-.c5 {
+.c6 {
   background: #ffffff;
   padding-top: 12px;
   padding-right: 16px;
@@ -938,7 +964,7 @@ exports[`FolderList renders 1`] = `
   cursor: pointer;
 }
 
-.c6 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -952,20 +978,20 @@ exports[`FolderList renders 1`] = `
   flex-direction: row;
 }
 
-.c7 > * {
+.c8 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c7 > * + * {
+.c8 > * + * {
   margin-left: 12px;
 }
 
-.c21 {
+.c22 {
   right: 16px;
 }
 
-.c22 {
+.c23 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -979,21 +1005,21 @@ exports[`FolderList renders 1`] = `
   flex-direction: row;
 }
 
-.c23 > * {
+.c24 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c23 > * + * {
+.c24 > * + * {
   margin-left: 8px;
 }
 
-.c24 {
+.c25 {
   position: absolute;
   top: 12px;
 }
 
-.c4 {
+.c5 {
   height: 100%;
   left: 0;
   position: absolute;
@@ -1002,37 +1028,43 @@ exports[`FolderList renders 1`] = `
   width: 100%;
 }
 
-.c4:hover,
-.c4:focus {
+.c5:hover,
+.c5:focus {
   -webkit-text-decoration: none;
   text-decoration: none;
 }
 
-.c11 path {
+.c12 path {
   fill: currentColor;
 }
 
-.c14 {
+.c15 {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
 }
 
-.c15 {
+.c16 {
   max-width: 100%;
   -webkit-text-decoration: none;
   text-decoration: none;
 }
 
-.c2 {
-  display: grid;
-  grid-template-columns: repeat( auto-fit, minmax(250px,1fr) );
-  grid-gap: 16px;
+.c19 {
+  max-width: 100%;
 }
 
-.c18 {
-  max-width: 100%;
+@media (max-width:68.75rem) {
+  .c3 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c3 {
+    grid-column: span;
+  }
 }
 
 <div>
@@ -1054,229 +1086,227 @@ exports[`FolderList renders 1`] = `
       <div
         class="c3"
       >
-        <button
-          aria-hidden="true"
-          aria-label="Folder 1"
-          class="c4"
-          tabindex="-1"
-          type="button"
-        />
         <div
-          class="c5 c6 c7"
-          cursor="pointer"
-          spacing="3"
+          class=""
         >
           <div
-            class="c8"
-          >
-            <input
-              aria-labelledby="folder-1-1-title"
-              class="c9"
-              type="checkbox"
-            />
-          </div>
-          <div
-            class="c10"
-          >
-            <svg
-              class="c11"
-              fill="none"
-              height="1.125rem"
-              viewBox="0 0 24 24"
-              width="1.25rem"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-          <div
-            class="c12 c13 c14"
-            id="folder-1-1-title"
-            overflow="hidden"
-          >
-            <a
-              aria-current="page"
-              class="c15 active"
-              href="/?folder=1"
-            >
-              <h2
-                class="c16"
-              >
-                <span
-                  class="c17 c18"
-                >
-                  Folder 1
-                  <div
-                    class="c19"
-                  >
-                    :
-                  </div>
-                </span>
-                <span
-                  class="c20"
-                >
-                  1
-                   folder, 
-                  1
-                   assets
-                </span>
-              </h2>
-            </a>
-          </div>
-          <div
-            class="c21 c22 c23 c24"
-            spacing="2"
+            class="c4"
           >
             <button
-              aria-disabled="false"
-              class="c25 c26"
+              aria-hidden="true"
+              aria-label="Folder 1"
+              class="c5"
+              tabindex="-1"
               type="button"
+            />
+            <div
+              class="c6 c7 c8"
+              cursor="pointer"
+              spacing="3"
             >
-              <svg
-                fill="none"
-                height="1em"
-                viewBox="0 0 24 24"
-                width="1em"
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="c9"
               >
-                <path
-                  clip-rule="evenodd"
-                  d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                  fill="#212134"
-                  fill-rule="evenodd"
+                <input
+                  aria-labelledby="folder-1-1-title"
+                  class="c10"
+                  type="checkbox"
                 />
-              </svg>
-            </button>
+              </div>
+              <div
+                class="c11"
+              >
+                <svg
+                  class="c12"
+                  fill="none"
+                  height="1.125rem"
+                  viewBox="0 0 24 24"
+                  width="1.25rem"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
+                    fill="#212134"
+                  />
+                </svg>
+              </div>
+              <div
+                class="c13 c14 c15"
+                id="folder-1-1-title"
+                overflow="hidden"
+              >
+                <a
+                  aria-current="page"
+                  class="c16 active"
+                  href="/?folder=1"
+                >
+                  <h2
+                    class="c17"
+                  >
+                    <span
+                      class="c18 c19"
+                    >
+                      Folder 1
+                      <div
+                        class="c20"
+                      >
+                        :
+                      </div>
+                    </span>
+                    <span
+                      class="c21"
+                    >
+                      1
+                       folder, 
+                      1
+                       assets
+                    </span>
+                  </h2>
+                </a>
+              </div>
+              <div
+                class="c22 c23 c24 c25"
+                spacing="2"
+              >
+                <button
+                  aria-disabled="false"
+                  class="c26 c27"
+                  type="button"
+                >
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                      fill="#212134"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div
         class="c3"
       >
-        <button
-          aria-hidden="true"
-          aria-label="Folder 2"
-          class="c4"
-          tabindex="-1"
-          type="button"
-        />
         <div
-          class="c5 c6 c7"
-          cursor="pointer"
-          spacing="3"
+          class=""
         >
           <div
-            class="c8"
-          >
-            <input
-              aria-labelledby="folder-2-2-title"
-              class="c9"
-              type="checkbox"
-            />
-          </div>
-          <div
-            class="c10"
-          >
-            <svg
-              class="c11"
-              fill="none"
-              height="1.125rem"
-              viewBox="0 0 24 24"
-              width="1.25rem"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
-                fill="#212134"
-              />
-            </svg>
-          </div>
-          <div
-            class="c12 c13 c14"
-            id="folder-2-2-title"
-            overflow="hidden"
-          >
-            <a
-              aria-current="page"
-              class="c15 active"
-              href="/?folder=2"
-            >
-              <h2
-                class="c16"
-              >
-                <span
-                  class="c17 c18"
-                >
-                  Folder 2
-                  <div
-                    class="c19"
-                  >
-                    :
-                  </div>
-                </span>
-                <span
-                  class="c20"
-                >
-                  11
-                   folder, 
-                  12
-                   assets
-                </span>
-              </h2>
-            </a>
-          </div>
-          <div
-            class="c21 c22 c23 c24"
-            spacing="2"
+            class="c4"
           >
             <button
-              aria-disabled="false"
-              class="c25 c26"
+              aria-hidden="true"
+              aria-label="Folder 2"
+              class="c5"
+              tabindex="-1"
               type="button"
+            />
+            <div
+              class="c6 c7 c8"
+              cursor="pointer"
+              spacing="3"
             >
-              <svg
-                fill="none"
-                height="1em"
-                viewBox="0 0 24 24"
-                width="1em"
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="c9"
               >
-                <path
-                  clip-rule="evenodd"
-                  d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                  fill="#212134"
-                  fill-rule="evenodd"
+                <input
+                  aria-labelledby="folder-2-2-title"
+                  class="c10"
+                  type="checkbox"
                 />
-              </svg>
-            </button>
+              </div>
+              <div
+                class="c11"
+              >
+                <svg
+                  class="c12"
+                  fill="none"
+                  height="1.125rem"
+                  viewBox="0 0 24 24"
+                  width="1.25rem"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
+                    fill="#212134"
+                  />
+                </svg>
+              </div>
+              <div
+                class="c13 c14 c15"
+                id="folder-2-2-title"
+                overflow="hidden"
+              >
+                <a
+                  aria-current="page"
+                  class="c16 active"
+                  href="/?folder=2"
+                >
+                  <h2
+                    class="c17"
+                  >
+                    <span
+                      class="c18 c19"
+                    >
+                      Folder 2
+                      <div
+                        class="c20"
+                      >
+                        :
+                      </div>
+                    </span>
+                    <span
+                      class="c21"
+                    >
+                      11
+                       folder, 
+                      12
+                       assets
+                    </span>
+                  </h2>
+                </a>
+              </div>
+              <div
+                class="c22 c23 c24 c25"
+                spacing="2"
+              >
+                <button
+                  aria-disabled="false"
+                  class="c26 c27"
+                  type="button"
+                >
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                      fill="#212134"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div
-        aria-hidden="true"
-      />
-      <div
-        aria-hidden="true"
-      />
-      <div
-        aria-hidden="true"
-      />
-      <div
-        aria-hidden="true"
-      />
-      <div
-        aria-hidden="true"
-      />
-      <div
-        aria-hidden="true"
-      />
     </div>
   </div>
   <div
-    class="c27"
+    class="c28"
   >
     <p
       aria-live="polite"
