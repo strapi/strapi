@@ -114,6 +114,17 @@ describe('Auth', () => {
     });
   });
 
+  describe('invalidatePassword', () => {
+    test('Compares password with hash', async () => {
+      const password = 'pcw123';
+      const password2 = 'pcs1234';
+      const hash = await hashPassword(password2);
+
+      const isValid = await validatePassword(password, hash);
+      expect(isValid).toBe(false);
+    });
+  });
+
   describe('forgotPassword', () => {
     test('Only run the process for active users', async () => {
       const findOne = jest.fn(() => Promise.resolve());
