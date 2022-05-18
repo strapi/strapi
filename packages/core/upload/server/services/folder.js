@@ -74,53 +74,101 @@ const deleteByIds = async (ids = []) => {
  * @returns {Promise<boolean>}
  */
 const update = async (id, { name, parent }, { user }) => {
-  const existingFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, id);
+  // only name is updated
+  if (isUndefined(parent)) {
+    const existingFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, id);
 
-  if (!existingFolder) {
-    return undefined;
-  }
+    if (!existingFolder) {
+      return undefined;
+    }
 
-  if (!isUndefined(parent)) {
-    const folderPathColumnName = strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath
-      .columnName;
-    const pathColumnName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
+    const newFolder = setCreatorFields({ user, isEdition: true })({ name, parent });
 
-    // Todo wrap into a transaction
-    const destinationFolder =
-      parent === null ? '/' : (await strapi.entityService.findOne(FOLDER_MODEL_UID, parent)).path;
+    if (isUndefined(parent)) {
+      const folder = await strapi.entityService.update(FOLDER_MODEL_UID, id, { data: newFolder });
+      return folder;
+    }
+    // location is updated => using transaction
+  } else {
+    const trx = await strapi.db.transaction();
+    try {
+      // fetch existing folder
+      const existingFolder = await strapi.db
+        .queryBuilder(FOLDER_MODEL_UID)
+        .select(['uid', 'path'])
+        .where({ id })
+        .transacting(trx)
+        .forUpdate()
+        .first()
+        .execute();
 
-    const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
-    const fileTable = strapi.getModel(FILE_MODEL_UID).collectionName;
+      // update parent folder
+      const joinTable = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent.joinTable;
+      await strapi.db
+        .queryBuilder(joinTable.name)
+        .transacting(trx)
+        .update({ [joinTable.inverseJoinColumn.name]: parent })
+        .where({ [joinTable.joinColumn.name]: id })
+        .execute();
 
-    await strapi.db
-      .connection(folderTable)
-      .where(pathColumnName, 'like', `${existingFolder.path}%`)
-      .update(
-        pathColumnName,
-        strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+      // fetch destinationFolder path
+      let destinationFolderPath = '/';
+      if (parent !== null) {
+        const destinationFolder = await strapi.db
+          .queryBuilder(FOLDER_MODEL_UID)
+          .select('path')
+          .where({ id: parent })
+          .transacting(trx)
+          .first()
+          .execute();
+        destinationFolderPath = destinationFolder.path;
+      }
+
+      const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
+      const fileTable = strapi.getModel(FILE_MODEL_UID).collectionName;
+      const folderPathColumnName = strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath
+        .columnName;
+      const pathColumnName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
+
+      // update folders below
+      await strapi.db
+        .connection(folderTable)
+        .transacting(trx)
+        .where(pathColumnName, 'like', `${existingFolder.path}%`)
+        .update(
           pathColumnName,
-          existingFolder.path,
-          joinBy('/', destinationFolder, existingFolder.uid),
-        ])
-      );
+          strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+            pathColumnName,
+            existingFolder.path,
+            joinBy('/', destinationFolderPath, existingFolder.uid),
+          ])
+        );
 
-    await strapi.db
-      .connection(fileTable)
-      .where(folderPathColumnName, 'like', `${existingFolder.path}%`)
-      .update(
-        folderPathColumnName,
-        strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+      // update files below
+      await strapi.db
+        .connection(fileTable)
+        .transacting(trx)
+        .where(folderPathColumnName, 'like', `${existingFolder.path}%`)
+        .update(
           folderPathColumnName,
-          existingFolder.path,
-          joinBy('/', destinationFolder, existingFolder.uid),
-        ])
-      );
+          strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+            folderPathColumnName,
+            existingFolder.path,
+            joinBy('/', destinationFolderPath, existingFolder.uid),
+          ])
+        );
+
+      await trx.commit();
+    } catch (e) {
+      await trx.rollback();
+      throw e;
+    }
+
+    // update less critical information (name + updatedBy)
+    const newFolder = setCreatorFields({ user, isEdition: true })({ name });
+    const folder = await strapi.entityService.update(FOLDER_MODEL_UID, id, { data: newFolder });
+    return folder;
   }
-
-  const newFolder = setCreatorFields({ user, isEdition: true })({ name, parent });
-  const folder = await strapi.entityService.update(FOLDER_MODEL_UID, id, { data: newFolder });
-
-  return folder;
 };
 
 /**
