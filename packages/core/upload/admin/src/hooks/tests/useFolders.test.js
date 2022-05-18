@@ -82,7 +82,9 @@ describe('useFolders', () => {
     await waitFor(() => result.current.isSuccess);
 
     expect(axiosInstance.get).toBeCalledWith(
-      `/upload/folders?filters${encodeURIComponent('[parent][id][$null]')}=true`
+      `/upload/folders?pagination[pageSize]=-1&filters${encodeURIComponent(
+        '[parent][id][$null]'
+      )}=true`
     );
   });
 
@@ -94,7 +96,7 @@ describe('useFolders', () => {
     await waitFor(() => result.current.isSuccess);
 
     expect(axiosInstance.get).toBeCalledWith(
-      `/upload/folders?filters${encodeURIComponent('[parent][id]')}=1`
+      `/upload/folders?pagination[pageSize]=-1&filters${encodeURIComponent('[parent][id]')}=1`
     );
   });
 

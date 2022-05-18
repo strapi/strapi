@@ -19,6 +19,9 @@ export const useFolders = ({ enabled = true }) => {
       const { folder, ...paramsExceptFolder } = query;
       const params = {
         ...paramsExceptFolder,
+        pagination: {
+          pageSize: -1,
+        },
         filters: {
           parent: {
             id: query?.folder ?? {
