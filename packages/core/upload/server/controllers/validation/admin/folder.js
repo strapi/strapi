@@ -22,7 +22,8 @@ const isNameUniqueInFolder = id =>
       }
     }
 
-    return exists;
+    const doesExist = await exists(filters);
+    return !doesExist;
   };
 
 const validateCreateFolderSchema = yup
