@@ -35,6 +35,7 @@ const createTelemetryInstance = strapi => {
   return {
     register() {
       if (!isDisabled) {
+        // TODO: Running yarn test:unit --detectOpenHandles reports an open handle; mock?
         //const pingCron = scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
         //crons.push(pingCron);
 
