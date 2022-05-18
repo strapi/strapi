@@ -1,15 +1,15 @@
-const findRecursiveParentFolderId = (node, searchedId, parentId = -1) => {
-  let result = -1;
+const findRecursiveParentFolderId = (node, searchedId, parentId = null) => {
+  let result = null;
 
   if (node.value === Number(searchedId)) {
     result = parentId;
   } else {
-    for (let i = 0; i < node.children.length && result === -1; i++) {
+    for (let i = 0; i < node.children.length && !result; i++) {
       result = findRecursiveParentFolderId(node.children[i], searchedId, node.value);
     }
   }
 
-  return result === -1 ? null : result;
+  return result;
 };
 
 export default findRecursiveParentFolderId;
