@@ -27,11 +27,11 @@ import * as yup from 'yup';
 
 import { PreviewBox } from './PreviewBox';
 import { ContextInfo } from '../ContextInfo';
+import { FolderStructureDefinition, AssetDefinition } from '../../constants';
 import { getTrad, findRecursiveFolderByValue } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { ReplaceMediaButton } from './ReplaceMediaButton';
-import { AssetDefinition } from '../../constants';
 import SelectTree from '../SelectTree';
 
 const fileInfoSchema = yup.object({
@@ -308,6 +308,6 @@ EditAssetDialog.propTypes = {
   canCopyLink: PropTypes.bool.isRequired,
   canDownload: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  folderStructure: PropTypes.array.isRequired,
+  folderStructure: FolderStructureDefinition.isRequired,
   trackedLocation: PropTypes.string,
 };

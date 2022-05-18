@@ -20,6 +20,7 @@ import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Form, useNotification, getAPIInnerErrors, useQueryParams } from '@strapi/helper-plugin';
 
 import { getTrad, findRecursiveFolderByValue } from '../../utils';
+import { FolderDefinition, FolderStructureDefinition } from '../../constants';
 import { useEditFolder } from '../../hooks/useEditFolder';
 import { useBulkRemove } from '../../hooks/useBulkRemove';
 import { ContextInfo } from '../ContextInfo';
@@ -273,17 +274,8 @@ EditFolderDialog.defaultProps = {
 };
 
 EditFolderDialog.propTypes = {
-  folder: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired,
-    children: PropTypes.array.isRequired,
-    createdAt: PropTypes.string.isRequired,
-    files: PropTypes.shape({
-      count: PropTypes.number.isRequired,
-    }).isRequired,
-    parent: PropTypes.number,
-  }),
-  folderStructure: PropTypes.array.isRequired,
+  folder: FolderDefinition,
+  folderStructure: FolderStructureDefinition.isRequired,
   onClose: PropTypes.func.isRequired,
   canUpdate: PropTypes.bool,
 };

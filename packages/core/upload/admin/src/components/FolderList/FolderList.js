@@ -14,6 +14,7 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import Pencil from '@strapi/icons/Pencil';
 
 import { FolderCard, FolderCardBody, FolderCardCheckbox, FolderCardLink } from '../FolderCard';
+import { FolderDefinition } from '../../constants';
 
 const CardTitle = styled(Typography).attrs({
   ellipsis: true,
@@ -101,8 +102,7 @@ FolderList.defaultProps = {
 };
 
 FolderList.propTypes = {
-  // TODO: describe shape
-  folders: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  folders: PropTypes.arrayOf(FolderDefinition).isRequired,
   size: PropTypes.oneOf(['S', 'M']),
   selectedFolders: PropTypes.array,
   onEditFolder: PropTypes.func.isRequired,
