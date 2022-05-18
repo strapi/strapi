@@ -117,7 +117,7 @@ module.exports = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::upload.read'],
+              actions: ['plugin::upload.assets.create'],
             },
           },
         ],
@@ -133,7 +133,7 @@ module.exports = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::upload.read'],
+              actions: ['plugin::upload.assets.update'],
             },
           },
         ],
@@ -165,7 +165,7 @@ module.exports = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::upload.read'],
+              actions: ['plugin::upload.assets.update'],
             },
           },
         ],
@@ -181,7 +181,7 @@ module.exports = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::upload.read'],
+              actions: ['plugin::upload.assets.update'],
             },
           },
         ],
