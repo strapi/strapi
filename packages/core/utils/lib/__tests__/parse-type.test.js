@@ -73,18 +73,6 @@ describe('parseType', () => {
         'Invalid format, expected an ISO compatible date'
       );
     });
-
-    it('Throws on incorrect dates and checks the error message', () => {
-      expect(() => parseType({ type: 'date', value: '2019-213-23' })).toThrow(
-        'Invalid format, expected an ISO compatible date'
-      );
-      expect(() => parseType({ type: 'date', value: '-212' })).toThrow(
-        'Invalid format, expected an ISO compatible date'
-      );
-      expect(() => parseType({ type: 'date', value: '2020-02-31' })).toThrow(
-        'Invalid format, expected an ISO compatible date'
-      );
-    });
   });
 
   describe('Datetime', () => {
