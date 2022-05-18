@@ -45,7 +45,7 @@ const useModalQueryParams = () => {
   };
 
   const handleChangeFolder = folder => {
-    setQueryObject(prev => ({ ...prev, folder }));
+    setQueryObject(prev => ({ ...prev, folder: folder.id ?? null }));
   };
 
   return [

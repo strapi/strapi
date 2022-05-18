@@ -7,25 +7,25 @@ import { useIntl } from 'react-intl';
 import pluginId from '../pluginId';
 import { axiosInstance, getRequestUrl } from '../utils';
 
-export const useAssets = ({ skipWhen, query, rawQuery }) => {
+export const useAssets = ({ skipWhen, query = {} }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
   const dataRequestURL = getRequestUrl('files');
+  const { folder, ...paramsExceptFolder } = query;
+  const params = {
+    ...paramsExceptFolder,
+    filters: {
+      folder: {
+        id: query?.folder ?? {
+          $null: true,
+        },
+      },
+    },
+  };
 
   const getAssets = async () => {
     try {
-      const { folder, ...paramsExceptFolder } = query;
-      const params = {
-        ...paramsExceptFolder,
-        filters: {
-          folder: {
-            id: query?.folder ?? {
-              $null: true,
-            },
-          },
-        },
-      };
       const { data } = await axiosInstance.get(`${dataRequestURL}?${stringify(params)}`);
 
       notifyStatus(
@@ -46,7 +46,7 @@ export const useAssets = ({ skipWhen, query, rawQuery }) => {
     }
   };
 
-  const { data, error, isLoading } = useQuery([pluginId, 'assets', rawQuery], getAssets, {
+  const { data, error, isLoading } = useQuery([pluginId, 'assets', stringify(params)], getAssets, {
     enabled: !skipWhen,
     staleTime: 0,
     cacheTime: 0,

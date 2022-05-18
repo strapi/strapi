@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { stringify } from 'qs';
-import { useHistory, useLocation } from 'react-router-dom';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Flex } from '@strapi/design-system/Flex';
@@ -10,7 +8,6 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { useQueryParams } from '@strapi/helper-plugin';
 import Pencil from '@strapi/icons/Pencil';
 
 import { FolderCard, FolderCardBody, FolderCardCheckbox, FolderCardLink } from '../FolderCard';
@@ -31,12 +28,9 @@ export const FolderList = ({
   size,
   onSelectFolder,
   onEditFolder,
+  onClickFolder,
   selectedFolders,
 }) => {
-  const history = useHistory();
-  const { pathname } = useLocation();
-  const [{ query }] = useQueryParams();
-
   return (
     <KeyboardNavigable tagName="article">
       {title && (
@@ -52,35 +46,46 @@ export const FolderList = ({
           const isSelected = !!selectedFolders.find(
             currentFolder => currentFolder.id === folder.id
           );
-          const url = `${pathname}?${stringify(
-            { ...query, folder: folder.id },
-            { encode: false }
-          )}`;
 
           return (
             <GridItem col={3} key={`folder-${folder.uid}`}>
               <FolderCard
                 ariaLabel={folder.name}
                 id={`folder-${folder.uid}`}
-                onDoubleClick={() => history.push(url)}
+                onDoubleClick={event => {
+                  event.preventDefault();
+                  onClickFolder(folder);
+                }}
                 startAction={
-                  <FolderCardCheckbox
-                    value={isSelected}
-                    onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
-                  />
+                  onSelectFolder && (
+                    <FolderCardCheckbox
+                      value={isSelected}
+                      onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
+                    />
+                  )
                 }
-                cardActions={<IconButton icon={<Pencil />} onClick={() => onEditFolder(folder)} />}
+                cardActions={
+                  onEditFolder && (
+                    <IconButton icon={<Pencil />} onClick={() => onEditFolder(folder)} />
+                  )
+                }
                 size={size}
               >
                 <FolderCardBody>
-                  <FolderCardLink to={url}>
+                  <FolderCardLink
+                    to="/"
+                    onClick={event => {
+                      event.preventDefault();
+                      onClickFolder(folder);
+                    }}
+                  >
                     <Flex as="h2" direction="column" alignItems="start">
                       <CardTitle>
                         {folder.name}
                         <VisuallyHidden>:</VisuallyHidden>
                       </CardTitle>
 
-                      <Typography as="span" textColor="neutral600" variant="pi">
+                      <Typography as="span" textColor="neutral600" variant="pi" ellipsis>
                         {folder.children.count} folder, {folder.files.count} assets
                       </Typography>
                     </Flex>
@@ -96,6 +101,8 @@ export const FolderList = ({
 };
 
 FolderList.defaultProps = {
+  onEditFolder: null,
+  onSelectFolder: null,
   size: 'M',
   selectedFolders: [],
   title: null,
@@ -105,7 +112,8 @@ FolderList.propTypes = {
   folders: PropTypes.arrayOf(FolderDefinition).isRequired,
   size: PropTypes.oneOf(['S', 'M']),
   selectedFolders: PropTypes.array,
-  onEditFolder: PropTypes.func.isRequired,
-  onSelectFolder: PropTypes.func.isRequired,
+  onClickFolder: PropTypes.func.isRequired,
+  onEditFolder: PropTypes.func,
+  onSelectFolder: PropTypes.func,
   title: PropTypes.string,
 };

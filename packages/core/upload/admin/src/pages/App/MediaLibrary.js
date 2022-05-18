@@ -56,10 +56,12 @@ export const MediaLibrary = () => {
 
   const { data: assetsData, isLoading: assetsLoading, errors: assetsError } = useAssets({
     skipWhen: !canRead,
+    query,
   });
 
   const { data: foldersData, isLoading: foldersLoading, errors: foldersError } = useFolders({
     enabled: assetsData?.pagination?.page === 1 && !isFiltering,
+    query,
   });
 
   const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure();
@@ -96,6 +98,13 @@ export const MediaLibrary = () => {
   const handleEditFolderClose = payload => {
     setFolderToEdit(null);
     toggleEditFolderDialog(payload);
+  };
+
+  const handleClickFolder = folder => {
+    setQuery({
+      ...query,
+      folder: folder.id,
+    });
   };
 
   useFocusWhenNavigate();
@@ -213,6 +222,7 @@ export const MediaLibrary = () => {
               {folders?.length > 0 && !isFiltering && (
                 <FolderList
                   folders={folders}
+                  onClickFolder={handleClickFolder}
                   onEditFolder={handleEditFolder}
                   onSelectFolder={selectOne}
                   selectedFolders={selected.filter(({ type }) => type === 'folder')}

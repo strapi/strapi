@@ -12,6 +12,7 @@ import { Badge } from '@strapi/design-system/Badge';
 import { Loader } from '@strapi/design-system/Loader';
 import { Stack } from '@strapi/design-system/Stack';
 import { NoPermissions, AnErrorOccurred, useSelectionState } from '@strapi/helper-plugin';
+
 import getTrad from '../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
 import { BrowseStep } from './BrowseStep';
@@ -48,7 +49,7 @@ export const AssetDialog = ({
     canDownload,
   } = useMediaLibraryPermissions();
   const [
-    { rawQuery, queryObject },
+    { queryObject },
     {
       onChangeFilters,
       onChangePage,
@@ -62,12 +63,12 @@ export const AssetDialog = ({
     data: { pagination, results: assets } = {},
     isLoading: isLoadingAssets,
     error: errorAssets,
-  } = useAssets({ skipWhen: !canRead, rawQuery });
+  } = useAssets({ skipWhen: !canRead, query: queryObject });
   const {
     data: { results: folders } = {},
     isLoading: isLoadingFolders,
     error: errorFolders,
-  } = useFolders();
+  } = useFolders({ query: queryObject });
 
   const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
     ['id'],
@@ -246,7 +247,7 @@ export const AssetDialog = ({
               <BrowseStep
                 allowedTypes={allowedTypes}
                 assets={assets}
-                folder={folders}
+                folders={folders}
                 onSelectAsset={handleSelectAsset}
                 selectedAssets={selectedAssets}
                 multiple={multiple}

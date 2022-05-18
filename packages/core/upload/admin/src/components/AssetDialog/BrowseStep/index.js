@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import getTrad from '../../../utils/getTrad';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
 import { AssetList } from '../../AssetList';
+import { FolderList } from '../../FolderList';
 import { EmptyAssets } from '../../EmptyAssets';
 import { Filters } from './Filters';
 import PaginationFooter from './PaginationFooter';
@@ -39,6 +40,7 @@ export const BrowseStep = ({
   onChangePageSize,
   onChangeSearch,
   onChangeSort,
+  onChangeFolder,
   onEditAsset,
   onSelectAllAsset,
   onSelectAsset,
@@ -98,7 +100,19 @@ export const BrowseStep = ({
           </Box>
         )}
 
-        {folders.length > 0 && <></>}
+        {folders.length > 0 && (
+          <FolderList
+            folders={folders}
+            size="S"
+            onClickFolder={onChangeFolder}
+            onEditFolder={null}
+            onSelectFolder={null}
+            title={formatMessage({
+              id: getTrad('list.folders.title'),
+              defaultMessage: 'Folders',
+            })}
+          />
+        )}
 
         {assets.length > 0 ? (
           <AssetList
@@ -108,6 +122,10 @@ export const BrowseStep = ({
             onSelectAsset={onSelectAsset}
             selectedAssets={selectedAssets}
             onEditAsset={onEditAsset}
+            title={formatMessage({
+              id: getTrad('list.assets.title'),
+              defaultMessage: 'Assets',
+            })}
           />
         ) : (
           <Box paddingBottom={6}>
@@ -154,6 +172,7 @@ BrowseStep.propTypes = {
 
   multiple: PropTypes.bool,
   onChangeFilters: PropTypes.func.isRequired,
+  onChangeFolder: PropTypes.func.isRequired,
   onChangePage: PropTypes.func.isRequired,
   onChangePageSize: PropTypes.func.isRequired,
   onChangeSort: PropTypes.func.isRequired,
