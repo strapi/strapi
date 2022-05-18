@@ -56,7 +56,6 @@ const getSelectStyles = theme => {
         border: `1px solid ${theme.colors.neutral200} !important`,
         boxShadow: 0,
         fontSize: '14px',
-        fontFamily: 'Arial',
         zIndex: 2,
       };
     },

@@ -1,3 +1,4 @@
+import { stringify } from 'qs';
 import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { useNotification, useQueryParams } from '@strapi/helper-plugin';
@@ -10,12 +11,23 @@ export const useAssets = ({ skipWhen }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
-  const [{ rawQuery }] = useQueryParams();
+  const [{ query, rawQuery }] = useQueryParams();
   const dataRequestURL = getRequestUrl('files');
 
   const getAssets = async () => {
     try {
-      const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery}`);
+      const { folder, ...paramsExceptFolder } = query;
+      const params = {
+        ...paramsExceptFolder,
+        filters: {
+          folder: {
+            id: query?.folder ?? {
+              $null: true,
+            },
+          },
+        },
+      };
+      const { data } = await axiosInstance.get(`${dataRequestURL}?${stringify(params)}`);
 
       notifyStatus(
         formatMessage({

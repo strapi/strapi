@@ -4,7 +4,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
+import { NotificationsProvider, useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 
 import { axiosInstance } from '../../utils';
@@ -35,6 +35,7 @@ const notificationStatusMock = jest.fn();
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: () => notificationStatusMock,
+  useQueryParams: jest.fn().mockReturnValue([{ rawQuery: '', query: '' }]),
 }));
 
 const client = new QueryClient({
@@ -75,12 +76,26 @@ describe('useAssets', () => {
     jest.clearAllMocks();
   });
 
-  test('fetches data from the right URL', async () => {
+  test('fetches data from the right URL if not query was set', async () => {
     const { result, waitFor } = await setup({});
 
     await waitFor(() => result.current.isSuccess);
 
-    expect(axiosInstance.get).toBeCalledWith('/upload/files');
+    expect(axiosInstance.get).toBeCalledWith(
+      `/upload/files?filters${encodeURIComponent('[folder][id][$null]')}=true`
+    );
+  });
+
+  test('fetches data from the right URL if a query was set', async () => {
+    useQueryParams.mockReturnValue([{ rawQuery: '', query: { folder: 1 } }]);
+
+    const { result, waitFor } = await setup({});
+
+    await waitFor(() => result.current.isSuccess);
+
+    expect(axiosInstance.get).toBeCalledWith(
+      `/upload/files?filters${encodeURIComponent('[folder][id]')}=1`
+    );
   });
 
   test('it does not fetch, if skipWhen is set', async () => {

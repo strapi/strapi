@@ -94,7 +94,7 @@ describe('useEditFolder', () => {
       await editFolder(FOLDER_CREATE_FIXTURE);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
+    expect(axiosInstance.post).toHaveBeenCalledWith('/upload/folders/', expect.any(Object));
   });
 
   test('calls the proper endpoint when creating a folder (put)', async () => {
@@ -104,10 +104,16 @@ describe('useEditFolder', () => {
     const { editFolder } = current;
 
     await act(async () => {
-      await editFolder(FOLDER_EDIT_FIXTURE);
+      await editFolder(
+        {
+          name: FOLDER_EDIT_FIXTURE.name,
+          parent: FOLDER_EDIT_FIXTURE.parent,
+        },
+        FOLDER_EDIT_FIXTURE.id
+      );
     });
 
-    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
+    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders/2', expect.any(Object));
   });
 
   test('calls the proper endpoint when editing a folder', async () => {
@@ -117,10 +123,16 @@ describe('useEditFolder', () => {
     const { editFolder } = current;
 
     await act(async () => {
-      await editFolder(FOLDER_EDIT_FIXTURE);
+      await editFolder(
+        {
+          name: FOLDER_EDIT_FIXTURE.name,
+          parent: FOLDER_EDIT_FIXTURE.parent,
+        },
+        FOLDER_EDIT_FIXTURE.id
+      );
     });
 
-    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
+    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders/2', expect.any(Object));
   });
 
   test('does not call toggleNotification in case of success', async () => {
@@ -131,7 +143,13 @@ describe('useEditFolder', () => {
     const { editFolder } = current;
 
     await act(async () => {
-      await editFolder(FOLDER_EDIT_FIXTURE);
+      await editFolder(
+        {
+          name: FOLDER_EDIT_FIXTURE.name,
+          parent: FOLDER_EDIT_FIXTURE.parent,
+        },
+        FOLDER_EDIT_FIXTURE.id
+      );
     });
 
     expect(toggleNotification).not.toHaveBeenCalled();
@@ -146,11 +164,17 @@ describe('useEditFolder', () => {
     const { editFolder } = current;
 
     await act(async () => {
-      await editFolder(FOLDER_EDIT_FIXTURE);
+      await editFolder(
+        {
+          name: FOLDER_EDIT_FIXTURE.name,
+          parent: FOLDER_EDIT_FIXTURE.parent,
+        },
+        FOLDER_EDIT_FIXTURE.id
+      );
     });
 
     await waitFor(() =>
-      expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'folder'], {
+      expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'folders'], {
         active: true,
       })
     );
@@ -168,7 +192,13 @@ describe('useEditFolder', () => {
 
     try {
       await act(async () => {
-        await editFolder(FOLDER_EDIT_FIXTURE);
+        await editFolder(
+          {
+            name: FOLDER_EDIT_FIXTURE.name,
+            parent: FOLDER_EDIT_FIXTURE.parent,
+          },
+          FOLDER_EDIT_FIXTURE.id
+        );
       });
     } catch (err) {
       // ...

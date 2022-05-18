@@ -18,18 +18,21 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Button } from '@strapi/design-system/Button';
+import { FieldLabel } from '@strapi/design-system/Field';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { getFileExtension, Form } from '@strapi/helper-plugin';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Formik } from 'formik';
 import * as yup from 'yup';
+
 import { PreviewBox } from './PreviewBox';
 import { ContextInfo } from '../ContextInfo';
-import { getTrad } from '../../utils';
+import { FolderStructureDefinition, AssetDefinition } from '../../constants';
+import { getTrad, findRecursiveFolderByValue } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { ReplaceMediaButton } from './ReplaceMediaButton';
-import { AssetDefinition } from '../../constants';
+import SelectTree from '../SelectTree';
 
 const fileInfoSchema = yup.object({
   name: yup.string().required(),
@@ -44,6 +47,7 @@ export const EditAssetDialog = ({
   canCopyLink,
   canDownload,
   trackedLocation,
+  folderStructure,
 }) => {
   const { formatMessage, formatDate } = useIntl();
   const submitButtonRef = useRef(null);
@@ -91,10 +95,17 @@ export const EditAssetDialog = ({
     }
   };
 
+  const activeFolderId = asset?.folder?.id;
   const initialFormData = {
     name: asset.name,
-    alternativeText: asset.alternativeText || '',
-    caption: asset.caption || '',
+    alternativeText: asset.alternativeText ?? undefined,
+    caption: asset.caption ?? undefined,
+    parent: {
+      value: activeFolderId ?? null,
+      label:
+        findRecursiveFolderByValue(folderStructure, activeFolderId)?.label ??
+        folderStructure[0].label,
+    },
   };
 
   const handleClose = values => {
@@ -112,7 +123,7 @@ export const EditAssetDialog = ({
       onSubmit={handleSubmit}
       initialValues={initialFormData}
     >
-      {({ values, errors, handleChange }) => (
+      {({ values, errors, handleChange, setFieldValue }) => (
         <ModalLayout onClose={() => handleClose(values)} labelledBy="title">
           <ModalHeader>
             <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
@@ -176,7 +187,6 @@ export const EditAssetDialog = ({
                     />
 
                     <TextInput
-                      size="S"
                       label={formatMessage({
                         id: getTrad('form.input.label.file-name'),
                         defaultMessage: 'File name',
@@ -189,7 +199,6 @@ export const EditAssetDialog = ({
                     />
 
                     <TextInput
-                      size="S"
                       label={formatMessage({
                         id: getTrad('form.input.label.file-alt'),
                         defaultMessage: 'Alternative text',
@@ -206,7 +215,6 @@ export const EditAssetDialog = ({
                     />
 
                     <TextInput
-                      size="S"
                       label={formatMessage({
                         id: getTrad('form.input.label.file-caption'),
                         defaultMessage: 'Caption',
@@ -217,6 +225,32 @@ export const EditAssetDialog = ({
                       onChange={handleChange}
                       disabled={formDisabled}
                     />
+
+                    <Stack spacing={1}>
+                      <FieldLabel htmlFor="asset-folder">
+                        {formatMessage({
+                          id: getTrad('form.input.label.file-location'),
+                          defaultMessage: 'Location',
+                        })}
+                      </FieldLabel>
+
+                      <SelectTree
+                        name="parent"
+                        defaultValue={values.parent}
+                        options={folderStructure}
+                        onChange={value => {
+                          setFieldValue('parent', value);
+                        }}
+                        menuPortalTarget={document.querySelector('body')}
+                        inputId="asset-folder"
+                        {...(errors.parent
+                          ? {
+                              'aria-errormessage': 'folder-parent-error',
+                              'aria-invalid': true,
+                            }
+                          : {})}
+                      />
+                    </Stack>
                   </Stack>
 
                   <VisuallyHidden>
@@ -274,5 +308,6 @@ EditAssetDialog.propTypes = {
   canCopyLink: PropTypes.bool.isRequired,
   canDownload: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  folderStructure: FolderStructureDefinition.isRequired,
   trackedLocation: PropTypes.string,
 };

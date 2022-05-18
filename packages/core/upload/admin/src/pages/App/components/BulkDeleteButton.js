@@ -6,17 +6,17 @@ import { Button } from '@strapi/design-system/Button';
 import { Stack } from '@strapi/design-system/Stack';
 import Trash from '@strapi/icons/Trash';
 import { ConfirmDialog } from '@strapi/helper-plugin';
-import { useBulkRemoveAsset } from '../../../hooks/useBulkRemoveAsset';
+
+import { useBulkRemove } from '../../../hooks/useBulkRemove';
 import getTrad from '../../../utils/getTrad';
 
-export const BulkDeleteButton = ({ selectedAssets, onSuccess }) => {
+export const BulkDeleteButton = ({ selected, onSuccess }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-
-  const { isLoading, removeAssets } = useBulkRemoveAsset();
+  const { isLoading, remove } = useBulkRemove();
 
   const handleConfirmRemove = async () => {
-    await removeAssets(selectedAssets.map(({ id }) => id));
+    await remove(selected);
     onSuccess();
   };
 
@@ -28,10 +28,11 @@ export const BulkDeleteButton = ({ selectedAssets, onSuccess }) => {
             {
               id: getTrad('list.assets.selected'),
               defaultMessage:
-                '{number, plural, =0 {No asset} one {1 asset} other {# assets}} selected',
+                '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}} selected',
             },
             {
-              number: selectedAssets.length,
+              numberFolders: selected.filter(({ type }) => type === 'folder').length,
+              numberAssets: selected.filter(({ type }) => type === 'asset').length,
             }
           )}
         </Typography>
@@ -56,6 +57,6 @@ export const BulkDeleteButton = ({ selectedAssets, onSuccess }) => {
 };
 
 BulkDeleteButton.propTypes = {
-  selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  selected: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onSuccess: PropTypes.func.isRequired,
 };

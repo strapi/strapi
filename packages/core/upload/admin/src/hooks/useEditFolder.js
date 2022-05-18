@@ -4,28 +4,29 @@ import { useNotification } from '@strapi/helper-plugin';
 import pluginId from '../pluginId';
 import { axiosInstance, getRequestUrl } from '../utils';
 
-const editFolderRequest = folder => {
-  const method = folder?.id ? 'put' : 'post';
-  const url = getRequestUrl('folders');
+const editFolderRequest = ({ attrs, id }) => {
+  const isEditing = !!id;
+  const method = isEditing ? 'put' : 'post';
+  const url = getRequestUrl(`folders/${id ?? ''}`);
 
-  return axiosInstance[method](url, folder).then(res => res.data);
+  return axiosInstance[method](url, attrs).then(res => res.data);
 };
 
 export const useEditFolder = () => {
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(({ folder }) => editFolderRequest(folder), {
+  const mutation = useMutation((...args) => editFolderRequest(...args), {
     onSuccess: () => {
-      queryClient.refetchQueries([pluginId, 'folder'], { active: true });
-      queryClient.refetchQueries([pluginId, 'folders', 'structure'], { active: true });
+      queryClient.refetchQueries([pluginId, 'folders'], { active: true });
+      queryClient.refetchQueries([pluginId, 'folder', 'structure'], { active: true });
     },
     onError: reason => {
       toggleNotification({ type: 'warning', message: reason.message });
     },
   });
 
-  const editFolder = folder => mutation.mutateAsync({ folder });
+  const editFolder = (attrs, id) => mutation.mutateAsync({ attrs, id });
 
   return { ...mutation, editFolder, status: mutation.status };
 };

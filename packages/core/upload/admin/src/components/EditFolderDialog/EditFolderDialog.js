@@ -17,10 +17,12 @@ import { Stack } from '@strapi/design-system/Stack';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Form, useNotification, getAPIInnerErrors } from '@strapi/helper-plugin';
+import { Form, useNotification, getAPIInnerErrors, useQueryParams } from '@strapi/helper-plugin';
 
-import { getTrad } from '../../utils';
+import { getTrad, findRecursiveFolderByValue } from '../../utils';
+import { FolderDefinition, FolderStructureDefinition } from '../../constants';
 import { useEditFolder } from '../../hooks/useEditFolder';
+import { useBulkRemove } from '../../hooks/useBulkRemove';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
 
@@ -34,43 +36,47 @@ const folderSchema = yup.object({
     .nullable(true),
 });
 
-export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolderStructure }) => {
+export const EditFolderDialog = ({ onClose, folder, folderStructure, canUpdate }) => {
   const submitButtonRef = useRef(null);
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatDate } = useIntl();
   const { editFolder, isLoading } = useEditFolder();
+  const { remove } = useBulkRemove();
   const toggleNotification = useNotification();
-  const rootFolder = {
-    value: null,
-    label: formatMessage({
-      id: getTrad('form.input.label.folder-location-default-label'),
-      defaultMessage: 'Media Library',
-    }),
-    children: [],
-  };
-
-  const folderStructure = [
-    {
-      ...rootFolder,
-      children: remoteFolderStructure,
+  const [{ query }] = useQueryParams();
+  const isEditing = !!folder;
+  const activeFolderId = folder?.parent?.id ?? query?.folder;
+  const formDisabled = !canUpdate;
+  const initialFormData = {
+    name: folder?.name ?? undefined,
+    parent: {
+      value: activeFolderId ? parseInt(activeFolderId, 10) : folderStructure[0].value,
+      label: activeFolderId
+        ? findRecursiveFolderByValue(folderStructure, parseInt(activeFolderId, 10))?.label
+        : folderStructure[0].label,
     },
-  ];
-
-  const initialFormData = Object.assign({}, folder, { parent: folder?.parent ?? rootFolder });
+  };
 
   const handleSubmit = async (values, { setErrors }) => {
     try {
-      await editFolder({
-        ...folder,
-        ...values,
-        parent: values.parent.value ?? null,
-      });
+      await editFolder(
+        {
+          ...values,
+          parent: values.parent.value ?? null,
+        },
+        folder?.id
+      );
 
       toggleNotification({
         type: 'success',
-        message: formatMessage({
-          id: getTrad('modal.folder-notification-success'),
-          defaultMessage: 'Folder successfully created',
-        }),
+        message: isEditing
+          ? formatMessage({
+              id: getTrad('modal.folder-notification-edited-success'),
+              defaultMessage: 'Folder successfully edited',
+            })
+          : formatMessage({
+              id: getTrad('modal.folder-notification-created-success'),
+              defaultMessage: 'Folder successfully created',
+            }),
       });
 
       onClose({ created: true });
@@ -92,14 +98,29 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
     onClose();
   };
 
+  const handleDelete = async event => {
+    event.preventDefault();
+
+    await remove([folder]);
+
+    onClose();
+  };
+
   return (
     <ModalLayout onClose={handleClose} labelledBy="title">
       <ModalHeader>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-          {formatMessage({
-            id: getTrad('modal.folder.create.title'),
-            defaultMessage: 'Add new folder',
-          })}
+          {formatMessage(
+            isEditing
+              ? {
+                  id: getTrad('modal.folder.edit.title'),
+                  defaultMessage: 'Edit folder',
+                }
+              : {
+                  id: getTrad('modal.folder.create.title'),
+                  defaultMessage: 'Add new folder',
+                }
+          )}
         </Typography>
       </ModalHeader>
 
@@ -113,7 +134,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
           {({ values, errors, handleChange, setFieldValue }) => (
             <Form noValidate>
               <Grid gap={4}>
-                {folder && (
+                {isEditing && (
                   <GridItem xs={12} col={12}>
                     <ContextInfo
                       blocks={[
@@ -122,7 +143,16 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
                             id: getTrad('modal.folder.create.elements'),
                             defaultMessage: 'Elements',
                           }),
-                          value: folder.children.length,
+                          value: formatMessage(
+                            {
+                              id: getTrad('modal.folder.elements.count'),
+                              defaultMessage: '{assetCount} assets, {folderCount} folders',
+                            },
+                            {
+                              assetCount: folder?.files?.count ?? 0,
+                              folderCount: folder?.children?.length ?? 0,
+                            }
+                          ),
                         },
 
                         {
@@ -130,7 +160,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
                             id: getTrad('modal.folder.create.creation-date'),
                             defaultMessage: 'Creation Date',
                           }),
-                          value: folder.createdAt,
+                          value: formatDate(new Date(folder.createdAt)),
                         },
                       ]}
                     />
@@ -147,12 +177,13 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
                     value={values.name}
                     error={errors.name}
                     onChange={handleChange}
+                    disabled={formDisabled}
                   />
                 </GridItem>
 
                 <GridItem xs={12} col={6}>
                   <Stack spacing={1}>
-                    <FieldLabel for="folder-parent">
+                    <FieldLabel htmlFor="folder-parent">
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
                         defaultMessage: 'Location',
@@ -168,6 +199,7 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
                       name="parent"
                       menuPortalTarget={document.querySelector('body')}
                       inputId="folder-parent"
+                      disabled={formDisabled}
                       {...(errors.parent
                         ? {
                             'aria-errormessage': 'folder-parent-error',
@@ -207,9 +239,29 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
           </Button>
         }
         endActions={
-          <Button onClick={() => submitButtonRef.current.click()} name="submit" loading={isLoading}>
-            {formatMessage({ id: 'modal.folder.create.submit', defaultMessage: 'Create' })}
-          </Button>
+          <Stack horizontal spacing={2}>
+            {isEditing && canUpdate && (
+              <Button type="button" variant="danger-light" onClick={handleDelete} name="delete">
+                {formatMessage({
+                  id: 'modal.folder.create.delete',
+                  defaultMessage: 'Delete folder',
+                })}
+              </Button>
+            )}
+
+            <Button
+              onClick={() => submitButtonRef.current.click()}
+              name="submit"
+              loading={isLoading}
+              disabled={formDisabled}
+            >
+              {formatMessage(
+                isEditing
+                  ? { id: 'modal.folder.edit.submit', defaultMessage: 'Save' }
+                  : { id: 'modal.folder.create.submit', defaultMessage: 'Create' }
+              )}
+            </Button>
+          </Stack>
         }
       />
     </ModalLayout>
@@ -218,16 +270,12 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure: remoteFolde
 
 EditFolderDialog.defaultProps = {
   folder: undefined,
+  canUpdate: false,
 };
 
 EditFolderDialog.propTypes = {
-  folder: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    children: PropTypes.array.isRequired,
-    createdAt: PropTypes.string.isRequired,
-    parent: PropTypes.number,
-  }),
-  // TODO: describe shape
-  folderStructure: PropTypes.array.isRequired,
+  folder: FolderDefinition,
+  folderStructure: FolderStructureDefinition.isRequired,
   onClose: PropTypes.func.isRequired,
+  canUpdate: PropTypes.bool,
 };

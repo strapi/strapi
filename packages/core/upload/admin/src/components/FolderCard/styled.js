@@ -1,7 +1,7 @@
+import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { BaseLink } from '@strapi/design-system/BaseLink';
-
-export const FolderCardLink = styled(BaseLink)`
+export const FolderCardLink = styled(NavLink)`
+  max-width: 100%;
   text-decoration: none;
 `;

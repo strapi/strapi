@@ -18,6 +18,8 @@ export const FolderCardBody = props => {
       id={`${id}-title`}
       alignItems="flex-start"
       direction="column"
+      maxWidth="100%"
+      overflow="hidden"
       position="relative"
       zIndex={3}
     />
