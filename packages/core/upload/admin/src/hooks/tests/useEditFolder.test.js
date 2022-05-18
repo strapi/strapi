@@ -94,7 +94,7 @@ describe('useEditFolder', () => {
       await editFolder(FOLDER_CREATE_FIXTURE);
     });
 
-    expect(axiosInstance.post).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
+    expect(axiosInstance.post).toHaveBeenCalledWith('/upload/folders/', expect.any(Object));
   });
 
   test('calls the proper endpoint when creating a folder (put)', async () => {
@@ -132,7 +132,7 @@ describe('useEditFolder', () => {
       );
     });
 
-    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
+    expect(axiosInstance.put).toHaveBeenCalledWith('/upload/folders/2', expect.any(Object));
   });
 
   test('does not call toggleNotification in case of success', async () => {
