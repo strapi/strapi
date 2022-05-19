@@ -101,6 +101,8 @@ node_modules
 
 testApp
 coverage
+!src/api/coverage
+!src/api/content-types/coverage
 
 ############################
 # Strapi
