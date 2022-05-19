@@ -1,7 +1,7 @@
-import findRecursiveParentFolderId from '../findRecursiveParentFolderId';
+import findRecursiveFolderMetadatas from '../findRecursiveFolderMetadatas';
 
-describe('ML || utils || findRecursiveParentFolderId', () => {
-  test('should return parent folder id', () => {
+describe('ML || utils || findRecursiveFolderMetadatas', () => {
+  test('should return parent folder id and label', () => {
     const folderStructure = {
       value: null,
       label: 'Media Library',
@@ -20,13 +20,16 @@ describe('ML || utils || findRecursiveParentFolderId', () => {
       ],
     };
 
-    const result = findRecursiveParentFolderId(folderStructure, 2);
-    const expected = 1;
+    const result = findRecursiveFolderMetadatas(folderStructure, 2);
+    const expected = {
+      parentId: 1,
+      currentFolderLabel: 'Michka',
+    };
 
     expect(result).toEqual(expected);
   });
 
-  test('should return null if parent is root ML', () => {
+  test('should return parent id null if parent is root ML', () => {
     const folderStructure = {
       value: null,
       label: 'Media Library',
@@ -45,8 +48,11 @@ describe('ML || utils || findRecursiveParentFolderId', () => {
       ],
     };
 
-    const result = findRecursiveParentFolderId(folderStructure, 1);
-    const expected = null;
+    const result = findRecursiveFolderMetadatas(folderStructure, 1);
+    const expected = {
+      currentFolderLabel: 'Cats',
+      parentId: null,
+    };
 
     expect(result).toEqual(expected);
   });
@@ -70,7 +76,7 @@ describe('ML || utils || findRecursiveParentFolderId', () => {
       ],
     };
 
-    const result = findRecursiveParentFolderId(folderStructure, 10);
+    const result = findRecursiveFolderMetadatas(folderStructure, 10);
     const expected = null;
 
     expect(result).toEqual(expected);
