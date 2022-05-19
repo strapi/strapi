@@ -93,6 +93,22 @@ module.exports = {
     },
     {
       method: 'GET',
+      path: '/folders/:id',
+      handler: 'admin-folder.findOne',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.read'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
       path: '/folders',
       handler: 'admin-folder.find',
       config: {
