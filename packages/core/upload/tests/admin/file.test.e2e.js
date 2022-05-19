@@ -54,10 +54,10 @@ describe('Upload', () => {
 
   describe('Read', () => {
     test('GET /upload/files => Find files', async () => {
-      const getRes = await rq({ method: 'GET', url: '/upload/files' });
+      const res = await rq({ method: 'GET', url: '/upload/files' });
 
-      expect(getRes.statusCode).toBe(200);
-      expect(getRes.body).toEqual({
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
         results: expect.arrayContaining([
           expect.objectContaining({
             id: expect.anything(),
@@ -71,6 +71,7 @@ describe('Upload', () => {
           total: expect.any(Number),
         },
       });
+      res.body.results.forEach(file => expect(file.folder).toBeDefined());
     });
   });
 });
