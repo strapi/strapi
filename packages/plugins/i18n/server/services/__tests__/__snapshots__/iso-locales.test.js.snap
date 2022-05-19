@@ -1099,6 +1099,10 @@ Array [
     "name": "Kwasio (Cameroon) (nmg-CM)",
   },
   Object {
+    "code": "ky",
+    "name": "Kyrgyz (ky)",
+  },
+  Object {
     "code": "lag",
     "name": "Langi (lag)",
   },
@@ -1261,6 +1265,10 @@ Array [
   Object {
     "code": "mer-KE",
     "name": "Meru (Kenya) (mer-KE)",
+  },
+  Object {
+    "code": "mn",
+    "name": "Mongolian (mn)",
   },
   Object {
     "code": "mfe",
@@ -1517,6 +1525,10 @@ Array [
   Object {
     "code": "sbp-TZ",
     "name": "Sangu (Tanzania) (sbp-TZ)",
+  },
+  Object {
+    "code": "sa",
+    "name": "Sanskrit (sa)",
   },
   Object {
     "code": "seh",
@@ -1791,6 +1803,10 @@ Array [
     "name": "Taita (Kenya) (dav-KE)",
   },
   Object {
+    "code": "tg",
+    "name": "Tajik (tg)",
+  },
+  Object {
     "code": "ta",
     "name": "Tamil (ta)",
   },
@@ -1873,6 +1889,10 @@ Array [
   Object {
     "code": "tr",
     "name": "Turkish (tr)",
+  },
+  Object {
+    "code": "tk",
+    "name": "Turkmen (tk)",
   },
   Object {
     "code": "tr-TR",

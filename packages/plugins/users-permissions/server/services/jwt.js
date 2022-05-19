@@ -21,8 +21,6 @@ module.exports = ({ strapi }) => ({
       }
 
       token = parts[1];
-    } else if (ctx.query.access_token) {
-      token = ctx.query.access_token;
     } else {
       return null;
     }

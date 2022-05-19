@@ -12,12 +12,27 @@ const defaultAdminAuthSettings = {
   },
 };
 
-const registerPermissionActions = () => {
-  getService('permission').actionProvider.registerMany(adminActions.actions);
+const registerPermissionActions = async () => {
+  await getService('permission').actionProvider.registerMany(adminActions.actions);
 };
 
-const registerAdminConditions = () => {
-  getService('permission').conditionProvider.registerMany(adminConditions.conditions);
+const registerAdminConditions = async () => {
+  await getService('permission').conditionProvider.registerMany(adminConditions.conditions);
+};
+
+const registerModelHooks = () => {
+  const { sendDidChangeInterfaceLanguage } = getService('metrics');
+
+  strapi.db.lifecycles.subscribe({
+    models: ['admin::user'],
+    afterCreate: sendDidChangeInterfaceLanguage,
+    afterDelete: sendDidChangeInterfaceLanguage,
+    afterUpdate({ params }) {
+      if (params.data.preferedLanguage) {
+        sendDidChangeInterfaceLanguage();
+      }
+    },
+  });
 };
 
 const syncAuthSettings = async () => {
@@ -38,13 +53,15 @@ const syncAuthSettings = async () => {
 };
 
 module.exports = async () => {
-  registerAdminConditions();
-  registerPermissionActions();
+  await registerAdminConditions();
+  await registerPermissionActions();
+  registerModelHooks();
 
   const permissionService = getService('permission');
   const userService = getService('user');
   const roleService = getService('role');
   const apiTokenService = getService('api-token');
+  const tokenService = getService('token');
 
   await roleService.createRolesIfNoneExist();
   await roleService.resetSuperAdminPermissions();
@@ -57,5 +74,6 @@ module.exports = async () => {
 
   await syncAuthSettings();
 
-  apiTokenService.createSaltIfNotDefined();
+  apiTokenService.checkSaltIsDefined();
+  tokenService.checkSecretIsDefined();
 };

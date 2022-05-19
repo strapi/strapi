@@ -7,8 +7,10 @@ const ctService = require('../../services/content-types')();
 describe('i18n - Controller - content-types', () => {
   describe('getNonLocalizedAttributes', () => {
     beforeEach(() => {
-      const getModel = () => {};
+      const contentType = () => ({});
+      const getModel = () => ({});
       global.strapi = {
+        contentType,
         getModel,
         plugins: { i18n: { services: { 'content-types': ctService } } },
         admin: { services: { constants: { READ_ACTION: 'read', CREATE_ACTION: 'create' } } },
@@ -42,10 +44,10 @@ describe('i18n - Controller - content-types', () => {
     test('entity not found', async () => {
       const notFound = jest.fn();
       const findOne = jest.fn(() => Promise.resolve(undefined));
-      const getModel = jest.fn(() => ({ pluginOptions: { i18n: { localized: true } } }));
+      const contentType = jest.fn(() => ({ pluginOptions: { i18n: { localized: true } } }));
 
       global.strapi.query = () => ({ findOne });
-      global.strapi.getModel = getModel;
+      global.strapi.contentType = contentType;
       const ctx = {
         state: { user: {} },
         request: {
@@ -87,10 +89,10 @@ describe('i18n - Controller - content-types', () => {
 
       const findOne = jest.fn(() => Promise.resolve(entity));
       const findMany = jest.fn(() => Promise.resolve(permissions));
-      const getModel = jest.fn(() => model);
+      const contentType = jest.fn(() => model);
 
       global.strapi.query = () => ({ findOne });
-      global.strapi.getModel = getModel;
+      global.strapi.contentType = contentType;
       global.strapi.admin.services.permission = { findMany };
       const ctx = {
         state: { user: { roles: [{ id: 1 }, { id: 2 }] } },

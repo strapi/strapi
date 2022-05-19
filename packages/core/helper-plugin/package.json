@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.0.4",
+  "version": "4.1.11",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -44,7 +44,7 @@
     "@fortawesome/free-brands-svg-icons": "^5.15.2",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
-    "axios": "0.24.0",
+    "axios": "0.25.0",
     "babel-plugin-styled-components": "2.0.2",
     "formik": "2.2.9",
     "invariant": "^2.2.1",
@@ -58,7 +58,7 @@
     "react-intl": "5.20.2",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "styled-components": "^5.2.3",
+    "styled-components": "5.3.3",
     "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {
@@ -76,13 +76,11 @@
     "@storybook/builder-webpack5": "6.4.10",
     "@storybook/manager-webpack5": "6.4.10",
     "@storybook/react": "^6.3.7",
-    "@strapi/design-system": "0.0.1-alpha.71",
-    "@strapi/icons": "0.0.1-alpha.71",
+    "@strapi/design-system": "1.1.0",
+    "@strapi/icons": "1.1.0",
     "babel-loader": "^8.2.2",
     "cross-env": "^7.0.3",
     "date-fns": "2.22.1",
-    "enzyme": "3.9.0",
-    "enzyme-adapter-react-16": "1.15.6",
     "rimraf": "3.0.2"
   },
   "peerDependencies": {

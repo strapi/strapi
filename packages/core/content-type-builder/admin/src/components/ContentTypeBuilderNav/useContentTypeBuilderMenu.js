@@ -123,7 +123,7 @@ const useContentTypeBuilderMenu = () => {
     {
       name: 'models',
       title: {
-        id: `${getTrad('menu.section.models.name.plural')}`,
+        id: `${getTrad('menu.section.models.name')}`,
         defaultMessage: 'Collection Types',
       },
       customLink: isInDevelopmentMode && {
@@ -136,7 +136,7 @@ const useContentTypeBuilderMenu = () => {
     {
       name: 'singleTypes',
       title: {
-        id: `${getTrad('menu.section.single-types.name.plural')}`,
+        id: `${getTrad('menu.section.single-types.name')}`,
         defaultMessage: 'Single Types',
       },
       customLink: isInDevelopmentMode && {
@@ -149,7 +149,7 @@ const useContentTypeBuilderMenu = () => {
     {
       name: 'components',
       title: {
-        id: `${getTrad('menu.section.components.name.plural')}`,
+        id: `${getTrad('menu.section.components.name')}`,
         defaultMessage: 'Components',
       },
       customLink: isInDevelopmentMode && {

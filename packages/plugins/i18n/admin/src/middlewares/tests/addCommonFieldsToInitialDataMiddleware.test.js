@@ -6,7 +6,7 @@ jest.mock('@strapi/helper-plugin', () => ({
     nonLocalizedFields: { common: 'test' },
     localizations: ['test'],
   }),
-  formatComponentData: data => data,
+  formatContentTypeData: data => data,
   contentManagementUtilRemoveFieldsFromData: data => data,
 }));
 

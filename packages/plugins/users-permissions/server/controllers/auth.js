@@ -17,7 +17,7 @@ const {
   validateSendEmailConfirmationBody,
 } = require('./validation/auth');
 
-const { sanitize } = utils;
+const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
 const { ApplicationError, ValidationError } = utils.errors;
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -34,7 +34,7 @@ module.exports = {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
 
-    const store = await strapi.store({ type: 'plugin', name: 'users-permissions' });
+    const store = strapi.store({ type: 'plugin', name: 'users-permissions' });
 
     if (provider === 'local') {
       if (!_.get(await store.get({ key: 'grant' }), 'email.enabled')) {
@@ -101,22 +101,15 @@ module.exports = {
       }
 
       // Connect the user with the third-party provider.
-      let user;
-      let error;
       try {
-        [user, error] = await getService('providers').connect(provider, ctx.query);
-      } catch ([user, error]) {
+        const user = await getService('providers').connect(provider, ctx.query);
+        ctx.send({
+          jwt: getService('jwt').issue({ id: user.id }),
+          user: await sanitizeUser(user, ctx),
+        });
+      } catch (error) {
         throw new ApplicationError(error.message);
       }
-
-      if (!user) {
-        throw new ApplicationError(error.message);
-      }
-
-      ctx.send({
-        jwt: getService('jwt').issue({ id: user.id }),
-        user: await sanitizeUser(user, ctx),
-      });
     }
   },
 
@@ -137,13 +130,11 @@ module.exports = {
         throw new ValidationError('Incorrect code provided');
       }
 
-      const password = await getService('user').hashPassword({ password: params.password });
-
+      await getService('user').edit(user.id, {
+        resetPasswordToken: null,
+        password: params.password,
+      });
       // Update the user.
-      await strapi
-        .query('plugin::users-permissions.user')
-        .update({ where: { id: user.id }, data: { resetPasswordToken: null, password } });
-
       ctx.send({
         jwt: getService('jwt').issue({ id: user.id }),
         user: await sanitizeUser(user, ctx),
@@ -188,7 +179,10 @@ module.exports = {
     }
 
     // Ability to pass OAuth callback dynamically
-    grantConfig[provider].callback = _.get(ctx, 'query.callback') || grantConfig[provider].callback;
+    grantConfig[provider].callback =
+      _.get(ctx, 'query.callback') ||
+      _.get(ctx, 'session.grant.dynamic.callback') ||
+      grantConfig[provider].callback;
     grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
 
     return grant(grantConfig)(ctx, next);
@@ -242,6 +236,8 @@ module.exports = {
 
     settings.message = await getService('users-permissions').template(settings.message, {
       URL: advanced.email_reset_password,
+      SERVER_URL: getAbsoluteServerUrl(strapi.config),
+      ADMIN_URL: getAbsoluteAdminUrl(strapi.config),
       USER: userInfo,
       TOKEN: resetPasswordToken,
     });
@@ -322,7 +318,6 @@ module.exports = {
     }
 
     params.role = role.id;
-    params.password = await getService('user').hashPassword(params);
 
     const user = await strapi.query('plugin::users-permissions.user').findOne({
       where: { email: params.email },
@@ -341,7 +336,7 @@ module.exports = {
         params.confirmed = true;
       }
 
-      const user = await strapi.query('plugin::users-permissions.user').create({ data: params });
+      const user = await getService('user').add(params);
 
       const sanitizedUser = await sanitizeUser(user, ctx);
 
@@ -364,8 +359,11 @@ module.exports = {
     } catch (err) {
       if (_.includes(err.message, 'username')) {
         throw new ApplicationError('Username already taken');
-      } else {
+      } else if (_.includes(err.message, 'email')) {
         throw new ApplicationError('Email already taken');
+      } else {
+        strapi.log.error(err);
+        throw new ApplicationError('An error occurred during account creation');
       }
     }
   },
@@ -380,7 +378,7 @@ module.exports = {
       throw new ValidationError('token.invalid');
     }
 
-    const user = await userService.fetch({ confirmationToken }, []);
+    const [user] = await userService.fetchAll({ filters: { confirmationToken }});
 
     if (!user) {
       throw new ValidationError('token.invalid');
@@ -418,6 +416,13 @@ module.exports = {
     const user = await strapi.query('plugin::users-permissions.user').findOne({
       where: { email: params.email },
     });
+
+    if (!user) {
+      return ctx.send({
+        email: params.email,
+        sent: true,
+      });
+    }
 
     if (user.confirmed) {
       throw new ApplicationError('already.confirmed');

@@ -17,7 +17,7 @@ const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description', 'co
  */
 const sanitizeUser = user => {
   return {
-    ..._.omit(user, ['password', 'resetPasswordToken', 'roles']),
+    ..._.omit(user, ['password', 'resetPasswordToken', 'registrationToken', 'roles']),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };
 };
@@ -314,6 +314,15 @@ const displayWarningIfUsersDontHaveRole = async () => {
   }
 };
 
+/** Returns an array of interface languages currently used by users
+ * @returns {Promise<Array<string>>}
+ */
+const getLanguagesInUse = async () => {
+  const users = await strapi.query('admin::user').findMany({ select: ['preferedLanguage'] });
+
+  return users.map(user => user.preferedLanguage || 'en');
+};
+
 module.exports = {
   create,
   updateById,
@@ -331,4 +340,5 @@ module.exports = {
   assignARoleToAll,
   displayWarningIfUsersDontHaveRole,
   resetPasswordByEmail,
+  getLanguagesInUse,
 };

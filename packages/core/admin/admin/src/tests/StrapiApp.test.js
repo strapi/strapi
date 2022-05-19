@@ -24,6 +24,10 @@ describe('ADMIN | StrapiApp', () => {
       }
 
       .c1 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -33,17 +37,18 @@ describe('ADMIN | StrapiApp', () => {
         flex-direction: column;
       }
 
-      .c1 > * {
+      .c2 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c1 > * + * {
+      .c2 > * + * {
         margin-top: 8px;
       }
 
       <div
-        class="c0 c1"
+        class="c0 c1 c2"
+        spacing="2"
         width="31.25rem"
       />
     `);
@@ -293,13 +298,13 @@ describe('ADMIN | StrapiApp', () => {
 
     it('should override the theme', () => {
       const adminConfig = {
-        config: { theme: { main: { colors: { red: 'black' } } } },
+        config: { theme: { colors: { red: 'black' } } },
       };
       const app = StrapiApp({ middlewares, reducers, library, adminConfig });
 
       app.createCustomConfigurations();
 
-      expect(app.configurations.theme.main.colors.red).toBe('black');
+      expect(app.configurations.themes.light.colors.red).toBe('black');
     });
 
     it('should override the tutorials', () => {

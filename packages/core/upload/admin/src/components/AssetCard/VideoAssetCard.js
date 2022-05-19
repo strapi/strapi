@@ -16,6 +16,7 @@ import {
 } from '@strapi/design-system/Card';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Pencil from '@strapi/icons/Pencil';
+import Trash from '@strapi/icons/Trash';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { VideoPreview } from './VideoPreview';
@@ -42,23 +43,38 @@ export const VideoAssetCard = ({
   selected,
   onSelect,
   onEdit,
+  onRemove,
   size,
 }) => {
   const { formatMessage } = useIntl();
   const [duration, setDuration] = useState();
-  const formattedDuration = duration ? formatDuration(duration) : undefined;
+
+  const formattedDuration = duration && formatDuration(duration);
 
   return (
     <Card>
       <CardHeader>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
-        {onEdit && (
+        {(onRemove || onEdit) && (
           <CardAction position="end">
-            <IconButton
-              label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-              icon={<Pencil />}
-              onClick={onEdit}
-            />
+            {onRemove && (
+              <IconButton
+                label={formatMessage({
+                  id: getTrad('control-card.remove-selection'),
+                  defaultMessage: 'Remove from selection',
+                })}
+                icon={<Trash />}
+                onClick={onRemove}
+              />
+            )}
+
+            {onEdit && (
+              <IconButton
+                label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
+                icon={<Pencil />}
+                onClick={onEdit}
+              />
+            )}
           </CardAction>
         )}
         <CardAsset size={size}>
@@ -70,7 +86,9 @@ export const VideoAssetCard = ({
       </CardHeader>
       <CardBody>
         <CardContent>
-          <CardTitle as="h2">{name}</CardTitle>
+          <Box paddingTop={1}>
+            <CardTitle as="h2">{name}</CardTitle>
+          </Box>
           <CardSubtitle>
             <Extension>{extension}</Extension>
           </CardSubtitle>
@@ -86,6 +104,7 @@ export const VideoAssetCard = ({
 VideoAssetCard.defaultProps = {
   onSelect: undefined,
   onEdit: undefined,
+  onRemove: undefined,
   selected: false,
   size: 'M',
 };
@@ -96,6 +115,7 @@ VideoAssetCard.propTypes = {
   name: PropTypes.string.isRequired,
   onSelect: PropTypes.func,
   onEdit: PropTypes.func,
+  onRemove: PropTypes.func,
   url: PropTypes.string.isRequired,
   selected: PropTypes.bool,
   size: PropTypes.oneOf(['S', 'M']),

@@ -40,6 +40,10 @@ describe('Admin Controller', () => {
       const result = await adminController.init();
 
       expect(global.strapi.config.get).toHaveBeenCalledWith('uuid', false);
+      expect(global.strapi.config.get).toHaveBeenCalledWith(
+        'packageJsonStrapi.telemetryDisabled',
+        null
+      );
       expect(global.strapi.admin.services.user.exists).toHaveBeenCalled();
       expect(result.data).toBeDefined();
       expect(result.data).toStrictEqual({
@@ -81,6 +85,7 @@ describe('Admin Controller', () => {
         strapiVersion: '1.0.0',
         nodeVersion: process.version,
         communityEdition: false,
+        useYarn: true,
       });
     });
   });

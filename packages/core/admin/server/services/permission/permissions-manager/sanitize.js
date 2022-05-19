@@ -1,6 +1,6 @@
 'use strict';
 
-const { subject: asSubject } = require('@casl/ability');
+const { subject: asSubject, detectSubjectType } = require('@casl/ability');
 const { permittedFieldsOf } = require('@casl/ability/extra');
 const {
   defaults,
@@ -14,6 +14,7 @@ const {
   uniq,
   intersection,
   pick,
+  getOr,
 } = require('lodash/fp');
 
 const { contentTypes, traverseEntity, sanitize, pipeAsync } = require('@strapi/utils');
@@ -46,6 +47,8 @@ module.exports = ({ action, ability, model }) => {
     const permittedFields = fields.shouldIncludeAll ? null : getOutputFields(fields.permitted);
 
     return pipeAsync(
+      // Remove fields hidden from the admin
+      traverseEntity(omitHiddenFields, { schema }),
       // Remove unallowed fields from admin::user relations
       traverseEntity(pickAllowedAdminUserFields, { schema }),
       // Remove not allowed fields (RBAC)
@@ -61,6 +64,8 @@ module.exports = ({ action, ability, model }) => {
     const permittedFields = fields.shouldIncludeAll ? null : getInputFields(fields.permitted);
 
     return pipeAsync(
+      // Remove fields hidden from the admin
+      traverseEntity(omitHiddenFields, { schema }),
       // Remove not allowed fields (RBAC)
       traverseEntity(allowedFields(permittedFields), { schema }),
       // Remove roles from createdBy & updateBy fields
@@ -76,11 +81,13 @@ module.exports = ({ action, ability, model }) => {
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
 
-      const permittedFields = permittedFieldsOf(ability, actionOverride, subject);
+      const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
+        fieldsFrom: rule => rule.fields || [],
+      });
 
       const hasAtLeastOneRegistered = some(
         fields => !isNil(fields),
-        flatMap(prop('fields'), ability.rulesFor(actionOverride, subject))
+        flatMap(prop('fields'), ability.rulesFor(actionOverride, detectSubjectType(subject)))
       );
       const shouldIncludeAllFields = isEmpty(permittedFields) && !hasAtLeastOneRegistered;
 
@@ -105,11 +112,34 @@ module.exports = ({ action, ability, model }) => {
     return defaults({ subject: asSubject(model, data), action }, options);
   };
 
+  /**
+   * Omit creator fields' (createdBy & updatedBy) roles from the admin API responses
+   */
   const omitCreatorRoles = omit([`${CREATED_BY_ATTRIBUTE}.roles`, `${UPDATED_BY_ATTRIBUTE}.roles`]);
 
+  /**
+   * Visitor used to remove hidden fields from the admin API responses
+   */
+  const omitHiddenFields = ({ key, schema }, { remove }) => {
+    const isHidden = getOr(false, ['config', 'attributes', key, 'hidden'], schema);
+
+    if (isHidden) {
+      remove(key);
+    }
+  };
+
+  /**
+   * Visitor used to only select needed fields from the admin users entities & avoid leaking sensitive information
+   */
   const pickAllowedAdminUserFields = ({ attribute, key, value }, { set }) => {
-    if (attribute.type === 'relation' && attribute.target === 'admin::user') {
-      set(key, pick(['id', 'firstname', 'lastname', 'username'], value));
+    const pickAllowedFields = pick(['id', 'firstname', 'lastname', 'username']);
+
+    if (attribute.type === 'relation' && attribute.target === 'admin::user' && value) {
+      if (Array.isArray(value)) {
+        set(key, value.map(pickAllowedFields));
+      } else {
+        set(key, pickAllowedFields(value));
+      }
     }
   };
 

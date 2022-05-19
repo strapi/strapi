@@ -1,12 +1,11 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Form } from '@strapi/helper-plugin';
+import { Form, Link } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Main } from '@strapi/design-system/Main';
 import { Flex } from '@strapi/design-system/Flex';
-import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Typography } from '@strapi/design-system/Typography';
@@ -15,7 +14,7 @@ import UnauthenticatedLayout, {
   Column,
   LayoutContent,
 } from '../../../../layouts/UnauthenticatedLayout';
-import Logo from '../Logo';
+import Logo from '../../../../components/UnauthenticatedLogo';
 
 const ForgotPassword = ({ onSubmit, schema }) => {
   const { formatMessage } = useIntl();
@@ -60,7 +59,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   )}
                 </Column>
 
-                <Stack size={6}>
+                <Stack spacing={6}>
                   <TextInput
                     error={
                       errors.email

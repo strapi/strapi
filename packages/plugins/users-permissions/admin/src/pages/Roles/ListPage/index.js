@@ -93,7 +93,7 @@ const RoleListPage = () => {
   };
 
   const pageTitle = formatMessage({
-    id: getTrad('HeaderNav.link.roles'),
+    id: 'global.roles',
     defaultMessage: 'Roles',
   });
 
@@ -122,7 +122,7 @@ const RoleListPage = () => {
       <Main aria-busy={isLoading}>
         <HeaderLayout
           title={formatMessage({
-            id: 'Settings.roles.title',
+            id: 'global.roles',
             defaultMessage: 'Roles',
           })}
           subtitle={formatMessage({
@@ -161,13 +161,13 @@ const RoleListPage = () => {
                 <Tr>
                   <Th>
                     <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: getTrad('Roles.name'), defaultMessage: 'Name' })}
+                      {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
                     </Typography>
                   </Th>
                   <Th>
                     <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({
-                        id: getTrad('Roles.description'),
+                        id: 'global.description',
                         defaultMessage: 'Description',
                       })}
                     </Typography>
@@ -175,7 +175,7 @@ const RoleListPage = () => {
                   <Th>
                     <Typography variant="sigma" textColor="neutral600">
                       {formatMessage({
-                        id: getTrad('Roles.users'),
+                        id: 'global.users',
                         defaultMessage: 'Users',
                       })}
                     </Typography>
@@ -183,7 +183,7 @@ const RoleListPage = () => {
                   <Th>
                     <VisuallyHidden>
                       {formatMessage({
-                        id: 'components.TableHeader.actions-label',
+                        id: 'global.actions',
                         defaultMessage: 'Actions',
                       })}
                     </VisuallyHidden>

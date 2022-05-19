@@ -22,8 +22,9 @@ export const MediaLibraryInput = ({
   name,
   onChange,
   value,
+  required,
 }) => {
-  const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos'];
+  const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos', 'audios'];
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [step, setStep] = useState(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -116,7 +117,6 @@ export const MediaLibraryInput = ({
     setUploadedFiles(prev => [...prev, ...uploadedFiles]);
   };
 
-  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
     ? formatMessage(
         { id: description.id, defaultMessage: description.defaultMessage },
@@ -147,8 +147,9 @@ export const MediaLibraryInput = ({
         onEditAsset={handleAssetEdit}
         onNext={handleNext}
         onPrevious={handlePrevious}
-        error={errorMessage}
+        error={error}
         hint={hint}
+        required={required}
         selectedAssetIndex={selectedIndex}
         trackedLocation="content-manager"
       />
@@ -178,12 +179,13 @@ export const MediaLibraryInput = ({
 };
 
 MediaLibraryInput.defaultProps = {
-  attribute: { allowedTypes: ['videos', 'files', 'images'] },
+  attribute: { allowedTypes: ['videos', 'files', 'images', 'audios'] },
   disabled: false,
   description: undefined,
   error: undefined,
   intlLabel: undefined,
   multiple: false,
+  required: false,
   value: [],
 };
 
@@ -195,10 +197,11 @@ MediaLibraryInput.propTypes = {
     defaultMessage: PropTypes.string,
     values: PropTypes.shape({}),
   }),
-  error: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
+  error: PropTypes.string,
   intlLabel: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
   multiple: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
+  required: PropTypes.bool,
   value: PropTypes.oneOfType([PropTypes.arrayOf(AssetDefinition), AssetDefinition]),
 };

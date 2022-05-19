@@ -15,7 +15,6 @@
   "HeaderNav.link.advancedSettings": "Zaawansowane",
   "HeaderNav.link.emailTemplates": "Szablony e-mail",
   "HeaderNav.link.providers": "Dostawcy",
-  "HeaderNav.link.roles": "Role",
   "Plugin.permissions.plugins.description": "Określ dozwolone działania w wtyczce {name}.",
   "Plugins.header.description": "Jedynie akcje związane z wywoływaniami wymienionymi poniżej.",
   "Plugins.header.title": "Uprawnienia",

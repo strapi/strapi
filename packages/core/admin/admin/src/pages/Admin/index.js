@@ -12,9 +12,10 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import LeftMenu from '../../components/LeftMenu';
 import AppLayout from '../../layouts/AppLayout';
-import { useMenu, useReleaseNotification } from '../../hooks';
+import { useMenu } from '../../hooks';
 import Onboarding from './Onboarding';
 import { createRoute } from '../../utils';
+import GuidedTourModal from '../../components/GuidedTour/Modal';
 
 const CM = lazy(() =>
   import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
@@ -27,6 +28,7 @@ const MarketplacePage = lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
 );
 const NotFoundPage = lazy(() => import('../NotFoundPage'));
+const InternalErrorPage = lazy(() => import('../InternalErrorPage'));
 
 const ProfilePage = lazy(() =>
   import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage')
@@ -46,8 +48,6 @@ const useTrackUsage = () => {
 };
 
 const Admin = () => {
-  // Show a notification when the current version of Strapi is not the latest one
-  useReleaseNotification();
   useTrackUsage();
   const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
   const { menu } = useStrapiApp();
@@ -87,9 +87,11 @@ const Admin = () => {
               <InstalledPluginsPage />
             </Route>
             <Route path="/404" component={NotFoundPage} />
+            <Route path="/500" component={InternalErrorPage} />
             <Route path="" component={NotFoundPage} />
           </Switch>
         </Suspense>
+        <GuidedTourModal />
         <Onboarding />
       </AppLayout>
     </DndProvider>

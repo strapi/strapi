@@ -53,7 +53,7 @@ describe('Onboarding', () => {
         >
           <svg
             aria-hidden="true"
-            class="svg-inline--fa fa-question fa-w-12 "
+            class="svg-inline--fa fa-question "
             data-icon="question"
             data-prefix="fas"
             focusable="false"

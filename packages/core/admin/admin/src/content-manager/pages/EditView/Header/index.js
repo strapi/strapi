@@ -1,22 +1,22 @@
 import React, { memo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import isEqualFastCompare from 'react-fast-compare';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
+import { Link } from '@strapi/helper-plugin';
 import { HeaderLayout } from '@strapi/design-system/Layout';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { Link } from '@strapi/design-system/Link';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Check from '@strapi/icons/Check';
-import PropTypes from 'prop-types';
-import isEqualFastCompare from 'react-fast-compare';
 import { getTrad } from '../../../utils';
 import { connect, getDraftRelations, select } from './utils';
 
@@ -71,7 +71,7 @@ const Header = ({
 
   if (isCreatingEntry && canCreate) {
     primaryAction = (
-      <Stack horizontal size={2}>
+      <Stack horizontal spacing={2}>
         {hasDraftAndPublish && (
           <Button disabled startIcon={<Check />} variant="secondary">
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
@@ -172,7 +172,7 @@ const Header = ({
             to="/"
           >
             {formatMessage({
-              id: 'app.components.HeaderLayout.link.go-back',
+              id: 'global.back',
               defaultMessage: 'Back',
             })}
           </Link>
@@ -187,7 +187,7 @@ const Header = ({
           isOpen={showWarningUnpublish}
         >
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack size={2}>
+            <Stack spacing={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Typography id="confirm-description">
                   {formatMessage(
@@ -242,7 +242,7 @@ const Header = ({
           isOpen={showWarningDraftRelation}
         >
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack size={2}>
+            <Stack spacing={2}>
               <Flex justifyContent="center" style={{ textAlign: 'center' }}>
                 <Typography id="confirm-description">
                   {draftRelationsCountRef.current}
@@ -314,8 +314,5 @@ Header.propTypes = {
 
 const Memoized = memo(Header, isEqualFastCompare);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);
 export { Header };

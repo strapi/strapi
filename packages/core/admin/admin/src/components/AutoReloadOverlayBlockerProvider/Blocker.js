@@ -6,7 +6,7 @@ import styled, { keyframes } from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
 import Clock from '@strapi/icons/Clock';
 import Refresh from '@strapi/icons/Refresh';
-import { Link } from '@strapi/design-system/Link';
+import { Link } from '@strapi/design-system/v2/Link';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
@@ -44,8 +44,8 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
   if (isOpen) {
     return ReactDOM.createPortal(
       <Overlay>
-        <Content size={6}>
-          <Stack size={2}>
+        <Content spacing={6}>
+          <Stack spacing={2}>
             <Flex justifyContent="center">
               <Typography as="h1" variant="alpha">
                 {formatMessage(title)}
@@ -72,13 +72,9 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
           </Flex>
           <Flex justifyContent="center">
             <Box paddingTop={2}>
-              <Link
-                href="https://docs.strapi.io"
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-              >
+              <Link href="https://docs.strapi.io" isExternal>
                 {formatMessage({
-                  id: 'app.components.BlockLink.documentation',
+                  id: 'global.documentation',
                   defaultMessage: 'Read the documentation',
                 })}
               </Link>

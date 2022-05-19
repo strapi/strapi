@@ -125,7 +125,7 @@ const forms = {
               },
               {
                 intlLabel: {
-                  id: getTrad('modalForm.attribute.text.type-selection'),
+                  id: 'global.type',
                   defaultMessage: 'Type',
                 },
                 name: 'kind',
@@ -134,7 +134,7 @@ const forms = {
                 radios: [
                   {
                     title: {
-                      id: getTrad('menu.section.models.name.singular'),
+                      id: getTrad('form.button.collection-type.name'),
                       defaultMessage: 'Collection Type',
                     },
                     description: {
@@ -146,7 +146,7 @@ const forms = {
                   },
                   {
                     title: {
-                      id: getTrad('menu.section.single-types.name.singular'),
+                      id: getTrad('form.button.single-type.name'),
                       defaultMessage: 'Single Type',
                     },
                     description: {

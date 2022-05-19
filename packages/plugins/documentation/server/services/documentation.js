@@ -5,8 +5,8 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 const { getAbsoluteServerUrl } = require('@strapi/utils');
 
-const { builApiEndpointPath } = require('../utils/builders');
-const defaultConfig = require('../config/default-config');
+const defaultPluginConfig = require('../config/default-plugin-config');
+const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
 
 module.exports = ({ strapi }) => {
   const config = strapi.config.get('plugin.documentation');
@@ -18,6 +18,10 @@ module.exports = ({ strapi }) => {
 
     getFullDocumentationPath() {
       return path.join(strapi.dirs.extensions, 'documentation', 'documentation');
+    },
+
+    getCustomDocumentationPath() {
+      return path.join(strapi.dirs.extensions, 'documentation', 'config', 'settings.json');
     },
 
     getDocumentationVersions() {
@@ -103,28 +107,46 @@ module.exports = ({ strapi }) => {
       return [...apisToDocument, ...pluginsToDocument];
     },
 
+    async getCustomConfig() {
+      const customConfigPath = this.getCustomDocumentationPath();
+      const pathExists = await fs.pathExists(customConfigPath);
+      if (pathExists) {
+        return fs.readJson(customConfigPath);
+      }
+
+      return {};
+    },
+
     /**
      * @description - Creates the Swagger json files
      */
     async generateFullDoc(version = this.getDocumentationVersion()) {
       let paths = {};
-
+      let schemas = {};
       const apis = this.getPluginAndApiInfo();
       for (const api of apis) {
         const apiName = api.name;
         const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
 
         const apiDocPath = path.join(apiDirPath, `${apiName}.json`);
-        const apiPathsObject = builApiEndpointPath(api);
 
-        if (!apiPathsObject) {
+        const apiPath = builApiEndpointPath(api);
+
+        if (!apiPath) {
           continue;
         }
 
         await fs.ensureFile(apiDocPath);
-        await fs.writeJson(apiDocPath, apiPathsObject, { spaces: 2 });
+        await fs.writeJson(apiDocPath, apiPath, { spaces: 2 });
 
-        paths = { ...paths, ...apiPathsObject.paths };
+        const componentSchema = buildComponentSchema(api);
+
+        schemas = {
+          ...schemas,
+          ...componentSchema,
+        };
+
+        paths = { ...paths, ...apiPath };
       }
 
       const fullDocJsonPath = path.join(
@@ -133,23 +155,26 @@ module.exports = ({ strapi }) => {
         'full_documentation.json'
       );
 
-      const settings = _.cloneDeep(defaultConfig);
+      const defaultConfig = _.cloneDeep(defaultPluginConfig);
 
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
 
-      _.set(settings, 'servers', [
+      _.set(defaultConfig, 'servers', [
         {
           url: `${serverUrl}${apiPath}`,
           description: 'Development server',
         },
       ]);
+      _.set(defaultConfig, ['info', 'x-generation-date'], new Date().toISOString());
+      _.set(defaultConfig, ['info', 'version'], version);
+      _.merge(defaultConfig.components, { schemas });
 
-      _.set(settings, ['info', 'x-generation-date'], new Date().toISOString());
-      _.set(settings, ['info', 'version'], version);
+      const customConfig = await this.getCustomConfig();
+      const config = _.merge(defaultConfig, customConfig);
 
       await fs.ensureFile(fullDocJsonPath);
-      await fs.writeJson(fullDocJsonPath, { ...settings, paths }, { spaces: 2 });
+      await fs.writeJson(fullDocJsonPath, { ...config, paths }, { spaces: 2 });
     },
   };
 };

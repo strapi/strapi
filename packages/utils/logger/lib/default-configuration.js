@@ -1,15 +1,15 @@
 'use strict';
 
 const { transports } = require('winston');
-const { LEVEL, LEVEL_LABEL, LEVELS } = require('./constants');
+const { LEVEL_LABEL, LEVELS } = require('./constants');
 const { prettyPrint } = require('./formats');
 
 const createDefaultConfiguration = () => {
   return {
-    level: LEVEL,
+    level: LEVEL_LABEL,
     levels: LEVELS,
     format: prettyPrint(),
-    transports: [new transports.Console({ level: LEVEL_LABEL })],
+    transports: [new transports.Console()],
   };
 };
 

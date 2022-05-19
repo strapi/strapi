@@ -9,11 +9,10 @@ import flatMap from 'lodash/flatMap';
 import isEqual from 'lodash/isEqual';
 import get from 'lodash/get';
 import set from 'lodash/set';
-import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
+import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { Main } from '@strapi/design-system/Main';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
@@ -59,8 +58,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
         'relation',
         'component',
         'boolean',
-        'date',
         'media',
+        'password',
         'richtext',
         'timestamp',
       ].includes(type) && !!type
@@ -106,6 +105,14 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
     dispatch({
       type: 'ON_CHANGE_META',
       keys: name.split('.'),
+      value,
+    });
+  };
+
+  const handleSizeChange = ({ name, value }) => {
+    dispatch({
+      type: 'ON_CHANGE_SIZE',
+      name,
       value,
     });
   };
@@ -242,7 +249,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                 to="/"
               >
                 {formatMessage({
-                  id: 'app.components.go-back',
+                  id: 'global.back',
                   defaultMessage: 'Back',
                 })}
               </Link>
@@ -253,7 +260,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                 startIcon={<Check />}
                 type="submit"
               >
-                {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+                {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>
             }
           />
@@ -267,7 +274,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
               paddingLeft={7}
               paddingRight={7}
             >
-              <Stack size={4}>
+              <Stack spacing={4}>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('containers.SettingPage.settings'),
@@ -365,7 +372,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
             onSubmit={handleMetaSubmit}
             onToggle={handleToggleModal}
             type={get(attributes, [metaToEdit, 'type'], '')}
-            onChange={handleMetaChange}
+            onMetaChange={handleMetaChange}
+            onSizeChange={handleSizeChange}
           />
         )}
       </Main>

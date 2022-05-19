@@ -17,7 +17,17 @@ const streamToBuffer = stream =>
     stream.on('error', reject);
   });
 
+const getStreamSize = stream =>
+  new Promise((resolve, reject) => {
+    let size = 0;
+    stream.on('data', chunk => (size += Buffer.byteLength(chunk)));
+    stream.on('close', () => resolve(size));
+    stream.on('error', reject);
+    stream.resume();
+  });
+
 module.exports = {
   streamToBuffer,
   bytesToKbytes,
+  getStreamSize,
 };

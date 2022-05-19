@@ -43,11 +43,15 @@ describe('Application page', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c22 {
+      .c24 {
         padding-top: 4px;
       }
 
       .c11 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -57,23 +61,23 @@ describe('Application page', () => {
         flex-direction: column;
       }
 
-      .c11 > * {
+      .c12 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c11 > * + * {
+      .c12 > * + * {
         margin-top: 20px;
       }
 
-      .c12 {
+      .c13 {
         color: #32324d;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
       }
 
-      .c16 {
+      .c17 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -81,10 +85,84 @@ describe('Application page', () => {
         text-transform: uppercase;
       }
 
-      .c17 {
+      .c18 {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
+      }
+
+      .c21 {
+        color: #4945ff;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c22 {
+        padding-left: 8px;
+      }
+
+      .c19 {
+        cursor: pointer;
+      }
+
+      .c20 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c20 svg path {
+        fill: #4945ff;
+      }
+
+      .c20 svg {
+        font-size: 0.625rem;
+      }
+
+      .c20:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c20:focus-visible {
+        outline: none;
+      }
+
+      .c20:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c23 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
       }
 
       .c1 {
@@ -114,6 +192,10 @@ describe('Application page', () => {
       }
 
       .c5 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -125,13 +207,13 @@ describe('Application page', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c6 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -139,10 +221,6 @@ describe('Application page', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c7 {
@@ -162,101 +240,29 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c13 {
+      .c14 {
         padding-top: 4px;
       }
 
-      .c14 {
+      .c15 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 0px;
       }
 
-      .c15 {
+      .c16 {
         grid-column: span 6;
-      }
-
-      .c19 {
-        color: #4945ff;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
-      .c20 {
-        padding-left: 8px;
-      }
-
-      .c18 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-transform: uppercase;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        position: relative;
-        outline: none;
-      }
-
-      .c18 svg path {
-        fill: #4945ff;
-      }
-
-      .c18 svg {
-        font-size: 0.625rem;
-      }
-
-      .c18:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c18:focus-visible {
-        outline: none;
-      }
-
-      .c18:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c21 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
+        max-width: 100%;
       }
 
       @media (max-width:68.75rem) {
-        .c15 {
+        .c16 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c15 {
+        .c16 {
           grid-column: span;
         }
       }
@@ -307,47 +313,48 @@ describe('Application page', () => {
                 class="c10"
               >
                 <div
-                  class="c11"
+                  class="c11 c12"
+                  spacing="5"
                 >
                   <h3
-                    class="c12"
+                    class="c13"
                   >
                     Details
                   </h3>
                   <div
-                    class="c13 c14"
+                    class="c14 c15"
                   >
                     <div
-                      class="c15"
+                      class="c16"
                     >
                       <div
                         class=""
                       >
                         <span
-                          class="c16"
+                          class="c17"
                         >
                           strapi version
                         </span>
                         <p
-                          class="c17"
+                          class="c18"
                         >
                           v
                           4.0.0
                         </p>
                         <a
-                          class="c18"
+                          class="c19 c20"
                           href="https://support.strapi.io/support/home"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c19"
+                            class="c21"
                           >
                             Get help
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c20 c21"
+                            class="c22 c23"
                           >
                             <svg
                               fill="none"
@@ -366,18 +373,18 @@ describe('Application page', () => {
                       </div>
                     </div>
                     <div
-                      class="c15"
+                      class="c16"
                     >
                       <div
                         class=""
                       >
                         <span
-                          class="c16"
+                          class="c17"
                         >
                           current plan
                         </span>
                         <p
-                          class="c17"
+                          class="c18"
                         >
                           Enterprise Edition
                         </p>
@@ -385,28 +392,28 @@ describe('Application page', () => {
                     </div>
                   </div>
                   <div
-                    class="c13 c14"
+                    class="c14 c15"
                   >
                     <div
-                      class="c15"
+                      class="c16"
                     >
                       <div
                         class=""
                       >
                         <a
-                          class="c18"
+                          class="c19 c20"
                           href="https://github.com/strapi/strapi/releases/tag/v3.6.8"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c19"
+                            class="c21"
                           >
                             Upgrade your admin panel
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c20 c21"
+                            class="c22 c23"
                           >
                             <svg
                               fill="none"
@@ -425,25 +432,25 @@ describe('Application page', () => {
                       </div>
                     </div>
                     <div
-                      class="c15"
+                      class="c16"
                     >
                       <div
                         class=""
                       >
                         <a
-                          class="c18"
+                          class="c19 c20"
                           href="https://strapi.io/pricing-self-hosted"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
                           <span
-                            class="c19"
+                            class="c21"
                           >
                             See all pricing plans
                           </span>
                           <span
                             aria-hidden="true"
-                            class="c20 c21"
+                            class="c22 c23"
                           >
                             <svg
                               fill="none"
@@ -463,15 +470,15 @@ describe('Application page', () => {
                     </div>
                   </div>
                   <div
-                    class="c22"
+                    class="c24"
                   >
                     <span
-                      class="c16"
+                      class="c17"
                     >
                       node version
                     </span>
                     <p
-                      class="c17"
+                      class="c18"
                     />
                   </div>
                 </div>

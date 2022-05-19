@@ -1,6 +1,6 @@
 {
   "name": "@strapi/strapi",
-  "version": "4.0.4",
+  "version": "4.1.11",
   "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MySQL, MariaDB, PostgreSQL, SQLite",
   "keywords": [
     "strapi",
@@ -80,16 +80,16 @@
   "dependencies": {
     "@koa/cors": "3.1.0",
     "@koa/router": "10.1.1",
-    "@strapi/admin": "4.0.4",
-    "@strapi/database": "4.0.4",
-    "@strapi/generate-new": "4.0.4",
-    "@strapi/generators": "4.0.4",
-    "@strapi/logger": "4.0.4",
-    "@strapi/plugin-content-manager": "4.0.4",
-    "@strapi/plugin-content-type-builder": "4.0.4",
-    "@strapi/plugin-email": "4.0.4",
-    "@strapi/plugin-upload": "4.0.4",
-    "@strapi/utils": "4.0.4",
+    "@strapi/admin": "4.1.11",
+    "@strapi/database": "4.1.11",
+    "@strapi/generate-new": "4.1.11",
+    "@strapi/generators": "4.1.11",
+    "@strapi/logger": "4.1.11",
+    "@strapi/plugin-content-manager": "4.1.11",
+    "@strapi/plugin-content-type-builder": "4.1.11",
+    "@strapi/plugin-email": "4.1.11",
+    "@strapi/plugin-upload": "4.1.11",
+    "@strapi/utils": "4.1.11",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
@@ -117,7 +117,8 @@
     "koa-session": "6.2.0",
     "koa-static": "5.0.0",
     "lodash": "4.17.21",
-    "node-fetch": "2.6.5",
+    "mime-types": "2.1.35",
+    "node-fetch": "2.6.7",
     "node-machine-id": "1.1.12",
     "node-schedule": "2.0.0",
     "open": "8.2.1",
@@ -126,7 +127,8 @@
     "qs": "6.10.1",
     "resolve-cwd": "3.0.0",
     "semver": "7.3.5",
-    "statuses": "2.0.1"
+    "statuses": "2.0.1",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "supertest": "^6.1.6"

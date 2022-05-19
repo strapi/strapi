@@ -1,16 +1,7 @@
 'use strict';
 
-const defaultDocumentationConfig = require('./default-config');
-
-const defaultConfig = {
-  ...defaultDocumentationConfig,
-  session: {
-    key: 'plugin::documentation.sess',
-    maxAge: 'session',
-    secretKeys: ['mySecret'],
-  },
-};
+const defaultPluginConfig = require('./default-plugin-config');
 
 module.exports = {
-  default: defaultConfig,
+  default: defaultPluginConfig,
 };

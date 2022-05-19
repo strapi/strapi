@@ -6,12 +6,11 @@ import upperFirst from 'lodash/upperFirst';
 import pick from 'lodash/pick';
 import get from 'lodash/get';
 import { stringify } from 'qs';
-import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
+import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Divider } from '@strapi/design-system/Divider';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Link } from '@strapi/design-system/Link';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
 import Check from '@strapi/icons/Check';
@@ -191,7 +190,7 @@ const ListSettingsView = ({ layout, slug }) => {
           <HeaderLayout
             navigationAction={
               <Link startIcon={<ArrowLeft />} to={goBackUrl} id="go-back">
-                {formatMessage({ id: 'app.components.go-back', defaultMessage: 'Back' })}
+                {formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
               </Link>
             }
             primaryAction={
@@ -201,7 +200,7 @@ const ListSettingsView = ({ layout, slug }) => {
                 disabled={isEqual(modifiedData, initialData)}
                 type="submit"
               >
-                {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+                {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>
             }
             subtitle={formatMessage({

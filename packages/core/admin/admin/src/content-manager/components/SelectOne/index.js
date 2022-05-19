@@ -28,7 +28,7 @@ function SelectOne({
   const { formatMessage } = useIntl();
 
   return (
-    <Stack size={1}>
+    <Stack spacing={1}>
       <Select
         components={{
           ...components,
@@ -46,7 +46,7 @@ function SelectOne({
         onMenuOpen={onMenuOpen}
         onMenuScrollToBottom={onMenuScrollToBottom}
         placeholder={formatMessage(
-          placeholder || { id: 'components.Select.placeholder', defaultMessage: 'Select...' }
+          placeholder || { id: 'global.select', defaultMessage: 'Select...' }
         )}
         styles={styles}
         value={isNull(value) ? null : { label: get(value, [mainField.name], ''), value }}

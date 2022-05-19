@@ -34,7 +34,7 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
       <Divider />
       <Box paddingTop={6} paddingBottom={4}>
         <KeyboardNavigable tagName="button">
-          <Stack size={8}>
+          <Stack spacing={8}>
             {attributes.map((attributeRow, index) => {
               const key = index;
 

@@ -12,6 +12,7 @@ const Editor = ({
   editorRef,
   error,
   isPreviewMode,
+  isExpandMode,
   name,
   onChange,
   placeholder,
@@ -31,6 +32,8 @@ const Editor = ({
       readOnly: false,
       smartIndent: false,
       placeholder,
+      spellcheck: true,
+      inputStyle: 'contenteditable',
     });
 
     CodeMirror.commands.newlineAndIndentContinueMarkdownList = newlineAndIndentContinueMarkdownList;
@@ -64,7 +67,7 @@ const Editor = ({
 
   return (
     <EditorAndPreviewWrapper>
-      <EditorStylesContainer disabled={disabled || isPreviewMode}>
+      <EditorStylesContainer isExpandMode={isExpandMode} disabled={disabled || isPreviewMode}>
         <textarea ref={textareaRef} />
       </EditorStylesContainer>
       {isPreviewMode && <PreviewWysiwyg data={value} />}
@@ -76,6 +79,7 @@ Editor.defaultProps = {
   disabled: false,
   error: undefined,
   isPreviewMode: false,
+  isExpandMode: false,
   placeholder: '',
   value: '',
 };
@@ -85,6 +89,7 @@ Editor.propTypes = {
   editorRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   error: PropTypes.string,
   isPreviewMode: PropTypes.bool,
+  isExpandMode: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,

@@ -3,9 +3,10 @@ import { useHistory } from 'react-router-dom';
 import get from 'lodash/get';
 import {
   useTracking,
-  formatComponentData,
+  formatContentTypeData,
   useQueryParams,
   useNotification,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -29,6 +30,7 @@ import buildQueryString from '../../pages/ListView/utils/buildQueryString';
 const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const { trackUsage } = useTracking();
   const { push } = useHistory();
+  const { setCurrentStep } = useGuidedTour();
   const trackUsageRef = useRef(trackUsage);
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
   const [{ query, rawQuery }] = useQueryParams();
@@ -53,7 +55,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       );
 
       // This is needed in order to add a unique id for the repeatable components, in order to make the reorder easier
-      return formatComponentData(cleaned, allLayoutData.contentType, allLayoutData.components);
+      return formatContentTypeData(cleaned, allLayoutData.contentType, allLayoutData.components);
     },
     [allLayoutData]
   );
@@ -71,7 +73,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         allLayoutData.components
       );
 
-      acc[current] = formatComponentData(
+      acc[current] = formatContentTypeData(
         defaultComponentForm,
         allLayoutData.components[current],
         allLayoutData.components
@@ -84,7 +86,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       allLayoutData.contentType.attributes,
       allLayoutData.components
     );
-    const contentTypeDataStructureFormatted = formatComponentData(
+    const contentTypeDataStructureFormatted = formatContentTypeData(
       contentTypeDataStructure,
       allLayoutData.contentType,
       allLayoutData.components
@@ -141,10 +143,8 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   const displayErrors = useCallback(
     err => {
-      const errorPayload = err.response.payload;
-      console.error(errorPayload);
-
-      let errorMessage = get(errorPayload, ['message'], 'Bad Request');
+      const errorPayload = err.response.data;
+      let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
 
       // TODO handle errors correctly when back-end ready
       if (Array.isArray(errorMessage)) {
@@ -176,10 +176,12 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       } catch (err) {
         trackUsageRef.current('didNotDeleteEntry', { error: err, ...trackerProperty });
 
+        displayErrors(err);
+
         return Promise.reject(err);
       }
     },
-    [slug, toggleNotification, searchToSend]
+    [slug, displayErrors, toggleNotification, searchToSend]
   );
 
   const onDeleteSucceeded = useCallback(() => {
@@ -203,19 +205,25 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
           message: { id: getTrad('success.record.save') },
         });
 
+        setCurrentStep('contentManager.success');
+
         dispatch(submitSucceeded(cleanReceivedData(data)));
         setIsCreatingEntry(false);
 
         dispatch(setStatus('resolved'));
+
+        return Promise.resolve(data);
       } catch (err) {
         trackUsageRef.current('didNotCreateEntry', { error: err, trackerProperty });
 
         displayErrors(err);
 
         dispatch(setStatus('resolved'));
+
+        return Promise.reject(err);
       }
     },
-    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification]
+    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification, setCurrentStep]
   );
   const onPublish = useCallback(async () => {
     try {
@@ -235,10 +243,14 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(submitSucceeded(cleanReceivedData(data)));
 
       dispatch(setStatus('resolved'));
+
+      return Promise.resolve(data);
     } catch (err) {
       displayErrors(err);
 
       dispatch(setStatus('resolved'));
+
+      return Promise.reject(err);
     }
   }, [cleanReceivedData, displayErrors, slug, searchToSend, dispatch, toggleNotification]);
 
@@ -263,12 +275,16 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
         dispatch(setStatus('resolved'));
+
+        return Promise.resolve(data);
       } catch (err) {
         displayErrors(err);
 
         trackUsageRef.current('didNotEditEntry', { error: err, trackerProperty });
 
         dispatch(setStatus('resolved'));
+
+        return Promise.reject(err);
       }
     },
     [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification]
