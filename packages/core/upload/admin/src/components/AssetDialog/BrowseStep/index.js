@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { useIntl } from 'react-intl';
+import { Button } from '@strapi/design-system/Button';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
-import EmptyPicturesIcon from '@strapi/icons/EmptyPictures';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import styled from 'styled-components';
+import PlusIcon from '@strapi/icons/Plus';
+
 import getTrad from '../../../utils/getTrad';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
 import { AssetList } from '../../AssetList';
@@ -33,8 +35,10 @@ const EndBlockActions = styled(StartBlockActions)`
 export const BrowseStep = ({
   allowedTypes,
   assets,
+  canCreate,
   folders,
   multiple,
+  onAddAsset,
   onChangeFilters,
   onChangePage,
   onChangePageSize,
@@ -61,7 +65,7 @@ export const BrowseStep = ({
   return (
     <>
       <Stack spacing={4}>
-        {onSelectAllAsset && (
+        {assets.length > 0 && onSelectAllAsset && (
           <Box>
             <Box paddingBottom={4}>
               <Flex justifyContent="space-between" alignItems="flex-start">
@@ -130,13 +134,34 @@ export const BrowseStep = ({
         ) : (
           <Box paddingBottom={6}>
             <EmptyAssets
-              icon={EmptyPicturesIcon}
               size="S"
               count={6}
-              content={formatMessage({
-                id: getTrad('list.assets-empty.search'),
-                defaultMessage: 'No result found',
-              })}
+              action={
+                canCreate && (
+                  <Button
+                    variant="secondary"
+                    id="asset-dialog-title"
+                    startIcon={<PlusIcon />}
+                    onClick={onAddAsset}
+                  >
+                    {formatMessage({
+                      id: getTrad('header.actions.add-assets'),
+                      defaultMessage: 'Add new assets',
+                    })}
+                  </Button>
+                )
+              }
+              content={
+                canCreate
+                  ? formatMessage({
+                      id: getTrad('list.assets.empty'),
+                      defaultMessage: 'Upload your first assets...',
+                    })
+                  : formatMessage({
+                      id: getTrad('list.assets.empty.no-permissions'),
+                      defaultMessage: 'The asset list is empty',
+                    })
+              }
             />
           </Box>
         )}
@@ -168,9 +193,11 @@ BrowseStep.propTypes = {
 
   // TODO: add asset & folder shapes
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  canCreate: PropTypes.bool.isRequired,
   folders: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 
   multiple: PropTypes.bool,
+  onAddAsset: PropTypes.func.isRequired,
   onChangeFilters: PropTypes.func.isRequired,
   onChangeFolder: PropTypes.func.isRequired,
   onChangePage: PropTypes.func.isRequired,
