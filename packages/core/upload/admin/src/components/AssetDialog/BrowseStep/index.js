@@ -140,18 +140,18 @@ export const BrowseStep = ({
             />
           </Box>
         )}
-      </Stack>
 
-      {pagination.pageCount > 0 && (
-        <Flex justifyContent="space-between">
-          <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
-          <PaginationFooter
-            activePage={queryObject.page}
-            onChangePage={onChangePage}
-            pagination={pagination}
-          />
-        </Flex>
-      )}
+        {pagination.pageCount > 0 && (
+          <Flex justifyContent="space-between">
+            <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
+            <PaginationFooter
+              activePage={queryObject.page}
+              onChangePage={onChangePage}
+              pagination={pagination}
+            />
+          </Flex>
+        )}
+      </Stack>
     </>
   );
 };
