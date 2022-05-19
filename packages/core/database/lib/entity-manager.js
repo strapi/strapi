@@ -166,9 +166,11 @@ const createEntityManager = db => {
 
       const dataToInsert = processData(metadata, data, { withDefaults: true });
 
-      const [id] = await this.createQueryBuilder(uid)
+      const res = await this.createQueryBuilder(uid)
         .insert(dataToInsert)
         .execute();
+
+      const id = res[0].id || res[0];
 
       await this.attachRelations(uid, id, data);
 
