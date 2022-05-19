@@ -92,6 +92,8 @@ export const FolderCard = ({
 
 FolderCard.defaultProps = {
   id: undefined,
+  cardActions: null,
+  startAction: null,
 };
 
 FolderCard.propTypes = {
@@ -99,6 +101,6 @@ FolderCard.propTypes = {
   children: PropTypes.node.isRequired,
   id: PropTypes.string,
   onDoubleClick: PropTypes.func.isRequired,
-  startAction: PropTypes.element.isRequired,
-  cardActions: PropTypes.element.isRequired,
+  startAction: PropTypes.element,
+  cardActions: PropTypes.element,
 };
