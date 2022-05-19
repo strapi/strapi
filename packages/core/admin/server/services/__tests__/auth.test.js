@@ -112,9 +112,7 @@ describe('Auth', () => {
       const isValid = await validatePassword(password, hash);
       expect(isValid).toBe(true);
     });
-  });
 
-  describe('invalidatePassword', () => {
     test('Compares password with hash', async () => {
       const password = 'pcw123';
       const password2 = 'pcs1234';
