@@ -123,7 +123,7 @@ export const MediaLibrary = () => {
       );
 
   const currentFolder =
-    isFolder && findRecursiveFolderByValue(folderStructure, Number(query.folder));
+    isFolder && findRecursiveFolderByValue(folderStructure, parseInt(query.folder, 10));
   const folderLabel = currentFolder && currentFolder.label;
 
   return (
