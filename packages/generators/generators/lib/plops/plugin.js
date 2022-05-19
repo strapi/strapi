@@ -1,6 +1,7 @@
 'use strict';
 
 const chalk = require('chalk');
+const validateInput = require('./utils/validate-input');
 
 const logInstructions = pluginName => {
   const maxLength = `    resolve: './src/plugins/${pluginName}'`.length;
@@ -32,6 +33,7 @@ module.exports = plop => {
         type: 'input',
         name: 'pluginName',
         message: 'Plugin name',
+        validate: input => validateInput(input),
       },
     ],
     actions(answers) {
