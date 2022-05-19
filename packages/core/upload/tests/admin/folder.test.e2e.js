@@ -244,7 +244,19 @@ describe('Folder', () => {
   });
 
   describe('update', () => {
-    test('rename a folder', async () => {
+    test('Return 404 when folder does not exist', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: '/upload/folders/99999',
+        body: {
+          name: 'new name',
+        },
+      });
+
+      expect(res.status).toBe(404);
+    });
+
+    test('Rename a folder', async () => {
       const folder = await createFolder('folder-name', null);
 
       const res = await rq({
@@ -262,7 +274,7 @@ describe('Folder', () => {
       data.folders.push(res.body.data);
     });
 
-    test('cannot move and rename a folder if duplicated', async () => {
+    test('Cannot move and rename a folder if duplicated', async () => {
       const folder0 = await createFolder('folder-a-0', null);
       const folder1 = await createFolder('folder-a-1', null);
       const folder00 = await createFolder('folder-a-00', folder0.id);
@@ -281,7 +293,7 @@ describe('Folder', () => {
       expect(res.body.error.message).toBe('A folder with this name already exists');
     });
 
-    test('cannot move a folder if duplicated', async () => {
+    test('Cannot move a folder if duplicated', async () => {
       const folder0 = await createFolder('folder-b-0', null);
       const folder1 = await createFolder('folder-b-samename', null);
       await createFolder('folder-b-samename', folder0.id);
@@ -299,7 +311,7 @@ describe('Folder', () => {
       expect(res.body.error.message).toBe('A folder with this name already exists');
     });
 
-    test('cannot move a folder to a folder that does not exist', async () => {
+    test('Cannot move a folder to a folder that does not exist', async () => {
       const folder = await createFolder('folder-c-0', null);
       data.folders.push(folder);
 
@@ -315,7 +327,7 @@ describe('Folder', () => {
       expect(res.body.error.message).toBe('parent folder does not exist');
     });
 
-    test('cannot move a folder inside itself (0 level)', async () => {
+    test('Cannot move a folder inside itself (0 level)', async () => {
       const folder = await createFolder('folder-d-0', null);
       data.folders.push(folder);
 
@@ -331,7 +343,7 @@ describe('Folder', () => {
       expect(res.body.error.message).toBe('folder cannot be moved inside itself');
     });
 
-    test('cannot move a folder inside itself (1 level)', async () => {
+    test('Cannot move a folder inside itself (1 level)', async () => {
       const folder0 = await createFolder('folder-e-0', null);
       const folder00 = await createFolder('folder-e-00', folder0.id);
       data.folders.push(folder0, folder00);
@@ -348,7 +360,7 @@ describe('Folder', () => {
       expect(res.body.error.message).toBe('folder cannot be moved inside itself');
     });
 
-    test('cannot move a folder inside itself (2 levels)', async () => {
+    test('Cannot move a folder inside itself (2 levels)', async () => {
       const folder0 = await createFolder('folder-f-0', null);
       const folder00 = await createFolder('folder-f-00', folder0.id);
       const folder000 = await createFolder('folder-f-000', folder00.id);
@@ -366,7 +378,7 @@ describe('Folder', () => {
       expect(res.body.error.message).toBe('folder cannot be moved inside itself');
     });
 
-    test('move a folder inside another folder', async () => {
+    test('Move a folder inside another folder', async () => {
       const folder0 = await createFolder('folder-0', null);
       const folder00 = await createFolder('folder-00', folder0.id);
       const folder01 = await createFolder('folder-01', folder0.id);
@@ -435,7 +447,7 @@ describe('Folder', () => {
       data.folders.push(...resFolders.body.results);
     });
 
-    test('move a folder to root level', async () => {
+    test('Move a folder to root level', async () => {
       const folder0 = await createFolder('folder-test-0', null);
       const folder00 = await createFolder('folder-test-00', folder0.id);
       const folder02 = await createFolder('folder-test-02', folder0.id);
