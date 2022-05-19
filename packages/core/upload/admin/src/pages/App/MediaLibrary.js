@@ -33,7 +33,6 @@ import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
 import { EmptyAssets } from '../../components/EmptyAssets';
-import { useFolderStructure } from '../../hooks/useFolderStructure';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -63,8 +62,6 @@ export const MediaLibrary = () => {
     enabled: assetsData?.pagination?.page === 1 && !isFiltering,
     query,
   });
-
-  const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure();
 
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
@@ -116,8 +113,7 @@ export const MediaLibrary = () => {
   const assetCount = assets?.length ?? 0;
 
   const isNestedFolder = !!query?.folder;
-  const isLoading =
-    foldersLoading || folderStructureIsLoading || permissionsLoading || assetsLoading;
+  const isLoading = foldersLoading || permissionsLoading || assetsLoading;
 
   return (
     <Layout>
@@ -302,7 +298,6 @@ export const MediaLibrary = () => {
       {showEditFolderDialog && (
         <EditFolderDialog
           onClose={handleEditFolderClose}
-          folderStructure={folderStructure}
           folder={folderToEdit}
           canUpdate={canUpdate}
         />
@@ -315,7 +310,6 @@ export const MediaLibrary = () => {
           canUpdate={canUpdate}
           canCopyLink={canCopyLink}
           canDownload={canDownload}
-          folderStructure={folderStructure}
           trackedLocation="upload"
         />
       )}

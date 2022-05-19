@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+
 import { AssetDialog } from '../AssetDialog';
 import { AssetDefinition } from '../../constants';
 import { CarouselAssets } from './Carousel/CarouselAssets';
+import { EditFolderDialog } from '../EditFolderDialog';
 import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
 import getAllowedFiles from '../../utils/getAllowedFiles';
 
-const Steps = {
-  SelectAsset: 'SelectAsset',
-  UploadAsset: 'UploadAsset',
+const STEPS = {
+  AssetSelect: 'SelectAsset',
+  AssetUpload: 'UploadAsset',
+  FolderCreate: 'FolderCreate',
 };
 
 export const MediaLibraryInput = ({
@@ -96,7 +99,7 @@ export const MediaLibraryInput = ({
 
   const handleAssetDrop = assets => {
     setDroppedAssets(assets);
-    setStep(Steps.UploadAsset);
+    setStep(STEPS.AssetUpload);
   };
 
   let label = intlLabel.id ? formatMessage(intlLabel) : '';
@@ -142,7 +145,7 @@ export const MediaLibraryInput = ({
         label={label}
         onDeleteAsset={handleDeleteAsset}
         onDeleteAssetFromMediaLibrary={handleDeleteAssetFromMediaLibrary}
-        onAddAsset={() => setStep(Steps.SelectAsset)}
+        onAddAsset={() => setStep(STEPS.AssetSelect)}
         onDropAsset={handleAssetDrop}
         onEditAsset={handleAssetEdit}
         onNext={handleNext}
@@ -154,25 +157,30 @@ export const MediaLibraryInput = ({
         trackedLocation="content-manager"
       />
 
-      {step === Steps.SelectAsset && (
+      {step === STEPS.AssetSelect && (
         <AssetDialog
           allowedTypes={fieldAllowedTypes}
           initiallySelectedAssets={initiallySelectedAssets}
           onClose={() => setStep(undefined)}
           onValidate={handleValidation}
           multiple={multiple}
-          onAddAsset={() => setStep(Steps.UploadAsset)}
+          onAddAsset={() => setStep(STEPS.AssetUpload)}
+          onAddFolder={() => setStep(STEPS.FolderCreate)}
           trackedLocation="content-manager"
         />
       )}
 
-      {step === Steps.UploadAsset && (
+      {step === STEPS.AssetUpload && (
         <UploadAssetDialog
-          onClose={() => setStep(Steps.SelectAsset)}
+          onClose={() => setStep(STEPS.AssetSelect)}
           initialAssetsToAdd={droppedAssets}
           addUploadedFiles={handleFilesUploadSucceeded}
           trackedLocation="content-manager"
         />
+      )}
+
+      {step === STEPS.FolderCreate && (
+        <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} />
       )}
     </>
   );
