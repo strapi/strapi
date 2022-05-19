@@ -16,7 +16,7 @@ module.exports = {
       model: FOLDER_MODEL_UID,
     });
 
-    const { results } = await strapi.entityService.findWithRelationCounts(FOLDER_MODEL_UID, {
+    const { results } = await strapi.entityService.findWithRelationCountsPage(FOLDER_MODEL_UID, {
       filters: { id },
       populate: {
         children: {
@@ -25,7 +25,7 @@ module.exports = {
         files: {
           count: true,
         },
-      }
+      },
     });
 
     if (results.length === 0) {
@@ -43,7 +43,7 @@ module.exports = {
       model: FOLDER_MODEL_UID,
     });
 
-    const { results, pagination } = await strapi.entityService.findWithRelationCounts(FOLDER_MODEL_UID, {
+    const results = await strapi.entityService.findWithRelationCounts(FOLDER_MODEL_UID, {
       ...defaultsDeep(
         {
           populate: {
@@ -60,8 +60,7 @@ module.exports = {
     });
 
     ctx.body = {
-      results: await permissionsManager.sanitizeOutput(results),
-      pagination,
+      data: await permissionsManager.sanitizeOutput(results),
     };
   },
   async create(ctx) {

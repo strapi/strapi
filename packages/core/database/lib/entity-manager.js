@@ -617,7 +617,7 @@ const createEntityManager = db => {
         }
 
         if (attribute.joinColumn && attribute.owner) {
-          // handled in the row itslef
+          // handled in the row itself
           continue;
         }
 

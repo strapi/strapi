@@ -113,10 +113,10 @@ describe('Bulk actions for folders & files', () => {
 
       const resFolder = await rq({
         method: 'GET',
-        url: '/upload/folders?pagination[pageSize]=100',
+        url: '/upload/folders',
       });
 
-      const existingfoldersIds = resFolder.body.results.map(f => f.id);
+      const existingfoldersIds = resFolder.body.data.map(f => f.id);
       expect(existingfoldersIds).toEqual(expect.not.arrayContaining([folder1a.id, folder1a1.id]));
       expect(existingfoldersIds).toEqual(expect.arrayContaining([folder1.id, folder1b.id]));
 
@@ -196,12 +196,11 @@ describe('Bulk actions for folders & files', () => {
       });
 
       const {
-        body: { results: folderResults },
+        body: { data: folderResults },
       } = await rq({
         method: 'GET',
-        url: '/upload/folders?pagination[pageSize]=100&populate=parent',
+        url: '/upload/folders',
         qs: {
-          pagination: { pageSize: 100 },
           populate: 'parent',
           sort: 'id:asc',
           filters: { id: { $in: [folder1.id, folder1a.id, folder1b.id, folder1a1.id] } },
@@ -306,12 +305,11 @@ describe('Bulk actions for folders & files', () => {
       });
 
       const {
-        body: { results: folderResults },
+        body: { data: folderResults },
       } = await rq({
         method: 'GET',
-        url: '/upload/folders?pagination[pageSize]=100&populate=parent',
+        url: '/upload/folders?populate=parent',
         qs: {
-          pagination: { pageSize: 100 },
           populate: 'parent',
           sort: 'id:asc',
           filters: { id: { $in: [folder1.id, folder1a.id, folder1a1.id] } },
