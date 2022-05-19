@@ -29,7 +29,7 @@ import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
-import { getTrad, findRecursiveParentFolderId, findRecursiveFolderByValue } from '../../utils';
+import { getTrad, findRecursiveFolderMetadatas } from '../../utils';
 import { Filters } from './components/Filters';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
@@ -108,23 +108,24 @@ export const MediaLibrary = () => {
 
   const assets = assetsData?.results;
   const assetCount = assets?.length ?? 0;
-  const isNestedFolder = !!query?.folder;
 
+  const isNestedFolder = !!query?.folder;
   const isLoading =
     foldersLoading || folderStructureIsLoading || permissionsLoading || assetsLoading;
-  const isFolder = !isLoading && query.folder;
+  const isFolder = !isLoading && isNestedFolder;
 
-  const parentFolderId = isFolder && findRecursiveParentFolderId(folderStructure[0], query.folder);
-  const backQuery = parentFolderId
-    ? stringify({ ...query, folder: parentFolderId }, { encode: false })
+  const folderMetadatas =
+    isFolder && findRecursiveFolderMetadatas(folderStructure[0], query.folder);
+  const backQuery = folderMetadatas
+    ? stringify({ ...query, folder: folderMetadatas.parentId }, { encode: false })
     : stringify(
         { sort: query.sort, page: query.page, pageSize: query.pageSize },
         { encode: false }
       );
-
-  const currentFolder =
-    isFolder && findRecursiveFolderByValue(folderStructure, parseInt(query.folder, 10));
-  const folderLabel = currentFolder && currentFolder.label;
+  const folderLabel =
+    folderMetadatas && folderMetadatas.currentFolderLabel.length > 30
+      ? `${folderMetadatas.currentFolderLabel.slice(0, 25)}...`
+      : folderMetadatas.currentFolderLabel;
 
   return (
     <Layout>
