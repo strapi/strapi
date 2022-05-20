@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
 
 import pluginId from '../pluginId';
-import { axiosInstance, getRequestUrl } from '../utils';
+import { axiosInstance, getRequestUrl, getTrad } from '../utils';
 
 export const useBulkRemove = () => {
   const toggleNotification = useNotification();
@@ -44,8 +44,8 @@ export const useBulkRemove = () => {
       toggleNotification({
         type: 'success',
         message: {
-          id: 'modal.remove.success-label',
-          defaultMessage: 'The folder has been successfully removed.',
+          id: getTrad('modal.remove.success-label'),
+          defaultMessage: 'Changes successfully saved',
         },
       });
     },
