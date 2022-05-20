@@ -23,13 +23,13 @@ describe('Uploads folder (GraphQL)', () => {
     // delete all folders
     const res = await rqAdmin({
       method: 'GET',
-      url: '/upload/folders?pagination[pageSize]=100',
+      url: '/upload/folders',
     });
     await rqAdmin({
       method: 'POST',
       url: '/upload/actions/bulk-delete',
       body: {
-        folderIds: res.body.results.map(f => f.id),
+        folderIds: res.body.data.map(f => f.id),
       },
     });
 
