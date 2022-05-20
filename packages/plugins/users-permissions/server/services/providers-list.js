@@ -244,6 +244,24 @@ module.exports = async ({ provider, access_token, query, providers }) => {
           };
         });
     }
+    case 'authing': {
+      const authing = purest({ provider: 'authing' });
+
+      return authing
+        .get('userinfo')
+        .subdomain(providers.authing.subdomain)
+        .auth(access_token)
+        .request()
+        .then(({ body }) => {
+          const username = body.username || body.nickname || body.name || body.email.split('@')[0];
+          const email = body.email || `${username.replace(/\s+/g, '.')}@strapi.io`;
+
+          return {
+            username,
+            email,
+          };
+        });
+    }
     case 'cas': {
       const cas = purest({ provider: 'cas' });
 

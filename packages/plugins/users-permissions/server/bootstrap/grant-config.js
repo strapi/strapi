@@ -111,6 +111,15 @@ module.exports = baseURL => ({
     callback: `${baseURL}/auth0/callback`,
     scope: ['openid', 'email', 'profile'],
   },
+  authing: {
+    enabled: false,
+    icon: '',
+    key: '',
+    secret: '',
+    subdomain: 'my-tenant',
+    callback: `${baseURL}/authing/callback`,
+    scope: ['openid', 'email', 'profile'],
+  },
   cas: {
     enabled: false,
     icon: 'book',
