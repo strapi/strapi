@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
@@ -37,18 +37,34 @@ export const FolderCard = ({
   startAction,
   cardActions,
   ariaLabel,
-  onDoubleClick,
+  onClick,
   ...props
 }) => {
   const generatedId = useId(id);
+  const cardRef = useRef();
+  const [showCardAction, setShowCardAction] = useState(false);
+
+  const handleBlur = event => {
+    if (!cardRef.current.contains(event.relatedTarget)) {
+      setShowCardAction(false);
+    }
+  };
 
   return (
     <FolderCardContext.Provider value={{ id: generatedId }}>
-      <Box position="relative" {...props}>
+      <Box
+        position="relative"
+        onMouseEnter={() => setShowCardAction(true)}
+        onMouseLeave={() => setShowCardAction(false)}
+        onFocus={() => setShowCardAction(true)}
+        onBlur={handleBlur}
+        ref={cardRef}
+        tabIndex={0}
+        {...props}
+      >
         <FauxClickWrapper
           type="button"
-          onClick={event => event.preventDefault()}
-          onDoubleClick={onDoubleClick}
+          onClick={onClick}
           zIndex={1}
           tabIndex={-1}
           aria-label={ariaLabel}
@@ -83,7 +99,11 @@ export const FolderCard = ({
 
           {children}
 
-          {cardActions && <CardAction right={4}>{cardActions}</CardAction>}
+          {cardActions && showCardAction && (
+            <Box zIndex={3}>
+              <CardAction right={4}>{cardActions}</CardAction>
+            </Box>
+          )}
         </Stack>
       </Box>
     </FolderCardContext.Provider>
@@ -98,7 +118,7 @@ FolderCard.propTypes = {
   ariaLabel: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
   id: PropTypes.string,
-  onDoubleClick: PropTypes.func.isRequired,
+  onClick: PropTypes.func.isRequired,
   startAction: PropTypes.element.isRequired,
   cardActions: PropTypes.element.isRequired,
 };
