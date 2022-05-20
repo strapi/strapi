@@ -42,10 +42,7 @@ function Inputs({
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = fieldSchema.type;
-
-  const errorId = useMemo(() => {
-    return get(formErrors, [keys, 'id'], null);
-  }, [formErrors, keys]);
+  const error = get(formErrors, [keys], null);
 
   const fieldName = useMemo(() => {
     return getFieldName(keys);
@@ -177,7 +174,7 @@ function Inputs({
         description={description ? { id: description, defaultMessage: description } : null}
         intlLabel={{ id: label, defaultMessage: label }}
         labelAction={labelAction}
-        error={errorId}
+        error={error && formatMessage(error)}
         name={keys}
         required={isRequired}
       />
@@ -215,6 +212,7 @@ function Inputs({
         }
         queryInfos={queryInfos}
         value={value}
+        error={error && formatMessage(error)}
       />
     );
   }
@@ -228,7 +226,7 @@ function Inputs({
       isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
       description={description ? { id: description, defaultMessage: description } : null}
       disabled={shouldDisableField}
-      error={errorId}
+      error={error}
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{

@@ -1,13 +1,14 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { useIntl } from 'react-intl';
+import PropTypes from 'prop-types';
 import {
   SubNav,
   SubNavHeader,
   SubNavSection,
   SubNavSections,
   SubNavLink,
-} from '@strapi/design-system/SubNav';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
+} from '@strapi/design-system/v2/SubNav';
 import { getSectionsToDisplay } from '../../utils';
 
 const SettingsNav = ({ menu }) => {
@@ -30,7 +31,7 @@ const SettingsNav = ({ menu }) => {
   });
 
   const label = formatMessage({
-    id: 'app.components.LeftMenuLinkContainer.settings',
+    id: 'global.settings',
     defaultMessage: 'Settings',
   });
 
@@ -41,7 +42,7 @@ const SettingsNav = ({ menu }) => {
         {sections.map(section => (
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
             {section.links.map(link => (
-              <SubNavLink withBullet={link.hasNotification} to={link.to} key={link.id}>
+              <SubNavLink as={NavLink} withBullet={link.hasNotification} to={link.to} key={link.id}>
                 {formatMessage(link.intlLabel)}
               </SubNavLink>
             ))}

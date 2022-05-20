@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
-import { useTracking, CheckPermissions } from '@strapi/helper-plugin';
+import { useTracking, CheckPermissions, LinkButton } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
-import { LinkButton } from '@strapi/design-system/LinkButton';
 import Pencil from '@strapi/icons/Pencil';
 import getTrad from '../../../utils/getTrad';
 import useLayoutDnd from '../../../hooks/useLayoutDnd';

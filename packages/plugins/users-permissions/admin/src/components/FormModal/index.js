@@ -88,7 +88,7 @@ const FormModal = ({
                 endActions={
                   <>
                     <Button type="submit" loading={isSubmiting}>
-                      {formatMessage({ id: 'app.components.Button.save', defaultMessage: 'Save' })}
+                      {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                     </Button>
                   </>
                 }

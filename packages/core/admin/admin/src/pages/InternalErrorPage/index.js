@@ -5,9 +5,8 @@
  *
  */
 import React from 'react';
-import { useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, LinkButton } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
-import { LinkButton } from '@strapi/design-system/LinkButton';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { EmptyStateLayout } from '@strapi/design-system/EmptyStateLayout';
 import EmptyPictures from '@strapi/icons/EmptyPictures';

@@ -17,7 +17,7 @@ const {
   validateSendEmailConfirmationBody,
 } = require('./validation/auth');
 
-const { sanitize } = utils;
+const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
 const { ApplicationError, ValidationError } = utils.errors;
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -34,7 +34,7 @@ module.exports = {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
 
-    const store = await strapi.store({ type: 'plugin', name: 'users-permissions' });
+    const store = strapi.store({ type: 'plugin', name: 'users-permissions' });
 
     if (provider === 'local') {
       if (!_.get(await store.get({ key: 'grant' }), 'email.enabled')) {
@@ -101,22 +101,15 @@ module.exports = {
       }
 
       // Connect the user with the third-party provider.
-      let user;
-      let error;
       try {
-        [user, error] = await getService('providers').connect(provider, ctx.query);
-      } catch ([user, error]) {
+        const user = await getService('providers').connect(provider, ctx.query);
+        ctx.send({
+          jwt: getService('jwt').issue({ id: user.id }),
+          user: await sanitizeUser(user, ctx),
+        });
+      } catch (error) {
         throw new ApplicationError(error.message);
       }
-
-      if (!user) {
-        throw new ApplicationError(error.message);
-      }
-
-      ctx.send({
-        jwt: getService('jwt').issue({ id: user.id }),
-        user: await sanitizeUser(user, ctx),
-      });
     }
   },
 
@@ -243,6 +236,8 @@ module.exports = {
 
     settings.message = await getService('users-permissions').template(settings.message, {
       URL: advanced.email_reset_password,
+      SERVER_URL: getAbsoluteServerUrl(strapi.config),
+      ADMIN_URL: getAbsoluteAdminUrl(strapi.config),
       USER: userInfo,
       TOKEN: resetPasswordToken,
     });
@@ -383,7 +378,7 @@ module.exports = {
       throw new ValidationError('token.invalid');
     }
 
-    const user = await userService.fetch({ confirmationToken }, []);
+    const [user] = await userService.fetchAll({ filters: { confirmationToken } });
 
     if (!user) {
       throw new ValidationError('token.invalid');

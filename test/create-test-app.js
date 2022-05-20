@@ -1,5 +1,7 @@
 'use strict';
 
+process.env.NODE_ENV = 'test';
+
 const yargs = require('yargs');
 const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
 

@@ -40,7 +40,7 @@ const UnauthenticatedLayout = ({ children }) => {
           <LocaleToggle />
         </Box>
       </Flex>
-      <Box paddingTop={11} paddingBottom={11}>
+      <Box paddingTop={2} paddingBottom={11}>
         {children}
       </Box>
     </div>

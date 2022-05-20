@@ -196,6 +196,9 @@ describe('Upload plugin end to end tests', () => {
             profilePicture: {
               data: {
                 id: expect.anything(),
+                attributes: {
+                  provider: 'local',
+                },
               },
             },
           },
@@ -221,6 +224,9 @@ describe('Upload plugin end to end tests', () => {
             profilePicture: {
               data: {
                 id: expect.anything(),
+                attributes: {
+                  provider: 'local',
+                },
               },
             },
           },

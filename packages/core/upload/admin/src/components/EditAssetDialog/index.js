@@ -116,7 +116,7 @@ export const EditAssetDialog = ({
         <ModalLayout onClose={() => handleClose(values)} labelledBy="title">
           <ModalHeader>
             <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-              {formatMessage({ id: getTrad('modal.edit.title'), defaultMessage: 'Details' })}
+              {formatMessage({ id: 'global.details', defaultMessage: 'Details' })}
             </Typography>
           </ModalHeader>
           <ModalBody>
@@ -225,7 +225,7 @@ export const EditAssetDialog = ({
                   loading={isLoading}
                   disabled={formDisabled}
                 >
-                  {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
+                  {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
                 </Button>
               </>
             }
