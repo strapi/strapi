@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Flex } from '@strapi/design-system/Flex';
@@ -12,6 +13,7 @@ import Pencil from '@strapi/icons/Pencil';
 
 import { FolderCard, FolderCardBody, FolderCardCheckbox, FolderCardLink } from '../FolderCard';
 import { FolderDefinition } from '../../constants';
+import { getTrad } from '../../utils';
 
 const CardTitle = styled(Typography).attrs({
   ellipsis: true,
@@ -31,6 +33,8 @@ export const FolderList = ({
   onChangeFolder,
   selectedFolders,
 }) => {
+  const { formatMessage } = useIntl();
+
   return (
     <KeyboardNavigable tagName="article">
       {title && (
@@ -69,7 +73,14 @@ export const FolderList = ({
                 }
                 cardActions={
                   onEditFolder && (
-                    <IconButton icon={<Pencil />} onClick={() => onEditFolder(folder)} />
+                    <IconButton
+                      icon={<Pencil />}
+                      aria-label={formatMessage({
+                        id: getTrad('list.folder.edit'),
+                        defaultMessage: 'Edit folder',
+                      })}
+                      onClick={() => onEditFolder(folder)}
+                    />
                   )
                 }
                 size={size}
