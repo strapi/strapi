@@ -102,12 +102,18 @@ const update = async (id, { name, parent }, { user }) => {
         .first()
         .execute();
 
-      // update parent folder
+      // update parent folder (delete + insert; upsert not possible)
       const joinTable = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent.joinTable;
       await strapi.db
         .queryBuilder(joinTable.name)
         .transacting(trx)
-        .update({ [joinTable.inverseJoinColumn.name]: parent })
+        .delete()
+        .where({ [joinTable.joinColumn.name]: id })
+        .execute();
+      await strapi.db
+        .queryBuilder(joinTable.name)
+        .transacting(trx)
+        .insert({ [joinTable.inverseJoinColumn.name]: parent, [joinTable.joinColumn.name]: id })
         .where({ [joinTable.joinColumn.name]: id })
         .execute();
 
