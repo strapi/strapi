@@ -292,7 +292,11 @@ export const MediaLibrary = () => {
       </Main>
 
       {showUploadAssetDialog && (
-        <UploadAssetDialog onClose={toggleUploadAssetDialog} trackedLocation="upload" />
+        <UploadAssetDialog
+          onClose={toggleUploadAssetDialog}
+          trackedLocation="upload"
+          folderId={query?.folder}
+        />
       )}
 
       {showEditFolderDialog && (
