@@ -6,7 +6,6 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import { useFolderStructure } from '../../../hooks/useFolderStructure';
 import { useFolders } from '../../../hooks/useFolders';
 import { useAssets } from '../../../hooks/useAssets';
 import { MediaLibrary } from '../MediaLibrary';
@@ -61,20 +60,6 @@ jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
     canUpdate: true,
     canCopyLink: true,
     canDownload: true,
-  }),
-}));
-
-jest.mock('../../../hooks/useFolderStructure', () => ({
-  useFolderStructure: jest.fn().mockReturnValue({
-    isLoading: false,
-    error: null,
-    data: {
-      results: {
-        value: null,
-        label: 'Media Library',
-        children: [],
-      },
-    },
   }),
 }));
 
@@ -218,15 +203,6 @@ describe('Media library homepage', () => {
 
     it('shows a loader while resolving folders', () => {
       useFolders.mockReturnValueOnce({ isLoading: true });
-
-      renderML();
-
-      expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('true');
-      expect(screen.getByText('Loading content.')).toBeInTheDocument();
-    });
-
-    it('shows a loader while resolving the folder structure', () => {
-      useFolderStructure.mockReturnValueOnce({ isLoading: true });
 
       renderML();
 
