@@ -9,6 +9,8 @@ export type { Core };
 // Alias to resolve the Strapi global type easily
 export type Strapi = Core.Strapi;
 
+export interface StrapiInterface extends Core.Strapi {};
+
 declare global {
   interface AllTypes {}
 }
