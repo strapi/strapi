@@ -13,6 +13,7 @@ const STEPS = {
 
 export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) => {
   const [step, setStep] = useState(STEPS.AssetSelect);
+  const [folderId, setFolderId] = useState(null);
 
   switch (step) {
     case STEPS.AssetSelect:
@@ -23,15 +24,18 @@ export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) =>
           onValidate={onSelectAssets}
           onAddAsset={() => setStep(STEPS.AssetUpload)}
           onAddFolder={() => setStep(STEPS.FolderCreate)}
+          onChangeFolder={folderId => setFolderId(folderId)}
           multiple
         />
       );
 
     case STEPS.FolderCreate:
-      return <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} />;
+      return (
+        <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} parentFolderId={folderId} />
+      );
 
     default:
-      return <UploadAssetDialog onClose={() => setStep(STEPS.AssetSelect)} />;
+      return <UploadAssetDialog onClose={() => setStep(STEPS.AssetSelect)} folderId={folderId} />;
   }
 };
 
