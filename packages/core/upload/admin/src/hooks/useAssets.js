@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 import pluginId from '../pluginId';
 import { axiosInstance, getRequestUrl } from '../utils';
 
-export const useAssets = ({ skipWhen, query = {} }) => {
+export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
