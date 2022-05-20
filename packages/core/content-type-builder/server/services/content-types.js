@@ -124,7 +124,7 @@ const createContentType = async ({ contentType, components = [] }, options = {})
 };
 
 /**
- * Generate an API squeleton
+ * Generate an API skeleton
  * @param {string} name
  */
 const generateAPI = ({ singularName, kind = 'collectionType', pluralName, displayName }) => {
