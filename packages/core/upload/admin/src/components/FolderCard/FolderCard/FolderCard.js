@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
@@ -31,6 +31,19 @@ const StyledFolder = styled(Folder)`
   }
 `;
 
+const CardActionDisplay = styled(Box)`
+  display: none;
+`;
+
+const Card = styled(Box)`
+  &:hover,
+  &:focus-within {
+    ${CardActionDisplay} {
+      display: ${({ isCardActions }) => (isCardActions ? 'block' : '')};
+    }
+  }
+`;
+
 export const FolderCard = ({
   children,
   id,
@@ -41,27 +54,10 @@ export const FolderCard = ({
   ...props
 }) => {
   const generatedId = useId(id);
-  const cardRef = useRef();
-  const [showCardAction, setShowCardAction] = useState(false);
-
-  const handleBlur = event => {
-    if (!cardRef.current.contains(event.relatedTarget)) {
-      setShowCardAction(false);
-    }
-  };
 
   return (
     <FolderCardContext.Provider value={{ id: generatedId }}>
-      <Box
-        position="relative"
-        onMouseEnter={() => setShowCardAction(true)}
-        onMouseLeave={() => setShowCardAction(false)}
-        onFocus={() => setShowCardAction(true)}
-        onBlur={handleBlur}
-        ref={cardRef}
-        tabIndex={0}
-        {...props}
-      >
+      <Card position="relative" tabIndex={0} isCardActions={!!cardActions} {...props}>
         <FauxClickWrapper
           type="button"
           onClick={onClick}
@@ -99,19 +95,19 @@ export const FolderCard = ({
 
           {children}
 
-          {cardActions && showCardAction && (
-            <Box zIndex={3}>
-              <CardAction right={4}>{cardActions}</CardAction>
-            </Box>
-          )}
+          <CardActionDisplay zIndex={3}>
+            <CardAction right={4}>{cardActions}</CardAction>
+          </CardActionDisplay>
         </Stack>
-      </Box>
+      </Card>
     </FolderCardContext.Provider>
   );
 };
 
 FolderCard.defaultProps = {
   id: undefined,
+  startAction: null,
+  cardActions: null,
 };
 
 FolderCard.propTypes = {
@@ -119,6 +115,6 @@ FolderCard.propTypes = {
   children: PropTypes.node.isRequired,
   id: PropTypes.string,
   onClick: PropTypes.func.isRequired,
-  startAction: PropTypes.element.isRequired,
-  cardActions: PropTypes.element.isRequired,
+  startAction: PropTypes.element,
+  cardActions: PropTypes.element,
 };
