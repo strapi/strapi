@@ -4,13 +4,16 @@ import { StrapiAppProvider, AppInfosContext } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../components/Theme';
+import ThemeToggleProvider from '../../../components/ThemeToggleProvider';
 import { SettingsPage } from '..';
 import { useSettingsMenu } from '../../../hooks';
 
 jest.mock('../../../hooks', () => ({
   useSettingsMenu: jest.fn(() => ({ isLoading: false, menu: [] })),
   useAppInfos: jest.fn(() => ({ shouldUpdateStrapi: false })),
+  useThemeToggle: jest.fn(() => ({ currentTheme: 'light', themes: { light: lightTheme } })),
 }));
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
@@ -24,24 +27,26 @@ jest.mock('react-intl', () => ({
 jest.mock('../pages/ApplicationInfosPage', () => () => <h1>App infos</h1>);
 
 const makeApp = (history, settings) => (
-  <Theme>
-    <AppInfosContext.Provider value={{ shouldUpdateStrapi: false }}>
-      <StrapiAppProvider
-        settings={settings}
-        plugins={{}}
-        getPlugin={jest.fn()}
-        runHookParallel={jest.fn()}
-        runHookWaterfall={jest.fn()}
-        runHookSeries={jest.fn()}
-        menu={[]}
-      >
-        <Router history={history}>
-          <Route path="/settings/:settingId" component={SettingsPage} />
-          <Route path="/settings" component={SettingsPage} />
-        </Router>
-      </StrapiAppProvider>
-    </AppInfosContext.Provider>
-  </Theme>
+  <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+    <Theme>
+      <AppInfosContext.Provider value={{ shouldUpdateStrapi: false }}>
+        <StrapiAppProvider
+          settings={settings}
+          plugins={{}}
+          getPlugin={jest.fn()}
+          runHookParallel={jest.fn()}
+          runHookWaterfall={jest.fn()}
+          runHookSeries={jest.fn()}
+          menu={[]}
+        >
+          <Router history={history}>
+            <Route path="/settings/:settingId" component={SettingsPage} />
+            <Route path="/settings" component={SettingsPage} />
+          </Router>
+        </StrapiAppProvider>
+      </AppInfosContext.Provider>
+    </Theme>
+  </ThemeToggleProvider>
 );
 
 describe('ADMIN | pages | SettingsPage', () => {
@@ -63,7 +68,7 @@ describe('ADMIN | pages | SettingsPage', () => {
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c11 {
+      .c12 {
         padding-bottom: 56px;
       }
 
@@ -72,7 +77,7 @@ describe('ADMIN | pages | SettingsPage', () => {
         grid-template-columns: auto 1fr;
       }
 
-      .c12 {
+      .c13 {
         overflow-x: hidden;
       }
 
@@ -109,6 +114,10 @@ describe('ADMIN | pages | SettingsPage', () => {
       }
 
       .c3 {
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -120,10 +129,20 @@ describe('ADMIN | pages | SettingsPage', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: flex-start;
-        -webkit-box-align: flex-start;
-        -ms-flex-align: flex-start;
-        align-items: flex-start;
+      }
+
+      .c10 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
       .c4 {
@@ -144,22 +163,12 @@ describe('ADMIN | pages | SettingsPage', () => {
         background-color: #dcdce4;
       }
 
-      .c10 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c10 > * {
+      .c11 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c10 > * + * {
+      .c11 > * + * {
         margin-top: 8px;
       }
 
@@ -167,7 +176,7 @@ describe('ADMIN | pages | SettingsPage', () => {
         class="c0"
       >
         <nav
-          aria-label="app.components.LeftMenuLinkContainer.settings"
+          aria-label="global.settings"
           class="c1"
         >
           <div
@@ -179,7 +188,7 @@ describe('ADMIN | pages | SettingsPage', () => {
               <h2
                 class="c4"
               >
-                app.components.LeftMenuLinkContainer.settings
+                global.settings
               </h2>
             </div>
             <div
@@ -194,12 +203,13 @@ describe('ADMIN | pages | SettingsPage', () => {
             class="c9"
           >
             <ul
-              class="c10"
+              class="c10 c11"
+              spacing="2"
             />
           </div>
         </nav>
         <div
-          class="c11 c12"
+          class="c12 c13"
         >
           <h1>
             App infos

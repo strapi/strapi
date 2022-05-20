@@ -45,6 +45,16 @@ const sendMediaMetrics = data => {
   }
 };
 
+const createAndAssignTmpWorkingDirectoryToFiles = async files => {
+  const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+
+  Array.isArray(files)
+    ? files.forEach(file => (file.tmpWorkingDirectory = tmpWorkingDirectory))
+    : (files.tmpWorkingDirectory = tmpWorkingDirectory);
+
+  return tmpWorkingDirectory;
+};
+
 module.exports = ({ strapi }) => ({
   async emitEvent(event, data) {
     const modelDef = strapi.getModel('plugin::upload.file');
@@ -118,10 +128,8 @@ module.exports = ({ strapi }) => ({
 
   async upload({ data, files }, { user } = {}) {
     // create temporary folder to store files for stream manipulation
-    const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
-    Array.isArray(files)
-      ? files.forEach(f => (f.tmpWorkingDirectory = tmpWorkingDirectory))
-      : (files.tmpWorkingDirectory = tmpWorkingDirectory);
+    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
+
     let uploadedFiles = [];
 
     try {
@@ -181,11 +189,11 @@ module.exports = ({ strapi }) => ({
       const { width, height } = await getDimensions(fileData);
 
       _.assign(fileData, {
-        provider: config.provider,
         width,
         height,
       });
     }
+    _.set(fileData, 'provider', config.provider);
 
     return this.add(fileData, { user });
   },
@@ -220,8 +228,8 @@ module.exports = ({ strapi }) => ({
     }
 
     // create temporary folder to store files for stream manipulation
-    const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
-    file.tmpWorkingDirectory = tmpWorkingDirectory;
+    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(file);
+
     let fileData;
 
     try {
@@ -277,11 +285,11 @@ module.exports = ({ strapi }) => ({
         const { width, height } = await getDimensions(fileData);
 
         _.assign(fileData, {
-          provider: config.provider,
           width,
           height,
         });
       }
+      _.set(fileData, 'provider', config.provider);
     } finally {
       // delete temporary folder
       await fse.remove(tmpWorkingDirectory);
@@ -359,22 +367,31 @@ module.exports = ({ strapi }) => ({
   async uploadToEntity(params, files) {
     const { id, model, field } = params;
 
-    const arr = Array.isArray(files) ? files : [files];
-    const enhancedFiles = await Promise.all(
-      arr.map(file => {
-        return this.enhanceFile(
-          file,
-          {},
-          {
-            refId: id,
-            ref: model,
-            field,
-          }
-        );
-      })
-    );
+    // create temporary folder to store files for stream manipulation
+    const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
 
-    await Promise.all(enhancedFiles.map(file => this.uploadFileAndPersist(file)));
+    const arr = Array.isArray(files) ? files : [files];
+
+    try {
+      const enhancedFiles = await Promise.all(
+        arr.map(file => {
+          return this.enhanceFile(
+            file,
+            {},
+            {
+              refId: id,
+              ref: model,
+              field,
+            }
+          );
+        })
+      );
+
+      await Promise.all(enhancedFiles.map(file => this.uploadFileAndPersist(file)));
+    } finally {
+      // delete temporary folder
+      await fse.remove(tmpWorkingDirectory);
+    }
   },
 
   getSettings() {

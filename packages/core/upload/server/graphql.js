@@ -2,6 +2,7 @@
 
 const path = require('path');
 const os = require('os');
+const mime = require('mime-types');
 const fse = require('fs-extra');
 const { getStreamSize } = require('./utils/file');
 
@@ -32,7 +33,7 @@ module.exports = ({ strapi }) => {
   const fileTypeName = getTypeName(fileModel);
   const fileEntityResponseType = getEntityResponseName(fileModel);
 
-  const { optimize } = getUploadService('image-manipulation');
+  const { optimize, isSupportedImage } = getUploadService('image-manipulation');
 
   /**
    * Optimize and format a file using the upload services
@@ -45,11 +46,14 @@ module.exports = ({ strapi }) => {
   const formatFile = async (upload, extraInfo, metas) => {
     const uploadService = getUploadService('upload');
     const { filename, mimetype, createReadStream } = await upload;
-
     const currentFile = uploadService.formatFileInfo(
       {
         filename,
-        type: mimetype,
+        /**
+         * in case the mime-type wasn't sent, Strapi tries to guess it
+         * from the file extension, to avoid a corrupt database state
+         */
+        type: mimetype || mime.lookup(filename) || 'application/octet-stream',
         size: await getStreamSize(createReadStream()),
       },
       extraInfo || {},
@@ -57,8 +61,11 @@ module.exports = ({ strapi }) => {
     );
     currentFile.getStream = createReadStream;
 
-    const newFile = await optimize(currentFile);
-    return newFile;
+    if (!(await isSupportedImage(currentFile))) {
+      return currentFile;
+    }
+
+    return optimize(currentFile);
   };
 
   /**

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
-.c16 {
+.c18 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -13,12 +13,16 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c10 {
+.c12 {
   width: 100%;
   height: 100%;
 }
 
-.c11 {
+.c13 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -30,31 +34,27 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
-.c12 {
+.c14 {
   color: #4945ff;
   margin-bottom: 12px;
   width: 30px;
   height: 24px;
 }
 
-.c13 path {
+.c15 path {
   fill: #4945ff;
 }
 
-.c14 {
+.c16 {
   font-weight: 600;
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c2 {
+.c4 {
   background: #f6f6f9;
   padding: 8px;
   border-radius: 4px;
@@ -62,28 +62,60 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   border: 1px solid #dcdce4;
 }
 
-.c3 {
+.c5 {
   position: relative;
 }
 
-.c5 {
+.c7 {
   padding-right: 8px;
   padding-left: 8px;
   width: 100%;
 }
 
-.c7 {
+.c9 {
   height: 124px;
 }
 
-.c1 {
+.c2 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c8 {
+.c0 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c10 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -95,49 +127,35 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
-.c4 {
+.c6 {
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas: 'startAction slides endAction';
 }
 
-.c6 {
+.c8 {
   grid-area: slides;
 }
 
-.c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c0 > * {
+.c1 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c0 > * + * {
+.c1 > * + * {
   margin-top: 4px;
 }
 
-.c9 {
+.c11 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
 }
 
-.c15 {
+.c17 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -147,40 +165,45 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
 <body>
   <div>
     <div
-      class="c0"
+      class="c0 c1"
+      spacing="1"
     >
       <label
-        class="c1"
+        class="c2"
         for="carouselinput-1"
       >
-        default
+        <div
+          class="c3"
+        >
+          default
+        </div>
       </label>
       <div
         class=""
         id="carouselinput-1"
       >
         <div
-          class="c2"
+          class="c4"
         >
           <section
             aria-label="default"
             aria-roledescription="carousel"
-            class="c3 c4"
+            class="c5 c6"
           >
             <div
               aria-live="polite"
-              class="c5 c6"
+              class="c7 c8"
               width="100%"
             >
               <div
                 aria-label="upload.mediaLibraryInput.slideCount"
                 aria-roledescription="slide"
-                class="c7 c8 c9"
+                class="c9 c10 c11"
                 height="124px"
                 role="group"
               >
                 <button
-                  class="c10 c11"
+                  class="c12 c13"
                   height="100%"
                   style="cursor: pointer;"
                   type="button"
@@ -188,7 +211,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
                 >
                   <svg
                     aria-hidden="true"
-                    class="c12 c13"
+                    class="c14 c15"
                     fill="none"
                     height="24px"
                     viewBox="0 0 24 20"
@@ -205,7 +228,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
                     />
                   </svg>
                   <span
-                    class="c14 c15"
+                    class="c16 c17"
                     style="text-align: center;"
                   >
                     upload.mediaLibraryInput.placeholder
@@ -219,7 +242,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    class="c16"
+    class="c18"
   >
     <p
       aria-live="polite"

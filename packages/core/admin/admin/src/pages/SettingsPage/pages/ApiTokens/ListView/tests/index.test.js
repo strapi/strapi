@@ -5,8 +5,10 @@ import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { useRBAC } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import { axiosInstance } from '../../../../../../core/utils';
 import Theme from '../../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import ListView from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -49,13 +51,15 @@ const makeApp = history => {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-        <Theme>
-          <Router history={history}>
-            <Route path="/settings/api-tokens">
-              <ListView />
-            </Route>
-          </Router>
-        </Theme>
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+          <Theme>
+            <Router history={history}>
+              <Route path="/settings/api-tokens">
+                <ListView />
+              </Route>
+            </Router>
+          </Theme>
+        </ThemeToggleProvider>
       </IntlProvider>
     </QueryClientProvider>
   );
@@ -84,6 +88,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       }
 
       .c34 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -95,10 +103,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         -webkit-justify-content: end;
         -ms-flex-pack: end;
         justify-content: end;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c25 {
@@ -217,6 +221,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
       .c14 {
         overflow: hidden;
+        border: 1px solid #eaeaef;
       }
 
       .c18 {
@@ -282,6 +287,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       }
 
       .c22 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -289,10 +298,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c21 {
@@ -353,72 +358,63 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         width: 1px;
       }
 
-      .c27 {
-        -webkit-transform: rotate(180deg);
-        -ms-transform: rotate(180deg);
-        transform: rotate(180deg);
+      .c37 {
+        color: #4945ff;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c12 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c2 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
+      .c35 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c3 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c4 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c11 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
-      .c0:focus-visible {
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
         outline: none;
+      }
+
+      .c35 svg path {
+        fill: #4945ff;
+      }
+
+      .c35 svg {
+        font-size: 0.625rem;
+      }
+
+      .c35:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c35:focus-visible {
+        outline: none;
+      }
+
+      .c35:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
       }
 
       .c10 {
@@ -493,10 +489,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       .c6 {
         padding: 10px 16px;
         background: #4945ff;
-        border: none;
-        border-radius: 4px;
         border: 1px solid #4945ff;
-        background: #4945ff;
+        border-radius: 4px;
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -558,63 +552,77 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         background: #4945ff;
       }
 
-      .c37 {
-        color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+      .c6 svg > g,
+      .c6 svg path {
+        fill: #ffffff;
       }
 
-      .c35 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
+      .c27 {
+        -webkit-transform: rotate(180deg);
+        -ms-transform: rotate(180deg);
+        transform: rotate(180deg);
+      }
+
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c12 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        position: relative;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c4 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+      }
+
+      .c11 {
+        color: #666687;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .c0:focus-visible {
         outline: none;
-      }
-
-      .c35 svg path {
-        fill: #4945ff;
-      }
-
-      .c35 svg {
-        font-size: 0.625rem;
-      }
-
-      .c35:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c35:focus-visible {
-        outline: none;
-      }
-
-      .c35:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
       }
 
       .c36 svg path {

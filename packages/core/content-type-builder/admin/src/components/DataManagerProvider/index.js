@@ -541,10 +541,6 @@ const DataManagerProvider = ({
         addAttribute,
         addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(components, ['category']),
-        allComponentsIconAlreadyTaken: retrieveSpecificInfoFromComponents(components, [
-          'schema',
-          'icon',
-        ]),
         allIcons,
         changeDynamicZoneComponents,
         components,
@@ -600,9 +596,6 @@ DataManagerProvider.propTypes = {
 };
 
 const mapStateToProps = makeSelectDataManagerProvider();
-const withConnect = connect(
-  mapStateToProps,
-  null
-);
+const withConnect = connect(mapStateToProps, null);
 
 export default compose(withConnect)(memo(DataManagerProvider));

@@ -9,13 +9,13 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
+  Link,
 } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Main } from '@strapi/design-system/Main';
-import { Link } from '@strapi/design-system/Link';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
@@ -130,7 +130,7 @@ const CreatePage = () => {
             <>
               <HeaderLayout
                 primaryAction={
-                  <Stack horizontal size={2}>
+                  <Stack horizontal spacing={2}>
                     <Button
                       variant="secondary"
                       onClick={() => {
@@ -146,7 +146,7 @@ const CreatePage = () => {
                     </Button>
                     <Button onClick={handleSubmit} loading={isSubmitting} size="L">
                       {formatMessage({
-                        id: 'app.components.Button.save',
+                        id: 'global.save',
                         defaultMessage: 'Save',
                       })}
                     </Button>
@@ -163,22 +163,22 @@ const CreatePage = () => {
                 navigationAction={
                   <Link startIcon={<ArrowLeft />} to="/settings/roles">
                     {formatMessage({
-                      id: 'app.components.go-back',
+                      id: 'global.back',
                       defaultMessage: 'Back',
                     })}
                   </Link>
                 }
               />
               <ContentLayout>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                    <Stack size={4}>
+                    <Stack spacing={4}>
                       <Flex justifyContent="space-between">
                         <Box>
                           <Box>
                             <Typography fontWeight="bold">
                               {formatMessage({
-                                id: 'Settings.roles.form.title',
+                                id: 'global.details',
                                 defaultMessage: 'Details',
                               })}
                             </Typography>
@@ -209,7 +209,7 @@ const CreatePage = () => {
                             name="name"
                             error={errors.name && formatMessage({ id: errors.name })}
                             label={formatMessage({
-                              id: 'Settings.roles.form.input.name',
+                              id: 'global.name',
                               defaultMessage: 'Name',
                             })}
                             onChange={handleChange}
@@ -219,7 +219,7 @@ const CreatePage = () => {
                         <GridItem col={6}>
                           <Textarea
                             label={formatMessage({
-                              id: 'Settings.roles.form.input.description',
+                              id: 'global.description',
                               defaultMessage: 'Description',
                             })}
                             name="description"

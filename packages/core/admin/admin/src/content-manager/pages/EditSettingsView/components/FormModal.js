@@ -72,7 +72,7 @@ const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type }) => 
           }
           endActions={
             <Button type="submit">
-              {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
+              {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
             </Button>
           }
         />

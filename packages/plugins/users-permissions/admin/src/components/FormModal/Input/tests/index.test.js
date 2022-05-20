@@ -34,14 +34,25 @@ describe('<Input />', () => {
     } = render(makeApp('test', 'text', 'test'));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c2 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
+      .c0 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
-      .c1 {
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -49,13 +60,13 @@ describe('<Input />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -67,59 +78,63 @@ describe('<Input />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c5 {
+      .c2 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c6 {
         border: none;
         border-radius: 4px;
+        padding-bottom: 0.65625rem;
         padding-left: 16px;
         padding-right: 16px;
+        padding-top: 0.65625rem;
         color: #32324d;
         font-weight: 400;
         font-size: 0.875rem;
         display: block;
         width: 100%;
-      }
-
-      .c5::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c5::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c5:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c5::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c5[aria-disabled='true'] {
         background: inherit;
+      }
+
+      .c6::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c6::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c6:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c6::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c6[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c5:focus {
+      .c6:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c4 {
+      .c5 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
-        height: 2.5rem;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -128,53 +143,44 @@ describe('<Input />', () => {
         transition-duration: 0.2s;
       }
 
-      .c4:focus-within {
+      .c5:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c0 > * {
+      .c1 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c0 > * + * {
+      .c1 > * + * {
         margin-top: 4px;
       }
 
       <div>
         <div>
           <div
-            class="c0"
+            class="c0 c1"
+            spacing="1"
           >
-            <div
-              class="c1"
+            <label
+              class="c2"
+              for="textinput-1"
             >
-              <label
-                class="c2"
-                for="textinput-1"
+              <div
+                class="c3"
               >
                 Enabled
-              </label>
-            </div>
+              </div>
+            </label>
             <div
-              class="c3 c4"
+              class="c4 c5"
             >
               <input
                 aria-disabled="false"
                 aria-invalid="false"
                 aria-label="test"
-                class="c5"
+                class="c6"
                 id="textinput-1"
                 name="test"
                 placeholder=""
@@ -191,7 +197,7 @@ describe('<Input />', () => {
   it('should set the value correctly when the input\'s name is "noName"', () => {
     const { getByLabelText } = render(makeApp('noName', 'text', 'test'));
 
-    expect(getByLabelText('noName').value).toBe(`${strapi.backendURL}/connect/email/callback`);
+    expect(getByLabelText('noName').value).toBe(`${strapi.backendURL}/api/connect/email/callback`);
   });
 
   it('should display the toggleCheckbox correctly', () => {

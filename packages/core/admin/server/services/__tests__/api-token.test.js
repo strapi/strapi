@@ -54,8 +54,8 @@ describe('API Token', () => {
     });
   });
 
-  describe('createSaltIfNotDefined', () => {
-    test('It does nothing if the salt is alread defined', () => {
+  describe('checkSaltIsDefined', () => {
+    test('It does nothing if the salt is already defined', () => {
       const mockedAppendFile = jest.fn();
       const mockedConfigSet = jest.fn();
 
@@ -66,37 +66,28 @@ describe('API Token', () => {
           })),
           set: mockedConfigSet,
         },
-        fs: { appendFile: mockedAppendFile },
       };
 
-      apiTokenService.createSaltIfNotDefined();
+      apiTokenService.checkSaltIsDefined();
 
       expect(mockedAppendFile).not.toHaveBeenCalled();
       expect(mockedConfigSet).not.toHaveBeenCalled();
     });
 
-    test('It creates a new salt, appends it to the .env file and sets it in the configuration', () => {
-      const mockedAppendFile = jest.fn();
-      const mockedConfigSet = jest.fn();
-
+    test('It throws if the salt if the salt is not defined', () => {
       global.strapi = {
         config: {
           get: jest.fn(() => null),
-          set: mockedConfigSet,
         },
-        fs: { appendFile: mockedAppendFile },
       };
 
-      apiTokenService.createSaltIfNotDefined();
+      try {
+        apiTokenService.checkSaltIsDefined();
+      } catch (e) {
+        expect(e.message.includes('Missing apiToken.salt.')).toBe(true);
+      }
 
-      expect(mockedAppendFile).toHaveBeenCalledWith(
-        '.env',
-        `API_TOKEN_SALT=${mockedApiToken.hexedString}\n`
-      );
-      expect(mockedConfigSet).toHaveBeenCalledWith(
-        'admin.apiToken.salt',
-        mockedApiToken.hexedString
-      );
+      expect.assertions(1);
     });
 
     test('It throws an error if the env variable used in the config file has been changed and is empty', () => {

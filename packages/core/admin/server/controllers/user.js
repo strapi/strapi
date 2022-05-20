@@ -36,6 +36,10 @@ module.exports = {
 
     const userInfo = getService('user').sanitizeUser(createdUser);
 
+    // Note: We need to assign manually the registrationToken to the
+    // final user payload so that it's not removed in the sanitation process.
+    Object.assign(userInfo, { registrationToken: createdUser.registrationToken });
+
     // Send 201 created
     ctx.created({ data: userInfo });
   },

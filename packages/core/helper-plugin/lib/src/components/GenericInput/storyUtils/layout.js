@@ -54,7 +54,7 @@ const layout = [
   [
     {
       intlLabel: {
-        id: 'Auth.form.password.label',
+        id: 'global.password',
         defaultMessage: 'Password',
       },
       name: 'password',
@@ -69,15 +69,43 @@ const layout = [
     {
       intlLabel: {
         id: 'Auth.form.active.label',
-        defaultMessage: 'Active',
+        defaultMessage: 'Boolean: Nullable',
       },
-      name: 'isActive',
+      isNullable: true,
+      name: 'isNullable',
       type: 'bool',
       size: {
-        col: 6,
+        col: 2,
         xs: 12,
       },
     },
+
+    {
+      intlLabel: {
+        id: 'Auth.form.active.label',
+        defaultMessage: 'Boolean: Active by default',
+      },
+      name: 'isActiveByDefault',
+      type: 'bool',
+      size: {
+        col: 2,
+        xs: 12,
+      },
+    },
+
+    {
+      intlLabel: {
+        id: 'Auth.form.inactive.label',
+        defaultMessage: 'Boolean: Inactive by default',
+      },
+      name: 'isInactiveByDefault',
+      type: 'bool',
+      size: {
+        col: 2,
+        xs: 12,
+      },
+    },
+
     {
       name: 'private',
       type: 'checkbox',
@@ -93,7 +121,6 @@ const layout = [
         id: 'form.attribute.item.privateField.description',
         defaultMessage: 'This field will not show up in the API response',
       },
-      // validations: {},
     },
     {
       intlLabel: { id: 'meal', defaultMessage: 'meal' },

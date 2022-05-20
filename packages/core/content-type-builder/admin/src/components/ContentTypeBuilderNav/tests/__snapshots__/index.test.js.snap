@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
-.c40 {
+.c41 {
   padding-bottom: 56px;
 }
 
@@ -10,11 +10,11 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   grid-template-columns: auto 1fr;
 }
 
-.c41 {
+.c42 {
   overflow-x: hidden;
 }
 
-.c42 {
+.c43 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -26,7 +26,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c30 {
+.c31 {
   padding-left: 32px;
 }
 
@@ -50,36 +50,36 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-bottom: 16px;
 }
 
-.c14 {
+.c15 {
   padding-top: 8px;
   padding-right: 16px;
   padding-bottom: 8px;
   padding-left: 24px;
 }
 
-.c19 {
+.c20 {
   padding-right: 4px;
 }
 
-.c22 {
+.c23 {
   background: #eaeaef;
   padding: 4px;
   border-radius: 4px;
   min-width: 20px;
 }
 
-.c25 {
+.c26 {
   background: #f6f6f9;
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 32px;
 }
 
-.c28 {
+.c29 {
   padding-left: 8px;
 }
 
-.c35 {
+.c36 {
   padding-top: 8px;
   padding-right: 16px;
   padding-bottom: 8px;
@@ -99,24 +99,10 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c3 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
   -webkit-align-items: flex-start;
   -webkit-box-align: flex-start;
   -ms-flex-align: flex-start;
   align-items: flex-start;
-}
-
-.c16 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -128,13 +114,27 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
+}
+
+.c13 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c17 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c17 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -142,13 +142,31 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c18 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c23 {
+.c24 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -160,10 +178,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
 .c5 {
@@ -173,7 +187,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   line-height: 1.22;
 }
 
-.c20 {
+.c21 {
   color: #666687;
   font-weight: 600;
   font-size: 0.6875rem;
@@ -181,13 +195,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   text-transform: uppercase;
 }
 
-.c29 {
+.c30 {
   color: #32324d;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c39 {
+.c40 {
   font-weight: 500;
   color: #32324d;
   font-size: 0.875rem;
@@ -303,7 +317,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   background-color: #dcdce4;
 }
 
-.c26 {
+.c27 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -321,50 +335,50 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c26 svg > * {
+.c27 svg > * {
   fill: #666687;
 }
 
-.c26.active {
+.c27.active {
   background-color: #f0f0ff;
   border-right: 2px solid #4945ff;
 }
 
-.c26.active svg > * {
+.c27.active svg > * {
   fill: #271fe0;
 }
 
-.c26.active .c4 {
+.c27.active .c4 {
   color: #271fe0;
   font-weight: 500;
 }
 
-.c26:focus-visible {
+.c27:focus-visible {
   outline-offset: -2px;
 }
 
-.c27 {
+.c28 {
   width: 0.75rem;
   height: 0.25rem;
 }
 
-.c27 * {
+.c28 * {
   fill: #666687;
 }
 
-.c36 {
+.c37 {
   max-height: 2rem;
 }
 
-.c36 svg {
+.c37 svg {
   height: 0.25rem;
 }
 
-.c36 svg path {
+.c37 svg path {
   fill: #4a4a6a;
 }
 
-.c37 {
+.c38 {
   border: none;
   padding: 0;
   background: transparent;
@@ -378,7 +392,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c38 {
+.c39 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -393,13 +407,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   transform: rotateX(0deg);
 }
 
-.c18 {
+.c19 {
   border: none;
   padding: 0;
   background: transparent;
 }
 
-.c21 {
+.c22 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -413,19 +427,19 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   transform: rotateX(0deg);
 }
 
-.c15 {
+.c16 {
   max-height: 2rem;
 }
 
-.c15 svg {
+.c16 svg {
   height: 0.25rem;
 }
 
-.c15 svg path {
+.c16 svg path {
   fill: #8e8ea9;
 }
 
-.c24 {
+.c25 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -436,36 +450,30 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c13 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c13 > * {
+.c14 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c13 > * + * {
+.c14 > * + * {
   margin-top: 8px;
 }
 
-.c33 {
+.c34 {
   padding-right: 8px;
 }
 
-.c34 {
+.c35 {
   color: #4945ff;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c31 {
+.c32 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -473,28 +481,24 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
-.c32 {
+.c33 {
   background: transparent;
   border: none;
   position: relative;
   outline: none;
 }
 
-.c32[aria-disabled='true'] {
+.c33[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c32[aria-disabled='true'] svg path {
+.c33[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c32 svg {
+.c33 svg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -502,11 +506,11 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   font-size: 0.625rem;
 }
 
-.c32 svg path {
+.c33 svg path {
   fill: #4945ff;
 }
 
-.c32:after {
+.c33:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -521,11 +525,11 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c32:focus-visible {
+.c33:focus-visible {
   outline: none;
 }
 
-.c32:focus-visible:after {
+.c33:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -592,592 +596,613 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
         class="c12"
       >
         <ul
-          class="c13"
+          class="c13 c14"
+          spacing="2"
         >
           <li>
             <div
-              class="c14 c15"
+              class=""
             >
               <div
-                class="c16"
+                class="c15 c16"
               >
-                <button
-                  aria-controls="subnav-list-4"
-                  aria-expanded="true"
-                  class="c17 c18"
+                <div
+                  class="c17"
                 >
+                  <button
+                    aria-controls="subnav-list-4"
+                    aria-expanded="true"
+                    class="c18 c19"
+                  >
+                    <div
+                      class="c20"
+                    >
+                      <span
+                        class="c4 c21"
+                      >
+                        content-type-builder.menu.section.models.name.
+                      </span>
+                    </div>
+                    <div
+                      class="c22"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 14 8"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          clip-rule="evenodd"
+                          d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                          fill="#32324D"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </button>
                   <div
-                    class="c19"
+                    class="c23 c24 c25"
                   >
                     <span
-                      class="c4 c20"
+                      class="c4 c21"
                     >
-                      content-type-builder.menu.section.models.name.
+                      2
                     </span>
                   </div>
-                  <div
-                    class="c21"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      fill="none"
-                      height="1em"
-                      viewBox="0 0 14 8"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                        fill="#32324D"
-                        fill-rule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                </button>
-                <div
-                  class="c22 c23 c24"
-                >
-                  <span
-                    class="c4 c20"
-                  >
-                    2
-                  </span>
                 </div>
               </div>
+              <ul
+                id="subnav-list-4"
+              >
+                <li>
+                  <a
+                    class="c26 c27"
+                    href="/plugins/content-type-builder/content-types/application::address.address"
+                  >
+                    <div
+                      class="c18"
+                    >
+                      <svg
+                        class="c28"
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 4 4"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect
+                          fill="#A5A5BA"
+                          height="4"
+                          rx="2"
+                          width="4"
+                        />
+                      </svg>
+                      <div
+                        class="c29"
+                      >
+                        <span
+                          class="c4 c30"
+                        >
+                          Address
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="c26 c27"
+                    href="/plugins/content-type-builder/content-types/application::category.category"
+                  >
+                    <div
+                      class="c18"
+                    >
+                      <svg
+                        class="c28"
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 4 4"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect
+                          fill="#A5A5BA"
+                          height="4"
+                          rx="2"
+                          width="4"
+                        />
+                      </svg>
+                      <div
+                        class="c29"
+                      >
+                        <span
+                          class="c4 c30"
+                        >
+                          Category
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              </ul>
             </div>
-            <ul
-              id="subnav-list-4"
+            <div
+              class="c31"
             >
-              <li>
-                <a
-                  class="c25 c26"
-                  href="/plugins/content-type-builder/content-types/application::address.address"
-                >
-                  <div
-                    class="c17"
-                  >
-                    <svg
-                      class="c27"
-                      fill="none"
-                      height="1em"
-                      viewBox="0 0 4 4"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <rect
-                        fill="#A5A5BA"
-                        height="4"
-                        rx="2"
-                        width="4"
-                      />
-                    </svg>
-                    <div
-                      class="c28"
-                    >
-                      <span
-                        class="c4 c29"
-                      >
-                        Address
-                      </span>
-                    </div>
-                  </div>
-                </a>
-              </li>
-              <li>
-                <a
-                  class="c25 c26"
-                  href="/plugins/content-type-builder/content-types/application::category.category"
-                >
-                  <div
-                    class="c17"
-                  >
-                    <svg
-                      class="c27"
-                      fill="none"
-                      height="1em"
-                      viewBox="0 0 4 4"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <rect
-                        fill="#A5A5BA"
-                        height="4"
-                        rx="2"
-                        width="4"
-                      />
-                    </svg>
-                    <div
-                      class="c28"
-                    >
-                      <span
-                        class="c4 c29"
-                      >
-                        Category
-                      </span>
-                    </div>
-                  </div>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li
-            class="c30"
-          >
-            <button
-              aria-disabled="false"
-              class="c31 c32"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="c33"
+              <button
+                aria-disabled="false"
+                class="c32 c33"
+                type="button"
               >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
+                <span
+                  aria-hidden="true"
+                  class="c34"
                 >
-                  <path
-                    d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
-                    fill="#212134"
-                  />
-                </svg>
-              </span>
-              <span
-                class="c34"
-              >
-                Create new collection type
-              </span>
-            </button>
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </span>
+                <span
+                  class="c35"
+                >
+                  Create new collection type
+                </span>
+              </button>
+            </div>
           </li>
           <li>
             <div
-              class="c14 c15"
+              class=""
             >
               <div
-                class="c16"
+                class="c15 c16"
               >
-                <button
-                  aria-controls="subnav-list-5"
-                  aria-expanded="true"
-                  class="c17 c18"
-                >
-                  <div
-                    class="c19"
-                  >
-                    <span
-                      class="c4 c20"
-                    >
-                      content-type-builder.menu.section.single-types.name.
-                    </span>
-                  </div>
-                  <div
-                    class="c21"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      fill="none"
-                      height="1em"
-                      viewBox="0 0 14 8"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                        fill="#32324D"
-                        fill-rule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                </button>
                 <div
-                  class="c22 c23 c24"
+                  class="c17"
                 >
-                  <span
-                    class="c4 c20"
+                  <button
+                    aria-controls="subnav-list-5"
+                    aria-expanded="true"
+                    class="c18 c19"
                   >
-                    1
-                  </span>
-                </div>
-              </div>
-            </div>
-            <ul
-              id="subnav-list-5"
-            >
-              <li>
-                <a
-                  class="c25 c26"
-                  href="/plugins/content-type-builder/content-types/application::homepage.homepage"
-                >
-                  <div
-                    class="c17"
-                  >
-                    <svg
-                      class="c27"
-                      fill="none"
-                      height="1em"
-                      viewBox="0 0 4 4"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <rect
-                        fill="#A5A5BA"
-                        height="4"
-                        rx="2"
-                        width="4"
-                      />
-                    </svg>
                     <div
-                      class="c28"
+                      class="c20"
                     >
                       <span
-                        class="c4 c29"
+                        class="c4 c21"
                       >
-                        Homepage
+                        content-type-builder.menu.section.single-types.name.
                       </span>
                     </div>
+                    <div
+                      class="c22"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 14 8"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          clip-rule="evenodd"
+                          d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                          fill="#32324D"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </button>
+                  <div
+                    class="c23 c24 c25"
+                  >
+                    <span
+                      class="c4 c21"
+                    >
+                      1
+                    </span>
                   </div>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li
-            class="c30"
-          >
-            <button
-              aria-disabled="false"
-              class="c31 c32"
-              type="button"
+                </div>
+              </div>
+              <ul
+                id="subnav-list-5"
+              >
+                <li>
+                  <a
+                    class="c26 c27"
+                    href="/plugins/content-type-builder/content-types/application::homepage.homepage"
+                  >
+                    <div
+                      class="c18"
+                    >
+                      <svg
+                        class="c28"
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 4 4"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect
+                          fill="#A5A5BA"
+                          height="4"
+                          rx="2"
+                          width="4"
+                        />
+                      </svg>
+                      <div
+                        class="c29"
+                      >
+                        <span
+                          class="c4 c30"
+                        >
+                          Homepage
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div
+              class="c31"
             >
-              <span
-                aria-hidden="true"
-                class="c33"
+              <button
+                aria-disabled="false"
+                class="c32 c33"
+                type="button"
               >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
+                <span
+                  aria-hidden="true"
+                  class="c34"
                 >
-                  <path
-                    d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
-                    fill="#212134"
-                  />
-                </svg>
-              </span>
-              <span
-                class="c34"
-              >
-                Create new single type
-              </span>
-            </button>
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </span>
+                <span
+                  class="c35"
+                >
+                  Create new single type
+                </span>
+              </button>
+            </div>
           </li>
           <li>
             <div
-              class="c14 c15"
+              class=""
             >
               <div
-                class="c16"
+                class="c15 c16"
               >
-                <button
-                  aria-controls="subnav-list-6"
-                  aria-expanded="true"
-                  class="c17 c18"
+                <div
+                  class="c17"
                 >
+                  <button
+                    aria-controls="subnav-list-6"
+                    aria-expanded="true"
+                    class="c18 c19"
+                  >
+                    <div
+                      class="c20"
+                    >
+                      <span
+                        class="c4 c21"
+                      >
+                        content-type-builder.menu.section.components.name.
+                      </span>
+                    </div>
+                    <div
+                      class="c22"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 14 8"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          clip-rule="evenodd"
+                          d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                          fill="#32324D"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </button>
                   <div
-                    class="c19"
+                    class="c23 c24 c25"
                   >
                     <span
-                      class="c4 c20"
+                      class="c4 c21"
                     >
-                      content-type-builder.menu.section.components.name.
+                      2
                     </span>
                   </div>
-                  <div
-                    class="c21"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      fill="none"
-                      height="1em"
-                      viewBox="0 0 14 8"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                        fill="#32324D"
-                        fill-rule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                </button>
-                <div
-                  class="c22 c23 c24"
-                >
-                  <span
-                    class="c4 c20"
-                  >
-                    2
-                  </span>
                 </div>
               </div>
+              <ul
+                id="subnav-list-6"
+              >
+                <li>
+                  <div
+                    class=""
+                  >
+                    <div
+                      class="c36 c37"
+                    >
+                      <div
+                        class="c17"
+                      >
+                        <button
+                          aria-controls="subnav-list-7"
+                          aria-expanded="true"
+                          class="c38"
+                        >
+                          <div
+                            class="c39"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 14 8"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                fill="#32324D"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                          <div
+                            class="c29"
+                          >
+                            <span
+                              class="c4 c40"
+                            >
+                              Basic
+                            </span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                    <ul
+                      id="subnav-list-7"
+                    >
+                      <li>
+                        <a
+                          class="c26 c27"
+                          href="/plugins/content-type-builder/component-categories/basic/basic.simple"
+                        >
+                          <div
+                            class="c18"
+                          >
+                            <svg
+                              class="c28"
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 4 4"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect
+                                fill="#A5A5BA"
+                                height="4"
+                                rx="2"
+                                width="4"
+                              />
+                            </svg>
+                            <div
+                              class="c29"
+                            >
+                              <span
+                                class="c4 c30"
+                              >
+                                Simple
+                              </span>
+                            </div>
+                          </div>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+                <li>
+                  <div
+                    class=""
+                  >
+                    <div
+                      class="c36 c37"
+                    >
+                      <div
+                        class="c17"
+                      >
+                        <button
+                          aria-controls="subnav-list-8"
+                          aria-expanded="true"
+                          class="c38"
+                        >
+                          <div
+                            class="c39"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 14 8"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                fill="#32324D"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                          <div
+                            class="c29"
+                          >
+                            <span
+                              class="c4 c40"
+                            >
+                              Default
+                            </span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                    <ul
+                      id="subnav-list-8"
+                    >
+                      <li>
+                        <a
+                          class="c26 c27"
+                          href="/plugins/content-type-builder/component-categories/default/default.closingperiod"
+                        >
+                          <div
+                            class="c18"
+                          >
+                            <svg
+                              class="c28"
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 4 4"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect
+                                fill="#A5A5BA"
+                                height="4"
+                                rx="2"
+                                width="4"
+                              />
+                            </svg>
+                            <div
+                              class="c29"
+                            >
+                              <span
+                                class="c4 c30"
+                              >
+                                Closingperiod
+                              </span>
+                            </div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          class="c26 c27"
+                          href="/plugins/content-type-builder/component-categories/default/default.dish"
+                        >
+                          <div
+                            class="c18"
+                          >
+                            <svg
+                              class="c28"
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 4 4"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect
+                                fill="#A5A5BA"
+                                height="4"
+                                rx="2"
+                                width="4"
+                              />
+                            </svg>
+                            <div
+                              class="c29"
+                            >
+                              <span
+                                class="c4 c30"
+                              >
+                                Dish
+                              </span>
+                            </div>
+                          </div>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
             </div>
-            <ul
-              id="subnav-list-6"
+            <div
+              class="c31"
             >
-              <li>
-                <div
-                  class="c35 c36"
-                >
-                  <div
-                    class="c16"
-                  >
-                    <button
-                      aria-controls="subnav-list-7"
-                      aria-expanded="true"
-                      class="c37"
-                    >
-                      <div
-                        class="c38"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 14 8"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            clip-rule="evenodd"
-                            d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                            fill="#32324D"
-                            fill-rule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                      <div
-                        class="c28"
-                      >
-                        <span
-                          class="c4 c39"
-                        >
-                          Basic
-                        </span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-                <ul
-                  id="subnav-list-7"
-                >
-                  <li>
-                    <a
-                      class="c25 c26"
-                      href="/plugins/content-type-builder/component-categories/basic/basic.simple"
-                    >
-                      <div
-                        class="c17"
-                      >
-                        <svg
-                          class="c27"
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 4 4"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <rect
-                            fill="#A5A5BA"
-                            height="4"
-                            rx="2"
-                            width="4"
-                          />
-                        </svg>
-                        <div
-                          class="c28"
-                        >
-                          <span
-                            class="c4 c29"
-                          >
-                            Simple
-                          </span>
-                        </div>
-                      </div>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <div
-                  class="c35 c36"
-                >
-                  <div
-                    class="c16"
-                  >
-                    <button
-                      aria-controls="subnav-list-8"
-                      aria-expanded="true"
-                      class="c37"
-                    >
-                      <div
-                        class="c38"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 14 8"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            clip-rule="evenodd"
-                            d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                            fill="#32324D"
-                            fill-rule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                      <div
-                        class="c28"
-                      >
-                        <span
-                          class="c4 c39"
-                        >
-                          Default
-                        </span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-                <ul
-                  id="subnav-list-8"
-                >
-                  <li>
-                    <a
-                      class="c25 c26"
-                      href="/plugins/content-type-builder/component-categories/default/default.closingperiod"
-                    >
-                      <div
-                        class="c17"
-                      >
-                        <svg
-                          class="c27"
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 4 4"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <rect
-                            fill="#A5A5BA"
-                            height="4"
-                            rx="2"
-                            width="4"
-                          />
-                        </svg>
-                        <div
-                          class="c28"
-                        >
-                          <span
-                            class="c4 c29"
-                          >
-                            Closingperiod
-                          </span>
-                        </div>
-                      </div>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      class="c25 c26"
-                      href="/plugins/content-type-builder/component-categories/default/default.dish"
-                    >
-                      <div
-                        class="c17"
-                      >
-                        <svg
-                          class="c27"
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 4 4"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <rect
-                            fill="#A5A5BA"
-                            height="4"
-                            rx="2"
-                            width="4"
-                          />
-                        </svg>
-                        <div
-                          class="c28"
-                        >
-                          <span
-                            class="c4 c29"
-                          >
-                            Dish
-                          </span>
-                        </div>
-                      </div>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <li
-            class="c30"
-          >
-            <button
-              aria-disabled="false"
-              class="c31 c32"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="c33"
+              <button
+                aria-disabled="false"
+                class="c32 c33"
+                type="button"
               >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
+                <span
+                  aria-hidden="true"
+                  class="c34"
                 >
-                  <path
-                    d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
-                    fill="#212134"
-                  />
-                </svg>
-              </span>
-              <span
-                class="c34"
-              >
-                Create a new component
-              </span>
-            </button>
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </span>
+                <span
+                  class="c35"
+                >
+                  Create a new component
+                </span>
+              </button>
+            </div>
           </li>
         </ul>
       </div>
     </nav>
     <div
-      class="c40 c41"
+      class="c41 c42"
     >
       <div />
     </div>
   </div>
   <div
-    class="c42"
+    class="c43"
   >
     <p
       aria-live="polite"

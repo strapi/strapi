@@ -56,7 +56,7 @@ const FormModal = ({
           return (
             <Form>
               <ModalBody>
-                <Stack size={1}>
+                <Stack spacing={1}>
                   <Grid gap={5}>
                     {layout.form.map(row => {
                       return row.map(input => {
@@ -88,7 +88,7 @@ const FormModal = ({
                 endActions={
                   <>
                     <Button type="submit" loading={isSubmiting}>
-                      {formatMessage({ id: 'app.components.Button.save', defaultMessage: 'Save' })}
+                      {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                     </Button>
                   </>
                 }
