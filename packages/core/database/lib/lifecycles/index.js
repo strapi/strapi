@@ -33,7 +33,7 @@ const createLifecyclesProvider = db => {
     /**
      * @param {string} action
      * @param {string} uid
-     * @param {{ param?: any, result?: any }} properties
+     * @param {{ params?: any, result?: any }} properties
      * @param {Map<any, any>} state
      */
     createEvent(action, uid, properties, state) {
@@ -50,7 +50,7 @@ const createLifecyclesProvider = db => {
     /**
      * @param {string} action
      * @param {string} uid
-     * @param {{ param?: any, result?: any }} properties
+     * @param {{ params?: any, result?: any }} properties
      * @param {Map<any, any>} states
      */
     async run(action, uid, properties, states = new Map()) {
