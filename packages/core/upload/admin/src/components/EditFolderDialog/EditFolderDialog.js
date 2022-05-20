@@ -14,7 +14,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Form, useNotification, getAPIInnerErrors, useQueryParams } from '@strapi/helper-plugin';
+import { Form, useNotification, getAPIInnerErrors } from '@strapi/helper-plugin';
 
 import { getTrad, findRecursiveFolderByValue } from '../../utils';
 import { FolderDefinition } from '../../constants';
@@ -36,7 +36,7 @@ const folderSchema = yup.object({
     .nullable(true),
 });
 
-export const EditFolderDialog = ({ onClose, folder }) => {
+export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
   const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure({
     enabled: true,
   });
@@ -46,17 +46,15 @@ export const EditFolderDialog = ({ onClose, folder }) => {
   const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();
   const { remove } = useBulkRemove();
   const toggleNotification = useNotification();
-  const [{ query }] = useQueryParams();
   const isLoading = isLoadingPermissions || folderStructureIsLoading || isEditFolderLoading;
   const isEditing = !!folder;
-  const activeFolderId = folder?.parent?.id ?? query?.folder;
   const formDisabled = (folder && !canUpdate) || (!folder && !canCreate);
   const initialFormData = !folderStructureIsLoading && {
     name: folder?.name ?? undefined,
     parent: {
-      value: activeFolderId ? parseInt(activeFolderId, 10) : folderStructure[0].value,
-      label: activeFolderId
-        ? findRecursiveFolderByValue(folderStructure, parseInt(activeFolderId, 10))?.label
+      value: parentFolderId ? parseInt(parentFolderId, 10) : folderStructure[0].value,
+      label: parentFolderId
+        ? findRecursiveFolderByValue(folderStructure, parseInt(parentFolderId, 10))?.label
         : folderStructure[0].label,
     },
   };
@@ -280,9 +278,11 @@ export const EditFolderDialog = ({ onClose, folder }) => {
 
 EditFolderDialog.defaultProps = {
   folder: undefined,
+  parentFolderId: null,
 };
 
 EditFolderDialog.propTypes = {
   folder: FolderDefinition,
   onClose: PropTypes.func.isRequired,
+  parentFolderId: PropTypes.number,
 };

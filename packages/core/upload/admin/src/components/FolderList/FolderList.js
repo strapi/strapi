@@ -28,7 +28,7 @@ export const FolderList = ({
   size,
   onSelectFolder,
   onEditFolder,
-  onClickFolder,
+  onChangeFolder,
   selectedFolders,
 }) => {
   return (
@@ -54,7 +54,10 @@ export const FolderList = ({
                 id={`folder-${folder.uid}`}
                 onDoubleClick={event => {
                   event.preventDefault();
-                  onClickFolder(folder);
+
+                  if (onChangeFolder) {
+                    onChangeFolder(folder.id);
+                  }
                 }}
                 startAction={
                   onSelectFolder && (
@@ -76,7 +79,10 @@ export const FolderList = ({
                     to="/"
                     onClick={event => {
                       event.preventDefault();
-                      onClickFolder(folder);
+
+                      if (onChangeFolder) {
+                        onChangeFolder(folder.id);
+                      }
                     }}
                   >
                     <Flex as="h2" direction="column" alignItems="start">
@@ -101,6 +107,7 @@ export const FolderList = ({
 };
 
 FolderList.defaultProps = {
+  onChangeFolder: null,
   onEditFolder: null,
   onSelectFolder: null,
   size: 'M',
@@ -112,7 +119,7 @@ FolderList.propTypes = {
   folders: PropTypes.arrayOf(FolderDefinition).isRequired,
   size: PropTypes.oneOf(['S', 'M']),
   selectedFolders: PropTypes.array,
-  onClickFolder: PropTypes.func.isRequired,
+  onChangeFolder: PropTypes.func,
   onEditFolder: PropTypes.func,
   onSelectFolder: PropTypes.func,
   title: PropTypes.string,

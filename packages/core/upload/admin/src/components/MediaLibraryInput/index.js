@@ -32,6 +32,7 @@ export const MediaLibraryInput = ({
   const [step, setStep] = useState(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [droppedAssets, setDroppedAssets] = useState();
+  const [folderId, setFolderId] = useState(null);
   const { formatMessage } = useIntl();
 
   useEffect(() => {
@@ -166,6 +167,7 @@ export const MediaLibraryInput = ({
           multiple={multiple}
           onAddAsset={() => setStep(STEPS.AssetUpload)}
           onAddFolder={() => setStep(STEPS.FolderCreate)}
+          onChangeFolder={folder => setFolderId(folder)}
           trackedLocation="content-manager"
         />
       )}
@@ -176,11 +178,12 @@ export const MediaLibraryInput = ({
           initialAssetsToAdd={droppedAssets}
           addUploadedFiles={handleFilesUploadSucceeded}
           trackedLocation="content-manager"
+          folderId={folderId}
         />
       )}
 
       {step === STEPS.FolderCreate && (
-        <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} />
+        <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} parentFolderId={folderId} />
       )}
     </>
   );

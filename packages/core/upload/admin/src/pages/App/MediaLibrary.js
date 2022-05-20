@@ -97,10 +97,10 @@ export const MediaLibrary = () => {
     toggleEditFolderDialog(payload);
   };
 
-  const handleClickFolder = folder => {
+  const handleChangeFolder = folder => {
     setQuery({
       ...query,
-      folder: folder.id,
+      folder,
     });
   };
 
@@ -218,7 +218,7 @@ export const MediaLibrary = () => {
               {folders?.length > 0 && !isFiltering && (
                 <FolderList
                   folders={folders}
-                  onClickFolder={handleClickFolder}
+                  onChangeFolder={handleChangeFolder}
                   onEditFolder={handleEditFolder}
                   onSelectFolder={selectOne}
                   selectedFolders={selected.filter(({ type }) => type === 'folder')}
@@ -300,6 +300,7 @@ export const MediaLibrary = () => {
           onClose={handleEditFolderClose}
           folder={folderToEdit}
           canUpdate={canUpdate}
+          parentFolderId={query?.folder}
         />
       )}
 

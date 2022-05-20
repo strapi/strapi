@@ -15,7 +15,6 @@ import {
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
-import { useQueryParams } from '@strapi/helper-plugin';
 
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
@@ -31,8 +30,13 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploadedFiles }) => {
-  const [{ query }] = useQueryParams();
+export const UploadingAssetCard = ({
+  asset,
+  onCancel,
+  onStatusChange,
+  addUploadedFiles,
+  folderId,
+}) => {
   const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
 
@@ -62,7 +66,6 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
 
   useEffect(() => {
     const uploadFile = async () => {
-      const folderId = query?.folder;
       const files = await upload(asset, folderId);
 
       if (addUploadedFiles) {
@@ -116,6 +119,7 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
 
 UploadingAssetCard.defaultProps = {
   addUploadedFiles: undefined,
+  folderId: null,
 };
 
 UploadingAssetCard.propTypes = {
@@ -126,6 +130,7 @@ UploadingAssetCard.propTypes = {
     rawFile: PropTypes.instanceOf(File),
     type: PropTypes.oneOf(Object.values(AssetType)),
   }).isRequired,
+  folderId: PropTypes.number,
   onCancel: PropTypes.func.isRequired,
   onStatusChange: PropTypes.func.isRequired,
 };

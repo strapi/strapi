@@ -30,6 +30,7 @@ export const AssetDialog = ({
   onClose,
   onAddAsset,
   onAddFolder,
+  onChangeFolder,
   onValidate,
   multiple,
   initiallySelectedAssets,
@@ -53,7 +54,7 @@ export const AssetDialog = ({
       onChangePageSize,
       onChangeSort,
       onChangeSearch,
-      onChangeFolder,
+      onChangeFolder: onChangeFolderParam,
     },
   ] = useModalQueryParams();
   const {
@@ -153,6 +154,11 @@ export const AssetDialog = ({
     setSelections(nextAssets);
   };
 
+  const handleFolderChange = folder => {
+    onChangeFolder(folder);
+    onChangeFolderParam(folder);
+  };
+
   return (
     <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={isLoading}>
       <DialogTitle />
@@ -184,14 +190,17 @@ export const AssetDialog = ({
           </Tabs>
 
           <Stack horizontal spacing={2}>
-            <Button variant="secondary" onClick={onAddFolder}>
+            <Button
+              variant="secondary"
+              onClick={() => onAddFolder({ folderId: queryObject?.folder })}
+            >
               {formatMessage({
                 id: getTrad('modal.upload-list.sub-header.add-folder'),
                 defaultMessage: 'Add folder',
               })}
             </Button>
 
-            <Button onClick={onAddAsset}>
+            <Button onClick={() => onAddAsset({ folderId: queryObject?.folder })}>
               {formatMessage({
                 id: getTrad('modal.upload-list.sub-header.button'),
                 defaultMessage: 'Add more assets',
@@ -217,7 +226,7 @@ export const AssetDialog = ({
                 queryObject={queryObject}
                 onAddAsset={onAddAsset}
                 onChangeFilters={onChangeFilters}
-                onChangeFolder={onChangeFolder}
+                onChangeFolder={handleFolderChange}
                 onChangePage={onChangePage}
                 onChangePageSize={onChangePageSize}
                 onChangeSort={onChangeSort}
@@ -255,6 +264,7 @@ AssetDialog.propTypes = {
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,
   onAddFolder: PropTypes.func.isRequired,
+  onChangeFolder: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onValidate: PropTypes.func.isRequired,
   trackedLocation: PropTypes.string,

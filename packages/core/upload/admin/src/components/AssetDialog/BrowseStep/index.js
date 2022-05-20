@@ -108,7 +108,7 @@ export const BrowseStep = ({
           <FolderList
             folders={folders}
             size="S"
-            onClickFolder={onChangeFolder}
+            onChangeFolder={onChangeFolder}
             onEditFolder={null}
             onSelectFolder={null}
             title={formatMessage({
