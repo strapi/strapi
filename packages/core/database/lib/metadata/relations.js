@@ -32,7 +32,7 @@ const shouldUseJoinTable = attribute => attribute.useJoinTable !== false;
  * @param {Attribute} attribute
  * @param {ModelMetadata} meta
  * @param {Metadata} metadata
- * @retuns void
+ * @return void
  */
 const createOneToOne = (attributeName, attribute, meta, metadata) => {
   if (isOwner(attribute)) {

@@ -14,7 +14,7 @@ module.exports = [
   {
     name: 'pagination[withCount]',
     in: 'query',
-    description: 'Retun page/pageSize (default: true)',
+    description: 'Return page/pageSize (default: true)',
     deprecated: false,
     required: false,
     schema: {
