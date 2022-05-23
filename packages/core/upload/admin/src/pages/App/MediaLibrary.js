@@ -10,12 +10,10 @@ import {
   useSelectionState,
   useQueryParams,
 } from '@strapi/helper-plugin';
-import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
+import { Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Plus from '@strapi/icons/Plus';
-import { Link } from '@strapi/design-system/Link';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
@@ -27,13 +25,14 @@ import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
-import { getTrad, getRequestUrl } from '../../utils';
-import { Filters } from './components/Filters';
+import { getTrad } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { BulkDeleteButton } from './components/BulkDeleteButton';
 import { EmptyAssets } from '../../components/EmptyAssets';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
+import { BulkDeleteButton } from './components/BulkDeleteButton';
+import { Filters } from './components/Filters';
+import { Header } from './components/Header';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -106,58 +105,19 @@ export const MediaLibrary = () => {
   const assets = assetsData?.results;
   const assetCount = assets?.length ?? 0;
 
-  const isNestedFolder = !!query?.folder;
   const isLoading =
     foldersLoading || folderStructureIsLoading || permissionsLoading || assetsLoading;
 
   return (
     <Layout>
       <Main aria-busy={isLoading}>
-        <HeaderLayout
-          title={formatMessage({
-            id: getTrad('plugin.name'),
-            defaultMessage: 'Media Library',
-          })}
-          subtitle={formatMessage(
-            {
-              id: getTrad('header.content.assets'),
-              defaultMessage:
-                '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}',
-            },
-            { numberAssets: assetCount, numberFolders: folderCount }
-          )}
-          navigationAction={
-            isNestedFolder && (
-              // TODO: this is a placeholder for now
-              <Link startIcon={<ArrowLeft />} to={getRequestUrl('')}>
-                {formatMessage({
-                  id: getTrad('header.actions.folder-level-up'),
-                  defaultMessage: 'Back',
-                })}
-              </Link>
-            )
-          }
-          primaryAction={
-            canCreate && (
-              <Stack horizontal spacing={2}>
-                <Button startIcon={<Plus />} variant="secondary" onClick={toggleEditFolderDialog}>
-                  {formatMessage({
-                    id: getTrad('header.actions.add-folder'),
-                    defaultMessage: 'Add new folder',
-                  })}
-                </Button>
-
-                <Button startIcon={<Plus />} onClick={toggleUploadAssetDialog}>
-                  {formatMessage({
-                    id: getTrad('header.actions.add-assets'),
-                    defaultMessage: 'Add new assets',
-                  })}
-                </Button>
-              </Stack>
-            )
-          }
+        <Header
+          assetCount={assetCount}
+          folderCount={folderCount}
+          canCreate={canCreate}
+          onToggleEditFolderDialog={toggleEditFolderDialog}
+          onToggleUploadAssetDialog={toggleUploadAssetDialog}
         />
-
         <ActionLayout
           startActions={
             <>
