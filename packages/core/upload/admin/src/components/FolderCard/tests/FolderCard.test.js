@@ -19,7 +19,7 @@ const ComponentFixture = props => {
         id={ID_FIXTURE}
         ariaLabel="Folder 1"
         startAction={<></>}
-        onDoubleClick={() => {}}
+        onClick={() => {}}
         {...props}
       >
         <FolderCardBody as="h2">
@@ -44,12 +44,12 @@ describe('FolderCard', () => {
     expect(container).toMatchSnapshot();
   });
 
-  test('properly calls the onDoubleClick callback', () => {
+  test('properly calls the onClick callback', () => {
     const callback = jest.fn();
-    const { container } = setup({ onDoubleClick: callback });
+    const { container } = setup({ onClick: callback });
 
     act(() => {
-      fireEvent(container.querySelector('button'), new MouseEvent('dblclick', { bubbles: true }));
+      fireEvent(container.querySelector('button'), new MouseEvent('click', { bubbles: true }));
     });
 
     expect(callback).toHaveBeenCalledTimes(1);

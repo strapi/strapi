@@ -26,7 +26,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   flex-direction: column;
 }
 
-.c14 {
+.c20 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -132,6 +132,10 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   border-radius: 4px;
 }
 
+.c14 {
+  z-index: 3;
+}
+
 .c2 {
   background: #ffffff;
   padding-top: 12px;
@@ -167,6 +171,38 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   margin-left: 12px;
 }
 
+.c16 {
+  right: 16px;
+}
+
+.c17 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c18 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c18 > * + * {
+  margin-left: 8px;
+}
+
+.c19 {
+  position: absolute;
+  top: 12px;
+}
+
 .c1 {
   height: 100%;
   left: 0;
@@ -186,6 +222,10 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   fill: currentColor;
 }
 
+.c15 {
+  display: none;
+}
+
 .c11 {
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -195,7 +235,8 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 
 <div>
   <div
-    class="c0"
+    class="c0 "
+    tabindex="0"
   >
     <button
       aria-hidden="true"
@@ -257,10 +298,18 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
           </div>
         </a>
       </h2>
+      <div
+        class="c14 c15"
+      >
+        <div
+          class="c16 c17 c18 c19"
+          spacing="2"
+        />
+      </div>
     </div>
   </div>
   <div
-    class="c14"
+    class="c20"
   >
     <p
       aria-live="polite"
@@ -310,7 +359,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   flex-direction: column;
 }
 
-.c12 {
+.c18 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -341,6 +390,10 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   padding-bottom: 8px;
   padding-left: 12px;
   border-radius: 4px;
+}
+
+.c12 {
+  z-index: 3;
 }
 
 .c2 {
@@ -378,6 +431,38 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   margin-left: 12px;
 }
 
+.c14 {
+  right: 16px;
+}
+
+.c15 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c16 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c16 > * + * {
+  margin-left: 8px;
+}
+
+.c17 {
+  position: absolute;
+  top: 12px;
+}
+
 .c1 {
   height: 100%;
   left: 0;
@@ -397,6 +482,10 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   fill: currentColor;
 }
 
+.c13 {
+  display: none;
+}
+
 .c9 {
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -406,7 +495,8 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 
 <div>
   <div
-    class="c0"
+    class="c0 "
+    tabindex="0"
   >
     <button
       aria-hidden="true"
@@ -459,10 +549,18 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
           </div>
         </a>
       </h2>
+      <div
+        class="c12 c13"
+      >
+        <div
+          class="c14 c15 c16 c17"
+          spacing="2"
+        />
+      </div>
     </div>
   </div>
   <div
-    class="c12"
+    class="c18"
   >
     <p
       aria-live="polite"
