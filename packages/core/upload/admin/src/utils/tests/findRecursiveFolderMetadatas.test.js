@@ -1,84 +1,51 @@
 import findRecursiveFolderMetadatas from '../findRecursiveFolderMetadatas';
 
-describe('ML || utils || findRecursiveFolderMetadatas', () => {
-  test('should return parent folder id and label', () => {
-    const folderStructure = {
-      value: null,
-      label: 'Media Library',
+const FIXTURE_STRUCTURE = {
+  value: null,
+  label: 'Media Library',
+  children: [
+    {
+      value: 1,
+      label: 'Cats',
       children: [
         {
-          value: 1,
-          label: 'Cats',
-          children: [
-            {
-              value: 2,
-              label: 'Michka',
-              children: [],
-            },
-          ],
+          value: 2,
+          label: 'Michka',
+          children: [],
         },
       ],
-    };
+    },
+  ],
+};
 
-    const result = findRecursiveFolderMetadatas(folderStructure, 2);
-    const expected = {
+describe('ML || utils || findRecursiveFolderMetadatas', () => {
+  test('should return parent folder id and label', () => {
+    const result = findRecursiveFolderMetadatas(FIXTURE_STRUCTURE, 2);
+
+    expect(result).toEqual({
       parentId: 1,
       currentFolderLabel: 'Michka',
-    };
-
-    expect(result).toEqual(expected);
+    });
   });
 
   test('should return parent id null if parent is root ML', () => {
-    const folderStructure = {
-      value: null,
-      label: 'Media Library',
-      children: [
-        {
-          value: 1,
-          label: 'Cats',
-          children: [
-            {
-              value: 2,
-              label: 'Michka',
-              children: [],
-            },
-          ],
-        },
-      ],
-    };
+    const result = findRecursiveFolderMetadatas(FIXTURE_STRUCTURE, 1);
 
-    const result = findRecursiveFolderMetadatas(folderStructure, 1);
-    const expected = {
+    expect(result).toEqual({
       currentFolderLabel: 'Cats',
       parentId: null,
-    };
-
-    expect(result).toEqual(expected);
+    });
   });
 
   test('should return null if searched id does not exist', () => {
-    const folderStructure = {
-      value: null,
-      label: 'Media Library',
-      children: [
-        {
-          value: 1,
-          label: 'Cats',
-          children: [
-            {
-              value: 2,
-              label: 'Michka',
-              children: [],
-            },
-          ],
-        },
-      ],
-    };
+    const result = findRecursiveFolderMetadatas(FIXTURE_STRUCTURE, 10);
 
-    const result = findRecursiveFolderMetadatas(folderStructure, 10);
-    const expected = null;
+    expect(result).toEqual(null);
+  });
 
-    expect(result).toEqual(expected);
+  test('should return null if searched id does not exist (nullish)', () => {
+    const result = findRecursiveFolderMetadatas(FIXTURE_STRUCTURE, null);
+
+    expect(result).toEqual(null);
   });
 });
