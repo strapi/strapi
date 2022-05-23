@@ -105,7 +105,7 @@ describe('Auth', () => {
   });
 
   describe('validatePassword', () => {
-    test('Compares password with hash', async () => {
+    test('Compares password with hash (matching passwords)', async () => {
       const password = 'pcw123';
       const hash = await hashPassword(password);
 
@@ -113,7 +113,7 @@ describe('Auth', () => {
       expect(isValid).toBe(true);
     });
 
-    test('Compares password with hash', async () => {
+    test('Compares password with hash (not matching passwords)', async () => {
       const password = 'pcw123';
       const password2 = 'pcs1234';
       const hash = await hashPassword(password2);
