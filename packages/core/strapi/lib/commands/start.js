@@ -11,7 +11,7 @@ module.exports = async specifiedDir => {
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
   const outDir = await tsUtils.resolveOutDir(appDir);
   const buildDirExists = fs.existsSync(outDir);
-  if (isTSProject && !buildDirExists) throw new Error('Please build first to run this command');
+  if (isTSProject && !buildDirExists) throw new Error(`${outDir} directory not found. Please run the build command before starting your application`);
   const distDir = isTSProject && !specifiedDir ? outDir : specifiedDir;
 
   strapi({ distDir }).start();
