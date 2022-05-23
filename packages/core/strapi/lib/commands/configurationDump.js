@@ -1,7 +1,6 @@
 'use strict';
 
 const fs = require('fs');
-const path = require('path');
 const tsUtils = require('@strapi/typescript-utils');
 const strapi = require('../index');
 
@@ -17,14 +16,14 @@ module.exports = async function({ file: filePath, pretty }) {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-
+  const outDir = await tsUtils.resolveOutDir(appDir);
   if (isTSProject)
     await tsUtils.compile(appDir, {
       watch: false,
       configOptions: { options: { incremental: true } },
     });
 
-  const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
+  const distDir = isTSProject ? outDir : appDir;
 
   const app = await strapi({ appDir, distDir }).load();
 

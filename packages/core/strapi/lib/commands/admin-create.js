@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const { yup } = require('@strapi/utils');
 const _ = require('lodash');
 const inquirer = require('inquirer');
@@ -95,6 +94,7 @@ async function createAdmin({ email, password, firstname, lastname }) {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
+  const outDir = await tsUtils.resolveOutDir(appDir);
 
   if (isTSProject)
     await tsUtils.compile(appDir, {
@@ -102,7 +102,7 @@ async function createAdmin({ email, password, firstname, lastname }) {
       configOptions: { options: { incremental: true } },
     });
 
-  const distDir = isTSProject ? path.join(appDir, 'dist') : appDir;
+  const distDir = isTSProject ? outDir : appDir;
 
   const app = await strapi({ appDir, distDir }).load();
 
