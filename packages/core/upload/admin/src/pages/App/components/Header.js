@@ -28,14 +28,9 @@ export const Header = ({
     },
   ] = useQueryParams();
 
-  const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure();
-
-  const isNestedFolder = folder;
-
-  const isFolder = !folderStructureIsLoading && isNestedFolder;
-
-  const folderMetadatas = isFolder && findRecursiveFolderMetadatas(folderStructure[0], folder);
-
+  const { data, isLoading } = useFolderStructure();
+  const isNestedFolder = !!folder;
+  const folderMetadatas = !isLoading && findRecursiveFolderMetadatas(data[0], folder);
   const backQuery = stringify(
     folderMetadatas?.parentId
       ? { ...queryParamsWithoutFolder, folder: folderMetadatas.parentId }

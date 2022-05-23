@@ -79,6 +79,36 @@ describe('Header', () => {
     expect(container).toMatchSnapshot();
   });
 
+  test('truncates long folder lavels', () => {
+    useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { folder: 2 } }, jest.fn()]);
+    useFolderStructure.mockReturnValueOnce({
+      isLoading: false,
+      error: null,
+      data: [
+        {
+          value: null,
+          label: 'Media Library',
+          children: [
+            {
+              value: 1,
+              label: 'Cats',
+              children: [
+                {
+                  value: 2,
+                  label: 'The length of this label exceeds the maximum',
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const { queryByText } = setup();
+    expect(queryByText('Media Library - The length of this label excee...')).toBeInTheDocument();
+  });
+
   test('does not render a back button at the root level of the media library', () => {
     const { queryByText } = setup();
 
