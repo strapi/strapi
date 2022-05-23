@@ -303,7 +303,6 @@ export const MediaLibrary = () => {
         <EditFolderDialog
           onClose={handleEditFolderClose}
           folder={folderToEdit}
-          canUpdate={canUpdate}
           parentFolderId={query?.folder}
         />
       )}
