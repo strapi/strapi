@@ -139,4 +139,21 @@ describe('EditFolderDialog', () => {
     expect(getInput(container, 'name').value).toBe(folder.name);
     expect(screen.getByText('Some parent')).toBeInTheDocument();
   });
+
+  test('show confirmation delete dialog', async () => {
+    const folder = {
+      id: 1,
+      name: 'default folder name',
+      children: [],
+      parent: { id: 1, label: 'Some parent' },
+    };
+    const folderStructure = [{ value: 1, label: 'Some parent' }];
+    const { container } = setup({ folder, folderStructure });
+
+    act(() => {
+      fireEvent.click(getButton(container, 'delete'));
+    });
+
+    expect(screen.getByText('Are you sure you want to delete this?')).toBeInTheDocument();
+  });
 });
