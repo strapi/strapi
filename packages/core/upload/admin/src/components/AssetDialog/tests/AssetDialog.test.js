@@ -2,17 +2,16 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor } from '@testing-library/react';
-import { useRBAC, useQueryParams } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
-import { rest } from 'msw';
+
 import { AssetDialog } from '..';
 import en from '../../../translations/en.json';
-import server from './server';
-import { assetResultMock } from './asset.mock';
+import { useFolders } from '../../../hooks/useFolders';
+import { useAssets } from '../../../hooks/useAssets';
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useRBAC: jest.fn(),
   useNotification: jest.fn(() => jest.fn()),
   useQueryParams: jest.fn(),
 }));
@@ -24,6 +23,89 @@ jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || id) }),
 }));
 
+jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
+  useMediaLibraryPermissions: jest.fn().mockReturnValue({
+    canRead: true,
+    canCreate: true,
+    isLoading: false,
+    canUpdate: true,
+    canCopyLink: true,
+    canDownload: true,
+  }),
+}));
+
+jest.mock('../../../hooks/useFolders', () => ({
+  useFolders: jest.fn().mockReturnValue({
+    isLoading: false,
+    error: null,
+    data: [
+      {
+        id: 1,
+        name: 'Folder 1',
+        children: {
+          count: 1,
+        },
+        createdAt: '',
+        files: {
+          count: 1,
+        },
+        path: '/folder-1',
+        uid: 'folder-1',
+        updatedAt: '',
+      },
+    ],
+  }),
+}));
+
+jest.mock('../../../hooks/useAssets', () => ({
+  useAssets: jest.fn().mockReturnValue({
+    isLoading: false,
+    error: null,
+    data: {
+      pagination: {
+        pageCount: 1,
+        page: 1,
+        pageSize: 10,
+        total: 1,
+      },
+
+      results: [
+        {
+          id: 77,
+          name: '3874873.jpg',
+          alternativeText: null,
+          caption: null,
+          width: 400,
+          height: 400,
+          formats: {
+            thumbnail: {
+              name: 'thumbnail_3874873.jpg',
+              hash: 'thumbnail_3874873_b5818bb250',
+              ext: '.jpg',
+              mime: 'image/jpeg',
+              width: 156,
+              height: 156,
+              size: 3.97,
+              path: null,
+              url: '/uploads/thumbnail_3874873_b5818bb250.jpg',
+            },
+          },
+          hash: '3874873_b5818bb250',
+          ext: '.jpg',
+          mime: 'image/jpeg',
+          size: 11.79,
+          url: '/uploads/3874873_b5818bb250.jpg',
+          previewUrl: null,
+          provider: 'local',
+          provider_metadata: null,
+          createdAt: '2021-10-18T08:04:56.326Z',
+          updatedAt: '2021-10-18T08:04:56.326Z',
+        },
+      ],
+    },
+  }),
+}));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -32,7 +114,17 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderML = (props = { onClose: jest.fn(), multiple: false, initiallySelectedAssets: [] }) =>
+const renderML = (
+  props = {
+    onClose: jest.fn(),
+    onAddAsset: jest.fn(),
+    onAddFolder: jest.fn(),
+    onChangeFolder: jest.fn(),
+    onValidate: jest.fn(),
+    multiple: false,
+    initiallySelectedAssets: [],
+  }
+) =>
   renderTL(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
@@ -44,33 +136,13 @@ const renderML = (props = { onClose: jest.fn(), multiple: false, initiallySelect
   );
 
 describe('AssetDialog', () => {
-  beforeAll(() => server.listen());
-
-  beforeEach(() => {
-    useRBAC.mockReturnValue({
-      isLoading: false,
-      allowedActions: {
-        canRead: true,
-        canCreate: true,
-        canUpdate: true,
-        canCopyLink: true,
-        canDownload: true,
-      },
-    });
-
-    useQueryParams.mockReturnValue([{ rawQuery: 'some-url' }, jest.fn()]);
-  });
-
   afterEach(() => {
-    server.resetHandlers();
     jest.clearAllMocks();
   });
 
-  afterAll(() => server.close());
-
   describe('loading state', () => {
     it('shows a loader when resolving the permissions', () => {
-      useRBAC.mockReturnValue({ isLoading: true, allowedActions: {} });
+      useMediaLibraryPermissions.mockReturnValueOnce({ isLoading: true });
 
       renderML();
 
@@ -78,7 +150,22 @@ describe('AssetDialog', () => {
       expect(screen.getByText('Loading the asset list.')).toBeInTheDocument();
     });
 
-    it('shows a loader when resolving the assets', () => {
+    it('shows a loader when resolving assets', () => {
+      useAssets.mockReturnValueOnce({
+        isLoading: true,
+        error: null,
+        data: { pagination: {}, results: [] },
+      });
+
+      renderML();
+
+      expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
+      expect(screen.getByText('Loading the asset list.')).toBeInTheDocument();
+    });
+
+    it('shows a loader when resolving folders', () => {
+      useFolders.mockReturnValueOnce({ isLoading: true, error: null, data: null });
+
       renderML();
 
       expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
@@ -88,22 +175,10 @@ describe('AssetDialog', () => {
 
   describe('content', () => {
     describe('empty state', () => {
-      it('shows an empty state when there are no assets and the user is allowed to read', async () => {
-        renderML();
-
-        await waitFor(() =>
-          expect(screen.getByText('Upload your first assets...')).toBeInTheDocument()
-        );
-
-        expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
-      });
-
       it('shows a specific empty state when the user is not allowed to see the content', async () => {
-        useRBAC.mockReturnValue({
+        useMediaLibraryPermissions.mockReturnValueOnce({
           isLoading: false,
-          allowedActions: {
-            canRead: false,
-          },
+          canRead: false,
         });
 
         renderML();
@@ -116,44 +191,19 @@ describe('AssetDialog', () => {
 
         expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
       });
-
-      it('shows a specific empty state when the user can read but not create', async () => {
-        useRBAC.mockReturnValue({
-          isLoading: false,
-          allowedActions: {
-            canRead: true,
-            canCreate: false,
-          },
-        });
-
-        renderML();
-
-        await waitFor(() =>
-          expect(screen.getByText(`The asset list is empty.`)).toBeInTheDocument()
-        );
-        await waitFor(() =>
-          expect(screen.queryByText('Upload your first assets...')).not.toBeInTheDocument()
-        );
-
-        expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
-      });
     });
 
-    describe('content resolved', () => {
-      beforeEach(() => {
-        server.use(rest.get('*/upload/files*', (req, res, ctx) => res(ctx.json(assetResultMock))));
-      });
-
-      it('shows an asset when the data resolves', async () => {
+    describe('content', () => {
+      it('shows assets when the data resolves', async () => {
         renderML();
 
-        await waitFor(() => expect(screen.getByText('3874873.jpg')).toBeInTheDocument());
+        expect(screen.getByText('3874873.jpg')).toBeInTheDocument();
+      });
 
-        expect(
-          screen.getByText((_, element) => element.textContent === 'jpg - 400✕400')
-        ).toBeInTheDocument();
-        expect(screen.getByText('Image')).toBeInTheDocument();
-        expect(screen.getByLabelText('Edit')).toBeInTheDocument();
+      it('shows folders when the data resolves', async () => {
+        renderML();
+
+        expect(screen.getByText('Folder 1')).toBeInTheDocument();
       });
     });
   });
