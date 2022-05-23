@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { NavLink as Link } from 'react-router-dom';
+import { NavLink as RouterNavLink } from 'react-router-dom';
 import { Divider } from '@strapi/design-system/Divider';
 import {
   MainNav,
@@ -12,7 +12,7 @@ import {
   NavSection,
   NavUser,
   NavCondense,
-} from '@strapi/design-system/MainNav';
+} from '@strapi/design-system/v2/MainNav';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
@@ -29,7 +29,7 @@ const LinkUserWrapper = styled(Box)`
   left: ${({ theme }) => theme.spaces[5]};
 `;
 
-const LinkUser = styled(Link)`
+const LinkUser = styled(RouterNavLink)`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -88,6 +88,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   return (
     <MainNav condensed={condensed}>
       <NavBrand
+        as={RouterNavLink}
         workplace={formatMessage({
           id: 'app.components.LeftMenu.navbrand.workplace',
           defaultMessage: 'Workplace',
@@ -99,7 +100,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       <Divider />
 
       <NavSections>
-        <NavLink to="/content-manager" icon={<Write />}>
+        <NavLink as={RouterNavLink} to="/content-manager" icon={<Write />}>
           {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
         </NavLink>
 
@@ -109,7 +110,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               const Icon = link.icon;
 
               return (
-                <NavLink to={link.to} key={link.to} icon={<Icon />}>
+                <NavLink as={RouterNavLink} to={link.to} key={link.to} icon={<Icon />}>
                   {formatMessage(link.intlLabel)}
                 </NavLink>
               );
@@ -124,6 +125,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
 
               return (
                 <NavLink
+                  as={RouterNavLink}
                   badgeContent={
                     (link.notificationsCount > 0 && link.notificationsCount.toString()) || undefined
                   }
