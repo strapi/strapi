@@ -38,7 +38,7 @@ export const useFolders = ({ enabled = true, query = {} }) => {
         })
       );
 
-      return data;
+      return data.data;
     } catch (err) {
       toggleNotification({
         type: 'warning',

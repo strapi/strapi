@@ -57,11 +57,15 @@ export const MediaLibrary = () => {
     query,
   });
 
-  const { data: foldersData, isLoading: foldersLoading, errors: foldersError } = useFolders({
+  const { data: folders, isLoading: foldersLoading, errors: foldersError } = useFolders({
     enabled: assetsData?.pagination?.page === 1 && !isFiltering,
     query,
   });
 
+  const folderCount = folders?.length || 0;
+  const assets = assetsData?.results;
+  const assetCount = assets?.length ?? 0;
+  const isLoading = foldersLoading || permissionsLoading || assetsLoading;
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
@@ -104,14 +108,6 @@ export const MediaLibrary = () => {
   };
 
   useFocusWhenNavigate();
-
-  const folders = foldersData?.results;
-  const folderCount = folders?.length || 0;
-
-  const assets = assetsData?.results;
-  const assetCount = assets?.length ?? 0;
-
-  const isLoading = foldersLoading || permissionsLoading || assetsLoading;
 
   return (
     <Layout>

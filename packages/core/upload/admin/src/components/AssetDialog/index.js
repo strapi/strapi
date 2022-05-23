@@ -62,11 +62,9 @@ export const AssetDialog = ({
     isLoading: isLoadingAssets,
     error: errorAssets,
   } = useAssets({ skipWhen: !canRead, query: queryObject });
-  const {
-    data: { results: folders } = {},
-    isLoading: isLoadingFolders,
-    error: errorFolders,
-  } = useFolders({ query: queryObject });
+  const { data: folders, isLoading: isLoadingFolders, error: errorFolders } = useFolders({
+    query: queryObject,
+  });
 
   const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
     ['id'],
