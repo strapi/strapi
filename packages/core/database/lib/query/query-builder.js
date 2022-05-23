@@ -275,7 +275,8 @@ const createQueryBuilder = (uid, db) => {
           qb.select(state.select.map(column => this.aliasColumn(column)));
 
           if (this.shouldUseDistinct()) {
-            qb.distinct();
+            const [firstJoin] = state.joins;
+            qb.groupBy(firstJoin.referencedColumn);
           }
 
           break;
