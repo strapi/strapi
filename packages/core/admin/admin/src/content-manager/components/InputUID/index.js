@@ -179,11 +179,7 @@ const InputUID = ({
       setIsCustomized(true);
     }
 
-    if (e.target.value === '') {
-      onChange({ target: { name, value: null, type: 'text' } });
-    } else {
-      onChange(e);
-    }
+    onChange(e);
   };
 
   return (

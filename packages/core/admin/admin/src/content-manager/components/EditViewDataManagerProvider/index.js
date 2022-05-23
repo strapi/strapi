@@ -239,6 +239,14 @@ const EditViewDataManagerProvider = ({
         inputValue = null;
       }
 
+      // Allow to reset text, string, email, uid
+      if (
+        (type === 'text' || type === 'string' || type === 'email' || type === 'uid') &&
+        value === ''
+      ) {
+        inputValue = null;
+      }
+
       if (type === 'password' && !value) {
         dispatch({
           type: 'REMOVE_PASSWORD_FIELD',
