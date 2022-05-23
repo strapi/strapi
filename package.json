@@ -86,7 +86,6 @@
     "eslint-config-airbnb-base": "14.2.1",
     "eslint-config-prettier": "6.15.0",
     "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-jsdoc": "36.1.1",
     "eslint-plugin-jsx-a11y": "6.5.1",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-react": "7.29.4",
@@ -121,7 +120,7 @@
     "yargs": "13.3.2"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   }
 }
