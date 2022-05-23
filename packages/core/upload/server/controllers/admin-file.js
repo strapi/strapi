@@ -1,5 +1,6 @@
 'use strict';
 
+const { merge } = require('lodash/fp');
 const { getService } = require('../utils');
 const { ACTIONS, FILE_MODEL_UID } = require('../constants');
 const { findEntityAndCheckPermissions } = require('./utils/find-entity-and-check-permissions');
@@ -9,6 +10,8 @@ module.exports = {
     const {
       state: { userAbility },
     } = ctx;
+
+    const defaultQuery = { populate: { folder: true } };
 
     const pm = strapi.admin.services.permission.createPermissionsManager({
       ability: userAbility,
@@ -20,7 +23,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const query = pm.addPermissionsQueryTo(ctx.query);
+    const query = pm.addPermissionsQueryTo(merge(defaultQuery, ctx.query));
 
     const { results, pagination } = await getService('upload').findPage(query);
 

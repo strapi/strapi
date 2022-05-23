@@ -36,7 +36,7 @@ describe('Folder structure', () => {
       method: 'POST',
       url: '/upload/actions/bulk-delete',
       body: {
-        folderIds: res.body.results.map(f => f.id),
+        folderIds: res.body.data.map(f => f.id),
       },
     });
 

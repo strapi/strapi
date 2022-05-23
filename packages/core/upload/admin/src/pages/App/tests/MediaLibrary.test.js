@@ -337,22 +337,6 @@ describe('Media library homepage', () => {
         expect(screen.queryByText('header.actions.add-folder')).not.toBeInTheDocument();
       });
     });
-
-    describe('back', () => {
-      it('does not render a back button at the root level of the media library', () => {
-        renderML();
-
-        expect(screen.queryByText('header.actions.folder-level-up')).not.toBeInTheDocument();
-      });
-
-      it('does render a back button at a nested level of the media library', () => {
-        useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { folder: 1 } }, jest.fn()]);
-
-        renderML();
-
-        expect(screen.queryByText('header.actions.folder-level-up')).toBeInTheDocument();
-      });
-    });
   });
 
   describe('content', () => {

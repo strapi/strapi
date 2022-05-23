@@ -93,6 +93,22 @@ module.exports = {
     },
     {
       method: 'GET',
+      path: '/folders/:id',
+      handler: 'admin-folder.findOne',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.read'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
       path: '/folders',
       handler: 'admin-folder.find',
       config: {
@@ -117,7 +133,7 @@ module.exports = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::upload.read'],
+              actions: ['plugin::upload.assets.create'],
             },
           },
         ],
@@ -133,7 +149,7 @@ module.exports = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::upload.read'],
+              actions: ['plugin::upload.assets.update'],
             },
           },
         ],
@@ -165,7 +181,7 @@ module.exports = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::upload.read'],
+              actions: ['plugin::upload.assets.update'],
             },
           },
         ],
@@ -181,7 +197,7 @@ module.exports = {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['plugin::upload.read'],
+              actions: ['plugin::upload.assets.update'],
             },
           },
         ],
