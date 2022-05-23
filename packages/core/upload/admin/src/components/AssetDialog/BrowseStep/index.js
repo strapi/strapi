@@ -19,6 +19,7 @@ import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
 import SortPicker from '../../SortPicker';
+import { FolderDefinition, AssetDefinition } from '../../../constants';
 
 const StartBlockActions = styled(Flex)`
   & > * + * {
@@ -190,12 +191,9 @@ BrowseStep.defaultProps = {
 
 BrowseStep.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
-
-  // TODO: add asset & folder shapes
-  assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  assets: PropTypes.arrayOf(AssetDefinition).isRequired,
   canCreate: PropTypes.bool.isRequired,
-  folders: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-
+  folders: PropTypes.arrayOf(FolderDefinition).isRequired,
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,
   onChangeFilters: PropTypes.func.isRequired,
