@@ -67,20 +67,18 @@ jest.mock('../../../hooks/useFolders', () => ({
   useFolders: jest.fn().mockReturnValue({
     isLoading: false,
     error: null,
-    data: {
-      results: [
-        {
-          id: 1,
-          name: 'Folder 1',
-          children: {
-            count: 1,
-          },
-          files: {
-            count: 1,
-          },
+    data: [
+      {
+        id: 1,
+        name: 'Folder 1',
+        children: {
+          count: 1,
         },
-      ],
-    },
+        files: {
+          count: 1,
+        },
+      },
+    ],
   }),
 }));
 
