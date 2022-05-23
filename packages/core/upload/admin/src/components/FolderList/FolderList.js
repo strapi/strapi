@@ -13,7 +13,12 @@ import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { useQueryParams } from '@strapi/helper-plugin';
 import Pencil from '@strapi/icons/Pencil';
 
-import { FolderCard, FolderCardBody, FolderCardCheckbox, FolderCardLink } from '../FolderCard';
+import {
+  FolderCard,
+  FolderCardBody,
+  FolderCardCheckbox,
+  FolderCardBodyAction,
+} from '../FolderCard';
 import { FolderDefinition } from '../../constants';
 
 const CardTitle = styled(Typography).attrs({
@@ -73,7 +78,7 @@ export const FolderList = ({
                 size={size}
               >
                 <FolderCardBody>
-                  <FolderCardLink to={url}>
+                  <FolderCardBodyAction to={url}>
                     <Flex as="h2" direction="column" alignItems="start">
                       <CardTitle>
                         {folder.name}
@@ -84,7 +89,7 @@ export const FolderList = ({
                         {folder.children.count} folder, {folder.files.count} assets
                       </Typography>
                     </Flex>
-                  </FolderCardLink>
+                  </FolderCardBodyAction>
                 </FolderCardBody>
               </FolderCard>
             </GridItem>
