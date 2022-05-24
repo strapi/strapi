@@ -102,13 +102,6 @@ export const MediaLibrary = () => {
     folderCardRef.current.focus();
   };
 
-  const handleChangeFolder = folder => {
-    setQuery({
-      ...query,
-      folder,
-    });
-  };
-
   useFocusWhenNavigate();
 
   return (
@@ -176,7 +169,6 @@ export const MediaLibrary = () => {
               {folders?.length > 0 && !isFiltering && (
                 <FolderList
                   folders={folders}
-                  onChangeFolder={handleChangeFolder}
                   onEditFolder={handleEditFolder}
                   onSelectFolder={selectOne}
                   selectedFolders={selected.filter(({ type }) => type === 'folder')}

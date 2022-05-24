@@ -1,7 +1,10 @@
 import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { stringify } from 'qs';
+import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Flex } from '@strapi/design-system/Flex';
@@ -35,6 +38,13 @@ export const FolderList = forwardRef(
     ref
   ) => {
     const { formatMessage } = useIntl();
+    const { pathname } = useLocation();
+    const [{ query }] = useQueryParams();
+
+    const handleClickFolderCard = (event, folderId) => {
+      event.preventDefault();
+      onChangeFolder(folderId);
+    };
 
     return (
       <KeyboardNavigable tagName="article">
@@ -51,6 +61,10 @@ export const FolderList = forwardRef(
             const isSelected = !!selectedFolders.find(
               currentFolder => currentFolder.id === folder.id
             );
+            const url = `${pathname}?${stringify(
+              { ...query, folder: folder.id },
+              { encode: false }
+            )}`;
 
             return (
               <GridItem col={3} key={`folder-${folder.uid}`}>
@@ -58,14 +72,10 @@ export const FolderList = forwardRef(
                   ref={ref}
                   ariaLabel={folder.name}
                   id={`folder-${folder.uid}`}
-                  to="/"
-                  onClick={event => {
-                    event.preventDefault();
-
-                    if (onChangeFolder) {
-                      onChangeFolder(folder.id);
-                    }
-                  }}
+                  to={onChangeFolder ? undefined : url}
+                  onClick={
+                    onChangeFolder ? event => handleClickFolderCard(event, folder.id) : undefined
+                  }
                   startAction={
                     onSelectFolder && (
                       <FolderCardCheckbox
@@ -90,14 +100,12 @@ export const FolderList = forwardRef(
                 >
                   <FolderCardBody>
                     <FolderCardBodyAction
-                      to="/"
-                      onClick={event => {
-                        event.preventDefault();
-
-                        if (onChangeFolder) {
-                          onChangeFolder(folder.id);
-                        }
-                      }}
+                      to={onChangeFolder ? undefined : url}
+                      onClick={
+                        onChangeFolder
+                          ? event => handleClickFolderCard(event, folder.id)
+                          : undefined
+                      }
                     >
                       <Flex as="h2" direction="column" alignItems="start">
                         <CardTitle>
