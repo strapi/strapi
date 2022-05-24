@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { stringify } from 'qs';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Flex } from '@strapi/design-system/Flex';
@@ -10,7 +9,6 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { useQueryParams } from '@strapi/helper-plugin';
 import Pencil from '@strapi/icons/Pencil';
 
 import {
@@ -20,6 +18,7 @@ import {
   FolderCardBodyAction,
 } from '../FolderCard';
 import { FolderDefinition } from '../../constants';
+import { getTrad } from '../../utils';
 
 const CardTitle = styled(Typography).attrs({
   ellipsis: true,
@@ -36,11 +35,10 @@ export const FolderList = ({
   size,
   onSelectFolder,
   onEditFolder,
+  onChangeFolder,
   selectedFolders,
 }) => {
-  const history = useHistory();
-  const { pathname } = useLocation();
-  const [{ query }] = useQueryParams();
+  const { formatMessage } = useIntl();
 
   return (
     <KeyboardNavigable tagName="article">
@@ -57,35 +55,59 @@ export const FolderList = ({
           const isSelected = !!selectedFolders.find(
             currentFolder => currentFolder.id === folder.id
           );
-          const url = `${pathname}?${stringify(
-            { ...query, folder: folder.id },
-            { encode: false }
-          )}`;
 
           return (
             <GridItem col={3} key={`folder-${folder.uid}`}>
               <FolderCard
                 ariaLabel={folder.name}
                 id={`folder-${folder.uid}`}
-                onClick={() => history.push(url)}
+                onClick={event => {
+                  event.preventDefault();
+
+                  if (onChangeFolder) {
+                    onChangeFolder(folder.id);
+                  }
+                }}
                 startAction={
-                  <FolderCardCheckbox
-                    value={isSelected}
-                    onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
-                  />
+                  onSelectFolder && (
+                    <FolderCardCheckbox
+                      value={isSelected}
+                      onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
+                    />
+                  )
                 }
-                cardActions={<IconButton icon={<Pencil />} onClick={() => onEditFolder(folder)} />}
+                cardActions={
+                  onEditFolder && (
+                    <IconButton
+                      icon={<Pencil />}
+                      aria-label={formatMessage({
+                        id: getTrad('list.folder.edit'),
+                        defaultMessage: 'Edit folder',
+                      })}
+                      onClick={() => onEditFolder(folder)}
+                    />
+                  )
+                }
                 size={size}
               >
                 <FolderCardBody>
-                  <FolderCardBodyAction to={url}>
+                  <FolderCardBodyAction
+                    to="/"
+                    onClick={event => {
+                      event.preventDefault();
+
+                      if (onChangeFolder) {
+                        onChangeFolder(folder.id);
+                      }
+                    }}
+                  >
                     <Flex as="h2" direction="column" alignItems="start">
                       <CardTitle>
                         {folder.name}
                         <VisuallyHidden>:</VisuallyHidden>
                       </CardTitle>
 
-                      <Typography as="span" textColor="neutral600" variant="pi">
+                      <Typography as="span" textColor="neutral600" variant="pi" ellipsis>
                         {folder.children.count} folder, {folder.files.count} assets
                       </Typography>
                     </Flex>
@@ -101,6 +123,9 @@ export const FolderList = ({
 };
 
 FolderList.defaultProps = {
+  onChangeFolder: null,
+  onEditFolder: null,
+  onSelectFolder: null,
   size: 'M',
   selectedFolders: [],
   title: null,
@@ -110,7 +135,8 @@ FolderList.propTypes = {
   folders: PropTypes.arrayOf(FolderDefinition).isRequired,
   size: PropTypes.oneOf(['S', 'M']),
   selectedFolders: PropTypes.array,
-  onEditFolder: PropTypes.func.isRequired,
-  onSelectFolder: PropTypes.func.isRequired,
+  onChangeFolder: PropTypes.func,
+  onEditFolder: PropTypes.func,
+  onSelectFolder: PropTypes.func,
   title: PropTypes.string,
 };

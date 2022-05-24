@@ -125,7 +125,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 
   // TODO: streamline the logic based on the populate option
-  async findWithRelationCounts(uid, opts) {
+  async findWithRelationCountsPage(uid, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findWithRelationCounts' });
 
     const query = transformParamsToQuery(uid, wrappedParams);
@@ -136,6 +136,16 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       results,
       pagination,
     };
+  },
+
+  async findWithRelationCounts(uid, opts) {
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'findWithRelationCounts' });
+
+    const query = transformParamsToQuery(uid, wrappedParams);
+
+    const results = await db.query(uid).findMany(query);
+
+    return results;
   },
 
   async findOne(uid, entityId, opts) {

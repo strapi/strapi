@@ -124,7 +124,7 @@ describe('MediaLibrary / AssetList', () => {
     const { container } = renderTL(
       <MemoryRouter>
         <ThemeProvider theme={lightTheme}>
-          <AssetList assets={data} selectedAssets={[]} />
+          <AssetList assets={data} selectedAssets={[]} onSelectAsset={jest.fn} />
         </ThemeProvider>
       </MemoryRouter>
     );

@@ -44,10 +44,15 @@ const useModalQueryParams = () => {
     }
   };
 
+  const handleChangeFolder = folder => {
+    setQueryObject(prev => ({ ...prev, folder: folder ?? null }));
+  };
+
   return [
     { queryObject, rawQuery: stringify(queryObject, { encode: false }) },
     {
       onChangeFilters: handleChangeFilters,
+      onChangeFolder: handleChangeFolder,
       onChangePage: handeChangePage,
       onChangePageSize: handleChangePageSize,
       onChangeSort: handleChangeSort,

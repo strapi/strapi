@@ -1,34 +1,36 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import PlusIcon from '@strapi/icons/Plus';
 import { ModalLayout, ModalBody } from '@strapi/design-system/ModalLayout';
 import { Flex } from '@strapi/design-system/Flex';
 import { Button } from '@strapi/design-system/Button';
 import { Divider } from '@strapi/design-system/Divider';
-import { Box } from '@strapi/design-system/Box';
 import { useIntl } from 'react-intl';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Badge } from '@strapi/design-system/Badge';
 import { Loader } from '@strapi/design-system/Loader';
+import { Stack } from '@strapi/design-system/Stack';
 import { NoPermissions, AnErrorOccurred, useSelectionState } from '@strapi/helper-plugin';
+
 import getTrad from '../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
 import { BrowseStep } from './BrowseStep';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { useModalAssets } from '../../hooks/useModalAssets';
-import useModalQueryParams from '../../hooks/useModalAssets/useModalQueryParams';
+import { useAssets } from '../../hooks/useAssets';
+import { useFolders } from '../../hooks/useFolders';
+import useModalQueryParams from '../../hooks/useModalQueryParams';
 import { AssetDefinition } from '../../constants';
 import getAllowedFiles from '../../utils/getAllowedFiles';
 import { DialogTitle } from './DialogTitle';
 import { DialogFooter } from './DialogFooter';
 import { EditAssetDialog } from '../EditAssetDialog';
-import { EmptyAssets } from '../EmptyAssets';
 import { moveElement } from '../../utils/moveElement';
 
 export const AssetDialog = ({
   allowedTypes,
   onClose,
   onAddAsset,
+  onAddFolder,
+  onChangeFolder,
   onValidate,
   multiple,
   initiallySelectedAssets,
@@ -45,10 +47,24 @@ export const AssetDialog = ({
     canDownload,
   } = useMediaLibraryPermissions();
   const [
-    { rawQuery, queryObject },
-    { onChangeFilters, onChangePage, onChangePageSize, onChangeSort, onChangeSearch },
+    { queryObject },
+    {
+      onChangeFilters,
+      onChangePage,
+      onChangePageSize,
+      onChangeSort,
+      onChangeSearch,
+      onChangeFolder: onChangeFolderParam,
+    },
   ] = useModalQueryParams();
-  const { data, isLoading, error } = useModalAssets({ skipWhen: !canRead, rawQuery });
+  const {
+    data: { pagination, results: assets } = {},
+    isLoading: isLoadingAssets,
+    error: errorAssets,
+  } = useAssets({ skipWhen: !canRead, query: queryObject });
+  const { data: folders, isLoading: isLoadingFolders, error: errorFolders } = useFolders({
+    query: queryObject,
+  });
 
   const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
     ['id'],
@@ -75,10 +91,10 @@ export const AssetDialog = ({
     return multiple ? selectOne(asset) : selectOnly(asset);
   };
 
-  const loading = isLoadingPermissions || isLoading;
-  const assets = data?.results;
+  const isLoading = isLoadingPermissions || isLoadingAssets || isLoadingFolders;
+  const hasError = errorAssets || errorFolders;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
         <DialogTitle />
@@ -95,7 +111,7 @@ export const AssetDialog = ({
     );
   }
 
-  if (error) {
+  if (hasError) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />
@@ -110,44 +126,6 @@ export const AssetDialog = ({
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
         <DialogTitle />
         <NoPermissions />
-        <DialogFooter onClose={onClose} />
-      </ModalLayout>
-    );
-  }
-
-  if (canRead && assets?.length === 0 && !queryObject._q && queryObject.filters.$and.length === 0) {
-    return (
-      <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogTitle />
-        <Box paddingLeft={8} paddingRight={8} paddingBottom={6}>
-          <EmptyAssets
-            size="S"
-            count={6}
-            action={
-              canCreate ? (
-                <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
-                  {formatMessage({
-                    id: getTrad('header.actions.add-assets'),
-                    defaultMessage: 'Add new assets',
-                  })}
-                </Button>
-              ) : (
-                undefined
-              )
-            }
-            content={
-              canCreate
-                ? formatMessage({
-                    id: getTrad('list.assets.empty'),
-                    defaultMessage: 'Upload your first assets...',
-                  })
-                : formatMessage({
-                    id: getTrad('list.assets.empty.no-permissions'),
-                    defaultMessage: 'The asset list is empty',
-                  })
-            }
-          />
-        </Box>
         <DialogFooter onClose={onClose} />
       </ModalLayout>
     );
@@ -174,8 +152,13 @@ export const AssetDialog = ({
     setSelections(nextAssets);
   };
 
+  const handleFolderChange = folder => {
+    onChangeFolder(folder);
+    onChangeFolderParam(folder);
+  };
+
   return (
-    <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={loading}>
+    <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={isLoading}>
       <DialogTitle />
 
       <TabGroup
@@ -204,12 +187,24 @@ export const AssetDialog = ({
             </Tab>
           </Tabs>
 
-          <Button onClick={onAddAsset}>
-            {formatMessage({
-              id: getTrad('modal.upload-list.sub-header.button'),
-              defaultMessage: 'Add more assets',
-            })}
-          </Button>
+          <Stack horizontal spacing={2}>
+            <Button
+              variant="secondary"
+              onClick={() => onAddFolder({ folderId: queryObject?.folder })}
+            >
+              {formatMessage({
+                id: getTrad('modal.upload-list.sub-header.add-folder'),
+                defaultMessage: 'Add folder',
+              })}
+            </Button>
+
+            <Button onClick={() => onAddAsset({ folderId: queryObject?.folder })}>
+              {formatMessage({
+                id: getTrad('modal.upload-list.sub-header.button'),
+                defaultMessage: 'Add more assets',
+              })}
+            </Button>
+          </Stack>
         </Flex>
         <Divider />
         <TabPanels>
@@ -218,14 +213,18 @@ export const AssetDialog = ({
               <BrowseStep
                 allowedTypes={allowedTypes}
                 assets={assets}
+                canCreate={canCreate}
+                folders={folders}
                 onSelectAsset={handleSelectAsset}
                 selectedAssets={selectedAssets}
                 multiple={multiple}
                 onSelectAllAsset={handleSelectAllAssets}
                 onEditAsset={canUpdate ? setAssetToEdit : undefined}
-                pagination={data?.pagination}
+                pagination={pagination}
                 queryObject={queryObject}
+                onAddAsset={onAddAsset}
                 onChangeFilters={onChangeFilters}
+                onChangeFolder={handleFolderChange}
                 onChangePage={onChangePage}
                 onChangePageSize={onChangePageSize}
                 onChangeSort={onChangeSort}
@@ -262,6 +261,8 @@ AssetDialog.propTypes = {
   initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition),
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,
+  onAddFolder: PropTypes.func.isRequired,
+  onChangeFolder: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onValidate: PropTypes.func.isRequired,
   trackedLocation: PropTypes.string,

@@ -1,21 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { useIntl } from 'react-intl';
+import { Button } from '@strapi/design-system/Button';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
-import EmptyPicturesIcon from '@strapi/icons/EmptyPictures';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import styled from 'styled-components';
+import PlusIcon from '@strapi/icons/Plus';
+
 import getTrad from '../../../utils/getTrad';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
 import { AssetList } from '../../AssetList';
+import { FolderList } from '../../FolderList';
 import { EmptyAssets } from '../../EmptyAssets';
 import { Filters } from './Filters';
 import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
 import SortPicker from '../../SortPicker';
+import { FolderDefinition, AssetDefinition } from '../../../constants';
 
 const StartBlockActions = styled(Flex)`
   & > * + * {
@@ -32,12 +36,16 @@ const EndBlockActions = styled(StartBlockActions)`
 export const BrowseStep = ({
   allowedTypes,
   assets,
+  canCreate,
+  folders,
   multiple,
+  onAddAsset,
   onChangeFilters,
   onChangePage,
   onChangePageSize,
   onChangeSearch,
   onChangeSort,
+  onChangeFolder,
   onEditAsset,
   onSelectAllAsset,
   onSelectAsset,
@@ -58,7 +66,7 @@ export const BrowseStep = ({
   return (
     <>
       <Stack spacing={4}>
-        {onSelectAllAsset && (
+        {assets.length > 0 && onSelectAllAsset && (
           <Box>
             <Box paddingBottom={4}>
               <Flex justifyContent="space-between" alignItems="flex-start">
@@ -97,6 +105,20 @@ export const BrowseStep = ({
           </Box>
         )}
 
+        {folders.length > 0 && (
+          <FolderList
+            folders={folders}
+            size="S"
+            onChangeFolder={onChangeFolder}
+            onEditFolder={null}
+            onSelectFolder={null}
+            title={formatMessage({
+              id: getTrad('list.folders.title'),
+              defaultMessage: 'Folders',
+            })}
+          />
+        )}
+
         {assets.length > 0 ? (
           <AssetList
             allowedTypes={allowedTypes}
@@ -105,31 +127,57 @@ export const BrowseStep = ({
             onSelectAsset={onSelectAsset}
             selectedAssets={selectedAssets}
             onEditAsset={onEditAsset}
+            title={formatMessage({
+              id: getTrad('list.assets.title'),
+              defaultMessage: 'Assets',
+            })}
           />
         ) : (
           <Box paddingBottom={6}>
             <EmptyAssets
-              icon={EmptyPicturesIcon}
               size="S"
               count={6}
-              content={formatMessage({
-                id: getTrad('list.assets-empty.search'),
-                defaultMessage: 'No result found',
-              })}
+              action={
+                canCreate && (
+                  <Button
+                    variant="secondary"
+                    id="asset-dialog-title"
+                    startIcon={<PlusIcon />}
+                    onClick={onAddAsset}
+                  >
+                    {formatMessage({
+                      id: getTrad('header.actions.add-assets'),
+                      defaultMessage: 'Add new assets',
+                    })}
+                  </Button>
+                )
+              }
+              content={
+                canCreate
+                  ? formatMessage({
+                      id: getTrad('list.assets.empty'),
+                      defaultMessage: 'Upload your first assets...',
+                    })
+                  : formatMessage({
+                      id: getTrad('list.assets.empty.no-permissions'),
+                      defaultMessage: 'The asset list is empty',
+                    })
+              }
             />
           </Box>
         )}
+
+        {pagination.pageCount > 0 && (
+          <Flex justifyContent="space-between">
+            <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
+            <PaginationFooter
+              activePage={queryObject.page}
+              onChangePage={onChangePage}
+              pagination={pagination}
+            />
+          </Flex>
+        )}
       </Stack>
-      {pagination.pageCount > 0 && (
-        <Flex justifyContent="space-between">
-          <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
-          <PaginationFooter
-            activePage={queryObject.page}
-            onChangePage={onChangePage}
-            pagination={pagination}
-          />
-        </Flex>
-      )}
     </>
   );
 };
@@ -143,9 +191,13 @@ BrowseStep.defaultProps = {
 
 BrowseStep.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
-  assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  assets: PropTypes.arrayOf(AssetDefinition).isRequired,
+  canCreate: PropTypes.bool.isRequired,
+  folders: PropTypes.arrayOf(FolderDefinition).isRequired,
   multiple: PropTypes.bool,
+  onAddAsset: PropTypes.func.isRequired,
   onChangeFilters: PropTypes.func.isRequired,
+  onChangeFolder: PropTypes.func.isRequired,
   onChangePage: PropTypes.func.isRequired,
   onChangePageSize: PropTypes.func.isRequired,
   onChangeSort: PropTypes.func.isRequired,

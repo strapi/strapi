@@ -1,6 +1,7 @@
 import React from 'react';
+import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render } from '@testing-library/react';
+import { render, act, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { FolderList } from '../FolderList';
@@ -35,9 +36,11 @@ const FIXTURE_FOLDERS = [
 const ComponentFixture = props => {
   return (
     <MemoryRouter>
-      <ThemeProvider theme={lightTheme}>
-        <FolderList onSelectFolder={() => {}} onEditFolder={() => {}} {...props} />
-      </ThemeProvider>
+      <IntlProvider locale="en" messages={{}}>
+        <ThemeProvider theme={lightTheme}>
+          <FolderList onSelectFolder={() => {}} onEditFolder={() => {}} {...props} />
+        </ThemeProvider>
+      </IntlProvider>
     </MemoryRouter>
   );
 };
@@ -54,6 +57,14 @@ describe('FolderList', () => {
     expect(container).toMatchSnapshot();
   });
 
+  test('renders with size=small', () => {
+    const { container } = setup({
+      folders: FIXTURE_FOLDERS,
+      size: 'S',
+    });
+    expect(container).toMatchSnapshot();
+  });
+
   test('does select selected folders', () => {
     const { container } = setup({
       title: 'List title with selected items',
@@ -61,5 +72,56 @@ describe('FolderList', () => {
       selectedFolders: FIXTURE_FOLDERS,
     });
     expect(container).toMatchSnapshot();
+  });
+
+  test('does call onChangeFolder', () => {
+    const spy = jest.fn();
+    const { getByText } = setup({
+      folders: FIXTURE_FOLDERS,
+      onChangeFolder: spy,
+    });
+
+    const folder1 = getByText(FIXTURE_FOLDERS[0].name);
+
+    act(() => {
+      fireEvent.click(folder1);
+    });
+
+    expect(spy).toHaveBeenCalledWith(1);
+  });
+
+  test('does call onEditFolder', () => {
+    const spy = jest.fn();
+    const { container } = setup({
+      folders: FIXTURE_FOLDERS,
+      onEditFolder: spy,
+    });
+
+    const folder1 = container.querySelector('button[aria-label="Edit folder"]');
+
+    act(() => {
+      fireEvent.click(folder1);
+    });
+
+    expect(spy).toHaveBeenCalledWith(FIXTURE_FOLDERS[0]);
+  });
+
+  test('does call onSelectFolder', () => {
+    const spy = jest.fn();
+    const { container } = setup({
+      folders: FIXTURE_FOLDERS,
+      onSelectFolder: spy,
+    });
+
+    const folder1 = container.querySelector('input[type="checkbox"]');
+
+    act(() => {
+      fireEvent.click(folder1);
+    });
+
+    expect(spy).toHaveBeenCalledWith({
+      ...FIXTURE_FOLDERS[0],
+      type: 'folder',
+    });
   });
 });

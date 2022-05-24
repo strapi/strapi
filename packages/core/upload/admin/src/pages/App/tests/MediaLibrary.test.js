@@ -6,7 +6,6 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import { useFolderStructure } from '../../../hooks/useFolderStructure';
 import { useFolders } from '../../../hooks/useFolders';
 import { useAssets } from '../../../hooks/useAssets';
 import { MediaLibrary } from '../MediaLibrary';
@@ -64,38 +63,22 @@ jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/useFolderStructure', () => ({
-  useFolderStructure: jest.fn().mockReturnValue({
-    isLoading: false,
-    error: null,
-    data: {
-      results: {
-        value: null,
-        label: 'Media Library',
-        children: [],
-      },
-    },
-  }),
-}));
-
 jest.mock('../../../hooks/useFolders', () => ({
   useFolders: jest.fn().mockReturnValue({
     isLoading: false,
     error: null,
-    data: {
-      results: [
-        {
-          id: 1,
-          name: 'Folder 1',
-          children: {
-            count: 1,
-          },
-          files: {
-            count: 1,
-          },
+    data: [
+      {
+        id: 1,
+        name: 'Folder 1',
+        children: {
+          count: 1,
         },
-      ],
-    },
+        files: {
+          count: 1,
+        },
+      },
+    ],
   }),
 }));
 
@@ -218,15 +201,6 @@ describe('Media library homepage', () => {
 
     it('shows a loader while resolving folders', () => {
       useFolders.mockReturnValueOnce({ isLoading: true });
-
-      renderML();
-
-      expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('true');
-      expect(screen.getByText('Loading content.')).toBeInTheDocument();
-    });
-
-    it('shows a loader while resolving the folder structure', () => {
-      useFolderStructure.mockReturnValueOnce({ isLoading: true });
 
       renderML();
 
@@ -359,22 +333,6 @@ describe('Media library homepage', () => {
         renderML();
 
         expect(screen.queryByText('header.actions.add-folder')).not.toBeInTheDocument();
-      });
-    });
-
-    describe('back', () => {
-      it('does not render a back button at the root level of the media library', () => {
-        renderML();
-
-        expect(screen.queryByText('header.actions.folder-level-up')).not.toBeInTheDocument();
-      });
-
-      it('does render a back button at a nested level of the media library', () => {
-        useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { folder: 1 } }, jest.fn()]);
-
-        renderML();
-
-        expect(screen.queryByText('header.actions.folder-level-up')).toBeInTheDocument();
       });
     });
   });

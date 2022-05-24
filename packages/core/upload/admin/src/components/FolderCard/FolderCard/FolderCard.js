@@ -106,8 +106,8 @@ export const FolderCard = ({
 
 FolderCard.defaultProps = {
   id: undefined,
-  startAction: null,
   cardActions: null,
+  startAction: null,
 };
 
 FolderCard.propTypes = {
