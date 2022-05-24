@@ -37,13 +37,12 @@ exports[`FolderList does select selected folders 1`] = `
   border-radius: 4px;
 }
 
-.c24 {
-  z-index: 3;
+.c17 {
+  max-width: 100%;
 }
 
 .c14 {
   position: relative;
-  z-index: 3;
   overflow: hidden;
   max-width: 100%;
 }
@@ -62,7 +61,7 @@ exports[`FolderList does select selected folders 1`] = `
   flex-direction: column;
 }
 
-.c18 {
+.c19 {
   -webkit-align-items: start;
   -webkit-box-align: start;
   -ms-flex-align: start;
@@ -193,7 +192,7 @@ exports[`FolderList does select selected folders 1`] = `
   line-height: 1.25;
 }
 
-.c19 {
+.c20 {
   font-weight: 500;
   color: #32324d;
   display: block;
@@ -204,7 +203,7 @@ exports[`FolderList does select selected folders 1`] = `
   line-height: 1.43;
 }
 
-.c22 {
+.c23 {
   color: #666687;
   display: block;
   white-space: nowrap;
@@ -214,7 +213,7 @@ exports[`FolderList does select selected folders 1`] = `
   line-height: 1.33;
 }
 
-.c21 {
+.c22 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -384,8 +383,8 @@ exports[`FolderList does select selected folders 1`] = `
   display: none;
 }
 
-.c5:hover .c23,
-.c5:focus-within .c23 {
+.c5:hover .c24,
+.c5:focus-within .c24 {
   display: block;
 }
 
@@ -396,13 +395,12 @@ exports[`FolderList does select selected folders 1`] = `
   user-select: none;
 }
 
-.c17 {
-  max-width: 100%;
+.c18 {
   -webkit-text-decoration: none;
   text-decoration: none;
 }
 
-.c20 {
+.c21 {
   max-width: 100%;
 }
 
@@ -444,12 +442,13 @@ exports[`FolderList does select selected folders 1`] = `
             class="c4 c5"
             tabindex="0"
           >
-            <button
+            <a
+              aria-current="page"
               aria-hidden="true"
               aria-label="Folder 1"
-              class="c6"
+              class="c6 active"
+              href="/"
               tabindex="-1"
-              type="button"
             />
             <div
               class="c7 c8 c9"
@@ -490,24 +489,24 @@ exports[`FolderList does select selected folders 1`] = `
               >
                 <a
                   aria-current="page"
-                  class="c17 active"
+                  class="c17 c18 active"
                   href="/"
                 >
                   <h2
-                    class="c18"
+                    class="c19"
                   >
                     <span
-                      class="c19 c20"
+                      class="c20 c21"
                     >
                       Folder 1
                       <div
-                        class="c21"
+                        class="c22"
                       >
                         :
                       </div>
                     </span>
                     <span
-                      class="c22"
+                      class="c23"
                     >
                       1
                        folder, 
@@ -518,7 +517,7 @@ exports[`FolderList does select selected folders 1`] = `
                 </a>
               </div>
               <div
-                class="c23 c24 c25"
+                class="c24 c25"
               >
                 <div
                   class="c26 c27 c28 c29"
@@ -561,12 +560,13 @@ exports[`FolderList does select selected folders 1`] = `
             class="c4 c5"
             tabindex="0"
           >
-            <button
+            <a
+              aria-current="page"
               aria-hidden="true"
               aria-label="Folder 2"
-              class="c6"
+              class="c6 active"
+              href="/"
               tabindex="-1"
-              type="button"
             />
             <div
               class="c7 c8 c9"
@@ -607,24 +607,24 @@ exports[`FolderList does select selected folders 1`] = `
               >
                 <a
                   aria-current="page"
-                  class="c17 active"
+                  class="c17 c18 active"
                   href="/"
                 >
                   <h2
-                    class="c18"
+                    class="c19"
                   >
                     <span
-                      class="c19 c20"
+                      class="c20 c21"
                     >
                       Folder 2
                       <div
-                        class="c21"
+                        class="c22"
                       >
                         :
                       </div>
                     </span>
                     <span
-                      class="c22"
+                      class="c23"
                     >
                       11
                        folder, 
@@ -635,7 +635,7 @@ exports[`FolderList does select selected folders 1`] = `
                 </a>
               </div>
               <div
-                class="c23 c24 c25"
+                class="c24 c25"
               >
                 <div
                   class="c26 c27 c28 c29"
@@ -732,13 +732,12 @@ exports[`FolderList renders 1`] = `
   border-radius: 4px;
 }
 
-.c24 {
-  z-index: 3;
+.c17 {
+  max-width: 100%;
 }
 
 .c14 {
   position: relative;
-  z-index: 3;
   overflow: hidden;
   max-width: 100%;
 }
@@ -757,7 +756,7 @@ exports[`FolderList renders 1`] = `
   flex-direction: column;
 }
 
-.c18 {
+.c19 {
   -webkit-align-items: start;
   -webkit-box-align: start;
   -ms-flex-align: start;
@@ -888,7 +887,7 @@ exports[`FolderList renders 1`] = `
   line-height: 1.25;
 }
 
-.c19 {
+.c20 {
   font-weight: 500;
   color: #32324d;
   display: block;
@@ -899,7 +898,7 @@ exports[`FolderList renders 1`] = `
   line-height: 1.43;
 }
 
-.c22 {
+.c23 {
   color: #666687;
   display: block;
   white-space: nowrap;
@@ -909,7 +908,7 @@ exports[`FolderList renders 1`] = `
   line-height: 1.33;
 }
 
-.c21 {
+.c22 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1079,8 +1078,8 @@ exports[`FolderList renders 1`] = `
   display: none;
 }
 
-.c5:hover .c23,
-.c5:focus-within .c23 {
+.c5:hover .c24,
+.c5:focus-within .c24 {
   display: block;
 }
 
@@ -1091,13 +1090,12 @@ exports[`FolderList renders 1`] = `
   user-select: none;
 }
 
-.c17 {
-  max-width: 100%;
+.c18 {
   -webkit-text-decoration: none;
   text-decoration: none;
 }
 
-.c20 {
+.c21 {
   max-width: 100%;
 }
 
@@ -1139,12 +1137,13 @@ exports[`FolderList renders 1`] = `
             class="c4 c5"
             tabindex="0"
           >
-            <button
+            <a
+              aria-current="page"
               aria-hidden="true"
               aria-label="Folder 1"
-              class="c6"
+              class="c6 active"
+              href="/"
               tabindex="-1"
-              type="button"
             />
             <div
               class="c7 c8 c9"
@@ -1184,24 +1183,24 @@ exports[`FolderList renders 1`] = `
               >
                 <a
                   aria-current="page"
-                  class="c17 active"
+                  class="c17 c18 active"
                   href="/"
                 >
                   <h2
-                    class="c18"
+                    class="c19"
                   >
                     <span
-                      class="c19 c20"
+                      class="c20 c21"
                     >
                       Folder 1
                       <div
-                        class="c21"
+                        class="c22"
                       >
                         :
                       </div>
                     </span>
                     <span
-                      class="c22"
+                      class="c23"
                     >
                       1
                        folder, 
@@ -1212,7 +1211,7 @@ exports[`FolderList renders 1`] = `
                 </a>
               </div>
               <div
-                class="c23 c24 c25"
+                class="c24 c25"
               >
                 <div
                   class="c26 c27 c28 c29"
@@ -1255,12 +1254,13 @@ exports[`FolderList renders 1`] = `
             class="c4 c5"
             tabindex="0"
           >
-            <button
+            <a
+              aria-current="page"
               aria-hidden="true"
               aria-label="Folder 2"
-              class="c6"
+              class="c6 active"
+              href="/"
               tabindex="-1"
-              type="button"
             />
             <div
               class="c7 c8 c9"
@@ -1300,24 +1300,24 @@ exports[`FolderList renders 1`] = `
               >
                 <a
                   aria-current="page"
-                  class="c17 active"
+                  class="c17 c18 active"
                   href="/"
                 >
                   <h2
-                    class="c18"
+                    class="c19"
                   >
                     <span
-                      class="c19 c20"
+                      class="c20 c21"
                     >
                       Folder 2
                       <div
-                        class="c21"
+                        class="c22"
                       >
                         :
                       </div>
                     </span>
                     <span
-                      class="c22"
+                      class="c23"
                     >
                       11
                        folder, 
@@ -1328,7 +1328,7 @@ exports[`FolderList renders 1`] = `
                 </a>
               </div>
               <div
-                class="c23 c24 c25"
+                class="c24 c25"
               >
                 <div
                   class="c26 c27 c28 c29"
@@ -1420,13 +1420,12 @@ exports[`FolderList renders with size=small 1`] = `
   border-radius: 4px;
 }
 
-.c22 {
-  z-index: 3;
+.c15 {
+  max-width: 100%;
 }
 
 .c12 {
   position: relative;
-  z-index: 3;
   overflow: hidden;
   max-width: 100%;
 }
@@ -1445,7 +1444,7 @@ exports[`FolderList renders with size=small 1`] = `
   flex-direction: column;
 }
 
-.c16 {
+.c17 {
   -webkit-align-items: start;
   -webkit-box-align: start;
   -ms-flex-align: start;
@@ -1568,7 +1567,7 @@ exports[`FolderList renders with size=small 1`] = `
   fill: #666687;
 }
 
-.c17 {
+.c18 {
   font-weight: 500;
   color: #32324d;
   display: block;
@@ -1579,7 +1578,7 @@ exports[`FolderList renders with size=small 1`] = `
   line-height: 1.43;
 }
 
-.c20 {
+.c21 {
   color: #666687;
   display: block;
   white-space: nowrap;
@@ -1589,7 +1588,7 @@ exports[`FolderList renders with size=small 1`] = `
   line-height: 1.33;
 }
 
-.c19 {
+.c20 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1759,8 +1758,8 @@ exports[`FolderList renders with size=small 1`] = `
   display: none;
 }
 
-.c3:hover .c21,
-.c3:focus-within .c21 {
+.c3:hover .c22,
+.c3:focus-within .c22 {
   display: block;
 }
 
@@ -1771,13 +1770,12 @@ exports[`FolderList renders with size=small 1`] = `
   user-select: none;
 }
 
-.c15 {
-  max-width: 100%;
+.c16 {
   -webkit-text-decoration: none;
   text-decoration: none;
 }
 
-.c18 {
+.c19 {
   max-width: 100%;
 }
 
@@ -1810,12 +1808,13 @@ exports[`FolderList renders with size=small 1`] = `
             class="c2 c3"
             tabindex="0"
           >
-            <button
+            <a
+              aria-current="page"
               aria-hidden="true"
               aria-label="Folder 1"
-              class="c4"
+              class="c4 active"
+              href="/"
               tabindex="-1"
-              type="button"
             />
             <div
               class="c5 c6 c7"
@@ -1855,24 +1854,24 @@ exports[`FolderList renders with size=small 1`] = `
               >
                 <a
                   aria-current="page"
-                  class="c15 active"
+                  class="c15 c16 active"
                   href="/"
                 >
                   <h2
-                    class="c16"
+                    class="c17"
                   >
                     <span
-                      class="c17 c18"
+                      class="c18 c19"
                     >
                       Folder 1
                       <div
-                        class="c19"
+                        class="c20"
                       >
                         :
                       </div>
                     </span>
                     <span
-                      class="c20"
+                      class="c21"
                     >
                       1
                        folder, 
@@ -1883,7 +1882,7 @@ exports[`FolderList renders with size=small 1`] = `
                 </a>
               </div>
               <div
-                class="c21 c22 c23"
+                class="c22 c23"
               >
                 <div
                   class="c24 c25 c26 c27"
@@ -1926,12 +1925,13 @@ exports[`FolderList renders with size=small 1`] = `
             class="c2 c3"
             tabindex="0"
           >
-            <button
+            <a
+              aria-current="page"
               aria-hidden="true"
               aria-label="Folder 2"
-              class="c4"
+              class="c4 active"
+              href="/"
               tabindex="-1"
-              type="button"
             />
             <div
               class="c5 c6 c7"
@@ -1971,24 +1971,24 @@ exports[`FolderList renders with size=small 1`] = `
               >
                 <a
                   aria-current="page"
-                  class="c15 active"
+                  class="c15 c16 active"
                   href="/"
                 >
                   <h2
-                    class="c16"
+                    class="c17"
                   >
                     <span
-                      class="c17 c18"
+                      class="c18 c19"
                     >
                       Folder 2
                       <div
-                        class="c19"
+                        class="c20"
                       >
                         :
                       </div>
                     </span>
                     <span
-                      class="c20"
+                      class="c21"
                     >
                       11
                        folder, 
@@ -1999,7 +1999,7 @@ exports[`FolderList renders with size=small 1`] = `
                 </a>
               </div>
               <div
-                class="c21 c22 c23"
+                class="c22 c23"
               >
                 <div
                   class="c24 c25 c26 c27"

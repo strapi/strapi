@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // useState
+import React, { useState, useRef } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import {
@@ -51,6 +51,7 @@ export const MediaLibrary = () => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
+  const folderCardRef = useRef();
 
   const { data: assetsData, isLoading: assetsLoading, errors: assetsError } = useAssets({
     skipWhen: !canRead,
@@ -98,6 +99,7 @@ export const MediaLibrary = () => {
   const handleEditFolderClose = payload => {
     setFolderToEdit(null);
     toggleEditFolderDialog(payload);
+    folderCardRef.current.focus();
   };
 
   const handleChangeFolder = folder => {
@@ -182,6 +184,7 @@ export const MediaLibrary = () => {
                     id: getTrad('list.folders.title'),
                     defaultMessage: 'Folders',
                   })}
+                  ref={folderCardRef}
                 />
               )}
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { BaseLink } from '@strapi/design-system/BaseLink';
 import { Flex } from '@strapi/design-system/Flex';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
@@ -15,23 +16,25 @@ const ID_FIXTURE = 'folder';
 const ComponentFixture = props => {
   return (
     <ThemeProvider theme={lightTheme}>
-      <FolderCard
-        id={ID_FIXTURE}
-        ariaLabel="Folder 1"
-        startAction={<></>}
-        onClick={() => {}}
-        {...props}
-      >
-        <FolderCardBody as="h2">
-          <BaseLink href="https://strapi.io" textDecoration="none">
-            <Flex direction="column" alignItems="flex-start">
-              <Typography variant="omega" fontWeight="semiBold">
-                Pictures
-              </Typography>
-            </Flex>
-          </BaseLink>
-        </FolderCardBody>
-      </FolderCard>
+      <MemoryRouter>
+        <FolderCard
+          id={ID_FIXTURE}
+          ariaLabel="Folder 1"
+          startAction={<></>}
+          onClick={() => {}}
+          {...props}
+        >
+          <FolderCardBody as="h2">
+            <BaseLink href="https://strapi.io" textDecoration="none">
+              <Flex direction="column" alignItems="flex-start">
+                <Typography variant="omega" fontWeight="semiBold">
+                  Pictures
+                </Typography>
+              </Flex>
+            </BaseLink>
+          </FolderCardBody>
+        </FolderCard>
+      </MemoryRouter>
     </ThemeProvider>
   );
 };
@@ -65,5 +68,20 @@ describe('FolderCard', () => {
     expect(
       container.querySelector(`[aria-labelledby="${ID_FIXTURE}-3-title"]`)
     ).toBeInTheDocument();
+  });
+
+  test('renders as a link with to prop', () => {
+    const { container } = setup({
+      to: '/michka-page',
+    });
+
+    const link = container.querySelector('a[aria-hidden=true]');
+    expect(link).toHaveAttribute('href', '/michka-page');
+  });
+
+  test('renders as a button without to prop', () => {
+    const { container } = setup();
+
+    expect(container.querySelector('button[aria-hidden=true]')).toBeInTheDocument();
   });
 });

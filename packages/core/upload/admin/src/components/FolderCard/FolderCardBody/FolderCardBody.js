@@ -21,7 +21,6 @@ export const FolderCardBody = props => {
       maxWidth="100%"
       overflow="hidden"
       position="relative"
-      zIndex={3}
     />
   );
 };
