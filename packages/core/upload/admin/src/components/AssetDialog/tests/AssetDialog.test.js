@@ -1,11 +1,11 @@
 import React from 'react';
+import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { AssetDialog } from '..';
-import en from '../../../translations/en.json';
 import { useFolders } from '../../../hooks/useFolders';
 import { useAssets } from '../../../hooks/useAssets';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
@@ -14,13 +14,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => jest.fn()),
   useQueryParams: jest.fn(),
-}));
-
-jest.mock('../../../utils/getTrad', () => x => x);
-
-jest.mock('react-intl', () => ({
-  FormattedMessage: ({ id }) => id,
-  useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || id) }),
 }));
 
 jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
@@ -129,7 +122,9 @@ const renderML = (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
         <MemoryRouter>
-          <AssetDialog {...props} />
+          <IntlProvider messages={{}}>
+            <AssetDialog {...props} />
+          </IntlProvider>
         </MemoryRouter>
       </ThemeProvider>
     </QueryClientProvider>
@@ -147,7 +142,7 @@ describe('AssetDialog', () => {
       renderML();
 
       expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
-      expect(screen.getByText('Loading the asset list.')).toBeInTheDocument();
+      expect(screen.getByText('How do you want to upload your assets?')).toBeInTheDocument();
     });
 
     it('shows a loader when resolving assets', () => {
@@ -160,7 +155,7 @@ describe('AssetDialog', () => {
       renderML();
 
       expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
-      expect(screen.getByText('Loading the asset list.')).toBeInTheDocument();
+      expect(screen.getByText('How do you want to upload your assets?')).toBeInTheDocument();
     });
 
     it('shows a loader when resolving folders', () => {
@@ -169,7 +164,7 @@ describe('AssetDialog', () => {
       renderML();
 
       expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
-      expect(screen.getByText('Loading the asset list.')).toBeInTheDocument();
+      expect(screen.getByText('How do you want to upload your assets?')).toBeInTheDocument();
     });
   });
 
@@ -185,11 +180,33 @@ describe('AssetDialog', () => {
 
         await waitFor(() =>
           expect(
-            screen.getByText(`app.components.EmptyStateLayout.content-permissions`)
+            screen.getByText("You don't have the permissions to access that content")
           ).toBeInTheDocument()
         );
 
         expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
+      });
+    });
+
+    describe('error state', () => {
+      it('shows when loading assets threw an error', () => {
+        useAssets.mockReturnValueOnce({ isLoading: false, error: true });
+
+        renderML();
+
+        expect(
+          screen.getByText('Woops! Something went wrong. Please, try again.')
+        ).toBeInTheDocument();
+      });
+
+      it('shows when loading folders threw an error', () => {
+        useAssets.mockReturnValueOnce({ isLoading: false, error: true });
+
+        renderML();
+
+        expect(
+          screen.getByText('Woops! Something went wrong. Please, try again.')
+        ).toBeInTheDocument();
       });
     });
 
