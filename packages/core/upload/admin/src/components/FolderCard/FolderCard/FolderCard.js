@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { NavLink } from 'react-router-dom';
 
 import { pxToRem } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
@@ -51,6 +52,7 @@ export const FolderCard = ({
   cardActions,
   ariaLabel,
   onClick,
+  to,
   ...props
 }) => {
   const generatedId = useId(id);
@@ -59,9 +61,10 @@ export const FolderCard = ({
     <FolderCardContext.Provider value={{ id: generatedId }}>
       <Card position="relative" tabIndex={0} isCardActions={!!cardActions} {...props}>
         <FauxClickWrapper
-          type="button"
+          to={to || ''}
+          as={to ? NavLink : 'button'}
+          type={to ? '' : 'button'}
           onClick={onClick}
-          zIndex={1}
           tabIndex={-1}
           aria-label={ariaLabel}
           aria-hidden
@@ -108,6 +111,7 @@ FolderCard.defaultProps = {
   id: undefined,
   cardActions: null,
   startAction: null,
+  to: undefined,
 };
 
 FolderCard.propTypes = {
@@ -117,4 +121,5 @@ FolderCard.propTypes = {
   onClick: PropTypes.func.isRequired,
   startAction: PropTypes.element,
   cardActions: PropTypes.element,
+  to: PropTypes.string,
 };

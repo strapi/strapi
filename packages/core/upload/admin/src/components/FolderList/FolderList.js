@@ -61,6 +61,7 @@ export const FolderList = ({
               <FolderCard
                 ariaLabel={folder.name}
                 id={`folder-${folder.uid}`}
+                to="/"
                 onClick={event => {
                   event.preventDefault();
 
