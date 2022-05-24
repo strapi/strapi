@@ -147,8 +147,10 @@ describe('Build Component Schema', () => {
 
     const expectedShape = {
       type: 'object',
+      required: ['data'],
       properties: {
         data: {
+          required: [],
           type: 'object',
           properties: { test: { type: 'string' } },
         },
@@ -237,6 +239,7 @@ describe('Build Component Schema', () => {
 
     const expectedShape = {
       type: 'object',
+      required: ['locale'],
       properties: { test: { type: 'string' } },
     };
 

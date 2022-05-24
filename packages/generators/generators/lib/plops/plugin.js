@@ -2,6 +2,9 @@
 
 const chalk = require('chalk');
 const { isUsingTypeScriptSync } = require('@strapi/typescript-utils');
+const { isKebabCase, toKebabCase } = require('@strapi/utils');
+
+const validateInput = require('./utils/validate-input');
 
 const logInstructions = (pluginName, { language }) => {
   const maxLength = `    resolve: './src/plugins/${pluginName}'`.length;
@@ -37,6 +40,7 @@ module.exports = plop => {
         type: 'input',
         name: 'pluginName',
         message: 'Plugin name',
+        validate: input => validateInput(input),
       },
       {
         type: 'list',
@@ -51,7 +55,14 @@ module.exports = plop => {
       const language = isTypescript ? 'ts' : 'js';
       const projectLanguage = isUsingTypeScriptSync(process.cwd()) ? 'ts' : 'js';
 
-      // TODO: Adds tsconfig & build command for TS plugins?
+      if (!isKebabCase(answers.pluginName)) {
+        answers.pluginName = toKebabCase(answers.pluginName);
+        console.log(
+          chalk.yellow(
+            `Strapi only supports kebab-cased names for plugins.\nYour plugin has been automatically renamed to "${answers.pluginName}".`
+          )
+        );
+      }
 
       return [
         {

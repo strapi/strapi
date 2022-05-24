@@ -200,4 +200,19 @@ describe('BigInteger validator', () => {
       });
     });
   });
+
+  describe('min', () => {
+    test('it does not validate the min constraint if the attribute min is not a number', async () => {
+      const validator = strapiUtils.validateYupSchema(
+        validators.biginteger(
+          {
+            attr: { type: 'biginteger', minLength: '123' },
+          },
+          { isDraft: false }
+        )
+      );
+
+      expect(await validator(1)).toBe(1);
+    });
+  });
 });
