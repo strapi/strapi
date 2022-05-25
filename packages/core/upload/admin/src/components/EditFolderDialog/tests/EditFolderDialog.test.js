@@ -174,4 +174,21 @@ describe('EditFolderDialog', () => {
 
     expect(queryByText('second child')).toBeInTheDocument();
   });
+
+  test('show confirmation delete dialog', async () => {
+    const folder = {
+      id: 1,
+      name: 'default folder name',
+      children: [],
+      parent: { id: 1, label: 'Some parent' },
+    };
+    const folderStructure = [{ value: 1, label: 'Some parent' }];
+    const { container, queryByText } = setup({ folder, folderStructure });
+
+    act(() => {
+      fireEvent.click(getButton(container, 'delete'));
+    });
+
+    expect(queryByText('Are you sure you want to delete this?')).toBeInTheDocument();
+  });
 });
