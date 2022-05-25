@@ -27,45 +27,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   useQueryParams: jest.fn().mockReturnValue([{ query: {} }]),
 }));
 
-jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
-  useMediaLibraryPermissions: jest.fn().mockReturnValue({
-    isLoading: false,
-    canCreate: true,
-    canUpdate: true,
-  }),
-}));
-
-jest.mock('../../../hooks/useFolderStructure', () => ({
-  useFolderStructure: jest.fn().mockReturnValue({
-    isLoading: false,
-    error: null,
-    data: [
-      {
-        value: null,
-        label: 'Media Library',
-        children: [
-          {
-            value: 1,
-            label: 'first child',
-            children: [],
-          },
-
-          {
-            value: 2,
-            label: 'second child',
-            children: [
-              {
-                value: 21,
-                name: 'first child of the second child',
-                children: [],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  }),
-}));
+jest.mock('../../../hooks/useMediaLibraryPermissions');
+jest.mock('../../../hooks/useFolderStructure');
 
 const client = new QueryClient({
   defaultOptions: {
