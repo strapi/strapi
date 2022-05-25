@@ -250,9 +250,7 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onValueChange={value => {
-            onChange({ target: { name, value: value ?? null, type } });
-          }}
+          onValueChange={value => onChange({ target: { name, value, type } })}
           placeholder={formattedPlaceholder}
           required={required}
           step={step}
@@ -292,13 +290,7 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={event => {
-            if (event.target.value === '') {
-              onChange({ target: { name, value: null, type } });
-            } else {
-              onChange({ target: { name, value: event.target.value, type } });
-            }
-          }}
+          onChange={onChange}
           placeholder={formattedPlaceholder}
           required={required}
           type="text"
@@ -358,9 +350,7 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={value => {
-            onChange({ target: { name, value: value === '' ? null : value, type: 'select' } });
-          }}
+          onChange={value => onChange({ target: { name, value, type: 'select' } })}
           placeholder={formattedPlaceholder}
           required={required}
           value={value}
