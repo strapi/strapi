@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
@@ -20,106 +20,103 @@ import {
 import { FolderDefinition } from '../../constants';
 import { getTrad } from '../../utils';
 
-const CardTitle = styled(Typography).attrs({
-  ellipsis: true,
-  fontWeight: 'semiBold',
-  textColor: 'neutral800',
-  variant: 'omega',
-})`
+const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
 `;
 
-export const FolderList = forwardRef(
-  (
-    { title, folders, size, onSelectFolder, onEditFolder, onChangeFolder, selectedFolders },
-    ref
-  ) => {
-    const { formatMessage } = useIntl();
+export const FolderList = ({
+  title,
+  folders,
+  size,
+  onSelectFolder,
+  onEditFolder,
+  onChangeFolder,
+  selectedFolders,
+}) => {
+  const { formatMessage } = useIntl();
 
-    return (
-      <KeyboardNavigable tagName="article">
-        {title && (
-          <Box paddingTop={2} paddingBottom={2}>
-            <Typography as="h2" variant="delta" fontWeight="semiBold">
-              {title}
-            </Typography>
-          </Box>
-        )}
+  return (
+    <KeyboardNavigable tagName="article">
+      {title && (
+        <Box paddingTop={2} paddingBottom={2}>
+          <Typography as="h2" variant="delta" fontWeight="semiBold">
+            {title}
+          </Typography>
+        </Box>
+      )}
 
-        <Grid gap={4}>
-          {folders.map(folder => {
-            const isSelected = !!selectedFolders.find(
-              currentFolder => currentFolder.id === folder.id
-            );
+      <Grid gap={4}>
+        {folders.map(folder => {
+          const isSelected = !!selectedFolders.find(
+            currentFolder => currentFolder.id === folder.id
+          );
 
-            return (
-              <GridItem col={3} key={`folder-${folder.uid}`}>
-                <FolderCard
-                  ref={ref}
-                  ariaLabel={folder.name}
-                  id={`folder-${folder.uid}`}
-                  to="/"
-                  onClick={event => {
-                    event.preventDefault();
+          return (
+            <GridItem col={3} key={`folder-${folder.uid}`}>
+              <FolderCard
+                ariaLabel={folder.name}
+                id={`folder-${folder.uid}`}
+                to="/"
+                onClick={event => {
+                  event.preventDefault();
 
-                    if (onChangeFolder) {
-                      onChangeFolder(folder.id);
-                    }
-                  }}
-                  startAction={
-                    onSelectFolder && (
-                      <FolderCardCheckbox
-                        value={isSelected}
-                        onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
-                      />
-                    )
+                  if (onChangeFolder) {
+                    onChangeFolder(folder.id);
                   }
-                  cardActions={
-                    onEditFolder && (
-                      <IconButton
-                        icon={<Pencil />}
-                        aria-label={formatMessage({
-                          id: getTrad('list.folder.edit'),
-                          defaultMessage: 'Edit folder',
-                        })}
-                        onClick={() => onEditFolder(folder)}
-                      />
-                    )
-                  }
-                  size={size}
-                >
-                  <FolderCardBody>
-                    <FolderCardBodyAction
-                      to="/"
-                      onClick={event => {
-                        event.preventDefault();
+                }}
+                startAction={
+                  onSelectFolder && (
+                    <FolderCardCheckbox
+                      value={isSelected}
+                      onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
+                    />
+                  )
+                }
+                cardActions={
+                  onEditFolder && (
+                    <IconButton
+                      icon={<Pencil />}
+                      aria-label={formatMessage({
+                        id: getTrad('list.folder.edit'),
+                        defaultMessage: 'Edit folder',
+                      })}
+                      onClick={() => onEditFolder(folder)}
+                    />
+                  )
+                }
+                size={size}
+              >
+                <FolderCardBody>
+                  <FolderCardBodyAction
+                    to="/"
+                    onClick={event => {
+                      event.preventDefault();
 
-                        if (onChangeFolder) {
-                          onChangeFolder(folder.id);
-                        }
-                      }}
-                    >
-                      <Flex as="h2" direction="column" alignItems="start">
-                        <CardTitle>
-                          {folder.name}
-                          <VisuallyHidden>:</VisuallyHidden>
-                        </CardTitle>
+                      if (onChangeFolder) {
+                        onChangeFolder(folder.id);
+                      }
+                    }}
+                  >
+                    <Flex as="h2" direction="column" alignItems="start">
+                      <TypographyMaxWidth variant="omega" fontWeight="semiBold" ellipsis>
+                        {folder.name}
+                        <VisuallyHidden>:</VisuallyHidden>
+                      </TypographyMaxWidth>
 
-                        <Typography as="span" textColor="neutral600" variant="pi" ellipsis>
-                          {folder.children.count} folder, {folder.files.count} assets
-                        </Typography>
-                      </Flex>
-                    </FolderCardBodyAction>
-                  </FolderCardBody>
-                </FolderCard>
-              </GridItem>
-            );
-          })}
-        </Grid>
-      </KeyboardNavigable>
-    );
-  }
-);
+                      <TypographyMaxWidth textColor="neutral600" variant="pi" ellipsis>
+                        {folder.children.count} folder, {folder.files.count} assets
+                      </TypographyMaxWidth>
+                    </Flex>
+                  </FolderCardBodyAction>
+                </FolderCardBody>
+              </FolderCard>
+            </GridItem>
+          );
+        })}
+      </Grid>
+    </KeyboardNavigable>
+  );
+};
 
 FolderList.defaultProps = {
   onChangeFolder: null,

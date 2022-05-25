@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
@@ -45,60 +45,67 @@ const Card = styled(Box)`
   }
 `;
 
-export const FolderCard = forwardRef(
-  ({ children, id, startAction, cardActions, ariaLabel, onClick, to, ...props }, ref) => {
-    const generatedId = useId(id);
+export const FolderCard = ({
+  children,
+  id,
+  startAction,
+  cardActions,
+  ariaLabel,
+  onClick,
+  to,
+  ...props
+}) => {
+  const generatedId = useId(id);
 
-    return (
-      <FolderCardContext.Provider value={{ id: generatedId }}>
-        <Card position="relative" tabIndex={0} ref={ref} isCardActions={!!cardActions} {...props}>
-          <FauxClickWrapper
-            to={to || undefined}
-            as={to ? NavLink : 'button'}
-            type={to ? undefined : 'button'}
-            onClick={onClick}
-            tabIndex={-1}
-            aria-label={ariaLabel}
-            aria-hidden
-          />
+  return (
+    <FolderCardContext.Provider value={{ id: generatedId }}>
+      <Card position="relative" tabIndex={0} isCardActions={!!cardActions} {...props}>
+        <FauxClickWrapper
+          to={to || undefined}
+          as={to ? NavLink : 'button'}
+          type={to ? undefined : 'button'}
+          onClick={onClick}
+          tabIndex={-1}
+          aria-label={ariaLabel}
+          aria-hidden
+        />
 
-          <Stack
+        <Stack
+          hasRadius
+          background="neutral0"
+          shadow="tableShadow"
+          paddingBottom={3}
+          paddingLeft={4}
+          paddingRight={4}
+          paddingTop={3}
+          spacing={3}
+          horizontal
+          cursor="pointer"
+        >
+          {startAction}
+
+          <Box
             hasRadius
-            background="neutral0"
-            shadow="tableShadow"
-            paddingBottom={3}
-            paddingLeft={4}
-            paddingRight={4}
-            paddingTop={3}
-            spacing={3}
-            horizontal
-            cursor="pointer"
+            background="secondary100"
+            color="secondary500"
+            paddingBottom={2}
+            paddingLeft={3}
+            paddingRight={3}
+            paddingTop={2}
           >
-            {startAction}
+            <StyledFolder width={pxToRem(20)} height={pxToRem(18)} />
+          </Box>
 
-            <Box
-              hasRadius
-              background="secondary100"
-              color="secondary500"
-              paddingBottom={2}
-              paddingLeft={3}
-              paddingRight={3}
-              paddingTop={2}
-            >
-              <StyledFolder width={pxToRem(20)} height={pxToRem(18)} />
-            </Box>
+          {children}
 
-            {children}
-
-            <CardActionDisplay>
-              <CardAction right={4}>{cardActions}</CardAction>
-            </CardActionDisplay>
-          </Stack>
-        </Card>
-      </FolderCardContext.Provider>
-    );
-  }
-);
+          <CardActionDisplay>
+            <CardAction right={4}>{cardActions}</CardAction>
+          </CardActionDisplay>
+        </Stack>
+      </Card>
+    </FolderCardContext.Provider>
+  );
+};
 
 FolderCard.defaultProps = {
   id: undefined,
