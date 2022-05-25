@@ -27,6 +27,7 @@ import { moveElement } from '../../utils/moveElement';
 
 export const AssetDialog = ({
   allowedTypes,
+  folderId,
   onClose,
   onAddAsset,
   onAddFolder,
@@ -56,7 +57,7 @@ export const AssetDialog = ({
       onChangeSearch,
       onChangeFolder: onChangeFolderParam,
     },
-  ] = useModalQueryParams();
+  ] = useModalQueryParams({ folder: folderId });
   const {
     data: { pagination, results: assets } = {},
     isLoading: isLoadingAssets,
@@ -251,6 +252,7 @@ export const AssetDialog = ({
 
 AssetDialog.defaultProps = {
   allowedTypes: [],
+  folderId: null,
   initiallySelectedAssets: [],
   multiple: false,
   trackedLocation: undefined,
@@ -258,6 +260,7 @@ AssetDialog.defaultProps = {
 
 AssetDialog.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
+  folderId: PropTypes.number,
   initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition),
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,

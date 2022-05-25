@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { stringify } from 'qs';
 
-const useModalQueryParams = () => {
+const useModalQueryParams = initialState => {
   const [queryObject, setQueryObject] = useState({
     page: 1,
     sort: 'updatedAt:DESC',
@@ -10,6 +10,7 @@ const useModalQueryParams = () => {
     filters: {
       $and: [],
     },
+    ...initialState,
   });
 
   const handleChangeFilters = nextFilters => {

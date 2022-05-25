@@ -36,6 +36,25 @@ describe('useModalQueryParams', () => {
     });
   });
 
+  test('set initial state', () => {
+    const {
+      result: { current },
+    } = setup();
+
+    expect(current[0].queryObject).toStrictEqual(FIXTURE_QUERY);
+  });
+
+  test('handles initial state', () => {
+    const {
+      result: { current },
+    } = setup({ state: true });
+
+    expect(current[0].queryObject).toStrictEqual({
+      ...FIXTURE_QUERY,
+      state: true,
+    });
+  });
+
   test('onChangeFilters', () => {
     const { result } = setup();
 

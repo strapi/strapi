@@ -162,7 +162,11 @@ export const MediaLibraryInput = ({
         <AssetDialog
           allowedTypes={fieldAllowedTypes}
           initiallySelectedAssets={initiallySelectedAssets}
-          onClose={() => setStep(undefined)}
+          folderId={folderId}
+          onClose={() => {
+            setStep(undefined);
+            setFolderId(null);
+          }}
           onValidate={handleValidation}
           multiple={multiple}
           onAddAsset={() => setStep(STEPS.AssetUpload)}
