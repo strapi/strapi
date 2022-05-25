@@ -33,12 +33,12 @@ const FIXTURE_FOLDERS = [
 ];
 
 // eslint-disable-next-line react/prop-types
-const ComponentFixture = props => {
+const ComponentFixture = (props = { onSelectFolder: jest.fn(), onEditFolder: jest.fn() }) => {
   return (
     <MemoryRouter>
       <IntlProvider locale="en" messages={{}}>
         <ThemeProvider theme={lightTheme}>
-          <FolderList onSelectFolder={() => {}} onEditFolder={() => {}} {...props} />
+          <FolderList {...props} />
         </ThemeProvider>
       </IntlProvider>
     </MemoryRouter>

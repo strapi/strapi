@@ -57,13 +57,8 @@ function ComponentFixture(props) {
   );
 }
 
-function setup(props) {
-  const FIXTURE_PROPS = {
-    onClose: jest.fn(),
-    ...props,
-  };
-
-  return render(<ComponentFixture {...FIXTURE_PROPS} />, { container: document.body });
+function setup(props = { onClose: jest.fn() }) {
+  return render(<ComponentFixture {...props} />, { container: document.body });
 }
 
 function getInput(container, name) {

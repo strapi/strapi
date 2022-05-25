@@ -43,7 +43,7 @@ const renderML = (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
         <MemoryRouter>
-          <IntlProvider messages={{}}>
+          <IntlProvider locale="en" messages={{}}>
             <AssetDialog {...props} />
           </IntlProvider>
         </MemoryRouter>
