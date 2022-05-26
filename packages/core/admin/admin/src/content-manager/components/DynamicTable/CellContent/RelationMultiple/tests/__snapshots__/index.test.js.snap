@@ -21,6 +21,10 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
 }
 
 .c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
@@ -32,10 +36,6 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
 .c7 {
@@ -122,7 +122,7 @@ exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the sn
   align-items: center;
   padding: 8px 16px;
   background: #4945ff;
-  border: none;
+  border: 1px solid #4945ff;
   border: 1px solid transparent;
   background: transparent;
 }

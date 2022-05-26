@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Link } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Link } from '@strapi/design-system/Link';
 import { Typography } from '@strapi/design-system/Typography';
 import Cog from '@strapi/icons/Cog';
 import { useIntl } from 'react-intl';

@@ -106,7 +106,7 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
         paddingRight={4}
       >
         <StackCentered spacing={1}>
-          <StyledFontAwesomeIcon icon={icon} />
+          <StyledFontAwesomeIcon icon={icon || 'dice-d6'} />
           <Box maxWidth={`calc(${pxToRem(140)} - 32px)`}>
             <Typography variant="pi" fontWeight="bold" ellipsis>
               {displayName}

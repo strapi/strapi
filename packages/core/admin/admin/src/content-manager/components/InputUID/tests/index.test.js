@@ -47,7 +47,7 @@ describe('<InputUID />', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c8 {
+      .c9 {
         border: none;
         background: transparent;
         font-size: 1.6rem;
@@ -63,7 +63,11 @@ describe('<InputUID />', () => {
         align-items: center;
       }
 
-      .c10 {
+      .c11 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -71,18 +75,32 @@ describe('<InputUID />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c6 {
+      .c7 {
         padding-right: 12px;
         padding-left: 8px;
       }
 
-      .c2 {
+      .c0 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -90,13 +108,13 @@ describe('<InputUID />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -108,24 +126,22 @@ describe('<InputUID />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c1 {
+      .c2 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c5 {
+      .c6 {
         border: none;
         border-radius: 4px;
+        padding-bottom: 0.65625rem;
         padding-left: 16px;
         padding-right: 0;
+        padding-top: 0.65625rem;
         color: #32324d;
         font-weight: 400;
         font-size: 0.875rem;
@@ -134,40 +150,39 @@ describe('<InputUID />', () => {
         background: inherit;
       }
 
-      .c5::-webkit-input-placeholder {
+      .c6::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c5::-moz-placeholder {
+      .c6::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c5:-ms-input-placeholder {
+      .c6:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c5::placeholder {
+      .c6::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c5[aria-disabled='true'] {
+      .c6[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c5:focus {
+      .c6:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c4 {
+      .c5 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
-        height: 2.5rem;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -176,48 +191,38 @@ describe('<InputUID />', () => {
         transition-duration: 0.2s;
       }
 
-      .c4:focus-within {
+      .c5:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c0 > * {
+      .c1 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c0 > * + * {
+      .c1 > * + * {
         margin-top: 4px;
       }
 
-      .c7 {
+      .c8 {
         position: relative;
       }
 
-      .c9 svg {
+      .c10 svg {
         height: 1rem;
         width: 1rem;
       }
 
-      .c9 svg path {
+      .c10 svg path {
         fill: #a5a5ba;
       }
 
-      .c9 svg:hover path {
+      .c10 svg:hover path {
         fill: #4945ff;
       }
 
-      .c11 {
+      .c12 {
         -webkit-animation: gzYjWD 2s infinite linear;
         animation: gzYjWD 2s infinite linear;
       }
@@ -225,44 +230,44 @@ describe('<InputUID />', () => {
       <div>
         <div>
           <div
-            class="c0"
+            class="c0 c1"
             spacing="1"
           >
             <label
-              class="c1"
+              class="c2"
               for="textinput-1"
             >
               <div
-                class="c2"
+                class="c3"
               >
                 test
               </div>
             </label>
             <div
-              class="c3 c4"
+              class="c4 c5"
             >
               <input
                 aria-disabled="false"
                 aria-invalid="false"
-                class="c5"
+                class="c6"
                 id="textinput-1"
                 name="test"
                 placeholder=""
                 value="michka"
               />
               <div
-                class="c6"
+                class="c7"
               >
                 <div
-                  class="c7"
+                  class="c8"
                 >
                   <button
                     aria-label="regenerate"
-                    class="c8 c9"
+                    class="c9 c10"
                     type="button"
                   >
                     <div
-                      class="c10 c11"
+                      class="c11 c12"
                     >
                       <svg
                         fill="none"

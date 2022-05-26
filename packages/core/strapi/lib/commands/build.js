@@ -1,5 +1,4 @@
 'use strict';
-const path = require('path');
 
 const tsUtils = require('@strapi/typescript-utils');
 const { buildAdmin, buildTypeScript } = require('./builders');
@@ -12,13 +11,14 @@ module.exports = async ({ optimization, forceBuild = true }) => {
   const srcDir = process.cwd();
 
   const useTypeScriptServer = await tsUtils.isUsingTypeScript(srcDir);
+  const outDir = await tsUtils.resolveOutDir(srcDir);
 
   // Typescript
   if (useTypeScriptServer) {
     await buildTypeScript({ srcDir, watch: false });
 
     // Update the dir path for the next steps
-    buildDestDir = path.join(srcDir, 'dist');
+    buildDestDir = outDir;
   }
 
   await buildAdmin({
