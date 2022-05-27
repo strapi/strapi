@@ -33,6 +33,7 @@ describe('Build Component Schema', () => {
     const [pluginResponseValue, apiResponseValue] = Object.values(schemas);
 
     const expectedShape = {
+      type: 'object',
       properties: {
         data: {
           type: 'object',
@@ -82,6 +83,7 @@ describe('Build Component Schema', () => {
     const apiListResponseValue = schemas['RestaurantListResponse'];
 
     const expectedShape = {
+      type: 'object',
       properties: {
         data: {
           type: 'array',
