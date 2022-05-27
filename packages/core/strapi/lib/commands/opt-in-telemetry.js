@@ -22,6 +22,11 @@ const writePackageJSON = async (path, file, spacing) => {
     return true;
   } catch (err) {
     console.error(`${chalk.red('Error')}: ${err.message}`);
+    console.log(
+      `${chalk.yellow(
+        'Warning'
+      )}: There has been an error, please set "telemetryDisabled": false in the "strapi" object of your package.json manually.`
+    );
     return false;
   }
 };
@@ -88,11 +93,6 @@ module.exports = async function optInTelemetry() {
   const write = await writePackageJSON(packageJSONPath, updatedPackageJSON, 2);
 
   if (!write) {
-    console.log(
-      `${chalk.yellow(
-        'Warning'
-      )}: There has been an error, please set "telemetryDisabled": false in the "strapi" object of your package.json manually.`
-    );
     process.exit(0);
   }
 
