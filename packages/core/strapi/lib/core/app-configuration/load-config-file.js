@@ -30,7 +30,7 @@ const loadJSONFile = file => {
 const loadFile = file => {
   const ext = path.extname(file);
 
-  if(ext !== '.js' && ext !== '.json') {
+  if(ext !== '.js' && ext !== '.json' && ext !== '.ts') {
     throw new Error(`Remove an invalid config file: ${file}`);
   }
 
