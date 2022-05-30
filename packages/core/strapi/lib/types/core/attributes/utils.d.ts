@@ -1,7 +1,7 @@
 import { Get, KeysBy, NeverGuard, PickBy, SchemaUID } from '../../utils';
 import {
   Attribute,
-  Type,
+  AttributeType,
   GetBigIntegerAttributeValue,
   GetComponentAttributeValue,
   GetBooleanAttributeValue,
@@ -20,16 +20,16 @@ import {
   GetUIDAttributeValue,
 } from '.';
 
-export type PickTypes<T extends Type> = T;
+export type PickTypes<T extends AttributeType> = T;
 
-export type GetAttributesKeysByType<TUID extends SchemaUID, TType extends Type, TRule = never> = KeysBy<
-  GetAttributes<TUID>,
-  Attribute<TType> & NeverGuard<TRule, unknown>
+export type GetAttributesKeysByType<T extends SchemaUID, U extends AttributeType, P = never> = KeysBy<
+  GetAttributes<T>,
+  Attribute<U> & NeverGuard<P, unknown>
 >;
 
-export type GetAttributesByType<TUID extends SchemaUID, TType extends Type, TRule = never> = PickBy<
-  GetAttributes<TUID>,
-  Attribute<TType> & NeverGuard<TRule, unknown>
+export type GetAttributesByType<T extends SchemaUID, U extends AttributeType, P = never> = PickBy<
+  GetAttributes<T>,
+  Attribute<U> & NeverGuard<P, unknown>
 >;
 
 export type GetAttribute<T extends SchemaUID, U extends GetAttributesKey<T>> = Get<GetAttributes<T>, U>;
