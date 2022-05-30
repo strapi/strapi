@@ -37,7 +37,14 @@ export const DialogHeader = ({ currentFolder, onChangeFolder }) => {
           label={`${formatMessage({
             id: getTrad('header.actions.add-assets'),
             defaultMessage: 'Add new assets',
-          })}${folderLabel ? `, ${folderLabel} folder` : ''}`}
+          })}${
+            folderLabel
+              ? `, ${folderLabel} ${formatMessage({
+                  id: 'header.actions.add-assets.folder',
+                  defaultMessage: 'folder',
+                })}`
+              : ''
+          }`}
         >
           <Crumb>
             {formatMessage({

@@ -6,11 +6,6 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { useFolderStructure } from '../../../hooks/useFolderStructure';
 import { DialogHeader } from '../DialogHeader';
 
-jest.mock('../../../utils', () => ({
-  ...jest.requireActual('../../../utils'),
-  getTrad: x => x,
-}));
-
 jest.mock('../../../hooks/useFolderStructure');
 
 const setup = props => {
@@ -42,33 +37,10 @@ const setup = props => {
 
 describe('Upload || components || DialogHeader', () => {
   it('should render folder name and back button', () => {
-    useFolderStructure.mockReturnValueOnce({
-      isLoading: false,
-      error: null,
-      data: [
-        {
-          value: null,
-          label: 'Media Library',
-          children: [
-            {
-              value: 1,
-              label: 'Cats',
-              children: [
-                {
-                  value: 2,
-                  label: 'Michka',
-                  children: [],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
     const handleChangeFolderSpy = jest.fn();
     const { queryByText } = setup({ currentFolder: 2, onChangeFolder: handleChangeFolderSpy });
 
-    expect(queryByText('Michka')).toBeInTheDocument();
+    expect(queryByText('second child')).toBeInTheDocument();
 
     const goBackButton = screen.getByLabelText('Go back');
     expect(goBackButton).toBeInTheDocument();
@@ -102,24 +74,7 @@ describe('Upload || components || DialogHeader', () => {
     ).toBeInTheDocument();
   });
 
-  it('should not render folder name and back button', () => {
-    useFolderStructure.mockReturnValueOnce({
-      isLoading: false,
-      error: null,
-      data: [
-        {
-          value: null,
-          label: 'Media Library',
-          children: [
-            {
-              value: 1,
-              label: 'Cats',
-              children: [],
-            },
-          ],
-        },
-      ],
-    });
+  it('should not render folder name and back button if the current folder is root', () => {
     const { queryByText } = setup();
 
     expect(queryByText('Cats')).not.toBeInTheDocument();

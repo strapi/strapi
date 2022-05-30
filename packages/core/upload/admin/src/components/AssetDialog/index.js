@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { ModalLayout, ModalBody } from '@strapi/design-system/ModalLayout';
 import { Flex } from '@strapi/design-system/Flex';
 import { Button } from '@strapi/design-system/Button';
@@ -9,7 +10,7 @@ import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/
 import { Badge } from '@strapi/design-system/Badge';
 import { Loader } from '@strapi/design-system/Loader';
 import { Stack } from '@strapi/design-system/Stack';
-import { NoPermissions, AnErrorOccurred, useSelectionState, pxToRem } from '@strapi/helper-plugin';
+import { NoPermissions, AnErrorOccurred, useSelectionState } from '@strapi/helper-plugin';
 
 import getTrad from '../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
@@ -24,6 +25,10 @@ import { DialogHeader } from './DialogHeader';
 import { DialogFooter } from './DialogFooter';
 import { EditAssetDialog } from '../EditAssetDialog';
 import { moveElement } from '../../utils/moveElement';
+
+const LoadingBody = styled(Flex)`
+  min-height: calc(60vh + 80px);
+`;
 
 export const AssetDialog = ({
   allowedTypes,
@@ -99,14 +104,14 @@ export const AssetDialog = ({
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
         <DialogHeader />
-        <Flex justifyContent="center" paddingTop={4} paddingBottom={4} minHeight={pxToRem(560)}>
+        <LoadingBody justifyContent="center" paddingTop={4} paddingBottom={4}>
           <Loader>
             {formatMessage({
               id: getTrad('list.asset.load'),
               defaultMessage: 'How do you want to upload your assets?',
             })}
           </Loader>
-        </Flex>
+        </LoadingBody>
         <DialogFooter onClose={onClose} />
       </ModalLayout>
     );
