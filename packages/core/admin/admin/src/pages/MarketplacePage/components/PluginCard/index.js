@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
-import { LinkButton } from '@strapi/design-system/LinkButton';
+import { LinkButton } from '@strapi/design-system/v2/LinkButton';
 import { Flex } from '@strapi/design-system/Flex';
 import { Icon } from '@strapi/design-system/Icon';
 import { Tooltip } from '@strapi/design-system/Tooltip';
@@ -46,9 +46,9 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode
       direction="column"
       justifyContent="space-between"
       paddingTop={4}
-      paddingRight={6}
+      paddingRight={4}
       paddingBottom={4}
-      paddingLeft={6}
+      paddingLeft={4}
       hasRadius
       background="neutral0"
       shadow="tableShadow"
@@ -108,6 +108,7 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode
         <LinkButton
           size="S"
           href={`https://market.strapi.io/plugins/${attributes.slug}`}
+          isExternal
           endIcon={<ExternalLink />}
           aria-label={formatMessage(
             {
