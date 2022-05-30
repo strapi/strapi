@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, omit, isArray } = require('lodash/fp');
+const { has, get, omit, isArray } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
@@ -11,7 +11,8 @@ const BULK_ACTIONS = ['delete'];
 const paramsContain = (key, params) => {
   return (
     has(key, params.filters) ||
-    (isArray(params.filters) && params.filters.some(clause => has(key, clause)))
+    (isArray(params.filters) && params.filters.some(clause => has(key, clause))) ||
+    (isArray(get('$and', params.filters)) && params.filters.$and.some(clause => has(key, clause)))
   );
 };
 

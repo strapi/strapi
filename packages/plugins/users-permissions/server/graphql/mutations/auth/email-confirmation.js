@@ -19,7 +19,7 @@ module.exports = ({ nexus, strapi }) => {
     async resolve(parent, args, context) {
       const { koaContext } = context;
 
-      koaContext.request.body = toPlainObject(args);
+      koaContext.query = toPlainObject(args);
 
       await strapi
         .plugin('users-permissions')

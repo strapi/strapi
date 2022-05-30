@@ -6,7 +6,7 @@ import styled, { keyframes } from 'styled-components';
 import { pxToRem } from '@strapi/helper-plugin';
 import Clock from '@strapi/icons/Clock';
 import Refresh from '@strapi/icons/Refresh';
-import { Link } from '@strapi/design-system/Link';
+import { Link } from '@strapi/design-system/v2/Link';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
@@ -72,11 +72,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }) => {
           </Flex>
           <Flex justifyContent="center">
             <Box paddingTop={2}>
-              <Link
-                href="https://docs.strapi.io"
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-              >
+              <Link href="https://docs.strapi.io" isExternal>
                 {formatMessage({
                   id: 'global.documentation',
                   defaultMessage: 'Read the documentation',

@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { pxToRem, RemoveRoundedButton } from '@strapi/helper-plugin';
+import { pxToRem, RemoveRoundedButton, Link } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import has from 'lodash/has';
@@ -9,7 +9,6 @@ import isEmpty from 'lodash/isEmpty';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
-import { Link } from '@strapi/design-system/Link';
 import { getTrad } from '../../utils';
 
 const StyledBullet = styled.div`

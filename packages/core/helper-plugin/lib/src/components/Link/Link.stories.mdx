@@ -1,0 +1,23 @@
+<!--- Link.stories.mdx --->
+
+import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
+import { Box } from '@strapi/design-system/Box';
+import Link from './index';
+
+<Meta title="components/Link" component={Link} />
+
+# Link
+
+React-router-dom implementation of the [Strapi Design System Link](https://design-system-git-main-strapijs.vercel.app/?path=/story/design-system-components-link--base)
+
+## Link
+
+Basic usage
+
+<Canvas>
+  <Story name="base">
+    <Box padding={4}>
+        <Link to="/somewhere-internal">Internal link</Link>
+    </Box>
+  </Story>
+</Canvas>

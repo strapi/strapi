@@ -119,10 +119,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         line-height: 1.43;
       }
 
-      .c10:focus-visible {
-        outline: none;
-      }
-
       .c22 {
         color: #4945ff;
         font-size: 0.75rem;
@@ -180,6 +176,10 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
+      }
+
+      .c10:focus-visible {
+        outline: none;
       }
 
       .c5 {
