@@ -33,26 +33,21 @@ module.exports = {
 
     return {
       send(options) {
-        return new Promise((resolve, reject) => {
-          const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
+        const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
-          let data = {
-            from: from || settings.defaultFrom,
-            to,
-            cc,
-            bcc,
-            'h:Reply-To': replyTo || settings.defaultReplyTo,
-            subject,
-            text,
-            html,
-            ...rest,
-          };
+        let data = {
+          from: from || settings.defaultFrom,
+          to,
+          cc,
+          bcc,
+          'h:Reply-To': replyTo || settings.defaultReplyTo,
+          subject,
+          text,
+          html,
+          ...rest,
+        };
 
-          mg.messages
-            .create(providerOptions.domain, removeUndefined(data))
-            .then(() => resolve())
-            .catch(err => reject(err));
-        });
+        return mg.messages.create(providerOptions.domain, removeUndefined(data));
       },
     };
   },
