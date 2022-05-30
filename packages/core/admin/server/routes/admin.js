@@ -9,6 +9,34 @@ module.exports = [
   },
   {
     method: 'GET',
+    path: '/project-settings',
+    handler: 'admin.getProjectSettings',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        {
+          name: 'admin::hasPermissions',
+          config: { actions: ['admin::project-settings.read'] },
+        },
+      ],
+    },
+  },
+  {
+    method: 'POST',
+    path: '/project-settings',
+    handler: 'admin.updateProjectSettings',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        {
+          name: 'admin::hasPermissions',
+          config: { actions: ['admin::project-settings.update'] },
+        },
+      ],
+    },
+  },
+  {
+    method: 'GET',
     path: '/project-type',
     handler: 'admin.getProjectType',
     config: { auth: false },

@@ -7,9 +7,11 @@ const Img = styled.img`
 `;
 
 const Logo = () => {
-  const { authLogo } = useConfigurations();
+  const {
+    logos: { auth },
+  } = useConfigurations();
 
-  return <Img src={authLogo} aria-hidden alt="" />;
+  return <Img src={auth.default} aria-hidden alt="" />;
 };
 
 export default Logo;
