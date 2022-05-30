@@ -160,7 +160,7 @@ export const AssetDialog = ({
 
   return (
     <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={isLoading}>
-      <DialogTitle />
+      <DialogTitle currentFolder={queryObject?.folder} onChangeFolder={handleFolderChange} />
 
       <TabGroup
         label={formatMessage({
