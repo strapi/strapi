@@ -14,7 +14,7 @@
   "Auth.form.email.label": "Email",
   "Auth.form.email.placeholder": "kai@doe.com",
   "Auth.form.error.blocked": "Tài khoản của bạn bị khóa bởi người quản trị.",
-  "Auth.form.error.code.provide": "Mã được cung cấp không chính các.",
+  "Auth.form.error.code.provide": "Mã được cung cấp không chính xác.",
   "Auth.form.error.confirmed": "Tài khoản Email của bạn chưa được xác nhận.",
   "Auth.form.error.email.invalid": "Email sai.",
   "Auth.form.error.email.provide": "Vui lòng cung cấp tên đăng nhập hoặc email.",
