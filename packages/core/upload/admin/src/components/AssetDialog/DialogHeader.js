@@ -6,8 +6,7 @@ import { ModalHeader } from '@strapi/design-system/ModalLayout';
 import { Stack } from '@strapi/design-system/Stack';
 import { Icon } from '@strapi/design-system/Icon';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
-import getTrad from '../../utils/getTrad';
-import { findRecursiveFolderMetadatas } from '../../utils';
+import { findRecursiveFolderMetadatas, getTrad } from '../../utils';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 
 export const DialogHeader = ({ currentFolder, onChangeFolder }) => {
@@ -27,14 +26,19 @@ export const DialogHeader = ({ currentFolder, onChangeFolder }) => {
       <Stack horizontal spacing={4}>
         {currentFolder && (
           <button
-            aria-label="Go back"
+            aria-label={formatMessage({ id: 'modal.header.go-back', defaultMessage: 'Go back' })}
             type="button"
             onClick={() => onChangeFolder(folderMetadatas?.parentId)}
           >
             <Icon color="neutral500" as={ArrowLeft} />
           </button>
         )}
-        <Breadcrumbs label={`Add new assets ${folderLabel ? `, ${folderLabel}` : ''}`}>
+        <Breadcrumbs
+          label={`${formatMessage({
+            id: getTrad('header.actions.add-assets'),
+            defaultMessage: 'Add new assets',
+          })}${folderLabel ? `, ${folderLabel} folder` : ''}`}
+        >
           <Crumb>
             {formatMessage({
               id: getTrad('header.actions.add-assets'),
