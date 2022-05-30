@@ -166,7 +166,9 @@ const stringValidator = composeValidators(
   addUniqueValidator
 );
 
-const emailValidator = composeValidators(stringValidator, validator => validator.email());
+const emailValidator = composeValidators(stringValidator, validator =>
+  validator.email().min(1, '${path} cannot be empty')
+);
 
 const uidValidator = composeValidators(stringValidator, validator =>
   validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))

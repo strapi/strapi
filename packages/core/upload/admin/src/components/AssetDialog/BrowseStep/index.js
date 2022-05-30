@@ -62,43 +62,51 @@ export const BrowseStep = ({
   const hasSomeAssetSelected = allAllowedAsset.some(
     asset => selectedAssets.findIndex(currAsset => currAsset.id === asset.id) !== -1
   );
+  const isSearching = !!queryObject?._q;
+  const isFiltering =
+    queryObject?.filters?.$and && Object.keys(queryObject?.filters?.$and).length > 0;
 
   return (
     <Stack spacing={4}>
-      {assets.length > 0 && onSelectAllAsset && (
+      {onSelectAllAsset && (
         <Box>
           <Box paddingBottom={4}>
             <Flex justifyContent="space-between" alignItems="flex-start">
-              <StartBlockActions wrap="wrap">
-                {multiple && (
-                  <Flex
-                    paddingLeft={2}
-                    paddingRight={2}
-                    background="neutral0"
-                    hasRadius
-                    borderColor="neutral200"
-                    height={`${32 / 16}rem`}
-                  >
-                    <BaseCheckbox
-                      aria-label={formatMessage({
-                        id: getTrad('bulk.select.label'),
-                        defaultMessage: 'Select all assets',
-                      })}
-                      indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
-                      value={areAllAssetSelected}
-                      onChange={onSelectAllAsset}
-                    />
-                  </Flex>
-                )}
-                <SortPicker onChangeSort={onChangeSort} />
-                <Filters
-                  appliedFilters={queryObject.filters.$and}
-                  onChangeFilters={onChangeFilters}
-                />
-              </StartBlockActions>
-              <EndBlockActions pullRight>
-                <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
-              </EndBlockActions>
+              {(assets.length > 0 || folders.length > 0) && (
+                <StartBlockActions wrap="wrap">
+                  {multiple && (
+                    <Flex
+                      paddingLeft={2}
+                      paddingRight={2}
+                      background="neutral0"
+                      hasRadius
+                      borderColor="neutral200"
+                      height={`${32 / 16}rem`}
+                    >
+                      <BaseCheckbox
+                        aria-label={formatMessage({
+                          id: getTrad('bulk.select.label'),
+                          defaultMessage: 'Select all assets',
+                        })}
+                        indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
+                        value={areAllAssetSelected}
+                        onChange={onSelectAllAsset}
+                      />
+                    </Flex>
+                  )}
+                  <SortPicker onChangeSort={onChangeSort} />
+                  <Filters
+                    appliedFilters={queryObject.filters.$and}
+                    onChangeFilters={onChangeFilters}
+                  />
+                </StartBlockActions>
+              )}
+
+              {(assets.length > 0 || folders.length > 0 || isSearching) && (
+                <EndBlockActions pullRight>
+                  <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
+                </EndBlockActions>
+              )}
             </Flex>
           </Box>
         </Box>
@@ -137,13 +145,10 @@ export const BrowseStep = ({
             size="S"
             count={6}
             action={
-              canCreate && (
-                <Button
-                  variant="secondary"
-                  id="asset-dialog-title"
-                  startIcon={<PlusIcon />}
-                  onClick={onAddAsset}
-                >
+              canCreate &&
+              !isFiltering &&
+              !isSearching && (
+                <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
                   {formatMessage({
                     id: getTrad('header.actions.add-assets'),
                     defaultMessage: 'Add new assets',
@@ -152,7 +157,13 @@ export const BrowseStep = ({
               )
             }
             content={
-              canCreate
+              // eslint-disable-next-line no-nested-ternary
+              isFiltering
+                ? formatMessage({
+                    id: getTrad('list.assets-empty.title-withSearch'),
+                    defaultMessage: 'There are no assets with the applied filters',
+                  })
+                : canCreate && !isSearching
                 ? formatMessage({
                     id: getTrad('list.assets.empty'),
                     defaultMessage: 'Upload your first assets...',

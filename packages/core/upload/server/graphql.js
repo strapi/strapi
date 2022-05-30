@@ -2,6 +2,7 @@
 
 const path = require('path');
 const os = require('os');
+const mime = require('mime-types');
 const fse = require('fs-extra');
 const { FILE_MODEL_UID } = require('./constants');
 const { getStreamSize } = require('./utils/file');
@@ -49,7 +50,11 @@ module.exports = ({ strapi }) => {
     const currentFile = await uploadService.formatFileInfo(
       {
         filename,
-        type: mimetype,
+        /**
+         * in case the mime-type wasn't sent, Strapi tries to guess it
+         * from the file extension, to avoid a corrupt database state
+         */
+        type: mimetype || mime.lookup(filename) || 'application/octet-stream',
         size: await getStreamSize(createReadStream()),
       },
       extraInfo || {},
