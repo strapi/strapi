@@ -9,7 +9,7 @@ import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/
 import { Badge } from '@strapi/design-system/Badge';
 import { Loader } from '@strapi/design-system/Loader';
 import { Stack } from '@strapi/design-system/Stack';
-import { NoPermissions, AnErrorOccurred, useSelectionState } from '@strapi/helper-plugin';
+import { NoPermissions, AnErrorOccurred, useSelectionState, pxToRem } from '@strapi/helper-plugin';
 
 import getTrad from '../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
@@ -99,7 +99,7 @@ export const AssetDialog = ({
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
         <DialogHeader />
-        <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
+        <Flex justifyContent="center" paddingTop={4} paddingBottom={4} minHeight={pxToRem(560)}>
           <Loader>
             {formatMessage({
               id: getTrad('list.asset.load'),
