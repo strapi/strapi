@@ -20,7 +20,7 @@ import { useFolders } from '../../hooks/useFolders';
 import useModalQueryParams from '../../hooks/useModalQueryParams';
 import { AssetDefinition } from '../../constants';
 import getAllowedFiles from '../../utils/getAllowedFiles';
-import { DialogTitle } from './DialogTitle';
+import { DialogHeader } from './DialogHeader';
 import { DialogFooter } from './DialogFooter';
 import { EditAssetDialog } from '../EditAssetDialog';
 import { moveElement } from '../../utils/moveElement';
@@ -98,7 +98,7 @@ export const AssetDialog = ({
   if (isLoading) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
-        <DialogTitle />
+        <DialogHeader />
         <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
           <Loader>
             {formatMessage({
@@ -115,7 +115,7 @@ export const AssetDialog = ({
   if (hasError) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogTitle />
+        <DialogHeader />
         <AnErrorOccurred />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
@@ -125,7 +125,7 @@ export const AssetDialog = ({
   if (!canRead) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogTitle />
+        <DialogHeader />
         <NoPermissions />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
@@ -160,7 +160,7 @@ export const AssetDialog = ({
 
   return (
     <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={isLoading}>
-      <DialogTitle currentFolder={queryObject?.folder} onChangeFolder={handleFolderChange} />
+      <DialogHeader currentFolder={queryObject?.folder} onChangeFolder={handleFolderChange} />
 
       <TabGroup
         label={formatMessage({

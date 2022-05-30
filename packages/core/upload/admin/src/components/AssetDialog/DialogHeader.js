@@ -10,7 +10,7 @@ import getTrad from '../../utils/getTrad';
 import { findRecursiveFolderMetadatas } from '../../utils';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 
-export const DialogTitle = ({ currentFolder, onChangeFolder }) => {
+export const DialogHeader = ({ currentFolder, onChangeFolder }) => {
   const { formatMessage } = useIntl();
 
   const { data, isLoading } = useFolderStructure();
@@ -26,11 +26,15 @@ export const DialogTitle = ({ currentFolder, onChangeFolder }) => {
     <ModalHeader>
       <Stack horizontal spacing={4}>
         {currentFolder && (
-          <button type="button" onClick={() => onChangeFolder(folderMetadatas?.parentId)}>
+          <button
+            aria-label="Go back"
+            type="button"
+            onClick={() => onChangeFolder(folderMetadatas?.parentId)}
+          >
             <Icon color="neutral500" as={ArrowLeft} />
           </button>
         )}
-        <Breadcrumbs label="Category model, name field">
+        <Breadcrumbs label={`Add new assets ${folderLabel ? `, ${folderLabel}` : ''}`}>
           <Crumb>
             {formatMessage({
               id: getTrad('header.actions.add-assets'),
@@ -44,12 +48,12 @@ export const DialogTitle = ({ currentFolder, onChangeFolder }) => {
   );
 };
 
-DialogTitle.defaultProps = {
+DialogHeader.defaultProps = {
   currentFolder: undefined,
   onChangeFolder: undefined,
 };
 
-DialogTitle.propTypes = {
+DialogHeader.propTypes = {
   currentFolder: PropTypes.number,
   onChangeFolder: PropTypes.func,
 };
