@@ -63,8 +63,7 @@ export const BrowseStep = ({
     asset => selectedAssets.findIndex(currAsset => currAsset.id === asset.id) !== -1
   );
   const isSearching = !!queryObject?._q;
-  const isFiltering =
-    queryObject?.filters?.$and && Object.keys(queryObject?.filters?.$and).length > 0;
+  const isFiltering = queryObject?.filters?.$and?.length > 0;
 
   return (
     <Stack spacing={4}>
@@ -96,7 +95,7 @@ export const BrowseStep = ({
                   )}
                   <SortPicker onChangeSort={onChangeSort} />
                   <Filters
-                    appliedFilters={queryObject.filters.$and}
+                    appliedFilters={queryObject?.filters?.$and}
                     onChangeFilters={onChangeFilters}
                   />
                 </StartBlockActions>
