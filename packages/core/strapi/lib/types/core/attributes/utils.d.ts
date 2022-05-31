@@ -57,7 +57,7 @@ export type GetAttributeValue<T extends Attribute> =
   | GetUIDAttributeValue<T>;
 
 export type GetAttributeValueByKey<T extends SchemaUID, U extends GetAttributesKey<T>> = GetAttribute<T, U
-> extends infer P ? P extends Attribute ? GetAttributeValue<P> : never : never;
+> extends infer P extends Attribute ? GetAttributeValue<P> : never;
 
 export type GetAttributesValues<T extends SchemaUID> = {
   // Handle required attributes
