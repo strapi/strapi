@@ -14,6 +14,7 @@ import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
 import { Header } from '../index';
 import components from '../utils/tests/data/compos-schema.json';
 import ct from '../utils/tests/data/ct-schema.json';
+import { AdminContext } from '../../../../../contexts';
 
 const defaultProps = {
   allowedActions: { canUpdate: true, canCreate: true, canPublish: true },
@@ -32,13 +33,15 @@ const defaultProps = {
 const makeApp = (props = defaultProps) => {
   return (
     <MemoryRouter>
-      <IntlProvider locale="en" defaultLocale="en" messages={{}}>
-        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-          <Theme>
-            <Header {...props} />
-          </Theme>
-        </ThemeToggleProvider>
-      </IntlProvider>
+      <AdminContext.Provider value={{ getAdminInjectedComponents: () => [] }}>
+        <IntlProvider locale="en" defaultLocale="en" messages={{}}>
+          <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+            <Theme>
+              <Header {...props} />
+            </Theme>
+          </ThemeToggleProvider>
+        </IntlProvider>
+      </AdminContext.Provider>
     </MemoryRouter>
   );
 };

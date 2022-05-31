@@ -6,6 +6,7 @@ import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import HomePage from '../index';
 import { useModels } from '../../../hooks';
+import { AdminContext } from '../../../contexts';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -36,11 +37,13 @@ const history = createMemoryHistory();
 
 const App = (
   <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}} textComponent="span">
-      <Router history={history}>
-        <HomePage />
-      </Router>
-    </IntlProvider>
+    <AdminContext.Provider value={{ getAdminInjectedComponents: () => [] }}>
+      <IntlProvider locale="en" messages={{}} textComponent="span">
+        <Router history={history}>
+          <HomePage />
+        </Router>
+      </IntlProvider>
+    </AdminContext.Provider>
   </ThemeProvider>
 );
 
