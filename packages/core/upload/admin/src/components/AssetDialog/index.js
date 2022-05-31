@@ -27,7 +27,7 @@ import { EditAssetDialog } from '../EditAssetDialog';
 import { moveElement } from '../../utils/moveElement';
 
 const LoadingBody = styled(Flex)`
-  // 80px are coming from the Tabs component that is not included in the ModalBody
+  /* 80px are coming from the Tabs component that is not included in the ModalBody */
   min-height: ${() => `calc(60vh + ${pxToRem(80)})`};
 `;
 
