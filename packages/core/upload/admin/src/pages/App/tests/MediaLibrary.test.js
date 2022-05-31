@@ -284,13 +284,13 @@ describe('Media library homepage', () => {
       expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
     });
 
-    it('does not display folders if a search is performed', async () => {
+    it('does display folders if a search is performed', async () => {
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
 
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+      expect(screen.queryByText('list.folders.title')).toBeInTheDocument();
+      expect(screen.queryByText('Folder 1')).toBeInTheDocument();
     });
 
     it('does not display folders if the media library is being filtered', async () => {
@@ -298,8 +298,8 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+      expect(screen.queryByText('list.folders.title')).toBeInTheDocument();
+      expect(screen.queryByText('Folder 1')).toBeInTheDocument();
     });
 
     it('does not display folders if the current page !== 1', async () => {
@@ -340,13 +340,18 @@ describe('Media library homepage', () => {
       expect(screen.queryByText('3874873.jpg')).not.toBeInTheDocument();
     });
 
-    it('does display empty assets action, if there are no assets', () => {
+    it('does display empty assets action, if there are no assets and no folders', () => {
       useAssets.mockReturnValueOnce({
         isLoading: false,
         data: {
           pagination: FIXTURE_ASSET_PAGINATION,
           results: [],
         },
+      });
+
+      useFolders.mockReturnValueOnce({
+        isLoading: false,
+        data: [],
       });
 
       renderML();
@@ -382,6 +387,12 @@ describe('Media library homepage', () => {
           pagination: FIXTURE_ASSET_PAGINATION,
           results: [],
         },
+      });
+
+      useFolders.mockReturnValueOnce({
+        isLoading: false,
+        error: null,
+        data: [],
       });
 
       renderML();
