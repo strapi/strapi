@@ -10,10 +10,23 @@ const injectionZones = {
     tutorials: {
       links: [],
     },
+    homepage: { 'content-top': [], 'content-bottom': [] },
   },
   contentManager: {
-    editView: { informations: [], 'right-links': [] },
-    listView: { actions: [], deleteModalAdditionalInfos: [] },
+    editView: {
+      informations: [],
+      'right-links': [],
+      'header-actions': [],
+      'before-form': [],
+      'after-form': [],
+    },
+    listView: {
+      actions: [],
+      deleteModalAdditionalInfos: [],
+      'header-actions': [],
+      'bulk-actions': [],
+      'action-icons': [],
+    },
   },
 };
 

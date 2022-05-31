@@ -132,6 +132,7 @@ const EditView = ({
             <Main aria-busy={status !== 'resolved'}>
               <Header allowedActions={allowedActions} />
               <ContentLayout>
+                <InjectionZone area="contentManager.editView.before-form" />
                 <Grid gap={4}>
                   <GridItem col={9} s={12}>
                     <Stack spacing={6}>
@@ -354,6 +355,7 @@ const EditView = ({
                     </Stack>
                   </GridItem>
                 </Grid>
+                <InjectionZone area="contentManager.editView.after-form" />
               </ContentLayout>
             </Main>
           </EditViewDataManagerProvider>

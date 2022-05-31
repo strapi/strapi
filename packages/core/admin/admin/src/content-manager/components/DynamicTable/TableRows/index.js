@@ -14,6 +14,7 @@ import { useIntl } from 'react-intl';
 import { usePluginsQueryParams } from '../../../hooks';
 import CellContent from '../CellContent';
 import { getFullName } from '../../../../utils';
+import { InjectionZone } from '../../../../shared/components';
 
 const TableRows = ({
   canCreate,
@@ -156,6 +157,7 @@ const TableRows = ({
                       />
                     </Box>
                   )}
+                  <InjectionZone area="contentManager.listView.action-icons" />
                 </Flex>
               </Td>
             )}

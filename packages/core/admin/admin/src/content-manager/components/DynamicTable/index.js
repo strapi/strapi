@@ -11,6 +11,7 @@ import State from '../State';
 import TableRows from './TableRows';
 import ConfirmDialogDeleteAll from './ConfirmDialogDeleteAll';
 import ConfirmDialogDelete from './ConfirmDialogDelete';
+import { InjectionZone } from '../../../shared/components';
 
 const DynamicTable = ({
   canCreate,
@@ -87,6 +88,15 @@ const DynamicTable = ({
       rows={rows}
       withBulkActions
       withMainAction={canDelete && isBulkable}
+      additionalBulkActions={[
+        entries => (
+          <InjectionZone
+            key="injection-zone"
+            entries={entries}
+            area="contentManager.listView.bulk-actions"
+          />
+        ),
+      ]}
     >
       <TableRows
         canCreate={canCreate}

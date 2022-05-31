@@ -19,6 +19,7 @@ import {
   useTracking,
   Link,
 } from '@strapi/helper-plugin';
+import { Stack } from '@strapi/design-system/Stack';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Main } from '@strapi/design-system/Main';
 import { Box } from '@strapi/design-system/Box';
@@ -261,7 +262,12 @@ function ListView({
   return (
     <Main aria-busy={isLoading}>
       <HeaderLayout
-        primaryAction={getCreateAction()}
+        primaryAction={
+          <Stack spacing={2} horizontal>
+            {getCreateAction()}
+            <InjectionZone area="contentManager.listView.header-actions" />
+          </Stack>
+        }
         subtitle={subtitle}
         title={headerLayoutTitle}
         navigationAction={

@@ -34,6 +34,7 @@ const Table = ({
   onConfirmDelete,
   onOpenDeleteAllModalTrackedEvent,
   rows,
+  additionalBulkActions,
   withBulkActions,
   withMainAction,
   ...rest
@@ -155,6 +156,8 @@ const Table = ({
                 >
                   {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
                 </Button>
+                {additionalBulkActions &&
+                  additionalBulkActions.map(action => action(entriesToDelete))}
               </BlockActions>
             </Flex>
           </Box>
@@ -221,6 +224,7 @@ Table.defaultProps = {
   onConfirmDelete: () => {},
   onOpenDeleteAllModalTrackedEvent: undefined,
   rows: [],
+  additionalBulkActions: null,
   withBulkActions: false,
   withMainAction: false,
 };
@@ -250,6 +254,7 @@ Table.propTypes = {
   onConfirmDelete: PropTypes.func,
   onOpenDeleteAllModalTrackedEvent: PropTypes.string,
   rows: PropTypes.array,
+  additionalBulkActions: PropTypes.arrayOf(PropTypes.func),
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,
 };

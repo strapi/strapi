@@ -20,6 +20,7 @@ import GuidedTourHomepage from '../../components/GuidedTour/Homepage';
 import SocialLinks from './SocialLinks';
 import HomeHeader from './HomeHeader';
 import ContentBlocks from './ContentBlocks';
+import { InjectionZone } from '../../shared/components';
 
 const LogoContainer = styled(Box)`
   position: absolute;
@@ -75,6 +76,7 @@ const HomePage = () => {
               />
             </GridItem>
           </Grid>
+          <InjectionZone area="admin.homepage.content-top" />
           <Grid gap={6}>
             <GridItem col={8} s={12}>
               {showGuidedTour ? <GuidedTourHomepage /> : <ContentBlocks />}
@@ -83,6 +85,7 @@ const HomePage = () => {
               <SocialLinks />
             </GridItem>
           </Grid>
+          <InjectionZone area="admin.homepage.content-bottom" />
         </Box>
       </Main>
     </Layout>

@@ -19,6 +19,7 @@ import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Check from '@strapi/icons/Check';
 import { getTrad } from '../../../utils';
 import { connect, getDraftRelations, select } from './utils';
+import { InjectionZone } from '../../../../shared/components';
 
 const Header = ({
   allowedActions: { canUpdate, canCreate, canPublish },
@@ -83,6 +84,7 @@ const Header = ({
             defaultMessage: 'Save',
           })}
         </Button>
+        <InjectionZone area="contentManager.editView.header-actions" />
       </Stack>
     );
   }
@@ -110,7 +112,7 @@ const Header = ({
     /* eslint-enable indent */
 
     primaryAction = (
-      <Flex>
+      <Stack horizontal spacing={2}>
         {shouldShowPublishButton && (
           <Button
             disabled={didChangeData}
@@ -130,7 +132,8 @@ const Header = ({
             })}
           </Button>
         </Box>
-      </Flex>
+        <InjectionZone area="contentManager.editView.header-actions" />
+      </Stack>
     );
   }
 
