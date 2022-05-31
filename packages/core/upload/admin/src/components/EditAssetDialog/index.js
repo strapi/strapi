@@ -8,14 +8,11 @@ import PropTypes from 'prop-types';
 import React, { useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import isEqual from 'lodash/isEqual';
-import {
-  ModalLayout,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
+import styled from 'styled-components';
+import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
 import { Stack } from '@strapi/design-system/Stack';
+import { Flex } from '@strapi/design-system/Flex';
+import { Loader } from '@strapi/design-system/Loader';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Button } from '@strapi/design-system/Button';
 import { FieldLabel } from '@strapi/design-system/Field';
@@ -25,14 +22,20 @@ import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 
+import { DialogHeader } from './DialogHeader';
 import { PreviewBox } from './PreviewBox';
 import { ContextInfo } from '../ContextInfo';
-import { FolderStructureDefinition, AssetDefinition } from '../../constants';
+import { AssetDefinition } from '../../constants';
 import { getTrad, findRecursiveFolderByValue } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 import { useEditAsset } from '../../hooks/useEditAsset';
+import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { ReplaceMediaButton } from './ReplaceMediaButton';
 import SelectTree from '../SelectTree';
+
+const LoadingBody = styled(Flex)`
+  min-height: calc(60vh + 80px);
+`;
 
 const fileInfoSchema = yup.object({
   name: yup.string().required(),
@@ -47,13 +50,16 @@ export const EditAssetDialog = ({
   canCopyLink,
   canDownload,
   trackedLocation,
-  folderStructure,
 }) => {
   const { formatMessage, formatDate } = useIntl();
   const submitButtonRef = useRef(null);
   const [isCropping, setIsCropping] = useState(false);
   const [replacementFile, setReplacementFile] = useState();
   const { editAsset, isLoading } = useEditAsset();
+
+  const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure({
+    enabled: true,
+  });
 
   const handleSubmit = async values => {
     if (asset.isLocal) {
@@ -96,7 +102,7 @@ export const EditAssetDialog = ({
   };
 
   const activeFolderId = asset?.folder?.id;
-  const initialFormData = {
+  const initialFormData = !folderStructureIsLoading && {
     name: asset.name,
     alternativeText: asset.alternativeText ?? undefined,
     caption: asset.caption ?? undefined,
@@ -116,6 +122,29 @@ export const EditAssetDialog = ({
     }
   };
 
+  if (folderStructureIsLoading) {
+    return (
+      <ModalLayout onClose={() => handleClose()} labelledBy="title">
+        <DialogHeader />
+        <LoadingBody minHeight="60vh" justifyContent="center" paddingTop={4} paddingBottom={4}>
+          <Loader>
+            {formatMessage({
+              id: getTrad('list.asset.load'),
+              defaultMessage: 'How do you want to upload your assets?',
+            })}
+          </Loader>
+        </LoadingBody>
+        <ModalFooter
+          startActions={
+            <Button onClick={() => handleClose()} variant="tertiary">
+              {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+            </Button>
+          }
+        />
+      </ModalLayout>
+    );
+  }
+
   return (
     <Formik
       validationSchema={fileInfoSchema}
@@ -125,11 +154,7 @@ export const EditAssetDialog = ({
     >
       {({ values, errors, handleChange, setFieldValue }) => (
         <ModalLayout onClose={() => handleClose(values)} labelledBy="title">
-          <ModalHeader>
-            <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-              {formatMessage({ id: 'global.details', defaultMessage: 'Details' })}
-            </Typography>
-          </ModalHeader>
+          <DialogHeader />
           <ModalBody>
             <Grid gap={4}>
               <GridItem xs={12} col={6}>
@@ -308,6 +333,5 @@ EditAssetDialog.propTypes = {
   canCopyLink: PropTypes.bool.isRequired,
   canDownload: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  folderStructure: FolderStructureDefinition.isRequired,
   trackedLocation: PropTypes.string,
 };

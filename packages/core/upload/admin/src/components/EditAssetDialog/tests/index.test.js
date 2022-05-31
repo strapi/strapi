@@ -15,6 +15,7 @@ import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
 
 jest.mock('../../../utils/downloadFile');
+jest.mock('../../../hooks/useFolderStructure');
 
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
   acc[curr] = `upload.${en[curr]}`;
