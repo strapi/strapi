@@ -378,7 +378,7 @@ describe('Media library homepage', () => {
       expect(screen.queryByText('header.actions.add-assets')).not.toBeInTheDocument();
     });
 
-    it('does not display empty assets action, if there are no assets or the user is currently filtering', () => {
+    it('does not display empty assets action, if there are no assets, no folders and the user is currently filtering', () => {
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { filters: 'true' } }, jest.fn()]);
       useAssets.mockReturnValueOnce({
         isLoading: false,
@@ -398,7 +398,7 @@ describe('Media library homepage', () => {
       renderML();
 
       expect(
-        screen.queryByText('There are no assets with the applied filters')
+        screen.queryByText('There are no elements with the applied filters')
       ).toBeInTheDocument();
       expect(screen.queryByText('header.actions.add-assets')).not.toBeInTheDocument();
     });

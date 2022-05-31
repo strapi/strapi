@@ -191,7 +191,7 @@ export const MediaLibrary = () => {
                 isFiltering
                   ? formatMessage({
                       id: getTrad('list.assets-empty.title-withSearch'),
-                      defaultMessage: 'There are no assets with the applied filters',
+                      defaultMessage: 'There are no elements with the applied filters',
                     })
                   : canCreate
                   ? formatMessage({
