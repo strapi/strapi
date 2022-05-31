@@ -112,13 +112,14 @@ FolderCard.defaultProps = {
   cardActions: null,
   startAction: null,
   to: undefined,
+  onClick: undefined,
 };
 
 FolderCard.propTypes = {
   ariaLabel: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
   id: PropTypes.string,
-  onClick: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
   startAction: PropTypes.element,
   cardActions: PropTypes.element,
   to: PropTypes.string,
