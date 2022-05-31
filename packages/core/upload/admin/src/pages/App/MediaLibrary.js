@@ -29,7 +29,6 @@ import { getTrad } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { EmptyAssets } from '../../components/EmptyAssets';
-import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { BulkActions } from './components/BulkActions';
 import { Filters } from './components/Filters';
 import { Header } from './components/Header';

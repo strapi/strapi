@@ -20,7 +20,7 @@ import { getTrad } from '../../utils';
 import SelectTree from '../SelectTree';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 
-export const BulkMoveDialog = ({ onClose }) => {
+export const BulkMoveDialog = ({ onClose, errors }) => {
   const submitButtonRef = useRef(null);
   const { formatMessage } = useIntl();
   const { data: folderStructure, isLoading } = useFolderStructure();
@@ -48,7 +48,12 @@ export const BulkMoveDialog = ({ onClose }) => {
       </ModalHeader>
 
       <ModalBody>
-        <Formik validateOnChange={false} onSubmit={handleSubmit} initialValues={initialFormData}>
+        <Formik
+          validateOnChange={false}
+          onSubmit={handleSubmit}
+          initialValues={initialFormData}
+          initialErrors={errors}
+        >
           {({ values, errors, setFieldValue }) => (
             <Form noValidate>
               <Grid gap={4}>
@@ -118,8 +123,13 @@ export const BulkMoveDialog = ({ onClose }) => {
   );
 };
 
-BulkMoveDialog.defaultProps = {};
+BulkMoveDialog.defaultProps = {
+  errors: null,
+};
 
 BulkMoveDialog.propTypes = {
+  errors: PropTypes.shape({
+    parent: PropTypes.string.isRequired,
+  }),
   onClose: PropTypes.func.isRequired,
 };
