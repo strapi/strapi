@@ -9,7 +9,7 @@ import getTrad from '../../../utils/getTrad';
 import { BulkDeleteButton } from './BulkDeleteButton';
 import { BulkMoveButton } from './BulkMoveButton';
 
-export const BulkActions = ({ selected, onSuccess }) => {
+export const BulkActions = ({ selected, onSuccess, onError }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -29,12 +29,13 @@ export const BulkActions = ({ selected, onSuccess }) => {
       </Typography>
 
       <BulkDeleteButton selected={selected} onSuccess={onSuccess} />
-      <BulkMoveButton selected={selected} onSuccess={onSuccess} />
+      <BulkMoveButton selected={selected} onSuccess={onSuccess} onError={onError} />
     </Stack>
   );
 };
 
 BulkActions.propTypes = {
   selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
+  onError: PropTypes.func.isRequired,
   onSuccess: PropTypes.func.isRequired,
 };

@@ -2,39 +2,45 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
-import Trash from '@strapi/icons/Trash';
-import { ConfirmDialog } from '@strapi/helper-plugin';
+import Folder from '@strapi/icons/Folder';
 
+import { BulkMoveDialog } from '../../../components/BulkMoveDialog';
 import { AssetDefinition, FolderDefinition } from '../../../constants';
 import { useBulkMove } from '../../../hooks/useBulkMove';
 
 export const BulkMoveButton = ({ selected, onSuccess }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const { isLoading, move } = useBulkMove();
+  const { move } = useBulkMove();
 
-  const handleConfirmMove = async () => {
-    await move(null, selected);
-    onSuccess();
+  const handleConfirmMove = async ({ moved, destinationFolderId } = {}) => {
+    try {
+      if (moved) {
+        await move(destinationFolderId, selected);
+        onSuccess();
+      }
+
+      setShowConfirmDialog(false);
+      // eslint-ignore-next-line no-empty
+    } catch (error) {
+      // TODO:
+      // - keep dialog open
+      // - show error message ?
+    }
   };
 
   return (
     <>
       <Button
-        variant="danger-light"
+        variant="secondary"
         size="S"
-        startIcon={<Trash />}
+        startIcon={<Folder />}
         onClick={() => setShowConfirmDialog(true)}
       >
         {formatMessage({ id: 'global.move', defaultMessage: 'Move' })}
       </Button>
 
-      <ConfirmDialog
-        isConfirmButtonLoading={isLoading}
-        isOpen={showConfirmDialog}
-        onToggleDialog={() => setShowConfirmDialog(false)}
-        onConfirm={handleConfirmMove}
-      />
+      {showConfirmDialog && <BulkMoveDialog onClose={handleConfirmMove} />}
     </>
   );
 };
