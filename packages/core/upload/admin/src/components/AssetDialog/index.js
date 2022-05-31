@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { ModalLayout, ModalBody } from '@strapi/design-system/ModalLayout';
 import { Flex } from '@strapi/design-system/Flex';
 import { Button } from '@strapi/design-system/Button';
@@ -9,7 +10,7 @@ import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/
 import { Badge } from '@strapi/design-system/Badge';
 import { Loader } from '@strapi/design-system/Loader';
 import { Stack } from '@strapi/design-system/Stack';
-import { NoPermissions, AnErrorOccurred, useSelectionState } from '@strapi/helper-plugin';
+import { NoPermissions, AnErrorOccurred, useSelectionState, pxToRem } from '@strapi/helper-plugin';
 
 import getTrad from '../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
@@ -20,10 +21,15 @@ import { useFolders } from '../../hooks/useFolders';
 import useModalQueryParams from '../../hooks/useModalQueryParams';
 import { AssetDefinition } from '../../constants';
 import getAllowedFiles from '../../utils/getAllowedFiles';
-import { DialogTitle } from './DialogTitle';
+import { DialogHeader } from './DialogHeader';
 import { DialogFooter } from './DialogFooter';
 import { EditAssetDialog } from '../EditAssetDialog';
 import { moveElement } from '../../utils/moveElement';
+
+const LoadingBody = styled(Flex)`
+  /* 80px are coming from the Tabs component that is not included in the ModalBody */
+  min-height: ${() => `calc(60vh + ${pxToRem(80)})`};
+`;
 
 export const AssetDialog = ({
   allowedTypes,
@@ -98,15 +104,15 @@ export const AssetDialog = ({
   if (isLoading) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
-        <DialogTitle />
-        <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
+        <DialogHeader />
+        <LoadingBody justifyContent="center" paddingTop={4} paddingBottom={4}>
           <Loader>
             {formatMessage({
               id: getTrad('list.asset.load'),
               defaultMessage: 'How do you want to upload your assets?',
             })}
           </Loader>
-        </Flex>
+        </LoadingBody>
         <DialogFooter onClose={onClose} />
       </ModalLayout>
     );
@@ -115,7 +121,7 @@ export const AssetDialog = ({
   if (hasError) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogTitle />
+        <DialogHeader />
         <AnErrorOccurred />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
@@ -125,7 +131,7 @@ export const AssetDialog = ({
   if (!canRead) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogTitle />
+        <DialogHeader />
         <NoPermissions />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
@@ -160,7 +166,7 @@ export const AssetDialog = ({
 
   return (
     <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={isLoading}>
-      <DialogTitle />
+      <DialogHeader currentFolder={queryObject?.folder} onChangeFolder={handleFolderChange} />
 
       <TabGroup
         label={formatMessage({
