@@ -5,15 +5,15 @@ import { Button } from '@strapi/design-system/Button';
 import Trash from '@strapi/icons/Trash';
 import { ConfirmDialog } from '@strapi/helper-plugin';
 
-import { useBulkRemove } from '../../../hooks/useBulkRemove';
+import { useBulkMove } from '../../../hooks/useBulkMove';
 
-export const BulkDeleteButton = ({ selected, onSuccess }) => {
+export const BulkMoveButton = ({ selected, onSuccess }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const { isLoading, remove } = useBulkRemove();
+  const { isLoading, move } = useBulkMove();
 
-  const handleConfirmRemove = async () => {
-    await remove(selected);
+  const handleConfirmMove = async () => {
+    await move(null, selected);
     onSuccess();
   };
 
@@ -25,20 +25,20 @@ export const BulkDeleteButton = ({ selected, onSuccess }) => {
         startIcon={<Trash />}
         onClick={() => setShowConfirmDialog(true)}
       >
-        {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
+        {formatMessage({ id: 'global.move', defaultMessage: 'Move' })}
       </Button>
 
       <ConfirmDialog
         isConfirmButtonLoading={isLoading}
         isOpen={showConfirmDialog}
         onToggleDialog={() => setShowConfirmDialog(false)}
-        onConfirm={handleConfirmRemove}
+        onConfirm={handleConfirmMove}
       />
     </>
   );
 };
 
-BulkDeleteButton.propTypes = {
+BulkMoveButton.propTypes = {
   selected: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onSuccess: PropTypes.func.isRequired,
 };
