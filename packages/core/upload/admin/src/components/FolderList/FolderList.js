@@ -1,40 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
-import { Flex } from '@strapi/design-system/Flex';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { IconButton } from '@strapi/design-system/IconButton';
+import { Grid } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import Pencil from '@strapi/icons/Pencil';
 
-import {
-  FolderCard,
-  FolderCardBody,
-  FolderCardCheckbox,
-  FolderCardBodyAction,
-} from '../FolderCard';
-import { FolderDefinition } from '../../constants';
-import { getTrad } from '../../utils';
-
-const TypographyMaxWidth = styled(Typography)`
-  max-width: 100%;
-`;
-
-export const FolderList = ({
-  title,
-  folders,
-  size,
-  onSelectFolder,
-  onEditFolder,
-  onChangeFolder,
-  selectedFolders,
-}) => {
-  const { formatMessage } = useIntl();
-
+export const FolderList = ({ title, children }) => {
   return (
     <KeyboardNavigable tagName="article">
       {title && (
@@ -45,94 +16,16 @@ export const FolderList = ({
         </Box>
       )}
 
-      <Grid gap={4}>
-        {folders.map(folder => {
-          const isSelected = !!selectedFolders.find(
-            currentFolder => currentFolder.id === folder.id
-          );
-
-          return (
-            <GridItem col={3} key={`folder-${folder.uid}`}>
-              <FolderCard
-                ariaLabel={folder.name}
-                id={`folder-${folder.uid}`}
-                to="/"
-                onClick={event => {
-                  event.preventDefault();
-
-                  if (onChangeFolder) {
-                    onChangeFolder(folder.id);
-                  }
-                }}
-                startAction={
-                  onSelectFolder && (
-                    <FolderCardCheckbox
-                      value={isSelected}
-                      onChange={() => onSelectFolder({ ...folder, type: 'folder' })}
-                    />
-                  )
-                }
-                cardActions={
-                  onEditFolder && (
-                    <IconButton
-                      icon={<Pencil />}
-                      aria-label={formatMessage({
-                        id: getTrad('list.folder.edit'),
-                        defaultMessage: 'Edit folder',
-                      })}
-                      onClick={() => onEditFolder(folder)}
-                    />
-                  )
-                }
-                size={size}
-              >
-                <FolderCardBody>
-                  <FolderCardBodyAction
-                    to="/"
-                    onClick={event => {
-                      event.preventDefault();
-
-                      if (onChangeFolder) {
-                        onChangeFolder(folder.id);
-                      }
-                    }}
-                  >
-                    <Flex as="h2" direction="column" alignItems="start">
-                      <TypographyMaxWidth variant="omega" fontWeight="semiBold" ellipsis>
-                        {folder.name}
-                        <VisuallyHidden>:</VisuallyHidden>
-                      </TypographyMaxWidth>
-
-                      <TypographyMaxWidth textColor="neutral600" variant="pi" ellipsis>
-                        {folder.children.count} folder, {folder.files.count} assets
-                      </TypographyMaxWidth>
-                    </Flex>
-                  </FolderCardBodyAction>
-                </FolderCardBody>
-              </FolderCard>
-            </GridItem>
-          );
-        })}
-      </Grid>
+      <Grid gap={4}>{children}</Grid>
     </KeyboardNavigable>
   );
 };
 
 FolderList.defaultProps = {
-  onChangeFolder: null,
-  onEditFolder: null,
-  onSelectFolder: null,
-  size: 'M',
-  selectedFolders: [],
   title: null,
 };
 
 FolderList.propTypes = {
-  folders: PropTypes.arrayOf(FolderDefinition).isRequired,
-  size: PropTypes.oneOf(['S', 'M']),
-  selectedFolders: PropTypes.array,
-  onChangeFolder: PropTypes.func,
-  onEditFolder: PropTypes.func,
-  onSelectFolder: PropTypes.func,
+  children: PropTypes.node.isRequired,
   title: PropTypes.string,
 };
