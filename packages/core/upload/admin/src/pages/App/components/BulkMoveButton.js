@@ -5,6 +5,7 @@ import { Button } from '@strapi/design-system/Button';
 import Trash from '@strapi/icons/Trash';
 import { ConfirmDialog } from '@strapi/helper-plugin';
 
+import { AssetDefinition, FolderDefinition } from '../../../constants';
 import { useBulkMove } from '../../../hooks/useBulkMove';
 
 export const BulkMoveButton = ({ selected, onSuccess }) => {
@@ -39,6 +40,6 @@ export const BulkMoveButton = ({ selected, onSuccess }) => {
 };
 
 BulkMoveButton.propTypes = {
-  selected: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
   onSuccess: PropTypes.func.isRequired,
 };
