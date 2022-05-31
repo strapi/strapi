@@ -27,45 +27,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   useQueryParams: jest.fn().mockReturnValue([{ query: {} }]),
 }));
 
-jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
-  useMediaLibraryPermissions: jest.fn().mockReturnValue({
-    isLoading: false,
-    canCreate: true,
-    canUpdate: true,
-  }),
-}));
-
-jest.mock('../../../hooks/useFolderStructure', () => ({
-  useFolderStructure: jest.fn().mockReturnValue({
-    isLoading: false,
-    error: null,
-    data: [
-      {
-        value: null,
-        label: 'Media Library',
-        children: [
-          {
-            value: 1,
-            label: 'first child',
-            children: [],
-          },
-
-          {
-            value: 2,
-            label: 'second child',
-            children: [
-              {
-                value: 21,
-                name: 'first child of the second child',
-                children: [],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  }),
-}));
+jest.mock('../../../hooks/useMediaLibraryPermissions');
+jest.mock('../../../hooks/useFolderStructure');
 
 const client = new QueryClient({
   defaultOptions: {
@@ -94,13 +57,8 @@ function ComponentFixture(props) {
   );
 }
 
-function setup(props) {
-  const FIXTURE_PROPS = {
-    onClose: jest.fn(),
-    ...props,
-  };
-
-  return render(<ComponentFixture {...FIXTURE_PROPS} />, { container: document.body });
+function setup(props = { onClose: jest.fn() }) {
+  return render(<ComponentFixture {...props} />, { container: document.body });
 }
 
 function getInput(container, name) {
@@ -173,5 +131,22 @@ describe('EditFolderDialog', () => {
     const { queryByText } = setup({ parentFolderId: 2, onClose: spy });
 
     expect(queryByText('second child')).toBeInTheDocument();
+  });
+
+  test('show confirmation delete dialog', async () => {
+    const folder = {
+      id: 1,
+      name: 'default folder name',
+      children: [],
+      parent: { id: 1, label: 'Some parent' },
+    };
+    const folderStructure = [{ value: 1, label: 'Some parent' }];
+    const { container, queryByText } = setup({ folder, folderStructure });
+
+    act(() => {
+      fireEvent.click(getButton(container, 'delete'));
+    });
+
+    expect(queryByText('Are you sure you want to delete this?')).toBeInTheDocument();
   });
 });

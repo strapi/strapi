@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { HeaderLayout } from '@strapi/design-system/Layout';
-import { LinkButton } from '@strapi/design-system/LinkButton';
+import { LinkButton } from '@strapi/design-system/v2/LinkButton';
 import Upload from '@strapi/icons/Upload';
 import { useTracking } from '@strapi/helper-plugin';
 
@@ -27,6 +27,7 @@ const PageHeader = ({ isOnline }) => {
             variant="tertiary"
             href="https://market.strapi.io/submit-plugin"
             onClick={() => trackUsage('didSubmitPlugin')}
+            isExternal
           >
             {formatMessage({
               id: 'admin.pages.MarketPlacePage.submit.plugin.link',

@@ -16,88 +16,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   useQueryParams: jest.fn(),
 }));
 
-jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
-  useMediaLibraryPermissions: jest.fn().mockReturnValue({
-    canRead: true,
-    canCreate: true,
-    isLoading: false,
-    canUpdate: true,
-    canCopyLink: true,
-    canDownload: true,
-  }),
-}));
-
-jest.mock('../../../hooks/useFolders', () => ({
-  useFolders: jest.fn().mockReturnValue({
-    isLoading: false,
-    error: null,
-    data: [
-      {
-        id: 1,
-        name: 'Folder 1',
-        children: {
-          count: 1,
-        },
-        createdAt: '',
-        files: {
-          count: 1,
-        },
-        path: '/folder-1',
-        uid: 'folder-1',
-        updatedAt: '',
-      },
-    ],
-  }),
-}));
-
-jest.mock('../../../hooks/useAssets', () => ({
-  useAssets: jest.fn().mockReturnValue({
-    isLoading: false,
-    error: null,
-    data: {
-      pagination: {
-        pageCount: 1,
-        page: 1,
-        pageSize: 10,
-        total: 1,
-      },
-
-      results: [
-        {
-          id: 77,
-          name: '3874873.jpg',
-          alternativeText: null,
-          caption: null,
-          width: 400,
-          height: 400,
-          formats: {
-            thumbnail: {
-              name: 'thumbnail_3874873.jpg',
-              hash: 'thumbnail_3874873_b5818bb250',
-              ext: '.jpg',
-              mime: 'image/jpeg',
-              width: 156,
-              height: 156,
-              size: 3.97,
-              path: null,
-              url: '/uploads/thumbnail_3874873_b5818bb250.jpg',
-            },
-          },
-          hash: '3874873_b5818bb250',
-          ext: '.jpg',
-          mime: 'image/jpeg',
-          size: 11.79,
-          url: '/uploads/3874873_b5818bb250.jpg',
-          previewUrl: null,
-          provider: 'local',
-          provider_metadata: null,
-          createdAt: '2021-10-18T08:04:56.326Z',
-          updatedAt: '2021-10-18T08:04:56.326Z',
-        },
-      ],
-    },
-  }),
-}));
+jest.mock('../../../hooks/useMediaLibraryPermissions');
+jest.mock('../../../hooks/useFolders');
+jest.mock('../../../hooks/useAssets');
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -122,7 +43,7 @@ const renderML = (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
         <MemoryRouter>
-          <IntlProvider messages={{}}>
+          <IntlProvider locale="en" messages={{}}>
             <AssetDialog {...props} />
           </IntlProvider>
         </MemoryRouter>

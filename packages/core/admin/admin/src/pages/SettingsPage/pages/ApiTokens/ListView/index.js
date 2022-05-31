@@ -10,11 +10,11 @@ import {
   DynamicTable,
   useTracking,
   useGuidedTour,
+  LinkButton,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
-import { LinkButton } from '@strapi/design-system/LinkButton';
 import Plus from '@strapi/icons/Plus';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';

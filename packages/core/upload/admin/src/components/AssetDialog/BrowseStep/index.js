@@ -62,14 +62,16 @@ export const BrowseStep = ({
   const hasSomeAssetSelected = allAllowedAsset.some(
     asset => selectedAssets.findIndex(currAsset => currAsset.id === asset.id) !== -1
   );
+  const isSearching = !!queryObject?._q;
+  const isFiltering = queryObject?.filters?.$and?.length > 0;
 
   return (
-    <>
-      <Stack spacing={4}>
-        {assets.length > 0 && onSelectAllAsset && (
-          <Box>
-            <Box paddingBottom={4}>
-              <Flex justifyContent="space-between" alignItems="flex-start">
+    <Stack spacing={4}>
+      {onSelectAllAsset && (
+        <Box>
+          <Box paddingBottom={4}>
+            <Flex justifyContent="space-between" alignItems="flex-start">
+              {(assets.length > 0 || folders.length > 0) && (
                 <StartBlockActions wrap="wrap">
                   {multiple && (
                     <Flex
@@ -93,92 +95,98 @@ export const BrowseStep = ({
                   )}
                   <SortPicker onChangeSort={onChangeSort} />
                   <Filters
-                    appliedFilters={queryObject.filters.$and}
+                    appliedFilters={queryObject?.filters?.$and}
                     onChangeFilters={onChangeFilters}
                   />
                 </StartBlockActions>
+              )}
+
+              {(assets.length > 0 || folders.length > 0 || isSearching) && (
                 <EndBlockActions pullRight>
                   <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
                 </EndBlockActions>
-              </Flex>
-            </Box>
+              )}
+            </Flex>
           </Box>
-        )}
+        </Box>
+      )}
 
-        {folders.length > 0 && (
-          <FolderList
-            folders={folders}
+      {folders.length > 0 && (
+        <FolderList
+          folders={folders}
+          size="S"
+          onChangeFolder={onChangeFolder}
+          onEditFolder={null}
+          onSelectFolder={null}
+          title={formatMessage({
+            id: getTrad('list.folders.title'),
+            defaultMessage: 'Folders',
+          })}
+        />
+      )}
+
+      {assets.length > 0 ? (
+        <AssetList
+          allowedTypes={allowedTypes}
+          size="S"
+          assets={assets}
+          onSelectAsset={onSelectAsset}
+          selectedAssets={selectedAssets}
+          onEditAsset={onEditAsset}
+          title={formatMessage({
+            id: getTrad('list.assets.title'),
+            defaultMessage: 'Assets',
+          })}
+        />
+      ) : (
+        <Box paddingBottom={6}>
+          <EmptyAssets
             size="S"
-            onChangeFolder={onChangeFolder}
-            onEditFolder={null}
-            onSelectFolder={null}
-            title={formatMessage({
-              id: getTrad('list.folders.title'),
-              defaultMessage: 'Folders',
-            })}
+            count={6}
+            action={
+              canCreate &&
+              !isFiltering &&
+              !isSearching && (
+                <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
+                  {formatMessage({
+                    id: getTrad('header.actions.add-assets'),
+                    defaultMessage: 'Add new assets',
+                  })}
+                </Button>
+              )
+            }
+            content={
+              // eslint-disable-next-line no-nested-ternary
+              isFiltering
+                ? formatMessage({
+                    id: getTrad('list.assets-empty.title-withSearch'),
+                    defaultMessage: 'There are no assets with the applied filters',
+                  })
+                : canCreate && !isSearching
+                ? formatMessage({
+                    id: getTrad('list.assets.empty'),
+                    defaultMessage: 'Upload your first assets...',
+                  })
+                : formatMessage({
+                    id: getTrad('list.assets.empty.no-permissions'),
+                    defaultMessage: 'The asset list is empty',
+                  })
+            }
           />
-        )}
+        </Box>
+      )}
 
-        {assets.length > 0 ? (
-          <AssetList
-            allowedTypes={allowedTypes}
-            size="S"
-            assets={assets}
-            onSelectAsset={onSelectAsset}
-            selectedAssets={selectedAssets}
-            onEditAsset={onEditAsset}
-            title={formatMessage({
-              id: getTrad('list.assets.title'),
-              defaultMessage: 'Assets',
-            })}
+      {pagination.pageCount > 0 && (
+        <Flex justifyContent="space-between">
+          <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
+          <PaginationFooter
+            activePage={queryObject.page}
+            onChangePage={onChangePage}
+            pagination={pagination}
           />
-        ) : (
-          <Box paddingBottom={6}>
-            <EmptyAssets
-              size="S"
-              count={6}
-              action={
-                canCreate && (
-                  <Button
-                    variant="secondary"
-                    id="asset-dialog-title"
-                    startIcon={<PlusIcon />}
-                    onClick={onAddAsset}
-                  >
-                    {formatMessage({
-                      id: getTrad('header.actions.add-assets'),
-                      defaultMessage: 'Add new assets',
-                    })}
-                  </Button>
-                )
-              }
-              content={
-                canCreate
-                  ? formatMessage({
-                      id: getTrad('list.assets.empty'),
-                      defaultMessage: 'Upload your first assets...',
-                    })
-                  : formatMessage({
-                      id: getTrad('list.assets.empty.no-permissions'),
-                      defaultMessage: 'The asset list is empty',
-                    })
-              }
-            />
-          </Box>
-        )}
-
-        {pagination.pageCount > 0 && (
-          <Flex justifyContent="space-between">
-            <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
-            <PaginationFooter
-              activePage={queryObject.page}
-              onChangePage={onChangePage}
-              pagination={pagination}
-            />
-          </Flex>
-        )}
-      </Stack>
-    </>
+        </Flex>
+      )}
+    </Stack>
   );
 };
 
