@@ -41,6 +41,9 @@ declare global {
      */
      type ComponentUIDs = KeysBy<Schemas, ComponentSchema>;
 
+     /**
+      * Global shorthand to access the `StrapiInterface` type
+      */
      type Strapi = StrapiInterface;
   }
 

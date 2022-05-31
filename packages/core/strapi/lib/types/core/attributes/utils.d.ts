@@ -56,16 +56,16 @@ export type GetAttributeValue<T extends Attribute> =
   | GetTextAttributeValue<T>
   | GetUIDAttributeValue<T>;
 
-export type GetAttributeValueByKey<T extends SchemaUID, U extends GetAttributesKey<T>> = GetAttribute<T,  U
-> extends infer P extends Attribute ? GetAttributeValue<P>:never;
+export type GetAttributeValueByKey<T extends SchemaUID, U extends GetAttributesKey<T>> = GetAttribute<T, U
+> extends infer P ? P extends Attribute ? GetAttributeValue<P> : never : never;
 
 export type GetAttributesValues<T extends SchemaUID> = {
   // Handle required attributes
   [key in GetAttributesRequiredKeys<T>]-?: GetAttributeValueByKey<T, key>;
 } & {
-  // Handle optional attributes
-  [key in GetAttributesOptionalKeys<T>]?: GetAttributeValueByKey<T, key>;
-};
+    // Handle optional attributes
+    [key in GetAttributesOptionalKeys<T>]?: GetAttributeValueByKey<T, key>;
+  };
 
 export type GetAttributesRequiredKeys<T extends SchemaUID> = KeysBy<GetAttributes<T>, { required: true }>;
 export type GetAttributesOptionalKeys<T extends SchemaUID> = keyof Omit<

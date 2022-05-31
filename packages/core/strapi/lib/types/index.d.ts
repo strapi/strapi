@@ -1,3 +1,4 @@
 export * from './core';
-export * from './factories';
-export * from './utils'
+
+export * as utils from './utils'
+export * as factories from './factories';
