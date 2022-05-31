@@ -12,6 +12,7 @@ const registerBodySchema = yup.object().shape({
     .string()
     .email()
     .required(),
+  username: yup.string().required(),
   password: yup.string().required(),
 });
 

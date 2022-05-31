@@ -35,37 +35,35 @@ module.exports = {
     const params = ctx.request.body;
 
     const store = strapi.store({ type: 'plugin', name: 'users-permissions' });
+    const grantSettings = await store.get({ key: 'grant' });
+
+    const grantProvider = provider === 'local' ? 'email' : provider;
+
+    if (!_.get(grantSettings, [grantProvider, 'enabled'])) {
+      throw new ApplicationError('This provider is disabled');
+    }
 
     if (provider === 'local') {
-      if (!_.get(await store.get({ key: 'grant' }), 'email.enabled')) {
-        throw new ApplicationError('This provider is disabled');
-      }
-
       await validateCallbackBody(params);
 
-      const query = { provider };
-
-      // Check if the provided identifier is an email or not.
-      const isEmail = emailRegExp.test(params.identifier);
-
-      // Set the identifier to the appropriate query field.
-      if (isEmail) {
-        query.email = params.identifier.toLowerCase();
-      } else {
-        query.username = params.identifier;
-      }
+      const { identifier } = params;
 
       // Check if the user exists.
-      const user = await strapi.query('plugin::users-permissions.user').findOne({ where: query });
+      const user = await strapi.query('plugin::users-permissions.user').findOne({
+        where: {
+          provider,
+          $or: [{ email: identifier.toLowerCase() }, { username: identifier }],
+        },
+      });
 
       if (!user) {
         throw new ValidationError('Invalid identifier or password');
       }
 
-      if (
-        _.get(await store.get({ key: 'advanced' }), 'email_confirmation') &&
-        user.confirmed !== true
-      ) {
+      const advancedSettings = await store.get({ key: 'advanced' });
+      const requiresConfirmation = _.get(advancedSettings, 'email_confirmation');
+
+      if (requiresConfirmation && user.confirmed !== true) {
         throw new ApplicationError('Your account email is not confirmed');
       }
 
@@ -87,29 +85,24 @@ module.exports = {
 
       if (!validPassword) {
         throw new ValidationError('Invalid identifier or password');
-      } else {
-        ctx.send({
-          jwt: getService('jwt').issue({
-            id: user.id,
-          }),
-          user: await sanitizeUser(user, ctx),
-        });
-      }
-    } else {
-      if (!_.get(await store.get({ key: 'grant' }), [provider, 'enabled'])) {
-        throw new ApplicationError('This provider is disabled');
       }
 
-      // Connect the user with the third-party provider.
-      try {
-        const user = await getService('providers').connect(provider, ctx.query);
-        ctx.send({
-          jwt: getService('jwt').issue({ id: user.id }),
-          user: await sanitizeUser(user, ctx),
-        });
-      } catch (error) {
-        throw new ApplicationError(error.message);
-      }
+      return ctx.send({
+        jwt: getService('jwt').issue({ id: user.id }),
+        user: await sanitizeUser(user, ctx),
+      });
+    }
+
+    // Connect the user with the third-party provider.
+    try {
+      const user = await getService('providers').connect(provider, ctx.query);
+
+      return ctx.send({
+        jwt: getService('jwt').issue({ id: user.id }),
+        user: await sanitizeUser(user, ctx),
+      });
+    } catch (error) {
+      throw new ApplicationError(error.message);
     }
   },
 
@@ -292,14 +285,6 @@ module.exports = {
 
     await validateRegisterBody(params);
 
-    // Throw an error if the password selected by the user
-    // contains more than three times the symbol '$'.
-    if (getService('user').isHashed(params.password)) {
-      throw new ValidationError(
-        'Your password cannot contain more than three times the symbol `$`'
-      );
-    }
-
     const role = await strapi
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: settings.default_role } });
@@ -308,15 +293,7 @@ module.exports = {
       throw new ApplicationError('Impossible to find the default role');
     }
 
-    // Check if the provided email is valid or not.
-    const isEmail = emailRegExp.test(params.email);
-
-    if (isEmail) {
-      params.email = params.email.toLowerCase();
-    } else {
-      throw new ValidationError('Please provide a valid email address');
-    }
-
+    params.email = params.email.toLowerCase();
     params.role = role.id;
 
     const user = await strapi.query('plugin::users-permissions.user').findOne({
@@ -361,6 +338,8 @@ module.exports = {
         throw new ApplicationError('Username already taken');
       } else if (_.includes(err.message, 'email')) {
         throw new ApplicationError('Email already taken');
+      } else if (err instanceof ApplicationError) {
+        throw err;
       } else {
         strapi.log.error(err);
         throw new ApplicationError('An error occurred during account creation');
