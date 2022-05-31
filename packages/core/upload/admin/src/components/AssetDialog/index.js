@@ -10,7 +10,7 @@ import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/
 import { Badge } from '@strapi/design-system/Badge';
 import { Loader } from '@strapi/design-system/Loader';
 import { Stack } from '@strapi/design-system/Stack';
-import { NoPermissions, AnErrorOccurred, useSelectionState } from '@strapi/helper-plugin';
+import { NoPermissions, AnErrorOccurred, useSelectionState, pxToRem } from '@strapi/helper-plugin';
 
 import getTrad from '../../utils/getTrad';
 import { SelectedStep } from './SelectedStep';
@@ -27,7 +27,8 @@ import { EditAssetDialog } from '../EditAssetDialog';
 import { moveElement } from '../../utils/moveElement';
 
 const LoadingBody = styled(Flex)`
-  min-height: calc(60vh + 80px);
+  // 80px are coming from the Tabs component that is not included in the ModalBody
+  min-height: ${() => `calc(60vh + ${pxToRem(80)})`};
 `;
 
 export const AssetDialog = ({
