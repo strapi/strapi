@@ -17,7 +17,7 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Button } from '@strapi/design-system/Button';
 import { FieldLabel } from '@strapi/design-system/Field';
 import { TextInput } from '@strapi/design-system/TextInput';
-import { getFileExtension, Form } from '@strapi/helper-plugin';
+import { getFileExtension, Form, pxToRem } from '@strapi/helper-plugin';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Formik } from 'formik';
 import * as yup from 'yup';
@@ -34,7 +34,7 @@ import { ReplaceMediaButton } from './ReplaceMediaButton';
 import SelectTree from '../SelectTree';
 
 const LoadingBody = styled(Flex)`
-  min-height: calc(60vh + 80px);
+  min-height: ${() => `calc(60vh + ${pxToRem(80)})`};
 `;
 
 const fileInfoSchema = yup.object({
