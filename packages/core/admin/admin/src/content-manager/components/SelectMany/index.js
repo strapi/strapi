@@ -25,7 +25,6 @@ function SelectMany({
   options,
   placeholder,
   searchToPersist,
-  styles,
   targetModel,
   value,
   description,
@@ -73,7 +72,6 @@ function SelectMany({
         placeholder={formatMessage(
           placeholder || { id: 'global.select', defaultMessage: 'Select...' }
         )}
-        styles={styles}
         value={[]}
       />
       <Box paddingTop={3} style={{ overflow: 'auto' }}>
@@ -139,7 +137,6 @@ SelectMany.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
   }),
   searchToPersist: PropTypes.string,
-  styles: PropTypes.object.isRequired,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.array,
   description: PropTypes.string,

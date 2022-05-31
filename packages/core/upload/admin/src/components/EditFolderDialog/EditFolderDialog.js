@@ -6,25 +6,25 @@ import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import {
-  ModalLayout,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from '@strapi/design-system/ModalLayout';
+import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
 import { FieldLabel } from '@strapi/design-system/Field';
+import { Flex } from '@strapi/design-system/Flex';
+import { Loader } from '@strapi/design-system/Loader';
 import { Stack } from '@strapi/design-system/Stack';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
-import { Form, useNotification, getAPIInnerErrors, useQueryParams } from '@strapi/helper-plugin';
+import { Form, useNotification, getAPIInnerErrors } from '@strapi/helper-plugin';
 
 import { getTrad, findRecursiveFolderByValue } from '../../utils';
-import { FolderDefinition, FolderStructureDefinition } from '../../constants';
+import { FolderDefinition } from '../../constants';
 import { useEditFolder } from '../../hooks/useEditFolder';
 import { useBulkRemove } from '../../hooks/useBulkRemove';
+import { useFolderStructure } from '../../hooks/useFolderStructure';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
+import { EditFolderModalHeader } from './ModalHeader';
 import RemoveFolderDialog from './RemoveFolderDialog';
 
 const folderSchema = yup.object({
@@ -37,23 +37,26 @@ const folderSchema = yup.object({
     .nullable(true),
 });
 
-export const EditFolderDialog = ({ onClose, folder, folderStructure, canUpdate }) => {
+export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
+  const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure({
+    enabled: true,
+  });
+  const { canCreate, isLoading: isLoadingPermissions, canUpdate } = useMediaLibraryPermissions();
   const submitButtonRef = useRef(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { formatMessage, formatDate } = useIntl();
-  const { editFolder, isLoading } = useEditFolder();
+  const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();
   const { remove } = useBulkRemove();
   const toggleNotification = useNotification();
-  const [{ query }] = useQueryParams();
+  const isLoading = isLoadingPermissions || folderStructureIsLoading || isEditFolderLoading;
   const isEditing = !!folder;
-  const activeFolderId = folder?.parent?.id ?? query?.folder;
-  const formDisabled = !canUpdate;
-  const initialFormData = {
+  const formDisabled = (folder && !canUpdate) || (!folder && !canCreate);
+  const initialFormData = !folderStructureIsLoading && {
     name: folder?.name ?? undefined,
     parent: {
-      value: activeFolderId ? parseInt(activeFolderId, 10) : folderStructure[0].value,
-      label: activeFolderId
-        ? findRecursiveFolderByValue(folderStructure, parseInt(activeFolderId, 10))?.label
+      value: parentFolderId ? parseInt(parentFolderId, 10) : folderStructure[0].value,
+      label: parentFolderId
+        ? findRecursiveFolderByValue(folderStructure, parseInt(parentFolderId, 10))?.label
         : folderStructure[0].label,
     },
   };
@@ -103,24 +106,29 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure, canUpdate }
     onClose();
   };
 
+  if (isLoading) {
+    return (
+      <ModalLayout onClose={() => onClose()} labelledBy="title">
+        <EditFolderModalHeader isEditing={isEditing} />
+
+        <ModalBody>
+          <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
+            <Loader>
+              {formatMessage({
+                id: getTrad('list.asset.load'),
+                defaultMessage: 'How do you want to upload your assets?',
+              })}
+            </Loader>
+          </Flex>
+        </ModalBody>
+      </ModalLayout>
+    );
+  }
+
   return (
     <>
       <ModalLayout onClose={() => onClose()} labelledBy="title">
-        <ModalHeader>
-          <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-            {formatMessage(
-              isEditing
-                ? {
-                    id: getTrad('modal.folder.edit.title'),
-                    defaultMessage: 'Edit folder',
-                  }
-                : {
-                    id: getTrad('modal.folder.create.title'),
-                    defaultMessage: 'Add new folder',
-                  }
-            )}
-          </Typography>
-        </ModalHeader>
+        <EditFolderModalHeader isEditing={isEditing} />
 
         <ModalBody>
           <Formik
@@ -277,12 +285,11 @@ export const EditFolderDialog = ({ onClose, folder, folderStructure, canUpdate }
 
 EditFolderDialog.defaultProps = {
   folder: undefined,
-  canUpdate: false,
+  parentFolderId: null,
 };
 
 EditFolderDialog.propTypes = {
   folder: FolderDefinition,
-  folderStructure: FolderStructureDefinition.isRequired,
   onClose: PropTypes.func.isRequired,
-  canUpdate: PropTypes.bool,
+  parentFolderId: PropTypes.number,
 };

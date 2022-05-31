@@ -4,7 +4,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-import { NotificationsProvider, useNotification, useQueryParams } from '@strapi/helper-plugin';
+import { NotificationsProvider, useNotification } from '@strapi/helper-plugin';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 
 import { axiosInstance } from '../../utils';
@@ -35,7 +35,6 @@ const notificationStatusMock = jest.fn();
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: () => notificationStatusMock,
-  useQueryParams: jest.fn().mockReturnValue([{ rawQuery: '', query: '' }]),
 }));
 
 const client = new QueryClient({
@@ -89,9 +88,7 @@ describe('useFolders', () => {
   });
 
   test('fetches data from the right URL if a query param was set', async () => {
-    useQueryParams.mockReturnValue([{ rawQuery: '', query: { folder: 1 } }]);
-
-    const { result, waitFor } = await setup({});
+    const { result, waitFor } = await setup({ query: { folder: 1 } });
 
     await waitFor(() => result.current.isSuccess);
 

@@ -19,6 +19,8 @@ const createQueryBuilder = (uid, db) => {
     populate: null,
     limit: null,
     offset: null,
+    transaction: null,
+    forUpdate: false,
     orderBy: [],
     groupBy: [],
   };
@@ -112,6 +114,16 @@ const createQueryBuilder = (uid, db) => {
 
     search(query) {
       state.search = query;
+      return this;
+    },
+
+    transacting(transaction) {
+      state.transaction = transaction;
+      return this;
+    },
+
+    forUpdate() {
+      state.forUpdate = true;
       return this;
     },
 
@@ -306,6 +318,14 @@ const createQueryBuilder = (uid, db) => {
           db.truncate();
           break;
         }
+      }
+
+      if (state.transaction) {
+        qb.transacting(state.transaction);
+      }
+
+      if (state.forUpdate) {
+        qb.forUpdate();
       }
 
       if (state.limit) {
