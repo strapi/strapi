@@ -1,21 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { useIntl } from 'react-intl';
+import { Button } from '@strapi/design-system/Button';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
-import EmptyPicturesIcon from '@strapi/icons/EmptyPictures';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
-import styled from 'styled-components';
+import PlusIcon from '@strapi/icons/Plus';
+
 import getTrad from '../../../utils/getTrad';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
 import { AssetList } from '../../AssetList';
+import { FolderList } from '../../FolderList';
 import { EmptyAssets } from '../../EmptyAssets';
 import { Filters } from './Filters';
 import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
 import SortPicker from '../../SortPicker';
+import { FolderDefinition, AssetDefinition } from '../../../constants';
 
 const StartBlockActions = styled(Flex)`
   & > * + * {
@@ -32,12 +36,16 @@ const EndBlockActions = styled(StartBlockActions)`
 export const BrowseStep = ({
   allowedTypes,
   assets,
+  canCreate,
+  folders,
   multiple,
+  onAddAsset,
   onChangeFilters,
   onChangePage,
   onChangePageSize,
   onChangeSearch,
   onChangeSort,
+  onChangeFolder,
   onEditAsset,
   onSelectAllAsset,
   onSelectAsset,
@@ -54,14 +62,16 @@ export const BrowseStep = ({
   const hasSomeAssetSelected = allAllowedAsset.some(
     asset => selectedAssets.findIndex(currAsset => currAsset.id === asset.id) !== -1
   );
+  const isSearching = !!queryObject?._q;
+  const isFiltering = queryObject?.filters?.$and?.length > 0;
 
   return (
-    <>
-      <Stack spacing={4}>
-        {onSelectAllAsset && (
-          <Box>
-            <Box paddingBottom={4}>
-              <Flex justifyContent="space-between" alignItems="flex-start">
+    <Stack spacing={4}>
+      {onSelectAllAsset && (
+        <Box>
+          <Box paddingBottom={4}>
+            <Flex justifyContent="space-between" alignItems="flex-start">
+              {(assets.length > 0 || folders.length > 0) && (
                 <StartBlockActions wrap="wrap">
                   {multiple && (
                     <Flex
@@ -85,41 +95,87 @@ export const BrowseStep = ({
                   )}
                   <SortPicker onChangeSort={onChangeSort} />
                   <Filters
-                    appliedFilters={queryObject.filters.$and}
+                    appliedFilters={queryObject?.filters?.$and}
                     onChangeFilters={onChangeFilters}
                   />
                 </StartBlockActions>
+              )}
+
+              {(assets.length > 0 || folders.length > 0 || isSearching) && (
                 <EndBlockActions pullRight>
                   <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
                 </EndBlockActions>
-              </Flex>
-            </Box>
+              )}
+            </Flex>
           </Box>
-        )}
+        </Box>
+      )}
 
-        {assets.length > 0 ? (
-          <AssetList
-            allowedTypes={allowedTypes}
+      {folders.length > 0 && (
+        <FolderList
+          folders={folders}
+          size="S"
+          onChangeFolder={onChangeFolder}
+          onEditFolder={null}
+          onSelectFolder={null}
+          title={formatMessage({
+            id: getTrad('list.folders.title'),
+            defaultMessage: 'Folders',
+          })}
+        />
+      )}
+
+      {assets.length > 0 ? (
+        <AssetList
+          allowedTypes={allowedTypes}
+          size="S"
+          assets={assets}
+          onSelectAsset={onSelectAsset}
+          selectedAssets={selectedAssets}
+          onEditAsset={onEditAsset}
+          title={formatMessage({
+            id: getTrad('list.assets.title'),
+            defaultMessage: 'Assets',
+          })}
+        />
+      ) : (
+        <Box paddingBottom={6}>
+          <EmptyAssets
             size="S"
-            assets={assets}
-            onSelectAsset={onSelectAsset}
-            selectedAssets={selectedAssets}
-            onEditAsset={onEditAsset}
+            count={6}
+            action={
+              canCreate &&
+              !isFiltering &&
+              !isSearching && (
+                <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
+                  {formatMessage({
+                    id: getTrad('header.actions.add-assets'),
+                    defaultMessage: 'Add new assets',
+                  })}
+                </Button>
+              )
+            }
+            content={
+              // eslint-disable-next-line no-nested-ternary
+              isFiltering
+                ? formatMessage({
+                    id: getTrad('list.assets-empty.title-withSearch'),
+                    defaultMessage: 'There are no assets with the applied filters',
+                  })
+                : canCreate && !isSearching
+                ? formatMessage({
+                    id: getTrad('list.assets.empty'),
+                    defaultMessage: 'Upload your first assets...',
+                  })
+                : formatMessage({
+                    id: getTrad('list.assets.empty.no-permissions'),
+                    defaultMessage: 'The asset list is empty',
+                  })
+            }
           />
-        ) : (
-          <Box paddingBottom={6}>
-            <EmptyAssets
-              icon={EmptyPicturesIcon}
-              size="S"
-              count={6}
-              content={formatMessage({
-                id: getTrad('list.assets-empty.search'),
-                defaultMessage: 'No result found',
-              })}
-            />
-          </Box>
-        )}
-      </Stack>
+        </Box>
+      )}
+
       {pagination.pageCount > 0 && (
         <Flex justifyContent="space-between">
           <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
@@ -130,7 +186,7 @@ export const BrowseStep = ({
           />
         </Flex>
       )}
-    </>
+    </Stack>
   );
 };
 
@@ -143,9 +199,13 @@ BrowseStep.defaultProps = {
 
 BrowseStep.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
-  assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  assets: PropTypes.arrayOf(AssetDefinition).isRequired,
+  canCreate: PropTypes.bool.isRequired,
+  folders: PropTypes.arrayOf(FolderDefinition).isRequired,
   multiple: PropTypes.bool,
+  onAddAsset: PropTypes.func.isRequired,
   onChangeFilters: PropTypes.func.isRequired,
+  onChangeFolder: PropTypes.func.isRequired,
   onChangePage: PropTypes.func.isRequired,
   onChangePageSize: PropTypes.func.isRequired,
   onChangeSort: PropTypes.func.isRequired,

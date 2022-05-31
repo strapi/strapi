@@ -19,19 +19,7 @@ jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || id) }),
 }));
 
-jest.mock('../../../hooks/useFolderStructure', () => ({
-  useFolderStructure: jest.fn().mockReturnValue({
-    isLoading: false,
-    error: null,
-    data: [
-      {
-        value: null,
-        label: 'Media Library',
-        children: [],
-      },
-    ],
-  }),
-}));
+jest.mock('../../../hooks/useFolderStructure');
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

@@ -6,7 +6,6 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import { useFolderStructure } from '../../../hooks/useFolderStructure';
 import { useFolders } from '../../../hooks/useFolders';
 import { useAssets } from '../../../hooks/useAssets';
 import { MediaLibrary } from '../MediaLibrary';
@@ -53,99 +52,10 @@ const FIXTURE_ASSETS = [
   },
 ];
 
-jest.mock('../../../hooks/useMediaLibraryPermissions', () => ({
-  useMediaLibraryPermissions: jest.fn().mockReturnValue({
-    isLoading: false,
-    canRead: true,
-    canCreate: true,
-    canUpdate: true,
-    canCopyLink: true,
-    canDownload: true,
-  }),
-}));
-
-jest.mock('../../../hooks/useFolderStructure', () => ({
-  useFolderStructure: jest.fn().mockReturnValue({
-    isLoading: false,
-    error: null,
-    data: [
-      {
-        value: null,
-        label: 'Media Library',
-        children: [],
-      },
-    ],
-  }),
-}));
-
-jest.mock('../../../hooks/useFolders', () => ({
-  useFolders: jest.fn().mockReturnValue({
-    isLoading: false,
-    error: null,
-    data: {
-      results: [
-        {
-          id: 1,
-          name: 'Folder 1',
-          children: {
-            count: 1,
-          },
-          files: {
-            count: 1,
-          },
-        },
-      ],
-    },
-  }),
-}));
-
-jest.mock('../../../hooks/useAssets', () => ({
-  useAssets: jest.fn().mockReturnValue({
-    isLoading: false,
-    error: null,
-    data: {
-      pagination: {
-        pageCount: 1,
-        page: 1,
-        pageSize: 10,
-        total: 1,
-      },
-      results: [
-        {
-          id: 77,
-          name: '3874873.jpg',
-          alternativeText: null,
-          caption: null,
-          width: 400,
-          height: 400,
-          formats: {
-            thumbnail: {
-              name: 'thumbnail_3874873.jpg',
-              hash: 'thumbnail_3874873_b5818bb250',
-              ext: '.jpg',
-              mime: 'image/jpeg',
-              width: 156,
-              height: 156,
-              size: 3.97,
-              path: null,
-              url: '/uploads/thumbnail_3874873_b5818bb250.jpg',
-            },
-          },
-          hash: '3874873_b5818bb250',
-          ext: '.jpg',
-          mime: 'image/jpeg',
-          size: 11.79,
-          url: '/uploads/3874873_b5818bb250.jpg',
-          previewUrl: null,
-          provider: 'local',
-          provider_metadata: null,
-          createdAt: '2021-10-18T08:04:56.326Z',
-          updatedAt: '2021-10-18T08:04:56.326Z',
-        },
-      ],
-    },
-  }),
-}));
+jest.mock('../../../hooks/useMediaLibraryPermissions');
+jest.mock('../../../hooks/useFolders');
+jest.mock('../../../hooks/useFolderStructure');
+jest.mock('../../../hooks/useAssets');
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -218,15 +128,6 @@ describe('Media library homepage', () => {
 
     it('shows a loader while resolving folders', () => {
       useFolders.mockReturnValueOnce({ isLoading: true });
-
-      renderML();
-
-      expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('true');
-      expect(screen.getByText('Loading content.')).toBeInTheDocument();
-    });
-
-    it('shows a loader while resolving the folder structure', () => {
-      useFolderStructure.mockReturnValueOnce({ isLoading: true });
 
       renderML();
 

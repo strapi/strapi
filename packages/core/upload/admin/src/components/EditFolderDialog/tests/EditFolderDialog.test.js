@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
-import { render, fireEvent, act, waitFor, screen } from '@testing-library/react';
+import { render, fireEvent, act, waitFor } from '@testing-library/react';
 import { NotificationsProvider } from '@strapi/helper-plugin';
 import { QueryClientProvider, QueryClient } from 'react-query';
 
@@ -27,13 +27,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   useQueryParams: jest.fn().mockReturnValue([{ query: {} }]),
 }));
 
-const FIXTURE_FOLDER_STRUCTURE = [
-  {
-    value: null,
-    label: 'Media Library',
-    children: [],
-  },
-];
+jest.mock('../../../hooks/useMediaLibraryPermissions');
+jest.mock('../../../hooks/useFolderStructure');
 
 const client = new QueryClient({
   defaultOptions: {
@@ -62,14 +57,8 @@ function ComponentFixture(props) {
   );
 }
 
-function setup(props) {
-  const FIXTURE_PROPS = {
-    folderStructure: FIXTURE_FOLDER_STRUCTURE,
-    onClose: jest.fn(),
-    ...props,
-  };
-
-  return render(<ComponentFixture {...FIXTURE_PROPS} />, { container: document.body });
+function setup(props = { onClose: jest.fn() }) {
+  return render(<ComponentFixture {...props} />, { container: document.body });
 }
 
 function getInput(container, name) {
@@ -81,6 +70,10 @@ function getButton(container, name) {
 }
 
 describe('EditFolderDialog', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('renders and matches the snapshot', () => {
     const { container } = setup();
     expect(container).toMatchSnapshot();
@@ -124,20 +117,20 @@ describe('EditFolderDialog', () => {
   test('set default form values', async () => {
     const spy = jest.fn();
     const folder = {
-      id: 1,
+      id: 2,
       name: 'default folder name',
-      children: [],
-      parent: { id: 1, label: 'Some parent' },
     };
-    const folderStructure = [{ value: 1, label: 'Some parent' }];
-    const { container } = setup({ folder, folderStructure, onClose: spy });
-
-    act(() => {
-      fireEvent.click(getButton(container, 'submit'));
-    });
+    const { container, queryByText } = setup({ folder, onClose: spy });
 
     expect(getInput(container, 'name').value).toBe(folder.name);
-    expect(screen.getByText('Some parent')).toBeInTheDocument();
+    expect(queryByText('Media Library')).toBeInTheDocument();
+  });
+
+  test('set default form values with parentFolderId', async () => {
+    const spy = jest.fn();
+    const { queryByText } = setup({ parentFolderId: 2, onClose: spy });
+
+    expect(queryByText('second child')).toBeInTheDocument();
   });
 
   test('show confirmation delete dialog', async () => {
@@ -148,12 +141,12 @@ describe('EditFolderDialog', () => {
       parent: { id: 1, label: 'Some parent' },
     };
     const folderStructure = [{ value: 1, label: 'Some parent' }];
-    const { container } = setup({ folder, folderStructure });
+    const { container, queryByText } = setup({ folder, folderStructure });
 
     act(() => {
       fireEvent.click(getButton(container, 'delete'));
     });
 
-    expect(screen.getByText('Are you sure you want to delete this?')).toBeInTheDocument();
+    expect(queryByText('Are you sure you want to delete this?')).toBeInTheDocument();
   });
 });

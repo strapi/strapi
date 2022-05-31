@@ -29,7 +29,6 @@ import { getTrad } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { EmptyAssets } from '../../components/EmptyAssets';
-import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
 import { Filters } from './components/Filters';
 import { Header } from './components/Header';
@@ -55,14 +54,18 @@ export const MediaLibrary = () => {
 
   const { data: assetsData, isLoading: assetsLoading, errors: assetsError } = useAssets({
     skipWhen: !canRead,
+    query,
   });
 
-  const { data: foldersData, isLoading: foldersLoading, errors: foldersError } = useFolders({
+  const { data: folders, isLoading: foldersLoading, errors: foldersError } = useFolders({
     enabled: assetsData?.pagination?.page === 1 && !isFiltering,
+    query,
   });
 
-  const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure();
-
+  const folderCount = folders?.length || 0;
+  const assets = assetsData?.results;
+  const assetCount = assets?.length ?? 0;
+  const isLoading = foldersLoading || permissionsLoading || assetsLoading;
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
@@ -97,16 +100,14 @@ export const MediaLibrary = () => {
     toggleEditFolderDialog(payload);
   };
 
+  const handleChangeFolder = folder => {
+    setQuery({
+      ...query,
+      folder,
+    });
+  };
+
   useFocusWhenNavigate();
-
-  const folders = foldersData?.results;
-  const folderCount = folders?.length || 0;
-
-  const assets = assetsData?.results;
-  const assetCount = assets?.length ?? 0;
-
-  const isLoading =
-    foldersLoading || folderStructureIsLoading || permissionsLoading || assetsLoading;
 
   return (
     <Layout>
@@ -173,6 +174,7 @@ export const MediaLibrary = () => {
               {folders?.length > 0 && !isFiltering && (
                 <FolderList
                   folders={folders}
+                  onChangeFolder={handleChangeFolder}
                   onEditFolder={handleEditFolder}
                   onSelectFolder={selectOne}
                   selectedFolders={selected.filter(({ type }) => type === 'folder')}
@@ -246,15 +248,18 @@ export const MediaLibrary = () => {
       </Main>
 
       {showUploadAssetDialog && (
-        <UploadAssetDialog onClose={toggleUploadAssetDialog} trackedLocation="upload" />
+        <UploadAssetDialog
+          onClose={toggleUploadAssetDialog}
+          trackedLocation="upload"
+          folderId={query?.folder}
+        />
       )}
 
       {showEditFolderDialog && (
         <EditFolderDialog
           onClose={handleEditFolderClose}
-          folderStructure={folderStructure}
           folder={folderToEdit}
-          canUpdate={canUpdate}
+          parentFolderId={query?.folder}
         />
       )}
 
@@ -265,7 +270,6 @@ export const MediaLibrary = () => {
           canUpdate={canUpdate}
           canCopyLink={canCopyLink}
           canDownload={canDownload}
-          folderStructure={folderStructure}
           trackedLocation="upload"
         />
       )}
