@@ -15,6 +15,7 @@ const {
   validateCallbackBody,
   validateRegisterBody,
   validateSendEmailConfirmationBody,
+  validateForgotPasswordBody,
 } = require('./validation/auth');
 
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
@@ -182,87 +183,71 @@ module.exports = {
   },
 
   async forgotPassword(ctx) {
-    let { email } = ctx.request.body;
-
-    // Check if the provided email is valid or not.
-    const isEmail = emailRegExp.test(email);
-
-    if (isEmail) {
-      email = email.toLowerCase();
-    } else {
-      throw new ValidationError('Please provide a valid email address');
-    }
+    const { email } = await validateForgotPasswordBody(ctx.request.body);
 
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
+
+    const emailSettings = await pluginStore.get({ key: 'email' });
+    const advancedSettings = await pluginStore.get({ key: 'advanced' });
 
     // Find the user by email.
     const user = await strapi
       .query('plugin::users-permissions.user')
       .findOne({ where: { email: email.toLowerCase() } });
 
-    // User not found.
-    if (!user) {
-      throw new ApplicationError('This email does not exist');
-    }
-
-    // User blocked
-    if (user.blocked) {
-      throw new ApplicationError('This user is disabled');
+    // NOTE: we do not want to leak the existing emails
+    if (!user || user.blocked) {
+      return ctx.send({ ok: true });
     }
 
     // Generate random token.
-    const resetPasswordToken = crypto.randomBytes(64).toString('hex');
-
-    const settings = await pluginStore.get({ key: 'email' }).then(storeEmail => {
-      try {
-        return storeEmail['reset_password'].options;
-      } catch (error) {
-        return {};
-      }
-    });
-
-    const advanced = await pluginStore.get({
-      key: 'advanced',
-    });
-
     const userInfo = await sanitizeUser(user, ctx);
 
-    settings.message = await getService('users-permissions').template(settings.message, {
-      URL: advanced.email_reset_password,
-      SERVER_URL: getAbsoluteServerUrl(strapi.config),
-      ADMIN_URL: getAbsoluteAdminUrl(strapi.config),
-      USER: userInfo,
-      TOKEN: resetPasswordToken,
-    });
+    const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
-    settings.object = await getService('users-permissions').template(settings.object, {
-      USER: userInfo,
-    });
+    const resetPasswordSettings = _.get(emailSettings, 'reset_password.options', {});
+    const emailBody = await getService('users-permissions').template(
+      resetPasswordSettings.message,
+      {
+        URL: advancedSettings.email_reset_password,
+        SERVER_URL: getAbsoluteServerUrl(strapi.config),
+        ADMIN_URL: getAbsoluteAdminUrl(strapi.config),
+        USER: userInfo,
+        TOKEN: resetPasswordToken,
+      }
+    );
+
+    const emailObject = await getService('users-permissions').template(
+      resetPasswordSettings.object,
+      {
+        USER: userInfo,
+      }
+    );
+
+    const emailToSend = {
+      to: user.email,
+      from:
+        resetPasswordSettings.from.email || resetPasswordSettings.from.name
+          ? `${resetPasswordSettings.from.name} <${resetPasswordSettings.from.email}>`
+          : undefined,
+      replyTo: resetPasswordSettings.response_email,
+      subject: emailObject,
+      text: emailBody,
+      html: emailBody,
+    };
+
+    // NOTE: Update the user before sending the email so an Admin can generate the link if the email fails
+    await getService('user').edit(user.id, { resetPasswordToken });
 
     try {
       // Send an email to the user.
       await strapi
         .plugin('email')
         .service('email')
-        .send({
-          to: user.email,
-          from:
-            settings.from.email || settings.from.name
-              ? `${settings.from.name} <${settings.from.email}>`
-              : undefined,
-          replyTo: settings.response_email,
-          subject: settings.object,
-          text: settings.message,
-          html: settings.message,
-        });
+        .send(emailToSend);
     } catch (err) {
       throw new ApplicationError(err.message);
     }
-
-    // Update the user.
-    await strapi
-      .query('plugin::users-permissions.user')
-      .update({ where: { id: user.id }, data: { resetPasswordToken } });
 
     ctx.send({ ok: true });
   },
@@ -270,16 +255,20 @@ module.exports = {
   async register(ctx) {
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
 
-    const settings = await pluginStore.get({
-      key: 'advanced',
-    });
+    const settings = await pluginStore.get({ key: 'advanced' });
 
     if (!settings.allow_register) {
       throw new ApplicationError('Register action is currently disabled');
     }
 
     const params = {
-      ..._.omit(ctx.request.body, ['confirmed', 'confirmationToken', 'resetPasswordToken']),
+      ..._.omit(ctx.request.body, [
+        'confirmed',
+        'blocked',
+        'confirmationToken',
+        'resetPasswordToken',
+        'provider',
+      ]),
       provider: 'local',
     };
 
@@ -293,27 +282,45 @@ module.exports = {
       throw new ApplicationError('Impossible to find the default role');
     }
 
-    params.email = params.email.toLowerCase();
-    params.role = role.id;
+    const { email, username, provider } = params;
 
-    const user = await strapi.query('plugin::users-permissions.user').findOne({
-      where: { email: params.email },
+    const identifierFilter = {
+      $or: [
+        { email: email.toLowerCase() },
+        { username: email.toLowerCase() },
+        { username },
+        { email: username },
+      ],
+    };
+
+    const conflictingUserCount = await strapi.query('plugin::users-permissions.user').count({
+      where: { ...identifierFilter, provider },
     });
 
-    if (user && user.provider === params.provider) {
-      throw new ApplicationError('Email is already taken');
+    if (conflictingUserCount > 0) {
+      throw new ApplicationError('Email or Username are already taken');
     }
 
-    if (user && user.provider !== params.provider && settings.unique_email) {
-      throw new ApplicationError('Email is already taken');
+    if (settings.unique_email) {
+      const conflictingUserCount = await strapi.query('plugin::users-permissions.user').count({
+        where: { ...identifierFilter },
+      });
+
+      if (conflictingUserCount > 0) {
+        throw new ApplicationError('Email or Username are already taken');
+      }
     }
+
+    let newUser = {
+      ...params,
+      role: role.id,
+      email: email.toLowerCase(),
+      username,
+      confirmed: !settings.email_confirmation,
+    };
 
     try {
-      if (!settings.email_confirmation) {
-        params.confirmed = true;
-      }
-
-      const user = await getService('user').add(params);
+      const user = await getService('user').add(newUser);
 
       const sanitizedUser = await sanitizeUser(user, ctx);
 
@@ -334,15 +341,11 @@ module.exports = {
         user: sanitizedUser,
       });
     } catch (err) {
-      if (_.includes(err.message, 'username')) {
-        throw new ApplicationError('Username already taken');
-      } else if (_.includes(err.message, 'email')) {
-        throw new ApplicationError('Email already taken');
-      } else if (err instanceof ApplicationError) {
+      if (err instanceof ApplicationError) {
         throw err;
       } else {
         strapi.log.error(err);
-        throw new ApplicationError('An error occurred during account creation');
+        throw new Error('An unknown error occurred during account creation');
       }
     }
   },

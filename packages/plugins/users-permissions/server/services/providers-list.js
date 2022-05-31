@@ -71,32 +71,30 @@ module.exports = async ({ provider, access_token, query, providers }) => {
         },
       });
 
-      return github
+      const { body: userBody } = await github
         .get('user')
         .auth(access_token)
-        .request()
-        .then(({ body: userbody }) => {
-          // This is the public email on the github profile
-          if (userbody.email) {
-            return {
-              username: userbody.login,
-              email: userbody.email,
-            };
-          }
-          // Get the email with Github's user/emails API
-          return github
-            .get('user/emails')
-            .auth(access_token)
-            .request()
-            .then(({ body: emailsbody }) => {
-              return {
-                username: userbody.login,
-                email: Array.isArray(emailsbody)
-                  ? emailsbody.find(email => email.primary === true).email
-                  : null,
-              };
-            });
-        });
+        .request();
+
+      // This is the public email on the github profile
+      if (userBody.email) {
+        return {
+          username: userBody.login,
+          email: userBody.email,
+        };
+      }
+      // Get the email with Github's user/emails API
+      const { body: emailBody } = await github
+        .get('user/emails')
+        .auth(access_token)
+        .request();
+
+      return {
+        username: userBody.login,
+        email: Array.isArray(emailBody)
+          ? emailBody.find(email => email.primary === true).email
+          : null,
+      };
     }
     case 'microsoft': {
       const microsoft = purest({ provider: 'microsoft' });
