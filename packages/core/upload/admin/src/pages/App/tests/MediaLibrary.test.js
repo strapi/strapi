@@ -268,7 +268,7 @@ describe('Media library homepage', () => {
     it('displays folders', async () => {
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).toBeInTheDocument();
+      expect(screen.queryByText('Folders')).toBeInTheDocument();
       expect(screen.getByText('Folder 1')).toBeInTheDocument();
     });
 

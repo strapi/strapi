@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BrowseStep renders 1`] = `
-.c78 {
+.c84 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -158,7 +158,7 @@ exports[`BrowseStep renders 1`] = `
   fill: #32324d;
 }
 
-.c55 {
+.c61 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -170,7 +170,7 @@ exports[`BrowseStep renders 1`] = `
   background: #f0f0ff;
 }
 
-.c55 .c15 {
+.c61 .c15 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -181,69 +181,72 @@ exports[`BrowseStep renders 1`] = `
   align-items: center;
 }
 
-.c55 .c18 {
+.c61 .c18 {
   color: #ffffff;
 }
 
-.c55[aria-disabled='true'] {
+.c61[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c55[aria-disabled='true'] .c18 {
+.c61[aria-disabled='true'] .c18 {
   color: #666687;
 }
 
-.c55[aria-disabled='true'] svg > g,
-.c55[aria-disabled='true'] svg path {
+.c61[aria-disabled='true'] svg > g,
+.c61[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c55[aria-disabled='true']:active {
+.c61[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c55[aria-disabled='true']:active .c18 {
+.c61[aria-disabled='true']:active .c18 {
   color: #666687;
 }
 
-.c55[aria-disabled='true']:active svg > g,
-.c55[aria-disabled='true']:active svg path {
+.c61[aria-disabled='true']:active svg > g,
+.c61[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c55:hover {
+.c61:hover {
   background-color: #ffffff;
 }
 
-.c55:active {
+.c61:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c55:active .c18 {
+.c61:active .c18 {
   color: #4945ff;
 }
 
-.c55:active svg > g,
-.c55:active svg path {
+.c61:active svg > g,
+.c61:active svg path {
   fill: #4945ff;
 }
 
-.c55 .c18 {
+.c61 .c18 {
   color: #271fe0;
 }
 
-.c55 svg > g,
-.c55 svg path {
+.c61 svg > g,
+.c61 svg path {
   fill: #271fe0;
 }
 
 .c36 {
   position: relative;
-  z-index: 3;
   overflow: hidden;
+  max-width: 100%;
+}
+
+.c40 {
   max-width: 100%;
 }
 
@@ -310,7 +313,7 @@ exports[`BrowseStep renders 1`] = `
   flex-direction: column;
 }
 
-.c40 {
+.c41 {
   -webkit-align-items: start;
   -webkit-box-align: start;
   -ms-flex-align: start;
@@ -324,7 +327,7 @@ exports[`BrowseStep renders 1`] = `
   flex-direction: column;
 }
 
-.c56 {
+.c62 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -354,7 +357,7 @@ exports[`BrowseStep renders 1`] = `
   cursor: pointer;
 }
 
-.c50 {
+.c56 {
   text-align: center;
 }
 
@@ -395,12 +398,12 @@ exports[`BrowseStep renders 1`] = `
   margin-top: 16px;
 }
 
-.c52 > * {
+.c58 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c52 > * + * {
+.c58 > * + * {
   margin-top: 24px;
 }
 
@@ -436,22 +439,26 @@ exports[`BrowseStep renders 1`] = `
   border-radius: 4px;
 }
 
-.c45 {
+.c39 {
+  max-width: 100%;
+}
+
+.c51 {
   padding-bottom: 24px;
 }
 
-.c47 {
+.c53 {
   border-radius: 4px;
   height: 138px;
 }
 
-.c49 {
+.c55 {
   position: absolute;
   top: 64px;
   width: 100%;
 }
 
-.c69 {
+.c75 {
   padding-left: 8px;
 }
 
@@ -474,7 +481,7 @@ exports[`BrowseStep renders 1`] = `
   line-height: 1.25;
 }
 
-.c41 {
+.c42 {
   font-weight: 500;
   color: #32324d;
   display: block;
@@ -485,7 +492,7 @@ exports[`BrowseStep renders 1`] = `
   line-height: 1.43;
 }
 
-.c44 {
+.c45 {
   color: #666687;
   display: block;
   white-space: nowrap;
@@ -495,27 +502,39 @@ exports[`BrowseStep renders 1`] = `
   line-height: 1.33;
 }
 
-.c54 {
+.c60 {
   color: #666687;
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
 }
 
-.c70 {
+.c76 {
   color: #666687;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c76 {
+.c82 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c53 {
+.c44 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c59 {
   width: 160px;
   height: 88px;
 }
@@ -618,7 +637,7 @@ exports[`BrowseStep renders 1`] = `
   fill: #666687;
 }
 
-.c61 {
+.c67 {
   position: absolute;
   left: 0;
   right: 0;
@@ -629,24 +648,24 @@ exports[`BrowseStep renders 1`] = `
   border: none;
 }
 
-.c61:focus {
+.c67:focus {
   outline: none;
 }
 
-.c61[aria-disabled='true'] {
+.c67[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c64 {
+.c70 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c66 {
+.c72 {
   padding-left: 12px;
 }
 
-.c57 {
+.c63 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -660,7 +679,7 @@ exports[`BrowseStep renders 1`] = `
   flex-direction: column;
 }
 
-.c59 {
+.c65 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -674,7 +693,7 @@ exports[`BrowseStep renders 1`] = `
   flex-direction: row;
 }
 
-.c62 {
+.c68 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -692,7 +711,7 @@ exports[`BrowseStep renders 1`] = `
   justify-content: space-between;
 }
 
-.c65 {
+.c71 {
   color: #32324d;
   display: block;
   white-space: nowrap;
@@ -702,12 +721,12 @@ exports[`BrowseStep renders 1`] = `
   line-height: 1.43;
 }
 
-.c58 > * {
+.c64 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c60 {
+.c66 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -723,28 +742,28 @@ exports[`BrowseStep renders 1`] = `
   transition-duration: 0.2s;
 }
 
-.c60:focus-within {
+.c66:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c67 {
+.c73 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c67 svg {
+.c73 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c67 svg path {
+.c73 svg path {
   fill: #666687;
 }
 
-.c68 {
+.c74 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -753,196 +772,62 @@ exports[`BrowseStep renders 1`] = `
   border: none;
 }
 
-.c68 svg {
+.c74 svg {
   width: 0.375rem;
 }
 
-.c63 {
+.c69 {
   width: 100%;
 }
 
-.c43 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c30 {
-  height: 100%;
-  left: 0;
-  position: absolute;
-  opacity: 0;
-  top: 0;
-  width: 100%;
-}
-
-.c30:hover,
-.c30:focus {
-  -webkit-text-decoration: none;
-  text-decoration: none;
-}
-
-.c35 path {
-  fill: currentColor;
-}
-
-.c38 {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-.c39 {
-  max-width: 100%;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-}
-
-.c42 {
-  max-width: 100%;
+.c47 {
+  right: 16px;
 }
 
 .c48 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c49 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c49 > * + * {
+  margin-left: 8px;
+}
+
+.c50 {
+  position: absolute;
+  top: 12px;
+}
+
+.c54 {
   background: linear-gradient( 180deg, rgba(234,234,239,0) 0%, #dcdce4 100% );
   opacity: 0.33;
 }
 
-.c46 {
+.c52 {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
   grid-gap: 16px;
 }
 
-.c51 {
+.c57 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c71 > * + * {
-  margin-left: 4px;
-}
-
-.c77 {
-  line-height: revert;
-}
-
-.c72 {
-  padding: 12px;
-  border-radius: 4px;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  position: relative;
-  outline: none;
-}
-
-.c72:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c72:focus-visible {
-  outline: none;
-}
-
-.c72:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c74 {
-  padding: 12px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  position: relative;
-  outline: none;
-}
-
-.c74:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c74:focus-visible {
-  outline: none;
-}
-
-.c74:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c75 {
-  color: #271fe0;
-  background: #ffffff;
-}
-
-.c75:hover {
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c73 {
-  font-size: 0.7rem;
-  pointer-events: none;
-}
-
-.c73 svg path {
-  fill: #c0c0cf;
-}
-
-.c73:focus svg path,
-.c73:hover svg path {
-  fill: #c0c0cf;
 }
 
 .c9 {
@@ -1102,6 +987,154 @@ exports[`BrowseStep renders 1`] = `
   width: 6px;
 }
 
+.c30 {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  width: 100%;
+}
+
+.c30:hover,
+.c30:focus {
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.c35 path {
+  fill: currentColor;
+}
+
+.c46 {
+  display: none;
+}
+
+.c38 {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c77 > * + * {
+  margin-left: 4px;
+}
+
+.c83 {
+  line-height: revert;
+}
+
+.c78 {
+  padding: 12px;
+  border-radius: 4px;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c78:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c78:focus-visible {
+  outline: none;
+}
+
+.c78:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c80 {
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c80:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c80:focus-visible {
+  outline: none;
+}
+
+.c80:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c81 {
+  color: #271fe0;
+  background: #ffffff;
+}
+
+.c81:hover {
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c79 {
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+
+.c79 svg path {
+  fill: #c0c0cf;
+}
+
+.c79:focus svg path,
+.c79:hover svg path {
+  fill: #c0c0cf;
+}
+
 .c5 > * + * {
   margin-left: 8px;
 }
@@ -1118,6 +1151,10 @@ exports[`BrowseStep renders 1`] = `
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
+}
+
+.c43 {
+  max-width: 100%;
 }
 
 @media (max-width:68.75rem) {
@@ -1275,7 +1312,8 @@ exports[`BrowseStep renders 1`] = `
             class=""
           >
             <div
-              class="c29"
+              class="c29 "
+              tabindex="0"
             >
               <button
                 aria-hidden="true"
@@ -1311,34 +1349,38 @@ exports[`BrowseStep renders 1`] = `
                   id="folder-1-1-title"
                   overflow="hidden"
                 >
-                  <a
-                    aria-current="page"
-                    class="c39 active"
-                    href="/"
+                  <button
+                    class="c39"
+                    type="button"
                   >
                     <h2
-                      class="c40"
+                      class="c40 c41"
                     >
                       <span
-                        class="c41 c42"
+                        class="c42 c43"
                       >
                         Folder 1
                         <div
-                          class="c43"
+                          class="c44"
                         >
                           :
                         </div>
                       </span>
                       <span
-                        class="c44"
+                        class="c45 c43"
                       >
-                        1
-                         folder, 
-                        1
-                         assets
+                        1 folder, 1 assets
                       </span>
                     </h2>
-                  </a>
+                  </button>
+                </div>
+                <div
+                  class="c46"
+                >
+                  <div
+                    class="c47 c48 c49 c50"
+                    spacing="2"
+                  />
                 </div>
               </div>
             </div>
@@ -1351,7 +1393,8 @@ exports[`BrowseStep renders 1`] = `
             class=""
           >
             <div
-              class="c29"
+              class="c29 "
+              tabindex="0"
             >
               <button
                 aria-hidden="true"
@@ -1387,34 +1430,38 @@ exports[`BrowseStep renders 1`] = `
                   id="folder-2-2-title"
                   overflow="hidden"
                 >
-                  <a
-                    aria-current="page"
-                    class="c39 active"
-                    href="/"
+                  <button
+                    class="c39"
+                    type="button"
                   >
                     <h2
-                      class="c40"
+                      class="c40 c41"
                     >
                       <span
-                        class="c41 c42"
+                        class="c42 c43"
                       >
                         Folder 2
                         <div
-                          class="c43"
+                          class="c44"
                         >
                           :
                         </div>
                       </span>
                       <span
-                        class="c44"
+                        class="c45 c43"
                       >
-                        11
-                         folder, 
-                        12
-                         assets
+                        11 folder, 12 assets
                       </span>
                     </h2>
-                  </a>
+                  </button>
+                </div>
+                <div
+                  class="c46"
+                >
+                  <div
+                    class="c47 c48 c49 c50"
+                    spacing="2"
+                  />
                 </div>
               </div>
             </div>
@@ -1423,53 +1470,53 @@ exports[`BrowseStep renders 1`] = `
       </div>
     </div>
     <div
-      class="c45"
+      class="c51"
     >
       <div
         class="c29"
       >
         <div
-          class="c46"
+          class="c52"
         >
           <div
-            class="c47 c48"
+            class="c53 c54"
             height="138px"
           />
           <div
-            class="c47 c48"
+            class="c53 c54"
             height="138px"
           />
           <div
-            class="c47 c48"
+            class="c53 c54"
             height="138px"
           />
           <div
-            class="c47 c48"
+            class="c53 c54"
             height="138px"
           />
           <div
-            class="c47 c48"
+            class="c53 c54"
             height="138px"
           />
           <div
-            class="c47 c48"
+            class="c53 c54"
             height="138px"
           />
         </div>
         <div
-          class="c49"
+          class="c55"
           width="100%"
         >
           <div
-            class="c50 c0 c1 c51"
+            class="c56 c0 c1 c57"
             spacing="4"
           >
             <div
-              class="c0 c52 c51"
+              class="c0 c58 c57"
               spacing="6"
             >
               <svg
-                class="c53 "
+                class="c59 "
                 fill="none"
                 height="88px"
                 viewBox="0 0 216 120"
@@ -1532,14 +1579,14 @@ exports[`BrowseStep renders 1`] = `
                 </defs>
               </svg>
               <p
-                class="c54"
+                class="c60"
               >
                 Upload your first assets...
               </p>
             </div>
             <button
               aria-disabled="false"
-              class="c13 c55"
+              class="c13 c61"
               type="button"
             >
               <div
@@ -1570,17 +1617,17 @@ exports[`BrowseStep renders 1`] = `
       </div>
     </div>
     <div
-      class="c56"
+      class="c62"
     >
       <div
         class="c20"
       >
         <div>
           <div
-            class="c57 c58"
+            class="c63 c64"
           >
             <div
-              class="c59 c60"
+              class="c65 c66"
             >
               <button
                 aria-disabled="false"
@@ -1588,21 +1635,21 @@ exports[`BrowseStep renders 1`] = `
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
                 aria-labelledby="select-1-label select-1-content"
-                class="c61"
+                class="c67"
                 id="select-1"
                 type="button"
               />
               <div
-                class="c62 c63"
+                class="c68 c69"
               >
                 <div
-                  class="c59"
+                  class="c65"
                 >
                   <div
-                    class="c64"
+                    class="c70"
                   >
                     <span
-                      class="c65"
+                      class="c71"
                       id="select-1-content"
                     >
                       10
@@ -1610,11 +1657,11 @@ exports[`BrowseStep renders 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c59"
+                  class="c65"
                 >
                   <button
                     aria-hidden="true"
-                    class="c66 c67 c68"
+                    class="c72 c73 c74"
                     tabindex="-1"
                     type="button"
                   >
@@ -1639,10 +1686,10 @@ exports[`BrowseStep renders 1`] = `
           </div>
         </div>
         <div
-          class="c69"
+          class="c75"
         >
           <label
-            class="c70"
+            class="c76"
             for="page-size"
           >
             Entries per page
@@ -1651,20 +1698,20 @@ exports[`BrowseStep renders 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-efaPnb"
+        class="sc-cKAQkk"
       >
         <ul
-          class="c20 c71"
+          class="c20 c77"
         >
           <li>
             <button
               aria-disabled="true"
-              class="c72 c73"
+              class="c78 c79"
               tabindex="-1"
               type="button"
             >
               <div
-                class="c43"
+                class="c44"
               >
                 Go to previous page
               </div>
@@ -1685,17 +1732,17 @@ exports[`BrowseStep renders 1`] = `
           </li>
           <li>
             <button
-              class="c74 c75"
+              class="c80 c81"
               type="button"
             >
               <div
-                class="c43"
+                class="c44"
               >
                 Go to page 1
               </div>
               <span
                 aria-hidden="true"
-                class="c76 c77"
+                class="c82 c83"
               >
                 1
               </span>
@@ -1704,12 +1751,12 @@ exports[`BrowseStep renders 1`] = `
           <li>
             <button
               aria-disabled="true"
-              class="c72 c73"
+              class="c78 c79"
               tabindex="-1"
               type="button"
             >
               <div
-                class="c43"
+                class="c44"
               >
                 Go to next page
               </div>
@@ -1733,7 +1780,7 @@ exports[`BrowseStep renders 1`] = `
     </div>
   </div>
   <div
-    class="c78"
+    class="c84"
   >
     <p
       aria-live="polite"
