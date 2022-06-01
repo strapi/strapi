@@ -8,10 +8,8 @@ export interface DynamicZoneAttribute<T extends Strapi.ComponentUIDs[] = []>
 }
 
 type DynamicZoneValue<T extends Strapi.ComponentUIDs[]> = Array<
-  ValuesOf<T> extends infer P
-    ? P extends SchemaUID
-      ? GetAttributesValues<P> & { __component: P }
-      : never
+  ValuesOf<T> extends infer P extends SchemaUID
+    ? GetAttributesValues<P> & { __component: P }
     : never
 >;
 
