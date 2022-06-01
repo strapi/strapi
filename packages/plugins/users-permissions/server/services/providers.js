@@ -9,11 +9,9 @@ const _ = require('lodash');
 const urlJoin = require('url-join');
 
 const { getAbsoluteServerUrl } = require('@strapi/utils');
+const { getService } = require('../utils');
 
 module.exports = ({ strapi }) => {
-  // lazy load heavy dependencies
-  const providerRequest = require('./providers-list');
-
   /**
    * Helper to get profiles
    *
@@ -27,7 +25,12 @@ module.exports = ({ strapi }) => {
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
       .get();
 
-    return providerRequest({ provider, query, access_token, providers });
+    return getService('providers-registry').run({
+      provider,
+      query,
+      access_token,
+      providers,
+    });
   };
 
   /**
@@ -42,8 +45,6 @@ module.exports = ({ strapi }) => {
 
   const connect = async (provider, query) => {
     const access_token = query.access_token || query.code || query.oauth_token;
-
-    console.dir({ query });
 
     if (!access_token) {
       throw new Error('No access_token.');

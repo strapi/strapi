@@ -16,12 +16,11 @@ const {
   validateRegisterBody,
   validateSendEmailConfirmationBody,
   validateForgotPasswordBody,
+  validateResetPasswordBody,
 } = require('./validation/auth');
 
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
 const { ApplicationError, ValidationError } = utils.errors;
-
-const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 const sanitizeUser = (user, ctx) => {
   const { auth } = ctx.state;
@@ -108,40 +107,32 @@ module.exports = {
   },
 
   async resetPassword(ctx) {
-    const params = _.assign({}, ctx.request.body, ctx.params);
+    const { password, passwordConfirmation, code } = await validateResetPasswordBody(
+      ctx.request.body
+    );
 
-    if (
-      params.password &&
-      params.passwordConfirmation &&
-      params.password === params.passwordConfirmation &&
-      params.code
-    ) {
-      const user = await strapi
-        .query('plugin::users-permissions.user')
-        .findOne({ where: { resetPasswordToken: `${params.code}` } });
-
-      if (!user) {
-        throw new ValidationError('Incorrect code provided');
-      }
-
-      await getService('user').edit(user.id, {
-        resetPasswordToken: null,
-        password: params.password,
-      });
-      // Update the user.
-      ctx.send({
-        jwt: getService('jwt').issue({ id: user.id }),
-        user: await sanitizeUser(user, ctx),
-      });
-    } else if (
-      params.password &&
-      params.passwordConfirmation &&
-      params.password !== params.passwordConfirmation
-    ) {
+    if (password !== passwordConfirmation) {
       throw new ValidationError('Passwords do not match');
-    } else {
-      throw new ValidationError('Incorrect params provided');
     }
+
+    const user = await strapi
+      .query('plugin::users-permissions.user')
+      .findOne({ where: { resetPasswordToken: code } });
+
+    if (!user) {
+      throw new ValidationError('Incorrect code provided');
+    }
+
+    await getService('user').edit(user.id, {
+      resetPasswordToken: null,
+      password,
+    });
+
+    // Update the user.
+    ctx.send({
+      jwt: getService('jwt').issue({ id: user.id }),
+      user: await sanitizeUser(user, ctx),
+    });
   },
 
   async connect(ctx, next) {
@@ -195,7 +186,6 @@ module.exports = {
       .query('plugin::users-permissions.user')
       .findOne({ where: { email: email.toLowerCase() } });
 
-    // NOTE: we do not want to leak the existing emails
     if (!user || user.blocked) {
       return ctx.send({ ok: true });
     }
@@ -239,15 +229,11 @@ module.exports = {
     // NOTE: Update the user before sending the email so an Admin can generate the link if the email fails
     await getService('user').edit(user.id, { resetPasswordToken });
 
-    try {
-      // Send an email to the user.
-      await strapi
-        .plugin('email')
-        .service('email')
-        .send(emailToSend);
-    } catch (err) {
-      throw new ApplicationError(err.message);
-    }
+    // Send an email to the user.
+    await strapi
+      .plugin('email')
+      .service('email')
+      .send(emailToSend);
 
     ctx.send({ ok: true });
   },
@@ -319,35 +305,26 @@ module.exports = {
       confirmed: !settings.email_confirmation,
     };
 
-    try {
-      const user = await getService('user').add(newUser);
+    const user = await getService('user').add(newUser);
 
-      const sanitizedUser = await sanitizeUser(user, ctx);
+    const sanitizedUser = await sanitizeUser(user, ctx);
 
-      if (settings.email_confirmation) {
-        try {
-          await getService('user').sendConfirmationEmail(sanitizedUser);
-        } catch (err) {
-          throw new ApplicationError(err.message);
-        }
-
-        return ctx.send({ user: sanitizedUser });
+    if (settings.email_confirmation) {
+      try {
+        await getService('user').sendConfirmationEmail(sanitizedUser);
+      } catch (err) {
+        throw new ApplicationError(err.message);
       }
 
-      const jwt = getService('jwt').issue(_.pick(user, ['id']));
-
-      return ctx.send({
-        jwt,
-        user: sanitizedUser,
-      });
-    } catch (err) {
-      if (err instanceof ApplicationError) {
-        throw err;
-      } else {
-        strapi.log.error(err);
-        throw new Error('An unknown error occurred during account creation');
-      }
+      return ctx.send({ user: sanitizedUser });
     }
+
+    const jwt = getService('jwt').issue(_.pick(user, ['id']));
+
+    return ctx.send({
+      jwt,
+      user: sanitizedUser,
+    });
   },
 
   async emailConfirmation(ctx, next, returnUser) {
@@ -383,45 +360,29 @@ module.exports = {
   },
 
   async sendEmailConfirmation(ctx) {
-    const params = _.assign(ctx.request.body);
-
-    await validateSendEmailConfirmationBody(params);
-
-    const isEmail = emailRegExp.test(params.email);
-
-    if (isEmail) {
-      params.email = params.email.toLowerCase();
-    } else {
-      throw new ValidationError('wrong.email');
-    }
+    const { email } = await validateSendEmailConfirmationBody(ctx.request.body);
 
     const user = await strapi.query('plugin::users-permissions.user').findOne({
-      where: { email: params.email },
+      where: { email: email.toLowerCase() },
     });
 
     if (!user) {
-      return ctx.send({
-        email: params.email,
-        sent: true,
-      });
+      return ctx.send({ email, sent: true });
     }
 
     if (user.confirmed) {
-      throw new ApplicationError('already.confirmed');
+      throw new ApplicationError('Already confirmed');
     }
 
     if (user.blocked) {
-      throw new ApplicationError('blocked.user');
+      throw new ApplicationError('User blocked');
     }
 
-    try {
-      await getService('user').sendConfirmationEmail(user);
-      ctx.send({
-        email: user.email,
-        sent: true,
-      });
-    } catch (err) {
-      throw new ApplicationError(err.message);
-    }
+    await getService('user').sendConfirmationEmail(user);
+
+    ctx.send({
+      email: user.email,
+      sent: true,
+    });
   },
 };
