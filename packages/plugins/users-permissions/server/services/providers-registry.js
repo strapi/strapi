@@ -106,9 +106,15 @@ const getInitialProviders = ({ purest }) => ({
         email: body.userPrincipalName,
       }));
   },
-  async twitter({ access_token, query }) {
+  async twitter({ access_token, query, providers }) {
     const twitter = purest({
       provider: 'twitter',
+      defaults: {
+        oauth: {
+          consumer_key: providers.twitter.key,
+          consumer_secret: providers.twitter.secret,
+        },
+      },
     });
 
     return twitter
