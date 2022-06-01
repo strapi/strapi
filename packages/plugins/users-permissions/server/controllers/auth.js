@@ -61,22 +61,8 @@ module.exports = {
         throw new ValidationError('Invalid identifier or password');
       }
 
-      const advancedSettings = await store.get({ key: 'advanced' });
-      const requiresConfirmation = _.get(advancedSettings, 'email_confirmation');
-
-      if (requiresConfirmation && user.confirmed !== true) {
-        throw new ApplicationError('Your account email is not confirmed');
-      }
-
-      if (user.blocked === true) {
-        throw new ApplicationError('Your account has been blocked by an administrator');
-      }
-
-      // The user never authenticated with the `local` provider.
       if (!user.password) {
-        throw new ApplicationError(
-          'This user never set a local password, please login with the provider used during account creation'
-        );
+        throw new ValidationError('Invalid identifier or password');
       }
 
       const validPassword = await getService('user').validatePassword(
@@ -86,6 +72,17 @@ module.exports = {
 
       if (!validPassword) {
         throw new ValidationError('Invalid identifier or password');
+      }
+
+      const advancedSettings = await store.get({ key: 'advanced' });
+      const requiresConfirmation = _.get(advancedSettings, 'email_confirmation');
+
+      if (requiresConfirmation && user.confirmed !== true) {
+        throw new ApplicationError('Your account email is not confirmed');
+      }
+
+      if (user.blocked === true) {
+        throw new ApplicationError('Your account has been blocked by an administrator');
       }
 
       return ctx.send({

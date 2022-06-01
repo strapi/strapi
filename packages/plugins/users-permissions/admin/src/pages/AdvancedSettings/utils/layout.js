@@ -81,8 +81,8 @@ const layout = [
       defaultMessage: 'After you confirmed your email, choose where you will be redirected.',
     },
     placeholder: {
-      id: getTrad('EditForm.inputToggle.placeholder.email-reset-password'),
-      defaultMessage: 'ex: https://youtfrontend.com/reset-password',
+      id: getTrad('EditForm.inputToggle.placeholder.email-confirmation-redirection'),
+      defaultMessage: 'ex: https://youtfrontend.com/email-confirmation',
     },
     name: 'email_confirmation_redirection',
     type: 'text',
