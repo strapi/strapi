@@ -23,6 +23,10 @@ const sendEmailConfirmationSchema = yup.object({
     .required(),
 });
 
+const validateEmailConfirmationSchema = yup.object({
+  confirmation: yup.string().required(),
+});
+
 const forgotPasswordSchema = yup
   .object({
     email: yup
@@ -44,6 +48,7 @@ module.exports = {
   validateCallbackBody: validateYupSchema(callbackSchema),
   validateRegisterBody: validateYupSchema(registerSchema),
   validateSendEmailConfirmationBody: validateYupSchema(sendEmailConfirmationSchema),
+  validateEmailConfirmationBody: validateYupSchema(validateEmailConfirmationSchema),
   validateForgotPasswordBody: validateYupSchema(forgotPasswordSchema),
   validateResetPasswordBody: validateYupSchema(resetPasswordSchema),
 };

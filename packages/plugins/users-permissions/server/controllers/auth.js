@@ -17,6 +17,7 @@ const {
   validateSendEmailConfirmationBody,
   validateForgotPasswordBody,
   validateResetPasswordBody,
+  validateEmailConfirmationBody,
 } = require('./validation/auth');
 
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
@@ -328,19 +329,17 @@ module.exports = {
   },
 
   async emailConfirmation(ctx, next, returnUser) {
-    const { confirmation: confirmationToken } = ctx.query;
+    const { confirmation: confirmationToken } = await validateEmailConfirmationBody(ctx.query);
+
+    console.log(confirmationToken);
 
     const userService = getService('user');
     const jwtService = getService('jwt');
 
-    if (_.isEmpty(confirmationToken)) {
-      throw new ValidationError('token.invalid');
-    }
-
     const [user] = await userService.fetchAll({ filters: { confirmationToken } });
 
     if (!user) {
-      throw new ValidationError('token.invalid');
+      throw new ValidationError('Invalid token');
     }
 
     await userService.edit(user.id, { confirmed: true, confirmationToken: null });
