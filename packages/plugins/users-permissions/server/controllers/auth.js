@@ -331,8 +331,6 @@ module.exports = {
   async emailConfirmation(ctx, next, returnUser) {
     const { confirmation: confirmationToken } = await validateEmailConfirmationBody(ctx.query);
 
-    console.log(confirmationToken);
-
     const userService = getService('user');
     const jwtService = getService('jwt');
 
