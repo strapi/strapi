@@ -48,7 +48,7 @@
   "list.assets.selected": "{number, plural, =0 {No asset} one {1 asset} other {# assets}} ready to upload",
   "list.assets.type-not-allowed": "This type of file is not allowed.",
   "list.folder.edit": "Edit folder",
-  "list.folder.subtitle": "{folderCount} folder, {filesCount} assets",
+  "list.folder.subtitle": "{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}",
   "list.folders.title": "Folders",
   "mediaLibraryInput.actions.nextSlide": "Next slide",
   "mediaLibraryInput.actions.previousSlide": "Previous slide",

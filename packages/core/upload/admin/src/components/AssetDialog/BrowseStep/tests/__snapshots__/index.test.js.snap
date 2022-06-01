@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`BrowseStep renders 1`] = `
+exports[`BrowseStep renders and match snapshot 1`] = `
 .c84 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -1369,7 +1369,7 @@ exports[`BrowseStep renders 1`] = `
                       <span
                         class="c45 c43"
                       >
-                        1 folder, 1 assets
+                        1 folder, 1 asset
                       </span>
                     </h2>
                   </button>
@@ -1450,7 +1450,7 @@ exports[`BrowseStep renders 1`] = `
                       <span
                         class="c45 c43"
                       >
-                        11 folder, 12 assets
+                        11 folders, 12 assets
                       </span>
                     </h2>
                   </button>

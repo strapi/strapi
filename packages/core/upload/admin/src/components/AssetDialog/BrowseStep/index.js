@@ -146,7 +146,8 @@ export const BrowseStep = ({
                           {formatMessage(
                             {
                               id: getTrad('list.folder.subtitle'),
-                              defaultMessage: '{folderCount} folder, {filesCount} assets',
+                              defaultMessage:
+                                '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
                             },
                             {
                               folderCount: folder.children.count,

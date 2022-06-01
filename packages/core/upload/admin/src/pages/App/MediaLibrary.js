@@ -216,6 +216,7 @@ export const MediaLibrary = () => {
                           startAction={
                             selectOne && (
                               <FolderCardCheckbox
+                                data-testid={`folder-checkbox-${folder.id}`}
                                 value={isSelected}
                                 onChange={() => selectOne({ ...folder, type: 'folder' })}
                               />
@@ -249,7 +250,8 @@ export const MediaLibrary = () => {
                                   {formatMessage(
                                     {
                                       id: getTrad('list.folder.subtitle'),
-                                      defaultMessage: '{folderCount} folder, {filesCount} assets',
+                                      defaultMessage:
+                                        '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
                                     },
                                     {
                                       folderCount: folder.children.count,
