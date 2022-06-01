@@ -361,7 +361,7 @@ exports[`Header renders 1`] = `
             <span
               class="c11 c12"
             >
-              header.actions.add-folder
+              Add new folder
             </span>
           </button>
           <button
@@ -397,7 +397,7 @@ exports[`Header renders 1`] = `
       <p
         class="c14"
       >
-        {numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}
+        2 folders - 2 assets
       </p>
     </div>
   </div>
