@@ -1,0 +1,48 @@
+paths:
+  '/connect/(.*)':
+    get:
+      description: Connect with a provider
+      responses:
+        301:
+          description: Redirect to provider auth
+  /auth/local:
+    post:
+      description: Connect locally
+      responses:
+        200:
+          description: Connection
+  /auth/local/register:
+    post:
+      responses:
+        200:
+          description: User registered
+  /auth/forgot-password:
+
+  /auth/reset-password:
+  /auth/email-confirmation:
+  /auth/send-email-confirmation:
+
+  /users-permissions/permissions:
+    get:
+  /users-permissions/roles:
+    get:
+    post:
+  /users-permissions/roles{id}:
+    get:
+    put:
+    delete:
+
+  /users:
+    get:
+    post:
+  /users/{id}:
+    get:
+    put:
+    delete:
+  /users/me:
+  /users/count:
+
+components:
+  schemas:
+  parameters:
+  responses:

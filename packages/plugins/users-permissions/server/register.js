@@ -10,4 +10,11 @@ module.exports = ({ strapi }) => {
   if (strapi.plugin('graphql')) {
     require('./graphql')({ strapi });
   }
+
+  if (strapi.plugin('documentation')) {
+    strapi
+      .plugin('documentation')
+      .service('documentation')
+      .registerDoc(require('../documentation/content-api'));
+  }
 };

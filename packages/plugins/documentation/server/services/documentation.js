@@ -11,7 +11,12 @@ const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
 module.exports = ({ strapi }) => {
   const config = strapi.config.get('plugin.documentation');
 
+  const registeredDocs = [];
+
   return {
+    registerDoc(doc) {
+      registeredDocs.push(doc);
+    },
     getDocumentationVersion() {
       return _.get(config, 'info.version');
     },
@@ -173,8 +178,17 @@ module.exports = ({ strapi }) => {
       const customConfig = await this.getCustomConfig();
       const config = _.merge(defaultConfig, customConfig);
 
+      const finalDoc = { ...config, paths };
+
+      registeredDocs.forEach(doc => {
+        _.assign(finalDoc.paths, doc.paths);
+        _.assign(finalDoc.components, doc.components);
+      });
+
+      console.log(finalDoc);
+
       await fs.ensureFile(fullDocJsonPath);
-      await fs.writeJson(fullDocJsonPath, { ...config, paths }, { spaces: 2 });
+      await fs.writeJson(fullDocJsonPath, finalDoc, { spaces: 2 });
     },
   };
 };

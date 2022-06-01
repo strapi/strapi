@@ -1,0 +1,36 @@
+{
+  "paths": {
+    "/connect/(.*)": {
+      "get": {
+        "tags": ["Users & Permissions - Auth"],
+        "description": "Connect with a provider",
+        "responses": {
+          "301": {
+            "description": "Redirect to provider auth"
+          }
+        }
+      }
+    },
+    "/auth/local": {
+      "post": {
+        "tags": ["Users & Permissions - Auth"],
+        "description": "Connect locally",
+        "responses": {
+          "200": {
+            "description": "Connection"
+          }
+        }
+      }
+    },
+    "/auth/local/register": {
+      "post": {
+        "tags": ["Users & Permissions - Auth"],
+        "responses": {
+          "200": {
+            "description": "User registered"
+          }
+        }
+      }
+    }
+  }
+}
