@@ -7,6 +7,8 @@ import { IntlProvider } from 'react-intl';
 
 import { BulkActions } from '../components/BulkActions';
 
+jest.mock('../../../hooks/useBulkRemove');
+
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
@@ -41,7 +43,7 @@ const setup = (
   );
 };
 
-describe('Header', () => {
+describe('BulkActions', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

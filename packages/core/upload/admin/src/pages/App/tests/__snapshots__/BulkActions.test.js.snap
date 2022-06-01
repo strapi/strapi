@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Header renders 1`] = `
+exports[`BulkActions renders 1`] = `
 .c12 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
