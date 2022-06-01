@@ -29,7 +29,7 @@ export const BulkMoveButton = ({ selected, onSuccess }) => {
     } catch (error) {
       const errors = getAPIInnerErrors(error, { getTrad });
       const formikErrors = Object.entries(errors).reduce((acc, [key, error]) => {
-        acc[key] = error.defaultMessage;
+        acc[key ?? 'destination'] = error.defaultMessage;
 
         return acc;
       }, {});

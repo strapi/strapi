@@ -20,16 +20,16 @@ import { getTrad } from '../../utils';
 import SelectTree from '../SelectTree';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 
-export const BulkMoveDialog = ({ onClose, errors }) => {
+export const BulkMoveDialog = ({ onClose, errors: initialErrors }) => {
   const submitButtonRef = useRef(null);
   const { formatMessage } = useIntl();
   const { data: folderStructure, isLoading } = useFolderStructure();
   const initialFormData = {
-    parent: folderStructure[0],
+    destination: folderStructure[0],
   };
 
   const handleSubmit = values => {
-    onClose({ moved: true, destinationFolderId: values.parent });
+    onClose({ moved: true, destinationFolderId: values.destination.value });
   };
 
   const handleClose = () => {
@@ -52,14 +52,14 @@ export const BulkMoveDialog = ({ onClose, errors }) => {
           validateOnChange={false}
           onSubmit={handleSubmit}
           initialValues={initialFormData}
-          initialErrors={errors}
+          initialErrors={initialErrors}
         >
           {({ values, errors, setFieldValue }) => (
             <Form noValidate>
               <Grid gap={4}>
                 <GridItem xs={12} col={12}>
                   <Stack spacing={1}>
-                    <FieldLabel htmlFor="folder-parent">
+                    <FieldLabel htmlFor="folder-destination">
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
                         defaultMessage: 'Location',
@@ -69,28 +69,28 @@ export const BulkMoveDialog = ({ onClose, errors }) => {
                     <SelectTree
                       options={folderStructure}
                       onChange={value => {
-                        setFieldValue('parent', value);
+                        setFieldValue('destination', value);
                       }}
-                      defaultValue={values.parent}
-                      name="parent"
+                      defaultValue={values.destination}
+                      name="destination"
                       menuPortalTarget={document.querySelector('body')}
-                      inputId="folder-parent"
-                      {...(errors.parent
+                      inputId="folder-destination"
+                      {...(errors.destination
                         ? {
-                            'aria-errormessage': 'folder-parent-error',
+                            'aria-errormessage': 'folder-destination-error',
                             'aria-invalid': true,
                           }
                         : {})}
                     />
 
-                    {errors.parent && (
+                    {errors.destination && (
                       <Typography
                         variant="pi"
                         as="p"
-                        id="folder-parent-error"
+                        id="folder-destination-error"
                         textColor="danger600"
                       >
-                        {errors.parent}
+                        {errors.destination}
                       </Typography>
                     )}
                   </Stack>
@@ -129,7 +129,7 @@ BulkMoveDialog.defaultProps = {
 
 BulkMoveDialog.propTypes = {
   errors: PropTypes.shape({
-    parent: PropTypes.string.isRequired,
+    destination: PropTypes.string.isRequired,
   }),
   onClose: PropTypes.func.isRequired,
 };
