@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // useState
+import React, { useState, useRef } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
@@ -66,6 +66,7 @@ export const MediaLibrary = () => {
     canDownload,
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
+  const currentFolderToEditRef = useRef();
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const [{ query }, setQuery] = useQueryParams();
@@ -117,6 +118,7 @@ export const MediaLibrary = () => {
   const handleEditFolderClose = payload => {
     setFolderToEdit(null);
     toggleEditFolderDialog(payload);
+    currentFolderToEditRef.current.focus();
   };
 
   useFocusWhenNavigate();
@@ -203,6 +205,11 @@ export const MediaLibrary = () => {
                     return (
                       <GridItem col={3} key={`folder-${folder.uid}`}>
                         <FolderCard
+                          ref={
+                            folderToEdit && folder.id === folderToEdit.id
+                              ? currentFolderToEditRef
+                              : undefined
+                          }
                           ariaLabel={folder.name}
                           id={`folder-${folder.uid}`}
                           to={url}
