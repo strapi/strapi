@@ -1,10 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderCard has all required ids set when rendering a start action 1`] = `
-.c12 {
-  cursor: pointer;
-}
-
 .c9 {
   position: relative;
   overflow: hidden;
@@ -129,6 +125,10 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   padding-bottom: 8px;
   padding-left: 12px;
   border-radius: 4px;
+}
+
+.c12 {
+  max-width: 100%;
 }
 
 .c2 {
@@ -276,11 +276,9 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
         id="folder-3-title"
         overflow="hidden"
       >
-        <a
+        <button
           class="c12"
-          href="https://strapi.io"
-          target="_self"
-          text-decoration="none"
+          type="button"
         >
           <div
             class="c10"
@@ -291,7 +289,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
               Pictures
             </span>
           </div>
-        </a>
+        </button>
       </h2>
       <div
         class="c14"
@@ -329,10 +327,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 `;
 
 exports[`FolderCard renders and matches the snapshot 1`] = `
-.c10 {
-  cursor: pointer;
-}
-
 .c7 {
   position: relative;
   overflow: hidden;
@@ -384,6 +378,10 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   padding-bottom: 8px;
   padding-left: 12px;
   border-radius: 4px;
+}
+
+.c10 {
+  max-width: 100%;
 }
 
 .c2 {
@@ -522,11 +520,9 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
         id="folder-1-title"
         overflow="hidden"
       >
-        <a
+        <button
           class="c10"
-          href="https://strapi.io"
-          target="_self"
-          text-decoration="none"
+          type="button"
         >
           <div
             class="c8"
@@ -537,7 +533,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
               Pictures
             </span>
           </div>
-        </a>
+        </button>
       </h2>
       <div
         class="c12"

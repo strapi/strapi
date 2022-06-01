@@ -1,6 +1,5 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { BaseLink } from '@strapi/design-system/BaseLink';
 import { Flex } from '@strapi/design-system/Flex';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Typography } from '@strapi/design-system/Typography';
@@ -9,11 +8,12 @@ import { render, fireEvent, act } from '@testing-library/react';
 import { FolderCard } from '../FolderCard';
 import { FolderCardBody } from '../FolderCardBody';
 import { FolderCardCheckbox } from '../FolderCardCheckbox';
+import { FolderCardBodyAction } from '../FolderCardBodyAction';
 
 const ID_FIXTURE = 'folder';
 
 // eslint-disable-next-line react/prop-types
-const ComponentFixture = props => {
+const ComponentFixture = ({ to, ...props }) => {
   return (
     <ThemeProvider theme={lightTheme}>
       <MemoryRouter>
@@ -22,16 +22,17 @@ const ComponentFixture = props => {
           ariaLabel="Folder 1"
           startAction={<></>}
           onClick={() => {}}
+          to={to}
           {...props}
         >
           <FolderCardBody as="h2">
-            <BaseLink href="https://strapi.io" textDecoration="none">
+            <FolderCardBodyAction onClick={() => {}} to={to}>
               <Flex direction="column" alignItems="flex-start">
                 <Typography variant="omega" fontWeight="semiBold">
                   Pictures
                 </Typography>
               </Flex>
-            </BaseLink>
+            </FolderCardBodyAction>
           </FolderCardBody>
         </FolderCard>
       </MemoryRouter>
