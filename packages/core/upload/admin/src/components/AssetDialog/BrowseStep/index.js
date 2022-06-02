@@ -7,19 +7,23 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { GridItem } from '@strapi/design-system/Grid';
+import { Typography } from '@strapi/design-system/Typography';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import PlusIcon from '@strapi/icons/Plus';
 
+import { FolderDefinition, AssetDefinition } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
 import { AssetList } from '../../AssetList';
 import { FolderList } from '../../FolderList';
 import { EmptyAssets } from '../../EmptyAssets';
+import SortPicker from '../../SortPicker';
+import { FolderCard, FolderCardBody, FolderCardBodyAction } from '../../FolderCard';
 import { Filters } from './Filters';
 import PaginationFooter from './PaginationFooter';
 import PageSize from './PageSize';
 import SearchAsset from './SearchAsset';
-import SortPicker from '../../SortPicker';
-import { FolderDefinition, AssetDefinition } from '../../../constants';
 
 const StartBlockActions = styled(Flex)`
   & > * + * {
@@ -31,6 +35,10 @@ const StartBlockActions = styled(Flex)`
 
 const EndBlockActions = styled(StartBlockActions)`
   flex-shrink: 0;
+`;
+
+const TypographyMaxWidth = styled(Typography)`
+  max-width: 100%;
 `;
 
 export const BrowseStep = ({
@@ -113,16 +121,48 @@ export const BrowseStep = ({
 
       {folders.length > 0 && (
         <FolderList
-          folders={folders}
-          size="S"
-          onChangeFolder={onChangeFolder}
-          onEditFolder={null}
-          onSelectFolder={null}
           title={formatMessage({
             id: getTrad('list.folders.title'),
             defaultMessage: 'Folders',
           })}
-        />
+        >
+          {folders.map(folder => {
+            return (
+              <GridItem col={3} key={`folder-${folder.uid}`}>
+                <FolderCard
+                  ariaLabel={folder.name}
+                  id={`folder-${folder.uid}`}
+                  onClick={() => onChangeFolder(folder.id)}
+                >
+                  <FolderCardBody>
+                    <FolderCardBodyAction onClick={() => onChangeFolder(folder.id)}>
+                      <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
+                        <TypographyMaxWidth fontWeight="semiBold" ellipsis>
+                          {folder.name}
+                          <VisuallyHidden>:</VisuallyHidden>
+                        </TypographyMaxWidth>
+
+                        <TypographyMaxWidth as="span" textColor="neutral600" variant="pi" ellipsis>
+                          {formatMessage(
+                            {
+                              id: getTrad('list.folder.subtitle'),
+                              defaultMessage:
+                                '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
+                            },
+                            {
+                              folderCount: folder.children.count,
+                              filesCount: folder.files.count,
+                            }
+                          )}
+                        </TypographyMaxWidth>
+                      </Flex>
+                    </FolderCardBodyAction>
+                  </FolderCardBody>
+                </FolderCard>
+              </GridItem>
+            );
+          })}
+        </FolderList>
       )}
 
       {assets.length > 0 ? (

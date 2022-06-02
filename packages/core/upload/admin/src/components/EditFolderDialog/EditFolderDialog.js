@@ -116,7 +116,7 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
             <Loader>
               {formatMessage({
                 id: getTrad('list.asset.load'),
-                defaultMessage: 'How do you want to upload your assets?',
+                defaultMessage: 'Content is loading.',
               })}
             </Loader>
           </Flex>
