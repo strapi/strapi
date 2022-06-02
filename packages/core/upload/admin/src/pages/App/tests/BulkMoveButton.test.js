@@ -85,7 +85,7 @@ describe('BulkMoveButton', () => {
     await waitFor(() => expect(onSuccessSpy).toBeCalled());
   });
 
-  test('opens destination dialog before the API call - 2', async () => {
+  test('keeps destination dialog open if the API call errored', async () => {
     const FIXTURE_SELECTION = [{ type: 'asset', id: 1 }];
     const FIXTURE_ERROR_MESSAGE = 'Failed to move folder';
 
