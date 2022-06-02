@@ -74,6 +74,8 @@ export const BrowseStep = ({
   const isSearching = !!queryObject?._q;
   const isFiltering = queryObject?.filters?.$and?.length > 0;
   const isSearchingOrFiltering = isSearching || isFiltering;
+  const assetCount = assets.length;
+  const folderCount = folders.length;
 
   return (
     <Stack spacing={4}>
@@ -81,7 +83,7 @@ export const BrowseStep = ({
         <Box>
           <Box paddingBottom={4}>
             <Flex justifyContent="space-between" alignItems="flex-start">
-              {(assets.length > 0 || folders.length > 0) && (
+              {(assetCount > 0 || folderCount > 0) && (
                 <StartBlockActions wrap="wrap">
                   {multiple && (
                     <Flex
@@ -111,7 +113,7 @@ export const BrowseStep = ({
                 </StartBlockActions>
               )}
 
-              {(assets.length > 0 || folders.length > 0 || isSearching) && (
+              {(assetCount > 0 || folderCount > 0 || isSearching) && (
                 <EndBlockActions pullRight>
                   <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
                 </EndBlockActions>
@@ -121,7 +123,7 @@ export const BrowseStep = ({
         </Box>
       )}
 
-      {assets.length === 0 && folders.length === 0 && (
+      {assetCount === 0 && folderCount === 0 && (
         <Box paddingBottom={6}>
           <EmptyAssets
             size="S"
@@ -159,10 +161,10 @@ export const BrowseStep = ({
         </Box>
       )}
 
-      {folders.length > 0 && (
+      {folderCount > 0 && (
         <FolderList
           title={
-            (((isSearchingOrFiltering && assets.length > 0) || !isSearchingOrFiltering) &&
+            (((isSearchingOrFiltering && assetCount > 0) || !isSearchingOrFiltering) &&
               formatMessage({
                 id: getTrad('list.folders.title'),
                 defaultMessage: 'Folders',
@@ -209,13 +211,13 @@ export const BrowseStep = ({
         </FolderList>
       )}
 
-      {assets.length > 0 && folders.length > 0 && (
+      {assetCount > 0 && folderCount > 0 && (
         <Box paddingTop={2}>
           <Divider />
         </Box>
       )}
 
-      {assets.length > 0 && (
+      {assetCount > 0 && (
         <AssetList
           allowedTypes={allowedTypes}
           size="S"
@@ -224,7 +226,7 @@ export const BrowseStep = ({
           selectedAssets={selectedAssets}
           onEditAsset={onEditAsset}
           title={
-            ((!isSearchingOrFiltering || (isSearchingOrFiltering && folders.length > 0)) &&
+            ((!isSearchingOrFiltering || (isSearchingOrFiltering && folderCount > 0)) &&
               queryObject.page === 1 &&
               formatMessage({
                 id: getTrad('list.assets.title'),
