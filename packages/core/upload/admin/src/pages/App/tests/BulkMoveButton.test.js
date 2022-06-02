@@ -51,11 +51,13 @@ describe('BulkMoveButton', () => {
     expect(container).toMatchSnapshot();
   });
 
-  test('opens confirm dialog before the API call', () => {
+  test('opens destination dialog before the API call', async () => {
+    const FIXTURE_SELECTION = [{ type: 'asset', id: 1 }];
+
     const onSuccessSpy = jest.fn();
     const { getByText } = setup({
       onSuccess: onSuccessSpy,
-      selected: [{ type: 'asset' }],
+      selected: FIXTURE_SELECTION,
     });
     const moveSpy = jest.fn().mockResolvedValueOnce({});
 
@@ -79,9 +81,63 @@ describe('BulkMoveButton', () => {
       fireEvent.click(submit);
     });
 
-    waitFor(() => expect(moveSpy).toBeCalledWith(null));
-    waitFor(() => expect(onSuccessSpy).toBeCalled());
+    await waitFor(() => expect(moveSpy).toBeCalledWith(null, FIXTURE_SELECTION));
+    await waitFor(() => expect(onSuccessSpy).toBeCalled());
   });
 
-  // TODO: test case of error
+  test('opens destination dialog before the API call - 2', async () => {
+    const FIXTURE_SELECTION = [{ type: 'asset', id: 1 }];
+    const FIXTURE_ERROR_MESSAGE = 'Failed to move folder';
+
+    const onSuccessSpy = jest.fn();
+    const { getByText } = setup({
+      onSuccess: onSuccessSpy,
+      selected: FIXTURE_SELECTION,
+    });
+    const moveSpy = jest.fn().mockRejectedValueOnce({
+      response: {
+        data: {
+          error: {
+            details: {
+              errors: [
+                {
+                  key: 'destination',
+                  path: [],
+                  message: FIXTURE_ERROR_MESSAGE,
+                  defaultMessage: FIXTURE_ERROR_MESSAGE,
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+
+    useBulkMove.mockReturnValueOnce({
+      isLoading: false,
+      error: null,
+      move: moveSpy,
+    });
+
+    act(() => {
+      fireEvent.click(getByText('Move'));
+    });
+
+    expect(getByText('Move elements to')).toBeInTheDocument();
+
+    act(() => {
+      const dialog = screen.getByRole('dialog');
+      const submit = within(dialog).getByRole('button', {
+        name: /move/i,
+      });
+      fireEvent.click(submit);
+    });
+
+    await waitFor(() => expect(moveSpy).toBeCalledWith(null, FIXTURE_SELECTION));
+
+    await waitFor(() => expect(onSuccessSpy).not.toBeCalled());
+    expect(getByText('Move elements to')).toBeInTheDocument();
+
+    // TODO: once implemented test whether FIXTURE_ERROR_MESSAGE is displayed in the modal
+  });
 });
