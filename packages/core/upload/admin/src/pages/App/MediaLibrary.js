@@ -17,7 +17,7 @@ import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
 import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
+import { Divider } from '@strapi/design-system/Divider';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { IconButton } from '@strapi/design-system/IconButton';
@@ -226,13 +226,17 @@ export const MediaLibrary = () => {
           )}
 
           {canRead && (
-            <Stack spacing={8}>
+            <>
               {folderCount > 0 && (
                 <FolderList
-                  title={formatMessage({
-                    id: getTrad('list.folders.title'),
-                    defaultMessage: 'Folders',
-                  })}
+                  title={
+                    (((isFiltering && assetCount > 0) || !isFiltering) &&
+                      formatMessage({
+                        id: getTrad('list.folders.title'),
+                        defaultMessage: 'Folders',
+                      })) ||
+                    ''
+                  }
                 >
                   {folders.map(folder => {
                     const selectedFolders = selected.filter(({ type }) => type === 'folder');
@@ -311,6 +315,12 @@ export const MediaLibrary = () => {
                 </FolderList>
               )}
 
+              {assetCount > 0 && folderCount > 0 && (
+                <Box paddingTop={6} paddingBottom={4}>
+                  <Divider />
+                </Box>
+              )}
+
               {assetCount > 0 && (
                 <>
                   <AssetList
@@ -334,7 +344,7 @@ export const MediaLibrary = () => {
                   )}
                 </>
               )}
-            </Stack>
+            </>
           )}
         </ContentLayout>
       </Main>

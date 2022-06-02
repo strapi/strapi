@@ -83,7 +83,7 @@ describe('BrowseStep', () => {
 
   it('calls onAddAsset callback', () => {
     const spy = jest.fn();
-    const { getByText } = setup({ onAddAsset: spy });
+    const { getByText } = setup({ onAddAsset: spy, folders: [] });
 
     fireEvent.click(getByText('Add new assets'));
     expect(spy).toHaveBeenCalled();
