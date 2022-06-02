@@ -130,7 +130,11 @@ export const MediaLibrary = () => {
               {canRead && <SortPicker onChangeSort={handleChangeSort} />}
               {canRead && <Filters />}
               {canRead && (
-                <Button onClick={() => setShowAssetTable(!showAssetTable)}>
+                <Button
+                  variant="tertiary"
+                  onClick={() => setShowAssetTable(!showAssetTable)}
+                  size="S"
+                >
                   {' '}
                   {showAssetTable ? 'Show Asset List' : 'Show Asset Table'}
                 </Button>
@@ -194,7 +198,14 @@ export const MediaLibrary = () => {
           )}
           {canRead && assets && assets.length > 0 && showAssetTable && (
             <>
-              <AssetTable assets={assets} assetCount={assetCount} onEditAsset={setAssetToEdit} canUpdate={canUpdate} canCopyLink={canCopyLink} canDownload={canDownload} onDelete={() => setAssetToEdit(undefined)}/>
+              <AssetTable
+                assets={assets}
+                assetCount={assetCount}
+                onEditAsset={setAssetToEdit}
+                canUpdate={canUpdate}
+                canCopyLink={canCopyLink}
+                canDownload={canDownload}
+              />
             </>
           )}
           {canRead && assets && assets.length > 0 && !showAssetTable && (

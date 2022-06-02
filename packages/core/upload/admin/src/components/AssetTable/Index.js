@@ -1,18 +1,32 @@
+import React, { useState } from 'react';
+import { useIntl } from 'react-intl';
 import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
-import React from 'react';
 import { Table, Thead, Tbody, Tr, Td, Th } from '@strapi/design-system/Table';
 import { Typography } from '@strapi/design-system/Typography';
 import { Avatar } from '@strapi/design-system/Avatar';
+import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
-import { RemoveAssetDialog } from '../RemoveAssetDialog';
 import PropTypes from 'prop-types';
 import Pencil from '@strapi/icons/Pencil';
 import Trash from '@strapi/icons/Trash';
+import DownloadIcon from '@strapi/icons/Download';
 import { IconButton } from '@strapi/design-system/IconButton';
-import { downloadFile } from '../../../utils/downloadFile';
+import { RemoveAssetDialog } from '../EditAssetDialog/RemoveAssetDialog';
+import { downloadFile } from '../../utils/downloadFile';
+import { CopyLinkButton } from '../CopyLinkButton';
+import { createAssetUrl } from '../../utils/createAssetUrl';
 
-export const AssetTable = ({ assets, assetCount, onEditAsset, canCopyLink, canDownload, canUpdate }) => {
+export const AssetTable = ({
+  assets,
+  assetCount,
+  onEditAsset,
+  canCopyLink,
+  canDownload,
+  canUpdate,
+}) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const { formatMessage } = useIntl();
+
   return (
     <>
       <Box padding={8} background="neutral100">
@@ -73,50 +87,62 @@ export const AssetTable = ({ assets, assetCount, onEditAsset, canCopyLink, canDo
                   <Typography textColor="neutral800">{asset.width}</Typography>
                 </Td>
                 <Td>
-                  <IconButton onClick={() => onEditAsset(asset)} label="Edit" icon={<Pencil />} />
+                  <Flex>
+                    <IconButton
+                      onClick={() => onEditAsset(asset)}
+                      label={formatMessage({
+                        id: 'asset.edit',
+                        defaultMessage: 'Edit',
+                      })}
+                      icon={<Pencil />}
+                    />
+
+                    {canUpdate && !asset.isLocal && (
+                      <Box paddingLeft={1}>
+                        <IconButton
+                          label={formatMessage({
+                            id: 'asset.delete',
+                            defaultMessage: 'Delete',
+                          })}
+                          icon={<Trash />}
+                          onClick={() => setShowConfirmDialog(true)}
+                        />
+                      </Box>
+                    )}
+
+                    {canDownload && (
+                      <Box paddingLeft={1}>
+                        <IconButton
+                          label={formatMessage({
+                            id: 'asset.download',
+                            defaultMessage: 'Download',
+                          })}
+                          icon={<DownloadIcon />}
+                          onClick={() => downloadFile(createAssetUrl(asset, false), asset.name)}
+                        />
+                      </Box>
+                    )}
+
+                    {canCopyLink && (
+                      <Box paddingLeft={1}>
+                        <CopyLinkButton url={createAssetUrl(asset, false)} />
+                      </Box>
+                    )}
+                  </Flex>
                 </Td>
-                <Td>
-                  {canDownload && (
-                  <IconButton
-                    label={formatMessage({
-                      id: getTrad('control-card.download'),
-                      defaultMessage: 'Download',
-                    })}
-                    icon={<DownloadIcon />}
-                    onClick={() => downloadFile(asset.url, asset.name)}
-                  />
-                  )}
-                </Td>
-                
-                <Td>
-                  {canUpdate && !asset.isLocal && (
-                  <IconButton
-                    label={formatMessage({
-                      id: 'global.delete',
-                      defaultMessage: 'Delete',
-                    })}
-                    icon={<Trash />}
-                    onClick={() => setShowConfirmDialog(true)}
+                {showConfirmDialog && (
+                  <RemoveAssetDialog
+                    onClose={() => {
+                      setShowConfirmDialog(false);
+                    }}
+                    asset={asset}
                   />
                 )}
-                </Td>
-
-                <Td>
-                  {canCopyLink && <CopyLinkButton url={asset.url} />}
-                </Td>
               </Tr>
             ))}
           </Tbody>
         </Table>
       </Box>
-      {showConfirmDialog && (
-        <RemoveAssetDialog
-          onClose={() => {
-            setShowConfirmDialog(false);
-          }}
-          asset={asset}
-        />
-      )}
     </>
   );
 };
