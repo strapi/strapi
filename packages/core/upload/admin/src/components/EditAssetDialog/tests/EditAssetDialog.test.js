@@ -9,6 +9,7 @@ import { EditAssetDialog } from '../index';
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
 
+jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../utils/downloadFile');
 
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {

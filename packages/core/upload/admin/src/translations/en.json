@@ -36,7 +36,7 @@
   "input.url.label": "URL",
   "list.assets.title": "Assets",
   "list.asset.at.finished": "The assets have finished loading.",
-  "list.asset.load": "Loading the asset list.",
+  "list.asset.load": "Content is loading.",
   "list.assets-empty.search": "No result found",
   "list.assets-empty.subtitle": "Add one to the list.",
   "list.assets-empty.title": "There are no assets yet",
