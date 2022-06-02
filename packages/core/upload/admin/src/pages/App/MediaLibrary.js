@@ -27,6 +27,7 @@ import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
 import { EmptyAssets } from '../../components/EmptyAssets';
+import { AssetTable } from '../../components/AssetTable';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -58,6 +59,7 @@ export const MediaLibrary = () => {
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState('id', []);
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
+  const [showAssetTable, setShowAssetTable] = useState(true);
 
   useFocusWhenNavigate();
 
@@ -127,6 +129,12 @@ export const MediaLibrary = () => {
               )}
               {canRead && <SortPicker onChangeSort={handleChangeSort} />}
               {canRead && <Filters />}
+              {canRead && (
+                <Button onClick={() => setShowAssetTable(!showAssetTable)}>
+                  {' '}
+                  {showAssetTable ? 'Show Asset List' : 'Show Asset Table'}
+                </Button>
+              )}
             </>
           }
           endActions={
@@ -184,7 +192,12 @@ export const MediaLibrary = () => {
               }
             />
           )}
-          {canRead && assets && assets.length > 0 && (
+          {canRead && assets && assets.length > 0 && showAssetTable && (
+            <>
+              <AssetTable assets={assets} assetCount={assetCount} />
+            </>
+          )}
+          {canRead && assets && assets.length > 0 && !showAssetTable && (
             <>
               <AssetList
                 assets={assets}
@@ -192,9 +205,9 @@ export const MediaLibrary = () => {
                 onSelectAsset={selectOne}
                 selectedAssets={selected}
               />
-              {data?.pagination && <PaginationFooter pagination={data.pagination} />}
             </>
           )}
+          {data?.pagination && <PaginationFooter pagination={data.pagination} />}
         </ContentLayout>
       </Main>
 
