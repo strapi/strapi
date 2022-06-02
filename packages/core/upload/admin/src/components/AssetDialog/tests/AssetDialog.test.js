@@ -63,7 +63,7 @@ describe('AssetDialog', () => {
       renderML();
 
       expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
-      expect(screen.getByText('How do you want to upload your assets?')).toBeInTheDocument();
+      expect(screen.getByText('Content is loading.')).toBeInTheDocument();
     });
 
     it('shows a loader when resolving assets', () => {
@@ -76,7 +76,7 @@ describe('AssetDialog', () => {
       renderML();
 
       expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
-      expect(screen.getByText('How do you want to upload your assets?')).toBeInTheDocument();
+      expect(screen.getByText('Content is loading.')).toBeInTheDocument();
     });
 
     it('shows a loader when resolving folders', () => {
@@ -85,7 +85,7 @@ describe('AssetDialog', () => {
       renderML();
 
       expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
-      expect(screen.getByText('How do you want to upload your assets?')).toBeInTheDocument();
+      expect(screen.getByText('Content is loading.')).toBeInTheDocument();
     });
   });
 

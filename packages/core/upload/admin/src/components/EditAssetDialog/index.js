@@ -131,7 +131,7 @@ export const EditAssetDialog = ({
           <Loader>
             {formatMessage({
               id: getTrad('list.asset.load'),
-              defaultMessage: 'We are loading the page. This action can take a few seconds.',
+              defaultMessage: 'Content is loading.',
             })}
           </Loader>
         </LoadingBody>
