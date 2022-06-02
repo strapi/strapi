@@ -136,7 +136,7 @@ export const MediaLibrary = () => {
                   size="S"
                 >
                   {' '}
-                  {showAssetTable ? 'Show Asset List' : 'Show Asset Table'}
+                  {showAssetTable ? 'Show Asset Card' : 'Show Asset List'}
                 </Button>
               )}
             </>
