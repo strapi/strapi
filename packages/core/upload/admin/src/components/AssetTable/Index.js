@@ -42,34 +42,34 @@ export const AssetTable = ({ assets, assetCount, onEditAsset }) => {
             </Tr>
           </Thead>
           <Tbody>
-            {assets.map(entry => (
-              <Tr key={entry.id}>
+            {assets.map(asset => (
+              <Tr key={asset.id}>
                 <Td>
-                  <Typography textColor="neutral800">{entry.id}</Typography>
+                  <Typography textColor="neutral800">{asset.id}</Typography>
                 </Td>
                 <Td>
                   <Avatar
-                    src={prefixFileUrlWithBackendUrl(entry?.formats?.thumbnail?.url || entry.url)}
-                    alt={entry.caption}
+                    src={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
+                    alt={asset.caption}
                   />
                 </Td>
                 <Td>
-                  <Typography textColor="neutral800">{entry.name}</Typography>
+                  <Typography textColor="neutral800">{asset.name}</Typography>
                 </Td>
                 <Td>
-                  <Typography textColor="neutral800">{entry.ext}</Typography>
+                  <Typography textColor="neutral800">{asset.ext}</Typography>
                 </Td>
                 <Td>
-                  <Typography textColor="neutral800">{entry.size}</Typography>
+                  <Typography textColor="neutral800">{asset.size}</Typography>
                 </Td>
                 <Td>
-                  <Typography textColor="neutral800">{entry.height}</Typography>
+                  <Typography textColor="neutral800">{asset.height}</Typography>
                 </Td>
                 <Td>
-                  <Typography textColor="neutral800">{entry.width}</Typography>
+                  <Typography textColor="neutral800">{asset.width}</Typography>
                 </Td>
                 <Td>
-                  <IconButton onClick={() => onEditAsset(entry)} label="Edit" icon={<Pencil />} />
+                  <IconButton onClick={() => onEditAsset(asset)} label="Edit" icon={<Pencil />} />
                 </Td>
               </Tr>
             ))}
