@@ -1,6 +1,8 @@
-import React, { useState } from 'react'; // useState
+import React, { useState, useRef } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+import { useLocation } from 'react-router-dom';
+import { stringify } from 'qs';
 import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
@@ -17,6 +19,12 @@ import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Typography } from '@strapi/design-system/Typography';
+import { GridItem } from '@strapi/design-system/Grid';
+import { Flex } from '@strapi/design-system/Flex';
+import Pencil from '@strapi/icons/Pencil';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditFolderDialog } from '../../components/EditFolderDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
@@ -29,6 +37,12 @@ import { getTrad } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { EmptyAssets } from '../../components/EmptyAssets';
+import {
+  FolderCard,
+  FolderCardBody,
+  FolderCardCheckbox,
+  FolderCardBodyAction,
+} from '../../components/FolderCard';
 import { BulkDeleteButton } from './components/BulkDeleteButton';
 import { Filters } from './components/Filters';
 import { Header } from './components/Header';
@@ -37,6 +51,10 @@ const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
   display: flex;
   align-items: center;
+`;
+
+const TypographyMaxWidth = styled(Typography)`
+  max-width: 100%;
 `;
 
 export const MediaLibrary = () => {
@@ -48,7 +66,9 @@ export const MediaLibrary = () => {
     canDownload,
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
+  const currentFolderToEditRef = useRef();
   const { formatMessage } = useIntl();
+  const { pathname } = useLocation();
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
 
@@ -98,13 +118,7 @@ export const MediaLibrary = () => {
   const handleEditFolderClose = payload => {
     setFolderToEdit(null);
     toggleEditFolderDialog(payload);
-  };
-
-  const handleChangeFolder = folder => {
-    setQuery({
-      ...query,
-      folder,
-    });
+    currentFolderToEditRef.current.focus();
   };
 
   useFocusWhenNavigate();
@@ -178,16 +192,86 @@ export const MediaLibrary = () => {
             <Stack spacing={8}>
               {folders?.length > 0 && !isFiltering && (
                 <FolderList
-                  folders={folders}
-                  onChangeFolder={handleChangeFolder}
-                  onEditFolder={handleEditFolder}
-                  onSelectFolder={selectOne}
-                  selectedFolders={selected.filter(({ type }) => type === 'folder')}
                   title={formatMessage({
                     id: getTrad('list.folders.title'),
                     defaultMessage: 'Folders',
                   })}
-                />
+                >
+                  {folders.map(folder => {
+                    const selectedFolders = selected.filter(({ type }) => type === 'folder');
+                    const isSelected = !!selectedFolders.find(
+                      currentFolder => currentFolder.id === folder.id
+                    );
+                    const url = `${pathname}?${stringify({
+                      ...query,
+                      folder: folder.id,
+                    })}`;
+
+                    return (
+                      <GridItem col={3} key={`folder-${folder.uid}`}>
+                        <FolderCard
+                          ref={
+                            folderToEdit && folder.id === folderToEdit.id
+                              ? currentFolderToEditRef
+                              : undefined
+                          }
+                          ariaLabel={folder.name}
+                          id={`folder-${folder.uid}`}
+                          to={url}
+                          startAction={
+                            selectOne && (
+                              <FolderCardCheckbox
+                                data-testid={`folder-checkbox-${folder.id}`}
+                                value={isSelected}
+                                onChange={() => selectOne({ ...folder, type: 'folder' })}
+                              />
+                            )
+                          }
+                          cardActions={
+                            <IconButton
+                              icon={<Pencil />}
+                              aria-label={formatMessage({
+                                id: getTrad('list.folder.edit'),
+                                defaultMessage: 'Edit folder',
+                              })}
+                              onClick={() => handleEditFolder(folder)}
+                            />
+                          }
+                        >
+                          <FolderCardBody>
+                            <FolderCardBodyAction to={url}>
+                              <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
+                                <TypographyMaxWidth fontWeight="semiBold" ellipsis>
+                                  {folder.name}
+                                  <VisuallyHidden>:</VisuallyHidden>
+                                </TypographyMaxWidth>
+
+                                <TypographyMaxWidth
+                                  as="span"
+                                  textColor="neutral600"
+                                  variant="pi"
+                                  ellipsis
+                                >
+                                  {formatMessage(
+                                    {
+                                      id: getTrad('list.folder.subtitle'),
+                                      defaultMessage:
+                                        '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
+                                    },
+                                    {
+                                      folderCount: folder.children.count,
+                                      filesCount: folder.files.count,
+                                    }
+                                  )}
+                                </TypographyMaxWidth>
+                              </Flex>
+                            </FolderCardBodyAction>
+                          </FolderCardBody>
+                        </FolderCard>
+                      </GridItem>
+                    );
+                  })}
+                </FolderList>
               )}
 
               {assetCount > 0 ? (
