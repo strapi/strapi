@@ -143,38 +143,148 @@ paths:
                   ok:
                     type: enum
                     enum: [true]
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /auth/reset-password:
     post:
       tags:
         - Users-Permissions - Auth
       summary: Rest user password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                passwordConfirmation:
+                  type: string
+                code:
+                  type: string
+            example:
+              password: Test1234
+              passwordConfirmation: Test1234
+              code: zertyoaizndoianzodianzdonaizdoinaozdnia
       responses:
+        200:
+          description: Returns a jwt token and user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-UserRegistration'
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /auth/email-confirmation:
     get:
       tags:
         - Users-Permissions - Auth
       summary: Confirm user email
+      parameters:
+        - in: query
+          name: confirmation
+          type: string
+          description: confirmation token received by email
       responses:
+        301:
+          description: Redirects to the configure email confirmation redirect url
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /auth/send-email-confirmation:
     post:
       tags:
         - Users-Permissions - Auth
       summary: Send confirmation email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
       responses:
+        200:
+          description: Returns email and boolean to confirm email was sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                  sent:
+                    type: enum
+                    enum: [true]
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /users-permissions/permissions:
     get:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Get default generated permissions
       responses:
+        200:
+          description: Returns the permissions tree
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permissions:
+                    $ref: '#/components/schemas/Users-Permissions-PermissionsTree'
+              example:
+                permissions:
+                  api::content-type.content-type:
+                    controllers:
+                      controllerA:
+                        find:
+                          enabled: false
+                          policy: ''
+                        findOne:
+                          enabled: false
+                          policy: ''
+                        create:
+                          enabled: false
+                          policy: ''
+                      controllerB:
+                        find:
+                          enabled: false
+                          policy: ''
+                        findOne:
+                          enabled: false
+                          policy: ''
+                        create:
+                          enabled: false
+                          policy: ''
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /users-permissions/roles:
     get:
       tags:
@@ -258,7 +368,6 @@ paths:
 
 components:
   schemas:
-    # TODO: generate dynamically from the CT at startup
     Users-Permissions-User:
       type: object
       properties:
@@ -295,6 +404,26 @@ components:
           example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
         user:
           $ref: '#/components/schemas/Users-Permissions-User'
+
+    Users-Permissions-PermissionsTree:
+      type: object
+      additionalProperties:
+        type: object
+        description: every api
+        properties:
+          controllers:
+            description: every controller of the api
+            type: object
+            additionalProperties:
+              type: object
+              additionalProperties:
+                description: every action of every controller
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                  policy:
+                    type: string
 
   parameters:
   responses:
