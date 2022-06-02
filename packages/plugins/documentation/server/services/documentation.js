@@ -15,6 +15,11 @@ module.exports = ({ strapi }) => {
 
   return {
     registerDoc(doc) {
+      // parseYaml
+      if (typeof doc === 'string') {
+        doc = require('yaml').parse(doc);
+      }
+      // receive an object we can register it directly
       registeredDocs.push(doc);
     },
     getDocumentationVersion() {
@@ -32,7 +37,7 @@ module.exports = ({ strapi }) => {
     getDocumentationVersions() {
       return fs
         .readdirSync(this.getFullDocumentationPath())
-        .map(version => {
+        .map((version) => {
           try {
             const doc = JSON.parse(
               fs.readFileSync(
@@ -46,7 +51,7 @@ module.exports = ({ strapi }) => {
             return null;
           }
         })
-        .filter(x => x);
+        .filter((x) => x);
     },
 
     /**
@@ -93,7 +98,7 @@ module.exports = ({ strapi }) => {
 
     getPluginAndApiInfo() {
       const plugins = _.get(config, 'x-strapi-config.plugins');
-      const pluginsToDocument = plugins.map(plugin => {
+      const pluginsToDocument = plugins.map((plugin) => {
         return {
           name: plugin,
           getter: 'plugin',
@@ -101,7 +106,7 @@ module.exports = ({ strapi }) => {
         };
       });
 
-      const apisToDocument = Object.keys(strapi.api).map(api => {
+      const apisToDocument = Object.keys(strapi.api).map((api) => {
         return {
           name: api,
           getter: 'api',
@@ -180,9 +185,21 @@ module.exports = ({ strapi }) => {
 
       const finalDoc = { ...config, paths };
 
-      registeredDocs.forEach(doc => {
+      registeredDocs.forEach((doc) => {
+        // Add tags
+        finalDoc.tags = finalDoc.tags || [];
+        finalDoc.tags.push(...(doc.tags || []));
+
+        // Add Paths
         _.assign(finalDoc.paths, doc.paths);
-        _.assign(finalDoc.components, doc.components);
+
+        // Add components
+        _.forEach(doc.components || {}, (val, key) => {
+          finalDoc.components[key] = finalDoc.components[key] || {};
+
+          console.log(key);
+          _.assign(finalDoc.components[key], val);
+        });
       });
 
       console.log(finalDoc);

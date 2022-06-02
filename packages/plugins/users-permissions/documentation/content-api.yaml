@@ -1,48 +1,300 @@
+tags:
+  - name: 'Users-Permissions - Auth'
+    description: 'Authentication endpoints'
+    externalDocs:
+      description: 'Find out more'
+      url: 'https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html'
+
+  - name: 'Users-Permissions - Users & Roles'
+    description: 'Users, roles, and permissions endpoints'
+    externalDocs:
+      description: 'Find out more'
+      url: 'https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html'
+
 paths:
   '/connect/(.*)':
     get:
-      description: Connect with a provider
+      tags:
+        - Users-Permissions - Auth
+      summary: Login with a provider
+      description: Redirects to provider login before being redirect to /auth/{provider}/callback
       responses:
         301:
-          description: Redirect to provider auth
+          description: Redirect response
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /auth/local:
     post:
-      description: Connect locally
+      tags:
+        - Users-Permissions - Auth
+      summary: Local login
+      description: Returns a jwt token and user info
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identifier:
+                  type: string
+                password:
+                  type: string
+            example:
+              identier: foobar
+              password: Test1234
+        required: true
       responses:
         200:
           description: Connection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-UserRegistration'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /auth/local/register:
     post:
+      tags:
+        - Users-Permissions - Auth
+      summary: Register a user
+      description: Returns a jwt token and user info
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+            example:
+              username: foobar
+              email: foo.bar@strapi.io
+              password: Test1234
+        required: true
       responses:
         200:
-          description: User registered
-  /auth/forgot-password:
+          description: Successfull registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-UserRegistration'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
+  /auth/{provider}/callback:
+    get:
+      tags:
+        - Users-Permissions - Auth
+      summary: Default Callback from provider auth
+      responses:
+        200:
+          description: Returns a jwt token and user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-UserRegistration'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/forgot-password:
+    post:
+      tags:
+        - Users-Permissions - Auth
+      summary: Send rest password email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+            example:
+              email: foo.bar@strapi.io
+      responses:
+        200:
+          description: Returns ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: enum
+                    enum: [true]
   /auth/reset-password:
+    post:
+      tags:
+        - Users-Permissions - Auth
+      summary: Rest user password
+      responses:
+        default:
+          description: 'Success'
   /auth/email-confirmation:
+    get:
+      tags:
+        - Users-Permissions - Auth
+      summary: Confirm user email
+      responses:
+        default:
+          description: 'Success'
   /auth/send-email-confirmation:
+    post:
+      tags:
+        - Users-Permissions - Auth
+      summary: Send confirmation email
+      responses:
+        default:
+          description: 'Success'
 
   /users-permissions/permissions:
     get:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
   /users-permissions/roles:
     get:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
     post:
-  /users-permissions/roles{id}:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
+  /users-permissions/roles/{id}:
     get:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
+  /users-permissions/roles/{role}:
     put:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
     delete:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
 
   /users:
     get:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
     post:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
   /users/{id}:
     get:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
     put:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
     delete:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        204:
+          description: Successfull deletion
   /users/me:
+    get:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
   /users/count:
+    get:
+      tags:
+        - Users-Permissions - Users & Roles
+      responses:
+        default:
+          description: 'Success'
 
 components:
   schemas:
+    # TODO: generate dynamically from the CT at startup
+    Users-Permissions-User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: 'foo.bar'
+        email:
+          type: string
+          example: 'foo.bar@strapi.io'
+        provider:
+          type: string
+          example: 'local'
+        confirmed:
+          type: boolean
+          example: true
+        blocked:
+          type: boolean
+          example: false
+        createdAt:
+          type: datetime
+          example: '2022-06-02T08:32:06.258Z'
+        updatedAt:
+          type: datetime
+          example: '2022-06-02T08:32:06.267Z'
+
+    Users-Permissions-UserRegistration:
+      type: object
+      properties:
+        jwt:
+          type: string
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+        user:
+          $ref: '#/components/schemas/Users-Permissions-User'
+
   parameters:
   responses:
