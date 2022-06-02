@@ -194,7 +194,7 @@ export const MediaLibrary = () => {
           )}
           {canRead && assets && assets.length > 0 && showAssetTable && (
             <>
-              <AssetTable assets={assets} assetCount={assetCount} onEditAsset={setAssetToEdit} />
+              <AssetTable assets={assets} assetCount={assetCount} onEditAsset={setAssetToEdit} canUpdate={canUpdate} canCopyLink={canCopyLink} canDownload={canDownload} onDelete={() => setAssetToEdit(undefined)}/>
             </>
           )}
           {canRead && assets && assets.length > 0 && !showAssetTable && (
