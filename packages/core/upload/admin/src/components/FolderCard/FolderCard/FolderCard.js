@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { NavLink } from 'react-router-dom';
 
 import { pxToRem } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
@@ -31,76 +32,88 @@ const StyledFolder = styled(Folder)`
   }
 `;
 
-export const FolderCard = ({
-  children,
-  id,
-  startAction,
-  cardActions,
-  ariaLabel,
-  onDoubleClick,
-  ...props
-}) => {
-  const generatedId = useId(id);
+const CardActionDisplay = styled(Box)`
+  display: none;
+`;
 
-  return (
-    <FolderCardContext.Provider value={{ id: generatedId }}>
-      <Box position="relative" {...props}>
-        <FauxClickWrapper
-          type="button"
-          onClick={event => event.preventDefault()}
-          onDoubleClick={onDoubleClick}
-          zIndex={1}
-          tabIndex={-1}
-          aria-label={ariaLabel}
-          aria-hidden
-        />
+const Card = styled(Box)`
+  &:hover,
+  &:focus-within {
+    ${CardActionDisplay} {
+      display: ${({ isCardActions }) => (isCardActions ? 'block' : '')};
+    }
+  }
+`;
 
-        <Stack
-          hasRadius
-          background="neutral0"
-          shadow="tableShadow"
-          paddingBottom={3}
-          paddingLeft={4}
-          paddingRight={4}
-          paddingTop={3}
-          spacing={3}
-          horizontal
-          cursor="pointer"
-        >
-          {startAction}
+export const FolderCard = forwardRef(
+  ({ children, id, startAction, cardActions, ariaLabel, onClick, to, ...props }, ref) => {
+    const generatedId = useId(id);
 
-          <Box
+    return (
+      <FolderCardContext.Provider value={{ id: generatedId }}>
+        <Card position="relative" tabIndex={0} isCardActions={!!cardActions} ref={ref} {...props}>
+          <FauxClickWrapper
+            to={to || undefined}
+            as={to ? NavLink : 'button'}
+            type={to ? undefined : 'button'}
+            onClick={onClick}
+            tabIndex={-1}
+            aria-label={ariaLabel}
+            aria-hidden
+          />
+
+          <Stack
             hasRadius
-            background="secondary100"
-            color="secondary500"
-            paddingBottom={2}
-            paddingLeft={3}
-            paddingRight={3}
-            paddingTop={2}
+            background="neutral0"
+            shadow="tableShadow"
+            paddingBottom={3}
+            paddingLeft={4}
+            paddingRight={4}
+            paddingTop={3}
+            spacing={3}
+            horizontal
+            cursor="pointer"
           >
-            <StyledFolder width={pxToRem(20)} height={pxToRem(18)} />
-          </Box>
+            {startAction}
 
-          {children}
+            <Box
+              hasRadius
+              background="secondary100"
+              color="secondary500"
+              paddingBottom={2}
+              paddingLeft={3}
+              paddingRight={3}
+              paddingTop={2}
+            >
+              <StyledFolder width={pxToRem(20)} height={pxToRem(18)} />
+            </Box>
 
-          {cardActions && <CardAction right={4}>{cardActions}</CardAction>}
-        </Stack>
-      </Box>
-    </FolderCardContext.Provider>
-  );
-};
+            {children}
+
+            <CardActionDisplay>
+              <CardAction right={4}>{cardActions}</CardAction>
+            </CardActionDisplay>
+          </Stack>
+        </Card>
+      </FolderCardContext.Provider>
+    );
+  }
+);
 
 FolderCard.defaultProps = {
   id: undefined,
   cardActions: null,
   startAction: null,
+  to: undefined,
+  onClick: undefined,
 };
 
 FolderCard.propTypes = {
   ariaLabel: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
   id: PropTypes.string,
-  onDoubleClick: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
   startAction: PropTypes.element,
   cardActions: PropTypes.element,
+  to: PropTypes.string,
 };

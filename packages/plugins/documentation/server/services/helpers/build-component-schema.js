@@ -95,6 +95,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     schemas = {
       ...schemas,
       [`${pascalCase(uniqueName)}ListResponse`]: {
+        type: 'object',
         properties: {
           data: {
             type: 'array',
@@ -128,6 +129,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   schemas = {
     ...schemas,
     [`${pascalCase(uniqueName)}Response`]: {
+      type: 'object',
       properties: {
         data: {
           type: 'object',

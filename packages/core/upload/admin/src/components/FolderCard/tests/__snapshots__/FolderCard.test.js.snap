@@ -1,13 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderCard has all required ids set when rendering a start action 1`] = `
-.c12 {
-  cursor: pointer;
-}
-
 .c9 {
   position: relative;
-  z-index: 3;
   overflow: hidden;
   max-width: 100%;
 }
@@ -26,7 +21,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   flex-direction: column;
 }
 
-.c14 {
+.c19 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -132,6 +127,10 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   border-radius: 4px;
 }
 
+.c12 {
+  max-width: 100%;
+}
+
 .c2 {
   background: #ffffff;
   padding-top: 12px;
@@ -167,6 +166,38 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   margin-left: 12px;
 }
 
+.c15 {
+  right: 16px;
+}
+
+.c16 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c17 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c17 > * + * {
+  margin-left: 8px;
+}
+
+.c18 {
+  position: absolute;
+  top: 12px;
+}
+
 .c1 {
   height: 100%;
   left: 0;
@@ -186,6 +217,10 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   fill: currentColor;
 }
 
+.c14 {
+  display: none;
+}
+
 .c11 {
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -195,7 +230,8 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 
 <div>
   <div
-    class="c0"
+    class="c0 "
+    tabindex="0"
   >
     <button
       aria-hidden="true"
@@ -240,11 +276,9 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
         id="folder-3-title"
         overflow="hidden"
       >
-        <a
+        <button
           class="c12"
-          href="https://strapi.io"
-          target="_self"
-          text-decoration="none"
+          type="button"
         >
           <div
             class="c10"
@@ -255,12 +289,20 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
               Pictures
             </span>
           </div>
-        </a>
+        </button>
       </h2>
+      <div
+        class="c14"
+      >
+        <div
+          class="c15 c16 c17 c18"
+          spacing="2"
+        />
+      </div>
     </div>
   </div>
   <div
-    class="c14"
+    class="c19"
   >
     <p
       aria-live="polite"
@@ -285,13 +327,8 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 `;
 
 exports[`FolderCard renders and matches the snapshot 1`] = `
-.c10 {
-  cursor: pointer;
-}
-
 .c7 {
   position: relative;
-  z-index: 3;
   overflow: hidden;
   max-width: 100%;
 }
@@ -310,7 +347,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   flex-direction: column;
 }
 
-.c12 {
+.c17 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -341,6 +378,10 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   padding-bottom: 8px;
   padding-left: 12px;
   border-radius: 4px;
+}
+
+.c10 {
+  max-width: 100%;
 }
 
 .c2 {
@@ -378,6 +419,38 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   margin-left: 12px;
 }
 
+.c13 {
+  right: 16px;
+}
+
+.c14 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c15 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c15 > * + * {
+  margin-left: 8px;
+}
+
+.c16 {
+  position: absolute;
+  top: 12px;
+}
+
 .c1 {
   height: 100%;
   left: 0;
@@ -397,6 +470,10 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   fill: currentColor;
 }
 
+.c12 {
+  display: none;
+}
+
 .c9 {
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -406,7 +483,8 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 
 <div>
   <div
-    class="c0"
+    class="c0 "
+    tabindex="0"
   >
     <button
       aria-hidden="true"
@@ -442,11 +520,9 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
         id="folder-1-title"
         overflow="hidden"
       >
-        <a
+        <button
           class="c10"
-          href="https://strapi.io"
-          target="_self"
-          text-decoration="none"
+          type="button"
         >
           <div
             class="c8"
@@ -457,12 +533,20 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
               Pictures
             </span>
           </div>
-        </a>
+        </button>
       </h2>
+      <div
+        class="c12"
+      >
+        <div
+          class="c13 c14 c15 c16"
+          spacing="2"
+        />
+      </div>
     </div>
   </div>
   <div
-    class="c12"
+    class="c17"
   >
     <p
       aria-live="polite"

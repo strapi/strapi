@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
-import { useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams, useSelectionState } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
@@ -62,6 +62,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   useRBAC: jest.fn(),
   useNotification: jest.fn(() => jest.fn()),
   useQueryParams: jest.fn().mockReturnValue([{ query: {}, rawQuery: '' }, jest.fn()]),
+  useSelectionState: jest
+    .fn()
+    .mockReturnValue([[], { selectOne: jest.fn(), selectAll: jest.fn() }]),
 }));
 
 jest.mock('../../../utils', () => ({
@@ -268,8 +271,36 @@ describe('Media library homepage', () => {
     it('displays folders', async () => {
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).toBeInTheDocument();
+      expect(screen.queryByText('Folders')).toBeInTheDocument();
       expect(screen.getByText('Folder 1')).toBeInTheDocument();
+    });
+
+    it('displays folder with checked checkbox when is selected', async () => {
+      useSelectionState.mockReturnValueOnce([
+        [
+          {
+            id: 1,
+            name: 'Folder 1',
+            children: { count: 1 },
+            createdAt: '',
+            files: { count: 1 },
+            path: '/folder-1',
+            uid: 'folder-1',
+            updatedAt: '',
+            type: 'folder',
+          },
+        ],
+        { selectOne: jest.fn(), selectAll: jest.fn() },
+      ]);
+      renderML();
+
+      expect(screen.getByTestId('folder-checkbox-1')).toBeChecked();
+    });
+
+    it('doest not displays folder with checked checkbox when is not selected', async () => {
+      renderML();
+
+      expect(screen.getByTestId('folder-checkbox-1')).not.toBeChecked();
     });
 
     it('does not display folders if the user does not have read permissions', async () => {
