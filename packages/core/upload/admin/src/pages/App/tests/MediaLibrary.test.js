@@ -319,8 +319,7 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+      expect(useFolders).toHaveBeenCalledWith({ enabled: false, query: { _q: 'true' } });
     });
 
     it('displays assets', async () => {
