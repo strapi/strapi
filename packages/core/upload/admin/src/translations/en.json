@@ -40,7 +40,7 @@
   "list.assets-empty.search": "No result found",
   "list.assets-empty.subtitle": "Add one to the list.",
   "list.assets-empty.title": "There are no assets yet",
-  "list.assets-empty.title-withSearch": "There are no assets with the applied filters",
+  "list.assets-empty.title-withSearch": "There are no elements with the applied filters",
   "list.assets.empty": "Upload your first assets...",
   "list.assets.empty.no-permissions": "The asset list is empty.",
   "list.assets.loading-asset": "Loading the preview for the media: {path}",

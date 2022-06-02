@@ -315,13 +315,13 @@ describe('Media library homepage', () => {
       expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
     });
 
-    it('does not display folders if a search is performed', async () => {
+    it('does display folders if a search is performed', async () => {
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
 
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+      expect(screen.queryByText('Folders')).toBeInTheDocument();
+      expect(screen.queryByText('Folder 1')).toBeInTheDocument();
     });
 
     it('does not display folders if the media library is being filtered', async () => {
@@ -329,11 +329,11 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+      expect(screen.queryByText('Folders')).toBeInTheDocument();
+      expect(screen.queryByText('Folder 1')).toBeInTheDocument();
     });
 
-    it('does not display folders if the current page !== 1', async () => {
+    it('does not fetch folders if the current page !== 1', async () => {
       useAssets.mockReturnValueOnce({
         isLoading: false,
         data: {
@@ -350,8 +350,7 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+      expect(useFolders).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
     });
 
     it('displays assets', async () => {
@@ -371,13 +370,18 @@ describe('Media library homepage', () => {
       expect(screen.queryByText('3874873.jpg')).not.toBeInTheDocument();
     });
 
-    it('does display empty assets action, if there are no assets', () => {
+    it('does display empty assets action, if there are no assets and no folders', () => {
       useAssets.mockReturnValueOnce({
         isLoading: false,
         data: {
           pagination: FIXTURE_ASSET_PAGINATION,
           results: [],
         },
+      });
+
+      useFolders.mockReturnValueOnce({
+        isLoading: false,
+        data: [],
       });
 
       renderML();
@@ -404,7 +408,7 @@ describe('Media library homepage', () => {
       expect(screen.queryByText('header.actions.add-assets')).not.toBeInTheDocument();
     });
 
-    it('does not display empty assets action, if there are no assets or the user is currently filtering', () => {
+    it('does not display empty assets action, if there are no assets, no folders and the user is currently filtering', () => {
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { filters: 'true' } }, jest.fn()]);
       useAssets.mockReturnValueOnce({
         isLoading: false,
@@ -415,10 +419,16 @@ describe('Media library homepage', () => {
         },
       });
 
+      useFolders.mockReturnValueOnce({
+        isLoading: false,
+        error: null,
+        data: [],
+      });
+
       renderML();
 
       expect(
-        screen.queryByText('There are no assets with the applied filters')
+        screen.queryByText('There are no elements with the applied filters')
       ).toBeInTheDocument();
       expect(screen.queryByText('header.actions.add-assets')).not.toBeInTheDocument();
     });
