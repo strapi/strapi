@@ -5,8 +5,10 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Avatar } from '@strapi/design-system/Avatar';
 import { Box } from '@strapi/design-system/Box';
 import PropTypes from 'prop-types';
+import Pencil from '@strapi/icons/Pencil';
+import { IconButton } from '@strapi/design-system/IconButton';
 
-export const AssetTable = ({ assets, assetCount }) => {
+export const AssetTable = ({ assets, assetCount, onEditAsset }) => {
   return (
     <>
       <Box padding={8} background="neutral100">
@@ -33,6 +35,9 @@ export const AssetTable = ({ assets, assetCount }) => {
               </Th>
               <Th>
                 <Typography variant="sigma">Width</Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma">Actions</Typography>
               </Th>
             </Tr>
           </Thead>
@@ -63,6 +68,9 @@ export const AssetTable = ({ assets, assetCount }) => {
                 <Td>
                   <Typography textColor="neutral800">{entry.width}</Typography>
                 </Td>
+                <Td>
+                  <IconButton onClick={() => onEditAsset(entry)} label="Edit" icon={<Pencil />} />
+                </Td>
               </Tr>
             ))}
           </Tbody>
@@ -75,4 +83,5 @@ export const AssetTable = ({ assets, assetCount }) => {
 AssetTable.propTypes = {
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   assetCount: PropTypes.number.isRequired,
+  onEditAsset: PropTypes.func.isRequired,
 };
