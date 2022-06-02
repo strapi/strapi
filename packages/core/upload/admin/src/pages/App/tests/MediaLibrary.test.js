@@ -320,7 +320,7 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).toBeInTheDocument();
+      expect(screen.queryByText('Folders')).toBeInTheDocument();
       expect(screen.queryByText('Folder 1')).toBeInTheDocument();
     });
 
@@ -329,11 +329,11 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).toBeInTheDocument();
+      expect(screen.queryByText('Folders')).toBeInTheDocument();
       expect(screen.queryByText('Folder 1')).toBeInTheDocument();
     });
 
-    it('does not display folders if the current page !== 1', async () => {
+    it('does not fetch folders if the current page !== 1', async () => {
       useAssets.mockReturnValueOnce({
         isLoading: false,
         data: {
@@ -350,7 +350,7 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      expect(useFolders).toHaveBeenCalledWith({ enabled: false, query: { _q: 'true' } });
+      expect(useFolders).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
     });
 
     it('displays assets', async () => {
