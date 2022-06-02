@@ -35,11 +35,13 @@ export const Filters = ({ appliedFilters, onChangeFilters }) => {
         />
       )}
 
-      <FilterList
-        appliedFilters={appliedFilters}
-        filtersSchema={displayedFilters}
-        onRemoveFilter={onChangeFilters}
-      />
+      {appliedFilters && (
+        <FilterList
+          appliedFilters={appliedFilters}
+          filtersSchema={displayedFilters}
+          onRemoveFilter={onChangeFilters}
+        />
+      )}
     </>
   );
 };

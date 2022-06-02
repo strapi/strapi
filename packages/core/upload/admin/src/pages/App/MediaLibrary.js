@@ -142,7 +142,12 @@ export const MediaLibrary = () => {
                       (assetCount > 0 || folderCount > 0) &&
                       selected.length === assetCount + folderCount
                     }
-                    onChange={() => selectAll([assets, folders])}
+                    onChange={() => {
+                      selectAll([
+                        ...assets.map(asset => ({ ...asset, type: 'asset' })),
+                        ...folders.map(folder => ({ ...folder, type: 'folder' })),
+                      ]);
+                    }}
                   />
                 </BoxWithHeight>
               )}
