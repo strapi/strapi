@@ -17,7 +17,7 @@ const { generateGlobalDefinition } = require('./global');
 const { generateImports } = require('./imports');
 const { logWarning, getSchemaTypeName } = require('./utils');
 
-module.exports = async function({ outDir, file }) {
+module.exports = async function({ outDir, file, silence }) {
   const [app, dirs] = await setup();
 
   const schemas = getAllStrapiSchemas(app);
@@ -36,16 +36,41 @@ module.exports = async function({ outDir, file }) {
 
   await generateSchemaFile(outDir || dirs.app, fullDefinition, file);
 
-  for (const defintion of definitions) {
-    table.push([defintion.kind, defintion.uid, defintion.type, chalk.greenBright('✓')]);
+  for (const definition of definitions) {
+    const isValidDefinition = definition.definition !== null;
+    const validateAndTransform = isValidDefinition ? fp.identity : chalk.redBright;
+
+    table.push([
+      validateAndTransform(definition.kind),
+      validateAndTransform(definition.uid),
+      validateAndTransform(definition.type),
+      isValidDefinition ? chalk.greenBright('✓') : chalk.redBright('✗'),
+    ]);
   }
 
-  console.log(table.toString());
-  console.log(
-    chalk.greenBright(
-      `Generated ${fp.size(definitions)} type definition for your Strapi application's schemas.`
-    )
-  );
+  const successfullDefinition = fp.filter(d => !fp.isNil(d.definition), definitions);
+  const skippedDefinition = fp.filter(d => fp.isNil(d.definition), definitions);
+
+  if (!silence) {
+    console.log(table.toString());
+    console.log(
+      chalk.greenBright(
+        `Generated ${fp.size(
+          successfullDefinition
+        )} type definition for your Strapi application's schemas.`
+      )
+    );
+
+    const skippedAmount = fp.size(skippedDefinition);
+
+    if (skippedAmount > 0) {
+      console.log(
+        chalk.redBright(
+          `Skipped ${skippedAmount} (${skippedDefinition.map(d => d.uid).join(', ')})`
+        )
+      );
+    }
+  }
 
   app.destroy();
 };
@@ -90,16 +115,14 @@ const generateTypesDefinitions = schemas => {
     }
 
     // Content Types
-    else if (modelType === 'contentType') {
+    else if (modelType === 'contentType' && ['singleType', 'collectionType'].includes(kind)) {
       definition = generateContentTypeDefinition(uid, schema, type);
     }
 
     // Other
     else {
-      logWarning(
-        `${uid} has an invalid model type: "${modelType}". Allowed model types are "component" and "contentType"`
-      );
-      continue;
+      logWarning(`"${uid}" has an invalid model definition. Skipping...`);
+      definition = null;
     }
 
     // Add the generated definition to the list
