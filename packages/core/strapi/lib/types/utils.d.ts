@@ -24,11 +24,11 @@ export type StringRecord<T> = Record<string, T>;
 
 /**
  * Retrieve object's (`T`) keys if they extends the given `U` type.
- * 
+ *
  * @example
  * type X = KeysBy<{ foo: 'bar', bar: 'foo', foobar: 2 }, string>
  * // 'foo' | 'bar'
- * 
+ *
  * type Base = { x: 'foo' | 'bar' };
  * type Obj = { foo: { x: 'foo' }, bar: { x: 'bar' }, other: { x: '42' } };
  * type X = KeysBy<Obj, Base>
@@ -36,15 +36,15 @@ export type StringRecord<T> = Record<string, T>;
  */
 export type KeysBy<T, U> = {
   [key in keyof T]: T[key] extends U ? key : never;
-}[keyof T]; 
+}[keyof T];
 
 /**
  * Retrieve object's (`T`) properties if their value extends the given `U` type.
- * 
+ *
  * @example
  * type X = KeysBy<{ foo: 'bar', bar: 'foo', foobar: 2 }, string>
  * // { foo: 'bar', bar: 'foo' }
- * 
+ *
  * type Base = { x: 'foo' | 'bar' };
  * type Obj = { foo: { x: 'foo' }, bar: { x: 'bar' }, other: { x: '42' } };
  * type X = KeysBy<Obj, Base>
@@ -54,14 +54,14 @@ export type PickBy<T, U> = Pick<T, KeysBy<T, U>>;
 
 /**
  * Assign a default value `U` to `T` if `T` is of type `never`
- * 
+ *
  * @example
  * type X = NeverGuard<{ foo: 'bar' }, string>
  * // { foo: 'bar' }
- * 
+ *
  * type X = NeverGuard<never>
  * // unknown
- * 
+ *
  * type X = NeverGuard<never, string>
  * // string
  */
@@ -70,9 +70,9 @@ export type NeverGuard<T, U = unknown> = [T] extends [never] ? U : T;
 /**
  * Dynamic type based on the keys of `Strapi.Schemas`.
  * It represents all the registered schemas' UID as a union type.
- * 
+ *
  * @example
- * 
+ *
  * declare global {
  *   namespace Strapi {
  *     interface Schemas {
@@ -81,7 +81,7 @@ export type NeverGuard<T, U = unknown> = [T] extends [never] ? U : T;
  *     }
  *   }
  * }
- * 
+ *
  * type X = SchemaUID;
  * // 'api::foo.foo' | 'api::bar.bar'
  */
@@ -89,12 +89,12 @@ export type SchemaUID = keyof Strapi.Schemas;
 
 /**
  * Get the type of a specific key `U` in `T`
- * 
+ *
  * @example
- * 
+ *
  * type X = Get<{ foo: 'bar', 'bar': 'foo' }, 'foo'>
  * // 'bar'
- * 
+ *
  * type X = Get<{ foo: 'bar', 'bar': 'foo' }, 'bar'>
  * // 'foo'
  */

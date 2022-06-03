@@ -2,18 +2,26 @@ import { SchemaUID } from '../../utils';
 import { Attribute } from './base';
 import { GetAttributesByType, GetAttributesValues } from './utils';
 
-export type RelationsType = 'oneToOne' | 'oneToMany' | 'manyToOne' | 'manyToMany';
+export type BasicRelationsType = 'oneToOne' | 'oneToMany' | 'manyToOne' | 'manyToMany';
+export type PolymorphicRelationsType =  morphToMany | 'morphToOne' | 'oneToManyMorph' | 'oneToOneMorph';
+export type RelationsType = BasicRelationsType & PolymorphicRelationsType;
 
 export interface RelationAttribute<
-  TSource extends SchemaUID,
-  TRelation extends RelationsType,
-  TTarget extends SchemaUID
+  S extends SchemaUID,
+  R extends RelationsType,
+  T extends SchemaUID
 > extends Attribute<'relation'> {
-  relation: TRelation;
-  target: TTarget;
-  inversedBy?: RelationsKeysFromTo<TTarget, TSource>;
-  mappedBy?: RelationsKeysFromTo<TTarget, TSource>;
+  relation: R;
+  target: T;
+  inversedBy?: RelationsKeysFromTo<T, S>;
+  mappedBy?: RelationsKeysFromTo<T, S>;
 }
+
+interface PolymorphicRelationAttribute<
+S extends SchemaUID,
+R extends RelationsType,
+T extends SchemaUID = never
+>  extends Omit<RelationAttribute<S, R, T>, 'target' | 'inversedBy' | 'mappedBy'> {}
 
 export type RelationsKeysFromTo<
   TTarget extends SchemaUID,

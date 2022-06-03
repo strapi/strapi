@@ -65,111 +65,66 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c22 {
-        color: #666687;
-      }
-
-      .c23 path {
-        fill: #666687;
-      }
-
-      .c25 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
+      .c0:focus-visible {
         outline: none;
       }
 
-      .c25 svg {
-        height: 12px;
-        width: 12px;
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
       }
 
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #ffffff;
+      .c6 {
+        padding-right: 56px;
+        padding-left: 56px;
       }
 
-      .c25[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c25:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c25:focus-visible {
-        outline: none;
-      }
-
-      .c25:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c26 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
+      .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-        border: none;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
       }
 
-      .c26 svg > g,
-      .c26 svg path {
-        fill: #8e8ea9;
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
-      .c26:hover svg > g,
-      .c26:hover svg path {
-        fill: #666687;
+      .c4 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
       }
 
-      .c26:active svg > g,
-      .c26:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c26[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c26[aria-disabled='true'] svg path {
-        fill: #666687;
+      .c5 {
+        color: #666687;
+        font-size: 1rem;
+        line-height: 1.5;
       }
 
       .c7 {
@@ -283,6 +238,18 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         height: 0.25rem;
       }
 
+      .c18 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c20 {
         color: #666687;
         font-weight: 600;
@@ -297,78 +264,111 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         line-height: 1.43;
       }
 
-      .c18 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c0:focus-visible {
+      .c25 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
         outline: none;
       }
 
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
+      .c25 svg {
+        height: 12px;
+        width: 12px;
       }
 
-      .c6 {
-        padding-right: 56px;
-        padding-left: 56px;
+      .c25 svg > g,
+      .c25 svg path {
+        fill: #ffffff;
       }
 
-      .c2 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+      .c25[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c25:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c25:focus-visible {
+        outline: none;
+      }
+
+      .c25:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+        border: none;
       }
 
-      .c4 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
+      .c26 svg > g,
+      .c26 svg path {
+        fill: #8e8ea9;
       }
 
-      .c5 {
+      .c26:hover svg > g,
+      .c26:hover svg path {
+        fill: #666687;
+      }
+
+      .c26:active svg > g,
+      .c26:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c26[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c26[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c22 {
         color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
+      }
+
+      .c23 path {
+        fill: #666687;
       }
 
       <main
