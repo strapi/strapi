@@ -142,7 +142,7 @@ export const BrowseStep = ({
             }
             content={
               // eslint-disable-next-line no-nested-ternary
-              isFiltering
+              isSearchingOrFiltering
                 ? formatMessage({
                     id: getTrad('list.assets-empty.title-withSearch'),
                     defaultMessage: 'There are no assets with the applied filters',
