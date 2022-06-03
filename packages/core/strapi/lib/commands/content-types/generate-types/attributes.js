@@ -1,12 +1,13 @@
 'use strict';
 
 const { addImport } = require('./imports');
+const { logWarning } = require('./utils');
 
 const generateAttributesDefinition = (attributes, uid) => {
   const attributesDefinitions = [];
 
   for (const [attributeName, attribute] of Object.entries(attributes)) {
-    const type = getAttributeType(attribute, uid);
+    const type = getAttributeType(attributeName, attribute, uid);
 
     attributesDefinitions.push([attributeName, type]);
   }
@@ -20,7 +21,7 @@ ${formattedDefinitions}
   }`;
 };
 
-const getAttributeType = (attribute, uid) => {
+const getAttributeType = (attributeName, attribute, uid) => {
   const mappers = {
     string() {
       return ['StringAttribute', null];
@@ -98,6 +99,10 @@ const getAttributeType = (attribute, uid) => {
   };
 
   if (!Object.keys(mappers).includes(attribute.type)) {
+    logWarning(
+      `"${attributeName}" attribute from "${uid}" has an invalid type: "${attribute.type}"`
+    );
+
     return null;
   }
 
