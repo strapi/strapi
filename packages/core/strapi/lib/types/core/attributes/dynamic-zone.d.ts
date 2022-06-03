@@ -1,4 +1,4 @@
-import { SchemaUID, ValuesOf } from '../../utils';
+import { SchemaUID, GetArrayValues } from '../../utils';
 import { Attribute } from './base';
 import { GetAttributesValues } from './utils';
 
@@ -8,7 +8,7 @@ export interface DynamicZoneAttribute<T extends Strapi.ComponentUIDs[] = []>
 }
 
 type DynamicZoneValue<T extends Strapi.ComponentUIDs[]> = Array<
-  ValuesOf<T> extends infer P
+  GetArrayValues<T> extends infer P
     ? P extends SchemaUID
       ? GetAttributesValues<P> & { __component: P }
       : never
