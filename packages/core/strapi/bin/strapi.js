@@ -214,6 +214,16 @@ program
   .action(getLocalScript('content-types/list'));
 
 program
+  .command('content-types:generate-types')
+  .description('Generate TypeScript typings for the content-types')
+  .option(
+    '-o, --out-dir <outDir>',
+    'Specify a relative directory in which the schemas definitions will be generated'
+  )
+  .option('-f, --file <file>', 'Specify a filename to store the schemas definitions')
+  .action(getLocalScript('content-types/generate-types'));
+
+program
   .command('hooks:list')
   .description('List all the application hooks')
   .action(getLocalScript('hooks/list'));
