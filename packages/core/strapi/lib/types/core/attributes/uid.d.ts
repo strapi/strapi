@@ -2,8 +2,10 @@ import { Attribute } from './base';
 import { SchemaUID } from '../../utils';
 import { GetAttributesKeysByType } from './utils';
 
-export interface UIDAttribute<T extends SchemaUID, U extends GetAttributesKeysByType<T, 'string'>>
-  extends Attribute<'uid'> {
+export interface UIDAttribute<
+  T extends SchemaUID = undefined,
+  U extends GetAttributesKeysByType<T, 'string'> = unknown
+> extends Attribute<'uid'> {
   targetField?: U;
 }
 
