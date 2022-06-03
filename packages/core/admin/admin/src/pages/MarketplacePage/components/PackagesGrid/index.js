@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import PackageCard from '../PluginCard';
+import PackageCard from '../PackageCard';
 
 const PackagesGrid = ({ packages, installedPackageNames, useYarn, isInDevelopmentMode }) => {
   return (
