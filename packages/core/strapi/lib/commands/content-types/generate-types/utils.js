@@ -7,7 +7,7 @@ const logWarning = message => {
   console.log(chalk.yellow(`[${new Date().toLocaleTimeString()}] (warning):\t${message}`));
 };
 
-const getSchemaTypeName = fp.flow(fp.replace(/(:.)/, ''), fp.camelCase, fp.upperFirst);
+const getSchemaTypeName = fp.flow(fp.replace(/(:.)/, ' '), fp.camelCase, fp.upperFirst);
 
 module.exports = {
   logWarning,

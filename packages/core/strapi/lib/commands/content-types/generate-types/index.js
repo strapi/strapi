@@ -43,7 +43,7 @@ module.exports = async function({ outDir, file }) {
   console.log(table.toString());
   console.log(
     chalk.greenBright(
-      `Generated ${fp.size(definitions)} type definition for your Strapi application.`
+      `Generated ${fp.size(definitions)} type definition for your Strapi application's schemas.`
     )
   );
 

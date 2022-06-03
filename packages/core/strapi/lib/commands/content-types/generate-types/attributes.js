@@ -30,21 +30,21 @@ const getAttributeType = (attribute, uid) => {
     password() {
       return ['PasswordAttribute', null];
     },
-    // email() {
-    //   return ['EmailAttribute', null];
-    // }
-    // date() {
-    //   return ['DateAttribute', null];
-    // },
-    // time() {
-    //   return ['TimeAttribute', null];
-    // },
-    // datetime() {
-    //   return ['DateTimeAttribute', null];
-    // },
-    // timestamp() {
-    //   return ['TimestampAttribute', null];
-    // },
+    email() {
+      return ['EmailAttribute', null];
+    },
+    date() {
+      return ['DateAttribute', null];
+    },
+    time() {
+      return ['TimeAttribute', null];
+    },
+    datetime() {
+      return ['DateTimeAttribute', null];
+    },
+    timestamp() {
+      return ['TimestampAttribute', null];
+    },
     integer() {
       return ['IntegerAttribute', null];
     },
