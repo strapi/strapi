@@ -33,6 +33,7 @@ describe('Build Component Schema', () => {
     const [pluginResponseValue, apiResponseValue] = Object.values(schemas);
 
     const expectedShape = {
+      type: 'object',
       properties: {
         data: {
           type: 'object',
@@ -82,6 +83,7 @@ describe('Build Component Schema', () => {
     const apiListResponseValue = schemas['RestaurantListResponse'];
 
     const expectedShape = {
+      type: 'object',
       properties: {
         data: {
           type: 'array',
@@ -147,8 +149,10 @@ describe('Build Component Schema', () => {
 
     const expectedShape = {
       type: 'object',
+      required: ['data'],
       properties: {
         data: {
+          required: [],
           type: 'object',
           properties: { test: { type: 'string' } },
         },
@@ -237,6 +241,7 @@ describe('Build Component Schema', () => {
 
     const expectedShape = {
       type: 'object',
+      required: ['locale'],
       properties: { test: { type: 'string' } },
     };
 

@@ -20,11 +20,9 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   // Store response and request schemas in an object
   let schemas = {};
   // Get all the route methods
-  const routeMethods = routeInfo.routes.map((route) => route.method);
+  const routeMethods = routeInfo.routes.map(route => route.method);
   // Check for localized paths
-  const hasLocalizationPath = routeInfo.routes.filter((route) =>
-    isLocalizedPath(route.path)
-  ).length;
+  const hasLocalizationPath = routeInfo.routes.filter(route => isLocalizedPath(route.path)).length;
   // When the route methods contain any post or put requests
   if (routeMethods.includes('POST') || routeMethods.includes('PUT')) {
     const attributesToOmit = [
@@ -38,23 +36,24 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     ];
     const attributesForRequest = _.omit(attributes, attributesToOmit);
 
-    const requiredAttributes = Object.entries(attributesForRequest)
-      .filter(([, attribute]) => attribute.required)
-      .map(([attributeName, attribute]) => {
-        return { [attributeName]: attribute };
-      });
+    // Get a list of required attribute names
+    const requiredAttributes = Object.entries(attributesForRequest).reduce((acc, attribute) => {
+      const [attributeKey, attributeValue] = attribute;
 
-    const requestAttributes =
-      routeMethods.includes('POST') && requiredAttributes.length
-        ? Object.assign({}, ...requiredAttributes)
-        : attributesForRequest;
+      if (attributeValue.required) {
+        acc.push(attributeKey);
+      }
+
+      return acc;
+    }, []);
 
     if (hasLocalizationPath) {
       schemas = {
         ...schemas,
         [`${pascalCase(uniqueName)}LocalizationRequest`]: {
+          required: [...requiredAttributes, 'locale'],
           type: 'object',
-          properties: cleanSchemaAttributes(requestAttributes, { isRequest: true }),
+          properties: cleanSchemaAttributes(attributesForRequest, { isRequest: true }),
         },
       };
     }
@@ -64,10 +63,12 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       ...schemas,
       [`${pascalCase(uniqueName)}Request`]: {
         type: 'object',
+        required: ['data'],
         properties: {
           data: {
+            required: requiredAttributes,
             type: 'object',
-            properties: cleanSchemaAttributes(requestAttributes, { isRequest: true }),
+            properties: cleanSchemaAttributes(attributesForRequest, { isRequest: true }),
           },
         },
       },
@@ -88,12 +89,13 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   }
 
   // Check for routes that need to return a list
-  const hasListOfEntities = routeInfo.routes.filter((route) => hasFindMethod(route.handler)).length;
+  const hasListOfEntities = routeInfo.routes.filter(route => hasFindMethod(route.handler)).length;
   if (hasListOfEntities) {
     // Build the list response schema
     schemas = {
       ...schemas,
       [`${pascalCase(uniqueName)}ListResponse`]: {
+        type: 'object',
         properties: {
           data: {
             type: 'array',
@@ -127,6 +129,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   schemas = {
     ...schemas,
     [`${pascalCase(uniqueName)}Response`]: {
+      type: 'object',
       properties: {
         data: {
           type: 'object',
@@ -143,7 +146,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   return schemas;
 };
 
-const buildComponentSchema = (api) => {
+const buildComponentSchema = api => {
   // A reusable loop for building paths and component schemas
   // Uses the api param to build a new set of params for each content type
   // Passes these new params to the function provided
