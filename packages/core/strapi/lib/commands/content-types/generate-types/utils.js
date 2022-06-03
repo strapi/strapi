@@ -9,45 +9,71 @@ const logWarning = message => {
 
 const getSchemaTypeName = fp.flow(fp.replace(/(:.)/, ' '), fp.camelCase, fp.upperFirst);
 
-const mapKeyValuesToType = (object, typeName, indent = 0) => {
-  if (!object || fp.isEmpty(object)) {
+const toType = (object, formatOptions = {}) => {
+  const {
+    prefix = null,
+    suffix = null,
+    inline = false,
+    indent = 2,
+    indentStart = 0,
+  } = formatOptions;
+
+  if (fp.isNil(object) || fp.isEmpty(object)) {
     return null;
   }
 
-  const formattedTypeName = typeName.includes('-') ? `'${typeName}'` : typeName;
+  let definition = '';
 
-  const properties = Object.entries(object)
-    .reduce((acc, [key, value]) => {
-      const offset = ' '.repeat(indent + 2);
-      const formattedKey = key.includes('-') ? `'${key}'` : key;
+  const properties = Object.entries(object);
 
-      // Common values
-      let newValue = value;
+  const lineBreak = (s = '') => (inline ? s : '\n');
+  const offset = (m = 0) => ' '.repeat(indentStart + indent * m);
+  const getPrefix = (s = '') => (prefix ? `${prefix}: ` : s);
+  const getSuffix = (s = '') => suffix || s;
 
-      // Object values
-      if (fp.isObject(value)) {
-        return `${acc}
-${mapKeyValuesToType(value, key, indent + 2)}`;
+  for (const [key, value] of properties) {
+    const validKey = key.includes('-') ? `'${key}'` : key;
+
+    let row;
+
+    // TODO: Handle arrays types
+
+    // Handle recursive types (objects)
+    if (fp.isObject(value) && !fp.isEmpty(value)) {
+      row = toType(value, {
+        prefix: validKey,
+        indentStart: indentStart + indent,
+        suffix,
+        inline,
+        indent,
+      });
+    }
+
+    // All non-recursive types are handled there
+    else {
+      let type = value;
+
+      if (fp.isString(value)) {
+        type = `'${value}'`;
       }
 
-      // String values
-      else if (fp.isString(value)) {
-        newValue = `'${value}'`;
-      }
+      row = `${offset(1)}${validKey}: ${type};${lineBreak(' ')}`;
+    }
 
-      return `${acc}
-${offset}${formattedKey}: ${newValue}`;
-    }, '')
-    // Removing leading \n (when acc is an empty string)
-    .slice(1);
+    definition += row;
+  }
 
-  return `${' '.repeat(indent)}${formattedTypeName}: {
-${properties}
-${' '.repeat(indent)}};`;
+  if (!inline) {
+    definition = definition.slice(0, definition.length - 1);
+  }
+
+  return `${offset()}${getPrefix()}{${lineBreak(' ')}${definition}${lineBreak(
+    ''
+  )}${offset()}}${getSuffix()}${lineBreak()}`;
 };
 
 module.exports = {
   logWarning,
   getSchemaTypeName,
-  mapKeyValuesToType,
+  toType,
 };

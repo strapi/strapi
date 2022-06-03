@@ -1,7 +1,9 @@
 'use strict';
 
+const fp = require('lodash/fp');
+
 const { addImport } = require('./imports');
-const { logWarning } = require('./utils');
+const { logWarning, toType } = require('./utils');
 
 const generateAttributesDefinition = (attributes, uid) => {
   const attributesDefinitions = [];
@@ -116,6 +118,17 @@ const getAttributeType = (attributeName, attribute, uid) => {
     addImport('RequiredAttribute');
 
     type = `${type} & RequiredAttribute`;
+  }
+
+  if (attribute.pluginOptions && !fp.isEmpty(attribute.pluginOptions)) {
+    addImport('PluginOptionsAttribute');
+
+    const pluginOptionsType = toType(attribute.pluginOptions, {
+      inline: true,
+      indent: 0,
+    });
+
+    type = `${type} & PluginOptionsAttribute<${pluginOptionsType}>`;
   }
 
   return type;

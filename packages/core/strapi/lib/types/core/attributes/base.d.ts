@@ -27,7 +27,7 @@ export type AttributeType =
 /**
  * Most basic shape of a schema attribute
  */
-export interface Attribute<T extends AttributeType = AttributeType> {
+export interface Attribute<T extends AttributeType = AttributeType, U extends {} = {}> {
   /**
    * Type of the attribute
    */
@@ -46,7 +46,9 @@ export interface Attribute<T extends AttributeType = AttributeType> {
   /**
    * Options defined and used by the plugins
    */
-  pluginOptions?: AttributePluginOptions;
+  pluginOptions?: U;
 }
 
-export type AttributePluginOptions = {};
+export interface PluginOptionsAttribute<T extends {}> {
+  pluginOptions: T;
+}

@@ -11,8 +11,7 @@ const tsUtils = require('@strapi/typescript-utils');
 
 const createStrapiInstance = require('../../../index');
 
-const { generateComponentDefinition } = require('./components');
-const { generateContentTypeDefinition } = require('./content-types');
+const { generateSchemaDefinition } = require('./schemas');
 const { generateGlobalDefinition } = require('./global');
 const { generateImports } = require('./imports');
 const { logWarning, getSchemaTypeName } = require('./utils');
@@ -29,7 +28,7 @@ module.exports = async function({ outDir, file, silence }) {
   const imports = generateImports();
 
   const fullDefinition = [
-    imports,
+    imports + '\n',
     definitions.map(fp.get('definition')).join('\n'),
     globalDefinition,
   ].join('');
@@ -109,14 +108,13 @@ const generateTypesDefinitions = schemas => {
 
     let definition;
 
-    // Components
-    if (modelType === 'component') {
-      definition = generateComponentDefinition(uid, schema, type);
-    }
+    const isComponent = modelType === 'component';
+    const isContentType =
+      modelType === 'contentType' && ['singleType', 'collectionType'].includes(kind);
 
-    // Content Types
-    else if (modelType === 'contentType' && ['singleType', 'collectionType'].includes(kind)) {
-      definition = generateContentTypeDefinition(uid, schema, type);
+    // Handle components and content types
+    if (isComponent || isContentType) {
+      definition = generateSchemaDefinition(uid, schema, type) + '\n';
     }
 
     // Other
