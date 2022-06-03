@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const getSchemaData = require('./get-schema-data');
-
+const pascalCase = require('./pascal-case');
 /**
  * @description - Converts types found on attributes to OpenAPI acceptable data types
  *
@@ -10,7 +10,7 @@ const getSchemaData = require('./get-schema-data');
  * @param {{ typeMap: Map, isRequest: boolean }} opts
  * @returns Attributes using OpenAPI acceptable data types
  */
-const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = false } = {}) => {
+const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = false, addSchema = () => {}, dataTypeName = "" } = {}, ) => {
   const attributesCopy = _.cloneDeep(attributes);
 
   for (const prop in attributesCopy) {
@@ -86,20 +86,7 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
       }
       case 'component': {
         const componentAttributes = strapi.components[attribute.component].attributes;
-
-        if (attribute.repeatable) {
-          attributesCopy[prop] = {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                ...(isRequest ? {} : { id: { type: 'string' } }),
-                ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest }),
-              },
-            },
-          };
-        } else {
-          attributesCopy[prop] = {
+        const componentExists = addSchema(pascalCase(attribute.component),{
             type: 'object',
             properties: {
               ...(isRequest ? {} : { id: { type: 'string' } }),
@@ -108,21 +95,58 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
                 isRequest,
               }),
             },
-          };
+          })
+        if (attribute.repeatable) {
+          attributesCopy[prop] = {
+            type: 'array',
+            items: componentExists ? 
+              {"$ref": `#/components/schemas/${pascalCase(attribute.component)}`} 
+              : {
+                  type: 'object',
+                  properties: {
+                    ...(isRequest ? {} : { id: { type: 'string' } }),
+                    ...cleanSchemaAttributes(componentAttributes, {
+                      typeMap,
+                      isRequest,
+                    }),
+                  },
+                }
+            };
+        } else {
+          attributesCopy[prop] =  componentExists ? 
+            {"$ref": `#/components/schemas/${pascalCase(attribute.component)}`} 
+            : {
+              type: 'object',
+              properties: {
+                ...(isRequest ? {} : { id: { type: 'string' } }),
+                ...cleanSchemaAttributes(componentAttributes, {
+                  typeMap,
+                  isRequest,
+                }),
+              },
+            };
         }
         break;
       }
       case 'dynamiczone': {
         const components = attribute.components.map(component => {
           const componentAttributes = strapi.components[component].attributes;
-          return {
+          const componentExists = addSchema(pascalCase(component),{
             type: 'object',
             properties: {
               ...(isRequest ? {} : { id: { type: 'string' } }),
               __component: { type: 'string' },
-              ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest }),
+              ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest, addSchema }),
             },
-          };
+          })
+          return componentExists ? {"$ref": `#/components/schemas/${pascalCase(component)}`} : {
+            type: 'object',
+            properties: {
+              ...(isRequest ? {} : { id: { type: 'string' } }),
+              __component: { type: 'string' },
+              ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest, addSchema }),
+            },
+          }
         });
 
         attributesCopy[prop] = {
@@ -171,8 +195,11 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
 
         if (prop === 'localizations') {
           attributesCopy[prop] = {
-            type: 'array',
-            items: { type: 'object', properties: {} },
+            type: 'object',
+            properties: { data: {
+              type: 'array',
+              items: dataTypeName.length ? { '$ref' : dataTypeName } : {}
+            } },
           };
           break;
         }
