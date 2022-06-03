@@ -25,7 +25,6 @@ export const BulkMoveButton = ({ selected, onSuccess }) => {
       }
 
       setShowConfirmDialog(false);
-      // eslint-ignore-next-line no-empty
     } catch (error) {
       const errors = getAPIInnerErrors(error, { getTrad });
       const formikErrors = Object.entries(errors).reduce((acc, [key, error]) => {
