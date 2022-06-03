@@ -5,6 +5,7 @@ export type AttributeType =
   | 'string'
   | 'text'
   | 'richtext'
+  | 'email'
   | 'password'
   | 'date'
   | 'time'
