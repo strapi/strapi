@@ -90,8 +90,13 @@ const getAttributeType = (attributeName, attribute, uid) => {
     },
     component() {
       const target = attribute.component;
+      const params = [`'${target}'`];
 
-      return ['ComponentAttribute', [`'${target}'`]];
+      if (attribute.repeatable) {
+        params.push(true);
+      }
+
+      return ['ComponentAttribute', params];
     },
     dynamiczone() {
       const components = JSON.stringify(attribute.components);
