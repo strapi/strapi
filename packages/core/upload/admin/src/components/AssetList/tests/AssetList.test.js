@@ -146,41 +146,6 @@ describe('MediaLibrary / AssetList', () => {
         padding-top: 4px;
       }
 
-      .c29 {
-        width: 100%;
-        height: 10.25rem;
-      }
-
-      .c30 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
-      .c24 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c1 {
         background: #ffffff;
         border-radius: 4px;
@@ -438,6 +403,18 @@ describe('MediaLibrary / AssetList', () => {
         text-transform: uppercase;
       }
 
+      .c24 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c28 {
         text-transform: uppercase;
       }
@@ -447,6 +424,29 @@ describe('MediaLibrary / AssetList', () => {
         display: block;
         max-width: 100%;
         max-height: 10.25rem;
+      }
+
+      .c29 {
+        width: 100%;
+        height: 10.25rem;
+      }
+
+      .c30 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
       }
 
       .c33 {
