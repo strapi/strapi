@@ -1,15 +1,17 @@
 'use strict';
 
-const uuid = require('uuid').v4;
 const { keys, sortBy, omit, map, isUndefined } = require('lodash/fp');
 const { joinBy, setCreatorFields } = require('@strapi/utils');
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
 
-const generateUID = () => uuid();
+const setPathIdAndPath = async folder => {
+  const { pathId: maxPathId } = await strapi.db
+    .queryBuilder(FOLDER_MODEL_UID)
+    .max('pathId')
+    .execute();
 
-const setPathAndUID = async folder => {
-  const uid = generateUID();
+  const pathId = maxPathId + 1;
   let parentPath = '/';
   if (folder.parent) {
     const parentFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, folder.parent);
@@ -17,16 +19,15 @@ const setPathAndUID = async folder => {
   }
 
   return Object.assign(folder, {
-    uid,
-    path: joinBy('/', parentPath, uid),
+    pathId,
+    path: joinBy('/', parentPath, pathId),
   });
 };
 
 const create = async (folderData, { user } = {}) => {
   const folderService = getService('folder');
 
-  // TODO: wrap with a transaction
-  let enrichedFolder = await folderService.setPathAndUID(folderData);
+  let enrichedFolder = await folderService.setPathIdAndPath(folderData);
   if (user) {
     enrichedFolder = await setCreatorFields({ user })(enrichedFolder);
   }
@@ -95,7 +96,7 @@ const update = async (id, { name, parent }, { user }) => {
       // fetch existing folder
       const existingFolder = await strapi.db
         .queryBuilder(FOLDER_MODEL_UID)
-        .select(['uid', 'path'])
+        .select(['pathId', 'path'])
         .where({ id })
         .transacting(trx)
         .forUpdate()
@@ -146,7 +147,7 @@ const update = async (id, { name, parent }, { user }) => {
           strapi.db.connection.raw('REPLACE(??, ?, ?)', [
             pathColumnName,
             existingFolder.path,
-            joinBy('/', destinationFolderPath, existingFolder.uid),
+            joinBy('/', destinationFolderPath, existingFolder.pathId),
           ])
         );
 
@@ -160,7 +161,7 @@ const update = async (id, { name, parent }, { user }) => {
           strapi.db.connection.raw('REPLACE(??, ?, ?)', [
             folderPathColumnName,
             existingFolder.path,
-            joinBy('/', destinationFolderPath, existingFolder.uid),
+            joinBy('/', destinationFolderPath, existingFolder.pathId),
           ])
         );
 
@@ -228,6 +229,6 @@ module.exports = {
   exists,
   deleteByIds,
   update,
-  setPathAndUID,
+  setPathIdAndPath,
   getStructure,
 };

@@ -24,8 +24,8 @@ module.exports = {
       min: 1,
       required: true,
     },
-    uid: {
-      type: 'string',
+    pathId: {
+      type: 'integer',
       unique: true,
       required: true,
     },
@@ -53,4 +53,17 @@ module.exports = {
       required: true,
     },
   },
+  // experimental feature:
+  indexes: [
+    {
+      name: 'upload_folders_path_id_index',
+      columns: ['path_id'],
+      type: 'unique',
+    },
+    {
+      name: 'upload_folders_path_index',
+      columns: ['path'],
+      type: 'unique',
+    },
+  ],
 };

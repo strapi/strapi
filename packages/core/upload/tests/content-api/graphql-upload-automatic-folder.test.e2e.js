@@ -66,9 +66,9 @@ describe('Uploads folder (GraphQL)', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads',
-          uid: expect.anything(),
+          pathId: expect.anything(),
         },
-        folderPath: `/${file.folder.uid}`,
+        folderPath: `/${file.folder.pathId}`,
       });
 
       uploadFolder = file.folder;
@@ -111,11 +111,11 @@ describe('Uploads folder (GraphQL)', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads',
-          uid: expect.anything(),
+          pathId: expect.anything(),
         },
-        folderPath: `/${file.folder.uid}`,
+        folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.uid).not.toBe(uploadFolder.uid);
+      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -166,11 +166,11 @@ describe('Uploads folder (GraphQL)', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads (1)',
-          uid: expect.anything(),
+          pathId: expect.anything(),
         },
-        folderPath: `/${file.folder.uid}`,
+        folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.uid).not.toBe(uploadFolder.uid);
+      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -206,9 +206,9 @@ describe('Uploads folder (GraphQL)', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads (1)',
-          uid: expect.anything(),
+          pathId: expect.anything(),
         },
-        folderPath: `/${file.folder.uid}`,
+        folderPath: `/${file.folder.pathId}`,
       });
 
       uploadFolder = file.folder;
@@ -251,11 +251,11 @@ describe('Uploads folder (GraphQL)', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads (1)',
-          uid: expect.anything(),
+          pathId: expect.anything(),
         },
-        folderPath: `/${file.folder.uid}`,
+        folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.uid).not.toBe(uploadFolder.uid);
+      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });
@@ -306,11 +306,11 @@ describe('Uploads folder (GraphQL)', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads (2)',
-          uid: expect.anything(),
+          pathId: expect.anything(),
         },
-        folderPath: `/${file.folder.uid}`,
+        folderPath: `/${file.folder.pathId}`,
       });
-      expect(file.folder.uid).not.toBe(uploadFolder.uid);
+      expect(file.folder.id).not.toBe(uploadFolder.id);
 
       uploadFolder = file.folder;
     });

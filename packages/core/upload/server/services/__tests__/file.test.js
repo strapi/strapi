@@ -2,7 +2,7 @@
 
 const { getFolderPath, deleteByIds } = require('../file');
 
-const folderPath = '/9bc2352b-e29b-4ba3-810f-7b91033222de';
+const folderPath = '/1';
 
 describe('file', () => {
   describe('getFolderPath', () => {

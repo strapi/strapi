@@ -12,6 +12,7 @@ const createQueryBuilder = (uid, db) => {
     type: 'select',
     select: [],
     count: null,
+    max: null,
     first: false,
     data: null,
     where: [],
@@ -73,6 +74,14 @@ const createQueryBuilder = (uid, db) => {
     count(count = '*') {
       state.type = 'count';
       state.count = count;
+
+      return this;
+    },
+
+    max(column) {
+      state.type = 'max';
+      state.max = column;
+      state.first = true;
 
       return this;
     },
@@ -294,6 +303,10 @@ const createQueryBuilder = (uid, db) => {
         }
         case 'count': {
           qb.count({ count: state.count });
+          break;
+        }
+        case 'max': {
+          qb.max(helpers.toColumnName(meta, state.max), { as: state.max });
           break;
         }
         case 'insert': {

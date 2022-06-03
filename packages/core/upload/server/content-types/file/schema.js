@@ -101,4 +101,12 @@ module.exports = {
       private: true,
     },
   },
+  // experimental feature:
+  indexes: [
+    {
+      name: 'upload_files_folder_path_index',
+      columns: ['folder_path'],
+      type: null,
+    },
+  ],
 };

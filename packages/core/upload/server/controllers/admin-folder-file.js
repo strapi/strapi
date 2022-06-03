@@ -66,7 +66,7 @@ module.exports = {
       // fetch folders
       const existingFolders = await strapi.db
         .queryBuilder(FOLDER_MODEL_UID)
-        .select(['id', 'uid', 'path'])
+        .select(['id', 'pathId', 'path'])
         .where({ id: { $in: folderIds } })
         .transacting(trx)
         .forUpdate()
@@ -121,6 +121,11 @@ module.exports = {
           .execute();
 
         for (const existingFolder of existingFolders) {
+          const replaceQuery =
+            strapi.db.dialect.client === 'sqlite'
+              ? '? || substring(??, ?)'
+              : 'CONCAT(?, substring(??, ?))';
+
           // update path for folders themselves & folders below
           await strapi.db
             .connection(folderTable)
@@ -128,10 +133,10 @@ module.exports = {
             .where(pathColName, 'like', `${existingFolder.path}%`)
             .update(
               pathColName,
-              strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+              strapi.db.connection.raw(replaceQuery, [
+                joinBy('/', destinationFolderPath, existingFolder.pathId),
                 pathColName,
-                existingFolder.path,
-                joinBy('/', destinationFolderPath, existingFolder.uid),
+                existingFolder.path.length + 1,
               ])
             );
 
@@ -142,10 +147,10 @@ module.exports = {
             .where(folderPathColName, 'like', `${existingFolder.path}%`)
             .update(
               folderPathColName,
-              strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+              strapi.db.connection.raw(replaceQuery, [
+                joinBy('/', destinationFolderPath, existingFolder.pathId),
                 folderPathColName,
-                existingFolder.path,
-                joinBy('/', destinationFolderPath, existingFolder.uid),
+                existingFolder.path.length + 1,
               ])
             );
         }
