@@ -234,8 +234,8 @@ const MarketPlacePage = () => {
             <TabGroup label="Some stuff for the label" id="tabs" variant="simple">
               <Box paddingBottom={4}>
                 <Tabs>
-                  <Tab>Plugins</Tab>
-                  <Tab>Providers</Tab>
+                  <Tab>Plugins ({searchResults.length})</Tab>
+                  <Tab>Providers ({marketplaceProvidersResponse.data.length})</Tab>
                 </Tabs>
               </Box>
               <TabPanels>
