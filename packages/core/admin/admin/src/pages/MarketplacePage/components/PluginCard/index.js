@@ -25,12 +25,12 @@ const EllipsisText = styled(Typography)`
   overflow: hidden;
 `;
 
-const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode }) => {
+const PluginCard = ({ plugin, installedPackageNames, useYarn, isInDevelopmentMode }) => {
   const { attributes } = plugin;
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const isInstalled = installedPluginNames.includes(attributes.npmPackageName);
+  const isInstalled = installedPackageNames.includes(attributes.npmPackageName);
 
   const commandToCopy = useYarn
     ? `yarn add ${attributes.npmPackageName}`
@@ -156,7 +156,7 @@ PluginCard.propTypes = {
       strapiCompatibility: PropTypes.oneOf(['v3', 'v4']).isRequired,
     }).isRequired,
   }).isRequired,
-  installedPluginNames: PropTypes.arrayOf(PropTypes.string).isRequired,
+  installedPackageNames: PropTypes.arrayOf(PropTypes.string).isRequired,
   useYarn: PropTypes.bool.isRequired,
   isInDevelopmentMode: PropTypes.bool,
 };
