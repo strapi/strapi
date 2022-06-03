@@ -37,13 +37,13 @@ import { getTrad } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { EmptyAssets } from '../../components/EmptyAssets';
+import { BulkActions } from './components/BulkActions';
 import {
   FolderCard,
   FolderCardBody,
   FolderCardCheckbox,
   FolderCardBodyAction,
 } from '../../components/FolderCard';
-import { BulkDeleteButton } from './components/BulkDeleteButton';
 import { Filters } from './components/Filters';
 import { Header } from './components/Header';
 
@@ -180,7 +180,7 @@ export const MediaLibrary = () => {
         />
 
         <ContentLayout>
-          {selected.length > 0 && <BulkDeleteButton selected={selected} onSuccess={selectAll} />}
+          {selected.length > 0 && <BulkActions selected={selected} onSuccess={selectAll} />}
 
           {isLoading && <LoadingIndicatorPage />}
 

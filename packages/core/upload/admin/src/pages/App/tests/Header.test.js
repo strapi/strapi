@@ -4,20 +4,10 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { render } from '@testing-library/react';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
+import { IntlProvider } from 'react-intl';
 
-import en from '../../../translations/en.json';
 import { Header } from '../components/Header';
 import { useFolderStructure } from '../../../hooks/useFolderStructure';
-
-jest.mock('../../../utils', () => ({
-  ...jest.requireActual('../../../utils'),
-  getTrad: x => x,
-}));
-
-jest.mock('react-intl', () => ({
-  FormattedMessage: ({ id }) => id,
-  useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || id) }),
-}));
 
 jest.mock('../../../hooks/useFolderStructure');
 
@@ -48,9 +38,11 @@ const setup = props => {
   return render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
-        <MemoryRouter>
-          <Header {...withDefaults} />
-        </MemoryRouter>
+        <IntlProvider locale="en">
+          <MemoryRouter>
+            <Header {...withDefaults} />
+          </MemoryRouter>
+        </IntlProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
@@ -100,37 +92,13 @@ describe('Header', () => {
   test('does not render a back button at the root level of the media library', () => {
     const { queryByText } = setup();
 
-    expect(queryByText('header.actions.folder-level-up')).not.toBeInTheDocument();
+    expect(queryByText('Back')).not.toBeInTheDocument();
   });
 
   test('does render a back button at a nested level of the media library', () => {
     useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { folder: 2 } }, jest.fn()]);
-    useFolderStructure.mockReturnValueOnce({
-      isLoading: false,
-      error: null,
-      data: [
-        {
-          value: null,
-          label: 'Media Library',
-          children: [
-            {
-              value: 1,
-              label: 'Cats',
-              children: [
-                {
-                  value: 2,
-                  label: 'Michka',
-                  children: [],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-
     const { queryByText } = setup();
 
-    expect(queryByText('header.actions.folder-level-up')).toBeInTheDocument();
+    expect(queryByText('Back')).toBeInTheDocument();
   });
 });
