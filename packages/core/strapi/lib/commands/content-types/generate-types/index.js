@@ -30,7 +30,7 @@ module.exports = async function({ outDir, file }) {
 
   const fullDefinition = [
     imports,
-    definitions.map(fp.get('definition')).join(''),
+    definitions.map(fp.get('definition')).join('\n'),
     globalDefinition,
   ].join('');
 

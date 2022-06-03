@@ -11,9 +11,13 @@ const generateAttributesDefinition = (attributes, uid) => {
     attributesDefinitions.push([attributeName, type]);
   }
 
-  return attributesDefinitions
+  const formattedDefinitions = attributesDefinitions
     .map(([name, attributeType]) => `    ${name}: ${attributeType};`)
     .join('\n');
+
+  return `  attributes: {
+${formattedDefinitions}
+  }`;
 };
 
 const getAttributeType = (attribute, uid) => {
