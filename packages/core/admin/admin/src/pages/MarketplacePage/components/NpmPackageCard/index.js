@@ -25,8 +25,8 @@ const EllipsisText = styled(Typography)`
   overflow: hidden;
 `;
 
-const PluginCard = ({ plugin, installedPackageNames, useYarn, isInDevelopmentMode }) => {
-  const { attributes } = plugin;
+const NpmPackageCard = ({ npmPackage, installedPackageNames, useYarn, isInDevelopmentMode }) => {
+  const { attributes } = npmPackage;
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
@@ -135,12 +135,12 @@ const PluginCard = ({ plugin, installedPackageNames, useYarn, isInDevelopmentMod
   );
 };
 
-PluginCard.defaultProps = {
+NpmPackageCard.defaultProps = {
   isInDevelopmentMode: false,
 };
 
-PluginCard.propTypes = {
-  plugin: PropTypes.shape({
+NpmPackageCard.propTypes = {
+  npmPackage: PropTypes.shape({
     id: PropTypes.string.isRequired,
     attributes: PropTypes.shape({
       name: PropTypes.string.isRequired,
@@ -153,7 +153,7 @@ PluginCard.propTypes = {
       developerName: PropTypes.string.isRequired,
       validated: PropTypes.bool.isRequired,
       madeByStrapi: PropTypes.bool.isRequired,
-      strapiCompatibility: PropTypes.oneOf(['v3', 'v4']).isRequired,
+      strapiCompatibility: PropTypes.oneOf(['v3', 'v4']),
     }).isRequired,
   }).isRequired,
   installedPackageNames: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -161,4 +161,4 @@ PluginCard.propTypes = {
   isInDevelopmentMode: PropTypes.bool,
 };
 
-export default PluginCard;
+export default NpmPackageCard;

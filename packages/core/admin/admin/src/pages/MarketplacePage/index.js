@@ -31,7 +31,7 @@ import adminPermissions from '../../permissions';
 import offlineCloud from '../../assets/images/icon_offline-cloud.svg';
 import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
 import MissingPluginBanner from './components/MissingPluginBanner';
-import PackgesGrid from './components/PackagesGrid';
+import NpmPackagesGrid from './components/NpmPackagesGrid';
 
 const matchSearch = (plugins, search) => {
   return matchSorter(plugins, search, {
@@ -240,16 +240,16 @@ const MarketPlacePage = () => {
               </Box>
               <TabPanels>
                 <TabPanel>
-                  <PackgesGrid
-                    packages={searchResults}
+                  <NpmPackagesGrid
+                    npmPackages={searchResults}
                     installedPackageNames={installedPluginNames}
                     useYarn={appInfoResponse.data.useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
                   />
                 </TabPanel>
                 <TabPanel>
-                  <PackgesGrid
-                    packages={marketplaceProvidersResponse.data}
+                  <NpmPackagesGrid
+                    npmPackages={marketplaceProvidersResponse.data}
                     useYarn={appInfoResponse.data.useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
                   />
