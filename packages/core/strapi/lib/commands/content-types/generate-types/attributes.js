@@ -30,6 +30,9 @@ const getAttributeType = (attribute, uid) => {
     password() {
       return ['PasswordAttribute', null];
     },
+    // email() {
+    //   return ['EmailAttribute', null];
+    // }
     // date() {
     //   return ['DateAttribute', null];
     // },
