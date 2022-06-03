@@ -194,7 +194,6 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
         }
 
         if (prop === 'localizations') {
-          console.log(dataTypeName)
           attributesCopy[prop] = {
             type: 'object',
             properties: { data: {

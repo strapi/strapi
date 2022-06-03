@@ -21,7 +21,6 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   let schemas = {};
   let componentSchemas = {};
   const addSchema = (schemaName, schema) => {
-    // console.log(componentSchemas)
     if(!Object.keys(schema) || !Object.keys(schema?.properties)) {
       return false;
     }
