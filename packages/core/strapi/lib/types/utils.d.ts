@@ -6,16 +6,10 @@
 
 /**
  *
- * Extract the given type's values in an union type
+ * Extract the array values into an union type
  *
- * @example
- * type X = ValuesOf<{ foo: string, bar: number }>
- * // string | number
- *
- * type X = ValuesOf<['foo', 'bar']>
- * // 'foo' | 'bar'
- */
-export type ValuesOf<T> = T[keyof T];
+ **/
+export type GetArrayValues<T extends Array<unknown>> = T extends Array<infer U> ? U : never;
 
 /**
  * Creates a record where every key is a string and every value is `T`
