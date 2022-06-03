@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
@@ -38,10 +38,6 @@ export const BulkMoveButton = ({ selected, onSuccess }) => {
       }
     }
   };
-
-  useEffect(() => {
-    setShowConfirmDialog(!!dialogErrors);
-  }, [dialogErrors, setShowConfirmDialog]);
 
   return (
     <>
