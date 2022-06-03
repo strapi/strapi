@@ -111,13 +111,15 @@ describe('GenericInput', () => {
       });
     });
 
-    test('does call onChange callback with null on empty value', () => {
+    test('does call onChange callback with undefined on empty value', () => {
       const spy = jest.fn();
       const { input } = setupNumber({ value: 1, onChange: spy });
 
       fireEvent.change(input, { target: { value: '' } });
 
-      expect(spy).toHaveBeenCalledWith({ target: { name: 'number', type: 'number', value: null } });
+      expect(spy).toHaveBeenCalledWith({
+        target: { name: 'number', type: 'number', value: undefined },
+      });
     });
   });
 });
