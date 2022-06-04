@@ -289,35 +289,145 @@ paths:
     get:
       tags:
         - Users-Permissions - Users & Roles
+      summary: List roles
       responses:
+        200:
+          description: Returns list of roles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Users-Permissions-Role'
+                        - type: object
+                          properties:
+                            nb_users:
+                              type: number
+              example:
+                roles:
+                  - id: 1
+                    name: Public
+                    description: Default role given to unauthenticated user.
+                    type: public
+                    createdAt: 2022-05-19T17:35:35.097Z
+                    updatedAt: 2022-05-31T16:05:36.603Z
+                    nb_users: 0
+
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
     post:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Create a role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                type:
+                  type: string
+                permissions:
+                  $ref: '#/components/schemas/Users-Permissions-PermissionsTree'
+            example:
+              name: foo
+              description: role foo
+              permissions:
+                api::content-type.content-type:
+                  controllers:
+                    controllerA:
+                      find:
+                        enabled: true
+
       responses:
+        200:
+          description: Returns ok if the role was create
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: enum
+                    enum: [true]
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /users-permissions/roles/{id}:
     get:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Get a role
       responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  role:
+                    $ref: '#/components/schemas/Users-Permissions-Role'
+              example:
+                role:
+                  id: 1
+                  name: Public
+                  description: Default role given to unauthenticated user.
+                  type: public
+                  createdAt: 2022-05-19T17:35:35.097Z
+                  updatedAt: 2022-05-31T16:05:36.603Z
+                  permissions:
+                    api::content-type.content-type:
+                      controllers:
+                        controllerA:
+                          find:
+                            enabled: true
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /users-permissions/roles/{role}:
     put:
       tags:
         - Users-Permissions - Users & Roles
       responses:
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
     delete:
       tags:
         - Users-Permissions - Users & Roles
       responses:
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /users:
     get:
@@ -325,26 +435,46 @@ paths:
         - Users-Permissions - Users & Roles
       responses:
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
     post:
       tags:
         - Users-Permissions - Users & Roles
       responses:
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /users/{id}:
     get:
       tags:
         - Users-Permissions - Users & Roles
       responses:
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
     put:
       tags:
         - Users-Permissions - Users & Roles
       responses:
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
     delete:
       tags:
         - Users-Permissions - Users & Roles
@@ -357,17 +487,42 @@ paths:
         - Users-Permissions - Users & Roles
       responses:
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /users/count:
     get:
       tags:
         - Users-Permissions - Users & Roles
       responses:
         default:
-          description: 'Success'
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
+    Users-Permissions-Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        createdAt:
+          type: datetime
+        updatedAt:
+          type: datetime
+
     Users-Permissions-User:
       type: object
       properties:
