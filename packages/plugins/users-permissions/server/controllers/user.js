@@ -55,10 +55,9 @@ module.exports = {
 
     const user = {
       ...ctx.request.body,
+      email: email.toLowerCase(),
       provider: 'local',
     };
-
-    user.email = _.toLower(user.email);
 
     if (!role) {
       const defaultRole = await strapi
@@ -139,7 +138,7 @@ module.exports = {
   async find(ctx) {
     const users = await getService('user').fetchAll(ctx.query);
 
-    ctx.body = await Promise.all(users.map(user => sanitizeOutput(user, ctx)));
+    ctx.body = await Promise.all(users.map((user) => sanitizeOutput(user, ctx)));
   },
 
   /**

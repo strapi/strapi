@@ -197,12 +197,9 @@ module.exports = ({ strapi }) => {
         _.forEach(doc.components || {}, (val, key) => {
           finalDoc.components[key] = finalDoc.components[key] || {};
 
-          console.log(key);
           _.assign(finalDoc.components[key], val);
         });
       });
-
-      console.log(finalDoc);
 
       await fs.ensureFile(fullDocJsonPath);
       await fs.writeJson(fullDocJsonPath, finalDoc, { spaces: 2 });

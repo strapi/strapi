@@ -329,30 +329,7 @@ paths:
         - Users-Permissions - Users & Roles
       summary: Create a role
       requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                description:
-                  type: string
-                type:
-                  type: string
-                permissions:
-                  $ref: '#/components/schemas/Users-Permissions-PermissionsTree'
-            example:
-              name: foo
-              description: role foo
-              permissions:
-                api::content-type.content-type:
-                  controllers:
-                    controllerA:
-                      find:
-                        enabled: true
-
+        $ref: '#/components/schemas/Users-Permissions-RoleRequest'
       responses:
         200:
           description: Returns ok if the role was create
@@ -376,6 +353,11 @@ paths:
       tags:
         - Users-Permissions - Users & Roles
       summary: Get a role
+      parameters:
+        - in: path
+          name: id
+          type: string
+          description: role Id
       responses:
         200:
           content:
@@ -410,7 +392,25 @@ paths:
     put:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Update a role
+      parameters:
+        - in: path
+          name: role
+          type: string
+          description: role Id
+      requestBody:
+        $ref: '#/components/schemas/Users-Permissions-RoleRequest'
       responses:
+        200:
+          description: Returns ok if the role was udpated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: enum
+                    enum: [true]
         default:
           description: Error
           content:
@@ -421,7 +421,23 @@ paths:
     delete:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Delete a role
+      parameters:
+        - in: path
+          name: role
+          type: string
+          description: role Id
       responses:
+        200:
+          description: Returns ok if the role was delete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: enum
+                    enum: [true]
         default:
           description: Error
           content:
@@ -433,7 +449,25 @@ paths:
     get:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Get list of users
       responses:
+        200:
+          summary: Returns an array of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Users-Permissions-User'
+              example:
+                - id: 9
+                  username: foao@strapi.io
+                  email: foao@strapi.io
+                  provider: local
+                  confirmed: false
+                  blocked: false
+                  createdAt: 2022-06-01T18:32:35.211Z
+                  updatedAt: 2022-06-01T18:32:35.217Z
         default:
           description: Error
           content:
@@ -444,7 +478,56 @@ paths:
     post:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Create a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  required: true
+                username:
+                  type: string
+                  required: true
+                password:
+                  type: string
+                  required: true
+
+            example:
+              username: foo
+              email: foo@strapi.io
+              password: foo-password
       responses:
+        201:
+          description: Returns created user info
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Users-Permissions-User'
+                  - type: object
+                    properties:
+                      role:
+                        $ref: '#/components/schemas/Users-Permissions-Role'
+              example:
+                id: 1
+                username: foo
+                email: foo@strapi.io
+                provider: local
+                confirmed: false
+                blocked: false
+                createdAt: 2022-05-19T17:35:35.096Z
+                updatedAt: 2022-05-19T17:35:35.096Z
+                role:
+                  id: 1
+                  name: X
+                  description: Default role given to authenticated user.
+                  type: authenticated
+                  createdAt: 2022-05-19T17:35:35.096Z
+                  updatedAt: 2022-06-04T07:11:59.551Z
         default:
           description: Error
           content:
@@ -456,7 +539,27 @@ paths:
     get:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Get a user
+      parameters:
+        - in: path
+          name: id
+          type: string
+          description: user Id
       responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-User'
+              example:
+                id: 1
+                username: foo
+                email: foo@strapi.io
+                provider: local
+                confirmed: false
+                blocked: false
+                createdAt: 2022-05-19T17:35:35.096Z
+                updatedAt: 2022-05-19T17:35:35.096Z
         default:
           description: Error
           content:
@@ -467,7 +570,61 @@ paths:
     put:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Update a user
+      parameters:
+        - in: path
+          name: id
+          type: string
+          description: user Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  required: true
+                username:
+                  type: string
+                  required: true
+                password:
+                  type: string
+                  required: true
+
+            example:
+              username: foo
+              email: foo@strapi.io
+              password: foo-password
       responses:
+        200:
+          description: Returns updated user info
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Users-Permissions-User'
+                  - type: object
+                    properties:
+                      role:
+                        $ref: '#/components/schemas/Users-Permissions-Role'
+              example:
+                id: 1
+                username: foo
+                email: foo@strapi.io
+                provider: local
+                confirmed: false
+                blocked: false
+                createdAt: 2022-05-19T17:35:35.096Z
+                updatedAt: 2022-05-19T17:35:35.096Z
+                role:
+                  id: 1
+                  name: X
+                  description: Default role given to authenticated user.
+                  type: authenticated
+                  createdAt: 2022-05-19T17:35:35.096Z
+                  updatedAt: 2022-06-04T07:11:59.551Z
         default:
           description: Error
           content:
@@ -478,14 +635,51 @@ paths:
     delete:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Delete a user
       responses:
-        204:
-          description: Successfull deletion
+        200:
+          description: Returns deleted user info
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Users-Permissions-User'
+              example:
+                id: 1
+                username: foo
+                email: foo@strapi.io
+                provider: local
+                confirmed: false
+                blocked: false
+                createdAt: 2022-05-19T17:35:35.096Z
+                updatedAt: 2022-05-19T17:35:35.096Z
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /users/me:
     get:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Get authenticated user info
       responses:
+        200:
+          description: Returns user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-User'
+              example:
+                id: 1
+                username: foo
+                email: foo@strapi.io
+                provider: local
+                confirmed: false
+                blocked: false
+                createdAt: 2022-05-19T17:35:35.096Z
+                updatedAt: 2022-05-19T17:35:35.096Z
         default:
           description: Error
           content:
@@ -497,7 +691,15 @@ paths:
     get:
       tags:
         - Users-Permissions - Users & Roles
+      summary: Get user count
       responses:
+        200:
+          description: Returns a number
+          content:
+            application/json:
+              schema:
+                type: number
+              example: 1
         default:
           description: Error
           content:
@@ -511,7 +713,7 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: number
         name:
           type: string
         description:
@@ -527,7 +729,7 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: number
           example: 1
         username:
           type: string
@@ -580,5 +782,32 @@ components:
                   policy:
                     type: string
 
+    Users-Permissions-RoleRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              type:
+                type: string
+              permissions:
+                $ref: '#/components/schemas/Users-Permissions-PermissionsTree'
+          example:
+            name: foo
+            description: role foo
+            permissions:
+              api::content-type.content-type:
+                controllers:
+                  controllerA:
+                    find:
+                      enabled: true
+
   parameters:
   responses:
+  examples:
+  requestBodies:
