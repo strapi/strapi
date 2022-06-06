@@ -66,6 +66,14 @@ The Strapi core team will review your pull request and either merge it, request 
 
 [Go to the repository](https://github.com/strapi/strapi) and fork it using your own GitHub account.
 
+---
+
+_You Can directly click on the following button to create a ready to code environment or continue with the further steps:_
+
+[![Open strapi in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/strapi/strapi)
+
+---
+
 ### 2. Clone your repository
 
 ```bash
