@@ -261,6 +261,7 @@ const createQueryBuilder = (uid, db) => {
       }
 
       const aliasedTableName = this.mustUseAlias() ? `${tableName} as ${this.alias}` : tableName;
+      const tableNameToUse = this.mustUseAlias() ? `${this.alias}` : tableName;
 
       const qb = db.getConnection(aliasedTableName);
 
@@ -281,7 +282,11 @@ const createQueryBuilder = (uid, db) => {
           break;
         }
         case 'count': {
-          qb.count({ count: state.count });
+          if (_.has('id', meta.attributes)) {
+            qb.countDistinct({ count: `${tableNameToUse}.id` });
+          } else {
+            qb.count({ count: state.count });
+          }
           break;
         }
         case 'insert': {
