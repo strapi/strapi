@@ -339,12 +339,14 @@ module.exports = {
       const user = await getService('user').add(params);
 
       const sanitizedUser = await sanitizeUser(user, ctx);
-
+      let registrationMessage = "Account registered successfully";
       if (settings.email_confirmation) {
         try {
           await getService('user').sendConfirmationEmail(sanitizedUser);
+          registrationMessage += "\nPlease confirm your account using the link sent to your email"
         } catch (err) {
-          throw new ApplicationError(err.message);
+          registrationMessage = "Your confirmation link got lost in the mail, please contact our team to get confirmed"
+          //throw new ApplicationError(err.message);
         }
 
         return ctx.send({ user: sanitizedUser });
@@ -354,6 +356,7 @@ module.exports = {
 
       return ctx.send({
         jwt,
+        registrationMessage,
         user: sanitizedUser,
       });
     } catch (err) {
