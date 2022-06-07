@@ -81,7 +81,6 @@ const createQueryBuilder = (uid, db) => {
     max(column) {
       state.type = 'max';
       state.max = column;
-      state.first = true;
 
       return this;
     },
@@ -302,11 +301,13 @@ const createQueryBuilder = (uid, db) => {
           break;
         }
         case 'count': {
-          qb.count({ count: state.count });
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.count));
+          qb.count({ count: dbColumnName });
           break;
         }
         case 'max': {
-          qb.max(helpers.toColumnName(meta, state.max), { as: state.max });
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.max));
+          qb.max({ max: dbColumnName });
           break;
         }
         case 'insert': {
