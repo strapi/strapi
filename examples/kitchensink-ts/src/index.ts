@@ -1,15 +1,20 @@
-import type { Strapi } from '@strapi/strapi';
+import '@strapi/strapi';
 
 export default {
-  register({ strapi }: { strapi: Strapi }) {
-    // No error when trying the access & set the
-    strapi.customAddMethod = (n1, n2) => {
-      return n1 + n2;
-    };
-  },
+  /**
+   * An asynchronous register function that runs before
+   * your application is initialized.
+   *
+   * This gives you an opportunity to extend code.
+   */
+  register(/*{ strapi }*/) {},
 
-  bootstrap({ strapi }: { strapi: Strapi }) {
-    // This should return 42
-    strapi.customAddMethod(11, 31);
-  },
+  /**
+   * An asynchronous bootstrap function that runs before
+   * your application gets started.
+   *
+   * This gives you an opportunity to set up your data model,
+   * run jobs, or perform some special logic.
+   */
+  bootstrap(/*{ strapi }*/) {},
 };
