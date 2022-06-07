@@ -7,6 +7,7 @@ import {
   fireEvent,
   screen,
   getByText,
+  queryByText,
 } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -1816,15 +1817,33 @@ describe('Marketplace page', () => {
     expect(offlineText).toBeVisible();
   });
 
-  it('defaults to plugins tabs', async () => {
+  it('defaults to plugins tab', async () => {
     render(App);
     const button = screen.getByRole('tab', { selected: true });
-    const pluginsTab = await getByText(button, /Plugins/i);
+    const pluginsTabActive = await getByText(button, /Plugins/i);
 
     const tabPanel = screen.getByRole('tabpanel');
     const pluginCardText = await getByText(tabPanel, 'Comments');
+    const providerCardText = await queryByText(tabPanel, 'Cloudinary');
 
-    expect(pluginsTab).not.toBe(null);
+    expect(pluginsTabActive).not.toBe(null);
     expect(pluginCardText).toBeVisible();
+    expect(providerCardText).toEqual(null);
+  });
+
+  it('switches to providers tab', async () => {
+    render(App);
+    const providersTab = screen.getByRole('tab', { selected: false });
+    fireEvent.click(providersTab);
+    const button = screen.getByRole('tab', { selected: true });
+    const providersTabActive = await getByText(button, /Providers/i);
+
+    const tabPanel = screen.getByRole('tabpanel');
+    const providerCardText = await getByText(tabPanel, 'Cloudinary');
+    const pluginCardText = await queryByText(tabPanel, 'Comments');
+
+    expect(providersTabActive).not.toBe(null);
+    expect(providerCardText).toBeVisible();
+    expect(pluginCardText).toEqual(null);
   });
 });
