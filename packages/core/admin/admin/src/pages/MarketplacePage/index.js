@@ -234,8 +234,20 @@ const MarketPlacePage = () => {
             <TabGroup label="Plugins and Providers for Strapi" id="tabs" variant="simple">
               <Box paddingBottom={4}>
                 <Tabs>
-                  <Tab>Plugins ({searchResults.length})</Tab>
-                  <Tab>Providers ({marketplaceProvidersResponse.data.length})</Tab>
+                  <Tab>
+                    {formatMessage({
+                      id: 'admin.pages.MarketPlacePage.plugins',
+                      defaultMessage: 'Plugins',
+                    })}{' '}
+                    ({searchResults.length})
+                  </Tab>
+                  <Tab>
+                    {formatMessage({
+                      id: 'admin.pages.MarketPlacePage.providers',
+                      defaultMessage: 'Providers',
+                    })}{' '}
+                    ({marketplaceProvidersResponse.data.length})
+                  </Tab>
                 </Tabs>
               </Box>
               <TabPanels>
