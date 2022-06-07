@@ -96,11 +96,12 @@ async function createAdmin({ email, password, firstname, lastname }) {
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
   const outDir = await tsUtils.resolveOutDir(appDir);
 
-  if (isTSProject)
+  if (isTSProject) {
     await tsUtils.compile(appDir, {
       watch: false,
       configOptions: { options: { incremental: true } },
     });
+  }
 
   const distDir = isTSProject ? outDir : appDir;
 
