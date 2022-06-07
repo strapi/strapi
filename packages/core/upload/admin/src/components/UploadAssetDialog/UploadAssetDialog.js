@@ -133,7 +133,7 @@ UploadAssetDialog.defaultProps = {
 
 UploadAssetDialog.propTypes = {
   addUploadedFiles: PropTypes.func,
-  folderId: PropTypes.number,
+  folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   initialAssetsToAdd: PropTypes.arrayOf(AssetDefinition),
   onClose: PropTypes.func.isRequired,
   trackedLocation: PropTypes.string,
