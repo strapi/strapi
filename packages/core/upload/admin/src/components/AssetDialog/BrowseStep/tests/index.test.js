@@ -34,7 +34,7 @@ const FIXTURE_FOLDERS = [
       count: 12,
     },
     updatedAt: '',
-    path: '/1',
+    path: '/2',
   },
 ];
 
