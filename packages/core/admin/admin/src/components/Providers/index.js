@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import { Provider } from 'react-redux';
-import { AdminContext, ConfigurationsContext } from '../../contexts';
+import { AdminContext } from '../../contexts';
+import ConfigurationsProvider from '../ConfigurationsProvider';
 import LanguageProvider from '../LanguageProvider';
 import GuidedTour from '../GuidedTour';
 import AutoReloadOverlayBlockerProvider from '../AutoReloadOverlayBlockerProvider';
@@ -47,8 +48,11 @@ const Providers = ({
         <QueryClientProvider client={queryClient}>
           <Provider store={store}>
             <AdminContext.Provider value={{ getAdminInjectedComponents }}>
-              <ConfigurationsContext.Provider
-                value={{ authLogo, menuLogo, showReleaseNotification, showTutorials }}
+              <ConfigurationsProvider
+                authLogo={authLogo}
+                menuLogo={menuLogo}
+                showReleaseNotification={showReleaseNotification}
+                showTutorials={showTutorials}
               >
                 <StrapiAppProvider
                   getPlugin={getPlugin}
@@ -71,7 +75,7 @@ const Providers = ({
                     </LanguageProvider>
                   </LibraryProvider>
                 </StrapiAppProvider>
-              </ConfigurationsContext.Provider>
+              </ConfigurationsProvider>
             </AdminContext.Provider>
           </Provider>
         </QueryClientProvider>
