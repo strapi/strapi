@@ -1,10 +1,44 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { BrowseStep } from '..';
+
+const FIXTURE_ASSETS = [
+  {
+    id: 77,
+    name: '3874873.jpg',
+    alternativeText: null,
+    caption: null,
+    width: 400,
+    height: 400,
+    formats: {
+      thumbnail: {
+        name: 'thumbnail_3874873.jpg',
+        hash: 'thumbnail_3874873_b5818bb250',
+        ext: '.jpg',
+        mime: 'image/jpeg',
+        width: 156,
+        height: 156,
+        size: 3.97,
+        path: null,
+        url: '/uploads/thumbnail_3874873_b5818bb250.jpg',
+      },
+    },
+    hash: '3874873_b5818bb250',
+    ext: '.jpg',
+    mime: 'image/jpeg',
+    size: 11.79,
+    url: '/uploads/3874873_b5818bb250.jpg',
+    previewUrl: null,
+    provider: 'local',
+    provider_metadata: null,
+    createdAt: '2021-10-18T08:04:56.326Z',
+    updatedAt: '2021-10-18T08:04:56.326Z',
+  },
+];
 
 const FIXTURE_FOLDERS = [
   {
@@ -17,21 +51,6 @@ const FIXTURE_FOLDERS = [
     },
     files: {
       count: 1,
-    },
-    updatedAt: '',
-    path: '/1',
-  },
-
-  {
-    id: 2,
-    createdAt: '',
-    uid: '2',
-    name: 'Folder 2',
-    children: {
-      count: 11,
-    },
-    files: {
-      count: 12,
     },
     updatedAt: '',
     path: '/1',
@@ -83,7 +102,7 @@ describe('BrowseStep', () => {
 
   it('calls onAddAsset callback', () => {
     const spy = jest.fn();
-    const { getByText } = setup({ onAddAsset: spy });
+    const { getByText } = setup({ onAddAsset: spy, folders: [] });
 
     fireEvent.click(getByText('Add new assets'));
     expect(spy).toHaveBeenCalled();
@@ -100,5 +119,48 @@ describe('BrowseStep', () => {
     );
 
     expect(spy).toHaveBeenCalled();
+  });
+
+  it('does display empty state upload first assets if no folder or assets', () => {
+    setup({ folders: [], assets: [] });
+
+    expect(screen.getByText('Upload your first assets...')).toBeInTheDocument();
+  });
+
+  it('does display empty state no results found if searching with no results', () => {
+    setup({
+      folders: [],
+      assets: [],
+      queryObject: { page: 1, pageSize: 10, filters: {}, _q: 'true' },
+    });
+
+    expect(screen.getByText('There are no assets with the applied filters')).toBeInTheDocument();
+  });
+
+  it('does not display assets title if searching and no folders', () => {
+    setup({
+      folders: [],
+      assets: FIXTURE_ASSETS,
+      queryObject: { page: 1, pageSize: 10, filters: {}, _q: 'true' },
+    });
+
+    expect(screen.queryByText('Assets')).not.toBeInTheDocument();
+  });
+
+  it('does not display folders title if searching and no assets', () => {
+    setup({
+      queryObject: { page: 1, pageSize: 10, filters: {}, _q: 'true' },
+    });
+
+    expect(screen.queryByText('Folders')).not.toBeInTheDocument();
+  });
+
+  it('displays assets and folders titles when there are folders and assets', () => {
+    setup({
+      assets: FIXTURE_ASSETS,
+    });
+
+    expect(screen.getByText('Folders')).toBeInTheDocument();
+    expect(screen.getByText('Assets')).toBeInTheDocument();
   });
 });

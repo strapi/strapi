@@ -6,6 +6,7 @@ import { Button } from '@strapi/design-system/Button';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
+import { Divider } from '@strapi/design-system/Divider';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { GridItem } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
@@ -72,6 +73,9 @@ export const BrowseStep = ({
   );
   const isSearching = !!queryObject?._q;
   const isFiltering = queryObject?.filters?.$and?.length > 0;
+  const isSearchingOrFiltering = isSearching || isFiltering;
+  const assetCount = assets.length;
+  const folderCount = folders.length;
 
   return (
     <Stack spacing={4}>
@@ -79,7 +83,7 @@ export const BrowseStep = ({
         <Box>
           <Box paddingBottom={4}>
             <Flex justifyContent="space-between" alignItems="flex-start">
-              {(assets.length > 0 || folders.length > 0) && (
+              {(assetCount > 0 || folderCount > 0) && (
                 <StartBlockActions wrap="wrap">
                   {multiple && (
                     <Flex
@@ -109,7 +113,7 @@ export const BrowseStep = ({
                 </StartBlockActions>
               )}
 
-              {(assets.length > 0 || folders.length > 0 || isSearching) && (
+              {(assetCount > 0 || folderCount > 0 || isSearching) && (
                 <EndBlockActions pullRight>
                   <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
                 </EndBlockActions>
@@ -119,12 +123,54 @@ export const BrowseStep = ({
         </Box>
       )}
 
-      {folders.length > 0 && (
+      {assetCount === 0 && folderCount === 0 && (
+        <Box paddingBottom={6}>
+          <EmptyAssets
+            size="S"
+            count={6}
+            action={
+              canCreate &&
+              !isFiltering &&
+              !isSearching && (
+                <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
+                  {formatMessage({
+                    id: getTrad('header.actions.add-assets'),
+                    defaultMessage: 'Add new assets',
+                  })}
+                </Button>
+              )
+            }
+            content={
+              // eslint-disable-next-line no-nested-ternary
+              isSearchingOrFiltering
+                ? formatMessage({
+                    id: getTrad('list.assets-empty.title-withSearch'),
+                    defaultMessage: 'There are no assets with the applied filters',
+                  })
+                : canCreate && !isSearching
+                ? formatMessage({
+                    id: getTrad('list.assets.empty'),
+                    defaultMessage: 'Upload your first assets...',
+                  })
+                : formatMessage({
+                    id: getTrad('list.assets.empty.no-permissions'),
+                    defaultMessage: 'The asset list is empty',
+                  })
+            }
+          />
+        </Box>
+      )}
+
+      {folderCount > 0 && (
         <FolderList
-          title={formatMessage({
-            id: getTrad('list.folders.title'),
-            defaultMessage: 'Folders',
-          })}
+          title={
+            (((isSearchingOrFiltering && assetCount > 0) || !isSearchingOrFiltering) &&
+              formatMessage({
+                id: getTrad('list.folders.title'),
+                defaultMessage: 'Folders',
+              })) ||
+            ''
+          }
         >
           {folders.map(folder => {
             return (
@@ -165,7 +211,13 @@ export const BrowseStep = ({
         </FolderList>
       )}
 
-      {assets.length > 0 ? (
+      {assetCount > 0 && folderCount > 0 && (
+        <Box paddingTop={2}>
+          <Divider />
+        </Box>
+      )}
+
+      {assetCount > 0 && (
         <AssetList
           allowedTypes={allowedTypes}
           size="S"
@@ -173,47 +225,16 @@ export const BrowseStep = ({
           onSelectAsset={onSelectAsset}
           selectedAssets={selectedAssets}
           onEditAsset={onEditAsset}
-          title={formatMessage({
-            id: getTrad('list.assets.title'),
-            defaultMessage: 'Assets',
-          })}
+          title={
+            ((!isSearchingOrFiltering || (isSearchingOrFiltering && folderCount > 0)) &&
+              queryObject.page === 1 &&
+              formatMessage({
+                id: getTrad('list.assets.title'),
+                defaultMessage: 'Assets',
+              })) ||
+            ''
+          }
         />
-      ) : (
-        <Box paddingBottom={6}>
-          <EmptyAssets
-            size="S"
-            count={6}
-            action={
-              canCreate &&
-              !isFiltering &&
-              !isSearching && (
-                <Button variant="secondary" startIcon={<PlusIcon />} onClick={onAddAsset}>
-                  {formatMessage({
-                    id: getTrad('header.actions.add-assets'),
-                    defaultMessage: 'Add new assets',
-                  })}
-                </Button>
-              )
-            }
-            content={
-              // eslint-disable-next-line no-nested-ternary
-              isFiltering
-                ? formatMessage({
-                    id: getTrad('list.assets-empty.title-withSearch'),
-                    defaultMessage: 'There are no assets with the applied filters',
-                  })
-                : canCreate && !isSearching
-                ? formatMessage({
-                    id: getTrad('list.assets.empty'),
-                    defaultMessage: 'Upload your first assets...',
-                  })
-                : formatMessage({
-                    id: getTrad('list.assets.empty.no-permissions'),
-                    defaultMessage: 'The asset list is empty',
-                  })
-            }
-          />
-        </Box>
       )}
 
       {pagination.pageCount > 0 && (

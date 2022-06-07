@@ -268,14 +268,73 @@ describe('Media library homepage', () => {
   });
 
   describe('content', () => {
-    it('displays folders', async () => {
+    it('does display empty state upload first assets if no folder or assets', () => {
+      useFolders.mockReturnValueOnce({
+        data: [],
+        isLoading: false,
+        error: null,
+      });
+      useAssets.mockReturnValueOnce({
+        isLoading: false,
+        error: null,
+        data: {},
+      });
+      renderML();
+
+      expect(screen.queryByText('Upload your first assets...')).toBeInTheDocument();
+    });
+
+    it('does display empty state no results found if searching with no results', () => {
+      useAssets.mockReturnValueOnce({
+        isLoading: false,
+        error: null,
+        data: {},
+      });
+      useFolders.mockReturnValueOnce({
+        data: [],
+        isLoading: false,
+        error: null,
+      });
+      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
+      renderML();
+
+      expect(
+        screen.queryByText('There are no elements with the applied filters')
+      ).toBeInTheDocument();
+    });
+
+    it('does not display assets title if searching and no folders', () => {
+      useFolders.mockReturnValueOnce({
+        data: [],
+        isLoading: false,
+        error: null,
+      });
+      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
+      renderML();
+
+      expect(screen.queryByText('Assets')).not.toBeInTheDocument();
+    });
+
+    it('does not display folders title if searching and no assets', () => {
+      useAssets.mockReturnValueOnce({
+        isLoading: false,
+        error: null,
+        data: {},
+      });
+      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
+      renderML();
+
+      expect(screen.queryByText('Folders')).not.toBeInTheDocument();
+    });
+
+    it('displays folders and folders title', () => {
       renderML();
 
       expect(screen.queryByText('Folders')).toBeInTheDocument();
       expect(screen.getByText('Folder 1')).toBeInTheDocument();
     });
 
-    it('displays folder with checked checkbox when is selected', async () => {
+    it('displays folder with checked checkbox when is selected', () => {
       useSelectionState.mockReturnValueOnce([
         [
           {
@@ -297,13 +356,13 @@ describe('Media library homepage', () => {
       expect(screen.getByTestId('folder-checkbox-1')).toBeChecked();
     });
 
-    it('doest not displays folder with checked checkbox when is not selected', async () => {
+    it('doest not displays folder with checked checkbox when is not selected', () => {
       renderML();
 
       expect(screen.getByTestId('folder-checkbox-1')).not.toBeChecked();
     });
 
-    it('does not display folders if the user does not have read permissions', async () => {
+    it('does not display folders if the user does not have read permissions', () => {
       useMediaLibraryPermissions.mockReturnValueOnce({
         isLoading: false,
         canRead: false,
@@ -315,7 +374,7 @@ describe('Media library homepage', () => {
       expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
     });
 
-    it('does display folders if a search is performed', async () => {
+    it('does display folders if a search is performed', () => {
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
 
       renderML();
@@ -324,7 +383,7 @@ describe('Media library homepage', () => {
       expect(screen.queryByText('Folder 1')).toBeInTheDocument();
     });
 
-    it('does not display folders if the media library is being filtered', async () => {
+    it('does not display folders if the media library is being filtered', () => {
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { filters: 'true' } }, jest.fn()]);
 
       renderML();
@@ -333,7 +392,7 @@ describe('Media library homepage', () => {
       expect(screen.queryByText('Folder 1')).toBeInTheDocument();
     });
 
-    it('does not fetch folders if the current page !== 1', async () => {
+    it('does not fetch folders if the current page !== 1', () => {
       useAssets.mockReturnValueOnce({
         isLoading: false,
         data: {
@@ -353,13 +412,13 @@ describe('Media library homepage', () => {
       expect(useFolders).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
     });
 
-    it('displays assets', async () => {
+    it('displays assets', () => {
       renderML();
 
       expect(screen.getByText('3874873.jpg')).toBeInTheDocument();
     });
 
-    it('does not display assets if the user does not have read permissions', async () => {
+    it('does not display assets if the user does not have read permissions', () => {
       useMediaLibraryPermissions.mockReturnValueOnce({
         isLoading: false,
         canRead: false,
