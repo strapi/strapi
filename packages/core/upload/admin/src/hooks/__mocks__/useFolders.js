@@ -11,7 +11,7 @@ export const useFolders = jest.fn().mockReturnValue({
         count: 1,
       },
       path: '/folder-1',
-      uid: 'folder-1',
+      pathId: 1,
       updatedAt: '',
     },
   ],

@@ -52,10 +52,10 @@ export const FolderList = ({
           );
 
           return (
-            <GridItem col={3} key={`folder-${folder.uid}`}>
+            <GridItem col={3} key={`folder-${folder.pathId}`}>
               <FolderCard
                 ariaLabel={folder.name}
-                id={`folder-${folder.uid}`}
+                id={`folder-${folder.pathId}`}
                 onDoubleClick={event => {
                   event.preventDefault();
 

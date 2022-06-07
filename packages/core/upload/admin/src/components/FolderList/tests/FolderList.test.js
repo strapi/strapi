@@ -9,7 +9,7 @@ import { FolderList } from '../FolderList';
 const FIXTURE_FOLDERS = [
   {
     id: 1,
-    uid: 1,
+    pathId: 1,
     name: 'Folder 1',
     children: {
       count: 1,
@@ -21,7 +21,7 @@ const FIXTURE_FOLDERS = [
 
   {
     id: 2,
-    uid: 2,
+    pathId: 2,
     name: 'Folder 2',
     children: {
       count: 11,
