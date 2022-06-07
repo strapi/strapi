@@ -1,26 +1,48 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { QueryClientProvider, QueryClient } from 'react-query';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useAppInfos } from '@strapi/helper-plugin';
 import ApplicationInfosPage from '../index';
+import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
+  // eslint-disable-next-line
+  CheckPermissions: ({ children }) => <div>{children}</div>,
   useAppInfos: jest.fn(),
+  useNotification: jest.fn(),
+}));
+jest.mock('../../../../../hooks/useConfigurations', () => () => ({
+  logos: {
+    menu: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+  },
 }));
 
+const client = new QueryClient();
+
 const App = (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}} textComponent="span">
-      <ApplicationInfosPage />
-    </IntlProvider>
-  </ThemeProvider>
+  <QueryClientProvider client={client}>
+    <ThemeProvider theme={lightTheme}>
+      <IntlProvider locale="en" messages={{}} textComponent="span">
+        <ApplicationInfosPage />
+      </IntlProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
 );
 
 describe('Application page', () => {
-  it('renders and matches the snapshot', () => {
-    useAppInfos.mockImplementationOnce(() => {
+  beforeAll(() => server.listen());
+
+  afterEach(() => {
+    server.resetHandlers();
+  });
+
+  afterAll(() => server.close());
+
+  it('renders and matches the snapshot', async () => {
+    useAppInfos.mockImplementation(() => {
       return {
         shouldUpdateStrapi: true,
         latestStrapiReleaseTag: 'v3.6.8',
@@ -31,6 +53,8 @@ describe('Application page', () => {
     const {
       container: { firstChild },
     } = render(App);
+
+    await waitFor(() => expect(screen.getByText('Logo')).toBeInTheDocument());
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c1 {
@@ -110,15 +134,15 @@ describe('Application page', () => {
 
       .c10 {
         background: #ffffff;
-        padding-top: 32px;
-        padding-right: 24px;
-        padding-bottom: 32px;
-        padding-left: 24px;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c24 {
+      .c32 {
         padding-top: 4px;
       }
 
@@ -137,14 +161,14 @@ describe('Application page', () => {
         max-width: 100%;
       }
 
-      .c13 {
+      .c21 {
         color: #32324d;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
       }
 
-      .c17 {
+      .c25 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -152,7 +176,7 @@ describe('Application page', () => {
         text-transform: uppercase;
       }
 
-      .c18 {
+      .c26 {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -187,15 +211,15 @@ describe('Application page', () => {
         line-height: 1.33;
       }
 
-      .c22 {
+      .c30 {
         padding-left: 8px;
       }
 
-      .c19 {
+      .c27 {
         cursor: pointer;
       }
 
-      .c20 {
+      .c28 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -210,15 +234,15 @@ describe('Application page', () => {
         outline: none;
       }
 
-      .c20 svg path {
+      .c28 svg path {
         fill: #4945ff;
       }
 
-      .c20 svg {
+      .c28 svg {
         font-size: 0.625rem;
       }
 
-      .c20:after {
+      .c28:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -233,11 +257,11 @@ describe('Application page', () => {
         border: 2px solid transparent;
       }
 
-      .c20:focus-visible {
+      .c28:focus-visible {
         outline: none;
       }
 
-      .c20:focus-visible:after {
+      .c28:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -248,7 +272,7 @@ describe('Application page', () => {
         border: 2px solid #4945ff;
       }
 
-      .c23 {
+      .c31 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -256,13 +280,13 @@ describe('Application page', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c16 {
+        .c24 {
           grid-column: span 12;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c16 {
+        .c24 {
           grid-column: span;
         }
       }
@@ -298,188 +322,370 @@ describe('Application page', () => {
                       Overview
                     </h1>
                   </div>
+                  <button
+                    aria-disabled="false"
+                    class="c8 c9"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="c10 c11 c12"
+                    >
+                      <svg
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                          fill="#212134"
+                        />
+                      </svg>
+                    </div>
+                    <span
+                      class="c13 c14"
+                    >
+                      Save
+                    </span>
+                  </button>
                 </div>
                 <p
-                  class="c8"
+                  class="c15"
                 >
                   Administration panel’s global information
                 </p>
               </div>
             </div>
             <div
-              class="c9"
+              class="c16"
             >
               <div
-                class="c10"
+                class="c17 c18"
+                spacing="6"
               >
                 <div
-                  class="c11 c12"
-                  spacing="5"
+                  class="c19"
                 >
-                  <h3
-                    class="c13"
-                  >
-                    Details
-                  </h3>
                   <div
-                    class="c14 c15"
+                    class="c17 c20"
+                    spacing="5"
                   >
+                    <h3
+                      class="c21"
+                    >
+                      Details
+                    </h3>
                     <div
-                      class="c16"
+                      class="c22 c23"
                     >
                       <div
-                        class=""
+                        class="c24"
                       >
-                        <span
-                          class="c17"
-                        >
-                          strapi version
-                        </span>
-                        <p
-                          class="c18"
-                        >
-                          v
-                          4.0.0
-                        </p>
-                        <a
-                          class="c19 c20"
-                          href="https://support.strapi.io/support/home"
-                          rel="noreferrer noopener"
-                          target="_blank"
+                        <div
+                          class=""
                         >
                           <span
-                            class="c21"
+                            class="c25"
                           >
-                            Get help
+                            strapi version
                           </span>
-                          <span
-                            aria-hidden="true"
-                            class="c22 c23"
+                          <p
+                            class="c26"
                           >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                            v
+                            4.0.0
+                          </p>
+                          <a
+                            class="c27 c28"
+                            href="https://support.strapi.io/support/home"
+                            rel="noreferrer noopener"
+                            target="_blank"
+                          >
+                            <span
+                              class="c29"
                             >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
+                              Get help
+                            </span>
+                            <span
+                              aria-hidden="true"
+                              class="c30 c31"
+                            >
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 24 24"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                  fill="#32324D"
+                                />
+                              </svg>
+                            </span>
+                          </a>
+                        </div>
+                      </div>
+                      <div
+                        class="c24"
+                      >
+                        <div
+                          class=""
+                        >
+                          <span
+                            class="c25"
+                          >
+                            current plan
                           </span>
-                        </a>
+                          <p
+                            class="c26"
+                          >
+                            Enterprise Edition
+                          </p>
+                        </div>
                       </div>
                     </div>
                     <div
-                      class="c16"
+                      class="c22 c23"
                     >
                       <div
-                        class=""
+                        class="c24"
                       >
-                        <span
-                          class="c17"
+                        <div
+                          class=""
                         >
-                          current plan
-                        </span>
-                        <p
-                          class="c18"
-                        >
-                          Enterprise Edition
-                        </p>
+                          <a
+                            class="c27 c28"
+                            href="https://github.com/strapi/strapi/releases/tag/v3.6.8"
+                            rel="noreferrer noopener"
+                            target="_blank"
+                          >
+                            <span
+                              class="c29"
+                            >
+                              Upgrade your admin panel
+                            </span>
+                            <span
+                              aria-hidden="true"
+                              class="c30 c31"
+                            >
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 24 24"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                  fill="#32324D"
+                                />
+                              </svg>
+                            </span>
+                          </a>
+                        </div>
                       </div>
+                      <div
+                        class="c24"
+                      >
+                        <div
+                          class=""
+                        >
+                          <a
+                            class="c27 c28"
+                            href="https://strapi.io/pricing-self-hosted"
+                            rel="noreferrer noopener"
+                            target="_blank"
+                          >
+                            <span
+                              class="c29"
+                            >
+                              See all pricing plans
+                            </span>
+                            <span
+                              aria-hidden="true"
+                              class="c30 c31"
+                            >
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 24 24"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                  fill="#32324D"
+                                />
+                              </svg>
+                            </span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="c32"
+                    >
+                      <span
+                        class="c25"
+                      >
+                        node version
+                      </span>
+                      <p
+                        class="c26"
+                      />
                     </div>
                   </div>
+                </div>
+                <div>
                   <div
-                    class="c14 c15"
+                    class="c19"
                   >
+                    <h3
+                      class="c21"
+                    >
+                      Customization
+                    </h3>
                     <div
-                      class="c16"
+                      class="c33 c23"
                     >
                       <div
-                        class=""
+                        class="c24"
                       >
-                        <a
-                          class="c19 c20"
-                          href="https://github.com/strapi/strapi/releases/tag/v3.6.8"
-                          rel="noreferrer noopener"
-                          target="_blank"
+                        <div
+                          class=""
                         >
-                          <span
-                            class="c21"
-                          >
-                            Upgrade your admin panel
-                          </span>
-                          <span
-                            aria-hidden="true"
-                            class="c22 c23"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                          <div>
+                            <div
+                              class="c34 c35"
+                              spacing="1"
                             >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </span>
-                        </a>
+                              <label
+                                class="c36"
+                                for="carouselinput-1"
+                              >
+                                <div
+                                  class="c37"
+                                >
+                                  Logo
+                                </div>
+                              </label>
+                              <div
+                                class=""
+                                id="carouselinput-1"
+                              >
+                                <div
+                                  class="c38"
+                                >
+                                  <section
+                                    aria-label="Logo"
+                                    aria-roledescription="carousel"
+                                    class="c39 c40"
+                                  >
+                                    <div
+                                      aria-live="polite"
+                                      class="c41 c42"
+                                      width="100%"
+                                    >
+                                      <div
+                                        aria-label="Logo slide"
+                                        aria-roledescription="slide"
+                                        class="c43 c44 c45"
+                                        height="124px"
+                                        role="group"
+                                      >
+                                        <img
+                                          alt="Logo"
+                                          class="c46"
+                                          src="http://localhost:1337/uploads/michka.svg"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div
+                                      class="c47 c44 c48"
+                                      spacing="1"
+                                      width="100%"
+                                    >
+                                      <span>
+                                        <button
+                                          aria-disabled="false"
+                                          aria-labelledby="tooltip-1"
+                                          class="c49 c50"
+                                          tabindex="0"
+                                          type="button"
+                                        >
+                                          <svg
+                                            fill="none"
+                                            height="1em"
+                                            viewBox="0 0 24 24"
+                                            width="1em"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          >
+                                            <path
+                                              d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                                              fill="#212134"
+                                            />
+                                          </svg>
+                                        </button>
+                                      </span>
+                                      <span>
+                                        <button
+                                          aria-disabled="false"
+                                          aria-labelledby="tooltip-3"
+                                          class="c49 c50"
+                                          tabindex="0"
+                                          type="button"
+                                        >
+                                          <svg
+                                            fill="none"
+                                            height="1em"
+                                            viewBox="0 0 24 24"
+                                            width="1em"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          >
+                                            <path
+                                              clip-rule="evenodd"
+                                              d="M15.681 2.804A9.64 9.64 0 0011.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 003.589-4.831 1.117 1.117 0 00-.664-1.418 1.086 1.086 0 00-1.393.676 7.769 7.769 0 01-2.792 3.758 7.546 7.546 0 01-4.41 1.428V4.222h.002a7.492 7.492 0 013.003.625 7.61 7.61 0 012.5 1.762l.464.551-2.986 3.042a.186.186 0 00.129.316H22V3.317a.188.188 0 00-.112-.172.179.179 0 00-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 00-3.239-2.293zm-3.863 1.418V2v2.222zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778z"
+                                              fill="#212134"
+                                              fill-rule="evenodd"
+                                            />
+                                          </svg>
+                                        </button>
+                                      </span>
+                                    </div>
+                                  </section>
+                                  <div
+                                    class="c51"
+                                  >
+                                    <span>
+                                      <div
+                                        aria-labelledby="tooltip-2"
+                                        class="c44"
+                                        tabindex="0"
+                                      >
+                                        <span
+                                          class="c52"
+                                        >
+                                          michka.svg
+                                        </span>
+                                      </div>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <p
+                                class="c53"
+                                id="carouselinput-1-hint"
+                              >
+                                Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div
-                      class="c16"
-                    >
-                      <div
-                        class=""
-                      >
-                        <a
-                          class="c19 c20"
-                          href="https://strapi.io/pricing-self-hosted"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c21"
-                          >
-                            See all pricing plans
-                          </span>
-                          <span
-                            aria-hidden="true"
-                            class="c22 c23"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </span>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    class="c24"
-                  >
-                    <span
-                      class="c17"
-                    >
-                      node version
-                    </span>
-                    <p
-                      class="c18"
-                    />
                   </div>
                 </div>
               </div>
@@ -491,7 +697,7 @@ describe('Application page', () => {
   });
 
   it('should display latest version and link upgrade version', () => {
-    useAppInfos.mockImplementationOnce(() => {
+    useAppInfos.mockImplementation(() => {
       return {
         shouldUpdateStrapi: true,
         latestStrapiReleaseTag: 'v3.6.8',
@@ -506,7 +712,20 @@ describe('Application page', () => {
   });
 
   it("shouldn't display link upgrade version if not necessary", () => {
-    useAppInfos.mockImplementationOnce(() => {
+    useAppInfos.mockImplementation(() => {
+      return {
+        shouldUpdateStrapi: false,
+        latestStrapiReleaseTag: 'v3.6.8',
+      };
+    });
+
+    const { queryByText } = render(App);
+
+    expect(queryByText('Upgrade your admin panel')).not.toBeInTheDocument();
+  });
+
+  it('should display', () => {
+    useAppInfos.mockImplementation(() => {
       return {
         shouldUpdateStrapi: false,
         latestStrapiReleaseTag: 'v3.6.8',

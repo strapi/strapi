@@ -11,8 +11,13 @@ import Register from '..';
 
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale: () => {},
-  localeNames: ['en'],
+  localeNames: { en: 'English' },
   messages: ['test'],
+}));
+jest.mock('../../../../../hooks/useConfigurations', () => () => ({
+  logos: {
+    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+  },
 }));
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -835,11 +840,14 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                 aria-expanded="false"
                 aria-haspopup="true"
                 class="c2 c3"
+                label="English"
                 type="button"
               >
                 <span
                   class="c4 c5"
-                />
+                >
+                  English
+                </span>
                 <div
                   aria-hidden="true"
                   class="c6 c7"
@@ -891,6 +899,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                     alt=""
                     aria-hidden="true"
                     class="c15"
+                    src="defaultAuthLogo.png"
                   />
                   <div
                     class="c16"
