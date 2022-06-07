@@ -45,10 +45,10 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
   const submitButtonRef = useRef(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { formatMessage, formatDate } = useIntl();
-  const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();
+  const { editFolder } = useEditFolder();
   const { remove } = useBulkRemove();
   const toggleNotification = useNotification();
-  const isLoading = isLoadingPermissions || folderStructureIsLoading || isEditFolderLoading;
+  const isLoading = isLoadingPermissions || folderStructureIsLoading;
   const isEditing = !!folder;
   const formDisabled = (folder && !canUpdate) || (!folder && !canCreate);
   const initialFormData = !folderStructureIsLoading && {

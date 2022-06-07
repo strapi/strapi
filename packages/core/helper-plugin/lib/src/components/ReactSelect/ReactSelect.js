@@ -11,7 +11,7 @@ import getSelectStyles from './utils/getSelectStyles';
 
 const ReactSelect = ({ components, styles, ...props }) => {
   const theme = useTheme();
-  const customStyles = getSelectStyles(theme);
+  const customStyles = getSelectStyles(theme, props);
 
   return (
     <Select
