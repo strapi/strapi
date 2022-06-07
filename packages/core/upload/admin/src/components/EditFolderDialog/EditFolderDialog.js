@@ -52,7 +52,7 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
   const isEditing = !!folder;
   const formDisabled = (folder && !canUpdate) || (!folder && !canCreate);
   const initialFormData = !folderStructureIsLoading && {
-    name: folder?.name ?? undefined,
+    name: folder?.name ?? '',
     parent: {
       /* ideally we would use folderStructure[0].value, but since it is null
          react complains about rendering null as field value */
