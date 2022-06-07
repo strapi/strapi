@@ -6,6 +6,7 @@ import {
   getByPlaceholderText,
   fireEvent,
   screen,
+  getByText,
 } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -1000,7 +1001,7 @@ describe('Marketplace page', () => {
                   class="c29"
                 >
                   <div
-                    aria-label="admin.pages.MarketPlacePage.tab-group.label"
+                    aria-label="Plugins and Providers for Strapi"
                     role="tablist"
                   >
                     <button
@@ -1813,5 +1814,17 @@ describe('Marketplace page', () => {
     const offlineText = screen.getByText('You are offline');
 
     expect(offlineText).toBeVisible();
+  });
+
+  it('defaults to plugins tabs', async () => {
+    render(App);
+    const button = screen.getByRole('tab', { selected: true });
+    const pluginsTab = await getByText(button, /Plugins/i);
+
+    const tabPanel = screen.getByRole('tabpanel');
+    const pluginCardText = await getByText(tabPanel, 'Comments');
+
+    expect(pluginsTab).not.toBe(null);
+    expect(pluginCardText).toBeVisible();
   });
 });

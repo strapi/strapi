@@ -232,7 +232,10 @@ const MarketPlacePage = () => {
             />
           ) : (
             <TabGroup
-              label={formatMessage({ id: 'admin.pages.MarketPlacePage.tab-group.label' })}
+              label={formatMessage({
+                id: 'admin.pages.MarketPlacePage.tab-group.label',
+                defaultMessage: 'Plugins and Providers for Strapi',
+              })}
               id="tabs"
               variant="simple"
             >
