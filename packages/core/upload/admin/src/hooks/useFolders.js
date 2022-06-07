@@ -19,18 +19,24 @@ export const useFolders = ({ enabled = true, query = {} }) => {
       pageSize: -1,
     },
     filters: {
-      ...query?.filters,
-      parent: {
-        id: query?.folder ?? {
-          $null: true,
+      $and: [
+        ...(query?.filters?.$and ?? []),
+        {
+          parent: {
+            id: query?.folder ?? {
+              $null: true,
+            },
+          },
         },
-      },
+      ],
     },
   };
 
   const fetchFolders = async () => {
     try {
-      const { data } = await axiosInstance.get(`${dataRequestURL}?${stringify(params)}`);
+      const { data } = await axiosInstance.get(
+        `${dataRequestURL}?${stringify(params, { encode: false })}`
+      );
 
       notifyStatus(
         formatMessage({
