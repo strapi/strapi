@@ -231,7 +231,7 @@ const MarketPlacePage = () => {
               )}
             />
           ) : (
-            <TabGroup label="Some stuff for the label" id="tabs" variant="simple">
+            <TabGroup label="Plugins and Providers for Strapi" id="tabs" variant="simple">
               <Box paddingBottom={4}>
                 <Tabs>
                   <Tab>Plugins ({searchResults.length})</Tab>
@@ -245,6 +245,7 @@ const MarketPlacePage = () => {
                     installedPackageNames={installedPluginNames}
                     useYarn={appInfoResponse.data.useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
+                    npmPackageType="plugin"
                   />
                 </TabPanel>
                 <TabPanel>
@@ -252,6 +253,7 @@ const MarketPlacePage = () => {
                     npmPackages={marketplaceProvidersResponse.data}
                     useYarn={appInfoResponse.data.useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
+                    npmPackageType="provider"
                   />
                 </TabPanel>
               </TabPanels>

@@ -25,7 +25,13 @@ const EllipsisText = styled(Typography)`
   overflow: hidden;
 `;
 
-const NpmPackageCard = ({ npmPackage, installedPackageNames, useYarn, isInDevelopmentMode }) => {
+const NpmPackageCard = ({
+  npmPackage,
+  installedPackageNames,
+  useYarn,
+  isInDevelopmentMode,
+  npmPackageType,
+}) => {
   const { attributes } = npmPackage;
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -40,6 +46,11 @@ const NpmPackageCard = ({ npmPackage, installedPackageNames, useYarn, isInDevelo
     id: 'admin.pages.MarketPlacePage.plugin.tooltip.madeByStrapi',
     defaultMessage: 'Made by Strapi',
   });
+
+  const npmPackageHref =
+    npmPackageType === 'provider'
+      ? attributes.npmPackageUrl
+      : `https://market.strapi.io/plugins/${attributes.slug}`;
 
   return (
     <Flex
@@ -107,7 +118,7 @@ const NpmPackageCard = ({ npmPackage, installedPackageNames, useYarn, isInDevelo
       <Stack horizontal spacing={2} style={{ alignSelf: 'flex-end' }} paddingTop={6}>
         <LinkButton
           size="S"
-          href={`https://market.strapi.io/plugins/${attributes.slug}`}
+          href={npmPackageHref}
           isExternal
           endIcon={<ExternalLink />}
           aria-label={formatMessage(
@@ -159,6 +170,7 @@ NpmPackageCard.propTypes = {
   installedPackageNames: PropTypes.arrayOf(PropTypes.string).isRequired,
   useYarn: PropTypes.bool.isRequired,
   isInDevelopmentMode: PropTypes.bool,
+  npmPackageType: PropTypes.string.isRequired,
 };
 
 export default NpmPackageCard;

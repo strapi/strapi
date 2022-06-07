@@ -3,7 +3,13 @@ import PropTypes from 'prop-types';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import NpmPackageCard from '../NpmPackageCard';
 
-const NpmPackagesGrid = ({ npmPackages, installedPackageNames, useYarn, isInDevelopmentMode }) => {
+const NpmPackagesGrid = ({
+  npmPackages,
+  installedPackageNames,
+  useYarn,
+  isInDevelopmentMode,
+  npmPackageType,
+}) => {
   return (
     <Grid gap={4}>
       {npmPackages.map((npmPackage) => (
@@ -13,6 +19,7 @@ const NpmPackagesGrid = ({ npmPackages, installedPackageNames, useYarn, isInDeve
             installedPackageNames={installedPackageNames}
             useYarn={useYarn}
             isInDevelopmentMode={isInDevelopmentMode}
+            npmPackageType={npmPackageType}
           />
         </GridItem>
       ))}
@@ -29,6 +36,7 @@ NpmPackagesGrid.propTypes = {
   installedPackageNames: PropTypes.arrayOf(PropTypes.string),
   useYarn: PropTypes.bool.isRequired,
   isInDevelopmentMode: PropTypes.bool.isRequired,
+  npmPackageType: PropTypes.string.isRequired,
 };
 
 export default NpmPackagesGrid;
