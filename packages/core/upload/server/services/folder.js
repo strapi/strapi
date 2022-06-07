@@ -6,12 +6,13 @@ const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
 
 const setPathIdAndPath = async folder => {
-  const { pathId: maxPathId } = await strapi.db
+  const { max } = await strapi.db
     .queryBuilder(FOLDER_MODEL_UID)
     .max('pathId')
+    .first()
     .execute();
 
-  const pathId = maxPathId + 1;
+  const pathId = max + 1;
   let parentPath = '/';
   if (folder.parent) {
     const parentFolder = await strapi.entityService.findOne(FOLDER_MODEL_UID, folder.parent);
@@ -111,12 +112,15 @@ const update = async (id, { name, parent }, { user }) => {
         .delete()
         .where({ [joinTable.joinColumn.name]: id })
         .execute();
-      await strapi.db
-        .queryBuilder(joinTable.name)
-        .transacting(trx)
-        .insert({ [joinTable.inverseJoinColumn.name]: parent, [joinTable.joinColumn.name]: id })
-        .where({ [joinTable.joinColumn.name]: id })
-        .execute();
+
+      if (parent !== null) {
+        await strapi.db
+          .queryBuilder(joinTable.name)
+          .transacting(trx)
+          .insert({ [joinTable.inverseJoinColumn.name]: parent, [joinTable.joinColumn.name]: id })
+          .where({ [joinTable.joinColumn.name]: id })
+          .execute();
+      }
 
       // fetch destinationFolder path
       let destinationFolderPath = '/';
@@ -141,7 +145,8 @@ const update = async (id, { name, parent }, { user }) => {
       await strapi.db
         .connection(folderTable)
         .transacting(trx)
-        .where(pathColumnName, 'like', `${existingFolder.path}%`)
+        .where(pathColumnName, existingFolder.path)
+        .orWhere(pathColumnName, 'like', `${existingFolder.path}/%`)
         .update(
           pathColumnName,
           strapi.db.connection.raw('REPLACE(??, ?, ?)', [
@@ -155,7 +160,8 @@ const update = async (id, { name, parent }, { user }) => {
       await strapi.db
         .connection(fileTable)
         .transacting(trx)
-        .where(folderPathColumnName, 'like', `${existingFolder.path}%`)
+        .where(folderPathColumnName, existingFolder.path)
+        .orWhere(folderPathColumnName, 'like', `${existingFolder.path}/%`)
         .update(
           folderPathColumnName,
           strapi.db.connection.raw('REPLACE(??, ?, ?)', [

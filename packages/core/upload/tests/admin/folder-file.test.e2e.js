@@ -160,8 +160,6 @@ describe('Bulk actions for folders & files', () => {
         },
       });
 
-      console.log('res.body', res.body);
-
       expect(res.body.data).toMatchObject({
         files: [
           {
