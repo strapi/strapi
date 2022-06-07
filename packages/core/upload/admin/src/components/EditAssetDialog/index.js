@@ -42,6 +42,7 @@ const fileInfoSchema = yup.object({
   name: yup.string().required(),
   alternativeText: yup.string(),
   caption: yup.string(),
+  folder: yup.number(),
 });
 
 export const EditAssetDialog = ({
@@ -63,12 +64,12 @@ export const EditAssetDialog = ({
   });
 
   const handleSubmit = async values => {
-    if (asset.isLocal) {
-      const nextAsset = { ...asset, ...values };
+    const nextAsset = { ...asset, ...values, folder: values.parent.value };
 
+    if (asset.isLocal) {
       onClose(nextAsset);
     } else {
-      const editedAsset = await editAsset({ ...asset, ...values }, replacementFile);
+      const editedAsset = await editAsset(nextAsset, replacementFile);
       onClose(editedAsset);
     }
   };
