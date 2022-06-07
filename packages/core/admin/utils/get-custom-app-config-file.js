@@ -1,7 +1,6 @@
 'use strict';
 
 const { join } = require('path');
-const { eq } = require('lodash/fp');
 const fse = require('fs-extra');
 const { isUsingTypeScript } = require('@strapi/typescript-utils');
 
@@ -16,8 +15,8 @@ const getCustomAppConfigFile = async dir => {
 
   const files = await fse.readdir(adminSrcPath);
 
-  const appJsx = files.find(eq('app.jsx'));
-  const appTsx = files.find(eq('app.tsx'));
+  const appJsx = files.find(file => /^app.jsx?$/.test(file));
+  const appTsx = files.find(file => /^app.tsx?$/.test(file));
 
   if (useTypeScript) {
     return appTsx || appJsx;
