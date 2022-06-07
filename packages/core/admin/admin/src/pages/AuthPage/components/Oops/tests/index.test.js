@@ -9,8 +9,13 @@ import Oops from '..';
 
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale: () => {},
-  localeNames: ['en'],
+  localeNames: { en: 'English' },
   messages: ['test'],
+}));
+jest.mock('../../../../../hooks/useConfigurations', () => () => ({
+  logos: {
+    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+  },
 }));
 
 describe('ADMIN | PAGES | AUTH | Oops', () => {
@@ -27,65 +32,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c22 {
-        color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c21 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        position: relative;
-        outline: none;
-      }
-
-      .c21 svg path {
-        fill: #4945ff;
-      }
-
-      .c21 svg {
-        font-size: 0.625rem;
-      }
-
-      .c21:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c21:focus-visible {
-        outline: none;
-      }
-
-      .c21:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
       .c1 {
         padding-top: 24px;
         padding-right: 40px;
@@ -113,10 +59,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       .c19 {
         padding-top: 16px;
-      }
-
-      .c10:focus-visible {
-        outline: none;
       }
 
       .c0 {
@@ -180,6 +122,69 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
+      }
+
+      .c22 {
+        color: #4945ff;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c21 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c21 svg path {
+        fill: #4945ff;
+      }
+
+      .c21 svg {
+        font-size: 0.625rem;
+      }
+
+      .c21:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c21:focus-visible {
+        outline: none;
+      }
+
+      .c21:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c10:focus-visible {
+        outline: none;
       }
 
       .c5 {
@@ -369,11 +374,14 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                 aria-expanded="false"
                 aria-haspopup="true"
                 class="c2 c3"
+                label="English"
                 type="button"
               >
                 <span
                   class="c4 c5"
-                />
+                >
+                  English
+                </span>
                 <div
                   aria-hidden="true"
                   class="c6 c7"
@@ -421,6 +429,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   alt=""
                   aria-hidden="true"
                   class="c15"
+                  src="defaultAuthLogo.png"
                 />
                 <div
                   class="c16"

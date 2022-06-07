@@ -83,7 +83,7 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Node:**
 
-- NodeJS >= 12 <= 16
+- NodeJS >= 14 <= 16
 - NPM >= 6.x
 
 **Database:**
