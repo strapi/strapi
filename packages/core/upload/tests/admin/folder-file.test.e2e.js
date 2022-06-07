@@ -104,7 +104,7 @@ describe('Bulk actions for folders & files', () => {
             id: folder1a.id,
             name: 'folder-a-1a',
             path: expect.anything(),
-            pathId: expect.anything(),
+            pathId: expect.any(Number),
             createdAt: expect.anything(),
             updatedAt: expect.anything(),
           },
@@ -160,6 +160,8 @@ describe('Bulk actions for folders & files', () => {
         },
       });
 
+      console.log('res.body', res.body);
+
       expect(res.body.data).toMatchObject({
         files: [
           {
@@ -188,7 +190,7 @@ describe('Bulk actions for folders & files', () => {
             id: folder1a.id,
             name: 'folder-b-1a',
             path: `${folder1b.path}/${folder1a.pathId}`,
-            pathId: expect.anything(),
+            pathId: expect.any(Number),
             createdAt: expect.anything(),
             updatedAt: expect.anything(),
           },
@@ -297,7 +299,7 @@ describe('Bulk actions for folders & files', () => {
             id: folder1a.id,
             name: 'folder-c-1a',
             path: `/${folder1a.pathId}`,
-            pathId: expect.anything(),
+            pathId: expect.any(Number),
             createdAt: expect.anything(),
             updatedAt: expect.anything(),
           },

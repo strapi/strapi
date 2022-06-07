@@ -79,7 +79,7 @@ describe('Uploads folder', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads',
-          pathId: expect.anything(),
+          pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
       });
@@ -114,7 +114,7 @@ describe('Uploads folder', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads',
-          pathId: expect.anything(),
+          pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
       });
@@ -159,7 +159,7 @@ describe('Uploads folder', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads (1)',
-          pathId: expect.anything(),
+          pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
       });
@@ -190,7 +190,7 @@ describe('Uploads folder', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads (1)',
-          pathId: expect.anything(),
+          pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
       });
@@ -226,7 +226,7 @@ describe('Uploads folder', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads (1)',
-          pathId: expect.anything(),
+          pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
       });
@@ -272,7 +272,7 @@ describe('Uploads folder', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads (2)',
-          pathId: expect.anything(),
+          pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
       });
@@ -317,7 +317,7 @@ describe('Uploads folder', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads (2)',
-          pathId: expect.anything(),
+          pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
       });
@@ -356,7 +356,7 @@ describe('Uploads folder', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads (2)',
-          pathId: expect.anything(),
+          pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
       });
@@ -404,7 +404,7 @@ describe('Uploads folder', () => {
       expect(file).toMatchObject({
         folder: {
           name: 'API Uploads (3)',
-          pathId: expect.anything(),
+          pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
       });
