@@ -85,7 +85,7 @@ module.exports = {
   async telemetryProperties(ctx) {
     // If the telemetry is disabled, ignore the request and return early
     if (strapi.telemetry.isDisabled) {
-      ctx.status(204);
+      ctx.status = 204;
       return;
     }
 
