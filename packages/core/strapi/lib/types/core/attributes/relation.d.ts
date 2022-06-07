@@ -3,7 +3,7 @@ import { Attribute } from './base';
 import { GetAttributesByType, GetAttributesValues } from './utils';
 
 export type BasicRelationsType = 'oneToOne' | 'oneToMany' | 'manyToOne' | 'manyToMany';
-export type PolymorphicRelationsType =  morphToMany | 'morphToOne' | 'oneToManyMorph' | 'oneToOneMorph';
+export type PolymorphicRelationsType =  'morphToOne' | 'morphToMany' | 'morphOne' | 'morphMany';
 export type RelationsType = BasicRelationsType & PolymorphicRelationsType;
 
 export interface RelationAttribute<
@@ -37,7 +37,7 @@ export type PickRelationsFromTo<TTarget extends SchemaUID, TSource extends Schem
 export type RelationPluralityModifier<
   TRelation extends RelationsType,
   TValue extends Object
-> = TRelation extends `${string}ToMany` ? TValue[] : TValue;
+> = TRelation extends `${string}Many` ? TValue[] : TValue;
 
 export type RelationValue<
   TRelation extends RelationsType,

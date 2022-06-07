@@ -1,7 +1,10 @@
 import { Attribute } from './base';
 import { BaseStringAttribute } from './common';
 
-export interface StringAttribute extends BaseStringAttribute<'string'> {}
+export interface StringAttribute<T extends RegExp = undefined>
+  extends BaseStringAttribute<'string'> {
+  regex?: T;
+}
 
 export type StringValue = string;
 

@@ -5,6 +5,8 @@ import { GetAttributesValues } from './utils';
 export interface DynamicZoneAttribute<T extends Strapi.ComponentUIDs[] = []>
   extends Attribute<'dynamiczone'> {
   components: T;
+  min?: number;
+  max?: number;
 }
 
 type DynamicZoneValue<T extends Strapi.ComponentUIDs[]> = Array<
