@@ -1,25 +1,19 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
-import { render, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, fireEvent, act, waitFor, screen } from '@testing-library/react';
+import { within } from '@testing-library/dom';
 import { NotificationsProvider } from '@strapi/helper-plugin';
 import { QueryClientProvider, QueryClient } from 'react-query';
 
 import { EditFolderDialog } from '../EditFolderDialog';
+import { useEditFolder } from '../../../hooks/useEditFolder';
 
 console.error = jest.fn();
 
 jest.mock('../../../utils/axiosInstance', () => ({
   ...jest.requireActual('../../../utils/axiosInstance'),
   put: jest.fn().mockImplementation({}),
-}));
-
-jest.mock('../../../hooks/useEditFolder', () => ({
-  ...jest.requireActual('../../../hooks/useEditFolder'),
-  useEditFolder: jest.fn().mockReturnValue({
-    editFolder: jest.fn().mockResolvedValue({}),
-    isLoading: false,
-  }),
 }));
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -29,6 +23,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 jest.mock('../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../hooks/useFolderStructure');
+jest.mock('../../../hooks/useEditFolder');
 
 const client = new QueryClient({
   defaultOptions: {
@@ -148,5 +143,51 @@ describe('EditFolderDialog', () => {
     });
 
     expect(queryByText('Are you sure you want to delete this?')).toBeInTheDocument();
+  });
+
+  test('keeps edit folder dialog open and show error message on API error', async () => {
+    const FIXTURE_ERROR_MESSAGE = 'folder cannot be moved inside itself';
+    const moveSpy = jest.fn().mockRejectedValueOnce({
+      response: {
+        data: {
+          error: {
+            details: {
+              errors: [
+                {
+                  path: ['parent'],
+                  message: FIXTURE_ERROR_MESSAGE,
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+    useEditFolder.mockReturnValueOnce({
+      isLoading: false,
+      editFolder: moveSpy,
+    });
+
+    const folder = {
+      id: 1,
+      name: 'default folder name',
+      children: [],
+      parent: { id: 1, label: 'Some parent' },
+    };
+    const folderStructure = [{ value: 1, label: 'Some parent' }];
+
+    const { getByText } = setup({ folder, folderStructure });
+
+    const dialog = screen.getByRole('dialog');
+    const submit = within(dialog).getByRole('button', {
+      name: /save/i,
+    });
+    fireEvent.click(submit);
+
+    await waitFor(() =>
+      expect(moveSpy).toBeCalledWith({ name: 'default folder name', parent: null }, 1)
+    );
+
+    expect(getByText(FIXTURE_ERROR_MESSAGE)).toBeInTheDocument();
   });
 });

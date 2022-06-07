@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
@@ -41,7 +41,6 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
     enabled: true,
   });
   const { canCreate, isLoading: isLoadingPermissions, canUpdate } = useMediaLibraryPermissions();
-  const submitButtonRef = useRef(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { formatMessage, formatDate } = useIntl();
   const { editFolder } = useEditFolder();
@@ -252,13 +251,7 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
                       </Button>
                     )}
 
-                    <Button
-                      onClick={() => submitButtonRef.current.click()}
-                      name="submit"
-                      loading={isLoading}
-                      disabled={formDisabled}
-                      type="submit"
-                    >
+                    <Button name="submit" loading={isLoading} disabled={formDisabled} type="submit">
                       {formatMessage(
                         isEditing
                           ? { id: 'modal.folder.edit.submit', defaultMessage: 'Save' }
