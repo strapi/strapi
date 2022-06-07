@@ -34,7 +34,7 @@ export const AssetList = ({
 
           if (onReorderAsset) {
             return (
-              <GridItem col={3}>
+              <GridItem col={3} height="100%">
                 <Draggable key={asset.id} index={index} moveItem={onReorderAsset} id={asset.id}>
                   <AssetCard
                     allowedTypes={allowedTypes}
@@ -50,7 +50,7 @@ export const AssetList = ({
           }
 
           return (
-            <GridItem col={3} key={asset.id}>
+            <GridItem col={3} key={asset.id} height="100%">
               <AssetCard
                 key={asset.id}
                 allowedTypes={allowedTypes}
