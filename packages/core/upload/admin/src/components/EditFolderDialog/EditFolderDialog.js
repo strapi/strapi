@@ -13,7 +13,6 @@ import { Loader } from '@strapi/design-system/Loader';
 import { Stack } from '@strapi/design-system/Stack';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Typography } from '@strapi/design-system/Typography';
-import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Form, useNotification, getAPIInnerErrors } from '@strapi/helper-plugin';
 
 import { getTrad, findRecursiveFolderByValue } from '../../utils';
@@ -130,17 +129,17 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
   return (
     <>
       <ModalLayout onClose={() => onClose()} labelledBy="title">
-        <EditFolderModalHeader isEditing={isEditing} />
+        <Formik
+          validationSchema={folderSchema}
+          validateOnChange={false}
+          onSubmit={handleSubmit}
+          initialValues={initialFormData}
+        >
+          {({ values, errors, handleChange, setFieldValue }) => (
+            <Form noValidate>
+              <EditFolderModalHeader isEditing={isEditing} />
 
-        <ModalBody>
-          <Formik
-            validationSchema={folderSchema}
-            validateOnChange={false}
-            onSubmit={handleSubmit}
-            initialValues={initialFormData}
-          >
-            {({ values, errors, handleChange, setFieldValue }) => (
-              <Form noValidate>
+              <ModalBody>
                 <Grid gap={4}>
                   {isEditing && (
                     <GridItem xs={12} col={12}>
@@ -229,54 +228,49 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
                     </Stack>
                   </GridItem>
                 </Grid>
+              </ModalBody>
 
-                <VisuallyHidden>
-                  <button type="submit" tabIndex={-1} ref={submitButtonRef} name="hidden-submit">
-                    {formatMessage({ id: 'submit', defaultMessage: 'Submit' })}
-                  </button>
-                </VisuallyHidden>
-              </Form>
-            )}
-          </Formik>
-        </ModalBody>
+              <ModalFooter
+                startActions={
+                  <Button onClick={() => onClose()} variant="tertiary" name="cancel">
+                    {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+                  </Button>
+                }
+                endActions={
+                  <Stack horizontal spacing={2}>
+                    {isEditing && canUpdate && (
+                      <Button
+                        type="button"
+                        variant="danger-light"
+                        onClick={() => setShowConfirmDialog(true)}
+                        name="delete"
+                      >
+                        {formatMessage({
+                          id: 'modal.folder.create.delete',
+                          defaultMessage: 'Delete folder',
+                        })}
+                      </Button>
+                    )}
 
-        <ModalFooter
-          startActions={
-            <Button onClick={() => onClose()} variant="tertiary" name="cancel">
-              {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
-            </Button>
-          }
-          endActions={
-            <Stack horizontal spacing={2}>
-              {isEditing && canUpdate && (
-                <Button
-                  type="button"
-                  variant="danger-light"
-                  onClick={() => setShowConfirmDialog(true)}
-                  name="delete"
-                >
-                  {formatMessage({
-                    id: 'modal.folder.create.delete',
-                    defaultMessage: 'Delete folder',
-                  })}
-                </Button>
-              )}
-
-              <Button
-                onClick={() => submitButtonRef.current.click()}
-                name="submit"
-                loading={isLoading}
-                disabled={formDisabled}
-              >
-                {formatMessage(
-                  isEditing
-                    ? { id: 'modal.folder.edit.submit', defaultMessage: 'Save' }
-                    : { id: 'modal.folder.create.submit', defaultMessage: 'Create' }
-                )}
-              </Button>
-            </Stack>
-          }
-        />
+                    <Button
+                      onClick={() => submitButtonRef.current.click()}
+                      name="submit"
+                      loading={isLoading}
+                      disabled={formDisabled}
+                      type="submit"
+                    >
+                      {formatMessage(
+                        isEditing
+                          ? { id: 'modal.folder.edit.submit', defaultMessage: 'Save' }
+                          : { id: 'modal.folder.create.submit', defaultMessage: 'Create' }
+                      )}
+                    </Button>
+                  </Stack>
+                }
+              />
+            </Form>
+          )}
+        </Formik>
       </ModalLayout>
       {showConfirmDialog && (
         <RemoveFolderDialog onClose={() => setShowConfirmDialog(false)} onConfirm={handleDelete} />
