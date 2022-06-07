@@ -16,6 +16,7 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const params = {
     ...paramsExceptFolder,
     filters: {
+      ...query?.filters,
       folder: {
         id: query?.folder ?? {
           $null: true,
