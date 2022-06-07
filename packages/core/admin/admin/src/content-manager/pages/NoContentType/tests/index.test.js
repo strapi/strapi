@@ -30,6 +30,47 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c12 {
+        color: #666687;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c7 {
+        background: #ffffff;
+        padding: 64px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c9 {
+        padding-bottom: 24px;
+      }
+
+      .c11 {
+        padding-bottom: 16px;
+      }
+
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      .c10 svg {
+        height: 5.5rem;
+      }
+
       .c18 {
         font-weight: 600;
         color: #32324d;
@@ -244,47 +285,6 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         color: #666687;
         font-size: 1rem;
         line-height: 1.5;
-      }
-
-      .c12 {
-        color: #666687;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c7 {
-        background: #ffffff;
-        padding: 64px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c9 {
-        padding-bottom: 24px;
-      }
-
-      .c11 {
-        padding-bottom: 16px;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
-      }
-
-      .c10 svg {
-        height: 5.5rem;
       }
 
       <main
