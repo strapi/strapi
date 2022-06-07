@@ -55,7 +55,7 @@ Option.propTypes = {
   onToggle: PropTypes.func.isRequired,
   selectProps: PropTypes.shape({
     maxDisplayDepth: PropTypes.number,
-    openValues: PropTypes.oneOfType(PropTypes.string, PropTypes.number),
+    openValues: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     onOptionToggle: PropTypes.func,
   }).isRequired,
 };
