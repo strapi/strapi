@@ -108,7 +108,7 @@ export const EditAssetDialog = ({
     alternativeText: asset.alternativeText ?? undefined,
     caption: asset.caption ?? undefined,
     parent: {
-      value: activeFolderId ?? null,
+      value: activeFolderId ?? undefined,
       label:
         findRecursiveFolderByValue(folderStructure, activeFolderId)?.label ??
         folderStructure[0].label,

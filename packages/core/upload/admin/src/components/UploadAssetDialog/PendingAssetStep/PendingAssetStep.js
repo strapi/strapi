@@ -171,7 +171,7 @@ PendingAssetStep.defaultProps = {
 PendingAssetStep.propTypes = {
   addUploadedFiles: PropTypes.func,
   assets: PropTypes.arrayOf(AssetDefinition).isRequired,
-  folderId: PropTypes.number,
+  folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onClose: PropTypes.func.isRequired,
   onEditAsset: PropTypes.func.isRequired,
   onRemoveAsset: PropTypes.func.isRequired,

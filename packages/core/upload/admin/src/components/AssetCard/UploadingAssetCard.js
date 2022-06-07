@@ -130,7 +130,7 @@ UploadingAssetCard.propTypes = {
     rawFile: PropTypes.instanceOf(File),
     type: PropTypes.oneOf(Object.values(AssetType)),
   }).isRequired,
-  folderId: PropTypes.number,
+  folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onCancel: PropTypes.func.isRequired,
   onStatusChange: PropTypes.func.isRequired,
 };

@@ -50,12 +50,12 @@ const Option = ({ children, data, selectProps, ...props }) => {
 };
 
 Option.propTypes = {
-  children: PropTypes.arrayOf(PropTypes.element).isRequired,
+  children: PropTypes.node.isRequired,
   data: PropTypes.object.isRequired,
   onToggle: PropTypes.func.isRequired,
   selectProps: PropTypes.shape({
     maxDisplayDepth: PropTypes.number,
-    openValues: PropTypes.arrayOf([PropTypes.string, PropTypes.number]),
+    openValues: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
     onOptionToggle: PropTypes.func,
   }).isRequired,
 };

@@ -54,7 +54,9 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
   const initialFormData = !folderStructureIsLoading && {
     name: folder?.name ?? undefined,
     parent: {
-      value: parentFolderId ? parseInt(parentFolderId, 10) : folderStructure[0].value,
+      /* ideally we would use folderStructure[0].value, but since it is null
+         react complains about rendering null as field value */
+      value: parentFolderId ? parseInt(parentFolderId, 10) : undefined,
       label: parentFolderId
         ? findRecursiveFolderByValue(folderStructure, parseInt(parentFolderId, 10))?.label
         : folderStructure[0].label,
@@ -291,5 +293,5 @@ EditFolderDialog.defaultProps = {
 EditFolderDialog.propTypes = {
   folder: FolderDefinition,
   onClose: PropTypes.func.isRequired,
-  parentFolderId: PropTypes.number,
+  parentFolderId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
