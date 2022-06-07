@@ -231,7 +231,11 @@ const MarketPlacePage = () => {
               )}
             />
           ) : (
-            <TabGroup label="Plugins and Providers for Strapi" id="tabs" variant="simple">
+            <TabGroup
+              label={formatMessage({ id: 'admin.pages.MarketPlacePage.tab-group.label' })}
+              id="tabs"
+              variant="simple"
+            >
               <Box paddingBottom={4}>
                 <Tabs>
                   <Tab>
