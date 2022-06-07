@@ -2,7 +2,6 @@
 
 const { join, resolve } = require('path');
 const fs = require('fs-extra');
-// eslint-disable-next-line node/no-extraneous-require
 const glob = require('glob');
 
 const getPluginsPath = () => {

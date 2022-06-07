@@ -2,15 +2,15 @@ import { LifecycleProvider } from './lifecycles';
 import { MigrationProvider } from './migrations';
 import { SchemaProvideer } from './schema';
 
-type LogicOperators<T> = {
+type LogicalOperators<T> = {
   $and?: WhereParams<T>[];
   $or?: WhereParams<T>[];
   $not?: WhereParams<T>;
-}
+};
 
 type AttributeOperators<T, K extends keyof T> = {
-  $eq?: T[K];
-  $ne?: T[K];
+  $eq?: T[K] | Array<T[K]>;
+  $ne?: T[K] | Array<T[K]>;
   $in?: T[K][];
   $notIn?: T[K][];
   $lt?: T[K];
@@ -27,12 +27,12 @@ type AttributeOperators<T, K extends keyof T> = {
   $null?: boolean;
   $notNull?: boolean;
   $not?: WhereParams<T> | AttributeOperators<T, K>;
-}
+};
 
 export type WhereParams<T> = {
   [K in keyof T]?: T[K] | T[K][] | AttributeOperators<T, K>;
 } &
-  LogicOperators<T>;
+  LogicalOperators<T>;
 
 type Sortables<T> = {
   // check sortable
