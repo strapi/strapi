@@ -1,4 +1,5 @@
 import React from 'react';
+import { stringify } from 'qs';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -80,8 +81,22 @@ describe('useAssets', () => {
 
     await waitFor(() => result.current.isSuccess);
 
+    const expected = {
+      filters: {
+        $and: [
+          {
+            folder: {
+              id: {
+                $null: true,
+              },
+            },
+          },
+        ],
+      },
+    };
+
     expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?filters${encodeURIComponent('[folder][id][$null]')}=true`
+      `/upload/files?${stringify(expected, { encode: false })}`
     );
   });
 
@@ -90,8 +105,47 @@ describe('useAssets', () => {
 
     await waitFor(() => result.current.isSuccess);
 
+    const expected = {
+      filters: {
+        $and: [
+          {
+            folder: {
+              id: 1,
+            },
+          },
+        ],
+      },
+    };
+
     expect(axiosInstance.get).toBeCalledWith(
-      `/upload/files?filters${encodeURIComponent('[folder][id]')}=1`
+      `/upload/files?${stringify(expected, { encode: false })}`
+    );
+  });
+
+  test('allows to merge filter query params using filters.$and', async () => {
+    const { result, waitFor } = await setup({
+      query: { folder: 5, filters: { $and: [{ something: 'true' }] } },
+    });
+
+    await waitFor(() => result.current.isSuccess);
+
+    const expected = {
+      filters: {
+        $and: [
+          {
+            something: true,
+          },
+          {
+            folder: {
+              id: 5,
+            },
+          },
+        ],
+      },
+    };
+
+    expect(axiosInstance.get).toBeCalledWith(
+      `/upload/files?${stringify(expected, { encode: false })}`
     );
   });
 

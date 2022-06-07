@@ -1,4 +1,5 @@
 import React from 'react';
+import { stringify } from 'qs';
 import { IntlProvider } from 'react-intl';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -80,10 +81,25 @@ describe('useFolders', () => {
 
     await waitFor(() => result.current.isSuccess);
 
+    const expected = {
+      pagination: {
+        pageSize: -1,
+      },
+      filters: {
+        $and: [
+          {
+            parent: {
+              id: {
+                $null: true,
+              },
+            },
+          },
+        ],
+      },
+    };
+
     expect(axiosInstance.get).toBeCalledWith(
-      `/upload/folders?pagination${encodeURIComponent('[pageSize]')}=-1&filters${encodeURIComponent(
-        '[parent][id][$null]'
-      )}=true`
+      `/upload/folders?${stringify(expected, { encode: false })}`
     );
   });
 
@@ -92,10 +108,53 @@ describe('useFolders', () => {
 
     await waitFor(() => result.current.isSuccess);
 
+    const expected = {
+      pagination: {
+        pageSize: -1,
+      },
+      filters: {
+        $and: [
+          {
+            parent: {
+              id: 1,
+            },
+          },
+        ],
+      },
+    };
+
     expect(axiosInstance.get).toBeCalledWith(
-      `/upload/folders?pagination${encodeURIComponent('[pageSize]')}=-1&filters${encodeURIComponent(
-        '[parent][id]'
-      )}=1`
+      `/upload/folders?${stringify(expected, { encode: false })}`
+    );
+  });
+
+  test('allows to merge filter query params using filters.$and', async () => {
+    const { result, waitFor } = await setup({
+      query: { folder: 5, filters: { $and: [{ something: 'true' }] } },
+    });
+
+    await waitFor(() => result.current.isSuccess);
+
+    const expected = {
+      filters: {
+        $and: [
+          {
+            something: true,
+          },
+          {
+            parent: {
+              id: 5,
+            },
+          },
+        ],
+      },
+      pagination: {
+        pageSize: -1,
+      },
+    };
+
+    expect(axiosInstance.get).toBeCalledWith(
+      `/upload/folders?${stringify(expected, { encode: false })}`
     );
   });
 

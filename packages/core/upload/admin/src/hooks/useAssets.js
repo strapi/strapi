@@ -16,17 +16,24 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const params = {
     ...paramsExceptFolder,
     filters: {
-      folder: {
-        id: query?.folder ?? {
-          $null: true,
+      $and: [
+        ...(query?.filters?.$and ?? []),
+        {
+          folder: {
+            id: query?.folder ?? {
+              $null: true,
+            },
+          },
         },
-      },
+      ],
     },
   };
 
   const getAssets = async () => {
     try {
-      const { data } = await axiosInstance.get(`${dataRequestURL}?${stringify(params)}`);
+      const { data } = await axiosInstance.get(
+        `${dataRequestURL}?${stringify(params, { encode: false })}`
+      );
 
       notifyStatus(
         formatMessage({
