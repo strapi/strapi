@@ -1,6 +1,7 @@
 import { Formik } from 'formik';
 import React from 'react';
 import PropTypes from 'prop-types';
+import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -13,21 +14,38 @@ import {
 import { FieldLabel } from '@strapi/design-system/Field';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
-import { Form } from '@strapi/helper-plugin';
+import { Form, getAPIInnerErrors } from '@strapi/helper-plugin';
 
+import { useBulkMove } from '../../hooks/useBulkMove';
 import { getTrad } from '../../utils';
 import SelectTree from '../SelectTree';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
+import { FolderDefinition, AssetDefinition } from '../../constants';
 
-export const BulkMoveDialog = ({ onClose, errors: initialErrors }) => {
+export const BulkMoveDialog = ({ onClose, selected }) => {
   const { formatMessage } = useIntl();
   const { data: folderStructure, isLoading } = useFolderStructure();
+  const { move } = useBulkMove();
   const initialFormData = {
     destination: folderStructure[0],
   };
 
-  const handleSubmit = values => {
-    onClose({ moved: true, destinationFolderId: values.destination.value });
+  const handleSubmit = async (values, { setErrors }) => {
+    try {
+      await move(values.destination.value, selected);
+      onClose();
+    } catch (error) {
+      const errors = getAPIInnerErrors(error, { getTrad });
+      const formikErrors = Object.entries(errors).reduce((acc, [key, error]) => {
+        acc[key || 'destination'] = error.defaultMessage;
+
+        return acc;
+      }, {});
+
+      if (!isEmpty(formikErrors)) {
+        setErrors(formikErrors);
+      }
+    }
   };
 
   const handleClose = () => {
@@ -36,12 +54,7 @@ export const BulkMoveDialog = ({ onClose, errors: initialErrors }) => {
 
   return (
     <ModalLayout onClose={handleClose} labelledBy="title">
-      <Formik
-        validateOnChange={false}
-        onSubmit={handleSubmit}
-        initialValues={initialFormData}
-        initialErrors={initialErrors}
-      >
+      <Formik validateOnChange={false} onSubmit={handleSubmit} initialValues={initialFormData}>
         {({ values, errors, setFieldValue }) => (
           <Form noValidate>
             <ModalHeader>
@@ -115,13 +128,9 @@ export const BulkMoveDialog = ({ onClose, errors: initialErrors }) => {
   );
 };
 
-BulkMoveDialog.defaultProps = {
-  errors: null,
-};
+BulkMoveDialog.defaultProps = {};
 
 BulkMoveDialog.propTypes = {
-  errors: PropTypes.shape({
-    destination: PropTypes.string.isRequired,
-  }),
+  selected: PropTypes.arrayOf(FolderDefinition, AssetDefinition).isRequired,
   onClose: PropTypes.func.isRequired,
 };

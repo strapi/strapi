@@ -137,7 +137,6 @@ describe('BulkMoveButton', () => {
 
     await waitFor(() => expect(onSuccessSpy).not.toBeCalled());
     expect(getByText('Move elements to')).toBeInTheDocument();
-
-    // TODO: once implemented test whether FIXTURE_ERROR_MESSAGE is displayed in the modal
+    expect(getByText(FIXTURE_ERROR_MESSAGE)).toBeInTheDocument();
   });
 });
