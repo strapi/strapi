@@ -137,6 +137,16 @@ describe('BrowseStep', () => {
     expect(screen.getByText('There are no assets with the applied filters')).toBeInTheDocument();
   });
 
+  it('does display filters, even if no assets or folders were found', () => {
+    setup({
+      folders: [],
+      assets: [],
+      queryObject: { page: 1, pageSize: 10, filters: { $and: [{ mime: 'audio' }] }, _q: '' },
+    });
+
+    expect(screen.getByText('Filters')).toBeInTheDocument();
+  });
+
   it('does not display assets title if searching and no folders', () => {
     setup({
       folders: [],
