@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useIntl } from 'react-intl';
 import { components } from 'react-select';
 import styled from 'styled-components';
 
@@ -10,12 +11,19 @@ import { Typography } from '@strapi/design-system/Typography';
 import ChevronUp from '@strapi/icons/ChevronUp';
 import ChevronDown from '@strapi/icons/ChevronDown';
 
-const ToggleButton = styled.button`
+const ToggleButton = styled(Flex)`
   align-self: flex-end;
-  margin-left: auto;
+  height: ${pxToRem(22)};
+  width: ${pxToRem(28)};
+
+  &:hover,
+  &:focus {
+    background-color: ${({ theme }) => theme.colors.primary200};
+  }
 `;
 
 const Option = ({ children, data, selectProps, ...props }) => {
+  const { formatMessage } = useIntl();
   const { depth, value, children: options } = data;
   const { maxDisplayDepth, openValues, onOptionToggle } = selectProps;
   const isOpen = openValues.includes(value);
@@ -25,14 +33,22 @@ const Option = ({ children, data, selectProps, ...props }) => {
       <components.Option {...props}>
         <Flex alignItems="start">
           <Typography textColor="neutral800" ellipsis>
-            <span style={{ paddingLeft: `${Math.min(depth, maxDisplayDepth) * 10}px` }}>
+            <span style={{ paddingLeft: `${Math.min(depth, maxDisplayDepth) * 14}px` }}>
               {children}
             </span>
           </Typography>
 
           {options?.length > 0 && (
             <ToggleButton
-              type="button"
+              aria-label={formatMessage({
+                id: 'app.utils.toggle',
+                defaultMessage: 'Toggle',
+              })}
+              as="button"
+              alignItems="center"
+              hasRadius
+              justifyContent="center"
+              marginLeft="auto"
               onClick={event => {
                 event.preventDefault();
                 event.stopPropagation();
