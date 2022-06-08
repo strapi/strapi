@@ -118,7 +118,10 @@ export const MediaLibrary = () => {
   const handleEditFolderClose = payload => {
     setFolderToEdit(null);
     toggleEditFolderDialog(payload);
-    currentFolderToEditRef.current.focus();
+
+    if (currentFolderToEditRef.current) {
+      currentFolderToEditRef.current.focus();
+    }
   };
 
   useFocusWhenNavigate();
