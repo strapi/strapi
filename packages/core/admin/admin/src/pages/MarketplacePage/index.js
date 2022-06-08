@@ -224,16 +224,16 @@ const MarketPlacePage = () => {
               onChange={e => setSearchQuery(e.target.value)}
               clearLabel={formatMessage({
                 id: 'admin.pages.MarketPlacePage.search.clear',
-                defaultMessage: 'Clear the plugin search',
+                defaultMessage: 'Clear the search',
               })}
               placeholder={formatMessage({
                 id: 'admin.pages.MarketPlacePage.search.placeholder',
-                defaultMessage: 'Search for a plugin',
+                defaultMessage: 'Search',
               })}
             >
               {formatMessage({
                 id: 'admin.pages.MarketPlacePage.search.placeholder',
-                defaultMessage: 'Search for a plugin',
+                defaultMessage: 'Search',
               })}
             </Searchbar>
           </Box>
