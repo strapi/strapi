@@ -412,6 +412,29 @@ describe('Media library homepage', () => {
       expect(useFolders).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
     });
 
+    it('does not fetch folders if the mime-type was applied', () => {
+      useAssets.mockReturnValueOnce({
+        isLoading: false,
+        data: {
+          pagination: {
+            ...FIXTURE_ASSET_PAGINATION,
+            pageCount: 2,
+            page: 2,
+            total: 2,
+          },
+          results: FIXTURE_ASSETS,
+        },
+      });
+      useQueryParams.mockReturnValueOnce([
+        { rawQuery: '', query: { _q: '', filters: { $and: { mime: 'audio' } } } },
+        jest.fn(),
+      ]);
+
+      renderML();
+
+      expect(useFolders).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+    });
+
     it('displays assets', () => {
       renderML();
 

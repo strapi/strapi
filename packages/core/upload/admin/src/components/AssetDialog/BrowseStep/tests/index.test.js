@@ -131,7 +131,7 @@ describe('BrowseStep', () => {
     setup({
       folders: [],
       assets: [],
-      queryObject: { page: 1, pageSize: 10, filters: {}, _q: 'true' },
+      queryObject: { page: 1, pageSize: 10, filters: { $and: [] }, _q: 'true' },
     });
 
     expect(screen.getByText('There are no assets with the applied filters')).toBeInTheDocument();
@@ -141,7 +141,7 @@ describe('BrowseStep', () => {
     setup({
       folders: [],
       assets: FIXTURE_ASSETS,
-      queryObject: { page: 1, pageSize: 10, filters: {}, _q: 'true' },
+      queryObject: { page: 1, pageSize: 10, filters: { $and: [] }, _q: 'true' },
     });
 
     expect(screen.queryByText('Assets')).not.toBeInTheDocument();
@@ -149,7 +149,7 @@ describe('BrowseStep', () => {
 
   it('does not display folders title if searching and no assets', () => {
     setup({
-      queryObject: { page: 1, pageSize: 10, filters: {}, _q: 'true' },
+      queryObject: { page: 1, pageSize: 10, filters: { $and: [] }, _q: 'true' },
     });
 
     expect(screen.queryByText('Folders')).not.toBeInTheDocument();
