@@ -301,7 +301,9 @@ const createQueryBuilder = (uid, db) => {
           break;
         }
         case 'count': {
-          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.count));
+          const dbColumnName =
+            state.count === '*' ? '*' : this.aliasColumn(helpers.toColumnName(meta, state.count));
+
           qb.count({ count: dbColumnName });
           break;
         }
