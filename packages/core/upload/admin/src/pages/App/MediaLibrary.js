@@ -33,7 +33,7 @@ import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
-import { getTrad } from '../../utils';
+import { getTrad, containsAssetFilter } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { EmptyAssets } from '../../components/EmptyAssets';
@@ -78,7 +78,7 @@ export const MediaLibrary = () => {
   });
 
   const { data: folders, isLoading: foldersLoading, errors: foldersError } = useFolders({
-    enabled: assetsData?.pagination?.page === 1,
+    enabled: canRead && assetsData?.pagination?.page === 1 && !containsAssetFilter(query),
     query,
   });
 

@@ -2,13 +2,14 @@ import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { render as renderTL, screen, waitFor } from '@testing-library/react';
+import { render as renderTL, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { AssetDialog } from '..';
 import { useFolders } from '../../../hooks/useFolders';
 import { useAssets } from '../../../hooks/useAssets';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import useModalQueryParams from '../../../hooks/useModalQueryParams';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -19,6 +20,9 @@ jest.mock('@strapi/helper-plugin', () => ({
 jest.mock('../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../hooks/useFolders');
 jest.mock('../../../hooks/useAssets');
+jest.mock('../../../hooks/useModalQueryParams');
+
+console.error = jest.fn();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,7 +95,7 @@ describe('AssetDialog', () => {
 
   describe('content', () => {
     describe('empty state', () => {
-      it('shows a specific empty state when the user is not allowed to see the content', async () => {
+      it('shows a specific empty state when the user is not allowed to see the content', () => {
         useMediaLibraryPermissions.mockReturnValueOnce({
           isLoading: false,
           canRead: false,
@@ -99,11 +103,12 @@ describe('AssetDialog', () => {
 
         renderML();
 
-        await waitFor(() =>
-          expect(
-            screen.getByText("You don't have the permissions to access that content")
-          ).toBeInTheDocument()
-        );
+        expect(
+          screen.getByText("You don't have the permissions to access that content")
+        ).toBeInTheDocument();
+
+        expect(screen.queryByText('Folders')).not.toBeInTheDocument();
+        expect(screen.queryByText('Assets')).not.toBeInTheDocument();
 
         expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
       });
@@ -142,6 +147,45 @@ describe('AssetDialog', () => {
         renderML();
 
         expect(screen.getByText('Folder 1')).toBeInTheDocument();
+      });
+
+      it('does not display folders, if the current page !== 1', () => {
+        useAssets.mockReturnValueOnce({
+          isLoading: false,
+          error: null,
+          data: { pagination: { page: 2 } },
+        });
+
+        expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+      });
+
+      it('does not display folders, if the mime-type filter was applied', () => {
+        useModalQueryParams.mockReturnValueOnce([
+          {
+            queryObject: {
+              page: 1,
+              sort: 'updatedAt:DESC',
+              pageSize: 10,
+              filters: {
+                $and: [
+                  {
+                    mime: true,
+                  },
+                ],
+              },
+            },
+          },
+          {
+            onChangeFilters: jest.fn(),
+            onChangePage: jest.fn(),
+            onChangePageSize: jest.fn(),
+            onChangeSort: jest.fn(),
+            onChangeSearch: jest.fn(),
+            onChangeFolder: jest.fn(),
+          },
+        ]);
+
+        expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
       });
     });
   });

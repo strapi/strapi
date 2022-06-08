@@ -12,7 +12,7 @@ import { Loader } from '@strapi/design-system/Loader';
 import { Stack } from '@strapi/design-system/Stack';
 import { NoPermissions, AnErrorOccurred, useSelectionState, pxToRem } from '@strapi/helper-plugin';
 
-import getTrad from '../../utils/getTrad';
+import { getTrad, containsAssetFilter } from '../../utils';
 import { SelectedStep } from './SelectedStep';
 import { BrowseStep } from './BrowseStep';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
@@ -70,6 +70,7 @@ export const AssetDialog = ({
     error: errorAssets,
   } = useAssets({ skipWhen: !canRead, query: queryObject });
   const { data: folders, isLoading: isLoadingFolders, error: errorFolders } = useFolders({
+    enabled: canRead && !containsAssetFilter(queryObject) && pagination?.page === 1,
     query: queryObject,
   });
 
