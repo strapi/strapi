@@ -21,7 +21,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 
-import { EmptyPluginSearch } from './components/EmptyPluginSearch';
+import EmptyNpmPackageSearch from './components/EmptyNpmPackageSearch';
 import PageHeader from './components/PageHeader';
 import { fetchAppInformation } from './utils/api';
 import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
@@ -33,8 +33,8 @@ import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
 import MissingPluginBanner from './components/MissingPluginBanner';
 import NpmPackagesGrid from './components/NpmPackagesGrid';
 
-const matchSearch = (plugins, search) => {
-  return matchSorter(plugins, search, {
+const matchSearch = (npmPackages, search) => {
+  return matchSorter(npmPackages, search, {
     keys: [
       {
         threshold: matchSorter.rankings.WORD_STARTS_WITH,
@@ -74,14 +74,20 @@ const MarketPlacePage = () => {
     );
   };
 
-  const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
-    useFetchMarketplacePlugins(notifyMarketplaceLoad);
+  const {
+    status: marketplacePluginsStatus,
+    data: marketplacePluginsResponse,
+  } = useFetchMarketplacePlugins(notifyMarketplaceLoad);
 
-  const { status: marketplaceProvidersStatus, data: marketplaceProvidersResponse } =
-    useFetchMarketplaceProviders(notifyMarketplaceLoad);
+  const {
+    status: marketplaceProvidersStatus,
+    data: marketplaceProvidersResponse,
+  } = useFetchMarketplaceProviders(notifyMarketplaceLoad);
 
-  const { status: installedPluginsStatus, data: installedPluginsResponse } =
-    useFetchInstalledPlugins();
+  const {
+    status: installedPluginsStatus,
+    data: installedPluginsResponse,
+  } = useFetchInstalledPlugins();
 
   const { data: appInfoResponse, status: appInfoStatus } = useQuery(
     'app-information',
@@ -185,8 +191,19 @@ const MarketPlacePage = () => {
     );
   }
 
-  const searchResults = matchSearch(marketplacePluginsResponse.data, searchQuery);
-  const installedPluginNames = installedPluginsResponse.plugins.map((plugin) => plugin.packageName);
+  // Search for plugins and providers that match the search query
+  const pluginSearchResults = matchSearch(marketplacePluginsResponse.data, searchQuery);
+  const providerSearchResults = matchSearch(marketplaceProvidersResponse.data, searchQuery);
+  const emptySearchMessage = formatMessage(
+    {
+      id: 'admin.pages.MarketPlacePage.search.empty',
+      defaultMessage: 'No result for "{target}"',
+    },
+    { target: searchQuery }
+  );
+
+  // Check if plugins are installed already
+  const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
 
   return (
     <Layout>
@@ -204,7 +221,7 @@ const MarketPlacePage = () => {
               name="searchbar"
               onClear={() => setSearchQuery('')}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               clearLabel={formatMessage({
                 id: 'admin.pages.MarketPlacePage.search.clear',
                 defaultMessage: 'Clear the plugin search',
@@ -220,64 +237,62 @@ const MarketPlacePage = () => {
               })}
             </Searchbar>
           </Box>
-          {searchQuery.length > 0 && !searchResults.length ? (
-            <EmptyPluginSearch
-              content={formatMessage(
-                {
-                  id: 'admin.pages.MarketPlacePage.search.empty',
-                  defaultMessage: 'No result for "{target}"',
-                },
-                { target: searchQuery }
-              )}
-            />
-          ) : (
-            <TabGroup
-              label={formatMessage({
-                id: 'admin.pages.MarketPlacePage.tab-group.label',
-                defaultMessage: 'Plugins and Providers for Strapi',
-              })}
-              id="tabs"
-              variant="simple"
-            >
-              <Box paddingBottom={4}>
-                <Tabs>
-                  <Tab>
-                    {formatMessage({
-                      id: 'admin.pages.MarketPlacePage.plugins',
-                      defaultMessage: 'Plugins',
-                    })}{' '}
-                    ({searchResults.length})
-                  </Tab>
-                  <Tab>
-                    {formatMessage({
-                      id: 'admin.pages.MarketPlacePage.providers',
-                      defaultMessage: 'Providers',
-                    })}{' '}
-                    ({marketplaceProvidersResponse.data.length})
-                  </Tab>
-                </Tabs>
-              </Box>
-              <TabPanels>
-                <TabPanel>
+          <TabGroup
+            label={formatMessage({
+              id: 'admin.pages.MarketPlacePage.tab-group.label',
+              defaultMessage: 'Plugins and Providers for Strapi',
+            })}
+            id="tabs"
+            variant="simple"
+          >
+            <Box paddingBottom={4}>
+              <Tabs>
+                <Tab>
+                  {formatMessage({
+                    id: 'admin.pages.MarketPlacePage.plugins',
+                    defaultMessage: 'Plugins',
+                  })}{' '}
+                  ({pluginSearchResults.length})
+                </Tab>
+                <Tab>
+                  {formatMessage({
+                    id: 'admin.pages.MarketPlacePage.providers',
+                    defaultMessage: 'Providers',
+                  })}{' '}
+                  ({providerSearchResults.length})
+                </Tab>
+              </Tabs>
+            </Box>
+            <TabPanels>
+              {/* Plugins panel */}
+              <TabPanel>
+                {searchQuery.length > 0 && !pluginSearchResults.length ? (
+                  <EmptyNpmPackageSearch content={emptySearchMessage} />
+                ) : (
                   <NpmPackagesGrid
-                    npmPackages={searchResults}
+                    npmPackages={pluginSearchResults}
                     installedPackageNames={installedPluginNames}
                     useYarn={appInfoResponse.data.useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
                     npmPackageType="plugin"
                   />
-                </TabPanel>
-                <TabPanel>
+                )}
+              </TabPanel>
+              {/* Providers panel */}
+              <TabPanel>
+                {searchQuery.length > 0 && !providerSearchResults.length ? (
+                  <EmptyNpmPackageSearch content={emptySearchMessage} />
+                ) : (
                   <NpmPackagesGrid
-                    npmPackages={marketplaceProvidersResponse.data}
+                    npmPackages={providerSearchResults}
                     useYarn={appInfoResponse.data.useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
                     npmPackageType="provider"
                   />
-                </TabPanel>
-              </TabPanels>
-            </TabGroup>
-          )}
+                )}
+              </TabPanel>
+            </TabPanels>
+          </TabGroup>
           <Box paddingTop={7}>
             <MissingPluginBanner />
           </Box>
