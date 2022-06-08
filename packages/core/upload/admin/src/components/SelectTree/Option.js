@@ -24,7 +24,7 @@ const Option = ({ children, data, selectProps, ...props }) => {
     <>
       <components.Option {...props}>
         <Flex alignItems="start">
-          <Typography textColor="neutral800">
+          <Typography textColor="neutral800" ellipsis>
             <span style={{ paddingLeft: `${Math.min(depth, maxDisplayDepth) * 10}px` }}>
               {children}
             </span>
