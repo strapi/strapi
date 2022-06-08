@@ -8,7 +8,7 @@ const { importDefault } = require('../../utils');
 // TODO:: allow folders with index.js inside for bigger policies
 module.exports = async function loadMiddlewares(strapi) {
   const localMiddlewares = await loadLocalMiddlewares(strapi);
-  const internalMiddlewares = importDefault('../../middlewares');
+  const internalMiddlewares = require('../../middlewares');
 
   strapi.container.get('middlewares').add(`global::`, localMiddlewares);
   strapi.container.get('middlewares').add(`strapi::`, internalMiddlewares);
