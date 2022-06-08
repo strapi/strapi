@@ -83,7 +83,7 @@ export const BrowseStep = ({
         <Box>
           <Box paddingBottom={4}>
             <Flex justifyContent="space-between" alignItems="flex-start">
-              {(assetCount > 0 || folderCount > 0) && (
+              {(assetCount > 0 || folderCount > 0 || isFiltering) && (
                 <StartBlockActions wrap="wrap">
                   {multiple && (
                     <Flex
