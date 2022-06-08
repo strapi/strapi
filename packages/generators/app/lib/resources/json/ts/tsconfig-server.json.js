@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = () => ({
-  extends: '@strapi/typescript-utils/lib/configs/server',
+  extends: '@strapi/typescript-utils/tsconfigs/server',
 
   compilerOptions: {
     outDir: 'dist',
