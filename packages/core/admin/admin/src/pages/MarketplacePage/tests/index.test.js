@@ -954,7 +954,7 @@ describe('Marketplace page', () => {
                         <div
                           class="c21"
                         >
-                          Search for a plugin
+                          Search
                         </div>
                       </label>
                     </div>
@@ -990,7 +990,7 @@ describe('Marketplace page', () => {
                         class="c28"
                         id="field-1"
                         name="searchbar"
-                        placeholder="Search for a plugin"
+                        placeholder="Search"
                         value=""
                       />
                     </div>
@@ -1760,20 +1760,50 @@ describe('Marketplace page', () => {
     expect(trackUsage).toHaveBeenCalledTimes(1);
   });
 
-  it('should return search results matching the query', async () => {
+  it('should return plugin search results matching the query', async () => {
     const { container } = render(App);
-    const input = await getByPlaceholderText(container, 'Search for a plugin');
+    const input = await getByPlaceholderText(container, 'Search');
     fireEvent.change(input, { target: { value: 'comment' } });
     const match = screen.getByText('Comments');
     const notMatch = screen.queryByText('Sentry');
+    const provider = screen.queryByText('Cloudinary');
 
     expect(match).toBeVisible();
     expect(notMatch).toEqual(null);
+    expect(provider).toEqual(null);
   });
 
-  it('should return empty search results given a bad query', async () => {
+  it('should return provider search results matching the query', async () => {
     const { container } = render(App);
-    const input = await getByPlaceholderText(container, 'Search for a plugin');
+    const providersTab = screen.getByRole('tab', { selected: false });
+    fireEvent.click(providersTab);
+
+    const input = await getByPlaceholderText(container, 'Search');
+    fireEvent.change(input, { target: { value: 'cloudina' } });
+    const match = screen.getByText('Cloudinary');
+    const notMatch = screen.queryByText('Mailgun');
+    const plugin = screen.queryByText('Comments');
+
+    expect(match).toBeVisible();
+    expect(notMatch).toEqual(null);
+    expect(plugin).toEqual(null);
+  });
+
+  it('should return empty plugin search results given a bad query', async () => {
+    const { container } = render(App);
+    const input = await getByPlaceholderText(container, 'Search');
+    const badQuery = 'asdf';
+    fireEvent.change(input, { target: { value: badQuery } });
+    const noResult = screen.getByText(`No result for "${badQuery}"`);
+
+    expect(noResult).toBeVisible();
+  });
+
+  it('should return empty provider search results given a bad query', async () => {
+    const { container } = render(App);
+    const providersTab = screen.getByRole('tab', { selected: false });
+    fireEvent.click(providersTab);
+    const input = await getByPlaceholderText(container, 'Search');
     const badQuery = 'asdf';
     fireEvent.change(input, { target: { value: badQuery } });
     const noResult = screen.getByText(`No result for "${badQuery}"`);
