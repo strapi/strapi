@@ -12,8 +12,8 @@ const containsMimeTypeFilter = query => {
   return !!result;
 };
 
-const isAssetOnlyFilter = query => {
+const containsAssetFilter = query => {
   return containsMimeTypeFilter(query);
 };
 
-export default isAssetOnlyFilter;
+export default containsAssetFilter;
