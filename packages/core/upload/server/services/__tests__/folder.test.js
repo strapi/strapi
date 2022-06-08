@@ -13,7 +13,9 @@ describe('folder', () => {
         db: {
           queryBuilder: () => ({
             max: () => ({
-              execute: () => ({ pathId: 2 }),
+              first: () => ({
+                execute: () => ({ max: 2 }),
+              }),
             }),
           }),
         },
