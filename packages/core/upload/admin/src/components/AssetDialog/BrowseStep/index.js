@@ -253,6 +253,7 @@ export const BrowseStep = ({
 
 BrowseStep.defaultProps = {
   allowedTypes: [],
+  folders: [],
   multiple: false,
   onSelectAllAsset: undefined,
   onEditAsset: undefined,
@@ -262,7 +263,7 @@ BrowseStep.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
   assets: PropTypes.arrayOf(AssetDefinition).isRequired,
   canCreate: PropTypes.bool.isRequired,
-  folders: PropTypes.arrayOf(FolderDefinition).isRequired,
+  folders: PropTypes.arrayOf(FolderDefinition),
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,
   onChangeFilters: PropTypes.func.isRequired,
