@@ -60,6 +60,7 @@
   "error.contentTypeName.reserved-name": "This name cannot be used in your project as it might break other functionalities",
   "error.validation.enum-duplicate": "Duplicate values are not allowed",
   "error.validation.enum-empty-string": "Empty strings are not allowed",
+  "error.validation.match-regex": "The value does not match the regex.",
   "error.validation.enum-number": "Values cannot start with a number",
   "error.validation.minSupMax": "Can't be superior",
   "error.validation.positive": "Must be a positive number",

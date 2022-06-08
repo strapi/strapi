@@ -5,6 +5,7 @@ import getTrad from '../../../utils/getTrad';
 import getRelationType from '../../../utils/getRelationType';
 import toRegressedEnumValue from '../../../utils/toRegressedEnumValue';
 import startsWithANumber from '../../../utils/startsWithANumber';
+import matchRegex from '../../../utils/matchRegex';
 import {
   alreadyUsedAttributeNames,
   createTextShape,
@@ -172,7 +173,13 @@ const types = {
           name: 'doesNotStartWithANumber',
           message: getTrad('error.validation.enum-number'),
           test: values => !values.some(startsWithANumber),
+        })
+        .test({
+          name: 'matchesRegex',
+          message: getTrad('error.validation.match-regex'),
+          test: values => values.every(matchRegex),
         }),
+
       enumName: yup.string().nullable(),
     };
 
