@@ -33,7 +33,7 @@
     "pluralize": "8.0.0",
     "redux": "^4.0.1",
     "reselect": "^4.0.0",
-    "swagger-ui-dist": "3.47.1"
+    "swagger-ui-dist": "4.11.1"
   },
   "peerDependencies": {
     "@strapi/design-system": "1.1.1",

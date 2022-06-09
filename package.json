@@ -24,8 +24,8 @@
   "workspaces": [
     "packages/*",
     "packages/*/*",
-    "examples/*",
-    ".github/actions/*"
+    ".github/actions/*",
+    "examples/*"
   ],
   "scripts": {
     "setup": "yarn && yarn build",
@@ -181,7 +181,7 @@
     "npm-run-all": "4.1.5",
     "plop": "2.7.6",
     "prettier": "1.19.1",
-    "qs": "6.10.1",
+    "qs": "6.10.5",
     "react-test-renderer": "17.0.2",
     "request": "2.88.2",
     "request-promise-native": "1.0.9",
