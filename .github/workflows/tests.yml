@@ -65,7 +65,7 @@ jobs:
       - name: Build
         run: yarn build
       - name: Run test
-        run: yarn run -s test:front && codecov -C -F front
+        run: yarn run -s test:front --coverage && codecov -C -F front
 
   e2e_ce_pg:
     runs-on: ubuntu-latest
