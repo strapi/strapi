@@ -31,9 +31,7 @@
     }
   ],
   "main": "./index.js",
-  "bin": {
-    "create-strapi-starter": "./index.js"
-  },
+  "bin": "./index.js",
   "scripts": {
     "test": "echo \"no tests yet\""
   },

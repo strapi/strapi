@@ -23,8 +23,17 @@
   "scripts": {
     "test:unit": "jest --verbose"
   },
-  "dependencies": {
+  "peerDependencies": {
+    "@strapi/design-system": "1.1.1",
+    "@strapi/helper-plugin": "4.1.12",
+    "@strapi/icons": "1.1.1",
     "@strapi/utils": "4.1.12",
+    "axios": "0.24.0",
+    "formik": "^2.2.6",
+    "prop-types": "^15.7.2",
+    "react-query": "3.24.3"
+  },
+  "dependencies": {
     "lodash": "4.17.21"
   },
   "engines": {

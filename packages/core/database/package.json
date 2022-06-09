@@ -38,6 +38,9 @@
     "lodash": "4.17.21",
     "umzug": "3.1.1"
   },
+  "peerDependencies": {
+    "mysql": "^2.18.1"
+  },
   "engines": {
     "node": ">=12.22.0 <=16.x.x",
     "npm": ">=6.0.0"

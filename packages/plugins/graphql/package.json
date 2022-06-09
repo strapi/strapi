@@ -30,7 +30,6 @@
     "@apollo/federation": "^0.28.0",
     "@graphql-tools/schema": "8.1.2",
     "@graphql-tools/utils": "^8.0.2",
-    "@strapi/utils": "4.1.12",
     "apollo-server-core": "3.1.2",
     "apollo-server-koa": "3.1.2",
     "glob": "^7.1.7",
@@ -52,7 +51,12 @@
     "koa": "^2.13.1"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.0.0"
+    "@strapi/helper-plugin": "4.1.12",
+    "@strapi/strapi": "^4.1.12",
+    "@strapi/utils": "4.1.12",
+    "immer": "^9.0.6",
+    "koa": "^2.13.3",
+    "webpack": "5.65.0"
   },
   "engines": {
     "node": ">=12.22.0 <=16.x.x",

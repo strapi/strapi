@@ -27,11 +27,23 @@
   },
   "dependencies": {
     "@strapi/provider-email-sendmail": "4.1.12",
-    "@strapi/utils": "4.1.12",
     "lodash": "4.17.21"
   },
   "devDependencies": {
     "@strapi/helper-plugin": "4.1.12"
+  },
+  "peerDependencies": {
+    "@strapi/design-system": "1.1.1",
+    "@strapi/helper-plugin": "4.1.12",
+    "@strapi/icons": "1.1.1",
+    "@strapi/utils": "4.1.12",
+    "axios": "0.24.0",
+    "immer": "~9.0.6",
+    "prop-types": "^15.7.2",
+    "qs": "6.10.1",
+    "react-is": "^17.0.2",
+    "react-select": "^4.0.2",
+    "webpack": "5.65.0"
   },
   "engines": {
     "node": ">=12.22.0 <=16.x.x",

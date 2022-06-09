@@ -24,8 +24,11 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/utils": "4.1.12",
     "lodash": "4.17.21"
+  },
+  "peerDependencies": {
+    "@strapi/utils": "4.1.12",
+    "immer": "^9.0.6"
   },
   "engines": {
     "node": ">=12.22.0 <=16.x.x",

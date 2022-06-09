@@ -24,8 +24,6 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@strapi/helper-plugin": "4.1.12",
-    "@strapi/utils": "4.1.12",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.5",
     "fs-extra": "10.0.0",
@@ -33,19 +31,26 @@
     "lodash": "4.17.21",
     "path-to-regexp": "6.2.0",
     "pluralize": "8.0.0",
-    "react": "^17.0.2",
-    "react-copy-to-clipboard": "^5.0.3",
-    "react-dom": "^17.0.2",
-    "react-intl": "5.20.2",
-    "react-redux": "7.2.3",
-    "react-router": "^5.2.0",
-    "react-router-dom": "5.2.0",
     "redux": "^4.0.1",
     "reselect": "^4.0.0",
     "swagger-ui-dist": "3.47.1"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.0.0"
+    "@strapi/design-system": "1.1.1",
+    "@strapi/helper-plugin": "4.1.12",
+    "@strapi/icons": "1.1.1",
+    "@strapi/strapi": "^4.1.12",
+    "@strapi/utils": "4.1.12",
+    "formik": "^2.2.6",
+    "immer": "9.0.6",
+    "qs": "6.10.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-is": "^17.0.2",
+    "react-query": "3.24.3",
+    "react-router-dom": "5.2.0",
+    "react-select": "^4.0.2",
+    "webpack": "5.65.0"
   },
   "engines": {
     "node": ">=12.22.0 <=16.x.x",
