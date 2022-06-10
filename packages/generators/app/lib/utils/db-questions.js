@@ -3,6 +3,7 @@
 const DEFAULT_PORTS = {
   postgres: 5432,
   mysql: 3306,
+  mongodb: 27017,
 };
 
 const database = ({ scope }) => ({
