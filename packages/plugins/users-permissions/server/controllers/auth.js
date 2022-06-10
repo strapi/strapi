@@ -357,13 +357,27 @@ module.exports = {
         user: sanitizedUser,
       });
     } catch (err) {
-      if (_.includes(err.message, 'username')) {
-        throw new ApplicationError('Username already taken');
-      } else if (_.includes(err.message, 'email')) {
-        throw new ApplicationError('Email already taken');
-      } else {
-        strapi.log.error(err);
-        throw new ApplicationError('An error occurred during account creation');
+      switch (true) {
+        case _.includes(err.message, 'unique'):
+          if (err.details.errors[0].path[0] === 'username') {
+            throw new ApplicationError('Username already taken');
+          }
+          throw new ApplicationError('Something went wrong');
+
+        case _.includes(err.message, 'characters'):
+          if (_.includes(err.message, 'username')) {
+            throw new ApplicationError('The username is too short. It must be at least 3 characters long');
+          }
+          if (_.includes(err.message, 'password')) {
+            throw new ApplicationError('The password is too short. It must be at least 6 characters long');
+          }
+          
+        case _.includes(err.message, 'email'):
+          throw new ApplicationError('Email already taken');
+
+        default:
+          strapi.log.error(err);
+          throw new ApplicationError('An error occurred during account creation');
       }
     }
   },
