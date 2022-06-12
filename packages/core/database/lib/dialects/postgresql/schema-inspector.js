@@ -39,11 +39,11 @@ const SQL_QUERIES = {
       AND t.relname = ?;
   `,
   FOREIGN_KEY_LIST: /* sql */ `
-    SELECT
+   SELECT
       tco."constraint_name" as constraint_name,
       kcu."column_name" as column_name,
-      rel_kcu."table_name" as foreign_table,
-      rel_kcu."column_name" as fk_column_name,
+      kcu."table_name" as foreign_table,
+      kcu."column_name" as fk_column_name,
       rco.update_rule as on_update,
       rco.delete_rule as on_delete
     FROM information_schema.table_constraints tco
@@ -53,10 +53,6 @@ const SQL_QUERIES = {
     JOIN information_schema.referential_constraints rco
       ON tco.constraint_schema = rco.constraint_schema
       AND tco.constraint_name = rco.constraint_name
-    JOIN information_schema.key_column_usage rel_kcu
-      ON rco.unique_constraint_schema = rel_kcu.constraint_schema
-      AND rco.unique_constraint_name = rel_kcu.constraint_name
-      AND kcu.ordinal_position = rel_kcu.ordinal_position
     WHERE
       tco.constraint_type = 'FOREIGN KEY'
       AND tco.constraint_schema = ?
