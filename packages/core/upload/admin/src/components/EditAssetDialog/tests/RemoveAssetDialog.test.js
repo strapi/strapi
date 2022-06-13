@@ -139,7 +139,7 @@ describe('RemoveAssetDialog', () => {
       await waitFor(() =>
         expect(toggleNotificationSpy).toHaveBeenCalledWith({
           message: {
-            defaultMessage: 'The asset has been successfully removed.',
+            defaultMessage: 'Elements have been successfully deleted.',
             id: 'modal.remove.success-label',
           },
           type: 'success',

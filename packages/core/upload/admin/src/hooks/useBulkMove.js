@@ -45,7 +45,7 @@ export const useBulkMove = () => {
         type: 'success',
         message: {
           id: getTrad('modal.move.success-label'),
-          defaultMessage: 'Changes successfully saved',
+          defaultMessage: 'Elements have been moved successfully.',
         },
       });
     },
