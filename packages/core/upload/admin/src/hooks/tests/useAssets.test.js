@@ -77,9 +77,10 @@ describe('useAssets', () => {
   });
 
   test('fetches data from the right URL if no query was set', async () => {
-    const { result, waitFor } = await setup();
+    const { result, waitFor, waitForNextUpdate } = await setup();
 
     await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
 
     const expected = {
       filters: {
@@ -101,9 +102,10 @@ describe('useAssets', () => {
   });
 
   test('fetches data from the right URL if a query was set', async () => {
-    const { result, waitFor } = await setup({ query: { folder: 1 } });
+    const { result, waitFor, waitForNextUpdate } = await setup({ query: { folder: 1 } });
 
     await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
 
     const expected = {
       filters: {
@@ -123,11 +125,12 @@ describe('useAssets', () => {
   });
 
   test('allows to merge filter query params using filters.$and', async () => {
-    const { result, waitFor } = await setup({
+    const { result, waitFor, waitForNextUpdate } = await setup({
       query: { folder: 5, filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
 
     const expected = {
       filters: {
@@ -160,8 +163,9 @@ describe('useAssets', () => {
   test('calls notifyStatus in case of success', async () => {
     const { notifyStatus } = useNotifyAT();
     const toggleNotification = useNotification();
-    const { waitForNextUpdate } = await setup({});
+    const { result, waitFor, waitForNextUpdate } = await setup({});
 
+    await waitFor(() => result.current.isSuccess);
     await waitForNextUpdate();
 
     expect(notifyStatus).toBeCalledWith('The assets have finished loading.');
@@ -169,13 +173,21 @@ describe('useAssets', () => {
   });
 
   test('calls toggleNotification in case of error', async () => {
+    const originalConsoleError = console.error;
+    console.error = jest.fn();
+
     axiosInstance.get.mockRejectedValueOnce(new Error('Jest mock error'));
 
     const { notifyStatus } = useNotifyAT();
     const toggleNotification = useNotification();
-    const { waitFor } = await setup({});
+    const { result, waitFor, waitForNextUpdate } = await setup({});
 
-    await waitFor(() => expect(toggleNotification).toBeCalled());
-    await waitFor(() => expect(notifyStatus).not.toBeCalled());
+    await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
+
+    expect(toggleNotification).toBeCalled();
+    expect(notifyStatus).not.toBeCalled();
+
+    console.error = originalConsoleError;
   });
 });
