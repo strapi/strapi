@@ -25,6 +25,7 @@ import { DialogHeader } from './DialogHeader';
 import { DialogFooter } from './DialogFooter';
 import { EditAssetDialog } from '../EditAssetDialog';
 import { moveElement } from '../../utils/moveElement';
+import { EditFolderDialog } from '../EditFolderDialog';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
@@ -44,6 +45,7 @@ export const AssetDialog = ({
   trackedLocation,
 }) => {
   const [assetToEdit, setAssetToEdit] = useState(undefined);
+  const [folderToEdit, setFolderToEdit] = useState(undefined);
   const { formatMessage } = useIntl();
   const {
     canRead,
@@ -152,6 +154,10 @@ export const AssetDialog = ({
     );
   }
 
+  if (folderToEdit) {
+    return <EditFolderDialog folder={folderToEdit} onClose={() => setFolderToEdit(undefined)} />;
+  }
+
   const handleMoveItem = (hoverIndex, destIndex) => {
     const offset = destIndex - hoverIndex;
     const orderedAssetsClone = selectedAssets.slice();
@@ -228,6 +234,7 @@ export const AssetDialog = ({
                 multiple={multiple}
                 onSelectAllAsset={handleSelectAllAssets}
                 onEditAsset={canUpdate ? setAssetToEdit : undefined}
+                onEditFolder={canUpdate ? setFolderToEdit : undefined}
                 pagination={pagination}
                 queryObject={queryObject}
                 onAddAsset={onAddAsset}

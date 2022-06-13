@@ -11,6 +11,8 @@ import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
 import { GridItem } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { IconButton } from '@strapi/design-system/IconButton';
+import PencilIcon from '@strapi/icons/Pencil';
 import PlusIcon from '@strapi/icons/Plus';
 
 import { FolderDefinition, AssetDefinition } from '../../../constants';
@@ -56,6 +58,7 @@ export const BrowseStep = ({
   onChangeSort,
   onChangeFolder,
   onEditAsset,
+  onEditFolder,
   onSelectAllAsset,
   onSelectAsset,
   pagination,
@@ -179,6 +182,18 @@ export const BrowseStep = ({
                   ariaLabel={folder.name}
                   id={`folder-${folder.uid}`}
                   onClick={() => onChangeFolder(folder.id)}
+                  cardActions={
+                    onEditFolder && (
+                      <IconButton
+                        icon={<PencilIcon />}
+                        aria-label={formatMessage({
+                          id: getTrad('list.folder.edit'),
+                          defaultMessage: 'Edit folder',
+                        })}
+                        onClick={() => onEditFolder(folder)}
+                      />
+                    )
+                  }
                 >
                   <FolderCardBody>
                     <FolderCardBodyAction onClick={() => onChangeFolder(folder.id)}>
@@ -257,6 +272,7 @@ BrowseStep.defaultProps = {
   multiple: false,
   onSelectAllAsset: undefined,
   onEditAsset: undefined,
+  onEditFolder: undefined,
 };
 
 BrowseStep.propTypes = {
@@ -273,6 +289,7 @@ BrowseStep.propTypes = {
   onChangeSort: PropTypes.func.isRequired,
   onChangeSearch: PropTypes.func.isRequired,
   onEditAsset: PropTypes.func,
+  onEditFolder: PropTypes.func,
   onSelectAsset: PropTypes.func.isRequired,
   onSelectAllAsset: PropTypes.func,
   queryObject: PropTypes.shape({
