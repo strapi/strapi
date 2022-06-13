@@ -1,14 +1,11 @@
 import React from 'react';
+import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { PendingAssetStep } from '../PendingAssetStep';
-import en from '../../../../translations/en.json';
 
 jest.mock('../../../../utils/getTrad', () => x => x);
-jest.mock('react-intl', () => ({
-  useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id]) }),
-}));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,6 +16,13 @@ const queryClient = new QueryClient({
 });
 
 describe('PendingAssetStep', () => {
+  beforeAll(() => {
+    // see https://github.com/testing-library/react-testing-library/issues/470
+    Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
+      set: () => {},
+    });
+  });
+
   it('snapshots the component with valid cards', () => {
     const assets = [
       {
@@ -52,16 +56,18 @@ describe('PendingAssetStep', () => {
     const { container } = renderTL(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={lightTheme}>
-          <PendingAssetStep
-            assets={assets}
-            onClose={jest.fn()}
-            onAddAsset={jest.fn()}
-            onEditAsset={jest.fn()}
-            onClickAddAsset={jest.fn()}
-            onCancelUpload={jest.fn()}
-            onRemoveAsset={jest.fn()}
-            onUploadSucceed={jest.fn()}
-          />
+          <IntlProvider locale="en">
+            <PendingAssetStep
+              assets={assets}
+              onClose={jest.fn()}
+              onAddAsset={jest.fn()}
+              onEditAsset={jest.fn()}
+              onClickAddAsset={jest.fn()}
+              onCancelUpload={jest.fn()}
+              onRemoveAsset={jest.fn()}
+              onUploadSucceed={jest.fn()}
+            />
+          </IntlProvider>
         </ThemeProvider>
       </QueryClientProvider>
     );

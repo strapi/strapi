@@ -32,7 +32,7 @@ function ComponentFixture(props) {
 }
 
 function setup(props = { onClose: jest.fn() }) {
-  return render(<ComponentFixture {...props} />, { container: document.body });
+  return render(<ComponentFixture {...props} />, { container: document.getElementById('app') });
 }
 
 describe('BulkMoveDialog', () => {
@@ -41,10 +41,10 @@ describe('BulkMoveDialog', () => {
   });
 
   test('renders and matches the snapshot', () => {
-    const { container } = setup({
+    setup({
       selected: [],
       onClose: jest.fn(),
     });
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

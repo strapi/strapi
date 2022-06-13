@@ -27,11 +27,11 @@ const queryClient = new QueryClient({
 
 const renderCompo = (
   props = {
+    onChange: jest.fn(),
+    name: 'test',
     intlLabel: {
       id: 'default',
       defaultMessage: 'default message',
-      onChange: jest.fn(),
-      name: 'test',
     },
   }
 ) =>
@@ -43,13 +43,13 @@ const renderCompo = (
         </NotificationsProvider>
       </ThemeProvider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: document.getElementById('app') }
   );
 
 describe('<MediaLibraryInput />', () => {
   it('renders and matches the snapshot', () => {
-    const { container } = renderCompo();
+    renderCompo();
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

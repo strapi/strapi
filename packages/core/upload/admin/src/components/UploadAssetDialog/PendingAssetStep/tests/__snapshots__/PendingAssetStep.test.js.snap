@@ -873,7 +873,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
             <span
               class="c12"
             >
-              {number, plural, =0 {No asset} one {1 asset} other {# assets}} ready to upload
+              3 assets ready to upload
             </span>
             <span
               class="c13"
@@ -918,28 +918,32 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       class="c23 c24 c25 c26"
                       spacing="2"
                     >
-                      <button
-                        aria-disabled="false"
-                        class="c27 c28"
-                        type="button"
-                      >
-                        <svg
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 24 24"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
-                            fill="#32324D"
-                          />
-                        </svg>
-                      </button>
                       <span>
                         <button
                           aria-disabled="false"
                           aria-labelledby="tooltip-1"
+                          class="c27 c28"
+                          tabindex="0"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                              fill="#32324D"
+                            />
+                          </svg>
+                        </button>
+                      </span>
+                      <span>
+                        <button
+                          aria-disabled="false"
+                          aria-labelledby="tooltip-3"
                           class="c27 c28"
                           tabindex="0"
                           type="button"
@@ -1038,28 +1042,32 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       class="c23 c24 c25 c26"
                       spacing="2"
                     >
-                      <button
-                        aria-disabled="false"
-                        class="c27 c28"
-                        type="button"
-                      >
-                        <svg
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 24 24"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
-                            fill="#32324D"
-                          />
-                        </svg>
-                      </button>
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby="tooltip-3"
+                          aria-labelledby="tooltip-5"
+                          class="c27 c28"
+                          tabindex="0"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                              fill="#32324D"
+                            />
+                          </svg>
+                        </button>
+                      </span>
+                      <span>
+                        <button
+                          aria-disabled="false"
+                          aria-labelledby="tooltip-7"
                           class="c27 c28"
                           tabindex="0"
                           type="button"
@@ -1177,28 +1185,32 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       class="c23 c24 c25 c26"
                       spacing="2"
                     >
-                      <button
-                        aria-disabled="false"
-                        class="c27 c28"
-                        type="button"
-                      >
-                        <svg
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 24 24"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
-                            fill="#32324D"
-                          />
-                        </svg>
-                      </button>
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby="tooltip-5"
+                          aria-labelledby="tooltip-9"
+                          class="c27 c28"
+                          tabindex="0"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                              fill="#32324D"
+                            />
+                          </svg>
+                        </button>
+                      </span>
+                      <span>
+                        <button
+                          aria-disabled="false"
+                          aria-labelledby="tooltip-11"
                           class="c27 c28"
                           tabindex="0"
                           type="button"
@@ -1326,7 +1338,9 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
           >
             <span
               class="c16 c17"
-            />
+            >
+              cancel
+            </span>
           </button>
         </div>
         <div
@@ -1340,7 +1354,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
             <span
               class="c16 c17"
             >
-              Upload {number, plural, one {# asset} other {# assets}} to the library
+              Upload 3 assets to the library
             </span>
           </button>
         </div>

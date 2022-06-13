@@ -556,27 +556,29 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
 <body
   class="lock-body-scroll"
 >
-  <div
-    class="c0"
-  >
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-log"
-      role="log"
-    />
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-status"
-      role="status"
-    />
-    <p
-      aria-live="assertive"
-      aria-relevant="all"
-      id="live-region-alert"
-      role="alert"
-    />
+  <div>
+    <div
+      class="c0"
+    >
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-log"
+        role="log"
+      />
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-status"
+        role="status"
+      />
+      <p
+        aria-live="assertive"
+        aria-relevant="all"
+        id="live-region-alert"
+        role="alert"
+      />
+    </div>
   </div>
   <div
     data-react-portal="true"
@@ -808,27 +810,29 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   width: 1px;
 }
 
-<div
-    class="c0"
-  >
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-log"
-      role="log"
-    />
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-status"
-      role="status"
-    />
-    <p
-      aria-live="assertive"
-      aria-relevant="all"
-      id="live-region-alert"
-      role="alert"
-    />
+<div>
+    <div
+      class="c0"
+    >
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-log"
+        role="log"
+      />
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-status"
+        role="status"
+      />
+      <p
+        aria-live="assertive"
+        aria-relevant="all"
+        id="live-region-alert"
+        role="alert"
+      />
+    </div>
   </div>
   .c1 {
   background: #ffffff;
