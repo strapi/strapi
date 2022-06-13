@@ -14,10 +14,15 @@ const clientDependencies = require('./utils/db-client-dependencies');
 const dbQuestions = require('./utils/db-questions');
 const createProject = require('./create-project');
 
+const LANGUAGES = {
+  javascript: 'JavaScript',
+  typescript: 'TypeScript',
+};
+
 module.exports = async scope => {
   if (!scope.useTypescript) {
     const language = await askAboutLanguages(scope);
-    scope.useTypescript = language === 'Typescript';
+    scope.useTypescript = language === LANGUAGES.typescript;
   }
 
   await trackUsage({ event: 'didChooseCustomDatabase', scope });
@@ -169,8 +174,8 @@ async function askAboutLanguages() {
       type: 'list',
       name: 'language',
       message: 'Choose your preferred language',
-      choices: ['Javascript', 'Typescript'],
-      default: 'Javascript',
+      choices: Object.values(LANGUAGES),
+      default: LANGUAGES.javascript,
     },
   ]);
 

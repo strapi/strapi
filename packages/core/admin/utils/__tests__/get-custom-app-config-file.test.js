@@ -22,7 +22,7 @@ describe('getCustomAppConfigFile', () => {
     expect(result).toBeUndefined();
   });
 
-  test('It should return undefined when the app config file extension is not (.ts|.tsx) and useTypeScript is truthy', async () => {
+  test('It should return app.js when the app config file extension is not (.ts|.tsx) and useTypeScript is truthy', async () => {
     fse.readdir = jest.fn(() => {
       return ['app.js', 'webpack.config.js', 'app.example.ts', 'app.example.tsx'];
     });
@@ -31,7 +31,7 @@ describe('getCustomAppConfigFile', () => {
 
     const result = await getCustomAppConfigFile('/');
 
-    expect(result).toBeUndefined();
+    expect(result).toBe('app.js');
   });
 
   test('It should return app.js when the app config file extension is .js and useTypeScript is falsy', async () => {
@@ -46,23 +46,21 @@ describe('getCustomAppConfigFile', () => {
     expect(result).toEqual('app.js');
   });
 
-  test('It should return (app.ts|app.tsx) when the app config file extension is .ts and useTypeScript is truthy', async () => {
-    fse.readdir = jest.fn(() => {
-      return ['app.js', 'webpack.config.js', 'app.ts', 'app.example.tsx'];
-    });
+  test.each([
+    ['app.ts', ['app.js', 'webpack.config.js', 'app.ts', 'app.example.tsx']],
+    ['app.ts', ['app.ts', 'webpack.config.js', 'app.js', 'app.example.tsx']],
+    ['app.ts', ['webpack.config.js', 'app.jsx', 'app.ts', 'app.example.tsx']],
+    ['app.jsx', ['webpack.config.js', 'app.jsx', 'app.example.tsx']],
+  ])(
+    'It should return %s when the app config file extension is .ts and useTypeScript is truthy',
+    async (expected, files) => {
+      fse.readdir = jest.fn(() => files);
 
-    isUsingTypeScript.mockImplementation(() => true);
+      isUsingTypeScript.mockImplementation(() => true);
 
-    const result = await getCustomAppConfigFile('/');
+      const result = await getCustomAppConfigFile('/');
 
-    expect(result).toEqual('app.ts');
-
-    fse.readdir = jest.fn(() => {
-      return ['app.js', 'webpack.config.js', 'app.tsx'];
-    });
-
-    const otherResult = await getCustomAppConfigFile('/');
-
-    expect(otherResult).toEqual('app.tsx');
-  });
+      expect(result).toEqual(expected);
+    }
+  );
 });

@@ -82,7 +82,13 @@ module.exports = {
     return projectSettingsService.updateProjectSettings({ ...body, ...formatedFiles });
   },
 
-  async telemetryProperties() {
+  async telemetryProperties(ctx) {
+    // If the telemetry is disabled, ignore the request and return early
+    if (strapi.telemetry.isDisabled) {
+      ctx.status = 204;
+      return;
+    }
+
     const useTypescriptOnServer = await isUsingTypeScript(strapi.dirs.app.root);
     const useTypescriptOnAdmin = await isUsingTypeScript(
       path.join(strapi.dirs.app.root, 'src', 'admin')
