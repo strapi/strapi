@@ -112,7 +112,11 @@ describe('Media library homepage', () => {
 
   describe('loading state', () => {
     it('shows a loader when resolving the permissions', () => {
-      useMediaLibraryPermissions.mockReturnValueOnce({ isLoading: true });
+      useMediaLibraryPermissions.mockReturnValueOnce({
+        isLoading: true,
+        canCreate: false,
+        canRead: false,
+      });
 
       renderML();
 
@@ -151,6 +155,7 @@ describe('Media library homepage', () => {
         useMediaLibraryPermissions.mockReturnValueOnce({
           isLoading: false,
           canRead: false,
+          canCreate: false,
         });
 
         renderML();
@@ -170,6 +175,7 @@ describe('Media library homepage', () => {
         useMediaLibraryPermissions.mockReturnValueOnce({
           isLoading: false,
           canRead: false,
+          canCreate: false,
         });
 
         renderML();
@@ -226,6 +232,7 @@ describe('Media library homepage', () => {
       it('hides the "Upload new asset" button when the user does not have the permissions to', async () => {
         useMediaLibraryPermissions.mockReturnValueOnce({
           isLoading: false,
+          canRead: false,
           canCreate: false,
         });
 
@@ -366,6 +373,7 @@ describe('Media library homepage', () => {
       useMediaLibraryPermissions.mockReturnValueOnce({
         isLoading: false,
         canRead: false,
+        canCreate: false,
       });
 
       renderML();
@@ -445,6 +453,7 @@ describe('Media library homepage', () => {
       useMediaLibraryPermissions.mockReturnValueOnce({
         isLoading: false,
         canRead: false,
+        canCreate: false,
       });
 
       renderML();
@@ -475,6 +484,7 @@ describe('Media library homepage', () => {
       useMediaLibraryPermissions.mockReturnValueOnce({
         isLoading: false,
         canCreate: false,
+        canRead: false,
       });
       useAssets.mockReturnValueOnce({
         isLoading: false,
