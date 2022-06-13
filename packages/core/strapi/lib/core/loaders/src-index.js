@@ -29,7 +29,7 @@ module.exports = strapi => {
     return {};
   }
 
-  const srcIndex = importDefault(require(pathToSrcIndex)).default;
+  const srcIndex = importDefault(pathToSrcIndex);
 
   try {
     validateSrcIndex(srcIndex);

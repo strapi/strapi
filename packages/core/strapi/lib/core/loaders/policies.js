@@ -22,7 +22,7 @@ module.exports = async function loadPolicies(strapi) {
 
     if (fd.isFile() && extname(name) === '.js') {
       const key = basename(name, '.js');
-      policies[key] = importDefault(require(fullPath)).default;
+      policies[key] = importDefault(fullPath);
     }
   }
 

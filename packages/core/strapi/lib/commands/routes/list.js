@@ -3,25 +3,12 @@
 const CLITable = require('cli-table3');
 const chalk = require('chalk');
 const { toUpper } = require('lodash/fp');
-const tsUtils = require('@strapi/typescript-utils');
 
 const strapi = require('../../index');
 
 module.exports = async function() {
-  const appDir = process.cwd();
-
-  const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-  const outDir = await tsUtils.resolveOutDir(appDir);
-
-  if (isTSProject)
-    await tsUtils.compile(appDir, {
-      watch: false,
-      configOptions: { options: { incremental: true } },
-    });
-
-  const distDir = isTSProject ? outDir : appDir;
-
-  const app = await strapi({ appDir, distDir }).load();
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   const list = app.server.listRoutes();
 

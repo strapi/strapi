@@ -71,7 +71,6 @@ module.exports = (config, { strapi }) => {
       {
         method: 'GET',
         path: '/assets/images/(.*)',
-        // Why do we use the __dirname and not strapi.dirs here? @alexandrebodin
         handler: serveStatic(path.resolve(__dirname, 'assets/images'), {
           maxage: maxAge,
           defer: true,

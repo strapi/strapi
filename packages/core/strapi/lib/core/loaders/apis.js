@@ -155,7 +155,7 @@ const loadFile = file => {
 
   switch (ext) {
     case '.js':
-      return importDefault(require(file)).default;
+      return importDefault(file);
     case '.json':
       return fse.readJSON(file);
     default:

@@ -1,10 +1,7 @@
 import type Koa from 'koa';
 
 import type { StringMap } from './utils';
-
-type Controller = {
-  [methodName: string | number | symbol]: (context: Koa.Context) => unknown;
-}
+import type { GenericController } from '../core-api/controller'
 
 /**
  * The Strapi interface implemented by the main Strapi class.
@@ -47,12 +44,12 @@ export interface Strapi {
    *
    * It returns all the registered controllers
    */
-  readonly controllers: StringMap<Controller>;
+  readonly controllers: StringMap<GenericController>;
 
   /**
    * Find a controller using its unique identifier
    */
-  controller(uid: string): Controller | undefined;
+  controller(uid: string): GenericController | undefined;
 
   /**
    * Getter for the Strapi content types container
@@ -282,10 +279,92 @@ export interface Strapi {
    * Binds database queries for a specific model based on its unique identifier.
    */
   query(uid: string): any;
+
+  /**
+   * Main Strapi container holding all the registries and providers (config, content-types, services, policies, etc...)
+   */
+  container: any;
+
+  /**
+   * References to all the directories handled by Strapi 
+   */
+  dirs: StrapiDirectories;
+
+  /**
+   * Internal flag used to check if the application has been loaded
+   */
+  isLoaded: boolean;
+
+  /**
+   * Fully reload the application
+   */
+  reload(): void;
+
+  /**
+   * Holds a reference to the Koa application and the http server used by Strapi
+   */
+  server: any;
+
+  /**
+   * Strapi util used to manage application files
+   */
+  fs: any;
+
+  /**
+   * Event hub used to send and receive events from anywhere in the application
+   */
+  eventHub: any;
+
+  /**
+   * Internal util used to log stats and messages on application Startup
+   */
+  startupLogger: any;
+
+  /**
+   * Strapi logger used to send errors, warning or information messages 
+   */
+  log: any;
+
+
+  /**
+   * Used to manage cron within Strapi
+   */
+  cron: any;
+
+  /**
+   * Telemetry util used to collect anonymous data on the application usage
+   */
+  telemetry: any;
 }
 
 export interface Lifecycles {
   REGISTER: 'register';
   BOOTSTRAP: 'bootstrap';
   DESTROY: 'destroy';
+}
+
+export interface StrapiDirectories {
+  static: {
+    public: string;
+  };
+  app: {
+    root: string;
+    src: string;
+    api: string;
+    components: string;
+    extensions: string;
+    policies: string;
+    middlewares: string;
+    config: string;
+  };
+  dist: {
+    root: string;
+    src: string;
+    api: string;
+    components: string;
+    extensions: string;
+    policies: string;
+    middlewares: string;
+    config: string;
+  };
 }

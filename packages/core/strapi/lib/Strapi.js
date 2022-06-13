@@ -24,6 +24,7 @@ const createTelemetry = require('./services/metrics');
 const createAuth = require('./services/auth');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
+const { LIFECYCLES } = require('./utils/lifecycles');
 const ee = require('./utils/ee');
 const contentTypesRegistry = require('./core/registries/content-types');
 const servicesRegistry = require('./core/registries/services');
@@ -42,16 +43,6 @@ const sanitizersRegistry = require('./core/registries/sanitizers');
 
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
-
-/**
- * A map of all the available Strapi lifecycles
- * @type {import('@strapi/strapi').Core.Lifecycles}
- */
-const LIFECYCLES = {
-  REGISTER: 'register',
-  BOOTSTRAP: 'bootstrap',
-  DESTROY: 'destroy',
-};
 
 /**
  * Resolve the working directories based on the instance options.

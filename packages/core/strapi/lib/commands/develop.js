@@ -149,7 +149,6 @@ function watchFileChanges({ appDir, strapiInstance, watchIgnoreFiles, polling })
     }
   };
 
-  // @soupette should we keep watching the dist dir (for the watch admin?)
   const watcher = chokidar.watch(appDir, {
     ignoreInitial: true,
     usePolling: polling,
@@ -158,8 +157,6 @@ function watchFileChanges({ appDir, strapiInstance, watchIgnoreFiles, polling })
       /tmp/,
       '**/src/admin/**',
       '**/src/plugins/**/admin/**',
-      // FIXME pass the plugin path to the strapiAdmin.build and strapiAdmin.watch in order to stop copying
-      // the FE files when using TS
       '**/dist/src/plugins/test/admin/**',
       '**/documentation',
       '**/documentation/**',

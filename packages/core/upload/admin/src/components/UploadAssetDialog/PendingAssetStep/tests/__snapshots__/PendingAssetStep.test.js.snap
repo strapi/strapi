@@ -486,18 +486,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   padding-top: 4px;
 }
 
-.c44 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
 .c20 {
   background: #ffffff;
   border-radius: 4px;
@@ -666,6 +654,18 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 
 .c31 {
   text-transform: uppercase;
+}
+
+.c44 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c48 {
