@@ -41,7 +41,10 @@ describe('BulkMoveDialog', () => {
   });
 
   test('renders and matches the snapshot', () => {
-    const { container } = setup();
+    const { container } = setup({
+      selected: [],
+      onClose: jest.fn(),
+    });
     expect(container).toMatchSnapshot();
   });
 });

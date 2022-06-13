@@ -27,6 +27,8 @@ describe('PendingAssetStep', () => {
         url: 'http://localhost:5000/CPAM.jpg',
         ext: 'jpg',
         mime: 'image/jpeg',
+        alt: '',
+        name: 'something.jpg',
       },
       {
         source: 'url',
@@ -34,6 +36,7 @@ describe('PendingAssetStep', () => {
         url: 'http://localhost:5000/MARIAGE%20FRACHET%204.pdf',
         ext: 'pdf',
         mime: 'application/pdf',
+        name: 'something.pdf',
       },
       {
         source: 'url',
@@ -41,6 +44,8 @@ describe('PendingAssetStep', () => {
         url: 'http://localhost:5000/mov_bbb.mp4',
         ext: 'mp4',
         mime: 'video/mp4',
+        alt: '',
+        name: 'something.mp4',
       },
     ];
 
@@ -51,8 +56,10 @@ describe('PendingAssetStep', () => {
             assets={assets}
             onClose={jest.fn()}
             onAddAsset={jest.fn()}
+            onEditAsset={jest.fn()}
             onClickAddAsset={jest.fn()}
             onCancelUpload={jest.fn()}
+            onRemoveAsset={jest.fn()}
             onUploadSucceed={jest.fn()}
           />
         </ThemeProvider>

@@ -25,7 +25,16 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderCompo = (props = { intlLabel: { id: 'default', defaultMessage: 'default message' } }) =>
+const renderCompo = (
+  props = {
+    intlLabel: {
+      id: 'default',
+      defaultMessage: 'default message',
+      onChange: jest.fn(),
+      name: 'test',
+    },
+  }
+) =>
   render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
