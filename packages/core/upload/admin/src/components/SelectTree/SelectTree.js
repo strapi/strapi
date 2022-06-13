@@ -12,7 +12,13 @@ const hasParent = option => !option.parent;
 const hasParentOrMatchesValue = (option, value) =>
   option.value === value || option.parent === value;
 
-const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ...props }) => {
+const SelectTree = ({
+  options: defaultOptions,
+  maxDisplayDepth,
+  defaultValue,
+  error,
+  ...props
+}) => {
   const flatDefaultOptions = useMemo(() => flattenTree(defaultOptions), [defaultOptions]);
   const optionsFiltered = useMemo(() => flatDefaultOptions.filter(hasParent), [flatDefaultOptions]);
   const [options, setOptions] = useState(optionsFiltered);
@@ -45,6 +51,7 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ..
       components={{ Option }}
       options={options}
       defaultValue={defaultValue}
+      error={error}
       /* -- custom props, used by the Option component */
       maxDisplayDepth={maxDisplayDepth}
       openValues={openValues}
@@ -69,6 +76,7 @@ OptionShape.defaultProps = {
 
 SelectTree.defaultProps = {
   defaultValue: undefined,
+  error: undefined,
   maxDisplayDepth: 5,
 };
 
@@ -76,6 +84,7 @@ SelectTree.propTypes = {
   defaultValue: PropTypes.shape({
     value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   }),
+  error: PropTypes.string,
   maxDisplayDepth: PropTypes.number,
   options: PropTypes.arrayOf(OptionShape).isRequired,
 };

@@ -1,4 +1,4 @@
-const getSelectStyles = (theme, { 'aria-errormessage': error }) => {
+const getSelectStyles = (theme, error) => {
   return {
     clearIndicator: base => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
     container: base => ({
