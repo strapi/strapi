@@ -1,0 +1,50 @@
+{
+  "name": "@strapi/telemetry-be",
+  "version": "4.1.12",
+  "description": "Strapi backend telemetry package",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./lib",
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {},
+  "engines": {
+    "node": ">=12.22.0 <=16.x.x",
+    "npm": ">=6.0.0"
+  },
+  "dependencies": {
+    "@amplitude/node": "^1.10.0",
+    "@amplitude/types": "^1.10.0",
+    "@amplitude/identify": "^1.10.0",
+    "lodash": "4.17.21",
+    "is-docker": "2.2.1",
+    "node-fetch": "2.6.7",
+    "ci-info": "3.2.0",
+    "node-machine-id": "1.1.12",
+    "uuid": "^3.3.2",
+    "node-schedule": "2.0.0"
+  },
+  "devDependencies": {
+    "@amplitude/ampli": "1.9.0"
+  }
+}

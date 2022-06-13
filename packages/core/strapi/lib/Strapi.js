@@ -5,6 +5,7 @@ const { isFunction } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 const { createAsyncParallelHook } = require('@strapi/utils').hooks;
+const { ampli, createCoreTelemetryInstance } = require('@strapi/telemetry-be');
 
 const loadConfiguration = require('./core/app-configuration');
 
@@ -19,7 +20,6 @@ const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
-const createTelemetry = require('./services/metrics');
 const createAuth = require('./services/auth');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
@@ -78,7 +78,7 @@ class Strapi {
     this.startupLogger = createStartupLogger(this);
     this.log = createLogger(this.config.get('logger', {}));
     this.cron = createCronService();
-    this.telemetry = createTelemetry(this);
+    this.telemetry = createCoreTelemetryInstance(this);
 
     createUpdateNotifier(this).notify();
   }
@@ -199,12 +199,22 @@ class Strapi {
   sendStartupTelemetry() {
     // Emit started event.
     // do not await to avoid slower startup
-    this.telemetry.send('didStartServer', {
-      database: strapi.config.get('database.connection.client'),
-      plugins: Object.keys(strapi.plugins),
-      // TODO: to add back
-      // providers: this.config.installedProviders,
-    });
+    // this.telemetry.send('didStartServer', {
+    //   database: strapi.config.get('database.connection.client'),
+    //   plugins: Object.keys(strapi.plugins),
+    //   // TODO: to add back
+    //   // providers: this.config.installedProviders,
+    // });
+
+    ampli.didStartServer(
+      '',
+      {
+        database: strapi.config.get('database.connection.client'),
+        plugins: Object.keys(strapi.plugins),
+      },
+      {},
+      { source: 'core', send: this.telemetry.send }
+    );
   }
 
   async openAdmin({ isInitialized }) {
@@ -215,9 +225,9 @@ class Strapi {
     if (shouldOpenAdmin && !isInitialized) {
       try {
         await utils.openBrowser(this.config);
-        this.telemetry.send('didOpenTab');
+        ampli.didOpenTab('', {}, {}, { souce: 'core', send: this.telemetry.send });
       } catch (e) {
-        this.telemetry.send('didNotOpenTab');
+        ampli.didNotOpenTab('', {}, {}, { souce: 'core', send: this.telemetry.send });
       }
     }
   }
