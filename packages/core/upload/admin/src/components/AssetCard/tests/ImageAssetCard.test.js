@@ -18,6 +18,7 @@ describe('ImageAssetCard', () => {
     const { container } = renderTL(
       <ThemeProvider theme={lightTheme}>
         <ImageAssetCard
+          alt=""
           name="hello.png"
           extension="png"
           height={40}
@@ -447,6 +448,7 @@ describe('ImageAssetCard', () => {
               class="c12"
             >
               <img
+                alt=""
                 aria-hidden="true"
                 class="c13"
                 src="http://somewhere.com/hello.png?width=40&height=40"
