@@ -1,10 +1,7 @@
 import type Koa from 'koa';
 
 import type { StringMap } from './utils';
-
-type Controller = {
-  [methodName: string | number | symbol]: (context: Koa.Context) => unknown;
-}
+import type { GenericController } from '../core-api/controller'
 
 /**
  * The Strapi interface implemented by the main Strapi class.
@@ -47,12 +44,12 @@ export interface Strapi {
    *
    * It returns all the registered controllers
    */
-  readonly controllers: StringMap<Controller>;
+  readonly controllers: StringMap<GenericController>;
 
   /**
    * Find a controller using its unique identifier
    */
-  controller(uid: string): Controller | undefined;
+  controller(uid: string): GenericController | undefined;
 
   /**
    * Getter for the Strapi content types container
