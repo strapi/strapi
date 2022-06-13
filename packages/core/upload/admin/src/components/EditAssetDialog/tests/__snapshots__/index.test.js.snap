@@ -1421,30 +1421,14 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                               >
                                 Media Library
                               </div>
-                              <div
-                                class="css-fph3ax-Input"
-                              >
-                                <div
-                                  class=""
-                                  style="display: inline-block;"
-                                >
-                                  <input
-                                    aria-autocomplete="list"
-                                    autocapitalize="none"
-                                    autocomplete="off"
-                                    autocorrect="off"
-                                    id="asset-folder"
-                                    spellcheck="false"
-                                    style="box-sizing: content-box; width: 2px; border: 0px; opacity: 1; outline: 0; padding: 0px;"
-                                    tabindex="0"
-                                    type="text"
-                                    value=""
-                                  />
-                                  <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-                                  />
-                                </div>
-                              </div>
+                              <input
+                                aria-autocomplete="list"
+                                class="css-wmatm6-dummyInput-DummyInput"
+                                id="asset-folder"
+                                readonly=""
+                                tabindex="0"
+                                value=""
+                              />
                             </div>
                             <div
                               class=" css-1hb7zxy-IndicatorsContainer"
