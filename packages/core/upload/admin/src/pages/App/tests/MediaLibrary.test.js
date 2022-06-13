@@ -343,7 +343,7 @@ describe('Media library homepage', () => {
             children: { count: 1 },
             createdAt: '',
             files: { count: 1 },
-            path: '/folder-1',
+            path: '/1',
             pathId: 1,
             updatedAt: '',
             type: 'folder',
