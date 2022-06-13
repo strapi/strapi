@@ -136,3 +136,9 @@ schema.graphql
 front-workspace.code-workspace
 .yarn
 .yarnrc
+
+###########################
+# pyenv local version
+###########################
+
+.python-version

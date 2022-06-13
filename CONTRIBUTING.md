@@ -48,6 +48,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 - You have [Node.js](https://nodejs.org/en/) at version >= v14 and <= v16 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
+- You Have [Python2](https://www.python.org/) at v2.7 installed.
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
 
