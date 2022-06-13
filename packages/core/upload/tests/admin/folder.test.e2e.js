@@ -15,13 +15,8 @@ let data = {
   folders: [],
 };
 
-const uuidRegex = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-const rootPathRegex = /^\/[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
-const getFolderPathRegex = uid =>
-  new RegExp(
-    '^/' + uid + '/[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$',
-    'i'
-  );
+const rootPathRegex = /^\/[0-9]*$/i;
+const getFolderPathRegex = pathId => new RegExp('^/' + pathId + '/[0-9]*$', 'i');
 
 const createFolder = async (name, parent = null) => {
   const res = await rq({
@@ -80,12 +75,12 @@ describe('Folder', () => {
       expect(res.body.data).toMatchObject({
         id: expect.anything(),
         name: 'folder 1',
-        uid: expect.stringMatching(uuidRegex),
+        pathId: expect.any(Number),
         path: expect.stringMatching(rootPathRegex),
         createdAt: expect.anything(),
         updatedAt: expect.anything(),
       });
-      expect(res.body.data.uid).toBe(res.body.data.path.split('/').pop());
+      expect(res.body.data.pathId.toString()).toBe(res.body.data.path.split('/').pop());
 
       data.folders.push(res.body.data);
     });
@@ -103,12 +98,12 @@ describe('Folder', () => {
       expect(res.body.data).toMatchObject({
         id: expect.anything(),
         name: 'folder-2',
-        uid: expect.stringMatching(uuidRegex),
-        path: expect.stringMatching(getFolderPathRegex(data.folders[0].uid)),
+        pathId: expect.any(Number),
+        path: expect.stringMatching(getFolderPathRegex(data.folders[0].pathId)),
         createdAt: expect.anything(),
         updatedAt: expect.anything(),
       });
-      expect(res.body.data.uid).toBe(res.body.data.path.split('/').pop());
+      expect(res.body.data.pathId.toString()).toBe(res.body.data.path.split('/').pop());
 
       data.folders.push(res.body.data);
     });
@@ -195,7 +190,7 @@ describe('Folder', () => {
       });
 
       expect(res.body.data).toMatchObject({
-        ...pick(['id', 'name', 'uid', 'path', 'createAt', 'updatedAt'], data.folders[0]),
+        ...pick(['id', 'name', 'pathId', 'path', 'createAt', 'updatedAt'], data.folders[0]),
         children: {
           count: expect.anything(),
         },
@@ -393,7 +388,7 @@ describe('Folder', () => {
 
       expect(res.body.data).toMatchObject({
         name: 'folder-00-new',
-        path: `${folder01.path}/${folder00.uid}`,
+        path: `${folder01.path}/${folder00.pathId}`,
       });
 
       const resFolders = await rq({
@@ -408,7 +403,7 @@ describe('Folder', () => {
 
       expect(resFolders.body.data[0]).toMatchObject({ path: folder0.path, parent: null });
       expect(resFolders.body.data[1]).toMatchObject({
-        path: `${folder01.path}/${folder00.uid}`,
+        path: `${folder01.path}/${folder00.pathId}`,
         parent: { id: folder01.id },
       });
       expect(resFolders.body.data[2]).toMatchObject({
@@ -420,7 +415,7 @@ describe('Folder', () => {
         parent: { id: folder0.id },
       });
       expect(resFolders.body.data[4]).toMatchObject({
-        path: `${folder01.path}/${folder00.uid}/${folder000.uid}`,
+        path: `${folder01.path}/${folder00.pathId}/${folder000.pathId}`,
         parent: { id: folder00.id },
       });
 
@@ -434,7 +429,7 @@ describe('Folder', () => {
       });
 
       expect(resFiles.body.results[0]).toMatchObject({
-        folderPath: `${folder01.path}/${folder00.uid}/${folder000.uid}`,
+        folderPath: `${folder01.path}/${folder00.pathId}/${folder000.pathId}`,
       });
       expect(resFiles.body.results[1]).toMatchObject({ folderPath: file02.folderPath });
 
@@ -461,7 +456,7 @@ describe('Folder', () => {
 
       expect(res.body.data).toMatchObject({
         name: 'folder-test-00-new',
-        path: `/${folder00.uid}`,
+        path: `/${folder00.pathId}`,
       });
 
       const resFolders = await rq({
@@ -476,7 +471,7 @@ describe('Folder', () => {
 
       expect(resFolders.body.data[0]).toMatchObject({ path: folder0.path, parent: null });
       expect(resFolders.body.data[1]).toMatchObject({
-        path: `/${folder00.uid}`,
+        path: `/${folder00.pathId}`,
         parent: null,
       });
       expect(resFolders.body.data[2]).toMatchObject({
@@ -484,7 +479,7 @@ describe('Folder', () => {
         parent: { id: folder0.id },
       });
       expect(resFolders.body.data[3]).toMatchObject({
-        path: `/${folder00.uid}/${folder000.uid}`,
+        path: `/${folder00.pathId}/${folder000.pathId}`,
         parent: { id: folder00.id },
       });
 
@@ -498,7 +493,7 @@ describe('Folder', () => {
       });
 
       expect(resFiles.body.results[0]).toMatchObject({
-        folderPath: `/${folder00.uid}/${folder000.uid}`,
+        folderPath: `/${folder00.pathId}/${folder000.pathId}`,
       });
       expect(resFiles.body.results[1]).toMatchObject({ folderPath: file02.folderPath });
 

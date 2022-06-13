@@ -41,8 +41,7 @@
     "react-redux": "7.2.3",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "sharp": "0.30.6",
-    "uuid": "8.3.2"
+    "sharp": "0.30.6"
   },
   "engines": {
     "node": ">=12.22.0 <=16.x.x",

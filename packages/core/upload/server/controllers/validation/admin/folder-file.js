@@ -20,6 +20,7 @@ const validateStructureMoveManyFoldersFilesSchema = yup
     destinationFolderId: yup
       .strapiID()
       .nullable()
+      .defined()
       .test('folder-exists', 'destination folder does not exist', folderExists),
     fileIds: yup.array().of(yup.strapiID().required()),
     folderIds: yup.array().of(yup.strapiID().required()),
@@ -37,7 +38,7 @@ const validateDuplicatesMoveManyFoldersFilesSchema = yup
       fields: ['name'],
       filters: { id: { $in: folderIds } },
     });
-    // TODO: handle when parent is null
+
     const existingFolders = await strapi.entityService.findMany(FOLDER_MODEL_UID, {
       fields: ['name'],
       filters: { parent: { id: destinationFolderId } },

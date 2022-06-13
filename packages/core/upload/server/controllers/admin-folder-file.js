@@ -66,7 +66,7 @@ module.exports = {
       // fetch folders
       const existingFolders = await strapi.db
         .queryBuilder(FOLDER_MODEL_UID)
-        .select(['id', 'uid', 'path'])
+        .select(['id', 'pathId', 'path'])
         .where({ id: { $in: folderIds } })
         .transacting(trx)
         .forUpdate()
@@ -101,7 +101,7 @@ module.exports = {
       const pathColName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
 
       if (existingFolders.length > 0) {
-        // update folders' parent relation (delete + insert; upsert not possible)
+        // update folders' parent relation
         const joinTable = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent.joinTable;
         await strapi.db
           .queryBuilder(joinTable.name)
@@ -109,29 +109,45 @@ module.exports = {
           .delete()
           .where({ [joinTable.joinColumn.name]: { $in: folderIds } })
           .execute();
-        await strapi.db
-          .queryBuilder(joinTable.name)
-          .transacting(trx)
-          .insert(
-            existingFolders.map(folder => ({
-              [joinTable.inverseJoinColumn.name]: destinationFolderId,
-              [joinTable.joinColumn.name]: folder.id,
-            }))
-          )
-          .execute();
+
+        if (destinationFolderId !== null) {
+          await strapi.db
+            .queryBuilder(joinTable.name)
+            .transacting(trx)
+            .insert(
+              existingFolders.map(folder => ({
+                [joinTable.inverseJoinColumn.name]: destinationFolderId,
+                [joinTable.joinColumn.name]: folder.id,
+              }))
+            )
+            .execute();
+        }
 
         for (const existingFolder of existingFolders) {
+          let replaceQuery;
+          switch (strapi.db.dialect.client) {
+            case 'sqlite':
+              replaceQuery = '? || SUBSTRING(??, ?)';
+              break;
+            case 'postgres':
+              replaceQuery = 'CONCAT(?::TEXT, SUBSTRING(??, ?::INTEGER))';
+              break;
+            default:
+              replaceQuery = 'CONCAT(?, SUBSTRING(??, ?))';
+          }
+
           // update path for folders themselves & folders below
           await strapi.db
             .connection(folderTable)
             .transacting(trx)
-            .where(pathColName, 'like', `${existingFolder.path}%`)
+            .where(pathColName, existingFolder.path)
+            .orWhere(pathColName, 'like', `${existingFolder.path}/%`)
             .update(
               pathColName,
-              strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+              strapi.db.connection.raw(replaceQuery, [
+                joinBy('/', destinationFolderPath, existingFolder.pathId),
                 pathColName,
-                existingFolder.path,
-                joinBy('/', destinationFolderPath, existingFolder.uid),
+                existingFolder.path.length + 1,
               ])
             );
 
@@ -139,13 +155,14 @@ module.exports = {
           await strapi.db
             .connection(fileTable)
             .transacting(trx)
-            .where(folderPathColName, 'like', `${existingFolder.path}%`)
+            .where(folderPathColName, existingFolder.path)
+            .orWhere(folderPathColName, 'like', `${existingFolder.path}/%`)
             .update(
               folderPathColName,
-              strapi.db.connection.raw('REPLACE(??, ?, ?)', [
+              strapi.db.connection.raw(replaceQuery, [
+                joinBy('/', destinationFolderPath, existingFolder.pathId),
                 folderPathColName,
-                existingFolder.path,
-                joinBy('/', destinationFolderPath, existingFolder.uid),
+                existingFolder.path.length + 1,
               ])
             );
         }
@@ -160,16 +177,19 @@ module.exports = {
           .delete()
           .where({ [fileJoinTable.joinColumn.name]: { $in: fileIds } })
           .execute();
-        await strapi.db
-          .queryBuilder(fileJoinTable.name)
-          .transacting(trx)
-          .insert(
-            existingFiles.map(file => ({
-              [fileJoinTable.inverseJoinColumn.name]: destinationFolderId,
-              [fileJoinTable.joinColumn.name]: file.id,
-            }))
-          )
-          .execute();
+
+        if (destinationFolderId !== null) {
+          await strapi.db
+            .queryBuilder(fileJoinTable.name)
+            .transacting(trx)
+            .insert(
+              existingFiles.map(file => ({
+                [fileJoinTable.inverseJoinColumn.name]: destinationFolderId,
+                [fileJoinTable.joinColumn.name]: file.id,
+              }))
+            )
+            .execute();
+        }
 
         // update files main fields (path + updatedBy)
         await strapi.db

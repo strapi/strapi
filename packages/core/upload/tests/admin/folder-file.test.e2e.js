@@ -104,7 +104,7 @@ describe('Bulk actions for folders & files', () => {
             id: folder1a.id,
             name: 'folder-a-1a',
             path: expect.anything(),
-            uid: expect.anything(),
+            pathId: expect.any(Number),
             createdAt: expect.anything(),
             updatedAt: expect.anything(),
           },
@@ -187,8 +187,8 @@ describe('Bulk actions for folders & files', () => {
           {
             id: folder1a.id,
             name: 'folder-b-1a',
-            path: `${folder1b.path}/${folder1a.uid}`,
-            uid: expect.anything(),
+            path: `${folder1b.path}/${folder1a.pathId}`,
+            pathId: expect.any(Number),
             createdAt: expect.anything(),
             updatedAt: expect.anything(),
           },
@@ -210,14 +210,14 @@ describe('Bulk actions for folders & files', () => {
       expect(folderResults[0]).toMatchObject({ ...folder1, parent: null });
       expect(folderResults[1]).toMatchObject({
         ...folder1a,
-        path: `${folder1b.path}/${folder1a.uid}`,
+        path: `${folder1b.path}/${folder1a.pathId}`,
         parent: { id: folder1b.id },
         updatedAt: expect.anything(),
       });
       expect(folderResults[2]).toMatchObject({ ...folder1b, parent: { id: folder1.id } });
       expect(folderResults[3]).toMatchObject({
         ...folder1a1,
-        path: `${folder1b.path}/${folder1a.uid}/${folder1a1.uid}`,
+        path: `${folder1b.path}/${folder1a.pathId}/${folder1a1.pathId}`,
         parent: { id: folder1a.id },
       });
 
@@ -244,7 +244,7 @@ describe('Bulk actions for folders & files', () => {
       expect(fileResults[2]).toMatchObject({ ...file1b, folder: { id: folder1b.id } });
       expect(fileResults[3]).toMatchObject({
         ...file1a1,
-        folderPath: `${folder1b.path}/${folder1a.uid}/${folder1a1.uid}`,
+        folderPath: `${folder1b.path}/${folder1a.pathId}/${folder1a1.pathId}`,
         folder: { id: folder1a1.id },
       });
 
@@ -296,8 +296,8 @@ describe('Bulk actions for folders & files', () => {
           {
             id: folder1a.id,
             name: 'folder-c-1a',
-            path: `/${folder1a.uid}`,
-            uid: expect.anything(),
+            path: `/${folder1a.pathId}`,
+            pathId: expect.any(Number),
             createdAt: expect.anything(),
             updatedAt: expect.anything(),
           },
@@ -319,13 +319,13 @@ describe('Bulk actions for folders & files', () => {
       expect(folderResults[0]).toMatchObject({ ...folder1, parent: null });
       expect(folderResults[1]).toMatchObject({
         ...folder1a,
-        path: `/${folder1a.uid}`,
+        path: `/${folder1a.pathId}`,
         parent: null,
         updatedAt: expect.anything(),
       });
       expect(folderResults[2]).toMatchObject({
         ...folder1a1,
-        path: `/${folder1a.uid}/${folder1a1.uid}`,
+        path: `/${folder1a.pathId}/${folder1a1.pathId}`,
         parent: { id: folder1a.id },
       });
 
@@ -351,7 +351,7 @@ describe('Bulk actions for folders & files', () => {
       });
       expect(fileResults[2]).toMatchObject({
         ...file1a1,
-        folderPath: `/${folder1a.uid}/${folder1a1.uid}`,
+        folderPath: `/${folder1a.pathId}/${folder1a1.pathId}`,
         folder: { id: folder1a1.id },
       });
 
