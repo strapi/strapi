@@ -250,7 +250,7 @@ export const MediaLibrary = () => {
                     })}`;
 
                     return (
-                      <GridItem col={3} key={`folder-${folder.uid}`}>
+                      <GridItem col={3} key={`folder-${folder.id}`}>
                         <FolderCard
                           ref={
                             folderToEdit && folder.id === folderToEdit.id
@@ -258,7 +258,7 @@ export const MediaLibrary = () => {
                               : undefined
                           }
                           ariaLabel={folder.name}
-                          id={`folder-${folder.uid}`}
+                          id={`folder-${folder.id}`}
                           to={url}
                           startAction={
                             selectOne && (

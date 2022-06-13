@@ -26,7 +26,7 @@ export const FolderDefinition = PropTypes.shape({
   parent: PropTypes.number,
   updatedAt: PropTypes.string.isRequired,
   updatedBy: PropTypes.shape(),
-  uid: PropTypes.string.isRequired,
+  pathId: PropTypes.number.isRequired,
   path: PropTypes.string.isRequired,
 });
 

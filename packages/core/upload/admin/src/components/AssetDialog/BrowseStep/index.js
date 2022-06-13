@@ -174,10 +174,10 @@ export const BrowseStep = ({
         >
           {folders.map(folder => {
             return (
-              <GridItem col={3} key={`folder-${folder.uid}`}>
+              <GridItem col={3} key={`folder-${folder.id}`}>
                 <FolderCard
                   ariaLabel={folder.name}
-                  id={`folder-${folder.uid}`}
+                  id={`folder-${folder.id}`}
                   onClick={() => onChangeFolder(folder.id)}
                 >
                   <FolderCardBody>

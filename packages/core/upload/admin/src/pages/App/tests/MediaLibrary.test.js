@@ -344,7 +344,7 @@ describe('Media library homepage', () => {
             createdAt: '',
             files: { count: 1 },
             path: '/folder-1',
-            uid: 'folder-1',
+            pathId: 1,
             updatedAt: '',
             type: 'folder',
           },
