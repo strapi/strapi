@@ -43,7 +43,7 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
   const { canCreate, isLoading: isLoadingPermissions, canUpdate } = useMediaLibraryPermissions();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { formatMessage, formatDate } = useIntl();
-  const { editFolder } = useEditFolder();
+  const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();
   const { remove } = useBulkRemove();
   const toggleNotification = useNotification();
   const isLoading = isLoadingPermissions || folderStructureIsLoading;
@@ -127,7 +127,7 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
 
   return (
     <>
-      <ModalLayout onClose={() => onClose()} labelledBy="title">
+      <ModalLayout onClose={() => !isEditFolderLoading && onClose()} labelledBy="title">
         <Formik
           validationSchema={folderSchema}
           validateOnChange={false}
@@ -231,7 +231,12 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
 
               <ModalFooter
                 startActions={
-                  <Button onClick={() => onClose()} variant="tertiary" name="cancel">
+                  <Button
+                    onClick={() => onClose()}
+                    variant="tertiary"
+                    name="cancel"
+                    disabled={isEditFolderLoading}
+                  >
                     {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
                   </Button>
                 }
@@ -243,6 +248,7 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
                         variant="danger-light"
                         onClick={() => setShowConfirmDialog(true)}
                         name="delete"
+                        disabled={isEditFolderLoading}
                       >
                         {formatMessage({
                           id: 'modal.folder.create.delete',
@@ -251,7 +257,12 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
                       </Button>
                     )}
 
-                    <Button name="submit" loading={isLoading} disabled={formDisabled} type="submit">
+                    <Button
+                      name="submit"
+                      loading={isEditFolderLoading}
+                      disabled={formDisabled}
+                      type="submit"
+                    >
                       {formatMessage(
                         isEditing
                           ? { id: 'modal.folder.edit.submit', defaultMessage: 'Save' }
