@@ -1,10 +1,10 @@
 'use strict';
-
 const path = require('path');
-
+const {requirePackage, adminAliases} = require('./pnp')
 const alias = [
   'object-assign',
   'whatwg-fetch',
+  '@fortawesome/fontawesome-free',
   '@fortawesome/fontawesome-svg-core',
   '@fortawesome/free-solid-svg-icons',
   'history',
@@ -33,19 +33,47 @@ const alias = [
   'reselect',
   'styled-components',
   'yup',
+  'axios',
+  'prop-types',
+  'react-query',
+  'semver',
+  'js-cookie',
+  'formik',
+  'match-sorter',
+  '@fortawesome/react-fontawesome',
+  'date-fns',
+  "markdown-it",
+    "markdown-it-abbr",
+    "markdown-it-container",
+    "markdown-it-deflist",
+    "markdown-it-emoji",
+    "markdown-it-footnote",
+    "markdown-it-ins",
+    "markdown-it-mark",
+    "markdown-it-sub",
+    "markdown-it-sup",
+    "match-sorter",
+    
+    "sanitize-html",
+    "@fingerprintjs/fingerprintjs"
+    
+    
+  
+  
 ];
 
 module.exports = alias.reduce(
   (acc, curr) => {
-    acc[`${curr}$`] = require.resolve(curr);
+    acc[`${curr}$`] = requirePackage.resolve(curr);
     return acc;
   },
   {
-    'react-select/animated': require.resolve('react-select/animated'),
-    'react-select/async': require.resolve('react-select/async'),
-    'react-select/async-creatable': require.resolve('react-select/async-creatable'),
-    'react-select/base': require.resolve('react-select/base'),
-    'react-select/creatable': require.resolve('react-select/creatable'),
+    ...adminAliases,
+    'react-select/animated': requirePackage.resolve('react-select/animated'),
+    'react-select/async': requirePackage.resolve('react-select/async'),
+    'react-select/async-creatable': requirePackage.resolve('react-select/async-creatable'),
+    'react-select/base': requirePackage.resolve('react-select/base'),
+    'react-select/creatable': requirePackage.resolve('react-select/creatable'),
     ee_else_ce: path.resolve(__dirname),
   }
 );

@@ -1671,7 +1671,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-flow-strip-types@npm:^7.16.7, @babel/plugin-transform-flow-strip-types@npm:^7.17.12":
+"@babel/plugin-transform-flow-strip-types@npm:^7.17.12":
   version: 7.17.12
   resolution: "@babel/plugin-transform-flow-strip-types@npm:7.17.12"
   dependencies:
@@ -2390,19 +2390,6 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0-0
   checksum: f81892a7970cb34643b93917cbbc9b581d5066d892639867521f4a85ec258e69362a37bbb7b899b351e71d26095a97cd2d6e35e5f9ee110715146e0ccc19e700
-  languageName: node
-  linkType: hard
-
-"@babel/preset-flow@npm:7.16.7":
-  version: 7.16.7
-  resolution: "@babel/preset-flow@npm:7.16.7"
-  dependencies:
-    "@babel/helper-plugin-utils": ^7.16.7
-    "@babel/helper-validator-option": ^7.16.7
-    "@babel/plugin-transform-flow-strip-types": ^7.16.7
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-  checksum: b73c743a6bdfb51fe907adbc425a82469145ea15f32b43096804e28ba30921c4ac3199f86e11d1cefbce95c3a5404aaf3534152f5a12358c57303c05dfc51b4f
   languageName: node
   linkType: hard
 
@@ -5045,13 +5032,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@purest/providers@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "@purest/providers@npm:1.0.4"
-  checksum: f28a21dbad0d8a27eb960360a8aade829cec105ceff08c4e4f16e083efd6c59abf0ca9804c491fd7c0450fef574834557aa8d635b9c190a7424f0cf2ed56c7a4
-  languageName: node
-  linkType: hard
-
 "@react-dnd/asap@npm:^4.0.0":
   version: 4.0.1
   resolution: "@react-dnd/asap@npm:4.0.1"
@@ -7186,88 +7166,47 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/admin@workspace:packages/core/admin"
   dependencies:
-    "@babel/core": 7.16.7
     "@babel/plugin-transform-runtime": 7.16.7
-    "@babel/polyfill": 7.12.1
-    "@babel/preset-env": 7.16.7
-    "@babel/preset-react": 7.16.7
-    "@babel/runtime": 7.16.7
     "@casl/ability": ^5.4.3
-    "@strapi/babel-plugin-switch-ee-ce": 4.1.12
-    babel-loader: 8.2.3
-    babel-plugin-styled-components: 2.0.2
-    bcryptjs: 2.4.3
-    chalk: ^4.1.1
-    chokidar: ^3.5.1
-    cross-env: ^7.0.3
-    dotenv: 8.5.1
-    duplicate-dependencies-webpack-plugin: 0.2.0
-    esbuild-loader: 2.18.0
-    execa: ^1.0.0
-    fast-deep-equal: 3.1.3
-    fs-extra: 10.0.0
-    history: ^4.9.0
-    hoist-non-react-statics: ^3.3.0
-    html-loader: 3.0.1
-    html-webpack-plugin: 5.5.0
-    invariant: ^2.2.4
-    jsonwebtoken: 8.5.1
-    koa-compose: 4.1.0
-    koa-passport: 4.1.4
-    koa-static: 5.0.0
-    lodash: 4.17.21
-    mini-css-extract-plugin: 2.4.4
-    moment: ^2.29.1
-    node-polyfill-webpack-plugin: 1.1.4
-    object-assign: ^4.1.1
-    p-map: 4.0.0
-    passport-local: 1.0.0
-    qs: 6.10.1
-    react-copy-to-clipboard: ^5.0.3
-    react-error-boundary: 3.1.1
-    react-fast-compare: ^3.2.0
-    react-helmet: ^6.1.0
-    react-intl: 5.20.2
-    react-query: 3.24.3
-    react-redux: 7.2.3
-    react-router: 5.2.0
-    react-router-dom: 5.2.0
-    react-virtualized: ^9.22.3
-    redux: ^4.0.1
-    reselect: ^4.0.0
-    rimraf: 3.0.2
-    sift: 13.5.0
-    style-loader: 3.3.1
-    webpack-bundle-analyzer: 4.4.1
-    webpack-dev-server: 4.7.3
-    webpackbar: 5.0.0-3
-    whatwg-fetch: ^3.6.2
-    yup: ^0.32.9
-  peerDependencies:
     "@fingerprintjs/fingerprintjs": 3.3.2
     "@fortawesome/fontawesome-free": ^5.15.3
     "@fortawesome/fontawesome-svg-core": ^1.2.35
     "@fortawesome/free-brands-svg-icons": ^5.15.3
     "@fortawesome/free-solid-svg-icons": ^5.15.3
     "@fortawesome/react-fontawesome": ^0.1.14
-    "@strapi/design-system": 1.1.1
-    "@strapi/helper-plugin": 4.1.12
-    "@strapi/i18n": 4.3.2
-    "@strapi/icons": 1.1.1
-    "@strapi/plugin-upload": 4.1.12
-    "@strapi/strapi": 4.1.12
-    "@strapi/utils": 4.1.12
+    "@strapi/babel-plugin-switch-ee-ce": 4.1.12
     axios: 0.24.0
+    babel-plugin-styled-components: 2.0.2
+    bcryptjs: 2.4.3
+    chalk: ^4.1.1
+    chokidar: ^3.5.1
     codemirror: ^5.61.0
     cropperjs: 1.5.11
+    cross-env: ^7.0.3
     css-loader: 6.5.1
     date-fns: 2.22.1
+    dotenv: 8.5.1
+    duplicate-dependencies-webpack-plugin: 0.2.0
+    esbuild-loader: 2.18.0
     eslint-plugin-redux-saga: 1.3.2
+    execa: ^1.0.0
+    fast-deep-equal: 3.1.3
     font-awesome: ^4.7.0
     formik: ^2.2.6
+    fs-extra: 10.0.0
     highlight.js: ^10.4.1
+    history: ^4.9.0
+    hoist-non-react-statics: ^3.3.0
+    html-loader: 3.0.1
+    html-webpack-plugin: 5.5.0
     immer: ~9.0.6
+    invariant: ^2.2.4
     js-cookie: 2.2.1
+    jsonwebtoken: 8.5.1
+    koa-compose: 4.1.0
+    koa-passport: 4.1.4
+    koa-static: 5.0.0
+    lodash: 4.17.21
     markdown-it: ^12.3.2
     markdown-it-abbr: ^1.0.4
     markdown-it-container: ^3.0.0
@@ -7279,17 +7218,61 @@ __metadata:
     markdown-it-sub: ^1.0.0
     markdown-it-sup: 1.0.0
     match-sorter: ^4.0.2
+    mini-css-extract-plugin: 2.4.4
+    moment: ^2.29.1
+    node-polyfill-webpack-plugin: 1.1.4
+    object-assign: ^4.1.1
+    p-map: 4.0.0
+    passport-local: 1.0.0
     prop-types: ^15.7.2
+    qs: 6.10.1
     react: ^17.0.2
+    react-copy-to-clipboard: ^5.0.3
     react-dnd: ^14.0.2
     react-dnd-html5-backend: ^14.0.0
     react-dom: ~17.0.2
+    react-error-boundary: 3.1.1
+    react-fast-compare: ^3.2.0
+    react-helmet: ^6.1.0
+    react-intl: 5.20.2
     react-is: ^17.0.2
+    react-query: 3.24.3
+    react-redux: 7.2.3
+    react-router: 5.2.0
+    react-router-dom: 5.2.0
     react-select: ^4.0.2
+    react-virtualized: ^9.22.3
+    redux: ^4.0.1
     redux-saga: ^0.16.0
+    reselect: ^4.0.0
+    rimraf: 3.0.2
     sanitize-html: 2.4.0
     semver: 7.3.5
+    sift: 13.5.0
+    style-loader: 3.3.1
     styled-components: 5.3.3
+    webpack-bundle-analyzer: 4.4.1
+    webpack-dev-server: 4.7.3
+    webpack-node-externals: ^3.0.0
+    webpackbar: 5.0.0-3
+    whatwg-fetch: ^3.6.2
+    yup: ^0.32.9
+  peerDependencies:
+    "@babel/core": 7.16.7
+    "@babel/polyfill": 7.12.1
+    "@babel/preset-env": 7.16.7
+    "@babel/preset-react": 7.16.7
+    "@babel/runtime": 7.16.7
+    "@strapi/design-system": 1.1.1
+    "@strapi/helper-plugin": 4.1.12
+    "@strapi/i18n": 4.3.2
+    "@strapi/icons": 1.1.1
+    "@strapi/plugin-content-manager": 4.1.12
+    "@strapi/plugin-content-type-builder": 4.1.12
+    "@strapi/plugin-upload": 4.1.12
+    "@strapi/strapi": 4.1.12
+    "@strapi/utils": 4.1.12
+    babel-loader: 8.2.3
     webpack: 5.65.0
     webpack-cli: 4.9.1
   languageName: unknown
@@ -7324,7 +7307,10 @@ __metadata:
     lodash: 4.17.21
     umzug: 3.1.1
   peerDependencies:
+    better-sqlite3: 7.4.6
+    mariadb: ^3.0.0
     mysql: ^2.18.1
+    pg: ^8.7.3
   languageName: unknown
   linkType: soft
 
@@ -7381,7 +7367,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/helper-plugin@workspace:packages/core/helper-plugin"
   dependencies:
-    "@babel/core": 7.16.7
     "@babel/plugin-proposal-class-properties": 7.16.7
     "@babel/plugin-proposal-export-default-from": 7.16.7
     "@babel/plugin-proposal-export-namespace-from": 7.16.7
@@ -7389,10 +7374,6 @@ __metadata:
     "@babel/plugin-proposal-private-methods": 7.16.7
     "@babel/plugin-proposal-private-property-in-object": 7.16.7
     "@babel/plugin-transform-runtime": 7.16.7
-    "@babel/preset-env": 7.16.7
-    "@babel/preset-flow": 7.16.7
-    "@babel/preset-react": 7.16.7
-    "@babel/runtime": 7.16.7
     "@fortawesome/fontawesome-free": ^5.15.2
     "@fortawesome/fontawesome-svg-core": ^1.2.35
     "@fortawesome/free-brands-svg-icons": ^5.15.2
@@ -7404,36 +7385,41 @@ __metadata:
     "@storybook/builder-webpack5": 6.4.10
     "@storybook/manager-webpack5": 6.4.10
     "@storybook/react": ^6.3.7
+    axios: 0.24.0
     babel-loader: ^8.2.2
     babel-plugin-styled-components: 2.0.2
     cross-env: ^7.0.3
+    date-fns: 2.22.1
     formik: 2.2.9
+    immer: ^9.0.6
     invariant: ^2.2.1
+    lodash: 4.17.21
     match-sorter: ^4.0.2
     mini-css-extract-plugin: 2.4.4
     moment: ^2.29.1
+    qs: 6.10.1
+    react: ^17.0.2
+    react-dom: ^17.0.2
     react-helmet: ^6.1.0
     react-intl: 5.20.2
+    react-is: ^17.0.2
+    react-router: ^5.2.0
+    react-router-dom: 5.2.0
+    react-select: ^4.0.2
     require-from-string: ^2.0.2
     rimraf: 3.0.2
     styled-components: 5.3.3
     whatwg-fetch: ^3.6.2
   peerDependencies:
+    "@babel/core": 7.16.7
+    "@babel/preset-env": 7.16.7
+    "@babel/preset-flow": 7.16.7
+    "@babel/preset-react": 7.16.7
+    "@babel/runtime": 7.16.7
+    "@strapi/admin": ^4.1.12
     "@strapi/design-system": 1.1.1
     "@strapi/icons": 1.1.1
     "@strapi/strapi": ^4.1.12
-    axios: 0.24.0
-    date-fns: 2.22.1
-    formik: ^2.2.6
-    immer: ^9.0.6
-    lodash: 4.17.21
-    qs: 6.10.1
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-is: ^17.0.2
-    react-router: ^5.2.0
-    react-router-dom: 5.2.0
-    react-select: ^4.0.2
     webpack: 5.65.0
   languageName: unknown
   linkType: soft
@@ -7464,10 +7450,10 @@ __metadata:
   resolution: "@strapi/plugin-content-manager@workspace:packages/core/content-manager"
   dependencies:
     "@sindresorhus/slugify": 1.1.0
+    immer: ^9.0.6
     lodash: 4.17.21
   peerDependencies:
     "@strapi/utils": 4.1.12
-    immer: ^9.0.6
   languageName: unknown
   linkType: soft
 
@@ -7475,38 +7461,38 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder"
   dependencies:
-    "@sindresorhus/slugify": 1.1.0
-    fs-extra: 10.0.0
-    pluralize: ^8.0.0
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-intl: 5.20.2
-    react-redux: 7.2.3
-    react-router: ^5.2.0
-    react-router-dom: 5.2.0
-    redux: ^4.0.1
-    reselect: ^4.0.0
-    yup: ^0.32.9
-  peerDependencies:
     "@fortawesome/fontawesome-free": ^5.15.3
     "@fortawesome/fontawesome-svg-core": ^1.2.35
     "@fortawesome/free-brands-svg-icons": ^5.15.3
     "@fortawesome/free-solid-svg-icons": ^5.15.3
     "@fortawesome/react-fontawesome": ^0.1.14
+    "@sindresorhus/slugify": 1.1.0
+    font-awesome: ^4.7.0
+    fs-extra: 10.0.0
+    immer: ^9.0.6
+    lodash: 4.17.21
+    match-sorter: ^4.0.2
+    pluralize: ^8.0.0
+    prop-types: ^15.7.2
+    qs: 6.10.1
+    react: ^17.0.2
+    react-dom: ^17.0.2
+    react-intl: 5.20.2
+    react-is: ^17.0.2
+    react-redux: 7.2.3
+    react-router: ^5.2.0
+    react-router-dom: 5.2.0
+    react-select: ^4.0.2
+    redux: ^4.0.1
+    reselect: ^4.0.0
+    yup: ^0.32.9
+  peerDependencies:
     "@strapi/design-system": 1.1.1
     "@strapi/generators": 4.1.12
     "@strapi/helper-plugin": 4.1.12
     "@strapi/icons": 1.1.1
     "@strapi/plugin-upload": 4.1.12
     "@strapi/utils": 4.1.12
-    font-awesome: ^4.7.0
-    immer: ^9.0.6
-    lodash: 4.17.21
-    match-sorter: ^4.0.2
-    prop-types: ^15.7.2
-    qs: 6.10.1
-    react-is: ^17.0.2
-    react-select: ^4.0.2
     webpack: 5.65.0
   languageName: unknown
   linkType: soft
@@ -7544,21 +7530,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-email@4.1.12, @strapi/plugin-email@workspace:packages/core/email":
+"@strapi/plugin-email@^4.1.11, @strapi/plugin-email@workspace:packages/core/email":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-email@workspace:packages/core/email"
   dependencies:
     "@strapi/helper-plugin": 4.1.12
     "@strapi/provider-email-sendmail": 4.1.12
     lodash: 4.17.21
+    prop-types: ^15.7.2
   peerDependencies:
     "@strapi/design-system": 1.1.1
     "@strapi/helper-plugin": 4.1.12
     "@strapi/icons": 1.1.1
+    "@strapi/provider-email-nodemailer": ^4.1.12
     "@strapi/utils": 4.1.12
     axios: 0.24.0
     immer: ~9.0.6
-    prop-types: ^15.7.2
     qs: 6.10.1
     react-is: ^17.0.2
     react-select: ^4.0.2
@@ -7566,7 +7553,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-graphql@4.1.12, @strapi/plugin-graphql@workspace:packages/plugins/graphql":
+"@strapi/plugin-graphql@workspace:packages/plugins/graphql":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-graphql@workspace:packages/plugins/graphql"
   dependencies:
@@ -7600,7 +7587,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-i18n@4.1.12, @strapi/plugin-i18n@workspace:packages/plugins/i18n":
+"@strapi/plugin-i18n@workspace:packages/plugins/i18n":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-i18n@workspace:packages/plugins/i18n"
   dependencies:
@@ -7672,48 +7659,48 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-users-permissions@4.1.12, @strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions":
+"@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions"
   dependencies:
-    bcryptjs: 2.4.3
-    grant-koa: 5.4.8
-    jsonwebtoken: ^8.1.0
-    koa: ^2.13.1
-    koa2-ratelimit: ^0.9.0
-    purest: 4.0.2
-    react: ^17.0.2
-    react-dom: ^17.0.2
-    react-intl: 5.20.2
-    react-redux: 7.2.3
-    react-router: ^5.2.0
-    react-router-dom: 5.2.0
-    request: ^2.83.0
-  peerDependencies:
     "@fortawesome/fontawesome-free": ^5.15.3
     "@fortawesome/fontawesome-svg-core": ^1.2.35
     "@fortawesome/free-brands-svg-icons": ^5.15.3
     "@fortawesome/free-solid-svg-icons": ^5.15.3
     "@fortawesome/react-fontawesome": ^0.1.14
+    axios: 0.24.0
+    bcryptjs: 2.4.3
+    font-awesome: ^4.7.0
+    formik: ^2.2.6
+    grant-koa: 5.4.8
+    immer: ~9.0.6
+    jsonwebtoken: ^8.1.0
+    koa: ^2.13.1
+    koa2-ratelimit: ^0.9.0
+    lodash: 4.17.21
+    match-sorter: ^4.0.2
+    prop-types: ^15.7.2
+    purest: 4.0.2
+    qs: 6.10.1
+    request: ^2.83.0
+    url-join: ^4.0.0
+  peerDependencies:
     "@strapi/design-system": 1.1.1
     "@strapi/helper-plugin": 4.1.12
     "@strapi/icons": 1.1.1
     "@strapi/utils": 4.1.12
-    axios: 0.24.0
-    font-awesome: ^4.7.0
-    formik: ^2.2.6
-    immer: ~9.0.6
     koa: ^2.13.3
-    lodash: 4.17.21
-    match-sorter: ^4.0.2
-    prop-types: ^15.7.2
-    qs: 6.10.1
+    react: ^17.0.2
+    react-dom: ^17.0.2
+    react-intl: 5.20.2
     react-is: ^17.0.2
     react-query: 3.24.3
+    react-redux: 7.2.3
+    react-router: ^5.2.0
+    react-router-dom: 5.2.0
     react-select: ^4.0.2
     redux: ^4.0.1
     redux-saga: ^0.16.0
-    url-join: ^4.0.0
     webpack: 5.65.0
   languageName: unknown
   linkType: soft
@@ -7737,7 +7724,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer":
+"@strapi/provider-email-nodemailer@^4.1.12, @strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
@@ -7801,38 +7788,49 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/strapi@^4.1.12, @strapi/strapi@workspace:packages/core/strapi":
+"@strapi/strapi@4.1.12, @strapi/strapi@workspace:packages/core/strapi":
   version: 0.0.0-use.local
   resolution: "@strapi/strapi@workspace:packages/core/strapi"
   dependencies:
     "@koa/cors": 3.1.0
     "@koa/router": 10.1.1
-    "@strapi/admin": 4.1.12
     "@strapi/database": 4.1.12
     "@strapi/generate-new": 4.1.12
     "@strapi/generators": 4.1.12
     "@strapi/logger": 4.1.12
     "@strapi/plugin-content-manager": 4.1.12
     "@strapi/plugin-content-type-builder": 4.1.12
+    "@strapi/plugin-documentation": 4.1.12
+    "@strapi/plugin-email": ^4.1.11
+    "@strapi/plugin-upload": 4.1.12
+    "@strapi/provider-upload-aws-s3": 4.1.12
+    axios: 0.24.0
+    babel-loader: 8.2.3
     bcryptjs: 2.4.3
     boxen: 5.1.2
     chalk: 4.1.2
     chokidar: 3.5.2
     ci-info: 3.2.0
     cli-table3: 0.6.1
+    codemirror: ^5.61.0
     commander: 8.2.0
     configstore: 5.0.1
+    css-loader: 6.5.1
+    date-fns: 2.22.1
     debug: 4.3.2
     delegates: 1.0.0
     dotenv: 10.0.0
     eslint: 7.25.0
     eslint-plugin-redux-saga: 1.3.2
     execa: 5.1.1
+    formik: ^2.2.6
     fs-extra: 10.0.0
     glob: 7.2.0
     http-errors: 1.8.0
+    immer: ^9.0.6
     inquirer: 8.2.0
     is-docker: 2.2.1
+    js-cookie: 2.2.1
     koa: 2.13.3
     koa-body: 4.2.0
     koa-compose: 4.1.0
@@ -7842,6 +7840,8 @@ __metadata:
     koa-ip: 2.1.0
     koa-session: 6.2.0
     koa-static: 5.0.0
+    lodash: 4.17.21
+    match-sorter: ^4.0.2
     mime-types: 2.1.35
     node-fetch: 2.6.7
     node-machine-id: 1.1.12
@@ -7849,74 +7849,60 @@ __metadata:
     open: 8.2.1
     ora: 5.4.1
     package-json: 7.0.0
-    react-dnd: ^14.0.2
-    react-dnd-html5-backend: ^14.0.0
-    react-router-dom: 5.2.0
-    react-select: ^4.0.2
-    resolve-cwd: 3.0.0
-    statuses: 2.0.1
-    styled-components: 5.3.3
-    supertest: ^6.1.6
-    uuid: ^3.3.2
-  peerDependencies:
-    "@fingerprintjs/fingerprintjs": 3.3.2
-    "@fortawesome/fontawesome-free": ^5.15.3
-    "@fortawesome/fontawesome-svg-core": ^1.2.35
-    "@fortawesome/free-brands-svg-icons": ^5.15.3
-    "@fortawesome/free-solid-svg-icons": ^5.15.3
-    "@fortawesome/react-fontawesome": ^0.1.14
-    "@strapi/design-system": 1.1.1
-    "@strapi/helper-plugin": 4.1.12
-    "@strapi/icons": 1.1.1
-    "@strapi/plugin-documentation": 4.1.12
-    "@strapi/plugin-email": 4.1.12
-    "@strapi/plugin-graphql": 4.1.12
-    "@strapi/plugin-i18n": 4.1.12
-    "@strapi/plugin-sentry": 4.1.12
-    "@strapi/plugin-upload": 4.1.12
-    "@strapi/plugin-users-permissions": 4.1.12
-    "@strapi/provider-upload-aws-s3": 4.1.12
-    "@strapi/utils": 4.1.12
-    aws-s3: 2.0.5
-    axios: 0.24.0
-    codemirror: ^5.61.0
-    cropperjs: 1.5.11
-    css-loader: 6.5.1
-    date-fns: 2.22.1
-    eslint-plugin-redux-saga: 1.3.2
-    font-awesome: ^4.7.0
-    formik: ^2.2.6
-    highlight.js: ^10.4.1
-    immer: ^9.0.6
-    js-cookie: 2.2.1
-    lodash: 4.17.21
-    markdown-it: ^12.3.2
-    markdown-it-abbr: ^1.0.4
-    markdown-it-container: ^3.0.0
-    markdown-it-deflist: ^2.1.0
-    markdown-it-emoji: ^2.0.0
-    markdown-it-footnote: ^3.0.3
-    markdown-it-ins: ^3.0.1
-    markdown-it-mark: ^3.0.1
-    markdown-it-sub: ^1.0.0
-    markdown-it-sup: 1.0.0
-    match-sorter: ^4.0.2
-    mysql: ^2.18.1
     prop-types: ^15.7.2
     qs: 6.10.1
     react: ^17.0.2
+    react-dnd: ^14.0.2
+    react-dnd-html5-backend: ^14.0.0
     react-dom: ^17.0.2
     react-is: ^17.0.2
     react-query: 3.24.3
-    react-router-dom: ^5.2.0
+    react-router-dom: 5.2.0
     react-select: ^4.0.2
     redux: ^4.0.1
     redux-saga: ^0.16.0
+    resolve-cwd: 3.0.0
     sanitize-html: 2.4.0
     semver: 7.3.5
+    statuses: 2.0.1
     style-loader: 3.3.1
+    styled-components: 5.3.3
+    supertest: ^6.1.6
     url-join: ^4.0.0
+    uuid: ^3.3.2
+  peerDependencies:
+    "@babel/core": 7.16.7
+    "@babel/polyfill": 7.12.1
+    "@babel/preset-env": 7.16.7
+    "@babel/preset-react": 7.16.7
+    "@babel/runtime": 7.16.7
+    "@strapi/admin": 4.1.12
+    "@strapi/design-system": 1.1.1
+    "@strapi/helper-plugin": 4.1.12
+    "@strapi/icons": 1.1.1
+    "@strapi/plugin-graphql": 4.1.12
+    "@strapi/plugin-i18n": 4.1.12
+    "@strapi/plugin-sentry": 4.1.12
+    "@strapi/plugin-users-permissions": 4.1.12
+    "@strapi/provider-email-nodemailer": ^4.1.12
+    "@strapi/utils": 4.1.12
+    better-sqlite3: 7.4.6
+    mariadb: ^3.0.0
+    mysql: ^2.18.1
+    pg: ^8.7.3
     webpack: 5.65.0
+    webpack-cli: 4.9.1
+  peerDependenciesMeta:
+    "@strapi/plugin-documentation":
+      optional: true
+    "@strapi/plugin-graphql":
+      optional: true
+    "@strapi/plugin-i18n":
+      optional: true
+    "@strapi/plugin-sentry":
+      optional: true
+    "@strapi/plugin-users-permissions":
+      optional: true
   bin:
     strapi: ./bin/strapi.js
   languageName: unknown
@@ -9760,33 +9746,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"adm-zip@npm:^0.5.9":
-  version: 0.5.9
-  resolution: "adm-zip@npm:0.5.9"
-  checksum: 4909bc04119fdd5e8f8ba43826e50623e5c427cf0a939c809d4f9456a6a03c6aa0544e82088739de9ba16b7649f71b99ccbbddc7b2c38bd6143f9c4726cc7ed9
-  languageName: node
-  linkType: hard
-
-"ag-grid-community@npm:^26.2.1":
-  version: 26.2.1
-  resolution: "ag-grid-community@npm:26.2.1"
-  checksum: a41f587a01bf5c8028ed5736ef276d427d40c810f45b8995f486a778d8f7419248faf13af547b78dd1855b7447a69f30a534c1962cac20ce6b4fc76b3c24e2f3
-  languageName: node
-  linkType: hard
-
-"ag-grid-react@npm:^26.2.0":
-  version: 26.2.0
-  resolution: "ag-grid-react@npm:26.2.0"
-  dependencies:
-    prop-types: ^15.6.2
-  peerDependencies:
-    ag-grid-community: ~26.2.0
-    react: ^16.3.0 || ^17.0.0
-    react-dom: ^16.3.0 || ^17.0.0
-  checksum: dfb51e51fab2e0026bd8d25fab2717c96152f12e23900ab093f4cf18fb68d23731c29b2a84f0afd3ec480ce8bc9171202417045f0abb6eb4978451c3ac123386
-  languageName: node
-  linkType: hard
-
 "agent-base@npm:6, agent-base@npm:^6.0.0, agent-base@npm:^6.0.2":
   version: 6.0.2
   resolution: "agent-base@npm:6.0.2"
@@ -10734,7 +10693,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"aws-sdk@npm:^2.1151.0, aws-sdk@npm:^2.382.0":
+"aws-sdk@npm:^2.382.0":
   version: 2.1151.0
   resolution: "aws-sdk@npm:2.1151.0"
   dependencies:
@@ -11224,6 +11183,18 @@ __metadata:
   dependencies:
     open: ^7.0.3
   checksum: 3d1a945d125cbbc6e6a841bef7540435d77d5aa61fc4d345896f5f0b3780fcf9c7145373deaedf62d674a427b187ae973f4410884f9fea0c15f7f01f9dc339c7
+  languageName: node
+  linkType: hard
+
+"better-sqlite3@npm:7.4.6":
+  version: 7.4.6
+  resolution: "better-sqlite3@npm:7.4.6"
+  dependencies:
+    bindings: ^1.5.0
+    node-gyp: latest
+    prebuild-install: ^7.0.0
+    tar: ^6.1.11
+  checksum: 593241b9deb6621c7f4c72f1679c3b07b5711df48d91a6743119e4563866c3c1ba62f1ebfd34181d14144cdb8f287811b9391a16d384fdfb25089b88ee6a5633
   languageName: node
   linkType: hard
 
@@ -12836,7 +12807,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^6.1.0, commander@npm:^6.2.0, commander@npm:^6.2.1":
+"commander@npm:^6.2.0, commander@npm:^6.2.1":
   version: 6.2.1
   resolution: "commander@npm:6.2.1"
   checksum: d7090410c0de6bc5c67d3ca41c41760d6d268f3c799e530aafb73b7437d1826bbf0d2a3edac33f8b57cc9887b4a986dce307fa5557e109be40eadb7c43b21742
@@ -13781,13 +13752,6 @@ __metadata:
   version: 3.0.1
   resolution: "data-uri-to-buffer@npm:3.0.1"
   checksum: c59c3009686a78c071806b72f4810856ec28222f0f4e252aa495ec027ed9732298ceea99c50328cf59b151dd34cbc3ad6150bbb43e41fc56fa19f48c99e9fc30
-  languageName: node
-  linkType: hard
-
-"data-uri-to-buffer@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "data-uri-to-buffer@npm:4.0.0"
-  checksum: a010653869abe8bb51259432894ac62c52bf79ad761d418d94396f48c346f2ae739c46b254e8bb5987bded8a653d467db1968db3a69bab1d33aa5567baa5cfc7
   languageName: node
   linkType: hard
 
@@ -16361,16 +16325,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fetch-blob@npm:^3.1.2, fetch-blob@npm:^3.1.4":
-  version: 3.1.5
-  resolution: "fetch-blob@npm:3.1.5"
-  dependencies:
-    node-domexception: ^1.0.0
-    web-streams-polyfill: ^3.0.3
-  checksum: 6493f21bfe196798343431d20c0284835202728d076dd2cbf502a2846679f9265f3b0c3a7224750ae1a770b925da09e592b05fe7c3a22ca27794a39a0039ab21
-  languageName: node
-  linkType: hard
-
 "fetch-retry@npm:^5.0.2":
   version: 5.0.2
   resolution: "fetch-retry@npm:5.0.2"
@@ -16809,15 +16763,6 @@ __metadata:
   version: 0.2.2
   resolution: "format@npm:0.2.2"
   checksum: 646a60e1336250d802509cf24fb801e43bd4a70a07510c816fa133aa42cdbc9c21e66e9cc0801bb183c5b031c9d68be62e7fbb6877756e52357850f92aa28799
-  languageName: node
-  linkType: hard
-
-"formdata-polyfill@npm:^4.0.10":
-  version: 4.0.10
-  resolution: "formdata-polyfill@npm:4.0.10"
-  dependencies:
-    fetch-blob: ^3.1.2
-  checksum: 82a34df292afadd82b43d4a740ce387bc08541e0a534358425193017bf9fb3567875dc5f69564984b1da979979b70703aa73dee715a17b6c229752ae736dd9db
   languageName: node
   linkType: hard
 
@@ -18834,7 +18779,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:^9.0.6":
+"immer@npm:^9.0.6, immer@npm:~9.0.6":
   version: 9.0.14
   resolution: "immer@npm:9.0.14"
   checksum: 17f1365c06d653e672a4f609f08e7203e9ab4b4284818332d6ca9b3f3577a0e3c0066ca7933b636fbae560df79a4b3fde70ed717ce3c6e95c39bf3d5861d5be9
@@ -20824,19 +20769,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"json2csv@npm:^5.0.6":
-  version: 5.0.7
-  resolution: "json2csv@npm:5.0.7"
-  dependencies:
-    commander: ^6.1.0
-    jsonparse: ^1.3.1
-    lodash.get: ^4.4.2
-  bin:
-    json2csv: bin/json2csv.js
-  checksum: 81b511e4f5abba1dcda90593c193d15e5f05f1def91377b6289536e31fdb629889da6a2b4612b9ff699116a29b1758d20c0d71f7921fcfb09863da5b2d883139
-  languageName: node
-  linkType: hard
-
 "json5@npm:^1.0.1":
   version: 1.0.1
   resolution: "json5@npm:1.0.1"
@@ -22698,7 +22630,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mime-types@npm:2.1.35, mime-types@npm:^2.0.8, mime-types@npm:^2.1.12, mime-types@npm:^2.1.18, mime-types@npm:^2.1.27, mime-types@npm:^2.1.28, mime-types@npm:^2.1.30, mime-types@npm:^2.1.31, mime-types@npm:^2.1.34, mime-types@npm:~2.1.17, mime-types@npm:~2.1.19, mime-types@npm:~2.1.24, mime-types@npm:~2.1.34":
+"mime-types@npm:2.1.35, mime-types@npm:^2.0.8, mime-types@npm:^2.1.12, mime-types@npm:^2.1.18, mime-types@npm:^2.1.27, mime-types@npm:^2.1.28, mime-types@npm:^2.1.30, mime-types@npm:^2.1.31, mime-types@npm:~2.1.17, mime-types@npm:~2.1.19, mime-types@npm:~2.1.24, mime-types@npm:~2.1.34":
   version: 2.1.35
   resolution: "mime-types@npm:2.1.35"
   dependencies:
@@ -23522,13 +23454,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-domexception@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "node-domexception@npm:1.0.0"
-  checksum: ee1d37dd2a4eb26a8a92cd6b64dfc29caec72bff5e1ed9aba80c294f57a31ba4895a60fd48347cf17dd6e766da0ae87d75657dfd1f384ebfa60462c2283f5c7f
-  languageName: node
-  linkType: hard
-
 "node-fetch@npm:2.6.7, node-fetch@npm:^2.2.0, node-fetch@npm:^2.3.0, node-fetch@npm:^2.6.1, node-fetch@npm:^2.6.7":
   version: 2.6.7
   resolution: "node-fetch@npm:2.6.7"
@@ -23550,17 +23475,6 @@ __metadata:
     data-uri-to-buffer: ^3.0.1
     fetch-blob: ^2.1.1
   checksum: 586af0910649cb62f1c044ddac41e71c0b0f48133fba406ad5e0fab51baff18f22cd187ea65ef690ceed7386a71910e904348105dc8eae55f907fa94df7e76ca
-  languageName: node
-  linkType: hard
-
-"node-fetch@npm:^3.2.6":
-  version: 3.2.6
-  resolution: "node-fetch@npm:3.2.6"
-  dependencies:
-    data-uri-to-buffer: ^4.0.0
-    fetch-blob: ^3.1.4
-    formdata-polyfill: ^4.0.10
-  checksum: ece307ace3a3ff28638ccb0fa0545bb5c0cfd673a9d06fc314d937a73ae6a55917d5bacd7f080f9a9f1449ca20a5c01b1281d0e616acb20315e5ac315971da46
   languageName: node
   linkType: hard
 
@@ -25716,7 +25630,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prebuild-install@npm:^7.1.0":
+"prebuild-install@npm:^7.0.0, prebuild-install@npm:^7.1.0":
   version: 7.1.1
   resolution: "prebuild-install@npm:7.1.1"
   dependencies:
@@ -26416,7 +26330,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^17.0.2":
+"react-dom@npm:^17.0.2, react-dom@npm:~17.0.2":
   version: 17.0.2
   resolution: "react-dom@npm:17.0.2"
   dependencies:
@@ -26685,23 +26599,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^5.2.0":
-  version: 5.3.3
-  resolution: "react-router-dom@npm:5.3.3"
-  dependencies:
-    "@babel/runtime": ^7.12.13
-    history: ^4.9.0
-    loose-envify: ^1.3.1
-    prop-types: ^15.6.2
-    react-router: 5.3.3
-    tiny-invariant: ^1.0.2
-    tiny-warning: ^1.0.0
-  peerDependencies:
-    react: ">=15"
-  checksum: e1998918e391611f09b967bce0cb88bc9794aa3d8dc5f86453467a1226ae2ace648a1f401f5282f19c84a3a61fa6a3207e2a6fdfe8c8efae0b255244631febeb
-  languageName: node
-  linkType: hard
-
 "react-router-dom@npm:^6.0.0":
   version: 6.3.0
   resolution: "react-router-dom@npm:6.3.0"
@@ -26732,26 +26629,6 @@ __metadata:
   peerDependencies:
     react: ">=15"
   checksum: 6fc908729110a65a5676a9e41333e0f511a3c0ff84c93c0dc704330cf3e02124c93aaeab8031b0e2c71712390d9278fff848eeebfbdda36dca3201142f309973
-  languageName: node
-  linkType: hard
-
-"react-router@npm:5.3.3":
-  version: 5.3.3
-  resolution: "react-router@npm:5.3.3"
-  dependencies:
-    "@babel/runtime": ^7.12.13
-    history: ^4.9.0
-    hoist-non-react-statics: ^3.1.0
-    loose-envify: ^1.3.1
-    mini-create-react-context: ^0.4.0
-    path-to-regexp: ^1.7.0
-    prop-types: ^15.6.2
-    react-is: ^16.6.0
-    tiny-invariant: ^1.0.2
-    tiny-warning: ^1.0.0
-  peerDependencies:
-    react: ">=15"
-  checksum: 52a9f28fa97577fda18a8ed2922b658704eafe873e444fe07202640d55d9e81e67c03efd2b2a5b80e3a80e8be8352df826a227ce5f42b33b91bef853c74d4841
   languageName: node
   linkType: hard
 
@@ -29213,46 +29090,30 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "strapi@workspace:."
   dependencies:
+    "@babel/core": 7.16.7
     "@babel/polyfill": 7.12.1
+    "@babel/preset-env": 7.16.7
+    "@babel/preset-react": 7.16.7
     "@babel/runtime": 7.16.7
-    "@fingerprintjs/fingerprintjs": 3.3.2
-    "@fortawesome/fontawesome-free": ^5.15.3
-    "@fortawesome/fontawesome-svg-core": ^1.2.35
-    "@fortawesome/free-brands-svg-icons": ^5.15.3
-    "@fortawesome/free-solid-svg-icons": ^5.15.3
-    "@fortawesome/react-fontawesome": ^0.1.14
-    "@purest/providers": ^1.0.4
+    "@strapi/admin": 4.1.12
     "@strapi/design-system": 1.1.1
     "@strapi/helper-plugin": 4.1.12
     "@strapi/icons": 1.1.1
-    "@strapi/plugin-documentation": 4.1.12
-    "@strapi/plugin-email": 4.1.12
-    "@strapi/plugin-graphql": 4.1.12
-    "@strapi/plugin-i18n": 4.1.12
-    "@strapi/plugin-upload": 4.1.12
-    "@strapi/plugin-users-permissions": 4.1.12
-    "@strapi/provider-upload-aws-s3": 4.1.12
-    "@strapi/strapi": ^4.1.12
+    "@strapi/provider-email-nodemailer": ^4.1.12
+    "@strapi/strapi": 4.1.12
     "@strapi/utils": 4.1.12
     "@swc-node/jest": 1.5.0
     "@testing-library/dom": "*"
     "@testing-library/react": 11.2.7
     "@testing-library/react-hooks": 3.7.0
     "@testing-library/user-event": 13.5.0
-    adm-zip: ^0.5.9
-    ag-grid-community: ^26.2.1
-    ag-grid-react: ^26.2.0
-    aws-sdk: ^2.1151.0
-    axios: 0.24.0
     axios-mock-adapter: 1.20.0
     babel-eslint: 10.1.0
+    babel-loader: 8.2.3
+    better-sqlite3: 7.4.6
     chalk: 4.1.2
     chokidar: 3.5.3
-    codemirror: ^5.61.0
-    cropperjs: 1.5.11
     cross-env: 7.0.3
-    css-loader: 6.5.1
-    date-fns: 2.22.1
     dotenv: 14.2.0
     eslint: 7.32.0
     eslint-config-airbnb: 18.2.1
@@ -29266,70 +29127,30 @@ __metadata:
     eslint-plugin-react-hooks: 4.5.0
     eslint-plugin-redux-saga: 1.3.2
     execa: 1.0.0
-    font-awesome: ^4.7.0
-    form-data: ^4.0.0
-    formik: ^2.2.6
     fs-extra: 10.1.0
     get-port: 5.1.1
     glob: 7.2.3
-    graphql: ^15.5.1
-    highlight.js: ^10.4.1
     husky: 3.1.0
-    immer: ^9.0.6
     istanbul: ~0.4.2
     jest: 26.6.3
     jest-circus: 26.6.3
     jest-cli: 26.6.3
-    js-cookie: 2.2.1
-    json2csv: ^5.0.6
-    koa: 2.13.3
     lerna: 4.0.0
     lint-staged: 10.5.4
-    lodash: 4.17.21
-    markdown-it: ^12.3.2
-    markdown-it-abbr: ^1.0.4
-    markdown-it-container: ^3.0.0
-    markdown-it-deflist: ^2.1.0
-    markdown-it-emoji: ^2.0.0
-    markdown-it-footnote: ^3.0.3
-    markdown-it-ins: ^3.0.1
-    markdown-it-mark: ^3.0.1
-    markdown-it-sub: ^1.0.0
-    markdown-it-sup: 1.0.0
-    match-sorter: ^4.0.2
-    mime-types: ^2.1.34
     msw: 0.38.1
-    node-fetch: ^3.2.6
     npm-run-all: 4.1.5
     plop: 2.7.6
     prettier: 1.19.1
-    prop-types: ^15.7.2
     qs: 6.10.5
-    react: ^17.0.2
-    react-dnd: ^14.0.2
-    react-dnd-html5-backend: ^14.0.0
-    react-dom: ^17.0.2
-    react-is: ^17.0.2
-    react-query: 3.24.3
-    react-router: 5.2.0
-    react-router-dom: ^5.2.0
-    react-select: ^4.0.2
     react-test-renderer: 17.0.2
-    redux: ^4.0.1
-    redux-saga: ^0.16.0
     request: 2.88.2
     request-promise-native: 1.0.9
     rimraf: 3.0.2
-    sanitize-html: 2.4.0
-    semver: 7.3.5
-    style-loader: 3.3.1
-    styled-components: 5.3.3
     stylelint: 13.13.1
     stylelint-config-recommended: 3.0.0
     stylelint-config-styled-components: 0.1.1
     stylelint-processor-styled-components: 1.10.0
     supertest: 5.0.0
-    url-join: ^4.0.0
     webpack: 5.65.0
     webpack-cli: 4.9.1
     yargs: 13.3.2
@@ -31837,7 +31658,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web-streams-polyfill@npm:^3.0.1, web-streams-polyfill@npm:^3.0.3":
+"web-streams-polyfill@npm:^3.0.1":
   version: 3.2.1
   resolution: "web-streams-polyfill@npm:3.2.1"
   checksum: b119c78574b6d65935e35098c2afdcd752b84268e18746606af149e3c424e15621b6f1ff0b42b2676dc012fc4f0d313f964b41a4b5031e525faa03997457da02
@@ -32045,6 +31866,13 @@ __metadata:
     clone-deep: ^4.0.1
     wildcard: ^2.0.0
   checksum: 88786ab91013f1bd2a683834ff381be81c245a4b0f63304a5103e90f6653f44dab496a0768287f8531761f8ad957d1f9f3ccb2cb55df0de1bd9ee343e079da26
+  languageName: node
+  linkType: hard
+
+"webpack-node-externals@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "webpack-node-externals@npm:3.0.0"
+  checksum: 355080c35c821115b97dda8c93d9d0565a90a6012a532324eb0d6a64f8f0d609431fd29504fc7ce414755841ac14f601f3eef99472c2c5dc00233b504ebe73f2
   languageName: node
   linkType: hard
 

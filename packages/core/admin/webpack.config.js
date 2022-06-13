@@ -10,6 +10,8 @@ const WebpackBar = require('webpackbar');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
+const {requirePackage} = require('./pnp')
+
 
 const EE_REGEX = /from.* ['"]ee_else_ce\//;
 
@@ -31,9 +33,7 @@ module.exports = ({
   },
 }) => {
   const isProduction = env === 'production';
-
   const envVariables = getClientEnvironment({ ...options, env });
-
   const webpackPlugins = isProduction
     ? [
         new webpack.IgnorePlugin({
@@ -49,7 +49,7 @@ module.exports = ({
       ]
     : [];
 
-  const babelPolyfill = '@babel/polyfill/dist/polyfill.min.js';
+  const babelPolyfill = '@babel/polyfill/dist/polyfill.min.js';//requirePackage.resolveRequest('@babel/polyfill/dist/polyfill.min.js');
 
   return {
     mode: isProduction ? 'production' : 'development',
@@ -100,18 +100,18 @@ module.exports = ({
                 }
               },
               use: {
-                loader: require.resolve('babel-loader'),
+                loader: requirePackage.resolve('babel-loader'),
                 options: {
                   cacheDirectory: true,
                   cacheCompression: isProduction,
                   compact: isProduction,
                   presets: [
-                    require.resolve('@babel/preset-env'),
-                    require.resolve('@babel/preset-react'),
+                    requirePackage.resolve('@babel/preset-env'),
+                    requirePackage.resolve('@babel/preset-react'),
                   ],
                   plugins: [
                     [
-                      require.resolve('@strapi/babel-plugin-switch-ee-ce'),
+                      requirePackage.resolve('@strapi/babel-plugin-switch-ee-ce'),
                       {
                         // Imported this tells the custom plugin where to look for the ee folder
                         roots,
@@ -119,13 +119,13 @@ module.exports = ({
                     ],
 
                     [
-                      require.resolve('@babel/plugin-transform-runtime'),
+                      requirePackage.resolve('@babel/plugin-transform-runtime'),
                       {
                         helpers: true,
                         regenerator: true,
                       },
                     ],
-                    [require.resolve('babel-plugin-styled-components'), { pure: true }],
+                    [requirePackage.resolve('babel-plugin-styled-components'), { pure: true }],
                   ],
                 },
               },
@@ -133,10 +133,16 @@ module.exports = ({
             // Use esbuild-loader for the other files
             {
               use: {
-                loader: require.resolve('esbuild-loader'),
+                loader: requirePackage.resolve('babel-loader'),
                 options: {
-                  loader: 'jsx',
-                  target: 'es2015',
+                  sourceType: "module",
+                  cacheDirectory: true,
+                  cacheCompression: isProduction,
+                  compact: isProduction,
+                  presets: [
+                    requirePackage.resolve('@babel/preset-env'),
+                    requirePackage.resolve('@babel/preset-react'),
+                  ],
                 },
               },
             },
@@ -146,17 +152,19 @@ module.exports = ({
           test: /\.m?jsx?$/,
           include: pluginsPath,
           use: {
-            loader: require.resolve('esbuild-loader'),
+            loader: requirePackage.resolve('babel-loader'),
             options: {
-              loader: 'jsx',
-              target: 'es2015',
+              presets: [
+                requirePackage.resolve('@babel/preset-env'),
+                requirePackage.resolve('@babel/preset-react'),
+              ],
             },
           },
         },
 
         {
           test: /\.css$/i,
-          use: ['style-loader', 'css-loader'],
+          use: [requirePackage.resolve('style-loader'), requirePackage.resolve('css-loader')],
         },
         {
           test: /\.(svg|eot|otf|ttf|woff|woff2)$/,
@@ -174,7 +182,7 @@ module.exports = ({
         {
           test: /\.html$/,
           include: [path.join(__dirname, 'src')],
-          use: require.resolve('html-loader'),
+          use: requirePackage.resolve('html-loader'),
         },
         {
           test: /\.(mp4|webm)$/,
@@ -191,8 +199,7 @@ module.exports = ({
       alias,
       symlinks: false,
       extensions: ['.js', '.jsx', '.react.js'],
-      mainFields: ['browser', 'jsnext:main', 'main'],
-      modules: ['node_modules', path.resolve(__dirname, 'node_modules')],
+      mainFields: ['browser', 'jsnext:main', 'main']
     },
     plugins: [
       new HtmlWebpackPlugin({
