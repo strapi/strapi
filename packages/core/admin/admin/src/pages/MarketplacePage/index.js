@@ -12,7 +12,6 @@ import {
   useNotification,
   useAppInfos,
 } from '@strapi/helper-plugin';
-import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Searchbar } from '@strapi/design-system/Searchbar';
@@ -20,17 +19,19 @@ import { Box } from '@strapi/design-system/Box';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
+import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 
-import PluginCard from './components/PluginCard';
 import { EmptyPluginSearch } from './components/EmptyPluginSearch';
 import PageHeader from './components/PageHeader';
 import { fetchAppInformation } from './utils/api';
 import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
+import useFetchMarketplaceProviders from '../../hooks/useFetchMarketplaceProviders';
 import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 import adminPermissions from '../../permissions';
 import offlineCloud from '../../assets/images/icon_offline-cloud.svg';
 import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
 import MissingPluginBanner from './components/MissingPluginBanner';
+import NpmPackagesGrid from './components/NpmPackagesGrid';
 
 const matchSearch = (plugins, search) => {
   return matchSorter(plugins, search, {
@@ -73,15 +74,14 @@ const MarketPlacePage = () => {
     );
   };
 
-  const {
-    status: marketplacePluginsStatus,
-    data: marketplacePluginsResponse,
-  } = useFetchMarketplacePlugins(notifyMarketplaceLoad);
+  const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
+    useFetchMarketplacePlugins(notifyMarketplaceLoad);
 
-  const {
-    status: installedPluginsStatus,
-    data: installedPluginsResponse,
-  } = useFetchInstalledPlugins();
+  const { status: marketplaceProvidersStatus, data: marketplaceProvidersResponse } =
+    useFetchMarketplaceProviders(notifyMarketplaceLoad);
+
+  const { status: installedPluginsStatus, data: installedPluginsResponse } =
+    useFetchInstalledPlugins();
 
   const { data: appInfoResponse, status: appInfoStatus } = useQuery(
     'app-information',
@@ -96,13 +96,19 @@ const MarketPlacePage = () => {
     }
   );
 
-  const isLoading = [marketplacePluginsStatus, installedPluginsStatus, appInfoStatus].includes(
-    'loading'
-  );
+  const isLoading = [
+    marketplacePluginsStatus,
+    marketplaceProvidersStatus,
+    installedPluginsStatus,
+    appInfoStatus,
+  ].includes('loading');
 
-  const hasFailed = [marketplacePluginsStatus, installedPluginsStatus, appInfoStatus].includes(
-    'error'
-  );
+  const hasFailed = [
+    marketplacePluginsStatus,
+    marketplaceProvidersStatus,
+    installedPluginsStatus,
+    appInfoStatus,
+  ].includes('error');
 
   useEffect(() => {
     trackUsageRef.current('didGoToMarketplace');
@@ -180,7 +186,7 @@ const MarketPlacePage = () => {
   }
 
   const searchResults = matchSearch(marketplacePluginsResponse.data, searchQuery);
-  const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
+  const installedPluginNames = installedPluginsResponse.plugins.map((plugin) => plugin.packageName);
 
   return (
     <Layout>
@@ -198,7 +204,7 @@ const MarketPlacePage = () => {
               name="searchbar"
               onClear={() => setSearchQuery('')}
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               clearLabel={formatMessage({
                 id: 'admin.pages.MarketPlacePage.search.clear',
                 defaultMessage: 'Clear the plugin search',
@@ -225,18 +231,52 @@ const MarketPlacePage = () => {
               )}
             />
           ) : (
-            <Grid gap={4}>
-              {searchResults.map(plugin => (
-                <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={plugin.id}>
-                  <PluginCard
-                    plugin={plugin}
-                    installedPluginNames={installedPluginNames}
+            <TabGroup
+              label={formatMessage({
+                id: 'admin.pages.MarketPlacePage.tab-group.label',
+                defaultMessage: 'Plugins and Providers for Strapi',
+              })}
+              id="tabs"
+              variant="simple"
+            >
+              <Box paddingBottom={4}>
+                <Tabs>
+                  <Tab>
+                    {formatMessage({
+                      id: 'admin.pages.MarketPlacePage.plugins',
+                      defaultMessage: 'Plugins',
+                    })}{' '}
+                    ({searchResults.length})
+                  </Tab>
+                  <Tab>
+                    {formatMessage({
+                      id: 'admin.pages.MarketPlacePage.providers',
+                      defaultMessage: 'Providers',
+                    })}{' '}
+                    ({marketplaceProvidersResponse.data.length})
+                  </Tab>
+                </Tabs>
+              </Box>
+              <TabPanels>
+                <TabPanel>
+                  <NpmPackagesGrid
+                    npmPackages={searchResults}
+                    installedPackageNames={installedPluginNames}
                     useYarn={appInfoResponse.data.useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
+                    npmPackageType="plugin"
                   />
-                </GridItem>
-              ))}
-            </Grid>
+                </TabPanel>
+                <TabPanel>
+                  <NpmPackagesGrid
+                    npmPackages={marketplaceProvidersResponse.data}
+                    useYarn={appInfoResponse.data.useYarn}
+                    isInDevelopmentMode={isInDevelopmentMode}
+                    npmPackageType="provider"
+                  />
+                </TabPanel>
+              </TabPanels>
+            </TabGroup>
           )}
           <Box paddingTop={7}>
             <MissingPluginBanner />
