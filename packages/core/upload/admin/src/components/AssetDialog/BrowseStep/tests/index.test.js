@@ -44,7 +44,7 @@ const FIXTURE_FOLDERS = [
   {
     id: 1,
     createdAt: '',
-    uid: '1',
+    pathId: 1,
     name: 'Folder 1',
     children: {
       count: 1,
