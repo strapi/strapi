@@ -17,7 +17,7 @@ export const useRemoveAsset = onSuccess => {
         type: 'success',
         message: {
           id: 'modal.remove.success-label',
-          defaultMessage: 'The asset has been successfully removed.',
+          defaultMessage: 'Elements have been successfully deleted.',
         },
       });
 

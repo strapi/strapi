@@ -68,7 +68,7 @@
   "modal.nav.computer": "From computer",
   "modal.nav.selected": "selected",
   "modal.nav.url": "From url",
-  "modal.remove.success-label": "Changes successfully saved.",
+  "modal.remove.success-label": "Elements have been successfully deleted.",
   "modal.selected-list.sub-header-subtitle": "Drag & drop to reorder the assets in the field",
   "modal.upload-list.footer.button": "Upload {number, plural, one {# asset} other {# assets}} to the library",
   "modal.upload-list.sub-header-subtitle": "Manage the assets before adding them to the Media Library",

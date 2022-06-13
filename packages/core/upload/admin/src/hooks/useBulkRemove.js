@@ -45,7 +45,7 @@ export const useBulkRemove = () => {
         type: 'success',
         message: {
           id: getTrad('modal.remove.success-label'),
-          defaultMessage: 'Changes successfully saved',
+          defaultMessage: 'Elements have been successfully deleted.',
         },
       });
     },
