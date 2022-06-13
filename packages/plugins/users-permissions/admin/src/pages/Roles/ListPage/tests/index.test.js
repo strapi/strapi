@@ -59,147 +59,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c14 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c11 {
-        padding-right: 8px;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c8 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c8 svg > g,
-      .c8 svg path {
-        fill: #ffffff;
-      }
-
-      .c8[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c8:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c8:focus-visible {
-        outline: none;
-      }
-
-      .c8:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c12 {
-        height: 100%;
-      }
-
-      .c9 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        padding: 10px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c9 .c10 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c9 .c13 {
-        color: #ffffff;
-      }
-
-      .c9[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c9[aria-disabled='true'] .c13 {
-        color: #666687;
-      }
-
-      .c9[aria-disabled='true'] svg > g,
-      .c9[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c9[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c9[aria-disabled='true']:active .c13 {
-        color: #666687;
-      }
-
-      .c9[aria-disabled='true']:active svg > g,
-      .c9[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c9:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c9:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c9 svg > g,
-      .c9 svg path {
-        fill: #ffffff;
-      }
-
       .c34 {
         color: #666687;
         font-weight: 500;
@@ -384,6 +243,147 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
 
       .c26 {
         height: 100vh;
+      }
+
+      .c14 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c11 {
+        padding-right: 8px;
+      }
+
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c8 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c8 svg > g,
+      .c8 svg path {
+        fill: #ffffff;
+      }
+
+      .c8[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c8:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c8:focus-visible {
+        outline: none;
+      }
+
+      .c8:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c12 {
+        height: 100%;
+      }
+
+      .c9 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        padding: 10px 16px;
+        background: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c9 .c10 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c9 .c13 {
+        color: #ffffff;
+      }
+
+      .c9[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c9[aria-disabled='true'] .c13 {
+        color: #666687;
+      }
+
+      .c9[aria-disabled='true'] svg > g,
+      .c9[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c9[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c9[aria-disabled='true']:active .c13 {
+        color: #666687;
+      }
+
+      .c9[aria-disabled='true']:active svg > g,
+      .c9[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c9:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c9:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c9 svg > g,
+      .c9 svg path {
+        fill: #ffffff;
       }
 
       .c1 {

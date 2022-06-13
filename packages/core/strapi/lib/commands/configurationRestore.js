@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const _ = require('lodash');
-const tsUtils = require('@strapi/typescript-utils');
 
 const strapi = require('../index');
 
@@ -14,20 +13,8 @@ const strapi = require('../index');
 module.exports = async function({ file: filePath, strategy = 'replace' }) {
   const input = filePath ? fs.readFileSync(filePath) : await readStdin(process.stdin);
 
-  const appDir = process.cwd();
-
-  const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-  const outDir = await tsUtils.resolveOutDir(appDir);
-
-  if (isTSProject)
-    await tsUtils.compile(appDir, {
-      watch: false,
-      configOptions: { options: { incremental: true } },
-    });
-
-  const distDir = isTSProject ? outDir : appDir;
-
-  const app = await strapi({ appDir, distDir }).load();
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   let dataToImport;
   try {

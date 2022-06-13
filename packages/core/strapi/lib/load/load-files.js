@@ -21,7 +21,7 @@ const filePathToPath = require('./filepath-to-prop-path');
 const loadFiles = async (
   dir,
   pattern,
-  { requireFn = require, shouldUseFileNameAsKey = () => true, globArgs = {} } = {}
+  { requireFn = importDefault, shouldUseFileNameAsKey = () => true, globArgs = {} } = {}
 ) => {
   const root = {};
   const files = await glob(pattern, { cwd: dir, ...globArgs });
@@ -36,7 +36,7 @@ const loadFiles = async (
     if (path.extname(absolutePath) === '.json') {
       mod = await fse.readJson(absolutePath);
     } else {
-      mod = importDefault(requireFn(absolutePath)).default;
+      mod = requireFn(absolutePath);
     }
 
     Object.defineProperty(mod, '__filename__', {

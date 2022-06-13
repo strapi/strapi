@@ -3,7 +3,7 @@
 const path = require('path');
 const _ = require('lodash');
 const fs = require('fs-extra');
-const { isUsingTypeScript } = require('@strapi/typescript-utils');
+const tsUtils = require('@strapi/typescript-utils');
 const getCustomAppConfigFile = require('./get-custom-app-config-file');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
@@ -71,7 +71,10 @@ async function copyAdmin(dest) {
 async function createCacheDir({ appDir, plugins }) {
   const cacheDir = path.resolve(appDir, '.cache');
 
-  const useTypeScript = await isUsingTypeScript(path.join(appDir, 'src', 'admin'), 'tsconfig.json');
+  const useTypeScript = await tsUtils.isUsingTypeScript(
+    path.join(appDir, 'src', 'admin'),
+    'tsconfig.json'
+  );
 
   const pluginsWithFront = Object.keys(plugins)
     .filter(pluginName => {
@@ -121,40 +124,7 @@ async function createCacheDir({ appDir, plugins }) {
 
   // create the tsconfig.json file so we can develop plugins in ts while being in a JS project
   if (!useTypeScript) {
-    await createTSConfigFile(cacheDir);
-  }
-}
-
-async function createTSConfigFile(dest) {
-  const tsConfig = {
-    compilerOptions: {
-      lib: ['es2019', 'es2020.promise', 'es2020.bigint', 'es2020.string', 'DOM'],
-      noImplicitAny: false,
-      module: 'es2020',
-      target: 'es5',
-      jsx: 'react',
-      allowJs: true,
-      strict: true,
-      moduleResolution: 'node',
-      skipLibCheck: true,
-      esModuleInterop: true,
-      allowSyntheticDefaultImports: true,
-      resolveJsonModule: true,
-      noEmit: false,
-      incremental: true,
-    },
-    include: ['../../../src/admin/*', '../../../src/**/**/admin/src/*'],
-    exclude: ['node_modules', '**/*.test.js', '*.js'],
-  };
-
-  const filePath = path.join(dest, 'admin', 'src', 'tsconfig.json');
-
-  try {
-    await fs.ensureFile(filePath);
-
-    await fs.writeJSON(filePath, tsConfig, { spaces: 2 });
-  } catch (err) {
-    console.log(err);
+    await tsUtils.admin.createTSConfigFile(cacheDir);
   }
 }
 

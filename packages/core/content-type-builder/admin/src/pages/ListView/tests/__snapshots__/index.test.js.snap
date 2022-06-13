@@ -13,51 +13,74 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c26 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+.c5 {
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
-.c28 {
-  padding-right: 24px;
-  padding-left: 24px;
+.c3 {
+  padding-right: 8px;
 }
 
-.c41 {
-  padding-right: 0px;
-  padding-left: 24px;
+.c2 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
 }
 
-.c44 {
-  padding-top: 16px;
-  padding-bottom: 16px;
+.c2 svg path {
+  fill: #4945ff;
 }
 
-.c47 {
-  background: #dcdce4;
+.c2 svg {
+  font-size: 0.625rem;
 }
 
-.c49 {
-  padding-left: 12px;
+.c2:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
 }
 
-.c52 {
-  padding-left: 40px;
+.c2:focus-visible {
+  outline: none;
 }
 
-.c59 {
-  padding-right: 16px;
-  padding-left: 16px;
-  border-radius: borderRadius;
+.c2:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
 }
 
-.c64 {
-  max-width: calc(8.75rem - 32px);
-}
-
-.c70 {
-  background: #d9d8ff;
+.c4 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 .c16 {
@@ -387,105 +410,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c38 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c38 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c38 svg > g,
-.c38 svg path {
-  fill: #ffffff;
-}
-
-.c38[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c38:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c38:focus-visible {
-  outline: none;
-}
-
-.c38:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c39 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-  border: none;
-}
-
-.c39 svg > g,
-.c39 svg path {
-  fill: #8e8ea9;
-}
-
-.c39:hover svg > g,
-.c39:hover svg path {
-  fill: #666687;
-}
-
-.c39:active svg > g,
-.c39:active svg path {
-  fill: #a5a5ba;
-}
-
-.c39[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c39[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
 .c32 {
   padding-left: 8px;
 }
@@ -561,6 +485,165 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 
 .c37 > * + * {
   margin-left: 4px;
+}
+
+.c26 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c28 {
+  padding-right: 24px;
+  padding-left: 24px;
+}
+
+.c41 {
+  padding-right: 0px;
+  padding-left: 24px;
+}
+
+.c44 {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.c47 {
+  background: #dcdce4;
+}
+
+.c49 {
+  padding-left: 12px;
+}
+
+.c52 {
+  padding-left: 40px;
+}
+
+.c59 {
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: borderRadius;
+}
+
+.c64 {
+  max-width: calc(8.75rem - 32px);
+}
+
+.c70 {
+  background: #d9d8ff;
+}
+
+.c0 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c1 {
+  padding-bottom: 8px;
+}
+
+.c9 {
+  padding-left: 16px;
+}
+
+.c22 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c8 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.c21 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c30 {
+  color: #666687;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.c35 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c36 {
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c50 {
+  font-weight: 600;
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c58 {
+  font-weight: 600;
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c65 {
+  font-weight: 600;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c72 {
@@ -639,188 +722,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   display: block;
   width: 100%;
   border: none;
-}
-
-.c30 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c35 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c36 {
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c50 {
-  font-weight: 600;
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c58 {
-  font-weight: 600;
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c65 {
-  font-weight: 600;
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c5 {
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c3 {
-  padding-right: 8px;
-}
-
-.c2 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  position: relative;
-  outline: none;
-}
-
-.c2 svg path {
-  fill: #4945ff;
-}
-
-.c2 svg {
-  font-size: 0.625rem;
-}
-
-.c2:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c2:focus-visible {
-  outline: none;
-}
-
-.c2:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c4 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.c0 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
-}
-
-.c1 {
-  padding-bottom: 8px;
-}
-
-.c9 {
-  padding-left: 16px;
-}
-
-.c22 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c6 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c7 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c8 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-}
-
-.c21 {
-  color: #666687;
-  font-size: 1rem;
-  line-height: 1.5;
 }
 
 .c63 {
@@ -1115,6 +1016,105 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   border: none;
   position: relative;
   left: -0.25rem;
+}
+
+.c38 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c38 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c38 svg > g,
+.c38 svg path {
+  fill: #ffffff;
+}
+
+.c38[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c38:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c38:focus-visible {
+  outline: none;
+}
+
+.c38:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c39 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  border: none;
+}
+
+.c39 svg > g,
+.c39 svg path {
+  fill: #8e8ea9;
+}
+
+.c39:hover svg > g,
+.c39:hover svg path {
+  fill: #666687;
+}
+
+.c39:active svg > g,
+.c39:active svg path {
+  fill: #a5a5ba;
+}
+
+.c39[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c39[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c42 {

@@ -6,7 +6,8 @@ const chalk = require('chalk');
 const strapi = require('../../index');
 
 module.exports = async function() {
-  const app = await strapi().register();
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).register();
 
   const list = app.container.get('controllers').keys();
 

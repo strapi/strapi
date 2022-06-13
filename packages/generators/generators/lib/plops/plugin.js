@@ -6,6 +6,11 @@ const { isKebabCase, toKebabCase } = require('@strapi/utils');
 
 const validateInput = require('./utils/validate-input');
 
+const LANGUAGES = {
+  javascript: 'JavaScript',
+  typescript: 'TypeScript',
+};
+
 const logInstructions = (pluginName, { language }) => {
   const maxLength = `    resolve: './src/plugins/${pluginName}'`.length;
   const separator = Array(maxLength)
@@ -46,12 +51,12 @@ module.exports = plop => {
         type: 'list',
         name: 'language',
         message: 'Choose your preferred language',
-        choices: ['Javascript', 'Typescript'],
-        default: 'Javascript',
+        choices: Object.values(LANGUAGES),
+        default: LANGUAGES.javascript,
       },
     ],
     actions(answers) {
-      const isTypescript = answers.language === 'Typescript';
+      const isTypescript = answers.language === LANGUAGES.typescript;
       const language = isTypescript ? 'ts' : 'js';
       const projectLanguage = isUsingTypeScriptSync(process.cwd()) ? 'ts' : 'js';
 

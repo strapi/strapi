@@ -2,9 +2,9 @@
 
 const { join, resolve } = require('path');
 const fs = require('fs-extra');
-// eslint-disable-next-line node/no-extraneous-require
 const glob = require('glob');
 
+// Only for dev environement
 const getPluginsPath = () => {
   const rootPath = resolve(__dirname, '..', join('..', '..', '..', 'packages'));
   const corePath = join(rootPath, 'core', '*');

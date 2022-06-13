@@ -1,5 +1,5 @@
 {
-  "extends": "@strapi/typescript-utils/lib/configs/admin",
+  "extends": "@strapi/typescript-utils/tsconfigs/admin",
 
   "include": [
     "./",

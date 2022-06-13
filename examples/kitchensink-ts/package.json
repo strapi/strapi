@@ -20,10 +20,10 @@
     "name": "A Strapi developer"
   },
   "strapi": {
-    "uuid": "6e21118c-e938-4f36-b0cf-bb8503d409c0"
+    "uuid": "getstarted"
   },
   "engines": {
-    "node": ">=12.x.x <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   },
   "license": "MIT"
