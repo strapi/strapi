@@ -10,8 +10,7 @@ const WebpackBar = require('webpackbar');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
-const {requirePackage} = require('./pnp')
-
+const { requirePackage } = require('./pnp');
 
 const EE_REGEX = /from.* ['"]ee_else_ce\//;
 
@@ -49,7 +48,7 @@ module.exports = ({
       ]
     : [];
 
-  const babelPolyfill = '@babel/polyfill/dist/polyfill.min.js';//requirePackage.resolveRequest('@babel/polyfill/dist/polyfill.min.js');
+  const babelPolyfill = '@babel/polyfill/dist/polyfill.min.js'; //requirePackage.resolveRequest('@babel/polyfill/dist/polyfill.min.js');
 
   return {
     mode: isProduction ? 'production' : 'development',
@@ -133,16 +132,10 @@ module.exports = ({
             // Use esbuild-loader for the other files
             {
               use: {
-                loader: requirePackage.resolve('babel-loader'),
+                loader: requirePackage.resolve('esbuild-loader'),
                 options: {
-                  sourceType: "module",
-                  cacheDirectory: true,
-                  cacheCompression: isProduction,
-                  compact: isProduction,
-                  presets: [
-                    requirePackage.resolve('@babel/preset-env'),
-                    requirePackage.resolve('@babel/preset-react'),
-                  ],
+                  loader: 'jsx',
+                  target: 'es2015',
                 },
               },
             },
@@ -152,12 +145,10 @@ module.exports = ({
           test: /\.m?jsx?$/,
           include: pluginsPath,
           use: {
-            loader: requirePackage.resolve('babel-loader'),
+            loader: requirePackage.resolve('esbuild-loader'),
             options: {
-              presets: [
-                requirePackage.resolve('@babel/preset-env'),
-                requirePackage.resolve('@babel/preset-react'),
-              ],
+              loader: 'jsx',
+              target: 'es2015',
             },
           },
         },
@@ -199,7 +190,7 @@ module.exports = ({
       alias,
       symlinks: false,
       extensions: ['.js', '.jsx', '.react.js'],
-      mainFields: ['browser', 'jsnext:main', 'main']
+      mainFields: ['browser', 'jsnext:main', 'main'],
     },
     plugins: [
       new HtmlWebpackPlugin({
