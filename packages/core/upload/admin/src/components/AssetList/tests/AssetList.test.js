@@ -129,6 +129,13 @@ const setup = (props = { assets: data, selectedAssets: [], onSelectAsset: jest.f
   );
 
 describe('MediaLibrary / AssetList', () => {
+  beforeAll(() => {
+    // see https://github.com/testing-library/react-testing-library/issues/470
+    Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
+      set: () => {},
+    });
+  });
+
   it('snapshots the asset list', () => {
     const { container } = setup();
 

@@ -77,9 +77,10 @@ describe('useFolders', () => {
   });
 
   test('fetches data from the right URL if no query param was set', async () => {
-    const { result, waitFor } = await setup({});
+    const { result, waitFor, waitForNextUpdate } = await setup({});
 
     await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
 
     const expected = {
       pagination: {
@@ -104,9 +105,10 @@ describe('useFolders', () => {
   });
 
   test('fetches data from the right URL if a query param was set', async () => {
-    const { result, waitFor } = await setup({ query: { folder: 1 } });
+    const { result, waitFor, waitForNextUpdate } = await setup({ query: { folder: 1 } });
 
     await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
 
     const expected = {
       pagination: {
@@ -129,11 +131,12 @@ describe('useFolders', () => {
   });
 
   test('allows to merge filter query params using filters.$and', async () => {
-    const { result, waitFor } = await setup({
+    const { result, waitFor, waitForNextUpdate } = await setup({
       query: { folder: 5, filters: { $and: [{ something: 'true' }] } },
     });
 
     await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
 
     const expected = {
       filters: {
@@ -178,6 +181,9 @@ describe('useFolders', () => {
   });
 
   test('calls toggleNotification in case of error', async () => {
+    const originalConsoleError = console.error;
+    console.error = jest.fn();
+
     axiosInstance.get.mockRejectedValueOnce(new Error('Jest mock error'));
 
     const { notifyStatus } = useNotifyAT();
@@ -186,5 +192,7 @@ describe('useFolders', () => {
 
     await waitFor(() => expect(toggleNotification).toBeCalled());
     await waitFor(() => expect(notifyStatus).not.toBeCalled());
+
+    console.error = originalConsoleError;
   });
 });

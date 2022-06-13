@@ -122,7 +122,7 @@ const renderCompo = (toggleNotification = jest.fn()) =>
         </NotificationsProvider>
       </ThemeProvider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: document.getElementById('app') }
   );
 
 describe('<EditAssetDialog />', () => {
@@ -137,9 +137,9 @@ describe('<EditAssetDialog />', () => {
   });
 
   it('renders and matches the snapshot', () => {
-    const { container } = renderCompo();
+    renderCompo();
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   describe('PreviewBox', () => {
