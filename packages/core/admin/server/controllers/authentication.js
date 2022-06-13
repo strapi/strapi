@@ -3,6 +3,7 @@
 const passport = require('koa-passport');
 const compose = require('koa-compose');
 const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
+const { ampli } = require('@strapi/telemetry-be');
 const { getService } = require('../utils');
 const {
   validateRegistrationInput,
@@ -122,7 +123,7 @@ module.exports = {
       roles: superAdminRole ? [superAdminRole.id] : [],
     });
 
-    strapi.telemetry.send('didCreateFirstAdmin');
+    ampli.didCreateFirstAdmin('', {}, {}, { source: 'core', send: strapi.telemetry.send });
 
     ctx.body = {
       data: {

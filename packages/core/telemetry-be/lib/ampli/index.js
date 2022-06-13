@@ -7,7 +7,7 @@
  * To update run 'ampli pull strapi-backend'
  *
  * Required dependencies: @amplitude/node@^1.10.0
- * Tracking Plan Version: 10
+ * Tracking Plan Version: 12
  * Build: 1.0.0
  * Runtime: node.js:javascript-ampli
  *
@@ -83,10 +83,10 @@ const ApiKey = {
  */
 const DefaultOptions = {
   plan: {
-    version: '10',
+    version: '12',
     branch: 'main',
     source: 'strapi-backend',
-    versionId: '3e28266e-d9e0-456d-8007-e64fe8317151',
+    versionId: '3c94cd0c-5a97-4fa8-8a8b-c142f9e89c66',
   },
 };
 
@@ -105,6 +105,12 @@ class Group {
 class DidAccessAuthenticatedAdministration {
   constructor() {
     this.event_type = 'didAccessAuthenticatedAdministration';
+  }
+}
+
+class DidChangeInterfaceLanguage {
+  constructor() {
+    this.event_type = 'didChangeInterfaceLanguage';
   }
 }
 
@@ -178,13 +184,6 @@ class DidInitializeI18N {
   }
 }
 
-class DidInstallStrapi {
-  constructor(properties) {
-    this.event_type = 'didInstallStrapi';
-    this.event_properties = properties;
-  }
-}
-
 class DidInviteUser {
   constructor(properties) {
     this.event_type = 'didInviteUser';
@@ -243,6 +242,12 @@ class DidUpdateRolePermissions {
   constructor(properties) {
     this.event_type = 'didUpdateRolePermissions';
     this.event_properties = properties;
+  }
+}
+
+class WillCreateProject {
+  constructor() {
+    this.event_type = 'willCreateProject';
   }
 }
 
@@ -402,6 +407,23 @@ class Ampli {
    */
   didAccessAuthenticatedAdministration(userId, options, extra) {
     return this.track(userId, new DidAccessAuthenticatedAdministration(), options, extra);
+  }
+
+  /**
+   * didChangeInterfaceLanguage
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/strapi/Default%20Workspace/events/main/latest/didChangeInterfaceLanguage)
+   *
+   * Owner: Ivan Sevcenko
+   *
+   * @param {string} userId The user's ID.
+   * @param {EventOptions} [options] Options for this track call.
+   * @param {MiddlewareExtra} [extra] Extra untyped parameters for use in middleware.
+   *
+   * @return {{promise: Promise<Response>}}
+   */
+  didChangeInterfaceLanguage(userId, options, extra) {
+    return this.track(userId, new DidChangeInterfaceLanguage(), options, extra);
   }
 
   /**
@@ -605,25 +627,6 @@ class Ampli {
   }
 
   /**
-   * didInstallStrapi
-   *
-   * [View in Tracking Plan](https://data.amplitude.com/strapi/Default%20Workspace/events/main/latest/didInstallStrapi)
-   *
-   * Owner: Ivan Sevcenko
-   *
-   * @param {string} userId The user's ID.
-   * @param {Object} properties The event's properties.
-   * @param {string} properties.deviceId Property has no description in tracking plan.
-   * @param {EventOptions} [options] Options for this track call.
-   * @param {MiddlewareExtra} [extra] Extra untyped parameters for use in middleware.
-   *
-   * @return {{promise: Promise<Response>}}
-   */
-  didInstallStrapi(userId, properties, options, extra) {
-    return this.track(userId, new DidInstallStrapi(properties), options, extra);
-  }
-
-  /**
    * didInviteUser
    *
    * [View in Tracking Plan](https://data.amplitude.com/strapi/Default%20Workspace/events/main/latest/didInviteUser)
@@ -798,6 +801,23 @@ class Ampli {
   }
 
   /**
+   * willCreateProject
+   *
+   * [View in Tracking Plan](https://data.amplitude.com/strapi/Default%20Workspace/events/main/latest/willCreateProject)
+   *
+   * Owner: Ivan Sevcenko
+   *
+   * @param {string} userId The user's ID.
+   * @param {EventOptions} [options] Options for this track call.
+   * @param {MiddlewareExtra} [extra] Extra untyped parameters for use in middleware.
+   *
+   * @return {{promise: Promise<Response>}}
+   */
+  willCreateProject(userId, options, extra) {
+    return this.track(userId, new WillCreateProject(), options, extra);
+  }
+
+  /**
    * Track any event.
    * @param {string|undefined} userId The user's ID.
    * @param {BaseEvent} event The event.
@@ -832,6 +852,7 @@ module.exports.Ampli = Ampli;
 module.exports.ApiKey = ApiKey;
 module.exports.DefaultOptions = DefaultOptions;
 module.exports.DidAccessAuthenticatedAdministration = DidAccessAuthenticatedAdministration;
+module.exports.DidChangeInterfaceLanguage = DidChangeInterfaceLanguage;
 module.exports.DidConfigureListView = DidConfigureListView;
 module.exports.DidCreateComponent = DidCreateComponent;
 module.exports.DidCreateContentType = DidCreateContentType;
@@ -842,7 +863,6 @@ module.exports.DidCreateFirstContentTypeEntry = DidCreateFirstContentTypeEntry;
 module.exports.DidDisableResponsiveDimensions = DidDisableResponsiveDimensions;
 module.exports.DidEnableResponsiveDimensions = DidEnableResponsiveDimensions;
 module.exports.DidInitializeI18N = DidInitializeI18N;
-module.exports.DidInstallStrapi = DidInstallStrapi;
 module.exports.DidInviteUser = DidInviteUser;
 module.exports.DidNotCreateContentType = DidNotCreateContentType;
 module.exports.DidNotOpenTab = DidNotOpenTab;
@@ -852,4 +872,5 @@ module.exports.DidSaveMediaWithCaption = DidSaveMediaWithCaption;
 module.exports.DidStartServer = DidStartServer;
 module.exports.DidUpdateI18NLocales = DidUpdateI18NLocales;
 module.exports.DidUpdateRolePermissions = DidUpdateRolePermissions;
+module.exports.WillCreateProject = WillCreateProject;
 module.exports.ampli = new Ampli();

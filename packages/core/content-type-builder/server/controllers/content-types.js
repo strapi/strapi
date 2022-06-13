@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { ampli } = require('@strapi/telemetry-be');
 
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { getService } = require('../utils');
@@ -70,9 +71,19 @@ module.exports = {
       };
 
       if (_.isEmpty(strapi.api)) {
-        await strapi.telemetry.send('didCreateFirstContentType', metricsProperties);
+        await ampli.didCreateFirstContentType(
+          '',
+          metricsProperties,
+          {},
+          { source: 'core', send: strapi.telemetry.send }
+        );
       } else {
-        await strapi.telemetry.send('didCreateContentType', metricsProperties);
+        await ampli.didCreateContentType(
+          '',
+          metricsProperties,
+          {},
+          { source: 'core', send: strapi.telemetry.send }
+        );
       }
 
       setImmediate(() => strapi.reload());
@@ -80,7 +91,12 @@ module.exports = {
       ctx.send({ data: { uid: contentType.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
-      await strapi.telemetry.send('didNotCreateContentType', { error: error.message });
+      await ampli.didNotCreateContentType(
+        '',
+        { error: error.message },
+        {},
+        { source: 'core', send: strapi.telemetry.send }
+      );
       ctx.send({ error: error.message }, 400);
     }
   },

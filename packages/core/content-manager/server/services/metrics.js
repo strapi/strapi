@@ -2,6 +2,7 @@
 
 const { intersection, prop } = require('lodash/fp');
 const { getRelationalFields } = require('@strapi/utils').relations;
+const { ampli } = require('@strapi/telemetry-be');
 
 module.exports = ({ strapi }) => {
   const sendDidConfigureListView = async (contentType, configuration) => {
@@ -22,7 +23,12 @@ module.exports = ({ strapi }) => {
     }
 
     try {
-      await strapi.telemetry.send('didConfigureListView', data);
+      await ampli.didConfigureListView(
+        '',
+        data,
+        {},
+        { source: 'core', send: strapi.telemetry.send }
+      );
     } catch (e) {
       // silence
     }

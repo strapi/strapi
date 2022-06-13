@@ -1,6 +1,7 @@
 'use strict';
 
 const { reduce } = require('lodash/fp');
+const { ampli } = require('@strapi/telemetry-be');
 const { getService } = require('../utils');
 
 const sendDidInitializeEvent = async () => {
@@ -11,13 +12,23 @@ const sendDidInitializeEvent = async () => {
     0
   )(strapi.contentTypes);
 
-  await strapi.telemetry.send('didInitializeI18n', { numberOfContentTypes });
+  await ampli.didInitializeI18N(
+    '',
+    { numberOfContentTypes },
+    {},
+    { source: 'core', send: strapi.telemetry.send }
+  );
 };
 
 const sendDidUpdateI18nLocalesEvent = async () => {
   const numberOfLocales = await getService('locales').count();
 
-  await strapi.telemetry.send('didUpdateI18nLocales', { numberOfLocales });
+  await ampli.didUpdateI18NLocales(
+    '',
+    { numberOfLocales },
+    {},
+    { source: 'core', send: strapi.telemetry.send }
+  );
 };
 
 module.exports = () => ({

@@ -179,9 +179,9 @@ describe('Single Types', () => {
       { params: {} }
     );
 
-    expect(sendTelemetry).toHaveBeenCalledWith('didCreateFirstContentTypeEntry', {
-      model: modelUid,
-    });
+    // expect(sendTelemetry).toHaveBeenCalledWith('didCreateFirstContentTypeEntry', {
+    //   model: modelUid,
+    // });
   });
 
   test('Successfull delete', async () => {

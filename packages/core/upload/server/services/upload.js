@@ -19,6 +19,7 @@ const {
   webhook: webhookUtils,
 } = require('@strapi/utils');
 const { NotFoundError } = require('@strapi/utils').errors;
+const { ampli } = require('@strapi/telemetry-be');
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
@@ -37,11 +38,16 @@ const generateFileName = name => {
 
 const sendMediaMetrics = data => {
   if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
-    strapi.telemetry.send('didSaveMediaWithCaption');
+    ampli.didSaveMediaWithCaption('', {}, {}, { source: 'core', send: strapi.telemetry.send });
   }
 
   if (_.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText)) {
-    strapi.telemetry.send('didSaveMediaWithAlternativeText');
+    ampli.didSaveMediaWithAlternativeText(
+      '',
+      {},
+      {},
+      { source: 'core', send: strapi.telemetry.send }
+    );
   }
 };
 
@@ -400,9 +406,19 @@ module.exports = ({ strapi }) => ({
 
   setSettings(value) {
     if (value.responsiveDimensions === true) {
-      strapi.telemetry.send('didEnableResponsiveDimensions');
+      ampli.didEnableResponsiveDimensions(
+        '',
+        {},
+        {},
+        { source: 'core', send: strapi.telemetry.send }
+      );
     } else {
-      strapi.telemetry.send('didDisableResponsiveDimensions');
+      ampli.didDisableResponsiveDimensions(
+        '',
+        {},
+        {},
+        { source: 'core', send: strapi.telemetry.send }
+      );
     }
 
     return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });

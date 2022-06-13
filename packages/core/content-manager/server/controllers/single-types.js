@@ -1,6 +1,7 @@
 'use strict';
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
+const { ampli } = require('@strapi/telemetry-be');
 
 const { getService, pickWritableAttributes } = require('../utils');
 
@@ -73,7 +74,12 @@ module.exports = {
       const newEntity = await entityManager.create(sanitizedBody, model, { params: query });
       ctx.body = await permissionChecker.sanitizeOutput(newEntity);
 
-      await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      await ampli.didCreateFirstContentTypeEntry(
+        '',
+        { model },
+        {},
+        { source: 'core', send: strapi.telemetry.send }
+      );
       return;
     }
 

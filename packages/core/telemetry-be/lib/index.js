@@ -12,12 +12,18 @@ console.log(ampli);
 const ampliBackendTelemetryMiddleware = payload => {
   console.log(payload);
 
+  const track = {
+    event: payload.event.event_type,
+    scope: payload.extra.scope,
+    error: payload.extra.error,
+  };
+
   switch (payload.extra.source) {
     case 'core':
       payload.extra.send(payload.event.event_type, payload.event.event_properties);
       break;
     case 'generators':
-      console.log('generators');
+      payload.extra.trackUsage({ ...track });
       break;
   }
   // send(payload.event_type, payload.event_properties)
