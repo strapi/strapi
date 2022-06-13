@@ -14,6 +14,7 @@ const stopProcess = require('./utils/stop-process');
 const { trackUsage, captureStderr } = require('./utils/usage');
 const mergeTemplate = require('./utils/merge-template.js');
 
+const packageJSON = require('./resources/json/common/package.json');
 const createDatabaseConfig = require('./resources/templates/database.js');
 const createAdminConfig = require('./resources/templates/admin-config.js');
 const createEnvFile = require('./resources/templates/env.js');
@@ -60,8 +61,6 @@ module.exports = async function createProject(scope, { client, connection, depen
     await trackUsage({ event: 'didCopyProjectFiles', scope });
 
     // copy templates
-    const packageJSON = require('./resources/json/common/package.json');
-
     await fse.writeJSON(
       join(rootPath, 'package.json'),
       packageJSON({
