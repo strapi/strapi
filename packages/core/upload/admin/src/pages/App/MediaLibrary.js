@@ -189,8 +189,6 @@ export const MediaLibrary = () => {
 
           {(assetsError || foldersError) && <AnErrorOccurred />}
 
-          {!canRead && <NoPermissions />}
-
           {folderCount === 0 && assetCount === 0 && (
             <EmptyAssets
               action={
@@ -228,7 +226,7 @@ export const MediaLibrary = () => {
             />
           )}
 
-          {canRead && (
+          {canRead ? (
             <>
               {folderCount > 0 && (
                 <FolderList
@@ -348,6 +346,8 @@ export const MediaLibrary = () => {
                 </>
               )}
             </>
+          ) : (
+            <NoPermissions />
           )}
         </ContentLayout>
       </Main>
