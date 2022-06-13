@@ -36,7 +36,10 @@ const ContentTypeBuilderNav = () => {
           id: `${getTrad('plugin.name')}`,
           defaultMessage: 'Content-Types Builder',
         })}
-        searchLabel="Search..."
+        searchLabel={formatMessage({
+          id: 'content-manager.components.LeftMenu.Search.label',
+          defaultMessage: 'Search for a content type',
+        })}
       />
       <SubNavSections>
         {menu.map(section => {
