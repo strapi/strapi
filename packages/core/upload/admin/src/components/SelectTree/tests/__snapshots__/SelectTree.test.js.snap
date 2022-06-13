@@ -45,7 +45,7 @@ Object {
 }
 
 .c2 svg {
-  width: 0.375rem;
+  width: 0.5625rem;
 }
 
 <body>
@@ -178,7 +178,7 @@ Object {
           class=" css-1hb7zxy-IndicatorsContainer"
         >
           <button
-            class="sc-iuqRDJ sc-cVEUmN sc-ksDcAU cuYSdT gplmCH hyBOQL"
+            class="sc-iuqRDJ sc-cVEUmN sc-ksDcAU cuYSdT gplmCH cPFMHe"
             type="button"
           >
             <svg

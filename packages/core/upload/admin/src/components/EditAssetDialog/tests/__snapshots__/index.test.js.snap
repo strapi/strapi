@@ -729,7 +729,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c43 svg {
-  width: 0.375rem;
+  width: 0.5625rem;
 }
 
 .c2 {
