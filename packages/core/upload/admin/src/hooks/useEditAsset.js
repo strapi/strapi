@@ -50,6 +50,7 @@ export const useEditAsset = () => {
       onSuccess: () => {
         queryClient.refetchQueries([pluginId, 'assets'], { active: true });
         queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+        queryClient.refetchQueries([pluginId, 'folders'], { active: true });
       },
       onError: reason => {
         if (reason.response.status === 403) {
