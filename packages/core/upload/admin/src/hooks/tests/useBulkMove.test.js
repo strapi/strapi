@@ -35,8 +35,6 @@ const FIXTURE_FOLDERS = [
 
 const FIXTURE_DESTINATION_FOLDER_ID = 1;
 
-console.error = jest.fn().mockImplementation();
-
 jest.mock('../../utils', () => ({
   ...jest.requireActual('../../utils'),
   axiosInstance: {

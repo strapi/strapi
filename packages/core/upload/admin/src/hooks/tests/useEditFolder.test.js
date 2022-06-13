@@ -20,8 +20,6 @@ const FOLDER_EDIT_FIXTURE = {
   parent: 1,
 };
 
-console.error = jest.fn().mockImplementation();
-
 jest.mock('../../utils', () => ({
   ...jest.requireActual('../../utils'),
   axiosInstance: {
@@ -181,6 +179,9 @@ describe('useEditFolder', () => {
   });
 
   test('calls toggleNotification in case of an error', async () => {
+    const originalConsoleError = console.error;
+    console.error = jest.fn();
+
     axiosInstance.put.mockRejectedValue({ message: 'err-test' });
 
     const toggleNotification = useNotification();
@@ -209,5 +210,7 @@ describe('useEditFolder', () => {
         expect.objectContaining({ message: 'err-test' })
       )
     );
+
+    console.error = originalConsoleError;
   });
 });

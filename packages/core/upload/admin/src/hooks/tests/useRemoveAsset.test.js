@@ -12,8 +12,6 @@ const ASSET_FIXTURE = {
   id: 1,
 };
 
-console.error = jest.fn();
-
 jest.mock('../../utils/deleteRequest', () => ({
   ...jest.requireActual('../../utils/deleteRequest'),
   deleteRequest: jest.fn().mockResolvedValue({ id: 1 }),
@@ -73,7 +71,7 @@ describe('useRemoveAsset', () => {
     const {
       result: { current },
       waitFor,
-    } = await setup();
+    } = await setup(jest.fn);
     const { removeAsset } = current;
 
     await act(async () => {
@@ -88,7 +86,7 @@ describe('useRemoveAsset', () => {
     const {
       result: { current },
       waitFor,
-    } = await setup();
+    } = await setup(jest.fn);
     const { removeAsset } = current;
 
     try {
@@ -109,7 +107,7 @@ describe('useRemoveAsset', () => {
     const {
       result: { current },
       waitFor,
-    } = await setup();
+    } = await setup(jest.fn);
     const { removeAsset } = current;
 
     await act(async () => {
@@ -124,6 +122,9 @@ describe('useRemoveAsset', () => {
   });
 
   test('calls toggleNotification in case of an error', async () => {
+    const originalConsoleError = console.error;
+    console.error = jest.fn();
+
     deleteRequest.mockRejectedValue({ message: 'error-msg' });
 
     const toggleNotification = useNotification();
@@ -146,5 +147,7 @@ describe('useRemoveAsset', () => {
         expect.objectContaining({ type: 'warning', message: 'error-msg' })
       )
     );
+
+    console.error = originalConsoleError;
   });
 });
