@@ -52,6 +52,7 @@ const MarketPlacePage = () => {
   const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
+  const [npmPackageType, setNpmPackageType] = useState('plugin');
   const { autoReload: isInDevelopmentMode } = useAppInfos();
   const isOnline = useNavigatorOnLine();
 
@@ -202,6 +203,11 @@ const MarketPlacePage = () => {
     { target: searchQuery }
   );
 
+  const handleTabChange = selected => {
+    const packageType = selected === 0 ? 'plugin' : 'provider';
+    setNpmPackageType(packageType);
+  };
+
   // Check if plugins are installed already
   const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
 
@@ -214,7 +220,7 @@ const MarketPlacePage = () => {
             defaultMessage: 'Marketplace - Plugins',
           })}
         />
-        <PageHeader isOnline={isOnline} />
+        <PageHeader isOnline={isOnline} npmPackageType={npmPackageType} />
         <ContentLayout>
           <Box width="25%" paddingBottom={4}>
             <Searchbar
@@ -244,6 +250,7 @@ const MarketPlacePage = () => {
             })}
             id="tabs"
             variant="simple"
+            onTabChange={handleTabChange}
           >
             <Box paddingBottom={4}>
               <Tabs>
