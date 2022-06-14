@@ -94,12 +94,17 @@ module.exports = {
   async plugins(ctx) {
     const enabledPlugins = strapi.config.get('enabledPlugins');
 
-    const plugins = Object.entries(enabledPlugins).map(([key, plugin]) => ({
-      name: plugin.info.name || key,
-      displayName: plugin.info.displayName || plugin.info.name || key,
-      description: plugin.info.description || '',
-      packageName: plugin.info.packageName,
-    }));
+    const plugins = Object.entries(enabledPlugins).map(([key, plugin]) => {
+      const provider = strapi.plugin(key).config('provider');
+
+      return {
+        name: plugin.info.name || key,
+        displayName: plugin.info.displayName || plugin.info.name || key,
+        description: plugin.info.description || '',
+        packageName: plugin.info.packageName,
+        provider,
+      };
+    });
 
     ctx.send({ plugins });
   },

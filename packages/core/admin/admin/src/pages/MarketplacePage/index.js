@@ -204,6 +204,7 @@ const MarketPlacePage = () => {
 
   // Check if plugins are installed already
   const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
+  const installedProviderNames = installedPluginsResponse.plugins.map(plugin => plugin.provider);
 
   return (
     <Layout>
@@ -284,6 +285,7 @@ const MarketPlacePage = () => {
                   <EmptyNpmPackageSearch content={emptySearchMessage} />
                 ) : (
                   <NpmPackagesGrid
+                    installedPackageNames={installedProviderNames}
                     npmPackages={providerSearchResults}
                     useYarn={appInfoResponse.data.useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
