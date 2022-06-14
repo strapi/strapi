@@ -12,6 +12,18 @@ import { useFolderStructure } from '../../hooks/useFolderStructure';
 
 const BackButton = styled.button`
   height: ${({ theme }) => theme.spaces[4]};
+  color: ${({ theme }) => theme.colors.neutral500};
+
+  &:hover,
+  &:focus {
+    color: ${({ theme }) => theme.colors.neutral600};
+  }
+`;
+
+const BackIcon = styled(Icon)`
+  path {
+    fill: currentColor;
+  }
 `;
 
 export const DialogHeader = ({ currentFolder, onChangeFolder }) => {
@@ -35,17 +47,7 @@ export const DialogHeader = ({ currentFolder, onChangeFolder }) => {
             type="button"
             onClick={() => onChangeFolder(folderMetadatas?.parentId)}
           >
-            <Icon
-              colors={theme =>
-                `&:hover {
-                  path {
-                    fill: ${theme.colors.neutral600};
-                  }
-                }`}
-              height="100%"
-              color="neutral500"
-              as={ArrowLeft}
-            />
+            <BackIcon height="100%" as={ArrowLeft} />
           </BackButton>
         )}
         <Breadcrumbs
