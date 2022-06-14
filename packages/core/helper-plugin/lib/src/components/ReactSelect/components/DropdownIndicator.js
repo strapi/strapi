@@ -9,7 +9,7 @@ export const CarretBox = styled(IconBox)`
   border: none;
 
   svg {
-    width: ${6 / 16}rem;
+    width: ${9 / 16}rem;
   }
 `;
 

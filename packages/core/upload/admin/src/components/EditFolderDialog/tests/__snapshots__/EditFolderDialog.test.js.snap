@@ -457,7 +457,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 }
 
 .c27 svg {
-  width: 0.375rem;
+  width: 0.5625rem;
 }
 
 .c12 {
