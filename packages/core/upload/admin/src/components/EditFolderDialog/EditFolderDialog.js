@@ -127,7 +127,7 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
 
   return (
     <>
-      <ModalLayout onClose={() => !isEditFolderLoading && onClose()} labelledBy="title">
+      <ModalLayout onClose={() => onClose()} labelledBy="title">
         <Formik
           validationSchema={folderSchema}
           validateOnChange={false}
@@ -227,12 +227,7 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
 
               <ModalFooter
                 startActions={
-                  <Button
-                    onClick={() => onClose()}
-                    variant="tertiary"
-                    name="cancel"
-                    disabled={isEditFolderLoading}
-                  >
+                  <Button onClick={() => onClose()} variant="tertiary" name="cancel">
                     {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
                   </Button>
                 }
@@ -244,7 +239,7 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
                         variant="danger-light"
                         onClick={() => setShowConfirmDialog(true)}
                         name="delete"
-                        disabled={isEditFolderLoading}
+                        disabled={!canUpdate || isEditFolderLoading}
                       >
                         {formatMessage({
                           id: 'modal.folder.create.delete',
