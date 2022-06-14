@@ -244,8 +244,9 @@ export const MediaLibrary = () => {
                     const isSelected = !!selectedFolders.find(
                       currentFolder => currentFolder.id === folder.id
                     );
+                    const { _q, ...queryParamsWithoutQ } = query;
                     const url = `${pathname}?${stringify({
-                      ...query,
+                      ...queryParamsWithoutQ,
                       folder: folder.id,
                     })}`;
 
