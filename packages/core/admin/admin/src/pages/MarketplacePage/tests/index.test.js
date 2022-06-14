@@ -1848,21 +1848,23 @@ describe('Marketplace page', () => {
   });
 
   it('defaults to plugins tab', async () => {
-    render(App);
+    const { container } = render(App);
     const button = screen.getByRole('tab', { selected: true });
     const pluginsTabActive = await getByText(button, /Plugins/i);
 
     const tabPanel = screen.getByRole('tabpanel');
     const pluginCardText = await getByText(tabPanel, 'Comments');
     const providerCardText = await queryByText(tabPanel, 'Cloudinary');
+    const submitPluginText = await queryByText(container, 'Submit your plugin');
 
     expect(pluginsTabActive).not.toBe(null);
     expect(pluginCardText).toBeVisible();
+    expect(submitPluginText).toBeVisible();
     expect(providerCardText).toEqual(null);
   });
 
   it('switches to providers tab', async () => {
-    render(App);
+    const { container } = render(App);
     const providersTab = screen.getByRole('tab', { selected: false });
     fireEvent.click(providersTab);
     const button = screen.getByRole('tab', { selected: true });
@@ -1871,9 +1873,11 @@ describe('Marketplace page', () => {
     const tabPanel = screen.getByRole('tabpanel');
     const providerCardText = await getByText(tabPanel, 'Cloudinary');
     const pluginCardText = await queryByText(tabPanel, 'Comments');
+    const submitProviderText = await queryByText(container, 'Submit your provider');
 
     expect(providersTabActive).not.toBe(null);
     expect(providerCardText).toBeVisible();
+    expect(submitProviderText).toBeVisible();
     expect(pluginCardText).toEqual(null);
   });
 });
