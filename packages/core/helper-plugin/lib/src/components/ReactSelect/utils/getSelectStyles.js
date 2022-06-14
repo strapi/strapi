@@ -1,4 +1,4 @@
-const getSelectStyles = theme => {
+const getSelectStyles = (theme, error) => {
   return {
     clearIndicator: base => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
     container: base => ({
@@ -13,6 +13,8 @@ const getSelectStyles = theme => {
 
       if (state.isFocused) {
         border = `1px solid ${theme.colors.primary600} !important`;
+      } else if (error) {
+        border = `1px solid ${theme.colors.danger600} !important`;
       } else {
         border = `1px solid ${theme.colors.neutral200} !important`;
       }
