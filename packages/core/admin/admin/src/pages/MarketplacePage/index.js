@@ -138,7 +138,7 @@ const MarketPlacePage = () => {
     return (
       <Layout>
         <Main>
-          <PageHeader isOnline={isOnline} npmPackageType={npmPackageType} />
+          <PageHeader isOnline={isOnline} />
           <Flex
             width="100%"
             direction="column"

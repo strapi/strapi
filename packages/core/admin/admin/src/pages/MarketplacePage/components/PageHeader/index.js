@@ -44,7 +44,11 @@ const PageHeader = ({ isOnline, npmPackageType }) => {
 
 export default PageHeader;
 
+PageHeader.defaultProps = {
+  npmPackageType: 'plugin',
+};
+
 PageHeader.propTypes = {
   isOnline: PropTypes.bool.isRequired,
-  npmPackageType: PropTypes.string.isRequired,
+  npmPackageType: PropTypes.string,
 };
