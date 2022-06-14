@@ -277,7 +277,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         border: 1px solid #4945ff;
       }
 
-      .c35 .sc-eZhRLC {
+      .c35 .sc-hAWBJg {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

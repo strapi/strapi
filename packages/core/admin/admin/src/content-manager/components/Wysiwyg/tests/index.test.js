@@ -785,7 +785,7 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
       }
 
-      .c30 .sc-eTwdGJ {
+      .c30 .sc-bjztik {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

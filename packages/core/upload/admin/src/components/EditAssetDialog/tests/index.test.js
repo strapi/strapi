@@ -15,6 +15,7 @@ import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
 
 jest.mock('../../../utils/downloadFile');
+jest.mock('../../../hooks/useFolderStructure');
 
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
   acc[curr] = `upload.${en[curr]}`;
@@ -87,6 +88,14 @@ const asset = {
   updatedAt: '2021-10-04T09:42:31.670Z',
 };
 
+const FIXTURE_FOLDER_STRUCTURE = [
+  {
+    value: null,
+    label: 'Media Library',
+    children: [],
+  },
+];
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -104,6 +113,7 @@ const renderCompo = (toggleNotification = jest.fn()) =>
             <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
               <EditAssetDialog
                 asset={asset}
+                folderStructure={FIXTURE_FOLDER_STRUCTURE}
                 onClose={jest.fn()}
                 canUpdate
                 canCopyLink
@@ -114,7 +124,7 @@ const renderCompo = (toggleNotification = jest.fn()) =>
         </ThemeProvider>
       </TrackingContext.Provider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: document.getElementById('app') }
   );
 
 describe('<EditAssetDialog />', () => {
@@ -129,9 +139,9 @@ describe('<EditAssetDialog />', () => {
   });
 
   it('renders and matches the snapshot', () => {
-    const { container } = renderCompo();
+    renderCompo();
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   describe('PreviewBox', () => {

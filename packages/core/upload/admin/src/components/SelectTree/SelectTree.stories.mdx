@@ -1,0 +1,62 @@
+import { useState } from 'react';
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import SelectTree from './index';
+
+<Meta title="components/SelectTree" />
+
+# SelectTree
+
+This component is used in order to render a tree-structure as a Select. All options which can be passed
+into `react-select` are forwarded.
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    {() => {
+        const [value, setValue] = useState({ value: 22, label: "Folder 2.2" });
+        const options = [
+            {
+                value: 1,
+                label: 'Folder 1'
+            },
+            {
+                value: 2,
+                label: 'Folder 2',
+                children: [
+                    {
+                        value: 21,
+                        label: 'Folder 2.1'
+                    },
+                    {
+                        value: 22,
+                        label: 'Folder 2.2',
+                        children: [
+                            {
+                                value: 221,
+                                label: 'Folder 2.2.1'
+                            },
+                            {
+                                value: 222,
+                                label: 'Folder 2.2.2'
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                value: 3,
+                label: 'Folder 3'
+            }
+        ];
+        return (
+            <>
+                <SelectTree options={options} defaultValue={value} onChange={({ value, label }) => setValue({ value, label })} />
+                <p>Selected Value: {value.value}</p>
+            </>
+        )
+    }}
+  </Story>
+</Canvas>
+
+<ArgsTable of={SelectTree} />

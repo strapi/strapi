@@ -15,12 +15,12 @@ import {
   useOverlayBlocker,
   useTracking,
   getYupInnerErrors,
+  getAPIInnerErrors,
 } from '@strapi/helper-plugin';
 
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema } from './utils';
-import { getAPIInnerError } from './utils/getAPIInnerError';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -316,7 +316,7 @@ const EditViewDataManagerProvider = ({
       } catch (err) {
         errors = {
           ...errors,
-          ...getAPIInnerError(err),
+          ...getAPIInnerErrors(err),
         };
       }
 
@@ -352,7 +352,7 @@ const EditViewDataManagerProvider = ({
     } catch (err) {
       errors = {
         ...errors,
-        ...getAPIInnerError(err),
+        ...getAPIInnerErrors(err),
       };
     }
 

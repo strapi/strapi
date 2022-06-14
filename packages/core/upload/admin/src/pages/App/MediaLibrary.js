@@ -1,6 +1,8 @@
-import React, { useState } from 'react'; // useState
+import React, { useState, useRef } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+import { useLocation } from 'react-router-dom';
+import { stringify } from 'qs';
 import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
@@ -10,28 +12,49 @@ import {
   useSelectionState,
   useQueryParams,
 } from '@strapi/helper-plugin';
-import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
+import { Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
 import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
+import { Divider } from '@strapi/design-system/Divider';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
+import { IconButton } from '@strapi/design-system/IconButton';
+import { Typography } from '@strapi/design-system/Typography';
+import { GridItem } from '@strapi/design-system/Grid';
+import { Flex } from '@strapi/design-system/Flex';
+import Pencil from '@strapi/icons/Pencil';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
+import { EditFolderDialog } from '../../components/EditFolderDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
 import { AssetList } from '../../components/AssetList';
+import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
-import { getTrad } from '../../utils';
-import { Filters } from './components/Filters';
+import { useFolders } from '../../hooks/useFolders';
+import { getTrad, containsAssetFilter } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { BulkDeleteButton } from './components/BulkDeleteButton';
 import { EmptyAssets } from '../../components/EmptyAssets';
+import { BulkActions } from './components/BulkActions';
+import {
+  FolderCard,
+  FolderCardBody,
+  FolderCardCheckbox,
+  FolderCardBodyAction,
+} from '../../components/FolderCard';
+import { Filters } from './components/Filters';
+import { Header } from './components/Header';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
   display: flex;
   align-items: center;
+`;
+
+const TypographyMaxWidth = styled(Typography)`
+  max-width: 100%;
 `;
 
 export const MediaLibrary = () => {
@@ -41,64 +64,78 @@ export const MediaLibrary = () => {
     canUpdate,
     canCopyLink,
     canDownload,
-    isLoading: isLoadingPermissions,
+    isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
-  const [{ query }, setQuery] = useQueryParams();
-
+  const currentFolderToEditRef = useRef();
   const { formatMessage } = useIntl();
-  const { data, isLoading, error } = useAssets({
+  const { pathname } = useLocation();
+  const [{ query }, setQuery] = useQueryParams();
+  const isFiltering = Boolean(query._q || query.filters);
+
+  const { data: assetsData, isLoading: assetsLoading, errors: assetsError } = useAssets({
     skipWhen: !canRead,
+    query,
   });
+
+  const { data: folders, isLoading: foldersLoading, errors: foldersError } = useFolders({
+    enabled: canRead && assetsData?.pagination?.page === 1 && !containsAssetFilter(query),
+    query,
+  });
+
+  const folderCount = folders?.length || 0;
+  const assets = assetsData?.results;
+  const assetCount = assets?.length ?? 0;
+  const isLoading = foldersLoading || permissionsLoading || assetsLoading;
+  const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
+  const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
+  const [assetToEdit, setAssetToEdit] = useState(undefined);
+  const [folderToEdit, setFolderToEdit] = useState(undefined);
+  const [selected, { selectOne, selectAll }] = useSelectionState(['type', 'id'], []);
+  const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
+  const toggleEditFolderDialog = ({ created = false } = {}) => {
+    // folders are only displayed on the first page, therefore
+    // we have to navigate the user to that page, in case a folder
+    // was created successfully in order for them to see it
+    if (created && query?.page !== '1') {
+      setQuery({
+        ...query,
+        page: 1,
+      });
+    }
+
+    setShowEditFolderDialog(prev => !prev);
+  };
 
   const handleChangeSort = value => {
     setQuery({ sort: value });
   };
 
-  const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
-  const [assetToEdit, setAssetToEdit] = useState(undefined);
-  const [selected, { selectOne, selectAll }] = useSelectionState('id', []);
-  const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
+  const handleEditFolder = folder => {
+    setFolderToEdit(folder);
+    setShowEditFolderDialog(true);
+  };
+
+  const handleEditFolderClose = payload => {
+    setFolderToEdit(null);
+    toggleEditFolderDialog(payload);
+
+    if (currentFolderToEditRef.current) {
+      currentFolderToEditRef.current.focus();
+    }
+  };
 
   useFocusWhenNavigate();
 
-  const loading = isLoadingPermissions || isLoading;
-  const assets = data?.results;
-  const assetCount = data?.pagination?.total || 0;
-  const isFiltering = Boolean(query._q || query.filters);
-
   return (
     <Layout>
-      <Main aria-busy={loading}>
-        <HeaderLayout
-          title={formatMessage({
-            id: getTrad('plugin.name'),
-            defaultMessage: 'Media Library',
-          })}
-          subtitle={formatMessage(
-            {
-              id: getTrad(
-                assetCount > 0
-                  ? 'header.content.assets-multiple'
-                  : 'header.content.assets.assets-single'
-              ),
-              defaultMessage: '0 assets',
-            },
-            { number: assetCount }
-          )}
-          primaryAction={
-            canCreate ? (
-              <Button startIcon={<Plus />} onClick={toggleUploadAssetDialog}>
-                {formatMessage({
-                  id: getTrad('header.actions.add-assets'),
-                  defaultMessage: 'Add new assets',
-                })}
-              </Button>
-            ) : (
-              undefined
-            )
-          }
+      <Main aria-busy={isLoading}>
+        <Header
+          assetCount={assetCount}
+          folderCount={folderCount}
+          canCreate={canCreate}
+          onToggleEditFolderDialog={toggleEditFolderDialog}
+          onToggleUploadAssetDialog={toggleUploadAssetDialog}
         />
-
         <ActionLayout
           startActions={
             <>
@@ -113,15 +150,21 @@ export const MediaLibrary = () => {
                   <BaseCheckbox
                     aria-label={formatMessage({
                       id: getTrad('bulk.select.label'),
-                      defaultMessage: 'Select all assets',
+                      defaultMessage: 'Select all folders & assets',
                     })}
                     indeterminate={
-                      assets?.length > 0 &&
-                      selected.length > 0 &&
-                      selected.length !== assets?.length
+                      selected?.length > 0 && selected?.length !== assetCount + folderCount
                     }
-                    value={assets?.length > 0 && selected.length === assets?.length}
-                    onChange={() => selectAll(assets)}
+                    value={
+                      (assetCount > 0 || folderCount > 0) &&
+                      selected.length === assetCount + folderCount
+                    }
+                    onChange={() => {
+                      selectAll([
+                        ...assets.map(asset => ({ ...asset, type: 'asset' })),
+                        ...folders.map(folder => ({ ...folder, type: 'folder' })),
+                      ]);
+                    }}
                   />
                 </BoxWithHeight>
               )}
@@ -140,17 +183,17 @@ export const MediaLibrary = () => {
         />
 
         <ContentLayout>
-          {selected.length > 0 && (
-            <BulkDeleteButton selectedAssets={selected} onSuccess={selectAll} />
-          )}
+          {selected.length > 0 && <BulkActions selected={selected} onSuccess={selectAll} />}
 
-          {loading && <LoadingIndicatorPage />}
-          {error && <AnErrorOccurred />}
-          {!canRead && <NoPermissions />}
-          {canRead && assets && assets.length === 0 && (
+          {isLoading && <LoadingIndicatorPage />}
+
+          {(assetsError || foldersError) && <AnErrorOccurred />}
+
+          {folderCount === 0 && assetCount === 0 && (
             <EmptyAssets
               action={
-                canCreate && !isFiltering ? (
+                canCreate &&
+                !isFiltering && (
                   <Button
                     variant="secondary"
                     startIcon={<Plus />}
@@ -161,8 +204,6 @@ export const MediaLibrary = () => {
                       defaultMessage: 'Add new assets',
                     })}
                   </Button>
-                ) : (
-                  undefined
                 )
               }
               content={
@@ -170,7 +211,7 @@ export const MediaLibrary = () => {
                 isFiltering
                   ? formatMessage({
                       id: getTrad('list.assets-empty.title-withSearch'),
-                      defaultMessage: 'There are no assets with the applied filters',
+                      defaultMessage: 'There are no elements with the applied filters',
                     })
                   : canCreate
                   ? formatMessage({
@@ -184,23 +225,149 @@ export const MediaLibrary = () => {
               }
             />
           )}
-          {canRead && assets && assets.length > 0 && (
+
+          {canRead ? (
             <>
-              <AssetList
-                assets={assets}
-                onEditAsset={setAssetToEdit}
-                onSelectAsset={selectOne}
-                selectedAssets={selected}
-              />
-              {data?.pagination && <PaginationFooter pagination={data.pagination} />}
+              {folderCount > 0 && (
+                <FolderList
+                  title={
+                    (((isFiltering && assetCount > 0) || !isFiltering) &&
+                      formatMessage({
+                        id: getTrad('list.folders.title'),
+                        defaultMessage: 'Folders',
+                      })) ||
+                    ''
+                  }
+                >
+                  {folders.map(folder => {
+                    const selectedFolders = selected.filter(({ type }) => type === 'folder');
+                    const isSelected = !!selectedFolders.find(
+                      currentFolder => currentFolder.id === folder.id
+                    );
+                    const url = `${pathname}?${stringify({
+                      ...query,
+                      folder: folder.id,
+                    })}`;
+
+                    return (
+                      <GridItem col={3} key={`folder-${folder.id}`}>
+                        <FolderCard
+                          ref={
+                            folderToEdit && folder.id === folderToEdit.id
+                              ? currentFolderToEditRef
+                              : undefined
+                          }
+                          ariaLabel={folder.name}
+                          id={`folder-${folder.id}`}
+                          to={url}
+                          startAction={
+                            selectOne && (
+                              <FolderCardCheckbox
+                                data-testid={`folder-checkbox-${folder.id}`}
+                                value={isSelected}
+                                onChange={() => selectOne({ ...folder, type: 'folder' })}
+                              />
+                            )
+                          }
+                          cardActions={
+                            <IconButton
+                              icon={<Pencil />}
+                              aria-label={formatMessage({
+                                id: getTrad('list.folder.edit'),
+                                defaultMessage: 'Edit folder',
+                              })}
+                              onClick={() => handleEditFolder(folder)}
+                            />
+                          }
+                        >
+                          <FolderCardBody>
+                            <FolderCardBodyAction to={url}>
+                              <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
+                                <TypographyMaxWidth fontWeight="semiBold" ellipsis>
+                                  {folder.name}
+                                  <VisuallyHidden>:</VisuallyHidden>
+                                </TypographyMaxWidth>
+
+                                <TypographyMaxWidth
+                                  as="span"
+                                  textColor="neutral600"
+                                  variant="pi"
+                                  ellipsis
+                                >
+                                  {formatMessage(
+                                    {
+                                      id: getTrad('list.folder.subtitle'),
+                                      defaultMessage:
+                                        '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
+                                    },
+                                    {
+                                      folderCount: folder.children.count,
+                                      filesCount: folder.files.count,
+                                    }
+                                  )}
+                                </TypographyMaxWidth>
+                              </Flex>
+                            </FolderCardBodyAction>
+                          </FolderCardBody>
+                        </FolderCard>
+                      </GridItem>
+                    );
+                  })}
+                </FolderList>
+              )}
+
+              {assetCount > 0 && folderCount > 0 && (
+                <Box paddingTop={6} paddingBottom={4}>
+                  <Divider />
+                </Box>
+              )}
+
+              {assetCount > 0 && (
+                <>
+                  <AssetList
+                    assets={assets}
+                    onEditAsset={setAssetToEdit}
+                    onSelectAsset={selectOne}
+                    selectedAssets={selected.filter(({ type }) => type === 'asset')}
+                    title={
+                      ((!isFiltering || (isFiltering && folderCount > 0)) &&
+                        assetsData?.pagination?.page === 1 &&
+                        formatMessage({
+                          id: getTrad('list.assets.title'),
+                          defaultMessage: 'Assets',
+                        })) ||
+                      ''
+                    }
+                  />
+
+                  {assetsData?.pagination && (
+                    <PaginationFooter pagination={assetsData.pagination} />
+                  )}
+                </>
+              )}
             </>
+          ) : (
+            <NoPermissions />
           )}
         </ContentLayout>
       </Main>
 
       {showUploadAssetDialog && (
-        <UploadAssetDialog onClose={toggleUploadAssetDialog} trackedLocation="upload" />
+        <UploadAssetDialog
+          onClose={toggleUploadAssetDialog}
+          trackedLocation="upload"
+          folderId={query?.folder}
+        />
       )}
+
+      {showEditFolderDialog && (
+        <EditFolderDialog
+          onClose={handleEditFolderClose}
+          folder={folderToEdit}
+          parentFolderId={query?.folder}
+        />
+      )}
+
       {assetToEdit && (
         <EditAssetDialog
           onClose={() => setAssetToEdit(undefined)}

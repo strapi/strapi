@@ -12,6 +12,37 @@ export const AssetSource = {
   Computer: 'computer',
 };
 
+export const FolderDefinition = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  children: PropTypes.shape({
+    count: PropTypes.number.isRequired,
+  }).isRequired,
+  createdAt: PropTypes.string.isRequired,
+  createdBy: PropTypes.shape(),
+  files: PropTypes.shape({
+    count: PropTypes.number.isRequired,
+  }).isRequired,
+  name: PropTypes.string.isRequired,
+  parent: PropTypes.number,
+  updatedAt: PropTypes.string.isRequired,
+  updatedBy: PropTypes.shape(),
+  pathId: PropTypes.number.isRequired,
+  path: PropTypes.string.isRequired,
+});
+
+const FolderStructure = PropTypes.shape({
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  label: PropTypes.string.isRequired,
+  children: PropTypes.array,
+});
+
+FolderStructure.children = PropTypes.arrayOf(PropTypes.shape(FolderStructure));
+FolderStructure.defaultProps = {
+  children: undefined,
+};
+
+export const FolderStructureDefinition = PropTypes.arrayOf(FolderStructure);
+
 export const AssetDefinition = PropTypes.shape({
   id: PropTypes.number,
   height: PropTypes.number,
@@ -25,6 +56,7 @@ export const AssetDefinition = PropTypes.shape({
   updatedAt: PropTypes.string,
   alternativeText: PropTypes.string,
   caption: PropTypes.string,
+  folder: PropTypes.shape(FolderDefinition),
   formats: PropTypes.shape({
     thumbnail: PropTypes.shape({
       url: PropTypes.string,

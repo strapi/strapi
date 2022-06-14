@@ -253,7 +253,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         width: 100%;
       }
 
-      .c33 .sc-eZhRLC {
+      .c33 .sc-hAWBJg {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
