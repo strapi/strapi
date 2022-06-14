@@ -45,6 +45,7 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ..
       components={{ Option }}
       options={options}
       defaultValue={defaultValue}
+      isSearchable={false}
       /* -- custom props, used by the Option component */
       maxDisplayDepth={maxDisplayDepth}
       openValues={openValues}
