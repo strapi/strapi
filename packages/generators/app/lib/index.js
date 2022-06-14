@@ -3,7 +3,7 @@
 const { join, resolve, basename } = require('path');
 const os = require('os');
 const crypto = require('crypto');
-const uuid = require('uuid/v4');
+const uuid = require('uuid').v4;
 const sentry = require('@sentry/node');
 // FIXME
 /* eslint-disable import/extensions */

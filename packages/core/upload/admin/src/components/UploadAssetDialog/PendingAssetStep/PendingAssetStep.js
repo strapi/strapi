@@ -8,6 +8,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
+
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import getTrad from '../../../utils/getTrad';
@@ -21,6 +22,7 @@ const Status = {
 
 export const PendingAssetStep = ({
   addUploadedFiles,
+  folderId,
   onClose,
   onEditAsset,
   onRemoveAsset,
@@ -113,6 +115,7 @@ export const PendingAssetStep = ({
                         onCancel={onCancelUpload}
                         onStatusChange={status => handleStatusChange(status, asset.rawFile)}
                         size="S"
+                        folderId={folderId}
                       />
                     </GridItem>
                   );
@@ -162,11 +165,13 @@ export const PendingAssetStep = ({
 
 PendingAssetStep.defaultProps = {
   addUploadedFiles: undefined,
+  folderId: null,
 };
 
 PendingAssetStep.propTypes = {
   addUploadedFiles: PropTypes.func,
   assets: PropTypes.arrayOf(AssetDefinition).isRequired,
+  folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onClose: PropTypes.func.isRequired,
   onEditAsset: PropTypes.func.isRequired,
   onRemoveAsset: PropTypes.func.isRequired,

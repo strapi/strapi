@@ -211,7 +211,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c13 .sc-chKlql {
+.c13 .sc-kOJRsK {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -281,7 +281,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c25 .sc-chKlql {
+.c25 .sc-kOJRsK {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;

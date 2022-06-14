@@ -233,7 +233,7 @@ describe('FromComputerForm', () => {
         border: 1px solid #4945ff;
       }
 
-      .c13 .sc-jZJapT {
+      .c13 .sc-cWPeQZ {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -303,7 +303,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c21 .sc-jZJapT {
+      .c21 .sc-cWPeQZ {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

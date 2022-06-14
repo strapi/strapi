@@ -218,7 +218,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         width: 100%;
       }
 
-      .c48 .sc-eZhRLC {
+      .c48 .sc-hAWBJg {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

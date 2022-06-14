@@ -490,7 +490,7 @@ describe('Admin | UseCasePage', () => {
         width: 100%;
       }
 
-      .c35 .sc-cKAQkk {
+      .c35 .sc-bxYNtK {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

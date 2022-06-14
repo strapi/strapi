@@ -9,6 +9,7 @@ import { EditAssetDialog } from '../index';
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
 
+jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../utils/downloadFile');
 
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
@@ -82,6 +83,14 @@ const asset = {
   updatedAt: '2021-10-04T09:42:31.670Z',
 };
 
+const FIXTURE_FOLDER_STRUCTURE = [
+  {
+    value: null,
+    label: 'Media Library',
+    children: [],
+  },
+];
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -100,13 +109,18 @@ const renderCompo = (
         <ThemeProvider theme={lightTheme}>
           <NotificationsProvider toggleNotification={toggleNotification}>
             <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-              <EditAssetDialog asset={asset} onClose={jest.fn()} {...props} />
+              <EditAssetDialog
+                asset={asset}
+                onClose={jest.fn()}
+                folderStructure={FIXTURE_FOLDER_STRUCTURE}
+                {...props}
+              />
             </IntlProvider>
           </NotificationsProvider>
         </ThemeProvider>
       </TrackingContext.Provider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: document.getElementById('app') }
   );
 
 describe('<EditAssetDialog />', () => {
@@ -125,9 +139,9 @@ describe('<EditAssetDialog />', () => {
   });
 
   it('renders and matches the snapshot', () => {
-    const { container } = renderCompo();
+    renderCompo();
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   describe('metadata form', () => {
@@ -267,14 +281,14 @@ describe('<EditAssetDialog />', () => {
       const fileList = [file];
       fileList.item = i => fileList[i];
 
-      const { container } = renderCompo({
+      renderCompo({
         canUpdate: true,
         canCopyLink: false,
         canDownload: false,
       });
 
-      fireEvent.change(container.querySelector('[type="file"]'), { target: { files: fileList } });
-      const img = container.querySelector('img');
+      fireEvent.change(document.querySelector('[type="file"]'), { target: { files: fileList } });
+      const img = document.querySelector('img');
 
       expect(img).toHaveAttribute('src', 'http://localhost:4000/assets/test.png');
     });

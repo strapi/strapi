@@ -252,7 +252,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 1px solid #4945ff;
       }
 
-      .c12 .sc-gloWDX {
+      .c12 .sc-cBsmfy {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
