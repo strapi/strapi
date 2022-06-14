@@ -7,14 +7,40 @@ import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 
 import { Header } from '../components/Header';
-import { useFolderStructure } from '../../../hooks/useFolderStructure';
-
-jest.mock('../../../hooks/useFolderStructure');
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useQueryParams: jest.fn().mockReturnValue([{ query: {}, rawQuery: '' }, jest.fn()]),
 }));
+
+const FIXTURE_FOLDER = {
+  id: 1,
+  name: 'Folder 1',
+  children: {
+    count: 1,
+  },
+  createdAt: '',
+  files: {
+    count: 1,
+  },
+  path: '/1',
+  pathId: '1',
+  updatedAt: '',
+  parent: {
+    id: 2,
+    name: 'Folder 2',
+    children: {
+      count: 1,
+    },
+    createdAt: '',
+    files: {
+      count: 1,
+    },
+    path: '/1',
+    pathId: '1',
+    updatedAt: '',
+  },
+};
 
 const setup = props => {
   const withDefaults = {
@@ -54,50 +80,29 @@ describe('Header', () => {
   });
 
   test('renders', () => {
-    const { container } = setup();
+    const { container } = setup({ folder: FIXTURE_FOLDER });
 
     expect(container).toMatchSnapshot();
   });
 
   test('truncates long folder lavels', () => {
     useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { folder: 2 } }, jest.fn()]);
-    useFolderStructure.mockReturnValueOnce({
-      isLoading: false,
-      error: null,
-      data: [
-        {
-          value: null,
-          label: 'Media Library',
-          children: [
-            {
-              value: 1,
-              label: 'Cats',
-              children: [
-                {
-                  value: 2,
-                  label: 'The length of this label exceeds the maximum',
-                  children: [],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
 
-    const { queryByText } = setup();
+    const { queryByText } = setup({
+      folder: { ...FIXTURE_FOLDER, name: 'The length of this label exceeds the maximum length' },
+    });
     expect(queryByText('Media Library - The length of this label excee...')).toBeInTheDocument();
   });
 
   test('does not render a back button at the root level of the media library', () => {
-    const { queryByText } = setup();
+    const { queryByText } = setup({ folder: { ...FIXTURE_FOLDER, parent: null } });
 
     expect(queryByText('Back')).not.toBeInTheDocument();
   });
 
   test('does render a back button at a nested level of the media library', () => {
     useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { folder: 2 } }, jest.fn()]);
-    const { queryByText } = setup();
+    const { queryByText } = setup({ folder: FIXTURE_FOLDER });
 
     expect(queryByText('Back')).toBeInTheDocument();
   });
