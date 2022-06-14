@@ -177,23 +177,22 @@ describe('useBulkMove', () => {
     const toggleNotification = useNotification();
     const queryClient = useQueryClient();
 
-    const {
-      result: { current },
-      waitFor,
-    } = await setup();
-    const { move } = current;
+    const { result, waitFor } = await setup();
+    const { move } = result.current;
 
     await act(async () => {
       await move(FIXTURE_DESTINATION_FOLDER_ID, FIXTURE_ASSETS);
     });
 
-    await waitFor(() =>
-      expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'assets'], {
-        active: true,
-      })
-    );
+    await waitFor(() => !result.current.isLoading);
 
-    await waitFor(() => expect(toggleNotification).toHaveBeenCalled());
+    expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'assets'], {
+      active: true,
+    });
+    expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'folders'], {
+      active: true,
+    });
+    expect(toggleNotification).toHaveBeenCalled();
   });
 
   test('does re-fetch folders, if folders were deleted', async () => {
