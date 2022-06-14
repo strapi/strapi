@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/Breadcrumbs';
@@ -8,6 +9,22 @@ import { Icon } from '@strapi/design-system/Icon';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { findRecursiveFolderMetadatas, getTrad } from '../../utils';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
+
+const BackButton = styled.button`
+  height: ${({ theme }) => theme.spaces[4]};
+  color: ${({ theme }) => theme.colors.neutral500};
+
+  &:hover,
+  &:focus {
+    color: ${({ theme }) => theme.colors.neutral600};
+  }
+`;
+
+const BackIcon = styled(Icon)`
+  path {
+    fill: currentColor;
+  }
+`;
 
 export const DialogHeader = ({ currentFolder, onChangeFolder }) => {
   const { formatMessage } = useIntl();
@@ -25,13 +42,13 @@ export const DialogHeader = ({ currentFolder, onChangeFolder }) => {
     <ModalHeader>
       <Stack horizontal spacing={4}>
         {currentFolder && (
-          <button
+          <BackButton
             aria-label={formatMessage({ id: 'modal.header.go-back', defaultMessage: 'Go back' })}
             type="button"
             onClick={() => onChangeFolder(folderMetadatas?.parentId)}
           >
-            <Icon color="neutral500" as={ArrowLeft} />
-          </button>
+            <BackIcon height="100%" as={ArrowLeft} />
+          </BackButton>
         )}
         <Breadcrumbs
           label={`${formatMessage({
