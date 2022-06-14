@@ -6,9 +6,11 @@ import { LinkButton } from '@strapi/design-system/v2/LinkButton';
 import Upload from '@strapi/icons/Upload';
 import { useTracking } from '@strapi/helper-plugin';
 
-const PageHeader = ({ isOnline }) => {
+const PageHeader = ({ isOnline, npmPackageType }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+
+  const tracking = npmPackageType === 'provider' ? 'didSubmitProvider' : 'didSubmitPlugin';
 
   return (
     <HeaderLayout
@@ -25,13 +27,13 @@ const PageHeader = ({ isOnline }) => {
           <LinkButton
             startIcon={<Upload />}
             variant="tertiary"
-            href="https://market.strapi.io/submit-plugin"
-            onClick={() => trackUsage('didSubmitPlugin')}
+            href={`https://market.strapi.io/submit-${npmPackageType}`}
+            onClick={() => trackUsage(tracking)}
             isExternal
           >
             {formatMessage({
-              id: 'admin.pages.MarketPlacePage.submit.plugin.link',
-              defaultMessage: 'Submit your plugin',
+              id: `admin.pages.MarketPlacePage.submit.${npmPackageType}.link`,
+              defaultMessage: `Submit your ${npmPackageType}`,
             })}
           </LinkButton>
         )
@@ -44,4 +46,5 @@ export default PageHeader;
 
 PageHeader.propTypes = {
   isOnline: PropTypes.bool.isRequired,
+  npmPackageType: PropTypes.string.isRequired,
 };

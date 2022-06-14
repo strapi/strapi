@@ -221,6 +221,7 @@
   "admin.pages.MarketPlacePage.search.empty": "No result for \"{target}\"",
   "admin.pages.MarketPlacePage.search.placeholder": "Search",
   "admin.pages.MarketPlacePage.submit.plugin.link": "Submit your plugin",
+  "admin.pages.MarketPlacePage.submit.provider.link": "Submit your provider",
   "admin.pages.MarketPlacePage.subtitle": "Get more out of Strapi",
   "admin.pages.MarketPlacePage.tab-group.label": "Plugins and Providers for Strapi",
   "admin.pages.MarketPlacePage.missingPlugin.title": "Missing a plugin?",
