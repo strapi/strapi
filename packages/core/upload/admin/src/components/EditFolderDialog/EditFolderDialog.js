@@ -207,6 +207,7 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
                         inputId="folder-parent"
                         disabled={formDisabled}
                         error={errors?.parent}
+                        ariaErrorMessage="folder-parent-error"
                       />
 
                       {errors.parent && (

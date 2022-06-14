@@ -9,7 +9,7 @@ import IndicatorSeparator from './components/IndicatorSeparator';
 
 import getSelectStyles from './utils/getSelectStyles';
 
-const ReactSelect = ({ components, styles, error, ...props }) => {
+const ReactSelect = ({ components, styles, error, ariaErrorMessage, ...props }) => {
   const theme = useTheme();
   const customStyles = getSelectStyles(theme, error);
 
@@ -17,7 +17,7 @@ const ReactSelect = ({ components, styles, error, ...props }) => {
     <Select
       {...props}
       components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, ...components }}
-      aria-errormessage={error && 'folder-parent-error'}
+      aria-errormessage={error && ariaErrorMessage}
       aria-invalid={!!error}
       styles={{ ...customStyles, ...styles }}
     />
@@ -27,12 +27,14 @@ const ReactSelect = ({ components, styles, error, ...props }) => {
 export default ReactSelect;
 
 ReactSelect.defaultProps = {
+  ariaErrorMessage: undefined,
   components: undefined,
   error: undefined,
   styles: undefined,
 };
 
 ReactSelect.propTypes = {
+  ariaErrorMessage: PropTypes.string,
   components: PropTypes.object,
   error: PropTypes.string,
   styles: PropTypes.object,
