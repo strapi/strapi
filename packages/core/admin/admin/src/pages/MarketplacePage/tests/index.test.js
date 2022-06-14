@@ -922,7 +922,7 @@ describe('Marketplace page', () => {
                     <span
                       class="c13 c14"
                     >
-                      Submit your plugin
+                      Submit plugin
                     </span>
                   </a>
                 </div>
@@ -1855,7 +1855,7 @@ describe('Marketplace page', () => {
     const tabPanel = screen.getByRole('tabpanel');
     const pluginCardText = await getByText(tabPanel, 'Comments');
     const providerCardText = await queryByText(tabPanel, 'Cloudinary');
-    const submitPluginText = await queryByText(container, 'Submit your plugin');
+    const submitPluginText = await queryByText(container, 'Submit plugin');
 
     expect(pluginsTabActive).not.toBe(null);
     expect(pluginCardText).toBeVisible();
@@ -1873,7 +1873,7 @@ describe('Marketplace page', () => {
     const tabPanel = screen.getByRole('tabpanel');
     const providerCardText = await getByText(tabPanel, 'Cloudinary');
     const pluginCardText = await queryByText(tabPanel, 'Comments');
-    const submitProviderText = await queryByText(container, 'Submit your provider');
+    const submitProviderText = await queryByText(container, 'Submit provider');
 
     expect(providersTabActive).not.toBe(null);
     expect(providerCardText).toBeVisible();

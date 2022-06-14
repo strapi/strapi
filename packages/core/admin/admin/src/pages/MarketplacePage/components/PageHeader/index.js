@@ -33,7 +33,7 @@ const PageHeader = ({ isOnline, npmPackageType }) => {
           >
             {formatMessage({
               id: `admin.pages.MarketPlacePage.submit.${npmPackageType}.link`,
-              defaultMessage: `Submit your ${npmPackageType}`,
+              defaultMessage: `Submit ${npmPackageType}`,
             })}
           </LinkButton>
         )
