@@ -89,7 +89,7 @@ export const MediaLibrary = () => {
     isLoading: isCurrentFolderLoading,
     error: currentFolderError,
   } = useFolder(query?.folder, {
-    enabled: !!query?.folder,
+    enabled: canRead && !!query?.folder,
   });
 
   // Folder was not found: redirect to the media library root
