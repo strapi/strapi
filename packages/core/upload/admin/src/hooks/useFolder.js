@@ -2,7 +2,7 @@ import { useQuery } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
 
 import pluginId from '../pluginId';
-import { axiosInstance, getRequestUrl } from '../utils';
+import { axiosInstance, getRequestUrl, getTrad } from '../utils';
 
 export const useFolder = (id, { enabled = true }) => {
   const toggleNotification = useNotification();
@@ -16,7 +16,10 @@ export const useFolder = (id, { enabled = true }) => {
     } catch (err) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error' },
+        message: {
+          id: getTrad('notification.warning.404'),
+          defaultMessage: 'Not found',
+        },
       });
 
       throw err;
