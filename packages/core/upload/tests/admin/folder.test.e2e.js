@@ -200,6 +200,23 @@ describe('Folder', () => {
       });
     });
 
+    test('Can read a folder & populate its parent', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: `/upload/folders/${data.folders[1].id}`,
+        qs: {
+          populate: 'parent',
+        },
+      });
+
+      expect(res.body.data).toMatchObject({
+        ...pick(['id', 'name', 'pathId', 'path', 'createAt', 'updatedAt'], data.folders[1]),
+        parent: {
+          id: expect.any(Number),
+        },
+      });
+    });
+
     test('Return 404 when folder does not exist', async () => {
       const res = await rq({
         method: 'GET',
