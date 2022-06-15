@@ -66,11 +66,8 @@ export const FolderCard = forwardRef(
             hasRadius
             background="neutral0"
             shadow="tableShadow"
-            paddingBottom={3}
-            paddingLeft={4}
-            paddingRight={4}
-            paddingTop={3}
-            spacing={3}
+            padding={3}
+            spacing={2}
             horizontal
             cursor="pointer"
           >

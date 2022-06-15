@@ -265,10 +265,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 
 .c31 {
   background: #ffffff;
-  padding-top: 12px;
-  padding-right: 16px;
-  padding-bottom: 12px;
-  padding-left: 16px;
+  padding: 12px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
   cursor: pointer;
@@ -318,7 +315,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 }
 
 .c33 > * + * {
-  margin-left: 12px;
+  margin-left: 8px;
 }
 
 .c2 {
@@ -1185,7 +1182,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               <div
                 class="c31 c32 c33"
                 cursor="pointer"
-                spacing="3"
+                spacing="2"
               >
                 <div
                   class="c34"
