@@ -133,10 +133,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 
 .c2 {
   background: #ffffff;
-  padding-top: 12px;
-  padding-right: 16px;
-  padding-bottom: 12px;
-  padding-left: 16px;
+  padding: 12px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
   cursor: pointer;
@@ -163,7 +160,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 }
 
 .c4 > * + * {
-  margin-left: 12px;
+  margin-left: 8px;
 }
 
 .c15 {
@@ -243,7 +240,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
     <div
       class="c2 c3 c4"
       cursor="pointer"
-      spacing="3"
+      spacing="2"
     >
       <div
         class="c5"
@@ -386,10 +383,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 
 .c2 {
   background: #ffffff;
-  padding-top: 12px;
-  padding-right: 16px;
-  padding-bottom: 12px;
-  padding-left: 16px;
+  padding: 12px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
   cursor: pointer;
@@ -416,7 +410,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 }
 
 .c4 > * + * {
-  margin-left: 12px;
+  margin-left: 8px;
 }
 
 .c13 {
@@ -496,7 +490,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
     <div
       class="c2 c3 c4"
       cursor="pointer"
-      spacing="3"
+      spacing="2"
     >
       <div
         class="c5"
