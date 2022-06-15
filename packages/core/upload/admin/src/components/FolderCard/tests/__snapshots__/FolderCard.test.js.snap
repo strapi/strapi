@@ -260,9 +260,9 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
         <svg
           class="c8"
           fill="none"
-          height="1.125rem"
+          height="1.5rem"
           viewBox="0 0 24 24"
-          width="1.25rem"
+          width="1.5rem"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -504,9 +504,9 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
         <svg
           class="c6"
           fill="none"
-          height="1.125rem"
+          height="1.5rem"
           viewBox="0 0 24 24"
-          width="1.25rem"
+          width="1.5rem"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
