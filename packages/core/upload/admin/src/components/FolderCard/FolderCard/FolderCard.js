@@ -85,7 +85,7 @@ export const FolderCard = forwardRef(
               paddingRight={3}
               paddingTop={2}
             >
-              <StyledFolder width={pxToRem(20)} height={pxToRem(18)} />
+              <StyledFolder width={pxToRem(24)} height={pxToRem(24)} />
             </Box>
 
             {children}
