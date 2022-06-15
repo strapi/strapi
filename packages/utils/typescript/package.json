@@ -1,6 +1,6 @@
 {
   "name": "@strapi/typescript-utils",
-  "version": "4.1.12",
+  "version": "4.2.0",
   "description": "Typescript support for Strapi",
   "keywords": [
     "strapi",
