@@ -1,7 +1,6 @@
 'use strict';
 
 const fs = require('fs');
-const tsUtils = require('@strapi/typescript-utils');
 const strapi = require('../index');
 
 const CHUNK_SIZE = 100;
@@ -10,22 +9,11 @@ const CHUNK_SIZE = 100;
  * Will dump configurations to a file or stdout
  * @param {string} file filepath to use as output
  */
-module.exports = async function({ file: filePath, pretty }) {
+module.exports = async function ({ file: filePath, pretty }) {
   const output = filePath ? fs.createWriteStream(filePath) : process.stdout;
 
-  const appDir = process.cwd();
-
-  const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-  const outDir = await tsUtils.resolveOutDir(appDir);
-  if (isTSProject)
-    await tsUtils.compile(appDir, {
-      watch: false,
-      configOptions: { options: { incremental: true } },
-    });
-
-  const distDir = isTSProject ? outDir : appDir;
-
-  const app = await strapi({ appDir, distDir }).load();
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   const count = await app.query('strapi::core-store').count();
 
@@ -39,8 +27,8 @@ module.exports = async function({ file: filePath, pretty }) {
       .findMany({ limit: CHUNK_SIZE, offset: page * CHUNK_SIZE, orderBy: 'key' });
 
     results
-      .filter(result => result.key.startsWith('plugin_'))
-      .forEach(result => {
+      .filter((result) => result.key.startsWith('plugin_'))
+      .forEach((result) => {
         exportData.push({
           key: result.key,
           value: result.value,

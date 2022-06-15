@@ -17,10 +17,7 @@ const {
 async function build({ appDir, buildDestDir, env, forceBuild, optimize, options, plugins }) {
   const buildAdmin = await shouldBuildAdmin({ appDir, plugins });
 
-  const useTypeScript = await isUsingTypeScript(
-    path.join(appDir, 'src', 'admin'),
-    'tsconfig.json'
-  );
+  const useTypeScript = await isUsingTypeScript(path.join(appDir, 'src', 'admin'), 'tsconfig.json');
 
   if (!buildAdmin && !forceBuild) {
     return;
@@ -39,7 +36,7 @@ async function build({ appDir, buildDestDir, env, forceBuild, optimize, options,
     ceRoot: path.resolve(cacheDir, 'admin', 'src'),
   };
 
-  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
+  const pluginsPath = Object.keys(plugins).map((pluginName) => plugins[pluginName].pathToPlugin);
 
   // Either use the tsconfig file from the generated app or the one inside the .cache folder
   // so we can develop plugins in TS while being in a JS app
@@ -99,10 +96,7 @@ async function clean({ appDir, buildDestDir }) {
 }
 
 async function watchAdmin({ appDir, browser, buildDestDir, host, options, plugins, port }) {
-  const useTypeScript = await isUsingTypeScript(
-    path.join(appDir, 'src', 'admin'),
-    'tsconfig.json'
-  );
+  const useTypeScript = await isUsingTypeScript(path.join(appDir, 'src', 'admin'), 'tsconfig.json');
   // Create the cache dir containing the front-end files.
   const cacheDir = path.join(appDir, '.cache');
   await createCacheDir({ appDir, plugins });
@@ -117,7 +111,7 @@ async function watchAdmin({ appDir, browser, buildDestDir, host, options, plugin
     ceRoot: path.resolve(cacheDir, 'admin', 'src'),
   };
 
-  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
+  const pluginsPath = Object.keys(plugins).map((pluginName) => plugins[pluginName].pathToPlugin);
 
   // Either use the tsconfig file from the generated app or the one inside the .cache folder
   // so we can develop plugins in TS while being in a JS app

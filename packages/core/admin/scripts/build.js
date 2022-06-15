@@ -46,7 +46,9 @@ const buildAdmin = async () => {
   };
 
   const config =
-    process.env.MESURE_BUILD_SPEED === 'true' ? smp.wrap(webpackConfig(args)) : webpackConfig(args);
+    process.env.MEASURE_BUILD_SPEED === 'true'
+      ? smp.wrap(webpackConfig(args))
+      : webpackConfig(args);
 
   const compiler = webpack(config);
 
@@ -101,7 +103,7 @@ buildAdmin()
   .then(() => {
     process.exit();
   })
-  .catch(err => {
+  .catch((err) => {
     console.error(err);
     process.exit(1);
   });

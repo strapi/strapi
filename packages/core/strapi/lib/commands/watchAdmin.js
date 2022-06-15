@@ -1,22 +1,17 @@
 'use strict';
 
 const strapiAdmin = require('@strapi/admin');
-const tsUtils = require('@strapi/typescript-utils');
 const { getConfigUrls, getAbsoluteServerUrl } = require('@strapi/utils');
 
 const getEnabledPlugins = require('../core/loaders/plugins/get-enabled-plugins');
 const addSlash = require('../utils/addSlash');
 const strapi = require('../index');
 
-module.exports = async function({ browser }) {
-  const currentDirectory = process.cwd();
-
-  const isTSProject = await tsUtils.isUsingTypeScript(currentDirectory);
-  const outDir = await tsUtils.resolveOutDir(currentDirectory);
-  const buildDestDir = isTSProject ? outDir : currentDirectory;
+module.exports = async function ({ browser }) {
+  const appContext = await strapi.compile();
 
   const strapiInstance = strapi({
-    distDir: buildDestDir,
+    ...appContext,
     autoReload: true,
     serveAdminPanel: false,
   });
@@ -31,8 +26,8 @@ module.exports = async function({ browser }) {
   const backendURL = getAbsoluteServerUrl(strapiInstance.config, true);
 
   strapiAdmin.watchAdmin({
-    appDir: currentDirectory,
-    buildDestDir,
+    appDir: appContext.appDir,
+    buildDestDir: appContext.distDir,
     plugins,
     port: adminPort,
     host: adminHost,

@@ -28,12 +28,9 @@ module.exports = async ({ buildDestDir, forceBuild = true, optimization, srcDir 
   console.log(`Building your admin UI with ${green(env)} configuration...`);
 
   // Always remove the .cache and build folders
-  // FIXME the BE should remove the build dir and the admin should only
-  // be responsible of removing the .cache dir.
   await strapiAdmin.clean({ appDir: srcDir, buildDestDir });
 
-  // @convly shouldn't we use the app dir here?
-  ee({ dir: buildDestDir });
+  ee({ dir: srcDir });
 
   return strapiAdmin
     .build({
@@ -52,7 +49,7 @@ module.exports = async ({ buildDestDir, forceBuild = true, optimization, srcDir 
     .then(() => {
       console.log('Admin UI built successfully');
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       process.exit(1);
     });

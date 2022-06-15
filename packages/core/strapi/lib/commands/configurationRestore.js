@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const _ = require('lodash');
-const tsUtils = require('@strapi/typescript-utils');
 
 const strapi = require('../index');
 
@@ -11,23 +10,11 @@ const strapi = require('../index');
  * @param {string} file filepath to use as input
  * @param {string} strategy import strategy. one of (replace, merge, keep, default: replace)
  */
-module.exports = async function({ file: filePath, strategy = 'replace' }) {
+module.exports = async function ({ file: filePath, strategy = 'replace' }) {
   const input = filePath ? fs.readFileSync(filePath) : await readStdin(process.stdin);
 
-  const appDir = process.cwd();
-
-  const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-  const outDir = await tsUtils.resolveOutDir(appDir);
-
-  if (isTSProject)
-    await tsUtils.compile(appDir, {
-      watch: false,
-      configOptions: { options: { incremental: true } },
-    });
-
-  const distDir = isTSProject ? outDir : appDir;
-
-  const app = await strapi({ appDir, distDir }).load();
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   let dataToImport;
   try {
@@ -93,7 +80,7 @@ const createImporter = (db, strategy) => {
  * Replace importer. Will replace the keys that already exist and create the new ones
  * @param {Object} db - DatabaseManager instance
  */
-const createReplaceImporter = db => {
+const createReplaceImporter = (db) => {
   const stats = {
     created: 0,
     replaced: 0,
@@ -124,7 +111,7 @@ const createReplaceImporter = db => {
  * Merge importer. Will merge the keys that already exist with their new value and create the new ones
  * @param {Object} db - DatabaseManager instance
  */
-const createMergeImporter = db => {
+const createMergeImporter = (db) => {
   const stats = {
     created: 0,
     merged: 0,
@@ -158,7 +145,7 @@ const createMergeImporter = db => {
  * Merge importer. Will keep the keys that already exist without changing them and create the new ones
  * @param {Object} db - DatabaseManager instance
  */
-const createKeepImporter = db => {
+const createKeepImporter = (db) => {
   const stats = {
     created: 0,
     untouched: 0,

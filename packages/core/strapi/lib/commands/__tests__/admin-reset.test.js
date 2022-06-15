@@ -16,7 +16,11 @@ const mock = {
 };
 
 jest.mock('../../index', () => {
-  return jest.fn(() => mock);
+  const impl = jest.fn(() => mock);
+
+  impl.compile = jest.fn();
+
+  return impl;
 });
 
 const inquirer = require('inquirer');
@@ -58,7 +62,7 @@ describe('admin:reset-password command', () => {
 
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      await resetAdminPasswordCommand().catch(err => {
+      await resetAdminPasswordCommand().catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 
@@ -86,7 +90,7 @@ describe('admin:reset-password command', () => {
         throw new Error('exit');
       });
 
-      await resetAdminPasswordCommand().catch(err => {
+      await resetAdminPasswordCommand().catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 

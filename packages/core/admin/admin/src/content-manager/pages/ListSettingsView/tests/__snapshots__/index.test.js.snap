@@ -1,6 +1,76 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1`] = `
+.c9 {
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c7 {
+  padding-right: 8px;
+}
+
+.c6 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c6 svg path {
+  fill: #4945ff;
+}
+
+.c6 svg {
+  font-size: 0.625rem;
+}
+
+.c6:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c6:focus-visible {
+  outline: none;
+}
+
+.c6:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c8 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
 .c22 {
   background: #ffffff;
   padding-top: 24px;
@@ -18,6 +88,95 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 .c62 {
   padding-top: 24px;
   padding-bottom: 24px;
+}
+
+.c63 {
+  background: #eaeaef;
+}
+
+.c64 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c1 {
+  padding-bottom: 56px;
+}
+
+.c4 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c5 {
+  padding-bottom: 8px;
+}
+
+.c21 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c0 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.c2 {
+  overflow-x: hidden;
+}
+
+.c10 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c11 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c12 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.c20 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c3:focus-visible {
+  outline: none;
 }
 
 .c19 {
@@ -239,102 +398,20 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   justify-content: space-between;
 }
 
-.c82 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
+.c45 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
 }
 
-.c82 svg {
-  height: 12px;
-  width: 12px;
+.c46 {
+  grid-column: span 6;
+  max-width: 100%;
 }
 
-.c82 svg > g,
-.c82 svg path {
-  fill: #ffffff;
-}
-
-.c82[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c82:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c82:focus-visible {
-  outline: none;
-}
-
-.c82:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c83 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c83 svg > g,
-.c83 svg path {
-  fill: #8e8ea9;
-}
-
-.c83:hover svg > g,
-.c83:hover svg path {
-  fill: #666687;
-}
-
-.c83:active svg > g,
-.c83:active svg path {
-  fill: #a5a5ba;
-}
-
-.c83[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c83[aria-disabled='true'] svg path {
-  fill: #666687;
+.c61 {
+  grid-column: span 3;
+  max-width: 100%;
 }
 
 .c52 {
@@ -495,29 +572,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 
 .c54 {
   width: 100%;
-}
-
-.c69 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c70 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c70 > * + * {
-  margin-left: 12px;
 }
 
 .c36 {
@@ -692,40 +746,62 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   line-height: 1.43;
 }
 
-.c9 {
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c28 {
+  gap: 16px;
 }
 
-.c7 {
-  padding-right: 8px;
-}
-
-.c6 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
+.c69 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c70 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c70 > * + * {
+  margin-left: 12px;
+}
+
+.c82 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
   position: relative;
   outline: none;
 }
 
-.c6 svg path {
-  fill: #4945ff;
+.c82 svg {
+  height: 12px;
+  width: 12px;
 }
 
-.c6 svg {
-  font-size: 0.625rem;
+.c82 svg > g,
+.c82 svg path {
+  fill: #ffffff;
 }
 
-.c6:after {
+.c82[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c82:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -740,11 +816,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid transparent;
 }
 
-.c6:focus-visible {
+.c82:focus-visible {
   outline: none;
 }
 
-.c6:focus-visible:after {
+.c82:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -755,120 +831,44 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid #4945ff;
 }
 
-.c8 {
+.c83 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c63 {
-  background: #eaeaef;
-}
-
-.c64 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c1 {
-  padding-bottom: 56px;
-}
-
-.c4 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
-}
-
-.c5 {
-  padding-bottom: 8px;
-}
-
-.c21 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c0 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.c2 {
-  overflow-x: hidden;
-}
-
-.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
 }
 
-.c11 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c83 svg > g,
+.c83 svg path {
+  fill: #8e8ea9;
 }
 
-.c12 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
+.c83:hover svg > g,
+.c83:hover svg path {
+  fill: #666687;
 }
 
-.c20 {
-  color: #666687;
-  font-size: 1rem;
-  line-height: 1.5;
+.c83:active svg > g,
+.c83:active svg path {
+  fill: #a5a5ba;
 }
 
-.c3:focus-visible {
-  outline: none;
+.c83[aria-disabled='true'] {
+  background-color: #eaeaef;
 }
 
-.c45 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c46 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c61 {
-  grid-column: span 3;
-  max-width: 100%;
-}
-
-.c28 {
-  gap: 16px;
+.c83[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c76 {
@@ -1845,6 +1845,76 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 1px;
 }
 
+.c9 {
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c7 {
+  padding-right: 8px;
+}
+
+.c6 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c6 svg path {
+  fill: #4945ff;
+}
+
+.c6 svg {
+  font-size: 0.625rem;
+}
+
+.c6:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c6:focus-visible {
+  outline: none;
+}
+
+.c6:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c8 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
 .c22 {
   background: #ffffff;
   padding-top: 24px;
@@ -1862,6 +1932,95 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 .c62 {
   padding-top: 24px;
   padding-bottom: 24px;
+}
+
+.c63 {
+  background: #eaeaef;
+}
+
+.c64 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c1 {
+  padding-bottom: 56px;
+}
+
+.c4 {
+  background: #f6f6f9;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
+}
+
+.c5 {
+  padding-bottom: 8px;
+}
+
+.c21 {
+  padding-right: 56px;
+  padding-left: 56px;
+}
+
+.c0 {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.c2 {
+  overflow-x: hidden;
+}
+
+.c10 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c11 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c12 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.25;
+}
+
+.c20 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c3:focus-visible {
+  outline: none;
 }
 
 .c19 {
@@ -2083,121 +2242,20 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   justify-content: space-between;
 }
 
-.c85 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
+.c45 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
 }
 
-.c87 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c46 {
+  grid-column: span 6;
+  max-width: 100%;
 }
 
-.c86 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-.c82 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c82 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c82 svg > g,
-.c82 svg path {
-  fill: #ffffff;
-}
-
-.c82[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c82:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c82:focus-visible {
-  outline: none;
-}
-
-.c82:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c83 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c83 svg > g,
-.c83 svg path {
-  fill: #8e8ea9;
-}
-
-.c83:hover svg > g,
-.c83:hover svg path {
-  fill: #666687;
-}
-
-.c83:active svg > g,
-.c83:active svg path {
-  fill: #a5a5ba;
-}
-
-.c83[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c83[aria-disabled='true'] svg path {
-  fill: #666687;
+.c61 {
+  grid-column: span 3;
+  max-width: 100%;
 }
 
 .c52 {
@@ -2358,29 +2416,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 .c54 {
   width: 100%;
-}
-
-.c69 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c70 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c70 > * + * {
-  margin-left: 12px;
 }
 
 .c36 {
@@ -2555,183 +2590,31 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   line-height: 1.43;
 }
 
-.c9 {
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c7 {
-  padding-right: 8px;
-}
-
-.c6 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  position: relative;
-  outline: none;
-}
-
-.c6 svg path {
-  fill: #4945ff;
-}
-
-.c6 svg {
-  font-size: 0.625rem;
-}
-
-.c6:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c6:focus-visible {
-  outline: none;
-}
-
-.c6:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-}
-
-.c63 {
-  background: #eaeaef;
-}
-
-.c64 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c1 {
-  padding-bottom: 56px;
-}
-
-.c4 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
-}
-
-.c5 {
-  padding-bottom: 8px;
-}
-
-.c21 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c0 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.c2 {
-  overflow-x: hidden;
-}
-
-.c10 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c11 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c12 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-}
-
-.c20 {
-  color: #666687;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.c3:focus-visible {
-  outline: none;
-}
-
-.c45 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c46 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c61 {
-  grid-column: span 3;
-  max-width: 100%;
-}
-
 .c28 {
   gap: 16px;
+}
+
+.c69 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c70 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c70 > * + * {
+  margin-left: 12px;
 }
 
 .c95 {
@@ -2818,6 +2701,123 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 .c93:not([aria-disabled]):hover {
   background-color: #f0f0ff;
+}
+
+.c85 {
+  background: #212134;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.c87 {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c86 {
+  position: absolute;
+  z-index: 4;
+  display: none;
+}
+
+.c82 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c82 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c82 svg > g,
+.c82 svg path {
+  fill: #ffffff;
+}
+
+.c82[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c82:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c82:focus-visible {
+  outline: none;
+}
+
+.c82:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c83 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c83 svg > g,
+.c83 svg path {
+  fill: #8e8ea9;
+}
+
+.c83:hover svg > g,
+.c83:hover svg path {
+  fill: #666687;
+}
+
+.c83:active svg > g,
+.c83:active svg path {
+  fill: #a5a5ba;
+}
+
+.c83[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c83[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c76 {

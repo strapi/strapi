@@ -55,7 +55,6 @@ module.exports = [
     handler: 'admin.telemetryProperties',
     config: {
       auth: false,
-      policies: ['admin::isTelemetryEnabled'],
     },
   },
   {

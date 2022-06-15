@@ -24,6 +24,7 @@ const createTelemetry = require('./services/metrics');
 const createAuth = require('./services/auth');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
+const { LIFECYCLES } = require('./utils/lifecycles');
 const ee = require('./utils/ee');
 const contentTypesRegistry = require('./core/registries/content-types');
 const servicesRegistry = require('./core/registries/services');
@@ -44,16 +45,6 @@ const sanitizersRegistry = require('./core/registries/sanitizers');
 const draftAndPublishSync = require('./migrations/draft-publish');
 
 /**
- * A map of all the available Strapi lifecycles
- * @type {import('@strapi/strapi').Core.Lifecycles}
- */
-const LIFECYCLES = {
-  REGISTER: 'register',
-  BOOTSTRAP: 'bootstrap',
-  DESTROY: 'destroy',
-};
-
-/**
  * Resolve the working directories based on the instance options.
  *
  * Behavior:
@@ -64,7 +55,7 @@ const LIFECYCLES = {
  * - If `appDir` is `undefined`, it'll be set to `process.cwd()`
  * - If `distDir` is `undefined`, it'll be set to `appDir`
  */
-const resolveWorkingDirectories = opts => {
+const resolveWorkingDirectories = (opts) => {
   const cwd = process.cwd();
 
   const appDir = opts.appDir ? path.resolve(cwd, opts.appDir) : cwd;
@@ -274,7 +265,7 @@ class Strapi {
    */
   async listen() {
     return new Promise((resolve, reject) => {
-      const onListen = async error => {
+      const onListen = async (error) => {
         if (error) {
           return reject(error);
         }
@@ -470,7 +461,7 @@ class Strapi {
 
   async startWebhooks() {
     const webhooks = await this.webhookStore.findWebhooks();
-    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
+    webhooks.forEach((webhook) => this.webhookRunner.add(webhook));
   }
 
   reload() {
@@ -478,7 +469,7 @@ class Strapi {
       shouldReload: 0,
     };
 
-    const reload = function() {
+    const reload = function () {
       if (state.shouldReload > 0) {
         // Reset the reloading state
         state.shouldReload -= 1;
@@ -542,7 +533,7 @@ class Strapi {
   }
 }
 
-module.exports = options => {
+module.exports = (options) => {
   const strapi = new Strapi(options);
   global.strapi = strapi;
   return strapi;

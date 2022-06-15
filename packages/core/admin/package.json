@@ -138,7 +138,9 @@
   "devDependencies": {
     "duplicate-dependencies-webpack-plugin": "0.2.0",
     "speed-measure-webpack-plugin": "1.5.0",
-    "webpack-bundle-analyzer": "4.4.1"
+    "webpack-bundle-analyzer": "4.4.1",
+    "glob": "8.0.3",
+    "typescript": "^4.7.2"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",

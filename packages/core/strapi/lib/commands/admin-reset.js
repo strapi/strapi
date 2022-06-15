@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 const inquirer = require('inquirer');
-const tsUtils = require('@strapi/typescript-utils');
 const strapi = require('../index');
 
 const promptQuestions = [
@@ -21,7 +20,7 @@ const promptQuestions = [
  * @param {string} cmdOptions.email - user's email
  * @param {string} cmdOptions.password - user's new password
  */
-module.exports = async function(cmdOptions = {}) {
+module.exports = async function (cmdOptions = {}) {
   const { email, password } = cmdOptions;
 
   if (_.isEmpty(email) && _.isEmpty(password) && process.stdin.isTTY) {
@@ -43,20 +42,8 @@ module.exports = async function(cmdOptions = {}) {
 };
 
 async function changePassword({ email, password }) {
-  const appDir = process.cwd();
-
-  const isTSProject = await tsUtils.isUsingTypeScript(appDir);
-  const outDir = await tsUtils.resolveOutDir(appDir);
-
-  if (isTSProject)
-    await tsUtils.compile(appDir, {
-      watch: false,
-      configOptions: { options: { incremental: true } },
-    });
-
-  const distDir = isTSProject ? outDir : appDir;
-
-  const app = await strapi({ appDir, distDir }).load();
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   await app.admin.services.user.resetPasswordByEmail(email, password);
 

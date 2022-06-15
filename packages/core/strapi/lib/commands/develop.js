@@ -18,7 +18,7 @@ const { buildTypeScript, buildAdmin } = require('./builders');
  *
  */
 
-module.exports = async function({ build, watchAdmin, polling, browser }) {
+module.exports = async function ({ build, watchAdmin, polling, browser }) {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
@@ -120,7 +120,7 @@ const workerProcess = ({ appDir, distDir, watchAdmin, polling, isTSProject }) =>
     isTSProject,
   });
 
-  process.on('message', async message => {
+  process.on('message', async (message) => {
     switch (message) {
       case 'kill':
         await strapiInstance.destroy();
@@ -149,7 +149,6 @@ function watchFileChanges({ appDir, strapiInstance, watchIgnoreFiles, polling })
     }
   };
 
-  // @soupette should we keep watching the dist dir (for the watch admin?)
   const watcher = chokidar.watch(appDir, {
     ignoreInitial: true,
     usePolling: polling,
@@ -158,8 +157,6 @@ function watchFileChanges({ appDir, strapiInstance, watchIgnoreFiles, polling })
       /tmp/,
       '**/src/admin/**',
       '**/src/plugins/**/admin/**',
-      // FIXME pass the plugin path to the strapiAdmin.build and strapiAdmin.watch in order to stop copying
-      // the FE files when using TS
       '**/dist/src/plugins/test/admin/**',
       '**/documentation',
       '**/documentation/**',
@@ -181,15 +178,15 @@ function watchFileChanges({ appDir, strapiInstance, watchIgnoreFiles, polling })
   });
 
   watcher
-    .on('add', path => {
+    .on('add', (path) => {
       strapiInstance.log.info(`File created: ${path}`);
       restart();
     })
-    .on('change', path => {
+    .on('change', (path) => {
       strapiInstance.log.info(`File changed: ${path}`);
       restart();
     })
-    .on('unlink', path => {
+    .on('unlink', (path) => {
       strapiInstance.log.info(`File deleted: ${path}`);
       restart();
     });

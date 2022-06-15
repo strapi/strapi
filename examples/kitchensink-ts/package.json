@@ -1,42 +1,30 @@
 {
   "name": "kitchensink-ts",
   "private": true,
-  "version": "4.1.8",
-  "description": "A Strapi application.",
+  "version": "4.1.12",
+  "description": "A Strapi application",
   "scripts": {
     "develop": "strapi develop",
-    "develop:ce": "STRAPI_DISABLE_EE=true strapi develop",
     "start": "strapi start",
     "build": "strapi build",
-    "build:ce": "STRAPI_DISABLE_EE=true strapi build",
     "strapi": "strapi"
   },
+  "devDependencies": {},
   "dependencies": {
-    "@strapi/admin": "4.1.8",
-    "@strapi/provider-email-mailgun": "4.1.8",
-    "@strapi/plugin-documentation": "4.1.8",
-    "@strapi/provider-upload-aws-s3": "4.1.8",
-    "@strapi/provider-upload-cloudinary": "4.1.8",
-    "@strapi/strapi": "4.1.8",
-    "@strapi/utils": "4.1.8",
-    "lodash": "4.17.21",
-    "mysql": "2.18.1",
-    "passport-google-oauth2": "0.2.0",
-    "pg": "8.6.0",
-    "sqlite3": "5.0.2"
+    "@strapi/strapi": "4.1.12",
+    "@strapi/plugin-users-permissions": "4.1.12",
+    "@strapi/plugin-i18n": "4.1.12",
+    "better-sqlite3": "7.4.6"
   },
-  "devDependencies": {
-    "@swc/cli": "0.1.55",
-    "@swc/core": "1.2.146",
-    "tsc": "2.0.4",
-    "typescript": "4.6.2"
+  "author": {
+    "name": "A Strapi developer"
   },
   "strapi": {
     "uuid": "getstarted"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE"
+  "license": "MIT"
 }

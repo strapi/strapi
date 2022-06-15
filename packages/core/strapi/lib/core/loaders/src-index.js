@@ -15,11 +15,11 @@ const srcSchema = yup
   })
   .noUnknown();
 
-const validateSrcIndex = srcIndex => {
+const validateSrcIndex = (srcIndex) => {
   return srcSchema.validateSync(srcIndex, { strict: true, abortEarly: false });
 };
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   if (!existsSync(strapi.dirs.dist.src)) {
     return;
   }
@@ -29,7 +29,7 @@ module.exports = strapi => {
     return {};
   }
 
-  const srcIndex = importDefault(require(pathToSrcIndex)).default;
+  const srcIndex = importDefault(pathToSrcIndex);
 
   try {
     validateSrcIndex(srcIndex);

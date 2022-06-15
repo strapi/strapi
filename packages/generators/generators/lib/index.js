@@ -7,8 +7,8 @@ const nodePlop = require('node-plop');
 /**
  * Starts the Plop CLI programmatically
  */
-const runCLI = async () => {
-  Plop.launch({ configPath: join(__dirname, 'plopfile.js') }, env =>
+const runCLI = () => {
+  Plop.launch({ configPath: join(__dirname, 'plopfile.js') }, (env) =>
     run({ ...env, dest: join(process.cwd(), 'src') }, undefined, true)
   );
 };
