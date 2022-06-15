@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-new",
-  "version": "4.1.8",
+  "version": "4.2.0",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "generate",
@@ -36,7 +36,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@sentry/node": "6.3.0",
+    "@sentry/node": "6.19.6",
     "chalk": "^4.1.1",
     "execa": "^1.0.0",
     "fs-extra": "10.0.0",
@@ -49,7 +49,7 @@
     "uuid": "^3.3.2"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   }
 }

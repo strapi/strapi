@@ -189,6 +189,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
 
       .c8 {
         overflow: hidden;
+        border: 1px solid #eaeaef;
       }
 
       .c12 {
@@ -254,6 +255,10 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       }
 
       .c17 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -261,10 +266,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c16 {
@@ -326,6 +327,10 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       }
 
       .c2 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -337,13 +342,13 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -351,10 +356,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c4 {

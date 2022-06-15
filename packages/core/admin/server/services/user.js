@@ -17,7 +17,7 @@ const sanitizeUserRoles = role => _.pick(role, ['id', 'name', 'description', 'co
  */
 const sanitizeUser = user => {
   return {
-    ..._.omit(user, ['password', 'resetPasswordToken', 'roles']),
+    ..._.omit(user, ['password', 'resetPasswordToken', 'registrationToken', 'roles']),
     roles: user.roles && user.roles.map(sanitizeUserRoles),
   };
 };

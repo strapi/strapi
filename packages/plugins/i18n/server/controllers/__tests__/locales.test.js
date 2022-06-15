@@ -4,6 +4,12 @@ const { ApplicationError } = require('@strapi/utils').errors;
 const { listLocales, createLocale, updateLocale, deleteLocale } = require('../locales');
 const localeModel = require('../../content-types/locale');
 
+const sanitizers = {
+  get() {
+    return [];
+  },
+};
+
 describe('Locales', () => {
   describe('listLocales', () => {
     test('can get locales', async () => {
@@ -24,6 +30,7 @@ describe('Locales', () => {
             },
           },
         },
+        sanitizers,
       };
 
       const ctx = {};
@@ -61,6 +68,7 @@ describe('Locales', () => {
             },
           },
         },
+        sanitizers,
       };
 
       const ctx = { request: { body: { ...locale, isDefault: true } }, state: { user: { id: 1 } } };
@@ -96,6 +104,7 @@ describe('Locales', () => {
             },
           },
         },
+        sanitizers,
       };
 
       const ctx = {
@@ -133,6 +142,7 @@ describe('Locales', () => {
             },
           },
         },
+        sanitizers,
       };
 
       const ctx = {
@@ -180,6 +190,7 @@ describe('Locales', () => {
             },
           },
         },
+        sanitizers,
       };
 
       const ctx = {
@@ -221,6 +232,7 @@ describe('Locales', () => {
             },
           },
         },
+        sanitizers,
       };
 
       const ctx = {
@@ -269,6 +281,7 @@ describe('Locales', () => {
             },
           },
         },
+        sanitizers,
       };
 
       const ctx = { params: { id: 1 } };
@@ -302,6 +315,7 @@ describe('Locales', () => {
             },
           },
         },
+        sanitizers,
       };
 
       const ctx = { params: { id: 1 } };

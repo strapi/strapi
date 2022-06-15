@@ -9,13 +9,13 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
+  Link,
 } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Main } from '@strapi/design-system/Main';
-import { Link } from '@strapi/design-system/Link';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';

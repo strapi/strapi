@@ -1,5 +1,6 @@
 const languageNativeNames = {
   ar: 'العربية',
+  ca: 'Català',
   cs: 'Čeština',
   de: 'Deutsch',
   dk: 'Dansk',

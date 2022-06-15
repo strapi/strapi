@@ -39,7 +39,7 @@ const createComponentSchema = (usedComponentNames, reservedNames, category) => {
       .matches(CATEGORY_NAME_REGEX, errorsTrads.regex)
       .required(errorsTrads.required),
 
-    icon: yup.string().required(errorsTrads.required),
+    icon: yup.string(),
   };
 
   return yup.object(shape);

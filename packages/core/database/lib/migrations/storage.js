@@ -14,21 +14,21 @@ const createStorage = (opts = {}) => {
   };
 
   return {
-    async logMigration(migrationName) {
+    async logMigration({ name }) {
       await db
         .getConnection()
         .insert({
-          name: migrationName,
+          name,
           time: new Date(),
         })
         .into(tableName);
     },
 
-    async unlogMigration(migrationName) {
+    async unlogMigration({ name }) {
       await db
         .getConnection(tableName)
         .del()
-        .where({ name: migrationName });
+        .where({ name });
     },
 
     async executed() {

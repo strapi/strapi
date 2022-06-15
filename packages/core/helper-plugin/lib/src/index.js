@@ -63,6 +63,8 @@ export { default as PaginationURLQuery } from './components/PaginationURLQuery';
 export { default as PageSizeURLQuery } from './components/PageSizeURLQuery';
 export { default as RelativeTime } from './components/RelativeTime';
 export { default as DateTimePicker } from './components/DateTimePicker';
+export { default as Link } from './components/Link';
+export { default as LinkButton } from './components/LinkButton';
 
 // New icons
 export { default as SortIcon } from './icons/SortIcon';

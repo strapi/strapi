@@ -7,8 +7,8 @@ const inquirer = require('inquirer');
  * @param {string|null} template - The Github repo of the template
  * @returns Object containting prompt answers
  */
-module.exports = async function promptUser(projectName, program) {
-  const questions = await getPromptQuestions(projectName, program);
+module.exports = async function promptUser(projectName, program, hasDatabaseOptions) {
+  const questions = await getPromptQuestions(projectName, program, hasDatabaseOptions);
   return inquirer.prompt(questions);
 };
 
@@ -17,7 +17,7 @@ module.exports = async function promptUser(projectName, program) {
  * @param {string|null} template - The template the project should use
  * @returns Array of prompt question objects
  */
-async function getPromptQuestions(projectName, program) {
+async function getPromptQuestions(projectName, program, hasDatabaseOptions) {
   return [
     {
       type: 'input',
@@ -30,7 +30,7 @@ async function getPromptQuestions(projectName, program) {
       type: 'list',
       name: 'quick',
       message: 'Choose your installation type',
-      when: !program.quickstart,
+      when: !program.quickstart && !hasDatabaseOptions,
       choices: [
         {
           name: 'Quickstart (recommended)',

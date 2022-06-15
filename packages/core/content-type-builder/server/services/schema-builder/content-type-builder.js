@@ -105,6 +105,7 @@ module.exports = function createComponentBuilder() {
         })
         .set('options', { draftAndPublish: infos.draftAndPublish || false })
         .set('pluginOptions', infos.pluginOptions)
+        .set('config', infos.config)
         .setAttributes(this.convertAttributes(infos.attributes));
 
       Object.keys(infos.attributes).forEach(key => {

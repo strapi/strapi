@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-rackspace",
-  "version": "4.1.8",
+  "version": "4.2.0",
   "description": "Rackspace provider for strapi upload",
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
     "streamifier": "0.1.1"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   }
 }

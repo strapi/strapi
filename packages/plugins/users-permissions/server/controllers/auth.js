@@ -378,7 +378,7 @@ module.exports = {
       throw new ValidationError('token.invalid');
     }
 
-    const user = await userService.fetch({ confirmationToken }, []);
+    const [user] = await userService.fetchAll({ filters: { confirmationToken } });
 
     if (!user) {
       throw new ValidationError('token.invalid');
