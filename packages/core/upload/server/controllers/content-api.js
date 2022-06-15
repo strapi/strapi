@@ -37,10 +37,6 @@ module.exports = {
     ctx.body = await sanitizeOutput(file, ctx);
   },
 
-  async count(ctx) {
-    ctx.body = await getService('upload').count(ctx.query);
-  },
-
   async destroy(ctx) {
     const {
       params: { id },
