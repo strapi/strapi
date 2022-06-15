@@ -13,10 +13,17 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const { notifyStatus } = useNotifyAT();
   const dataRequestURL = getRequestUrl('files');
   const { folder, _q, ...paramsExceptFolderAndQ } = query;
-  const params = {
-    ...paramsExceptFolderAndQ,
-    ...(_q && { _q }),
-    ...(!_q && {
+
+  let params;
+
+  if (_q) {
+    params = {
+      ...paramsExceptFolderAndQ,
+      _q,
+    };
+  } else {
+    params = {
+      ...paramsExceptFolderAndQ,
       filters: {
         $and: [
           ...(query?.filters?.$and ?? []),
@@ -29,8 +36,8 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
           },
         ],
       },
-    }),
-  };
+    };
+  }
 
   const getAssets = async () => {
     try {

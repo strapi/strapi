@@ -14,13 +14,16 @@ export const useFolders = ({ enabled = true, query = {} }) => {
   const dataRequestURL = getRequestUrl('folders');
   const { folder, _q, ...paramsExceptFolderAndQ } = query;
 
-  const params = {
-    ...paramsExceptFolderAndQ,
-    pagination: {
-      pageSize: -1,
-    },
-    ...(_q && { _q }),
-    ...(!_q && {
+  let params;
+
+  if (_q) {
+    params = {
+      ...paramsExceptFolderAndQ,
+      _q,
+    };
+  } else {
+    params = {
+      ...paramsExceptFolderAndQ,
       filters: {
         $and: [
           ...(query?.filters?.$and ?? []),
@@ -33,8 +36,8 @@ export const useFolders = ({ enabled = true, query = {} }) => {
           },
         ],
       },
-    }),
-  };
+    };
+  }
 
   const fetchFolders = async () => {
     try {
