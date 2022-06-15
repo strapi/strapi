@@ -54,7 +54,7 @@ const FIXTURE_ASSETS = [
 
 jest.mock('../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../hooks/useFolders');
-jest.mock('../../../hooks/useFolderStructure');
+jest.mock('../../../hooks/useFolder');
 jest.mock('../../../hooks/useAssets');
 
 jest.mock('@strapi/helper-plugin', () => ({

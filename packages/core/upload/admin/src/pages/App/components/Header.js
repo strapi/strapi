@@ -10,46 +10,32 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Link } from '@strapi/design-system/Link';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Plus from '@strapi/icons/Plus';
-import { getTrad, findRecursiveFolderMetadatas } from '../../../utils';
-import { useFolderStructure } from '../../../hooks/useFolderStructure';
+import { getTrad } from '../../../utils';
+import { FolderDefinition } from '../../../constants';
 
 export const Header = ({
-  assetCount,
-  folderCount,
   canCreate,
   onToggleEditFolderDialog,
   onToggleUploadAssetDialog,
+  folder,
+  assetCount,
+  folderCount,
 }) => {
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
-  const [
-    {
-      query: { folder, ...queryParamsWithoutFolder },
-    },
-  ] = useQueryParams();
-
-  const { data, isLoading } = useFolderStructure();
-  const isNestedFolder = !!folder;
-  const folderMetadatas = !isLoading && findRecursiveFolderMetadatas(data[0], folder);
-  const backQuery = stringify(
-    folderMetadatas?.parentId
-      ? { ...queryParamsWithoutFolder, folder: folderMetadatas.parentId }
-      : { ...queryParamsWithoutFolder },
-    { encode: false }
-  );
-
-  const folderLabel =
-    folderMetadatas?.currentFolderLabel &&
-    (folderMetadatas.currentFolderLabel.length > 30
-      ? `${folderMetadatas.currentFolderLabel.slice(0, 30)}...`
-      : folderMetadatas.currentFolderLabel);
+  const [{ query }] = useQueryParams();
+  const backQuery = {
+    ...query,
+    folder: folder?.parent?.id ?? undefined,
+  };
+  const name = folder?.name?.length > 30 ? `${folder.name.slice(0, 30)}...` : folder?.name;
 
   return (
     <HeaderLayout
       title={`${formatMessage({
         id: getTrad('plugin.name'),
         defaultMessage: `Media Library`,
-      })}${folderLabel ? ` - ${folderLabel}` : ''}`}
+      })}${name ? ` - ${name}` : ''}`}
       subtitle={formatMessage(
         {
           id: getTrad('header.content.assets'),
@@ -59,8 +45,11 @@ export const Header = ({
         { numberAssets: assetCount, numberFolders: folderCount }
       )}
       navigationAction={
-        isNestedFolder && (
-          <Link startIcon={<ArrowLeft />} to={`${pathname}?${backQuery}`}>
+        folder && (
+          <Link
+            startIcon={<ArrowLeft />}
+            to={`${pathname}?${stringify(backQuery, { encode: false })}`}
+          >
             {formatMessage({
               id: getTrad('header.actions.folder-level-up'),
               defaultMessage: 'Back',
@@ -91,10 +80,15 @@ export const Header = ({
   );
 };
 
+Header.defaultProps = {
+  folder: null,
+};
+
 Header.propTypes = {
   assetCount: PropTypes.number.isRequired,
-  folderCount: PropTypes.number.isRequired,
   canCreate: PropTypes.bool.isRequired,
+  folder: PropTypes.shape(FolderDefinition),
+  folderCount: PropTypes.number.isRequired,
   onToggleEditFolderDialog: PropTypes.func.isRequired,
   onToggleUploadAssetDialog: PropTypes.func.isRequired,
 };

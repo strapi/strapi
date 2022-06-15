@@ -17,15 +17,20 @@ module.exports = {
     });
 
     const { results } = await strapi.entityService.findWithRelationCountsPage(FOLDER_MODEL_UID, {
-      filters: { id },
-      populate: {
-        children: {
-          count: true,
+      ...defaultsDeep(
+        {
+          filters: { id },
+          populate: {
+            children: {
+              count: true,
+            },
+            files: {
+              count: true,
+            },
+          },
         },
-        files: {
-          count: true,
-        },
-      },
+        ctx.query
+      ),
     });
 
     if (results.length === 0) {

@@ -5,6 +5,8 @@ import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { Flex } from '@strapi/design-system/Flex';
+import { Loader } from '@strapi/design-system/Loader';
 import {
   ModalLayout,
   ModalHeader,
@@ -26,9 +28,10 @@ export const BulkMoveDialog = ({ onClose, selected }) => {
   const { formatMessage } = useIntl();
   const { data: folderStructure, isLoading } = useFolderStructure();
   const { move } = useBulkMove();
-  const initialFormData = {
-    destination: folderStructure[0],
-  };
+
+  if (!folderStructure) {
+    return null;
+  }
 
   const handleSubmit = async (values, { setErrors }) => {
     try {
@@ -50,6 +53,27 @@ export const BulkMoveDialog = ({ onClose, selected }) => {
 
   const handleClose = () => {
     onClose();
+  };
+
+  if (isLoading) {
+    return (
+      <ModalLayout onClose={handleClose} labelledBy="title">
+        <ModalBody>
+          <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
+            <Loader>
+              {formatMessage({
+                id: getTrad('list.asset.load'),
+                defaultMessage: 'Content is loading.',
+              })}
+            </Loader>
+          </Flex>
+        </ModalBody>
+      </ModalLayout>
+    );
+  }
+
+  const initialFormData = {
+    destination: folderStructure[0],
   };
 
   return (
