@@ -152,11 +152,11 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
                             value: formatMessage(
                               {
                                 id: getTrad('modal.folder.elements.count'),
-                                defaultMessage: '{assetCount} assets, {folderCount} folders',
+                                defaultMessage: '{folderCount} folders, {assetCount} assets',
                               },
                               {
                                 assetCount: folder?.files?.count ?? 0,
-                                folderCount: folder?.children?.length ?? 0,
+                                folderCount: folder?.children?.count ?? 0,
                               }
                             ),
                           },
