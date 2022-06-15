@@ -18,6 +18,8 @@ export const Header = ({
   onToggleEditFolderDialog,
   onToggleUploadAssetDialog,
   folder,
+  assetCount,
+  folderCount,
 }) => {
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
@@ -40,10 +42,10 @@ export const Header = ({
           defaultMessage:
             '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}',
         },
-        { numberAssets: folder?.files?.count ?? 0, numberFolders: folder?.children?.count ?? 0 }
+        { numberAssets: assetCount, numberFolders: folderCount }
       )}
       navigationAction={
-        folder?.parent && (
+        folder && (
           <Link
             startIcon={<ArrowLeft />}
             to={`${pathname}?${stringify(backQuery, { encode: false })}`}
@@ -83,8 +85,10 @@ Header.defaultProps = {
 };
 
 Header.propTypes = {
-  folder: PropTypes.shape(FolderDefinition),
+  assetCount: PropTypes.number.isRequired,
   canCreate: PropTypes.bool.isRequired,
+  folder: PropTypes.shape(FolderDefinition),
+  folderCount: PropTypes.number.isRequired,
   onToggleEditFolderDialog: PropTypes.func.isRequired,
   onToggleUploadAssetDialog: PropTypes.func.isRequired,
 };
