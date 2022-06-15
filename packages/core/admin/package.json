@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "4.1.12",
+  "version": "4.2.0",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -49,11 +49,11 @@
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
-    "@strapi/babel-plugin-switch-ee-ce": "4.1.12",
+    "@strapi/babel-plugin-switch-ee-ce": "4.2.0",
     "@strapi/design-system": "1.1.1",
-    "@strapi/helper-plugin": "4.1.12",
+    "@strapi/helper-plugin": "4.2.0",
     "@strapi/icons": "1.1.1",
-    "@strapi/utils": "4.1.12",
+    "@strapi/utils": "4.2.0",
     "axios": "0.24.0",
     "babel-loader": "8.2.3",
     "babel-plugin-styled-components": "2.0.2",
@@ -137,7 +137,7 @@
     "webpack-bundle-analyzer": "4.4.1"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   }
 }
