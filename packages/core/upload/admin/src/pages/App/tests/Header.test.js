@@ -95,7 +95,7 @@ describe('Header', () => {
   });
 
   test('does not render a back button at the root level of the media library', () => {
-    const { queryByText } = setup({ folder: { ...FIXTURE_FOLDER, parent: null } });
+    const { queryByText } = setup({ folder: null });
 
     expect(queryByText('Back')).not.toBeInTheDocument();
   });
