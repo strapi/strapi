@@ -9,7 +9,8 @@ const sharp = require('sharp');
 const { getService } = require('../utils');
 const { bytesToKbytes } = require('../utils/file');
 
-const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff'];
+const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif'];
+const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff'];
 
 const writeStreamToFile = (stream, path) =>
   new Promise((resolve, reject) => {
@@ -159,7 +160,19 @@ const breakpointSmallerThan = (breakpoint, { width, height }) => {
   return breakpoint < width || breakpoint < height;
 };
 
-const isSupportedImage = async file => {
+const isOptimizableImage = async file => {
+  let format;
+  try {
+    const metadata = await getMetadata(file);
+    format = metadata.format;
+  } catch (e) {
+    // throw when the file is not a supported image
+    return false;
+  }
+  return format && FORMATS_TO_OPTIMIZE.includes(format);
+};
+
+const isImage = async file => {
   let format;
   try {
     const metadata = await getMetadata(file);
@@ -172,7 +185,8 @@ const isSupportedImage = async file => {
 };
 
 module.exports = () => ({
-  isSupportedImage,
+  isOptimizableImage,
+  isImage,
   getDimensions,
   generateResponsiveFormats,
   generateThumbnail,
