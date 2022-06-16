@@ -1,6 +1,23 @@
-import { Attribute } from './base';
+import {
+  Attribute,
+  ConfigurableOption,
+  DefaultOption,
+  PrivateOption,
+  RequiredOption,
+  UniqueOption,
+} from './base';
 
-export interface TimestampAttribute extends Attribute<'timestamp'> {}
+export type TimestampAttribute = Attribute<'timestamp'> extends infer T
+  ? T extends Attribute
+    ? T &
+        // Options
+        ConfigurableOption &
+        DefaultOption<T> &
+        PrivateOption &
+        RequiredOption &
+        UniqueOption
+    : never
+  : never;
 
 export type TimestampValue = string;
 

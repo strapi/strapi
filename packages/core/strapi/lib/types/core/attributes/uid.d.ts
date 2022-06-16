@@ -1,23 +1,56 @@
-import { Attribute } from './base';
+import {
+  Attribute,
+  ConfigurableOption,
+  DefaultOption,
+  MinMaxLengthOption,
+  PrivateOption,
+  RequiredOption,
+} from './base';
 import { SchemaUID } from '../../utils';
 import { GetAttributesKeysByType } from './utils';
-import { BaseStringAttribute } from './common';
 
 export interface UIDAttributeOptions {
   separator?: string;
   lowercase?: boolean;
   decamelize?: boolean;
-  customReplacements?: any;
+  customReplacements?: Array<[string, string]>;
   preserveLeadingUnderscore?: boolean;
 }
 
-export interface UIDAttribute<
-  T extends SchemaUID = undefined,
-  U extends GetAttributesKeysByType<T, 'string' | 'text'> = unknown
-> extends BaseStringAttribute<'uid'> {
+export interface UIDAttributeProperties<
+  // UID options
+  S extends UIDAttributeOptions = UIDAttributeOptions,
+  // Own Schema Reference
+  T extends SchemaUID | undefined = undefined,
+  // Target attribute
+  U extends T extends SchemaUID
+    ? GetAttributesKeysByType<T, 'string' | 'text'>
+    : undefined = undefined
+> {
   targetField?: U;
-  options?: UIDAttributeOptions;
+  options?: S;
 }
+
+export type UIDAttribute<
+  // UID options
+  S extends UIDAttributeOptions = UIDAttributeOptions,
+  // Own Schema Reference
+  T extends SchemaUID | undefined = undefined,
+  // Target attribute
+  U extends T extends SchemaUID
+    ? GetAttributesKeysByType<T, 'string' | 'text'>
+    : undefined = undefined
+> = Attribute<'uid'> & UIDAttributeProperties<S, T, U> extends infer P
+  ? P extends Attribute
+    ? P &
+        // Options
+        ConfigurableOption &
+        DefaultOption<P> &
+        MinMaxLengthOption &
+        PrivateOption &
+        RequiredOption
+    : never
+  : never;
 
 export type UIDValue = string;
 

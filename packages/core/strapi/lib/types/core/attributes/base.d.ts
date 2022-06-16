@@ -1,3 +1,5 @@
+import { GetAttributeValue } from './utils';
+
 /**
  * List of all the Strapi attribute types
  */
@@ -34,19 +36,43 @@ export interface Attribute<T extends AttributeType = AttributeType> {
   type: T;
 
   /**
-   * Whether the attribute is optional or not
-   */
-  required?: boolean;
-
-  /**
-   * Whether the attribute will be omitted from the content-api response or not
-   */
-  private?: boolean;
-
-  /**
    * Options defined and used by the plugins
    */
-  pluginOptions?: AttributePluginOptions;
+  pluginOptions?: object;
 }
 
-export type AttributePluginOptions = {};
+// Common attributes Options
+
+export interface RequiredOption {
+  required?: boolean;
+}
+
+export interface PrivateOption {
+  private?: boolean;
+}
+
+export interface UniqueOption {
+  unique?: boolean;
+}
+
+export interface DefaultOption<T extends Attribute> {
+  default?: GetAttributeValue<T>;
+}
+
+export interface ConfigurableOption {
+  configurable?: boolean;
+}
+
+export interface MinMaxOption<T = number> {
+  min?: T;
+  max?: T;
+}
+
+export interface MinMaxLengthOption {
+  minLength?: number;
+  maxLength?: number;
+}
+
+export interface AttributePluginOption {
+  pluginOptions?: object;
+}

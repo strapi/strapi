@@ -1,16 +1,29 @@
-import { SchemaUID } from '../../utils';
-import { ComponentSchema } from '../schemas';
-import { Attribute } from './base';
-import { StringAttribute } from './string';
+import { Attribute, ConfigurableOption, MinMaxOption, PrivateOption, RequiredOption } from './base';
 import { GetAttributesValues } from './utils';
 
-export interface ComponentAttribute<T extends Strapi.ComponentUIDs, R extends boolean = false>
-  extends Attribute<'component'> {
+export interface ComponentAttributeProperties<
+  // Targeted component
+  T extends Strapi.ComponentUIDs,
+  // Repeatable
+  R extends boolean = false
+> {
   component: T;
   repeatable?: R;
-  min?: number;
-  max?: number;
 }
+
+export type ComponentAttribute<
+  // Targeted component
+  T extends Strapi.ComponentUIDs,
+  // Repeatable
+  R extends boolean = false
+> = Attribute<'component'> &
+  // Component Properties
+  ComponentAttributeProperties<T, R> &
+  // Options
+  ConfigurableOption &
+  MinMaxOption &
+  PrivateOption &
+  RequiredOption;
 
 export type ComponentValue<T extends Strapi.ComponentUIDs, R extends boolean> = GetAttributesValues<
   T

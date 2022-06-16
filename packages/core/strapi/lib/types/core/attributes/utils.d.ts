@@ -18,6 +18,7 @@ import {
   GetStringAttributeValue,
   GetTextAttributeValue,
   GetUIDAttributeValue,
+  BigIntegerAttribute,
 } from '.';
 import { GetDateAttributeValue } from './date';
 import { GetDateTimeAttributeValue } from './date-time';

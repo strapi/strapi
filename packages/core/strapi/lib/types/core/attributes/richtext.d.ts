@@ -1,7 +1,23 @@
-import { Attribute } from './base';
-import { BaseStringAttribute } from './common';
+import {
+  Attribute,
+  ConfigurableOption,
+  DefaultOption,
+  MinMaxLengthOption,
+  PrivateOption,
+  RequiredOption,
+} from './base';
 
-export interface RichTextAttribute extends BaseStringAttribute<'richtext'> {}
+export type RichTextAttribute = Attribute<'richtext'> extends infer T
+  ? T extends Attribute
+    ? T &
+        // Options
+        ConfigurableOption &
+        DefaultOption<T> &
+        MinMaxLengthOption &
+        PrivateOption &
+        RequiredOption
+    : never
+  : never;
 
 export type RichTextValue = string;
 

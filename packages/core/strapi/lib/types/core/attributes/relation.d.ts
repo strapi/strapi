@@ -1,27 +1,40 @@
 import { SchemaUID } from '../../utils';
-import { Attribute } from './base';
+import { Attribute, ConfigurableOption, PrivateOption } from './base';
 import { GetAttributesByType, GetAttributesValues } from './utils';
 
 export type BasicRelationsType = 'oneToOne' | 'oneToMany' | 'manyToOne' | 'manyToMany';
 export type PolymorphicRelationsType =  'morphToOne' | 'morphToMany' | 'morphOne' | 'morphMany';
-export type RelationsType = BasicRelationsType & PolymorphicRelationsType;
+export type RelationsType = BasicRelationsType | PolymorphicRelationsType;
 
-export interface RelationAttribute<
+export interface BasicRelationAttributeProperties<
   S extends SchemaUID,
   R extends RelationsType,
   T extends SchemaUID
-> extends Attribute<'relation'> {
+> {
   relation: R;
   target: T;
   inversedBy?: RelationsKeysFromTo<T, S>;
   mappedBy?: RelationsKeysFromTo<T, S>;
 }
 
-interface PolymorphicRelationAttribute<
-S extends SchemaUID,
-R extends RelationsType,
-T extends SchemaUID = never
->  extends Omit<RelationAttribute<S, R, T>, 'target' | 'inversedBy' | 'mappedBy'> {}
+export interface PolymorphicRelationAttributeProperties<
+  R extends RelationsType,
+> {
+  relation: R;
+}
+
+export type RelationAttribute<
+  S extends SchemaUID,
+  R extends RelationsType,
+  T extends SchemaUID
+> = Attribute<'relation'> &
+  // Properties
+  (R extends BasicRelationsType
+    ? BasicRelationAttributeProperties<S, R, T>
+    : PolymorphicRelationAttributeProperties<R>) &
+  // Options
+  ConfigurableOption &
+  PrivateOption
 
 export type RelationsKeysFromTo<
   TTarget extends SchemaUID,

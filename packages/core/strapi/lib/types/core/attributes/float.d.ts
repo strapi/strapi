@@ -1,7 +1,23 @@
-import { Attribute } from './base';
-import { BaseNumberAttribute } from './common';
+import {
+  Attribute,
+  ConfigurableOption,
+  DefaultOption,
+  MinMaxOption,
+  PrivateOption,
+  RequiredOption,
+} from './base';
 
-export interface FloatAttribute extends BaseNumberAttribute<'float'> {}
+export type FloatAttribute = Attribute<'float'> extends infer T
+  ? T extends Attribute
+    ? T &
+        // Options
+        ConfigurableOption &
+        DefaultOption<T> &
+        MinMaxOption &
+        PrivateOption &
+        RequiredOption
+    : never
+  : never;
 
 export type FloatValue = number;
 

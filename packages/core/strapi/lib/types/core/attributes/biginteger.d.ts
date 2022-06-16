@@ -1,8 +1,26 @@
-import { Attribute } from './base';
-import { BaseNumberAttribute, NumberAttributeValue } from './common';
+import {
+  Attribute,
+  ConfigurableOption,
+  DefaultOption,
+  MinMaxOption,
+  PrivateOption,
+  RequiredOption,
+} from './base';
 
-export interface BigIntegerAttribute extends BaseNumberAttribute<'biginteger'> {}
+export type BigIntegerAttribute = Attribute<'biginteger'> extends infer T
+  ? T extends Attribute
+    ? T &
+        // Options
+        ConfigurableOption &
+        DefaultOption<T> &
+        MinMaxOption<string> &
+        PrivateOption &
+        RequiredOption
+    : never
+  : never;
 
 export type BigIntegerValue = string;
 
-export type GetBigIntegerAttributeValue<T extends Attribute> = NumberAttributeValue<T>;
+export type GetBigIntegerAttributeValue<T extends Attribute> = T extends BigIntegerAttribute
+  ? BigIntegerValue
+  : never;

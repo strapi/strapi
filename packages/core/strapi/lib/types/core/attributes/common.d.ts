@@ -1,44 +1,42 @@
-import { SchemaUID } from '../../utils';
-import { SchemaAttributes } from '../schemas';
-import { Attribute } from './base';
-import { GetAttributes, PickTypes } from './utils';
-
-// Common Strapi types' union (string, number, etc...)
-
-export type StringTypes = PickTypes<'string' | 'text' | 'richtext' | 'password'>;
-
-export type NumberTypes = PickTypes<'integer' | 'biginteger' | 'float' | 'decimal'>;
-
 /**
- * Attributes abstractions for those sharing common properties
+ * Strapi custom scalar types
  */
 
-// Number
+import { MinMaxLengthOption, MinMaxOption } from './base';
+import { StringAttribute } from './string';
 
-export interface BaseNumberAttribute<T extends NumberTypes = NumberTypes> extends Attribute<T> {
-  min?: number;
-  max?: number;
-}
+export type JSON<T extends object = object> = T;
 
-export type NumberAttributeValue<T extends Attribute> = T extends BaseNumberAttribute
-  ? number
-  : never;
-
-// String
-
-export interface BaseStringAttribute<T extends StringTypes = StringTypes> extends Attribute<T> {
-  minLength?: number;
-  maxLength?: number;
-}
-
-export type StringAttributeValue<T extends Attribute> = T extends BaseStringAttribute
-  ? string
-  : never;
+export type Media = any;
 
 /**
- * Misc
+ * Setters for the attributes options
  */
 
-export interface RequiredAttribute extends Pick<Attribute, 'required'> {
-  required: true;
-}
+// required
+export type RequiredAttribute = { required: true };
+export type NonRequiredAttribute = { required: false };
+
+// private
+export type PrivateAttribute = { private: true };
+export type NonPrivateAttribute = { private: false };
+
+// unique
+export type UniqueAttribute = { unique: true };
+export type NonUniqueAttribute = { unique: false };
+
+// configurable
+export type ConfigurableAttribute = { configurable: true };
+export type NonConfigurableAttribute = { configurable: false };
+
+// min/max
+export type SetMinMax<T extends MinMaxOption<U>, U = number> = T;
+
+// minLength/maxLength
+export type SetMinMaxLength<T extends MinMaxLengthOption> = T;
+
+// pluginOptions
+export type SetAttributePluginOptions<T extends object = object> = { pluginOptions?: T };
+
+// default
+export type DefaultTo<T> = { default: T };
