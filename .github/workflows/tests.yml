@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -31,7 +31,7 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.codecov }}
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -52,7 +52,7 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.codecov }}
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -65,7 +65,7 @@ jobs:
       - name: Build
         run: yarn build
       - name: Run test
-        run: yarn run -s test:front && codecov -C -F front
+        run: yarn run -s test:front --coverage && codecov -C -F front
 
   e2e_ce_pg:
     runs-on: ubuntu-latest
@@ -73,7 +73,7 @@ jobs:
     name: '[CE] E2E (postgres, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
     services:
       postgres:
         # Docker Hub image
@@ -109,7 +109,7 @@ jobs:
     name: '[CE] E2E (mysql, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
     services:
       mysql:
         image: mysql
@@ -144,7 +144,7 @@ jobs:
     name: '[CE] E2E (mysql:5 , node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
     services:
       mysql:
         image: mysql:5
@@ -179,7 +179,7 @@ jobs:
     name: '[CE] E2E (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
         sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
     steps:
       - uses: actions/checkout@v2
@@ -203,7 +203,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
     services:
       postgres:
         # Docker Hub image
@@ -243,7 +243,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
     services:
       mysql:
         image: mysql
@@ -282,7 +282,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
         sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
     steps:
       - uses: actions/checkout@v2
