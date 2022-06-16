@@ -1,7 +1,5 @@
 import adminPermissions from '../../../permissions';
 
-console.log(adminPermissions);
-
 const defaultGlobalLinks = [
   {
     intlLabel: { id: 'Settings.application.title', defaultMessage: 'Overview' },
