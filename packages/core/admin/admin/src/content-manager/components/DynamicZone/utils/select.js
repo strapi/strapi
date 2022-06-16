@@ -16,21 +16,31 @@ function useSelect(name) {
     updateActionAllowedFields,
   } = useCMEditViewDataManager();
 
-  const dynamicDisplayedComponents = useMemo(
-    () => get(modifiedData, [name], []).map(data => data.__component),
-    [modifiedData, name]
-  );
-
+  const dynamicDisplayedComponents = useMemo(() => {
+    const parsedName = Array.isArray(name) ? name : name;
+    
+return get(modifiedData, parsedName, []).map(data => {
+      return data.__component;
+    });
+  }, [modifiedData, name]);
+  const contains = (items, name) => {
+    if (Array.isArray(name)) {
+      return items.includes(name[0]);
+    } 
+      
+return items.includes(name);
+    
+  };
   const isFieldAllowed = useMemo(() => {
     const allowedFields = isCreatingEntry ? createActionAllowedFields : updateActionAllowedFields;
 
-    return allowedFields.includes(name);
+    return contains(allowedFields, name.split('.'));
   }, [name, isCreatingEntry, createActionAllowedFields, updateActionAllowedFields]);
 
   const isFieldReadable = useMemo(() => {
     const allowedFields = isCreatingEntry ? [] : readActionAllowedFields;
 
-    return allowedFields.includes(name);
+    return contains(allowedFields, name.split('.'));
   }, [name, isCreatingEntry, readActionAllowedFields]);
 
   return {

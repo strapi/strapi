@@ -21,6 +21,7 @@ import Preview from './Preview';
 import DraggingSibling from './DraggingSibling';
 import { CustomIconButton } from './IconButtonCustoms';
 import { connect, select } from './utils';
+import DynamicZone from '../../DynamicZone';
 
 const DragButton = styled.span`
   display: flex;
@@ -244,6 +245,7 @@ const DraggedItem = ({
                   <Grid gap={4} key={key}>
                     {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
                       const isComponent = fieldSchema.type === 'component';
+                      const isDynamicZone = fieldSchema.type === 'dynamiczone';
                       const keys = `${componentFieldName}.${name}`;
 
                       if (isComponent) {
@@ -267,17 +269,28 @@ const DraggedItem = ({
                           </GridItem>
                         );
                       }
-
-                      return (
-                        <GridItem key={keys} col={size} s={12} xs={12}>
-                          <Inputs
-                            fieldSchema={fieldSchema}
-                            keys={keys}
-                            metadatas={metadatas}
+                      if (isDynamicZone) {
+                        return (
+                          <GridItem col={size} s={12} xs={12} key={name}>
+                            <DynamicZone
+                              name={keys}
+                              fieldSchema={fieldSchema}
+                              metadatas={metadatas}
+                            />
+                          </GridItem>
+                        );
+                      }
+                      
+return (
+  <GridItem key={keys} col={size} s={12} xs={12}>
+    <Inputs
+      fieldSchema={fieldSchema}
+      keys={keys}
+      metadatas={metadatas}
                             // onBlur={hasErrors ? checkFormErrors : null}
-                            queryInfos={queryInfos}
-                          />
-                        </GridItem>
+      queryInfos={queryInfos}
+    />
+  </GridItem>
                       );
                     })}
                   </Grid>
@@ -318,9 +331,6 @@ DraggedItem.propTypes = {
 
 const Memoized = memo(DraggedItem);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);
 
 export { DraggedItem };
