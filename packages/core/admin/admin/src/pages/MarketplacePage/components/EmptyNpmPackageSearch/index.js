@@ -5,12 +5,12 @@ import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Icon } from '@strapi/design-system/Icon';
 import EmptyStateDocument from '@strapi/icons/EmptyDocuments';
-import { EmptyPluginGrid } from './EmptyPluginGrid';
+import { EmptyNpmPackageGrid } from './EmptyNpmPackageGrid';
 
-export const EmptyPluginSearch = ({ content }) => {
+const EmptyNpmPackageSearch = ({ content }) => {
   return (
     <Box position="relative">
-      <EmptyPluginGrid />
+      <EmptyNpmPackageGrid />
       <Box position="absolute" top={11} width="100%">
         <Flex alignItems="center" justifyContent="center" direction="column">
           <Icon as={EmptyStateDocument} color="" width="160px" height="88px" />
@@ -25,6 +25,8 @@ export const EmptyPluginSearch = ({ content }) => {
   );
 };
 
-EmptyPluginSearch.propTypes = {
+EmptyNpmPackageSearch.propTypes = {
   content: PropTypes.string.isRequired,
 };
+
+export default EmptyNpmPackageSearch;
