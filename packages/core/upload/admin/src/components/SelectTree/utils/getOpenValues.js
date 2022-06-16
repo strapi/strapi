@@ -1,4 +1,4 @@
-function getOpenValues(options, defaultValue) {
+function getOpenValues(options, defaultValue = {}) {
   let values = [];
   const { value } = defaultValue;
   const option = options.find(option => option.value === value);
@@ -11,7 +11,7 @@ function getOpenValues(options, defaultValue) {
 
   let { parent } = option;
 
-  while (parent) {
+  while (parent !== undefined) {
     // eslint-disable-next-line no-loop-func
     const option = options.find(({ value }) => value === parent);
 
@@ -19,7 +19,7 @@ function getOpenValues(options, defaultValue) {
     parent = option.parent;
   }
 
-  return values;
+  return values.reverse();
 }
 
 export default getOpenValues;
