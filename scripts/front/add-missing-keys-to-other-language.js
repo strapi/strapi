@@ -63,16 +63,16 @@ const addMissingKeys = async lang => {
   translationFiles.forEach(addMissingKeyForSingleFile);
 };
 
-if (process.argv.length < 3) {
-  console.warn(
-    chalk.yellow(
-      'Please provide a language. For example:\nnode scripts/front/add-missing-keys-to-other-language.js vi'
-    )
-  );
-  process.exit(1);
-}
-
 if (require.main === module) {
+  if (process.argv.length < 3) {
+    console.warn(
+      chalk.yellow(
+        'Please provide a language. For example:\nnode scripts/front/add-missing-keys-to-other-language.js vi'
+      )
+    );
+    process.exit(1);
+  }
+
   addMissingKeys(process.argv[2]).catch(err => console.error(err));
 }
 
