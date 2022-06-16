@@ -50,7 +50,10 @@ module.exports = ({ strapi }) => {
           // Handle relations
           else if (isRelation(attribute)) {
             addRelationalAttribute(t, attributeName, attribute);
-          } else if (isComponent(attribute)) {
+          }
+
+          // Handle components
+          else if (isComponent(attribute)) {
             addComponentAttribute(t, attributeName, attribute);
           }
         }
