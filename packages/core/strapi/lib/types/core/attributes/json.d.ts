@@ -1,7 +1,14 @@
-import { Attribute } from './base';
+import { Attribute, ConfigurableOption, PrivateOption, RequiredOption } from './base';
+import { JSON } from './common';
 
-export interface JsonAttribute extends Attribute<'json'> {}
+export type JSONAttribute = Attribute<'json'> &
+  //Options
+  ConfigurableOption &
+  RequiredOption &
+  PrivateOption;
 
-export type JsonValue = {};
+export type JsonValue = JSON;
 
-export type GetJsonAttributeValue<T extends Attribute> = T extends JsonAttribute ? JsonValue : never;
+export type GetJsonAttributeValue<T extends Attribute> = T extends JSONAttribute
+  ? JsonValue
+  : never;

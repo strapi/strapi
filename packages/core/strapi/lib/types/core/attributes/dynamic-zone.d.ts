@@ -1,13 +1,18 @@
 import { SchemaUID, GetArrayValues } from '../../utils';
-import { Attribute } from './base';
+import { Attribute, ConfigurableOption, MinMaxOption, RequiredOption } from './base';
 import { GetAttributesValues } from './utils';
 
-export interface DynamicZoneAttribute<T extends Strapi.ComponentUIDs[] = []>
-  extends Attribute<'dynamiczone'> {
+export interface DynamicZoneAttributeProperties<T extends Strapi.ComponentUIDs[] = []> {
   components: T;
-  min?: number;
-  max?: number;
 }
+
+export type DynamicZoneAttribute<T extends Strapi.ComponentUIDs[] = []> = Attribute<'dynamiczone'> &
+  // Properties
+  DynamicZoneAttributeProperties<T> &
+  // Options
+  ConfigurableOption &
+  MinMaxOption &
+  RequiredOption;
 
 type DynamicZoneValue<T extends Strapi.ComponentUIDs[]> = Array<
   GetArrayValues<T> extends infer P

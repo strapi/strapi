@@ -51,4 +51,11 @@ declare global {
    * Strapi global variable definition
    **/
   export const strapi: StrapiInterface;
+
+  /**
+   * Adds the strapi global variable to the NodeJS Global interface
+   */
+  export interface Global {
+    strapi: StrapiInterface;
+  }
 }

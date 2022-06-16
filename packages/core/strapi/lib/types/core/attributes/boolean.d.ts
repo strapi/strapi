@@ -1,6 +1,21 @@
-import { Attribute } from './base';
+import {
+  Attribute,
+  ConfigurableOption,
+  DefaultOption,
+  PrivateOption,
+  RequiredOption,
+} from './base';
 
-export interface BooleanAttribute extends Attribute<'boolean'> {}
+export type BooleanAttribute = Attribute<'boolean'> extends infer T
+  ? T extends Attribute
+    ? T &
+        // Options
+        ConfigurableOption &
+        DefaultOption<T> &
+        PrivateOption &
+        RequiredOption
+    : never
+  : never;
 
 export type BooleanValue = boolean;
 

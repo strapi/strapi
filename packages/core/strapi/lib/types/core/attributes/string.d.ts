@@ -1,10 +1,31 @@
-import { Attribute } from './base';
-import { BaseStringAttribute } from './common';
+import {
+  Attribute,
+  ConfigurableOption,
+  DefaultOption,
+  MinMaxLengthOption,
+  PrivateOption,
+  RequiredOption,
+  UniqueOption,
+} from './base';
 
-export interface StringAttribute<T extends RegExp = undefined>
-  extends BaseStringAttribute<'string'> {
-  regex?: T;
+export interface StringAttributeProperties {
+  regex?: RegExp;
 }
+
+export type StringAttribute = Attribute<'string'> &
+  // Properties
+  StringAttributeProperties extends infer U
+  ? U extends Attribute
+    ? U &
+        // Options
+        ConfigurableOption &
+        DefaultOption<U> &
+        MinMaxLengthOption &
+        PrivateOption &
+        UniqueOption &
+        RequiredOption
+    : never
+  : never;
 
 export type StringValue = string;
 
