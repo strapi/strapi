@@ -9,4 +9,5 @@ module.exports = {
   role: require('./role'),
   user: require('./user'),
   webhooks: require('./webhooks'),
+  license: require('./license'),
 };

@@ -47,6 +47,20 @@ const hasPermissionsTestData = {
         conditions: [],
       },
 
+      // Admin license
+      {
+        action: 'admin::license.read',
+        subject: null,
+        properties: {},
+        conditions: [],
+      },
+      {
+        action: 'admin::license.create',
+        subject: null,
+        properties: {},
+        conditions: [],
+      },
+
       // Admin users
       {
         action: 'admin::users.create',
@@ -255,6 +269,20 @@ const hasPermissionsTestData = {
         conditions: [],
       },
 
+      // Admin license
+      {
+        action: 'admin::license.read',
+        subject: null,
+        properties: {},
+        conditions: [],
+      },
+      {
+        action: 'admin::license.create',
+        subject: null,
+        properties: {},
+        conditions: [],
+      },
+
       // Admin users
       {
         action: 'admin::users.create',
@@ -425,6 +453,9 @@ const hasPermissionsTestData = {
       { action: 'admin::webhook.read', subject: null },
       { action: 'admin::webhook.update', subject: null },
       { action: 'admin::webhook.delete', subject: null },
+      // license
+      { action: 'admin::license.read', subject: null },
+      { action: 'admin::license.create', subject: null },
       // users
       { action: 'admin::users.create', subject: null },
       { action: 'admin::users.read', subject: null },

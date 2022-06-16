@@ -1,5 +1,7 @@
 import adminPermissions from '../../../permissions';
 
+console.log(adminPermissions);
+
 const defaultGlobalLinks = [
   {
     intlLabel: { id: 'Settings.application.title', defaultMessage: 'Overview' },
@@ -21,6 +23,13 @@ const defaultGlobalLinks = [
     id: 'api-tokens',
     isDisplayed: false,
     permissions: adminPermissions.settings['api-tokens'].main,
+  },
+  {
+    intlLabel: { id: 'Settings.license.title', defaultMessage: 'License Activation' },
+    to: '/settings/license',
+    id: 'license',
+    isDisplayed: false,
+    permissions: adminPermissions.settings.license.main,
   },
 ];
 

@@ -75,6 +75,14 @@ const permissions = {
       ],
       update: [{ action: 'admin::webhooks.update', subject: null }],
     },
+    license: {
+      main: [
+        { action: 'admin::license.read', subject: null },
+        { action: 'admin::license.create', subject: null },
+      ],
+      read: [{ action: 'admin::license.read', subject: null }],
+      create: [{ action: 'admin::license.create', subject: null }],
+    },
     'api-tokens': {
       main: [
         { action: 'admin::api-tokens.create', subject: null },

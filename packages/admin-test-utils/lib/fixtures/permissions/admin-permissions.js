@@ -120,6 +120,20 @@ const adminPermissions = [
     properties: {},
     conditions: [],
   },
+  {
+    id: 186,
+    action: 'admin::license.read',
+    subject: null,
+    properties: {},
+    conditions: [],
+  },
+  {
+    id: 187,
+    action: 'admin::license.create',
+    subject: null,
+    properties: {},
+    conditions: [],
+  },
 ];
 
 module.exports = adminPermissions;

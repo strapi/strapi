@@ -146,5 +146,19 @@ module.exports = {
       section: 'settings',
       category: 'api tokens',
     },
+    {
+      uid: 'license.read',
+      displayName: 'Read',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'license',
+    },
+    {
+      uid: 'license.create',
+      displayName: 'Create (only for dev env)',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'license',
+    },
   ],
 };

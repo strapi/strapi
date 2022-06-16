@@ -93,6 +93,17 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
+        /* webpackChunkName: "webhook-list-page" */ '../pages/License/ProtectedPageView'
+      );
+
+      return component;
+    },
+    to: '/settings/license',
+    exact: true,
+  },
+  {
+    Component: async () => {
+      const component = await import(
         /* webpackChunkName: "api-tokens-list-page" */ '../pages/ApiTokens/ProtectedListView'
       );
 

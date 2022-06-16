@@ -7,6 +7,7 @@ const users = require('./users');
 const roles = require('./roles');
 const webhooks = require('./webhooks');
 const apiTokens = require('./api-tokens');
+const license = require('./license');
 
 module.exports = [
   ...admin,
@@ -16,4 +17,5 @@ module.exports = [
   ...roles,
   ...webhooks,
   ...apiTokens,
+  ...license,
 ];
