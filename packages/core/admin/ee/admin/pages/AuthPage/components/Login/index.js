@@ -33,7 +33,7 @@ const Login = loginProps => {
     <UnauthenticatedLayout>
       <BaseLogin {...loginProps}>
         <Box paddingTop={7}>
-          <Stack size={7}>
+          <Stack spacing={7}>
             <Flex>
               <DividerFull />
               <Box paddingLeft={3} paddingRight={3}>

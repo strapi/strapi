@@ -111,11 +111,11 @@ const Component = ({
     <Box>
       <Rectangle />
       <StyledBox hasRadius>
-        <Accordion expanded={isOpen} toggle={() => onToggle(index)} size="S" error={errorMessage}>
+        <Accordion expanded={isOpen} onToggle={() => onToggle(index)} size="S" error={errorMessage}>
           <AccordionToggle
             startIcon={<FontAwesomeIcon icon={icon} />}
             action={
-              <ActionStack horizontal size={0} expanded={isOpen}>
+              <ActionStack horizontal spacing={0} expanded={isOpen}>
                 {showDownIcon && (
                   <IconButtonCustom
                     noBorder

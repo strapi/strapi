@@ -72,7 +72,7 @@ const RelationNaturePicker = ({
       <Wrapper>
         <Flex paddingLeft={9} paddingRight={9} paddingTop={1} justifyContent="center">
           <KeyboardNavigable tagName="button">
-            <Stack size={3} horizontal>
+            <Stack spacing={3} horizontal>
               {relationsType.map(relation => {
                 const Asset = relations[relation];
                 const isEnabled =

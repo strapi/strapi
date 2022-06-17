@@ -88,8 +88,5 @@ DraftAndPublishBadge.propTypes = {
   isPublished: PropTypes.bool.isRequired,
 };
 
-export default connect(
-  DraftAndPublishBadge,
-  select
-);
+export default connect(DraftAndPublishBadge, select);
 export { DraftAndPublishBadge };

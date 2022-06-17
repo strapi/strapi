@@ -8,3 +8,6 @@ updates:
     ignore:
       - dependency-name: '*'
         update-types: ['version-update:semver-major']
+    labels:
+      - 'source: dependencies'
+      - 'pr: chore'

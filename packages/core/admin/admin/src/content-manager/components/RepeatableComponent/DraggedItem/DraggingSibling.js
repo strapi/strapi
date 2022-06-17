@@ -37,7 +37,7 @@ const ToggleButton = styled(TextButton)`
 const DraggingSibling = ({ displayedValue }) => {
   return (
     <SiblingWrapper>
-      <Stack horizontal size={3} flex={1}>
+      <Stack horizontal spacing={3} flex={1}>
         <Flex
           justifyContent="center"
           borderRadius="50%"
@@ -57,7 +57,7 @@ const DraggingSibling = ({ displayedValue }) => {
         </ToggleButton>
       </Stack>
 
-      <Stack horizontal size={0}>
+      <Stack horizontal spacing={0}>
         <CustomIconButtonSibling noBorder onClick={() => {}} icon={<Trash />} />
         <CustomIconButtonSibling icon={<Drag />} noBorder />
       </Stack>

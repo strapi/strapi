@@ -41,7 +41,7 @@ module.exports = ({ strapi }) => ({
     await Promise.all(createPromises);
   },
 
-  async getRole(roleID) {
+  async findOne(roleID) {
     const role = await strapi
       .query('plugin::users-permissions.role')
       .findOne({ where: { id: roleID }, populate: ['permissions'] });
@@ -68,7 +68,7 @@ module.exports = ({ strapi }) => ({
     };
   },
 
-  async getRoles() {
+  async find() {
     const roles = await strapi.query('plugin::users-permissions.role').findMany({ sort: ['name'] });
 
     for (const role of roles) {

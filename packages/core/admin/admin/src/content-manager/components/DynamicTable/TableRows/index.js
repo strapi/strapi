@@ -148,7 +148,7 @@ const TableRows = ({
                           onClickDelete(data.id);
                         }}
                         label={formatMessage(
-                          { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
+                          { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
                           { target: itemLineText }
                         )}
                         noBorder

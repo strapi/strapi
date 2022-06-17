@@ -39,7 +39,7 @@ function SelectMany({
   };
 
   return (
-    <Stack size={1}>
+    <Stack spacing={1}>
       <Select
         components={components}
         isDisabled={isDisabled}
@@ -70,13 +70,13 @@ function SelectMany({
         onMenuOpen={onMenuOpen}
         onMenuScrollToBottom={onMenuScrollToBottom}
         placeholder={formatMessage(
-          placeholder || { id: 'components.Select.placeholder', defaultMessage: 'Select...' }
+          placeholder || { id: 'global.select', defaultMessage: 'Select...' }
         )}
         styles={styles}
         value={[]}
       />
       <Box paddingTop={3} style={{ overflow: 'auto' }}>
-        <Stack as="ul" size={4} style={{ maxHeight: '128px', overflowX: 'hidden' }}>
+        <Stack as="ul" spacing={4} style={{ maxHeight: '128px', overflowX: 'hidden' }}>
           {value?.map((data, index) => {
             return (
               <ListItem

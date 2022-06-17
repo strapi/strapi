@@ -89,10 +89,10 @@ const SettingsPage = () => {
                     paddingLeft={7}
                     paddingRight={7}
                   >
-                    <Stack size={4}>
+                    <Stack spacing={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
-                          id: getTrad('pages.SettingsPage.title'),
+                          id: 'global.settings',
                           defaultMessage: 'Settings',
                         })}
                       </Typography>
@@ -125,7 +125,7 @@ const SettingsPage = () => {
                           <GridItem col={6} s={12}>
                             <TextInput
                               label={formatMessage({
-                                id: getTrad('pages.SettingsPage.password.label'),
+                                id: 'global.password',
                                 defaultMessage: 'Password',
                               })}
                               name="password"

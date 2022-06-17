@@ -1,13 +1,12 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-import { CheckPermissions, useTracking } from '@strapi/helper-plugin';
+import { CheckPermissions, useTracking, LinkButton } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { ContentLayout } from '@strapi/design-system/Layout';
 import { Box } from '@strapi/design-system/Box';
 import { Divider } from '@strapi/design-system/Divider';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
-import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
@@ -15,9 +14,7 @@ import Layer from '@strapi/icons/Layer';
 import Pencil from '@strapi/icons/Pencil';
 import { InjectionZone } from '../../../shared/components';
 import permissions from '../../../permissions';
-// import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
-// import FormWrapper from '../../components/FormWrapper';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
@@ -137,7 +134,7 @@ const EditView = ({
               <ContentLayout>
                 <Grid gap={4}>
                   <GridItem col={9} s={12}>
-                    <Stack size={6}>
+                    <Stack spacing={6}>
                       {formattedContentTypeLayout.map((row, index) => {
                         if (isDynamicZone(row)) {
                           const {
@@ -174,7 +171,7 @@ const EditView = ({
                             paddingBottom={6}
                             borderColor="neutral150"
                           >
-                            <Stack size={6}>
+                            <Stack spacing={6}>
                               {row.map((grid, gridIndex) => {
                                 return (
                                   <Grid gap={4} key={gridIndex}>
@@ -232,7 +229,7 @@ const EditView = ({
                     </Stack>
                   </GridItem>
                   <GridItem col={3} s={12}>
-                    <Stack size={2}>
+                    <Stack spacing={2}>
                       <DraftAndPublishBadge />
                       <Box
                         as="aside"
@@ -275,7 +272,7 @@ const EditView = ({
                           <Box paddingTop={2} paddingBottom={6}>
                             <Divider />
                           </Box>
-                          <Stack size={4}>
+                          <Stack spacing={4}>
                             {relationsLayout.map(
                               ({ name, fieldSchema, labelAction, metadatas, queryInfos }) => {
                                 return (
@@ -308,7 +305,7 @@ const EditView = ({
                         </Box>
                       )}
                       <Box as="aside" aria-labelledby="links">
-                        <Stack size={2}>
+                        <Stack spacing={2}>
                           <InjectionZone area="contentManager.editView.right-links" slug={slug} />
                           {slug !== 'strapi::administrator' && (
                             <CheckPermissions permissions={ctbPermissions}>
@@ -364,194 +361,6 @@ const EditView = ({
       }}
     </DataManagementWrapper>
   );
-
-  // return (
-  //   <DataManagementWrapper allLayoutData={layout} slug={slug} id={id} origin={origin}>
-  //     {({
-  // componentsDataStructure,
-  // contentTypeDataStructure,
-  // data,
-  // isCreatingEntry,
-  // isLoadingForData,
-  // onDelete,
-  // onDeleteSucceeded,
-  // onPost,
-  // onPublish,
-  // onPut,
-  // onUnpublish,
-  // redirectionLink,
-  // status,
-  //     }) => {
-  // return (
-  //   <EditViewDataManagerProvider
-  //     allowedActions={allowedActions}
-  //     allLayoutData={layout}
-  //     createActionAllowedFields={createActionAllowedFields}
-  //     componentsDataStructure={componentsDataStructure}
-  //     contentTypeDataStructure={contentTypeDataStructure}
-  //     from={redirectionLink}
-  //     initialValues={data}
-  //     isCreatingEntry={isCreatingEntry}
-  //     isLoadingForData={isLoadingForData}
-  //     isSingleType={isSingleType}
-  //     onPost={onPost}
-  //     onPublish={onPublish}
-  //     onPut={onPut}
-  //     onUnpublish={onUnpublish}
-  //     readActionAllowedFields={readActionAllowedFields}
-  //     redirectToPreviousPage={goBack}
-  //     slug={slug}
-  //     status={status}
-  //     updateActionAllowedFields={updateActionAllowedFields}
-  //   >
-  //           <Container className="container-fluid">
-  //             <Header allowedActions={allowedActions} />
-  //             <div className="row" style={{ paddingTop: 3 }}>
-  //               <div className="col-md-12 col-lg-9" style={{ marginBottom: 13 }}>
-  //                 {formattedContentTypeLayout.map((block, blockIndex) => {
-  //                   if (isDynamicZone(block)) {
-  //                     const {
-  //                       0: {
-  //                         0: { name, fieldSchema, metadatas, labelIcon },
-  //                       },
-  //                     } = block;
-  //                     const baselineAlignementSize = blockIndex === 0 ? '3px' : '0';
-
-  //                     return (
-  //                       <BaselineAlignment key={blockIndex} top size={baselineAlignementSize}>
-  // <DynamicZone
-  //   name={name}
-  //   fieldSchema={fieldSchema}
-  //   labelIcon={labelIcon}
-  //   metadatas={metadatas}
-  // />
-  //                       </BaselineAlignment>
-  //                     );
-  //                   }
-
-  //                   return (
-  //                     <FormWrapper key={blockIndex}>
-  //                       {block.map((fieldsBlock, fieldsBlockIndex) => {
-  //                         return (
-  //                           <div className="row" key={fieldsBlockIndex}>
-  //                             {fieldsBlock.map(
-  //                               ({ name, size, fieldSchema, labelIcon, metadatas }, fieldIndex) => {
-  //                                 const isComponent = fieldSchema.type === 'component';
-
-  //                                 if (isComponent) {
-  //                                   const { component, max, min, repeatable = false } = fieldSchema;
-  //                                   const componentUid = fieldSchema.component;
-
-  //                                   return (
-  //                                     <FieldComponent
-  //                                       key={componentUid}
-  //                                       componentUid={component}
-  //                                       labelIcon={labelIcon}
-  //                                       isRepeatable={repeatable}
-  //                                       label={metadatas.label}
-  //                                       max={max}
-  //                                       min={min}
-  //                                       name={name}
-  //                                     />
-  //                                   );
-  //                                 }
-
-  //                                 return (
-  //                                   <div className={`col-${size}`} key={name}>
-  //                                     <Inputs
-  //                                       autoFocus={
-  //                                         blockIndex === 0 &&
-  //                                         fieldsBlockIndex === 0 &&
-  //                                         fieldIndex === 0
-  //                                       }
-  //                                       fieldSchema={fieldSchema}
-  //                                       keys={name}
-  //                                       labelIcon={labelIcon}
-  //                                       metadatas={metadatas}
-  //                                     />
-  //                                   </div>
-  //                                 );
-  //                               }
-  //                             )}
-  //                           </div>
-  //                         );
-  //                       })}
-  //                     </FormWrapper>
-  //                   );
-  //                 })}
-  //               </div>
-  //               <div className="col-md-12 col-lg-3">
-  //                 <InformationCard />
-  //                 <Padded size="smd" top />
-  //                 {currentContentTypeLayoutData.layouts.editRelations.length > 0 && (
-  //                   <SubWrapper style={{ padding: '0 20px 1px', marginBottom: '25px' }}>
-  //                     <div style={{ paddingTop: '22px' }}>
-  //                       {currentContentTypeLayoutData.layouts.editRelations.map(
-  //                         ({ name, fieldSchema, labelIcon, metadatas, queryInfos }) => {
-  //                           return (
-  //                             <SelectWrapper
-  // {...fieldSchema}
-  // {...metadatas}
-  // key={name}
-  // labelIcon={labelIcon}
-  // name={name}
-  // relationsType={fieldSchema.relationType}
-  // queryInfos={queryInfos}
-  //                             />
-  //                           );
-  //                         }
-  //                       )}
-  //                     </div>
-  //                   </SubWrapper>
-  //                 )}
-  //                 <LinkWrapper>
-  //                   <ul>
-  // <CheckPermissions permissions={configurationPermissions}>
-  //   <LiLink
-  //     message={{
-  //       id: 'app.links.configure-view',
-  //     }}
-  //     icon="layout"
-  //     url={configurationsURL}
-  //     onClick={() => {
-  //       // trackUsage('willEditContentTypeLayoutFromEditView');
-  //     }}
-  //   />
-  // </CheckPermissions>
-  //                     {slug !== 'strapi::administrator' && (
-  //                       <CheckPermissions permissions={ctbPermissions}>
-  //                         <LiLink
-  //                           message={{
-  //                             id: getTrad('containers.Edit.Link.Fields'),
-  //                           }}
-  // onClick={() => {
-  //   trackUsage('willEditEditLayout');
-  // }}
-  //                           icon="fa-cog"
-  //                           url={`/plugins/content-type-builder/content-types/${slug}`}
-  //                         />
-  //                       </CheckPermissions>
-  //                     )}
-  //                     {/*  TODO add DOCUMENTATION */}
-  //                     <InjectionZone area="contentManager.editView.right-links" slug={slug} />
-
-  // {allowedActions.canDelete && (
-  //   <DeleteLink
-  //     isCreatingEntry={isCreatingEntry}
-  //     onDelete={onDelete}
-  //     onDeleteSucceeded={onDeleteSucceeded}
-  //   />
-  // )}
-  //                   </ul>
-  //                 </LinkWrapper>
-  //               </div>
-  //             </div>
-  //           </Container>
-  //         </EditViewDataManagerProvider>
-  //       );
-  //     }}
-  //   </DataManagementWrapper>
-  // );
 };
 
 EditView.defaultProps = {

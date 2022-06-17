@@ -21,7 +21,7 @@ const Button = styled.button`
   box-shadow: ${({ theme }) => theme.shadows.tableShadow};
   border-radius: 50%;
   svg {
-    color: ${({ theme }) => theme.colors.neutral0};
+    color: ${({ theme }) => theme.colors.buttonNeutral0};
   }
 `;
 
@@ -75,7 +75,7 @@ const Onboarding = () => {
     {
       icon: 'book',
       label: formatMessage({
-        id: 'app.components.LeftMenuFooter.documentation',
+        id: 'global.documentation',
         defaultMessage: 'Documentation',
       }),
       destination: 'https://docs.strapi.io',

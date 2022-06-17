@@ -34,7 +34,12 @@ const makeApp = (history, layout) => {
     },
     kind: 'collectionType',
     layouts: {
-      edit: [[{ name: 'postal_code', size: 6 }, { name: 'city', size: 6 }]],
+      edit: [
+        [
+          { name: 'postal_code', size: 6 },
+          { name: 'city', size: 6 },
+        ],
+      ],
       list: ['postal_code', 'categories'],
       editRelations: ['categories'],
     },

@@ -41,6 +41,8 @@ export const PreviewBox = ({
 }) => {
   const { trackUsage } = useTracking();
   const previewRef = useRef(null);
+  const [isCropImageReady, setIsCropImageReady] = useState(false);
+  const [hasCropIntent, setHasCropIntent] = useState(false);
   const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset, false));
   const [thumbnailUrl, setThumbnailUrl] = useState(createAssetUrl(asset, true));
   const { formatMessage } = useIntl();
@@ -123,14 +125,22 @@ export const PreviewBox = ({
   };
 
   const handleCropCancel = () => {
+    setHasCropIntent(false);
+    setIsCropImageReady(false);
     stopCropping();
     onCropCancel();
   };
 
   const handleCropStart = () => {
-    crop(previewRef.current);
-    onCropStart();
+    setHasCropIntent(true);
   };
+
+  useEffect(() => {
+    if (hasCropIntent && isCropImageReady) {
+      crop(previewRef.current);
+      onCropStart();
+    }
+  }, [isCropImageReady, hasCropIntent, onCropStart, crop]);
 
   return (
     <>
@@ -144,11 +154,11 @@ export const PreviewBox = ({
         )}
 
         <ActionRow paddingLeft={3} paddingRight={3} justifyContent="flex-end">
-          <Stack size={1} horizontal>
+          <Stack spacing={1} horizontal>
             {canUpdate && !asset.isLocal && (
               <IconButton
                 label={formatMessage({
-                  id: getTrad('app.utils.delete'),
+                  id: 'global.delete',
                   defaultMessage: 'Delete',
                 })}
                 icon={<Trash />}
@@ -198,7 +208,17 @@ export const PreviewBox = ({
             </UploadProgressWrapper>
           )}
 
-          <AssetPreview ref={previewRef} mime={asset.mime} name={asset.name} url={thumbnailUrl} />
+          <AssetPreview
+            ref={previewRef}
+            mime={asset.mime}
+            name={asset.name}
+            url={hasCropIntent ? assetUrl : thumbnailUrl}
+            onLoad={() => {
+              if (hasCropIntent) {
+                setIsCropImageReady(true);
+              }
+            }}
+          />
         </Wrapper>
 
         <ActionRow

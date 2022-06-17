@@ -1,6 +1,6 @@
 'use strict';
 
-const { assoc, has, prop, omit } = require('lodash/fp');
+const { assoc, has, prop, omit, merge } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 
@@ -40,13 +40,9 @@ const findCreatorRoles = entity => {
 };
 
 // TODO: define when we use this one vs basic populate
-const getDeepPopulate = (uid, populate, depth = 0) => {
+const getDeepPopulate = (uid, populate) => {
   if (populate) {
     return populate;
-  }
-
-  if (depth > 2) {
-    return {};
   }
 
   const { attributes } = strapi.getModel(uid);
@@ -55,14 +51,12 @@ const getDeepPopulate = (uid, populate, depth = 0) => {
     const attribute = attributes[attributeName];
 
     if (attribute.type === 'relation') {
-      populateAcc[attributeName] = attribute.target
-        ? { populate: getDeepPopulate(attribute.target, null, depth + 1) }
-        : true;
+      populateAcc[attributeName] = true; // Only populate first level of relations
     }
 
     if (attribute.type === 'component') {
       populateAcc[attributeName] = {
-        populate: getDeepPopulate(attribute.component, null, depth + 1),
+        populate: getDeepPopulate(attribute.component, null),
       };
     }
 
@@ -73,7 +67,7 @@ const getDeepPopulate = (uid, populate, depth = 0) => {
     if (attribute.type === 'dynamiczone') {
       populateAcc[attributeName] = {
         populate: (attribute.components || []).reduce((acc, componentUID) => {
-          return Object.assign(acc, getDeepPopulate(componentUID, null, depth + 1));
+          return merge(acc, getDeepPopulate(componentUID, null));
         }, {}),
       };
     }

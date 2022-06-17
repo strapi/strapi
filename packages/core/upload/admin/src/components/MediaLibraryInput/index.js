@@ -117,7 +117,6 @@ export const MediaLibraryInput = ({
     setUploadedFiles(prev => [...prev, ...uploadedFiles]);
   };
 
-  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
     ? formatMessage(
         { id: description.id, defaultMessage: description.defaultMessage },
@@ -148,7 +147,7 @@ export const MediaLibraryInput = ({
         onEditAsset={handleAssetEdit}
         onNext={handleNext}
         onPrevious={handlePrevious}
-        error={errorMessage}
+        error={error}
         hint={hint}
         required={required}
         selectedAssetIndex={selectedIndex}
@@ -198,7 +197,7 @@ MediaLibraryInput.propTypes = {
     defaultMessage: PropTypes.string,
     values: PropTypes.shape({}),
   }),
-  error: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
+  error: PropTypes.string,
   intlLabel: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
   multiple: PropTypes.bool,
   onChange: PropTypes.func.isRequired,

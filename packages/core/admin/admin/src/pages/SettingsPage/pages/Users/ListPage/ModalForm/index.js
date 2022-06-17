@@ -112,7 +112,7 @@ const ModalForm = ({ queryName, onToggle }) => {
           return (
             <Form>
               <ModalBody>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   {currentStep !== 'create' && <MagicLink registrationToken={registrationToken} />}
                   <Box>
                     <Typography variant="beta" as="h2">
@@ -122,7 +122,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                       })}
                     </Typography>
                     <Box paddingTop={4}>
-                      <Stack size={1}>
+                      <Stack spacing={1}>
                         <Grid gap={5}>
                           {layout.map(row => {
                             return row.map(input => {
@@ -146,7 +146,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                   <Box>
                     <Typography variant="beta" as="h2">
                       {formatMessage({
-                        id: 'app.components.Users.ModalCreateBody.block-title.login',
+                        id: 'global.roles',
                         defaultMessage: "User's role",
                       })}
                     </Typography>

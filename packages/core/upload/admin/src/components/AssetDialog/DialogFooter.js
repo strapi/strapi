@@ -18,7 +18,7 @@ export const DialogFooter = ({ onClose, onValidate }) => {
         onValidate && (
           <>
             <Button onClick={onValidate}>
-              {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
+              {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
             </Button>
           </>
         )

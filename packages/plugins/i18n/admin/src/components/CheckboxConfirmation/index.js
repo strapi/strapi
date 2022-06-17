@@ -67,7 +67,7 @@ const CheckboxConfirmation = ({ description, isCreating, intlLabel, name, onChan
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack size={2}>
+            <Stack spacing={2}>
               <Flex justifyContent="center">
                 <TextAlignTypography id="confirm-description">
                   {formatMessage({

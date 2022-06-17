@@ -65,7 +65,7 @@ const HomePage = () => {
       const sortedList = matchSorter(items, _q, {keys: ['name', 'instrument']})
       const itemsList = sortedList?.length ? sortedList : items;
       return (
-        <Stack paddingTop={6} size={4}>
+        <Stack paddingTop={6} spacing={4}>
           <SearchURLQuery label="Label" />
           {itemsList.map((item, i) => (
             <div key={i}>

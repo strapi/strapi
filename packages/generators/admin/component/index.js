@@ -6,10 +6,7 @@ const fileExistsInPackages = require('../utils/fileExistsInPackages');
 const getPluginList = require('../utils/getPluginList');
 const packagesFolder = require('../utils/packagesFolder');
 
-const pascalCase = flow(
-  camelCase,
-  upperFirst
-);
+const pascalCase = flow(camelCase, upperFirst);
 
 const prompts = [
   {

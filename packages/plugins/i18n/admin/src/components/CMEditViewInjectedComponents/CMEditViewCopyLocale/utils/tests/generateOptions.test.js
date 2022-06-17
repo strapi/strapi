@@ -24,7 +24,10 @@ describe('I18n | Components | CMEditViewCopyLocale | utils', () => {
         { publishedAt: 'test', locale: 'it', id: 3 },
       ];
 
-      const expected = [{ label: 'French', value: 2 }, { label: 'Italian', value: 3 }];
+      const expected = [
+        { label: 'French', value: 2 },
+        { label: 'Italian', value: 3 },
+      ];
 
       expect(generateOptions(appLocales, currentLocale, localizations, permissions)).toEqual(
         expected
@@ -41,7 +44,10 @@ describe('I18n | Components | CMEditViewCopyLocale | utils', () => {
         { publishedAt: 'test', locale: 'fr', id: 2 },
       ];
 
-      const expected = [{ label: 'English', value: 1 }, { label: 'French', value: 2 }];
+      const expected = [
+        { label: 'English', value: 1 },
+        { label: 'French', value: 2 },
+      ];
       const currentLocale = 'test';
       expect(generateOptions(appLocales, currentLocale, localizations, permissions)).toEqual(
         expected
@@ -60,7 +66,10 @@ describe('I18n | Components | CMEditViewCopyLocale | utils', () => {
         { publishedAt: 'test', locale: 'it', id: 3 },
       ];
 
-      const expected = [{ label: 'English', value: 1 }, { label: 'Italian', value: 3 }];
+      const expected = [
+        { label: 'English', value: 1 },
+        { label: 'Italian', value: 3 },
+      ];
 
       expect(generateOptions(appLocales, currentLocale, localizations, permissions)).toEqual(
         expected

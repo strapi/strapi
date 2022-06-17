@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Typography } from '@strapi/design-system/Typography';
-import { Link } from '@strapi/design-system/Link';
+import { Link } from '@strapi/design-system/v2/Link';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
@@ -23,7 +23,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
   return (
     <div>
       <Box paddingLeft={6} paddingBottom={10}>
-        <StackCustom size={5}>
+        <StackCustom spacing={5}>
           <Typography as="h1" variant="alpha">
             {hasCreatedContentType
               ? formatMessage({
@@ -49,7 +49,7 @@ const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
                 })}
           </WordWrap>
           {hasCreatedContentType ? (
-            <Link href="https://strapi.io/blog">
+            <Link isExternal href="https://strapi.io/blog">
               {formatMessage({
                 id: 'app.components.HomePage.button.blog',
                 defaultMessage: 'See more on the blog',

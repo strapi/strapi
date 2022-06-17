@@ -1,14 +1,26 @@
 'use strict';
 
+const { join } = require('path');
+
 const bootstrap = require('../bootstrap');
 
+jest.mock('@strapi/provider-upload-local', () => ({
+  init() {
+    return {
+      uploadStream: jest.fn(),
+      upload: jest.fn(),
+      delete: jest.fn(),
+    };
+  },
+}));
+
 describe('Upload plugin bootstrap function', () => {
-  test('Sets default config if id does not exist', async () => {
+  test('Sets default config if it does not exist', async () => {
     const setStore = jest.fn(() => {});
     const registerMany = jest.fn(() => {});
 
     global.strapi = {
-      dirs: { root: process.cwd() },
+      dirs: { root: process.cwd(), public: join(process.cwd(), 'public') },
       admin: {
         services: { permission: { actionProvider: { registerMany } } },
       },
@@ -16,10 +28,7 @@ describe('Upload plugin bootstrap function', () => {
         error() {},
       },
       config: {
-        get: jest
-          .fn()
-          .mockReturnValueOnce({ provider: 'local' })
-          .mockReturnValueOnce('public'),
+        get: jest.fn().mockReturnValueOnce({ provider: 'local' }),
         paths: {},
         info: {
           dependencies: {},

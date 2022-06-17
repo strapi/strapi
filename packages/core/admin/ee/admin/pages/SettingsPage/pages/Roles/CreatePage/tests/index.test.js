@@ -10,7 +10,9 @@ import { IntlProvider } from 'react-intl';
 import { Router, Switch, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import moment from 'moment';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../../../../admin/src/components/Theme';
+import ThemeToggleProvider from '../../../../../../../../admin/src/components/ThemeToggleProvider';
 
 import { CreatePage } from '../index';
 
@@ -37,18 +39,20 @@ const makeApp = history => (
     locale="en"
     defaultLocale="en"
   >
-    <Theme>
-      <Router history={history}>
-        <Switch>
-          <Route path="/settings/roles/duplicate/:id">
-            <CreatePage />
-          </Route>
-          <Route path="/settings/roles/new">
-            <CreatePage />
-          </Route>
-        </Switch>
-      </Router>
-    </Theme>
+    <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+      <Theme>
+        <Router history={history}>
+          <Switch>
+            <Route path="/settings/roles/duplicate/:id">
+              <CreatePage />
+            </Route>
+            <Route path="/settings/roles/new">
+              <CreatePage />
+            </Route>
+          </Switch>
+        </Router>
+      </Theme>
+    </ThemeToggleProvider>
   </IntlProvider>
 );
 

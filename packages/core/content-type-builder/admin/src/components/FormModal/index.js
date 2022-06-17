@@ -977,7 +977,7 @@ const FormModal = () => {
                 <Box paddingTop={6}>
                   <TabPanels>
                     <TabPanel>
-                      <Stack size={6}>
+                      <Stack spacing={6}>
                         <TabForm
                           form={baseForm}
                           formErrors={formErrors}
@@ -988,7 +988,7 @@ const FormModal = () => {
                       </Stack>
                     </TabPanel>
                     <TabPanel>
-                      <Stack size={6}>
+                      <Stack spacing={6}>
                         <TabForm
                           form={advancedForm}
                           formErrors={formErrors}

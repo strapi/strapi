@@ -39,11 +39,15 @@ describe('<PageSizeURLQuery />', () => {
     } = render(makeApp(history));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c12 {
+      .c13 {
         padding-left: 8px;
       }
 
       .c0 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -51,13 +55,9 @@ describe('<PageSizeURLQuery />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c4 {
+      .c5 {
         position: absolute;
         left: 0;
         right: 0;
@@ -68,34 +68,42 @@ describe('<PageSizeURLQuery />', () => {
         border: none;
       }
 
-      .c4:focus {
+      .c5:focus {
         outline: none;
       }
 
-      .c4[aria-disabled='true'] {
+      .c5[aria-disabled='true'] {
         cursor: not-allowed;
       }
 
       .c8 {
-        color: #32324d;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c7 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c9 {
+      .c10 {
         padding-left: 12px;
       }
 
-      .c2 {
+      .c1 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -103,13 +111,13 @@ describe('<PageSizeURLQuery />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c6 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c5 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -121,32 +129,24 @@ describe('<PageSizeURLQuery />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c1 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
+      .c9 {
+        color: #32324d;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
-      .c1 > * {
+      .c2 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c1 > * + * {
-        margin-top: 0px;
-      }
-
-      .c3 {
+      .c4 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -162,28 +162,28 @@ describe('<PageSizeURLQuery />', () => {
         transition-duration: 0.2s;
       }
 
-      .c3:focus-within {
+      .c4:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c10 {
+      .c11 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c10 svg {
+      .c11 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c10 svg path {
+      .c11 svg path {
         fill: #666687;
       }
 
-      .c11 {
+      .c12 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -192,15 +192,15 @@ describe('<PageSizeURLQuery />', () => {
         border: none;
       }
 
-      .c11 svg {
+      .c12 svg {
         width: 0.375rem;
       }
 
-      .c6 {
+      .c7 {
         width: 100%;
       }
 
-      .c13 {
+      .c14 {
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -211,10 +211,10 @@ describe('<PageSizeURLQuery />', () => {
       >
         <div>
           <div
-            class="c1"
+            class="c1 c2"
           >
             <div
-              class="c2 c3"
+              class="c3 c4"
             >
               <button
                 aria-disabled="false"
@@ -222,21 +222,21 @@ describe('<PageSizeURLQuery />', () => {
                 aria-haspopup="listbox"
                 aria-label="Entries per page"
                 aria-labelledby="select-1-label select-1-content"
-                class="c4"
+                class="c5"
                 id="select-1"
                 type="button"
               />
               <div
-                class="c5 c6"
+                class="c6 c7"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <div
-                    class="c7"
+                    class="c8"
                   >
                     <span
-                      class="c8"
+                      class="c9"
                       id="select-1-content"
                     >
                       10
@@ -244,11 +244,11 @@ describe('<PageSizeURLQuery />', () => {
                   </div>
                 </div>
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <button
                     aria-hidden="true"
-                    class="c9 c10 c11"
+                    class="c10 c11 c12"
                     tabindex="-1"
                     type="button"
                   >
@@ -273,10 +273,10 @@ describe('<PageSizeURLQuery />', () => {
           </div>
         </div>
         <div
-          class="c12"
+          class="c13"
         >
           <label
-            class="c13"
+            class="c14"
             for="page-size"
           >
             Entries per page

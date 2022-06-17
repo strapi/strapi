@@ -1,0 +1,24 @@
+name: 'Analyze lockfile dependencies'
+description: 'Parse dependencies from the yarn lockfile and run security tests on them'
+inputs:
+  path:
+    description: 'Path to the yarn lockfile'
+    required: false
+    default: 'yarn.lock'
+  type:
+    description: 'Lockfile type, either yarn or npm'
+    default: 'yarn'
+    required: false
+  allowedHosts:
+    description: 'Allowed hosts for packages resolution'
+    required: false
+    default: 'https://registry.yarnpkg.com'
+runs:
+  using: 'composite'
+  steps:
+    - run: $GITHUB_ACTION_PATH/script.sh
+      env:
+        LOCKFILE_PATH: ${{ inputs.path }}
+        LOCKFILE_TYPE: ${{ inputs.type }}
+        LOCKFILE_ALLOWED_HOSTS: ${{ inputs.allowedHosts }}
+      shell: bash

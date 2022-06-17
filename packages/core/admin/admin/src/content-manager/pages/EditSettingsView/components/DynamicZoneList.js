@@ -45,7 +45,7 @@ const DynamicZoneList = ({ components }) => {
   const { componentLayouts } = useLayoutDnd();
 
   return (
-    <Stack size={2} horizontal overflow="scroll hidden" padding={3}>
+    <Stack spacing={2} horizontal overflow="scroll hidden" padding={3}>
       {components.map(componentUid => (
         <CustomLink
           hasRadius

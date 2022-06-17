@@ -48,7 +48,8 @@ export const VideoAssetCard = ({
 }) => {
   const { formatMessage } = useIntl();
   const [duration, setDuration] = useState();
-  const formattedDuration = duration ? formatDuration(duration) : undefined;
+
+  const formattedDuration = duration && formatDuration(duration);
 
   return (
     <Card>

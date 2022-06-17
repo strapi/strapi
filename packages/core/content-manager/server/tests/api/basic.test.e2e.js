@@ -1,5 +1,7 @@
 'use strict';
 
+const { omit } = require('lodash/fp');
+
 const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 const { createAuthRequest } = require('../../../../../../test/helpers/request');
@@ -21,6 +23,16 @@ const product = {
       type: 'text',
       minLength: 4,
       maxLength: 30,
+    },
+    hiddenAttribute: {
+      type: 'string',
+    },
+  },
+  config: {
+    attributes: {
+      hiddenAttribute: {
+        hidden: true,
+      },
     },
   },
   displayName: 'Product',
@@ -47,6 +59,7 @@ describe('CM API - Basic', () => {
     const product = {
       name: 'Product 1',
       description: 'Product description',
+      hiddenAttribute: 'Secret value',
     };
     const res = await rq({
       method: 'POST',
@@ -55,7 +68,8 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
+    expect(res.body).toMatchObject(omit('hiddenAttribute', product));
+    expect(res.body).not.toHaveProperty('hiddenAttribute');
     expect(res.body.publishedAt).toBeUndefined();
     data.products.push(res.body);
   });
@@ -84,6 +98,7 @@ describe('CM API - Basic', () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
+      hiddenAttribute: 'Secret value',
     };
     const res = await rq({
       method: 'PUT',
@@ -92,7 +107,7 @@ describe('CM API - Basic', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
+    expect(res.body).toMatchObject(omit('hiddenAttribute', product));
     expect(res.body.id).toEqual(data.products[0].id);
     expect(res.body.publishedAt).toBeUndefined();
     data.products[0] = res.body;

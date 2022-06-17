@@ -16,7 +16,6 @@ import Label from './Label';
 import FieldWrapper from './FieldWrapper';
 
 const WAIT = 600;
-const stringify = JSON.stringify;
 const DEFAULT_THEME = 'blackboard';
 
 const loadCss = async () => {
@@ -80,9 +79,7 @@ class InputJSON extends React.Component {
     try {
       if (value === null) return this.codeMirror.setValue('');
 
-      const nextValue = stringify(value, null, 2);
-
-      return this.codeMirror.setValue(nextValue);
+      return this.codeMirror.setValue(value);
     } catch (err) {
       return this.setState({ error: true });
     }
@@ -160,7 +157,7 @@ class InputJSON extends React.Component {
 
     return (
       <FieldWrapper name={this.props.name} hint={this.props.description} error={this.props.error}>
-        <Stack size={1}>
+        <Stack spacing={1}>
           <Label
             intlLabel={this.props.intlLabel}
             labelAction={this.props.labelAction}

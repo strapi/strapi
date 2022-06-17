@@ -29,7 +29,7 @@ test('Test missing source label', async () => {
   github.context = {
     payload: {
       pull_request: {
-        labels: [{ name: 'issue-type: enhancement' }],
+        labels: [{ name: 'pr: enhancement' }],
       },
     },
   };
@@ -48,7 +48,7 @@ test('Test too many source label', async () => {
   github.context = {
     payload: {
       pull_request: {
-        labels: [{ name: 'source: a' }, { name: 'source: b' }, { name: 'issue-type: enhancement' }],
+        labels: [{ name: 'source: a' }, { name: 'source: b' }, { name: 'pr: enhancement' }],
       },
     },
   };
@@ -63,7 +63,7 @@ test('Test too many source label', async () => {
   setFailed.mockRestore();
 });
 
-test('Test missing issue-type label', async () => {
+test('Test missing pr label', async () => {
   github.context = {
     payload: {
       pull_request: {
@@ -77,16 +77,16 @@ test('Test missing issue-type label', async () => {
   await action();
 
   expect(setFailed).toHaveBeenCalled();
-  expect(setFailed.mock.calls[0][0]).toBe(`The PR must have one and only one 'issue-type:' label.`);
+  expect(setFailed.mock.calls[0][0]).toBe(`The PR must have one and only one 'pr:' label.`);
 
   setFailed.mockRestore();
 });
 
-test('Test too many issue-type label', async () => {
+test('Test too many pr label', async () => {
   github.context = {
     payload: {
       pull_request: {
-        labels: [{ name: 'issue-type: a' }, { name: 'issue-type: b' }, { name: 'source: core' }],
+        labels: [{ name: 'pr: a' }, { name: 'pr: b' }, { name: 'source: core' }],
       },
     },
   };
@@ -96,7 +96,7 @@ test('Test too many issue-type label', async () => {
   await action();
 
   expect(setFailed).toHaveBeenCalled();
-  expect(setFailed.mock.calls[0][0]).toBe(`The PR must have one and only one 'issue-type:' label.`);
+  expect(setFailed.mock.calls[0][0]).toBe(`The PR must have one and only one 'pr:' label.`);
 
   setFailed.mockRestore();
 });

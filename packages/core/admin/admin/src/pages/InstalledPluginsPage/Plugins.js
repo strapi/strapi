@@ -1,26 +1,24 @@
 import React from 'react';
-import { useQuery } from 'react-query';
 import { useIntl } from 'react-intl';
-import { LoadingIndicatorPage, useNotification, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
-import { useNotifyAT } from '@strapi/design-system/LiveRegions';
 import { Typography } from '@strapi/design-system/Typography';
 import { Table, Thead, Tbody, Tr, Td, Th } from '@strapi/design-system/Table';
-import { fetchPlugins } from './utils/api';
+import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 
 const Plugins = () => {
   const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
   const { notifyStatus } = useNotifyAT();
-  const toggleNotification = useNotification();
+  useFocusWhenNavigate();
 
   const title = formatMessage({
-    id: 'app.components.ListPluginsPage.title',
+    id: 'global.plugins',
     defaultMessage: 'Plugins',
   });
 
-  const notifyLoad = () => {
+  const notifyPluginPageLoad = () => {
     notifyStatus(
       formatMessage(
         {
@@ -32,14 +30,7 @@ const Plugins = () => {
     );
   };
 
-  const { status, data } = useQuery('list-plugins', () => fetchPlugins(notifyLoad), {
-    onError: () => {
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
-      });
-    },
-  });
+  const { status, data } = useFetchInstalledPlugins(notifyPluginPageLoad);
 
   const isLoading = status !== 'success' && status !== 'error';
 
@@ -70,7 +61,7 @@ const Plugins = () => {
                 <Th>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
-                      id: 'Settings.roles.list.header.name',
+                      id: 'global.name',
                       defaultMessage: 'Name',
                     })}
                   </Typography>
@@ -78,7 +69,7 @@ const Plugins = () => {
                 <Th>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
-                      id: 'Settings.roles.list.header.description',
+                      id: 'global.description',
                       defaultMessage: 'description',
                     })}
                   </Typography>

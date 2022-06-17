@@ -10,9 +10,11 @@ import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 import { useRBAC } from '@strapi/helper-plugin';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import { useRolesList } from '../../../../../../../../admin/src/hooks';
 
 import Theme from '../../../../../../../../admin/src/components/Theme';
+import ThemeToggleProvider from '../../../../../../../../admin/src/components/ThemeToggleProvider';
 import ListPage from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -31,11 +33,13 @@ jest.mock('../../../../../../../../admin/src/hooks', () => ({
 
 const makeApp = history => (
   <IntlProvider messages={{}} textComponent="span" locale="en">
-    <Theme>
-      <Router history={history}>
-        <ListPage />
-      </Router>
-    </Theme>
+    <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+      <Theme>
+        <Router history={history}>
+          <ListPage />
+        </Router>
+      </Theme>
+    </ThemeToggleProvider>
   </IntlProvider>
 );
 
@@ -55,6 +59,10 @@ describe('<ListPage />', () => {
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c1 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -66,10 +74,6 @@ describe('<ListPage />', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c3 {

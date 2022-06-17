@@ -26,7 +26,7 @@ const cleanFile = async filePath => {
 
     return Promise.resolve();
   } catch (err) {
-    return Promise.reject();
+    return Promise.reject(err);
   }
 };
 

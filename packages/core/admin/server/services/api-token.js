@@ -74,20 +74,21 @@ const create = async attributes => {
 /**
  * @returns {void}
  */
-const createSaltIfNotDefined = () => {
-  if (strapi.config.get('admin.apiToken.salt')) {
-    return;
-  }
+const checkSaltIsDefined = () => {
+  if (!strapi.config.get('admin.apiToken.salt')) {
+    // TODO V5: stop reading API_TOKEN_SALT
+    if (process.env.API_TOKEN_SALT) {
+      process.emitWarning(`[deprecated] In future versions, Strapi will stop reading directly from the environment variable API_TOKEN_SALT. Please set apiToken.salt in config/admin.js instead.
+For security reasons, keep storing the secret in an environment variable and use env() to read it in config/admin.js (ex: \`apiToken: { salt: env('API_TOKEN_SALT') }\`). See https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#configuration-using-environment-variables.`);
 
-  if (process.env.API_TOKEN_SALT) {
-    throw new Error(
-      `There's something wrong with the configuration of your api-token salt. If you have changed the env variable used in the configuration file, please verify that you have created and set the variable in your .env file.`
-    );
+      strapi.config.set('admin.apiToken.salt', process.env.API_TOKEN_SALT);
+    } else {
+      throw new Error(
+        `Missing apiToken.salt. Please set apiToken.salt in config/admin.js (ex: you can generate one using Node with \`crypto.randomBytes(16).toString('base64')\`).
+For security reasons, prefer storing the secret in an environment variable and read it in config/admin.js. See https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#configuration-using-environment-variables.`
+      );
+    }
   }
-
-  const salt = crypto.randomBytes(16).toString('hex');
-  strapi.fs.appendFile(process.env.ENV_PATH || '.env', `API_TOKEN_SALT=${salt}\n`);
-  strapi.config.set('admin.apiToken.salt', salt);
 };
 
 /**
@@ -162,7 +163,7 @@ const getBy = async (whereParams = {}) => {
 module.exports = {
   create,
   exists,
-  createSaltIfNotDefined,
+  checkSaltIsDefined,
   hash,
   list,
   revoke,

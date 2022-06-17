@@ -1,27 +1,16 @@
 'use strict';
 
-const knex = require('knex');
-
 const { getDialect } = require('./dialects');
 const createSchemaProvider = require('./schema');
 const createMetadata = require('./metadata');
 const { createEntityManager } = require('./entity-manager');
 const { createMigrationsProvider } = require('./migrations');
 const { createLifecyclesProvider } = require('./lifecycles');
+const createConnection = require('./connection');
 const errors = require('./errors');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
-
-const createConnection = config => {
-  const knexInstance = knex(config);
-
-  return Object.assign(knexInstance, {
-    getSchemaName() {
-      return this.client.connectionSettings.schema;
-    },
-  });
-};
 
 class Database {
   constructor(config) {

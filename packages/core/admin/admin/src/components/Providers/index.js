@@ -3,12 +3,15 @@ import PropTypes from 'prop-types';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import { Provider } from 'react-redux';
-import { AdminContext, ConfigurationsContext } from '../../contexts';
+import { AdminContext } from '../../contexts';
+import ConfigurationsProvider from '../ConfigurationsProvider';
 import LanguageProvider from '../LanguageProvider';
 import GuidedTour from '../GuidedTour';
 import AutoReloadOverlayBlockerProvider from '../AutoReloadOverlayBlockerProvider';
 import Notifications from '../Notifications';
 import OverlayBlocker from '../OverlayBlocker';
+import ThemeToggleProvider from '../ThemeToggleProvider';
+import Theme from '../Theme';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,41 +39,48 @@ const Providers = ({
   settings,
   showReleaseNotification,
   showTutorials,
-
   store,
+  themes,
 }) => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Provider store={store}>
-        <AdminContext.Provider value={{ getAdminInjectedComponents }}>
-          <ConfigurationsContext.Provider
-            value={{ authLogo, menuLogo, showReleaseNotification, showTutorials }}
-          >
-            <StrapiAppProvider
-              getPlugin={getPlugin}
-              menu={menu}
-              plugins={plugins}
-              runHookParallel={runHookParallel}
-              runHookWaterfall={runHookWaterfall}
-              runHookSeries={runHookSeries}
-              settings={settings}
-            >
-              <LibraryProvider components={components} fields={fields}>
-                <LanguageProvider messages={messages} localeNames={localeNames}>
-                  <AutoReloadOverlayBlockerProvider>
-                    <OverlayBlocker>
-                      <GuidedTour>
-                        <Notifications>{children}</Notifications>
-                      </GuidedTour>
-                    </OverlayBlocker>
-                  </AutoReloadOverlayBlockerProvider>
-                </LanguageProvider>
-              </LibraryProvider>
-            </StrapiAppProvider>
-          </ConfigurationsContext.Provider>
-        </AdminContext.Provider>
-      </Provider>
-    </QueryClientProvider>
+    <ThemeToggleProvider themes={themes}>
+      <Theme>
+        <QueryClientProvider client={queryClient}>
+          <Provider store={store}>
+            <AdminContext.Provider value={{ getAdminInjectedComponents }}>
+              <ConfigurationsProvider
+                authLogo={authLogo}
+                menuLogo={menuLogo}
+                showReleaseNotification={showReleaseNotification}
+                showTutorials={showTutorials}
+              >
+                <StrapiAppProvider
+                  getPlugin={getPlugin}
+                  menu={menu}
+                  plugins={plugins}
+                  runHookParallel={runHookParallel}
+                  runHookWaterfall={runHookWaterfall}
+                  runHookSeries={runHookSeries}
+                  settings={settings}
+                >
+                  <LibraryProvider components={components} fields={fields}>
+                    <LanguageProvider messages={messages} localeNames={localeNames}>
+                      <AutoReloadOverlayBlockerProvider>
+                        <OverlayBlocker>
+                          <GuidedTour>
+                            <Notifications>{children}</Notifications>
+                          </GuidedTour>
+                        </OverlayBlocker>
+                      </AutoReloadOverlayBlockerProvider>
+                    </LanguageProvider>
+                  </LibraryProvider>
+                </StrapiAppProvider>
+              </ConfigurationsProvider>
+            </AdminContext.Provider>
+          </Provider>
+        </QueryClientProvider>
+      </Theme>
+    </ThemeToggleProvider>
   );
 };
 
@@ -104,6 +114,33 @@ Providers.propTypes = {
   showReleaseNotification: PropTypes.bool.isRequired,
   showTutorials: PropTypes.bool.isRequired,
   store: PropTypes.object.isRequired,
+  themes: PropTypes.shape({
+    light: PropTypes.shape({
+      colors: PropTypes.object.isRequired,
+      shadows: PropTypes.object.isRequired,
+      sizes: PropTypes.object.isRequired,
+      zIndices: PropTypes.array.isRequired,
+      spaces: PropTypes.array.isRequired,
+      borderRadius: PropTypes.string.isRequired,
+      mediaQueries: PropTypes.object.isRequired,
+      fontSizes: PropTypes.array.isRequired,
+      lineHeights: PropTypes.array.isRequired,
+      fontWeights: PropTypes.object.isRequired,
+    }).isRequired,
+    dark: PropTypes.shape({
+      colors: PropTypes.object.isRequired,
+      shadows: PropTypes.object.isRequired,
+      sizes: PropTypes.object.isRequired,
+      zIndices: PropTypes.array.isRequired,
+      spaces: PropTypes.array.isRequired,
+      borderRadius: PropTypes.string.isRequired,
+      mediaQueries: PropTypes.object.isRequired,
+      fontSizes: PropTypes.array.isRequired,
+      lineHeights: PropTypes.array.isRequired,
+      fontWeights: PropTypes.object.isRequired,
+    }).isRequired,
+    custom: PropTypes.object,
+  }).isRequired,
 };
 
 export default Providers;

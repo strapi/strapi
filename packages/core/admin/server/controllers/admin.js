@@ -1,11 +1,18 @@
 'use strict';
 
+const path = require('path');
 const execa = require('execa');
 const _ = require('lodash');
+const { exists } = require('fs-extra');
 const { ValidationError } = require('@strapi/utils').errors;
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
 
+const {
+  validateUpdateProjectSettings,
+  validateUpdateProjectSettingsFiles,
+  validateUpdateProjectSettingsImagesDimensions,
+} = require('../validation/project-settings');
 const { getService } = require('../utils');
 
 const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
@@ -35,10 +42,43 @@ module.exports = {
   },
 
   async init() {
-    const uuid = strapi.config.get('uuid', false);
+    let uuid = strapi.config.get('uuid', false);
     const hasAdmin = await getService('user').exists();
+    const { menuLogo } = await getService('project-settings').getProjectSettings();
+    // set to null if telemetryDisabled flag not avaialble in package.json
+    const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled', null);
 
-    return { data: { uuid, hasAdmin } };
+    if (telemetryDisabled !== null && telemetryDisabled === true) {
+      uuid = false;
+    }
+
+    return {
+      data: {
+        uuid,
+        hasAdmin,
+        menuLogo: menuLogo ? menuLogo.url : null,
+      },
+    };
+  },
+
+  async getProjectSettings() {
+    return getService('project-settings').getProjectSettings();
+  },
+
+  async updateProjectSettings(ctx) {
+    const projectSettingsService = getService('project-settings');
+
+    const {
+      request: { files, body },
+    } = ctx;
+
+    await validateUpdateProjectSettings(body);
+    await validateUpdateProjectSettingsFiles(files);
+
+    const formatedFiles = await projectSettingsService.parseFilesData(files);
+    await validateUpdateProjectSettingsImagesDimensions(formatedFiles);
+
+    return projectSettingsService.updateProjectSettings({ ...body, ...formatedFiles });
   },
 
   async information() {
@@ -47,9 +87,17 @@ module.exports = {
     const strapiVersion = strapi.config.get('info.strapi', null);
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
+    const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
 
     return {
-      data: { currentEnvironment, autoReload, strapiVersion, nodeVersion, communityEdition },
+      data: {
+        currentEnvironment,
+        autoReload,
+        strapiVersion,
+        nodeVersion,
+        communityEdition,
+        useYarn,
+      },
     };
   },
 
@@ -82,6 +130,7 @@ module.exports = {
       name: plugin.info.name || key,
       displayName: plugin.info.displayName || plugin.info.name || key,
       description: plugin.info.description || '',
+      packageName: plugin.info.packageName,
     }));
 
     ctx.send({ plugins });

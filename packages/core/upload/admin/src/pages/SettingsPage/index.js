@@ -136,7 +136,7 @@ export const SettingsPage = () => {
               size="L"
             >
               {formatMessage({
-                id: 'app.components.Button.save',
+                id: 'global.save',
                 defaultMessage: 'Save',
               })}
             </Button>
@@ -151,9 +151,9 @@ export const SettingsPage = () => {
             <LoadingIndicatorPage />
           ) : (
             <Layout>
-              <Stack size={12}>
+              <Stack spacing={12}>
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                  <Stack size={4}>
+                  <Stack spacing={4}>
                     <Flex>
                       <Typography variant="delta" as="h2">
                         {formatMessage({

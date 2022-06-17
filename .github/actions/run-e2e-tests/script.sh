@@ -4,8 +4,9 @@ if [[ -z "$RUN_EE" ]]; then
 fi
 
 export ENV_PATH="$(pwd)/testApp/.env"
+export JWT_SECRET="aSecret"
 
 opts=($DB_OPTIONS)
 
-yarn run -s test:generate-app "${opts[@]}" $@
-yarn run -s test:e2e
+yarn run -s test:generate-app "${opts[@]}"
+yarn run -s test:e2e $@

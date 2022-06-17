@@ -89,7 +89,7 @@ const TableRows = ({
                       <IconButton
                         onClick={() => onClickDelete(data.id)}
                         label={formatMessage(
-                          { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
+                          { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
                           { target: getFullName(data.firstname, data.lastname) }
                         )}
                         noBorder

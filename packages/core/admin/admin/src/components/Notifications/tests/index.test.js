@@ -9,7 +9,9 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { useNotification } from '@strapi/helper-plugin';
 import { act } from 'react-dom/test-utils';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../Theme';
+import ThemeToggleProvider from '../../ThemeToggleProvider';
 import Notifications from '../index';
 
 const messages = {};
@@ -19,13 +21,15 @@ describe('<Notifications />', () => {
     const {
       container: { firstChild },
     } = render(
-      <Theme>
-        <IntlProvider locale="en" messages={messages} defaultLocale="en" textComponent="span">
-          <Notifications>
-            <div />
-          </Notifications>
-        </IntlProvider>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+        <Theme>
+          <IntlProvider locale="en" messages={messages} defaultLocale="en" textComponent="span">
+            <Notifications>
+              <div />
+            </Notifications>
+          </IntlProvider>
+        </Theme>
+      </ThemeToggleProvider>
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
@@ -39,6 +43,10 @@ describe('<Notifications />', () => {
       }
 
       .c1 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -48,17 +56,18 @@ describe('<Notifications />', () => {
         flex-direction: column;
       }
 
-      .c1 > * {
+      .c2 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c1 > * + * {
+      .c2 > * + * {
         margin-top: 8px;
       }
 
       <div
-        class="c0 c1"
+        class="c0 c1 c2"
+        spacing="2"
         width="31.25rem"
       />
     `);
@@ -80,13 +89,15 @@ describe('<Notifications />', () => {
     };
 
     render(
-      <Theme>
-        <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
-          <Notifications>
-            <Button />
-          </Notifications>
-        </IntlProvider>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+        <Theme>
+          <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
+            <Notifications>
+              <Button />
+            </Notifications>
+          </IntlProvider>
+        </Theme>
+      </ThemeToggleProvider>
     );
 
     // Click button
@@ -121,13 +132,15 @@ describe('<Notifications />', () => {
     };
 
     render(
-      <Theme>
-        <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
-          <Notifications>
-            <Button />
-          </Notifications>
-        </IntlProvider>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+        <Theme>
+          <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
+            <Notifications>
+              <Button />
+            </Notifications>
+          </IntlProvider>
+        </Theme>
+      </ThemeToggleProvider>
     );
 
     // Click button

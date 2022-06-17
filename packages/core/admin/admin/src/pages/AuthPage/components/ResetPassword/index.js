@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Form } from '@strapi/helper-plugin';
+import styled from 'styled-components';
+import { Formik } from 'formik';
+import { Form, Link } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Main } from '@strapi/design-system/Main';
 import { Flex } from '@strapi/design-system/Flex';
-import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Typography } from '@strapi/design-system/Typography';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
-import styled from 'styled-components';
-import { Formik } from 'formik';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
@@ -53,7 +52,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   <Box paddingTop={6} paddingBottom={7}>
                     <Typography as="h1" variant="alpha">
                       {formatMessage({
-                        id: 'Auth.reset-password.title',
+                        id: 'global.reset-password',
                         defaultMessage: 'Reset password',
                       })}
                     </Typography>
@@ -73,7 +72,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   )}
                 </Column>
 
-                <Stack size={6}>
+                <Stack spacing={6}>
                   <PasswordInput
                     name="password"
                     onChange={handleChange}
@@ -114,7 +113,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                     })}
                     required
                     label={formatMessage({
-                      id: 'Auth.form.password.label',
+                      id: 'global.password',
                       defaultMessage: 'Password',
                     })}
                     type={passwordShown ? 'text' : 'password'}
@@ -161,7 +160,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   />
                   <Button fullwidth type="submit">
                     {formatMessage({
-                      id: 'Auth.form.button.reset-password',
+                      id: 'global.change-password',
                       defaultMessage: 'Change password',
                     })}
                   </Button>

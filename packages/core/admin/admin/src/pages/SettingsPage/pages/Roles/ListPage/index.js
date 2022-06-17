@@ -69,7 +69,7 @@ const useRoleActions = () => {
       },
       {
         onClick: handleToggle,
-        label: formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' }),
+        label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
         icon: <Trash />,
       },
     ],
@@ -114,7 +114,7 @@ const RoleListPage = () => {
           </Button>
         }
         title={formatMessage({
-          id: 'Settings.roles.title',
+          id: 'global.roles',
           defaultMessage: 'roles',
         })}
         subtitle={formatMessage({
@@ -140,7 +140,7 @@ const RoleListPage = () => {
               <Th>
                 <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({
-                    id: 'Settings.roles.list.header.name',
+                    id: 'global.name',
                     defaultMessage: 'Name',
                   })}
                 </Typography>
@@ -148,7 +148,7 @@ const RoleListPage = () => {
               <Th>
                 <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({
-                    id: 'Settings.roles.list.header.description',
+                    id: 'global.description',
                     defaultMessage: 'Description',
                   })}
                 </Typography>
@@ -156,7 +156,7 @@ const RoleListPage = () => {
               <Th>
                 <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({
-                    id: 'Settings.roles.list.header.users',
+                    id: 'global.users',
                     defaultMessage: 'Users',
                   })}
                 </Typography>
@@ -164,7 +164,7 @@ const RoleListPage = () => {
               <Th>
                 <VisuallyHidden>
                   {formatMessage({
-                    id: 'Settings.roles.list.header.actions',
+                    id: 'global.actions',
                     defaultMessage: 'Actions',
                   })}
                 </VisuallyHidden>

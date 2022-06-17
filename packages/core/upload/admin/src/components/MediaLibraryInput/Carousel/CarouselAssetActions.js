@@ -32,7 +32,7 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
       {onDeleteAsset && (
         <IconButton
           label={formatMessage({
-            id: getTrad('app.utils.delete'),
+            id: 'global.delete',
             defaultMessage: 'Delete',
           })}
           icon={<TrashIcon />}

@@ -76,6 +76,10 @@ describe('ImageAssetCard', () => {
       }
 
       .c1 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -87,27 +91,13 @@ describe('ImageAssetCard', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c4 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c15 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -115,13 +105,27 @@ describe('ImageAssetCard', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c15 {
         -webkit-align-items: flex-start;
         -webkit-box-align: flex-start;
         -ms-flex-align: flex-start;
         align-items: flex-start;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
       .c23 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -133,10 +137,6 @@ describe('ImageAssetCard', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c5 > * {
@@ -165,6 +165,7 @@ describe('ImageAssetCard', () => {
         padding: 0;
         max-height: 100%;
         max-width: 100%;
+        object-fit: contain;
       }
 
       .c12 {
@@ -403,6 +404,7 @@ describe('ImageAssetCard', () => {
           >
             <div
               class="c3 c4 c5 c6"
+              spacing="2"
             >
               <input
                 aria-labelledby="card-1-title"
@@ -412,6 +414,7 @@ describe('ImageAssetCard', () => {
             </div>
             <div
               class="c8 c4 c5 c9"
+              spacing="2"
             >
               <span>
                 <button

@@ -105,7 +105,7 @@ const CMEditViewLocalePicker = ({
       <Box paddingTop={2} paddingBottom={6}>
         <Divider />
       </Box>
-      <Stack size={2}>
+      <Stack spacing={2}>
         <Box>
           <Select
             label={formatMessage({

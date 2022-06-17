@@ -65,7 +65,15 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c23 {
+      .c22 {
+        color: #666687;
+      }
+
+      .c23 path {
+        fill: #666687;
+      }
+
+      .c25 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -79,21 +87,21 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         outline: none;
       }
 
-      .c23 svg {
+      .c25 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c23 svg > g,
-      .c23 svg path {
+      .c25 svg > g,
+      .c25 svg path {
         fill: #ffffff;
       }
 
-      .c23[aria-disabled='true'] {
+      .c25[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c23:after {
+      .c25:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -108,11 +116,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: 2px solid transparent;
       }
 
-      .c23:focus-visible {
+      .c25:focus-visible {
         outline: none;
       }
 
-      .c23:focus-visible:after {
+      .c25:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -123,7 +131,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: 2px solid #4945ff;
       }
 
-      .c24 {
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -141,26 +149,26 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: none;
       }
 
-      .c24 svg > g,
-      .c24 svg path {
+      .c26 svg > g,
+      .c26 svg path {
         fill: #8e8ea9;
       }
 
-      .c24:hover svg > g,
-      .c24:hover svg path {
+      .c26:hover svg > g,
+      .c26:hover svg path {
         fill: #666687;
       }
 
-      .c24:active svg > g,
-      .c24:active svg path {
+      .c26:active svg > g,
+      .c26:active svg path {
         fill: #a5a5ba;
       }
 
-      .c24[aria-disabled='true'] {
+      .c26[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c24[aria-disabled='true'] svg path {
+      .c26[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -181,6 +189,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
 
       .c8 {
         overflow: hidden;
+        border: 1px solid #eaeaef;
       }
 
       .c12 {
@@ -246,6 +255,10 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       }
 
       .c17 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -253,10 +266,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c16 {
@@ -282,7 +291,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         text-transform: uppercase;
       }
 
-      .c22 {
+      .c24 {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -318,6 +327,10 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       }
 
       .c2 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -329,13 +342,13 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -343,10 +356,6 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c4 {
@@ -489,21 +498,25 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         class="c16"
                         tabindex="-1"
                       >
-                        <svg
-                          aria-label="Reset password"
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 24 24"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
+                        <div
+                          class="c22 c23"
                         >
-                          <path
-                            clip-rule="evenodd"
-                            d="M15.681 2.804A9.64 9.64 0 0011.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 003.589-4.831 1.117 1.117 0 00-.664-1.418 1.086 1.086 0 00-1.393.676 7.769 7.769 0 01-2.792 3.758 7.546 7.546 0 01-4.41 1.428V4.222h.002a7.492 7.492 0 013.003.625 7.61 7.61 0 012.5 1.762l.464.551-2.986 3.042a.186.186 0 00.129.316H22V3.317a.188.188 0 00-.112-.172.179.179 0 00-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 00-3.239-2.293zm-3.863 1.418V2v2.222zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778z"
-                            fill="#212134"
-                            fill-rule="evenodd"
-                          />
-                        </svg>
+                          <svg
+                            aria-label="Reset password"
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M15.681 2.804A9.64 9.64 0 0011.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 003.589-4.831 1.117 1.117 0 00-.664-1.418 1.086 1.086 0 00-1.393.676 7.769 7.769 0 01-2.792 3.758 7.546 7.546 0 01-4.41 1.428V4.222h.002a7.492 7.492 0 013.003.625 7.61 7.61 0 012.5 1.762l.464.551-2.986 3.042a.186.186 0 00.129.316H22V3.317a.188.188 0 00-.112-.172.179.179 0 00-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 00-3.239-2.293zm-3.863 1.418V2v2.222zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778z"
+                              fill="#212134"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
                       </td>
                       <td
                         aria-colindex="2"
@@ -511,7 +524,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         tabindex="-1"
                       >
                         <span
-                          class="c22"
+                          class="c24"
                         >
                           Reset password
                         </span>
@@ -526,7 +539,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-1"
-                            class="c23 c24"
+                            class="c25 c26"
                             tabindex="-1"
                             type="button"
                           >
@@ -558,19 +571,23 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         class="c16"
                         tabindex="-1"
                       >
-                        <svg
-                          aria-label="Email address confirmation"
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 24 24"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
+                        <div
+                          class="c22 c23"
                         >
-                          <path
-                            d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
-                            fill="#212134"
-                          />
-                        </svg>
+                          <svg
+                            aria-label="Email address confirmation"
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                              fill="#212134"
+                            />
+                          </svg>
+                        </div>
                       </td>
                       <td
                         aria-colindex="2"
@@ -578,7 +595,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                         tabindex="-1"
                       >
                         <span
-                          class="c22"
+                          class="c24"
                         >
                           Email address confirmation
                         </span>
@@ -593,7 +610,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-3"
-                            class="c23 c24"
+                            class="c25 c26"
                             tabindex="-1"
                             type="button"
                           >

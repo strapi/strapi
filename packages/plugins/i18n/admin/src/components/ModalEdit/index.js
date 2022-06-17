@@ -107,7 +107,7 @@ const ModalEdit = ({ locale, onClose }) => {
             }
             endActions={
               <Button type="submit" startIcon={<Check />} disabled={isEditing}>
-                {formatMessage({ id: 'app.components.Button.save' })}
+                {formatMessage({ id: 'global.save' })}
               </Button>
             }
           />

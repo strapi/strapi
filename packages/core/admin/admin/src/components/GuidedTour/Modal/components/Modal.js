@@ -17,7 +17,7 @@ const ModalWrapper = styled(Flex)`
   z-index: 4;
   inset: 0;
   /* this is theme.colors.neutral800 with opacity */
-  background: ${({ theme }) => `${theme.colors.neutral800}33`};
+  background: ${({ theme }) => `${theme.colors.neutral800}1F`};
 `;
 
 const Modal = ({ onClose, onSkip, children, hideSkip }) => {
@@ -33,7 +33,7 @@ const Modal = ({ onClose, onSkip, children, hideSkip }) => {
             shadow="popupShadow"
             hasRadius
             padding={4}
-            size={8}
+            spacing={8}
             role="dialog"
             aria-modal
             onClick={e => e.stopPropagation()}

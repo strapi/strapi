@@ -54,6 +54,10 @@ function captureStderr(name, error) {
 }
 
 function trackEvent(event, body) {
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
+
   try {
     return fetch('https://analytics.strapi.io/track', {
       method: 'POST',

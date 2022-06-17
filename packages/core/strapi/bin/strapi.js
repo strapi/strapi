@@ -175,6 +175,16 @@ program
 
 // Admin
 program
+  .command('admin:create-user')
+  .alias('admin:create')
+  .description('Create a new admin')
+  .option('-e, --email <email>', 'Email of the new admin')
+  .option('-p, --password <password>', 'Password of the new admin')
+  .option('-f, --firstname <first name>', 'First name of the new admin')
+  .option('-l, --lastname <last name>', 'Last name of the new admin')
+  .action(getLocalScript('admin-create'));
+
+program
   .command('admin:reset-user-password')
   .alias('admin:reset-password')
   .description("Reset an admin user's password")
@@ -216,5 +226,11 @@ program
   .command('controllers:list')
   .description('List all the application controllers')
   .action(getLocalScript('controllers/list'));
+
+//    `$ strapi opt-out-telemetry`
+program
+  .command('telemetry:disable')
+  .description('Stop Strapi from sending anonymous telemetry and metadata')
+  .action(getLocalScript('opt-out-telemetry'));
 
 program.parseAsync(process.argv);

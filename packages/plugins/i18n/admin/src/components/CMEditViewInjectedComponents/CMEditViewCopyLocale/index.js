@@ -122,7 +122,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack size={2}>
+            <Stack spacing={2}>
               <Flex justifyContent="center">
                 <CenteredTypography id="confirm-description">
                   {formatMessage({

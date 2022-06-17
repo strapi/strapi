@@ -18,9 +18,10 @@ const displayedFilters = [
     fieldSchema: {
       type: 'enumeration',
       options: [
+        { label: 'audio', value: 'audio' },
+        { label: 'file', value: 'file' },
         { label: 'image', value: 'image' },
         { label: 'video', value: 'video' },
-        { label: 'file', value: 'file' },
       ],
     },
     metadatas: { label: 'type' },

@@ -21,7 +21,7 @@ export const AssetMeta = ({ size, date, dimension, extension }) => {
     >
       <Grid gap={4}>
         <GridItem col={6} xs={12}>
-          <Stack size={1}>
+          <Stack spacing={1}>
             <Typography variant="sigma" textColor="neutral600">
               {formatMessage({ id: getTrad('modal.file-details.size'), defaultMessage: 'Size' })}
             </Typography>
@@ -31,7 +31,7 @@ export const AssetMeta = ({ size, date, dimension, extension }) => {
           </Stack>
         </GridItem>
         <GridItem col={6} xs={12}>
-          <Stack size={1}>
+          <Stack spacing={1}>
             <Typography variant="sigma" textColor="neutral600">
               {formatMessage({ id: getTrad('modal.file-details.date'), defaultMessage: 'Date' })}
             </Typography>
@@ -41,7 +41,7 @@ export const AssetMeta = ({ size, date, dimension, extension }) => {
           </Stack>
         </GridItem>
         <GridItem col={6} xs={12}>
-          <Stack size={1}>
+          <Stack spacing={1}>
             <Typography variant="sigma" textColor="neutral600">
               {formatMessage({
                 id: getTrad('modal.file-details.dimensions'),
@@ -54,7 +54,7 @@ export const AssetMeta = ({ size, date, dimension, extension }) => {
           </Stack>
         </GridItem>
         <GridItem col={6} xs={12}>
-          <Stack size={1}>
+          <Stack spacing={1}>
             <Typography variant="sigma" textColor="neutral600">
               {formatMessage({
                 id: getTrad('modal.file-details.extension'),

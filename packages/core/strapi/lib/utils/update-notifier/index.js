@@ -20,7 +20,7 @@ const boxenOptions = {
   borderStyle: 'round',
 };
 
-const geUpdatetMessage = (newVersion, currentVersion) => {
+const getUpdateMessage = (newVersion, currentVersion) => {
   const currentVersionLog = chalk.dim(currentVersion);
   const newVersionLog = chalk.green(newVersion);
   const releaseLink = chalk.bold('https://github.com/strapi/strapi/releases');
@@ -78,7 +78,7 @@ const createUpdateNotifier = strapi => {
       return;
     }
 
-    const message = boxen(geUpdatetMessage(latestVersion, pkg.version), boxenOptions);
+    const message = boxen(getUpdateMessage(latestVersion, pkg.version), boxenOptions);
     config.set('lastNotification', now);
     console.log(message);
   };

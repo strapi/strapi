@@ -1,12 +1,12 @@
 import React from 'react';
 import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { Link } from '@strapi/helper-plugin';
 import { Divider } from '@strapi/design-system/Divider';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
-import { Link } from '@strapi/design-system/Link';
 import { Loader } from '@strapi/design-system/Loader';
 import { Typography } from '@strapi/design-system/Typography';
 import { Main } from '@strapi/design-system/Main';
@@ -55,7 +55,7 @@ const Providers = () => {
               </Typography>
             </Box>
           </Column>
-          <Stack size={7}>
+          <Stack spacing={7}>
             {isLoading ? (
               <Flex justifyContent="center">
                 <Loader>{formatMessage({ id: 'Auth.login.sso.loading' })}</Loader>

@@ -101,7 +101,7 @@ describe('UploadAssetDialog', () => {
           )
         ).toBeInTheDocument();
         expect(
-          screen.getByText('Manage the assets before uploading them to the Media Library')
+          screen.getByText('Manage the assets before adding them to the Media Library')
         ).toBeInTheDocument();
         expect(screen.getAllByText(`test.${ext}`).length).toBe(number);
         expect(screen.getByText(ext)).toBeInTheDocument();
@@ -199,7 +199,7 @@ describe('UploadAssetDialog', () => {
       );
       expect(screen.getAllByText(`Add new assets`).length).toBe(2);
       expect(
-        screen.getByText('Manage the assets before uploading them to the Media Library')
+        screen.getByText('Manage the assets before adding them to the Media Library')
       ).toBeInTheDocument();
 
       assets.forEach(asset => {

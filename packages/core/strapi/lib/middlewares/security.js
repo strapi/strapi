@@ -12,7 +12,7 @@ const defaults = {
     useDefaults: true,
     directives: {
       'connect-src': ["'self'", 'https:'],
-      'img-src': ["'self'", 'data:', 'blob:'],
+      'img-src': ["'self'", 'data:', 'blob:', 'https://dl.airtable.com'],
       'media-src': ["'self'", 'data:', 'blob:'],
       upgradeInsecureRequests: null,
     },

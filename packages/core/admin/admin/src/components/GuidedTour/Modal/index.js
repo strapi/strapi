@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useReducer } from 'react';
 import at from 'lodash/at';
-import { useGuidedTour } from '@strapi/helper-plugin';
+import { useGuidedTour, useTracking } from '@strapi/helper-plugin';
 import layout from '../layout';
 import Modal from './components/Modal';
 import reducer, { initialState } from './reducer';
@@ -20,6 +20,7 @@ const GuidedTourModal = () => {
     { stepContent, sectionIndex, stepIndex, hasSectionAfter, hasStepAfter },
     dispatch,
   ] = useReducer(reducer, initialState);
+  const { trackUsage } = useTracking();
 
   useEffect(() => {
     if (!currentStep) {
@@ -56,6 +57,7 @@ const GuidedTourModal = () => {
 
   const handleCtaClick = () => {
     setStepState(currentStep, true);
+    trackUsage(stepContent.trackingEvent);
 
     setCurrentStep(null);
   };
@@ -63,6 +65,7 @@ const GuidedTourModal = () => {
   const handleSkip = () => {
     setSkipped(true);
     setCurrentStep(null);
+    trackUsage('didSkipGuidedtour');
   };
 
   if (isVisible && stepContent) {

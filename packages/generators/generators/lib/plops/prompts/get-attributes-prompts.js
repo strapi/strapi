@@ -1,6 +1,6 @@
 'use strict';
 
-const validateInput = require('../utils/validate-input');
+const validateAttributeInput = require('../utils/validate-attribute-input');
 
 const DEFAULT_TYPES = [
   // advanced types
@@ -50,7 +50,7 @@ module.exports = async inquirer => {
         type: 'input',
         name: 'attributeName',
         message: 'Name of attribute',
-        validate: input => validateInput(input),
+        validate: input => validateAttributeInput(input),
       },
       {
         type: 'list',
@@ -72,7 +72,10 @@ module.exports = async inquirer => {
         type: 'list',
         name: 'multiple',
         message: 'Choose media type',
-        choices: [{ name: 'Multiple', value: true }, { name: 'Single', value: false }],
+        choices: [
+          { name: 'Multiple', value: true },
+          { name: 'Single', value: false },
+        ],
       },
       {
         type: 'confirm',

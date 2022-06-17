@@ -23,11 +23,11 @@ const Permissions = () => {
     });
 
   return (
-    <Stack size={1}>
+    <Stack spacing={1}>
       {collapses.map((collapse, index) => (
         <Accordion
           expanded={collapse.isOpen}
-          toggle={() => handleToggle(index)}
+          onToggle={() => handleToggle(index)}
           key={collapse.name}
           variant={index % 2 === 0 ? 'secondary' : undefined}
         >

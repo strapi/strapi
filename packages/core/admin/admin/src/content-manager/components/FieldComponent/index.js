@@ -86,7 +86,7 @@ const FieldComponent = ({
           />
         )}
       </Flex>
-      <Stack size={1}>
+      <Stack spacing={1}>
         {!isRepeatable && !isInitialized && (
           <ComponentInitializer
             isReadOnly={isReadOnly}
@@ -106,7 +106,6 @@ const FieldComponent = ({
             componentValue={componentValue}
             componentValueLength={componentValueLength}
             componentUid={componentUid}
-            isNested={isNested}
             isReadOnly={isReadOnly}
             max={max}
             min={min}
@@ -159,7 +158,4 @@ FieldComponent.propTypes = {
 
 const Memoized = memo(FieldComponent, isEqual);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);

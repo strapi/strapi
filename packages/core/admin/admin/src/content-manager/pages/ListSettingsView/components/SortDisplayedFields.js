@@ -75,7 +75,7 @@ const SortDisplayedFields = ({
         hasRadius
       >
         <ScrollableContainer size="1" paddingBottom={4} ref={scrollableContainerRef}>
-          <Stack horizontal size={3}>
+          <Stack horizontal spacing={3}>
             {displayedFields.map((field, index) => (
               <DraggableCard
                 key={field}

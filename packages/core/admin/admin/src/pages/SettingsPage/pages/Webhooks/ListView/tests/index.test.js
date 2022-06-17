@@ -122,6 +122,10 @@ describe('Admin | containers | ListView', () => {
       }
 
       .c35 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -129,10 +133,6 @@ describe('Admin | containers | ListView', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c43 {
@@ -235,6 +235,10 @@ describe('Admin | containers | ListView', () => {
       }
 
       .c41 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -242,10 +246,6 @@ describe('Admin | containers | ListView', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c42 > * {
@@ -295,6 +295,7 @@ describe('Admin | containers | ListView', () => {
 
       .c17 {
         overflow: hidden;
+        border: 1px solid #eaeaef;
       }
 
       .c21 {
@@ -360,6 +361,10 @@ describe('Admin | containers | ListView', () => {
       }
 
       .c25 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -367,10 +372,6 @@ describe('Admin | containers | ListView', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c24 {
@@ -468,147 +469,6 @@ describe('Admin | containers | ListView', () => {
         width: 1px;
       }
 
-      .c1 {
-        padding-bottom: 56px;
-      }
-
-      .c4 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c15 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .c2 {
-        overflow-x: hidden;
-      }
-
-      .c5 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c6 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c7 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c14 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
-      .c40 {
-        color: #328048;
-        padding-left: 8px;
-      }
-
-      .c45 {
-        color: #d02b20;
-        padding-left: 8px;
-      }
-
-      .c37 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c39 {
-        background: #ee5e52;
-        border: none;
-        border-radius: 16px;
-        position: relative;
-        height: 1.5rem;
-        width: 2.5rem;
-      }
-
-      .c39 span {
-        font-size: 0;
-      }
-
-      .c39:before {
-        content: '';
-        background: #ffffff;
-        width: 1rem;
-        height: 1rem;
-        border-radius: 50%;
-        position: absolute;
-        -webkit-transition: all 0.5s;
-        transition: all 0.5s;
-        left: 4px;
-        top: 4px;
-      }
-
-      .c36 {
-        background: transparent;
-        padding: 0;
-        border: none;
-      }
-
-      .c36[aria-checked='true'] .c38 {
-        background: #5cb176;
-      }
-
-      .c36[aria-checked='true'] .c38:before {
-        -webkit-transform: translateX(1rem);
-        -ms-transform: translateX(1rem);
-        transform: translateX(1rem);
-      }
-
-      .c3:focus-visible {
-        outline: none;
-      }
-
       .c13 {
         font-weight: 600;
         color: #32324d;
@@ -681,10 +541,8 @@ describe('Admin | containers | ListView', () => {
       .c9 {
         padding: 10px 16px;
         background: #4945ff;
-        border: none;
-        border-radius: 4px;
         border: 1px solid #4945ff;
-        background: #4945ff;
+        border-radius: 4px;
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -744,6 +602,152 @@ describe('Admin | containers | ListView', () => {
       .c9:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c9 svg > g,
+      .c9 svg path {
+        fill: #ffffff;
+      }
+
+      .c1 {
+        padding-bottom: 56px;
+      }
+
+      .c4 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c15 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .c2 {
+        overflow-x: hidden;
+      }
+
+      .c5 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c6 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c7 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+      }
+
+      .c14 {
+        color: #666687;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .c40 {
+        color: #328048;
+        padding-left: 8px;
+      }
+
+      .c45 {
+        color: #d02b20;
+        padding-left: 8px;
+      }
+
+      .c37 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c39 {
+        background: #ee5e52;
+        border: none;
+        border-radius: 16px;
+        position: relative;
+        height: 1.5rem;
+        width: 2.5rem;
+      }
+
+      .c39 span {
+        font-size: 0;
+      }
+
+      .c39:before {
+        content: '';
+        background: #ffffff;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        position: absolute;
+        -webkit-transition: all 0.5s;
+        transition: all 0.5s;
+        left: 4px;
+        top: 4px;
+      }
+
+      .c36 {
+        background: transparent;
+        padding: 0;
+        border: none;
+      }
+
+      .c36[aria-checked='true'] .c38 {
+        background: #5cb176;
+      }
+
+      .c36[aria-checked='true'] .c38:before {
+        -webkit-transform: translateX(1rem);
+        -ms-transform: translateX(1rem);
+        transform: translateX(1rem);
+      }
+
+      .c3:focus-visible {
+        outline: none;
       }
 
       @media (prefers-reduced-motion:reduce) {
@@ -1034,6 +1038,7 @@ describe('Admin | containers | ListView', () => {
                               aria-hidden="true"
                               class="c41 c42"
                               role="button"
+                              spacing="1"
                             >
                               <span>
                                 <button
@@ -1175,6 +1180,7 @@ describe('Admin | containers | ListView', () => {
                               aria-hidden="true"
                               class="c41 c42"
                               role="button"
+                              spacing="1"
                             >
                               <span>
                                 <button

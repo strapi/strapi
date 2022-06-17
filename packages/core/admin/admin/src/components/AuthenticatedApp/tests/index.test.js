@@ -2,6 +2,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { useGuidedTour } from '@strapi/helper-plugin';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import { ConfigurationsContext } from '../../../contexts';
 import {
   fetchAppInfo,
@@ -11,6 +12,7 @@ import {
 } from '../utils/api';
 import packageJSON from '../../../../../package.json';
 import Theme from '../../Theme';
+import ThemeToggleProvider from '../../ThemeToggleProvider';
 import AuthenticatedApp from '..';
 
 const strapiVersion = packageJSON.version;
@@ -20,6 +22,9 @@ jest.mock('@strapi/helper-plugin', () => ({
   auth: { getUserInfo: () => ({ firstname: 'kai', lastname: 'doe' }) },
   useGuidedTour: jest.fn(() => ({
     setGuidedTourVisibility: jest.fn(),
+  })),
+  useNotification: jest.fn(() => ({
+    toggleNotification: jest.fn(),
   })),
 }));
 
@@ -43,13 +48,15 @@ const queryClient = new QueryClient({
 });
 
 const app = (
-  <Theme>
-    <QueryClientProvider client={queryClient}>
-      <ConfigurationsContext.Provider value={{ showReleaseNotification: false }}>
-        <AuthenticatedApp />
-      </ConfigurationsContext.Provider>
-    </QueryClientProvider>
-  </Theme>
+  <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+    <Theme>
+      <QueryClientProvider client={queryClient}>
+        <ConfigurationsContext.Provider value={{ showReleaseNotification: false }}>
+          <AuthenticatedApp />
+        </ConfigurationsContext.Provider>
+      </QueryClientProvider>
+    </Theme>
+  </ThemeToggleProvider>
 );
 
 describe('Admin | components | AuthenticatedApp', () => {

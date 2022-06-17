@@ -15,7 +15,6 @@
   "HeaderNav.link.advancedSettings": "Paramètres avancés",
   "HeaderNav.link.emailTemplates": "Templates d'e-mail",
   "HeaderNav.link.providers": "Fournisseurs",
-  "HeaderNav.link.roles": "Rôles & Permissions",
   "Plugin.permissions.plugins.description": "Définissez les actions autorisées dans le {name} plugin.",
   "Plugins.header.description": "Sont listés uniquement les actions associées à une route.",
   "Plugins.header.title": "Permissions",

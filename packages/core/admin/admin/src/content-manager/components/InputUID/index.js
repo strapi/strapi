@@ -82,7 +82,6 @@ const InputUID = ({
       onChange({ target: { name, value: data, type: 'text' } }, shouldSetInitialValue);
       setIsLoading(false);
     } catch (err) {
-      console.error({ err });
       setIsLoading(false);
     }
   };
@@ -107,7 +106,6 @@ const InputUID = ({
 
       setIsLoading(false);
     } catch (err) {
-      console.error({ err });
       setIsLoading(false);
     }
   };
@@ -124,8 +122,7 @@ const InputUID = ({
     if (
       debouncedValue &&
       debouncedValue.trim().match(UID_REGEX) &&
-      debouncedValue !== initialValue &&
-      !value
+      debouncedValue !== initialValue
     ) {
       checkAvailability();
     }
@@ -185,12 +182,10 @@ const InputUID = ({
     onChange(e);
   };
 
-  const formattedError = error ? formatMessage({ id: error, defaultMessage: error }) : undefined;
-
   return (
     <TextInput
       disabled={disabled}
-      error={formattedError}
+      error={error}
       endAction={
         <EndActionWrapper>
           {availability && availability.isAvailable && !regenerateLabel && (

@@ -10,7 +10,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const urlJoin = require('url-join');
 
-const { getAbsoluteServerUrl, sanitize } = require('@strapi/utils');
+const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = require('@strapi/utils');
 const { getService } = require('../utils');
 
 module.exports = ({ strapi }) => ({
@@ -58,8 +58,8 @@ module.exports = ({ strapi }) => ({
    * Promise to fetch a/an user.
    * @return {Promise}
    */
-  fetch(params, populate) {
-    return strapi.query('plugin::users-permissions.user').findOne({ where: params, populate });
+  fetch(id, params) {
+    return strapi.entityService.findOne('plugin::users-permissions.user', id, params);
   },
 
   /**
@@ -76,8 +76,8 @@ module.exports = ({ strapi }) => ({
    * Promise to fetch all users.
    * @return {Promise}
    */
-  fetchAll(params, populate) {
-    return strapi.query('plugin::users-permissions.user').findMany({ where: params, populate });
+  fetchAll(params) {
+    return strapi.entityService.findMany('plugin::users-permissions.user', params);
   },
 
   /**
@@ -118,6 +118,8 @@ module.exports = ({ strapi }) => ({
     const apiPrefix = strapi.config.get('api.rest.prefix');
     settings.message = await userPermissionService.template(settings.message, {
       URL: urlJoin(getAbsoluteServerUrl(strapi.config), apiPrefix, '/auth/email-confirmation'),
+      SERVER_URL: getAbsoluteServerUrl(strapi.config),
+      ADMIN_URL: getAbsoluteAdminUrl(strapi.config),
       USER: sanitizedUserInfo,
       CODE: confirmationToken,
     });

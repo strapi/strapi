@@ -1,12 +1,9 @@
+import { intervalToDuration } from 'date-fns';
+
+const zeroPad = num => String(num).padStart(2, '0');
+
 export const formatDuration = durationInSecond => {
-  const formatter = new Intl.DateTimeFormat('default', {
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-  });
+  const duration = intervalToDuration({ start: 0, end: durationInSecond * 1000 });
 
-  const date = new Date(1970, 0, 1);
-  date.setSeconds(durationInSecond);
-
-  return formatter.format(date);
+  return `${zeroPad(duration.hours)}:${zeroPad(duration.minutes)}:${zeroPad(duration.seconds)}`;
 };

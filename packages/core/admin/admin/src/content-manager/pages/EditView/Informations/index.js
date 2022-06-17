@@ -44,7 +44,7 @@ const Informations = () => {
       <Box paddingTop={2} paddingBottom={6}>
         <Divider />
       </Box>
-      <Stack size={4}>
+      <Stack spacing={4}>
         <Flex justifyContent="space-between">
           <Typography fontWeight="bold">
             {formatMessage({

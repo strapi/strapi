@@ -29,7 +29,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
       hasRadius={isNested}
       borderColor={isNested ? 'neutral200' : ''}
     >
-      <Stack size={6}>
+      <Stack spacing={6}>
         {fields.map((fieldRow, key) => {
           return (
             <Grid gap={4} key={key}>

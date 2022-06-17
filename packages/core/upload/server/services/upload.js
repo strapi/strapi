@@ -189,11 +189,11 @@ module.exports = ({ strapi }) => ({
       const { width, height } = await getDimensions(fileData);
 
       _.assign(fileData, {
-        provider: config.provider,
         width,
         height,
       });
     }
+    _.set(fileData, 'provider', config.provider);
 
     return this.add(fileData, { user });
   },
@@ -255,7 +255,7 @@ module.exports = ({ strapi }) => ({
         }
       }
 
-      getService('provider').upload(fileData);
+      await getService('provider').upload(fileData);
 
       // clear old formats
       _.set(fileData, 'formats', {});
@@ -265,7 +265,7 @@ module.exports = ({ strapi }) => ({
       if (await isSupportedImage(fileData)) {
         const thumbnailFile = await generateThumbnail(fileData);
         if (thumbnailFile) {
-          getService('provider').upload(thumbnailFile);
+          await getService('provider').upload(thumbnailFile);
           _.set(fileData, 'formats.thumbnail', thumbnailFile);
         }
 
@@ -276,7 +276,7 @@ module.exports = ({ strapi }) => ({
 
             const { key, file } = format;
 
-            getService('provider').upload(file);
+            await getService('provider').upload(file);
 
             _.set(fileData, ['formats', key], file);
           }
@@ -285,11 +285,11 @@ module.exports = ({ strapi }) => ({
         const { width, height } = await getDimensions(fileData);
 
         _.assign(fileData, {
-          provider: config.provider,
           width,
           height,
         });
       }
+      _.set(fileData, 'provider', config.provider);
     } finally {
       // delete temporary folder
       await fse.remove(tmpWorkingDirectory);

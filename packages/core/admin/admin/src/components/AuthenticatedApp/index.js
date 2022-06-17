@@ -1,6 +1,12 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 //  TODO: DS add loader
-import { auth, LoadingIndicatorPage, AppInfosContext, useGuidedTour } from '@strapi/helper-plugin';
+import {
+  auth,
+  LoadingIndicatorPage,
+  AppInfosContext,
+  useGuidedTour,
+  useNotification,
+} from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 import get from 'lodash/get';
 import packageJSON from '../../../../package.json';
@@ -20,6 +26,7 @@ const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {
   const { setGuidedTourVisibility } = useGuidedTour();
+  const toggleNotification = useNotification();
   const setGuidedTourVisibilityRef = useRef(setGuidedTourVisibility);
   const userInfo = auth.getUserInfo();
   const userName = get(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname);
@@ -34,7 +41,7 @@ const AuthenticatedApp = () => {
     { queryKey: 'app-infos', queryFn: fetchAppInfo },
     {
       queryKey: 'strapi-release',
-      queryFn: fetchStrapiLatestRelease,
+      queryFn: () => fetchStrapiLatestRelease(toggleNotification),
       enabled: showReleaseNotification,
       initialData: strapiVersion,
     },

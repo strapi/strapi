@@ -32,7 +32,7 @@ const TableHead = ({
           <Th>
             <BaseCheckbox
               aria-label={formatMessage({
-                id: 'app.component.table.select.all-entries',
+                id: 'global.select-all-entries',
                 defaultMessage: 'Select all entries',
               })}
               checked={areAllEntriesSelected}
@@ -96,7 +96,7 @@ const TableHead = ({
           <Th>
             <VisuallyHidden>
               {formatMessage({
-                id: 'components.TableHeader.actions-label',
+                id: 'global.actions',
                 defaultMessage: 'Actions',
               })}
             </VisuallyHidden>

@@ -114,7 +114,11 @@ module.exports = async ({ strapi }) => {
         },
 
         // Apollo Server
-        server.getMiddleware({ path }),
+        server.getMiddleware({
+          path,
+          cors: serverConfig.cors,
+          bodyParserConfig: serverConfig.bodyParserConfig,
+        }),
       ],
       config: {
         auth: false,

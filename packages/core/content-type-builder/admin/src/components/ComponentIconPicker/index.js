@@ -16,23 +16,14 @@ import Cell from './Cell';
 
 const CELL_WIDTH = 44;
 
-const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, value }) => {
-  const { allIcons, allComponentsIconAlreadyTaken } = useDataManager();
+const ComponentIconPicker = ({ error, intlLabel, name, onChange, value }) => {
+  const { allIcons } = useDataManager();
   const { formatMessage } = useIntl();
-  const [originalIcon] = useState(value);
-  const initialIcons = allIcons.filter(ico => {
-    if (isCreating) {
-      return !allComponentsIconAlreadyTaken.includes(ico);
-    }
-
-    // Edition
-    return !allComponentsIconAlreadyTaken.filter(icon => icon !== originalIcon).includes(ico);
-  });
 
   const searchWrapperRef = useRef();
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState('');
-  const [icons, setIcons] = useState(initialIcons);
+  const [icons, setIcons] = useState(allIcons);
   const toggleSearch = () => setShowSearch(prev => !prev);
 
   useEffect(() => {
@@ -43,7 +34,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
 
   const handleChangeSearch = ({ target: { value } }) => {
     setSearch(value);
-    setIcons(() => initialIcons.filter(icon => icon.includes(value)));
+    setIcons(() => allIcons.filter(icon => icon.includes(value)));
   };
 
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
@@ -69,7 +60,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
 
   return (
     <Box>
-      <Stack size={1}>
+      <Stack spacing={1}>
         <Flex justifyContent="space-between">
           <Typography
             variant="pi"
@@ -91,7 +82,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
                 }}
                 onClear={() => {
                   setSearch('');
-                  setIcons(initialIcons);
+                  setIcons(allIcons);
                   toggleSearch();
                 }}
                 value={search}
@@ -113,7 +104,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
             <IconButton onClick={toggleSearch} aria-label="Edit" icon={<Search />} noBorder />
           )}
         </Flex>
-        <Stack size={1}>
+        <Stack spacing={1}>
           <Box background="neutral100" borderColor={error ? 'danger600' : ''} hasRadius>
             <Box>
               <AutoSizer disableHeight>
@@ -175,7 +166,6 @@ ComponentIconPicker.defaultProps = {
 
 ComponentIconPicker.propTypes = {
   error: PropTypes.string,
-  isCreating: PropTypes.bool.isRequired,
   intlLabel: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,

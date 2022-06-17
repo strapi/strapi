@@ -16,7 +16,6 @@ const mergeTemplate = require('./utils/merge-template.js');
 
 const packageJSON = require('./resources/json/package.json');
 const createDatabaseConfig = require('./resources/templates/database.js');
-const createAdminConfig = require('./resources/templates/admin-config.js');
 const createEnvFile = require('./resources/templates/env.js');
 
 module.exports = async function createProject(scope, { client, connection, dependencies }) {
@@ -72,7 +71,6 @@ module.exports = async function createProject(scope, { client, connection, depen
     );
 
     // create config/server.js
-    await fse.writeFile(join(rootPath, `config/admin.js`), createAdminConfig());
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
 
     // merge template files if a template is specified
@@ -181,6 +179,9 @@ module.exports = async function createProject(scope, { client, connection, depen
 const installArguments = ['install', '--production', '--no-optional'];
 function runInstall({ rootPath, useYarn }) {
   if (useYarn) {
+    // Increase timeout for slow internet connections.
+    installArguments.push('--network-timeout 1000000');
+
     return execa('yarnpkg', installArguments, {
       cwd: rootPath,
       stdin: 'ignore',

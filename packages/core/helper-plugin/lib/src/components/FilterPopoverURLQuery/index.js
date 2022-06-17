@@ -118,7 +118,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onBlur, onToggle, 
     <Popover source={source} padding={3} spacing={4} onBlur={onBlur}>
       <FocusTrap onEscape={onToggle}>
         <form onSubmit={handleSubmit}>
-          <Stack size={1} style={{ minWidth: 184 }}>
+          <Stack spacing={1} style={{ minWidth: 184 }}>
             <Box>
               <Select
                 aria-label={formatMessage({

@@ -8,7 +8,7 @@ const stepper = {
     next: 'magic-link',
   },
   'magic-link': {
-    buttonSubmitLabel: { id: 'form.button.finish', defaultMessage: 'Finish' },
+    buttonSubmitLabel: { id: 'global.finish', defaultMessage: 'Finish' },
     isDisabled: true,
     next: null,
   },

@@ -17,7 +17,7 @@ const HeadersInput = () => {
   const { values, errors } = useFormikContext();
 
   return (
-    <Stack size={1}>
+    <Stack spacing={1}>
       <FieldLabel>
         {formatMessage({
           id: 'Settings.webhooks.form.headers',

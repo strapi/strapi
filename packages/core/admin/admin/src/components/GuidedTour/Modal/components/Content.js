@@ -14,7 +14,7 @@ const Content = ({ id, defaultMessage }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack size={4} paddingBottom={6}>
+    <Stack spacing={4} paddingBottom={6}>
       {formatMessage(
         { id, defaultMessage },
         {

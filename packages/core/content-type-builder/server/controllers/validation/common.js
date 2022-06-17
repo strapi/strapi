@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup } = require('@strapi/utils');
+const { yup, startsWithANumber } = require('@strapi/utils');
 const _ = require('lodash');
 
 const validators = {
@@ -19,7 +19,6 @@ const validators = {
 const NAME_REGEX = new RegExp('^[A-Za-z][_0-9A-Za-z]*$');
 const COLLECTION_NAME_REGEX = new RegExp('^[A-Za-z][-_0-9A-Za-z]*$');
 const CATEGORY_NAME_REGEX = new RegExp('^[A-Za-z][-_0-9A-Za-z]*$');
-const ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
 const ICON_REGEX = new RegExp('^[A-Za-z0-9][-A-Za-z0-9]*$');
 const UID_REGEX = new RegExp('^[A-Za-z0-9-_.~]*$');
 
@@ -61,8 +60,8 @@ const isValidKey = key => ({
 
 const isValidEnum = {
   name: 'isValidEnum',
-  message: '${path} must match the following regex: ' + ENUM_REGEX,
-  test: val => val === '' || ENUM_REGEX.test(val),
+  message: '${path} should not start with number',
+  test: val => val === '' || !startsWithANumber(val),
 };
 
 const areEnumValuesUnique = {

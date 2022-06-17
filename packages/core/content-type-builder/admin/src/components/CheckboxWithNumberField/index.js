@@ -29,7 +29,7 @@ const CheckboxWithNumberField = ({ error, intlLabel, modifiedData, name, onChang
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
   return (
-    <Stack size={2}>
+    <Stack spacing={2}>
       <Checkbox
         id={name}
         name={name}

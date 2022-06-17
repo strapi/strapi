@@ -71,7 +71,10 @@ const getEnabledPlugins = async strapi => {
       validatePluginName(packageInfo.strapi.name);
       installedPlugins[packageInfo.strapi.name] = {
         ...toDetailedDeclaration({ enabled: true, resolve: packagePath }),
-        info: packageInfo.strapi,
+        info: {
+          ...packageInfo.strapi,
+          packageName: packageInfo.name,
+        },
       };
     }
   }

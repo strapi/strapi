@@ -68,6 +68,10 @@ describe('FromComputerForm', () => {
       }
 
       .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -79,13 +83,13 @@ describe('FromComputerForm', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
+      }
+
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c4 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -93,10 +97,6 @@ describe('FromComputerForm', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c8 {
@@ -178,12 +178,10 @@ describe('FromComputerForm', () => {
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
         border: 1px solid #4945ff;
-        background: #4945ff;
       }
 
-      .c13 .sc-hRMWxn {
+      .c13 .sc-gJbFto {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -236,6 +234,11 @@ describe('FromComputerForm', () => {
         background: #4945ff;
       }
 
+      .c13 svg > g,
+      .c13 svg path {
+        fill: #ffffff;
+      }
+
       .c21 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -243,12 +246,12 @@ describe('FromComputerForm', () => {
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
+        border: 1px solid #4945ff;
         border: 1px solid #dcdce4;
         background: #ffffff;
       }
 
-      .c21 .sc-hRMWxn {
+      .c21 .sc-gJbFto {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -317,6 +320,10 @@ describe('FromComputerForm', () => {
       }
 
       .c18 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -328,13 +335,13 @@ describe('FromComputerForm', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c19 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c19 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -342,10 +349,6 @@ describe('FromComputerForm', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c17 {

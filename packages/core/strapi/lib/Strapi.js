@@ -37,6 +37,7 @@ const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 const { destroyOnSignal } = require('./utils/signals');
+const sanitizersRegistry = require('./core/registries/sanitizers');
 
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
@@ -50,8 +51,8 @@ const LIFECYCLES = {
 class Strapi {
   constructor(opts = {}) {
     destroyOnSignal(this);
-    this.dirs = utils.getDirs(opts.dir || process.cwd());
-    const appConfig = loadConfiguration(this.dirs.root, opts);
+    const rootDir = opts.dir || process.cwd();
+    const appConfig = loadConfiguration(rootDir, opts);
     this.container = createContainer(this);
     this.container.register('config', createConfigProvider(appConfig));
     this.container.register('content-types', contentTypesRegistry(this));
@@ -64,6 +65,9 @@ class Strapi {
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
+    this.container.register('sanitizers', sanitizersRegistry(this));
+
+    this.dirs = utils.getDirs(rootDir, { strapi: this });
 
     this.isLoaded = false;
     this.reload = this.reload();
@@ -155,6 +159,10 @@ class Strapi {
     return this.container.get('auth');
   }
 
+  get sanitizers() {
+    return this.container.get('sanitizers');
+  }
+
   async start() {
     try {
       if (!this.isLoaded) {
@@ -205,7 +213,12 @@ class Strapi {
       this.config.get('admin.autoOpen', true) !== false;
 
     if (shouldOpenAdmin && !isInitialized) {
-      await utils.openBrowser(this.config);
+      try {
+        await utils.openBrowser(this.config);
+        this.telemetry.send('didOpenTab');
+      } catch (e) {
+        this.telemetry.send('didNotOpenTab');
+      }
     }
   }
 
@@ -297,6 +310,10 @@ class Strapi {
     this.app = await loaders.loadSrcIndex(this);
   }
 
+  async loadSanitizers() {
+    await loaders.loadSanitizers(this);
+  }
+
   registerInternalHooks() {
     this.container.get('hooks').set('strapi::content-types.beforeSync', createAsyncParallelHook());
     this.container.get('hooks').set('strapi::content-types.afterSync', createAsyncParallelHook());
@@ -308,6 +325,7 @@ class Strapi {
   async register() {
     await Promise.all([
       this.loadApp(),
+      this.loadSanitizers(),
       this.loadPlugins(),
       this.loadAdmin(),
       this.loadAPIs(),

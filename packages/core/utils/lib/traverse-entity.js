@@ -41,6 +41,7 @@ const traverseEntity = async (visitor, options, entity) => {
     const isRelation = attribute.type === 'relation';
     const isComponent = attribute.type === 'component';
     const isDynamicZone = attribute.type === 'dynamiczone';
+    const isMedia = attribute.type === 'media';
 
     if (isRelation) {
       const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
@@ -48,6 +49,22 @@ const traverseEntity = async (visitor, options, entity) => {
       const traverseTarget = entry => {
         // Handle polymorphic relationships
         const targetSchemaUID = isMorphRelation ? entry.__type : attribute.target;
+        const targetSchema = strapi.getModel(targetSchemaUID);
+
+        const traverseOptions = { schema: targetSchema, path: newPath };
+
+        return traverseEntity(visitor, traverseOptions, entry);
+      };
+
+      // need to update copy
+      copy[key] = isArray(value)
+        ? await Promise.all(value.map(traverseTarget))
+        : await traverseTarget(value);
+    }
+
+    if (isMedia) {
+      const traverseTarget = entry => {
+        const targetSchemaUID = 'plugin::upload.file';
         const targetSchema = strapi.getModel(targetSchemaUID);
 
         const traverseOptions = { schema: targetSchema, path: newPath };

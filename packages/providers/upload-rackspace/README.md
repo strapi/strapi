@@ -21,11 +21,13 @@ yarn add @strapi/provider-upload-rackspace
 npm install @strapi/provider-upload-rackspace --save
 ```
 
-## Configurations
+## Configuration
 
-Your configuration is passed down to the client initialization. (e.g: `createClient(config)`). The implementation is based on the package `pkgcloud`. You can read the docs [here](https://github.com/pkgcloud/pkgcloud#storage).
+- `provider` defines the name of the provider
+- `providerOptions` is passed down during the construction of the provider. (ex: `createClient(config)`). [Complete list of options](https://github.com/pkgcloud/pkgcloud/blob/master/docs/providers/rackspace/README.md). The implementation is based on the package `pkgcloud`. [Documentation](https://github.com/pkgcloud/pkgcloud#storage)
+- `actionOptions` is passed directly to each method respectively allowing for custom options. You can find the complete list of [upload/ uploadStream options](https://github.com/pkgcloud/pkgcloud#upload-a-file) and [delete options](https://github.com/pkgcloud/pkgcloud/blob/master/docs/providers/rackspace/storage.md#clientremovefilecontainer-file-functionerr-result--)
 
-See the [using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) documentation for information on installing and using a provider. And see the [environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables) for setting and using environment variables in your configs.
+See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
 
 ### Provider Configuration
 
@@ -42,6 +44,11 @@ module.exports = ({ env }) => ({
         apiKey: env('RACKSPACE_KEY'),
         region: env('RACKSPACE_REGION'),
         container: env('RACKSPACE_CONTAINER'),
+      },
+      actionOptions: {
+        upload: {},
+        uploadStream: {},
+        delete: {},
       },
     },
   },

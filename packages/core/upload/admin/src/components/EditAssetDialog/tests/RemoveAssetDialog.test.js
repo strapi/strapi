@@ -124,18 +124,18 @@ describe('RemoveAssetDialog', () => {
         width: 1px;
       }
 
-      .c21 {
+      .c22 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c24 {
+      .c25 {
         padding-right: 8px;
       }
 
-      .c18 {
+      .c19 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -149,21 +149,21 @@ describe('RemoveAssetDialog', () => {
         outline: none;
       }
 
-      .c18 svg {
+      .c19 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c18 svg > g,
-      .c18 svg path {
+      .c19 svg > g,
+      .c19 svg path {
         fill: #ffffff;
       }
 
-      .c18[aria-disabled='true'] {
+      .c19[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c18:after {
+      .c19:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -178,11 +178,11 @@ describe('RemoveAssetDialog', () => {
         border: 2px solid transparent;
       }
 
-      .c18:focus-visible {
+      .c19:focus-visible {
         outline: none;
       }
 
-      .c18:focus-visible:after {
+      .c19:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -193,23 +193,23 @@ describe('RemoveAssetDialog', () => {
         border: 2px solid #4945ff;
       }
 
-      .c25 {
+      .c26 {
         height: 100%;
       }
 
-      .c19 {
+      .c20 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
+        border: 1px solid #4945ff;
         border: 1px solid #dcdce4;
         background: #ffffff;
       }
 
-      .c19 .c23 {
+      .c20 .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -220,68 +220,68 @@ describe('RemoveAssetDialog', () => {
         align-items: center;
       }
 
-      .c19 .c20 {
+      .c20 .c21 {
         color: #ffffff;
       }
 
-      .c19[aria-disabled='true'] {
+      .c20[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c19[aria-disabled='true'] .c20 {
+      .c20[aria-disabled='true'] .c21 {
         color: #666687;
       }
 
-      .c19[aria-disabled='true'] svg > g,
-      .c19[aria-disabled='true'] svg path {
+      .c20[aria-disabled='true'] svg > g,
+      .c20[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c19[aria-disabled='true']:active {
+      .c20[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c19[aria-disabled='true']:active .c20 {
+      .c20[aria-disabled='true']:active .c21 {
         color: #666687;
       }
 
-      .c19[aria-disabled='true']:active svg > g,
-      .c19[aria-disabled='true']:active svg path {
+      .c20[aria-disabled='true']:active svg > g,
+      .c20[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c19:hover {
+      .c20:hover {
         background-color: #f6f6f9;
       }
 
-      .c19:active {
+      .c20:active {
         background-color: #eaeaef;
       }
 
-      .c19 .c20 {
+      .c20 .c21 {
         color: #32324d;
       }
 
-      .c19 svg > g,
-      .c19 svg path {
+      .c20 svg > g,
+      .c20 svg path {
         fill: #32324d;
       }
 
-      .c22 {
+      .c23 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
+        border: 1px solid #4945ff;
         border: 1px solid #f5c0b8;
         background: #fcecea;
       }
 
-      .c22 .c23 {
+      .c23 .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -292,62 +292,62 @@ describe('RemoveAssetDialog', () => {
         align-items: center;
       }
 
-      .c22 .c20 {
+      .c23 .c21 {
         color: #ffffff;
       }
 
-      .c22[aria-disabled='true'] {
+      .c23[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c22[aria-disabled='true'] .c20 {
+      .c23[aria-disabled='true'] .c21 {
         color: #666687;
       }
 
-      .c22[aria-disabled='true'] svg > g,
-      .c22[aria-disabled='true'] svg path {
+      .c23[aria-disabled='true'] svg > g,
+      .c23[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c22[aria-disabled='true']:active {
+      .c23[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c22[aria-disabled='true']:active .c20 {
+      .c23[aria-disabled='true']:active .c21 {
         color: #666687;
       }
 
-      .c22[aria-disabled='true']:active svg > g,
-      .c22[aria-disabled='true']:active svg path {
+      .c23[aria-disabled='true']:active svg > g,
+      .c23[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c22:hover {
+      .c23:hover {
         background-color: #ffffff;
       }
 
-      .c22:active {
+      .c23:active {
         background-color: #ffffff;
         border: 1px solid #d02b20;
       }
 
-      .c22:active .c20 {
+      .c23:active .c21 {
         color: #d02b20;
       }
 
-      .c22:active svg > g,
-      .c22:active svg path {
+      .c23:active svg > g,
+      .c23:active svg path {
         fill: #d02b20;
       }
 
-      .c22 .c20 {
+      .c23 .c21 {
         color: #b72b1a;
       }
 
-      .c22 svg > g,
-      .c22 svg path {
+      .c23 svg > g,
+      .c23 svg path {
         fill: #b72b1a;
       }
 
@@ -372,11 +372,15 @@ describe('RemoveAssetDialog', () => {
         padding-bottom: 8px;
       }
 
-      .c14 {
+      .c15 {
         padding: 16px;
       }
 
       .c5 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -388,13 +392,13 @@ describe('RemoveAssetDialog', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
+      }
+
+      .c17 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c16 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -402,10 +406,6 @@ describe('RemoveAssetDialog', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c7 {
@@ -443,20 +443,20 @@ describe('RemoveAssetDialog', () => {
         fill: #d02b20;
       }
 
-      .c17 > * {
+      .c18 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c17 > * + * {
+      .c18 > * + * {
         margin-left: 8px;
       }
 
-      .c15 {
+      .c16 {
         border-top: 1px solid #eaeaef;
       }
 
-      .c15 button {
+      .c16 button {
         width: 100%;
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
@@ -468,7 +468,11 @@ describe('RemoveAssetDialog', () => {
         justify-content: center;
       }
 
-      .c12 {
+      .c13 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -480,13 +484,13 @@ describe('RemoveAssetDialog', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c11 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -496,16 +500,16 @@ describe('RemoveAssetDialog', () => {
         flex-direction: column;
       }
 
-      .c11 > * {
+      .c12 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c11 > * + * {
+      .c12 > * + * {
         margin-top: 8px;
       }
 
-      .c13 {
+      .c14 {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -586,13 +590,14 @@ describe('RemoveAssetDialog', () => {
                       </div>
                     </div>
                     <div
-                      class="c11"
+                      class="c11 c12"
+                      spacing="2"
                     >
                       <div
-                        class="c12"
+                        class="c13"
                       >
                         <span
-                          class="c13"
+                          class="c14"
                           id="confirm-description"
                         >
                           Are you sure you want to delete this?
@@ -601,31 +606,32 @@ describe('RemoveAssetDialog', () => {
                     </div>
                   </div>
                   <div
-                    class="c14 c15"
+                    class="c15 c16"
                   >
                     <div
-                      class="c16 c17"
+                      class="c17 c18"
+                      spacing="2"
                     >
                       <button
                         aria-disabled="false"
-                        class="c18 c19"
+                        class="c19 c20"
                         type="button"
                       >
                         <span
-                          class="c20 c21"
+                          class="c21 c22"
                         >
                           Cancel
                         </span>
                       </button>
                       <button
                         aria-disabled="false"
-                        class="c18 c22"
+                        class="c19 c23"
                         id="confirm-delete"
                         type="button"
                       >
                         <div
                           aria-hidden="true"
-                          class="c23 c24 c25"
+                          class="c24 c25 c26"
                         >
                           <svg
                             fill="none"
@@ -641,7 +647,7 @@ describe('RemoveAssetDialog', () => {
                           </svg>
                         </div>
                         <span
-                          class="c20 c21"
+                          class="c21 c22"
                         >
                           Confirm
                         </span>

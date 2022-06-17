@@ -11,11 +11,11 @@ const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack size={2}>
+    <Stack spacing={2}>
       <Typography variant="pi" fontWeight="bold" textColor="neutral800" htmlFor={name} as="label">
         {formatMessage(intlLabel)}
       </Typography>
-      <Wrapper horizontal size={4} style={{ alignItems: 'stretch' }}>
+      <Wrapper horizontal spacing={4} style={{ alignItems: 'stretch' }}>
         {radios.map(radio => {
           return (
             <label htmlFor={radio.value.toString()} key={radio.value} className="container">
@@ -34,7 +34,7 @@ const CustomRadioGroup = ({ intlLabel, name, onChange, radios, value }) => {
                   <Box paddingRight={4}>
                     <span className="checkmark" />
                   </Box>
-                  <Stack size={2}>
+                  <Stack spacing={2}>
                     <Typography fontWeight="bold">{formatMessage(radio.title)}</Typography>
                     <Typography variant="pi" textColor="neutral600">
                       {formatMessage(radio.description)}

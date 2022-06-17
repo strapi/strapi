@@ -5,3 +5,7 @@ comment:
 
 github_checks:
   annotations: false
+
+ignore:
+  - '**/*.md'
+  - '**/*.mdx'

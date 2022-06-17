@@ -16,7 +16,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
   return (
     <>
       <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-        <Stack size={4}>
+        <Stack spacing={4}>
           <Flex justifyContent="space-between">
             <Box>
               <Box>
@@ -24,7 +24,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
                   {role
                     ? role.name
                     : formatMessage({
-                        id: 'Settings.roles.form.title',
+                        id: 'global.details',
                         defaultMessage: 'Details',
                       })}
                 </Typography>
@@ -58,7 +58,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
                 name="name"
                 error={errors.name && formatMessage({ id: errors.name })}
                 label={formatMessage({
-                  id: 'Settings.roles.form.input.name',
+                  id: 'global.name',
                   defaultMessage: 'Name',
                 })}
                 onChange={onChange}
@@ -70,7 +70,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
               <Textarea
                 disabled={disabled}
                 label={formatMessage({
-                  id: 'Settings.roles.form.input.description',
+                  id: 'global.description',
                   defaultMessage: 'Description',
                 })}
                 name="description"
