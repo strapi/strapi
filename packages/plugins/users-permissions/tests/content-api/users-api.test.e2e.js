@@ -80,6 +80,22 @@ describe('Users API', () => {
     data.user = res.body;
   });
 
+  test('Updating unknown user returns 404', async () => {
+    const res = await rq({
+      method: 'PUT',
+      url: '/users/99999999',
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toMatchObject({
+      error: {
+        message: 'User not found',
+        name: 'NotFoundError',
+        status: 404,
+      },
+    });
+  });
+
   describe('Read users', () => {
     test('without filter', async () => {
       const res = await rq({
