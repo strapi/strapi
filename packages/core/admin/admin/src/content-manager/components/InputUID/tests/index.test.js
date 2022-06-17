@@ -47,6 +47,36 @@ describe('<InputUID />', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c9 {
+        border: none;
+        background: transparent;
+        font-size: 1.6rem;
+        width: auto;
+        padding: 0;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c11 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
       .c7 {
         padding-right: 12px;
         padding-left: 8px;
@@ -173,36 +203,6 @@ describe('<InputUID />', () => {
 
       .c1 > * + * {
         margin-top: 4px;
-      }
-
-      .c11 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c9 {
-        border: none;
-        background: transparent;
-        font-size: 1.6rem;
-        width: auto;
-        padding: 0;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c8 {
