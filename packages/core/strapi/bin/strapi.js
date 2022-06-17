@@ -221,7 +221,7 @@ program
     'Specify a relative directory in which the schemas definitions will be generated'
   )
   .option('-f, --file <file>', 'Specify a filename to store the schemas definitions')
-  .option('-s, --silence', `Don't display debug information`, false)
+  .option('-d, --debug', `Display debug information`, false)
   .action(getLocalScript('content-types/generate-types'));
 
 program

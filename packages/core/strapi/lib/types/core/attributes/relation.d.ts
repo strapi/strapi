@@ -26,7 +26,7 @@ export interface PolymorphicRelationAttributeProperties<
 export type RelationAttribute<
   S extends SchemaUID,
   R extends RelationsType,
-  T extends SchemaUID
+  T extends R extends PolymorphicRelationsType ? never: SchemaUID = never
 > = Attribute<'relation'> &
   // Properties
   (R extends BasicRelationsType

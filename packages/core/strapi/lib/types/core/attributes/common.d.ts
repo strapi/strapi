@@ -36,7 +36,7 @@ export type SetMinMax<T extends MinMaxOption<U>, U = number> = T;
 export type SetMinMaxLength<T extends MinMaxLengthOption> = T;
 
 // pluginOptions
-export type SetAttributePluginOptions<T extends object = object> = { pluginOptions?: T };
+export type SetPluginOptions<T extends object = object> = { pluginOptions?: T };
 
 // default
 export type DefaultTo<T> = { default: T };
