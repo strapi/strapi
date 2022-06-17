@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "4.1.12",
+  "version": "4.2.0",
   "description": "Protect your API with a full-authentication process based on JWT",
   "repository": {
     "type": "git",
@@ -71,7 +71,7 @@
     "koa": "^2.13.1"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

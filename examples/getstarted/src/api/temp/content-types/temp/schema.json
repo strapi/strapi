@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "temps",
+  "info": {
+    "singularName": "temp",
+    "pluralName": "temps",
+    "displayName": "temp",
+    "name": "temp",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "pluginOptions": {}
+    },
+    "category": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::category.category"
+    },
+    "categories": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::category.category",
+      "inversedBy": "temps"
+    }
+  }
+}

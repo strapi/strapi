@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.1.12",
+  "version": "4.2.0",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -91,14 +91,14 @@
     "@babel/preset-flow": "7.16.7",
     "@babel/preset-react": "7.16.7",
     "@babel/runtime": "7.16.7",
-    "@strapi/admin": "^4.1.12",
+    "@strapi/admin": "^4.2.0",
     "@strapi/design-system": "1.1.1",
     "@strapi/icons": "1.1.1",
-    "@strapi/strapi": "^4.1.12",
+    "@strapi/strapi": "^4.2.0",
     "webpack": "5.65.0"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   }
 }

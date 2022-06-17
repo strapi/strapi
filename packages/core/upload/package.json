@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-upload",
-  "version": "4.1.12",
+  "version": "4.2.0",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -23,7 +23,7 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
-    "@strapi/provider-upload-local": "4.1.12",
+    "@strapi/provider-upload-local": "4.2.0",
     "byte-size": "7.0.1",
     "cropperjs": "1.5.11",
     "fs-extra": "10.0.0",
@@ -40,11 +40,11 @@
   },
   "peerDependencies": {
     "@strapi/design-system": "1.1.1",
-    "@strapi/helper-plugin": "4.1.12",
+    "@strapi/helper-plugin": "4.2.0",
     "@strapi/icons": "1.1.1",
-    "@strapi/provider-upload-aws-s3": "4.1.12",
-    "@strapi/strapi": "4.1.12",
-    "@strapi/utils": "4.1.12",
+    "@strapi/provider-upload-aws-s3": "4.2.0",
+    "@strapi/strapi": "4.2.0",
+    "@strapi/utils": "4.2.0",
     "aws-s3": "2.0.5",
     "axios": "0.24.0",
     "date-fns": "2.22.1",
@@ -63,7 +63,7 @@
     "webpack": "5.65.0"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {
