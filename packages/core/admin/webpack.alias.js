@@ -5,6 +5,7 @@ const path = require('path');
 const alias = [
   '@fortawesome/fontawesome-svg-core',
   '@fortawesome/free-solid-svg-icons',
+  '@strapi/helper-plugin',
   'history',
   'hoist-non-react-statics',
   'immer',
