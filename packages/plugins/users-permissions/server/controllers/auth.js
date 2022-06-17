@@ -18,7 +18,7 @@ const {
 } = require('./validation/auth');
 
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
-const { ApplicationError, ValidationError } = utils.errors;
+const { ApplicationError, ValidationError, UnauthorizedError } = utils.errors;
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -59,7 +59,7 @@ module.exports = {
       const user = await strapi.query('plugin::users-permissions.user').findOne({ where: query });
 
       if (!user) {
-        throw new ValidationError('Invalid identifier or password');
+        throw new UnauthorizedError('Invalid identifier or password');
       }
 
       if (
@@ -86,7 +86,7 @@ module.exports = {
       );
 
       if (!validPassword) {
-        throw new ValidationError('Invalid identifier or password');
+        throw new UnauthorizedError('Invalid identifier or password');
       } else {
         ctx.send({
           jwt: getService('jwt').issue({
