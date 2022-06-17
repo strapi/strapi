@@ -7,6 +7,8 @@ import React, { useEffect, useState } from 'react';
 
 import { useIntl } from 'react-intl';
 
+import moment from 'moment';
+
 import {
   request,
   LoadingIndicatorPage,
@@ -43,7 +45,7 @@ const PageView = () => {
   const [shouldFetch, setShouldFetch] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [globalData, setGlobalData] = useState({ messageId: '', disabled: true });
+  const [globalData, setGlobalData] = useState({ messageId: '', disabled: true, licenseInfo: {} });
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
 
@@ -56,7 +58,7 @@ const PageView = () => {
   const fetchLicense = async () => {
     try {
       const {
-        data: { messageId, disabled },
+        data: { messageId, disabled, licenseInfo },
       } = await request(
         '/admin/licenses',
         {
@@ -65,7 +67,7 @@ const PageView = () => {
         true
       );
 
-      setGlobalData({ messageId, disabled });
+      setGlobalData({ messageId, disabled, licenseInfo });
       setIsLoading(false);
     } catch (err) {
       console.log(err);
@@ -107,9 +109,13 @@ const PageView = () => {
     } catch (error) {
       console.log(error);
     } finally {
+      setSavedLicense('');
+      setLicense('');
       unlockAppWithAutoreload();
     }
   };
+
+  console.log(globalData.licenseInfo.expireAt);
 
   return (
     <Layout>
@@ -162,7 +168,20 @@ const PageView = () => {
                     subtitle={`${formatMessage({
                       id: globalData.messageId,
                       defaultMessage: '',
-                    })}`}
+                    })}. ${
+                      globalData.licenseInfo
+                        ? `${formatMessage({
+                            id: 'Settings.license.information.license.edition',
+                            defaultMessage: 'Edition',
+                          })} ${globalData.licenseInfo.type} - ${formatMessage({
+                            id: 'Settings.license.information.license.expires_on',
+                            defaultMessage: 'Expires on',
+                          })}: ${moment(globalData.licenseInfo.expireAt).format('MM/DD/YYYY')}`
+                        : `${formatMessage({
+                            id: 'Settings.license.information.license.invalid',
+                            defaultMessage: 'Invalid license',
+                          })}`
+                    }`}
                     icon={<InformationSquare />}
                     iconBackground="primary100"
                   />

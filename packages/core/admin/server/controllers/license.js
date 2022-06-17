@@ -1,15 +1,26 @@
 'use strict';
 
 const fs = require('fs');
+// eslint-disable-next-line node/no-extraneous-require
+const ee = require('@strapi/strapi/lib/utils/ee');
 
 module.exports = {
   async findLicense(ctx) {
+    let licenseInfo = {};
+
+    if (strapi.EE) {
+      licenseInfo = ee.licenseInfo;
+    } else {
+      licenseInfo = null;
+    }
+
     // Make the license field disabled if not in development env
     if (process.env.NODE_ENV !== 'development') {
       return (ctx.body = {
         data: {
           messageId: 'Settings.license.wrong-env',
           disabled: true,
+          licenseInfo,
         },
       });
     }
@@ -47,6 +58,7 @@ module.exports = {
       data: {
         messageId,
         disabled: false,
+        licenseInfo,
       },
     };
   },
