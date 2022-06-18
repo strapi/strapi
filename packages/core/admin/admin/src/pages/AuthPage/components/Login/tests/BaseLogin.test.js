@@ -8,6 +8,12 @@ import * as yup from 'yup';
 import { createMemoryHistory } from 'history';
 import BaseLogin from '../BaseLogin';
 
+jest.mock('../../../../../hooks/useConfigurations', () => () => ({
+  logos: {
+    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+  },
+}));
+
 describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
   it('should render and match the snapshot', () => {
     const history = createMemoryHistory();
@@ -680,6 +686,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                 alt=""
                 aria-hidden="true"
                 class="c5"
+                src="defaultAuthLogo.png"
               />
               <div
                 class="c6"

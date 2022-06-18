@@ -1023,6 +1023,10 @@ Array [
     "name": "Kannada (India) (kn-IN)",
   },
   Object {
+    "code": "kaa",
+    "name": "Kara-Kalpak (kaa)",
+  },
+  Object {
     "code": "kk",
     "name": "Kazakh (kk)",
   },
