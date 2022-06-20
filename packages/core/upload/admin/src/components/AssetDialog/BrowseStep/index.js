@@ -80,6 +80,13 @@ export const BrowseStep = ({
   const assetCount = assets.length;
   const folderCount = folders.length;
 
+  const handleClickFolderCard = id => {
+    // Search query will always fetch the same results
+    // we remove it here to allow navigating in a folder and see the result of this navigation
+    onChangeSearch('');
+    onChangeFolder(id);
+  };
+
   return (
     <Stack spacing={4}>
       {onSelectAllAsset && (
@@ -181,7 +188,7 @@ export const BrowseStep = ({
                 <FolderCard
                   ariaLabel={folder.name}
                   id={`folder-${folder.id}`}
-                  onClick={() => onChangeFolder(folder.id)}
+                  onClick={() => handleClickFolderCard(folder.id)}
                   cardActions={
                     onEditFolder && (
                       <IconButton
@@ -196,7 +203,7 @@ export const BrowseStep = ({
                   }
                 >
                   <FolderCardBody>
-                    <FolderCardBodyAction onClick={() => onChangeFolder(folder.id)}>
+                    <FolderCardBodyAction onClick={() => handleClickFolderCard(folder.id)}>
                       <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
                         <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                           {folder.name}
