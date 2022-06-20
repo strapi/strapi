@@ -34,7 +34,7 @@ const DEFAULT_OUT_FILENAME = 'schemas.d.ts';
  * @param {boolean} [options.debug]
  */
 const generateSchemasDefinitions = async (options = {}) => {
-  const { strapi, outDir = process.cwd(), file = DEFAULT_OUT_FILENAME, debug = true } = options;
+  const { strapi, outDir = process.cwd(), file = DEFAULT_OUT_FILENAME, debug = false } = options;
 
   const schemas = getAllStrapiSchemas(strapi);
 
