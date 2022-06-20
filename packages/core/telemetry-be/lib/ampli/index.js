@@ -7,7 +7,7 @@
  * To update run 'ampli pull strapi-backend'
  *
  * Required dependencies: @amplitude/node@^1.10.0
- * Tracking Plan Version: 12
+ * Tracking Plan Version: 13
  * Build: 1.0.0
  * Runtime: node.js:javascript-ampli
  *
@@ -73,6 +73,11 @@ const ApiKey = {
 };
 
 /**
+ * @typedef {Object} GeneratorsScope
+ * @param {*} scope Property has no description in tracking plan.
+ */
+
+/**
  * @typedef {Object} PackagesCoreStrapiGroup
  * @param {string} diveceId Property has no description in tracking plan.
  * @param {string} uuid Property has no description in tracking plan.
@@ -83,10 +88,10 @@ const ApiKey = {
  */
 const DefaultOptions = {
   plan: {
-    version: '12',
+    version: '13',
     branch: 'main',
     source: 'strapi-backend',
-    versionId: '3c94cd0c-5a97-4fa8-8a8b-c142f9e89c66',
+    versionId: 'f06e3f4a-ae74-4742-bfc1-444b46985e49',
   },
 };
 
@@ -246,8 +251,9 @@ class DidUpdateRolePermissions {
 }
 
 class WillCreateProject {
-  constructor() {
+  constructor(properties) {
     this.event_type = 'willCreateProject';
+    this.event_properties = properties;
   }
 }
 
@@ -808,13 +814,15 @@ class Ampli {
    * Owner: Ivan Sevcenko
    *
    * @param {string} userId The user's ID.
+   * @param {Object} properties The event's properties.
+   * @param {*} properties.scope Property has no description in tracking plan.
    * @param {EventOptions} [options] Options for this track call.
    * @param {MiddlewareExtra} [extra] Extra untyped parameters for use in middleware.
    *
    * @return {{promise: Promise<Response>}}
    */
-  willCreateProject(userId, options, extra) {
-    return this.track(userId, new WillCreateProject(), options, extra);
+  willCreateProject(userId, properties, options, extra) {
+    return this.track(userId, new WillCreateProject(properties), options, extra);
   }
 
   /**
