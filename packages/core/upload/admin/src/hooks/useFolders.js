@@ -19,17 +19,23 @@ export const useFolders = ({ enabled = true, query = {} }) => {
   if (_q) {
     params = {
       ...paramsExceptFolderAndQ,
+      pagination: {
+        pageSize: -1,
+      },
       _q,
     };
   } else {
     params = {
       ...paramsExceptFolderAndQ,
+      pagination: {
+        pageSize: -1,
+      },
       filters: {
         $and: [
-          ...(query?.filters?.$and ?? []),
+          ...(paramsExceptFolderAndQ?.filters?.$and ?? []),
           {
             parent: {
-              id: query?.folder ?? {
+              id: folder ?? {
                 $null: true,
               },
             },

@@ -26,10 +26,10 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
       ...paramsExceptFolderAndQ,
       filters: {
         $and: [
-          ...(query?.filters?.$and ?? []),
+          ...(paramsExceptFolderAndQ?.filters?.$and ?? []),
           {
             folder: {
-              id: query?.folder ?? {
+              id: folder ?? {
                 $null: true,
               },
             },
