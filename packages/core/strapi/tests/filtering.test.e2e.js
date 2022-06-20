@@ -167,6 +167,40 @@ describe('Filtering API', () => {
         expect(res.body.data).toEqual([]);
       });
     });
+    describe('Filter equals with case insensitive', () => {
+      test('Should be usable with eqsi suffix', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              name: {
+                $eqsi: 'PRODuct 1',
+              },
+            },
+          },
+        });
+
+        expect(res.body.data.length).toBe(1);
+        expect(res.body.data[0]).toMatchObject(data.product[0]);
+      });
+
+      test('Should return an empty array when no match', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              name: {
+                $eqsi: 'Product non existant',
+              },
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([]);
+      });
+    });
 
     describe('Filter not equals', () => {
       test('Should return an array with matching entities', async () => {
