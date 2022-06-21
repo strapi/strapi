@@ -83,7 +83,7 @@ const getSelectStyles = (theme, error) => {
         ...base,
         lineHeight: theme.spaces[5],
         backgroundColor,
-        borderRadius: 4,
+        borderRadius: theme.borderRadius,
         '&:active': {
           backgroundColor: theme.colors.primary100,
         },
