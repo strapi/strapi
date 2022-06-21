@@ -177,40 +177,4 @@ describe('useEditFolder', () => {
       })
     );
   });
-
-  test('calls toggleNotification in case of an error', async () => {
-    const originalConsoleError = console.error;
-    console.error = jest.fn();
-
-    axiosInstance.put.mockRejectedValue({ message: 'err-test' });
-
-    const toggleNotification = useNotification();
-    const {
-      result: { current },
-      waitFor,
-    } = await setup();
-    const { editFolder } = current;
-
-    try {
-      await act(async () => {
-        await editFolder(
-          {
-            name: FOLDER_EDIT_FIXTURE.name,
-            parent: FOLDER_EDIT_FIXTURE.parent,
-          },
-          FOLDER_EDIT_FIXTURE.id
-        );
-      });
-    } catch (err) {
-      // ...
-    }
-
-    await waitFor(() =>
-      expect(toggleNotification).toHaveBeenCalledWith(
-        expect.objectContaining({ message: 'err-test' })
-      )
-    );
-
-    console.error = originalConsoleError;
-  });
 });

@@ -258,7 +258,7 @@ describe('Media library homepage', () => {
       it('shows the create button if the user has create permissions', () => {
         renderML();
 
-        expect(screen.getByText('header.actions.add-folder')).toBeInTheDocument();
+        expect(screen.getByText('Add new folder')).toBeInTheDocument();
       });
 
       it('hides the create button if the user does not have create permissions', () => {
@@ -269,7 +269,7 @@ describe('Media library homepage', () => {
 
         renderML();
 
-        expect(screen.queryByText('header.actions.add-folder')).not.toBeInTheDocument();
+        expect(screen.queryByText('Add new folder')).not.toBeInTheDocument();
       });
     });
   });
