@@ -152,6 +152,30 @@ describe('useAssets', () => {
     );
   });
 
+  test('does not use folder filter in params if _q', async () => {
+    const { result, waitFor, waitForNextUpdate } = await setup({
+      query: { folder: 5, _q: 'something', filters: { $and: [{ something: 'true' }] } },
+    });
+
+    await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
+
+    const expected = {
+      filters: {
+        $and: [
+          {
+            something: true,
+          },
+        ],
+      },
+      _q: 'something',
+    };
+
+    expect(axiosInstance.get).toBeCalledWith(
+      `/upload/files?${stringify(expected, { encode: false })}`
+    );
+  });
+
   test('it does not fetch, if skipWhen is set', async () => {
     const { result, waitFor } = await setup({ skipWhen: true });
 

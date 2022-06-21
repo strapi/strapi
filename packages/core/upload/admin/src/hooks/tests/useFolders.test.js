@@ -104,6 +104,33 @@ describe('useFolders', () => {
     );
   });
 
+  test('does not use parent filter in params if _q', async () => {
+    const { result, waitFor, waitForNextUpdate } = await setup({
+      query: { folder: 5, _q: 'something', filters: { $and: [{ something: 'true' }] } },
+    });
+
+    await waitFor(() => result.current.isSuccess);
+    await waitForNextUpdate();
+
+    const expected = {
+      filters: {
+        $and: [
+          {
+            something: 'true',
+          },
+        ],
+      },
+      pagination: {
+        pageSize: -1,
+      },
+      _q: 'something',
+    };
+
+    expect(axiosInstance.get).toBeCalledWith(
+      `/upload/folders?${stringify(expected, { encode: false })}`
+    );
+  });
+
   test('fetches data from the right URL if a query param was set', async () => {
     const { result, waitFor, waitForNextUpdate } = await setup({ query: { folder: 1 } });
 
