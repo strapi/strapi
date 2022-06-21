@@ -12,7 +12,7 @@ const { getService } = require('../utils');
 const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
 
 const { sanitize } = utils;
-const { ApplicationError, ValidationError } = utils.errors;
+const { ApplicationError, ValidationError, NotFoundError } = utils.errors;
 
 const sanitizeOutput = (user, ctx) => {
   const schema = strapi.getModel('plugin::users-permissions.user');
@@ -91,6 +91,9 @@ module.exports = {
     const { email, username, password } = ctx.request.body;
 
     const user = await getService('user').fetch(id);
+    if (!user) {
+      throw new NotFoundError(`User not found`);
+    }
 
     await validateUpdateUserBody(ctx.request.body);
 

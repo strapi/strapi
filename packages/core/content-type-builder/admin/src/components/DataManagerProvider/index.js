@@ -541,10 +541,6 @@ const DataManagerProvider = ({
         addAttribute,
         addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(components, ['category']),
-        allComponentsIconAlreadyTaken: retrieveSpecificInfoFromComponents(components, [
-          'schema',
-          'icon',
-        ]),
         allIcons,
         changeDynamicZoneComponents,
         components,

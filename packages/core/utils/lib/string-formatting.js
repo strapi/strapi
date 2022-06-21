@@ -2,6 +2,7 @@
 const _ = require('lodash');
 const { trimChars, trimCharsEnd, trimCharsStart } = require('lodash/fp');
 const slugify = require('@sindresorhus/slugify');
+const { kebabCase } = require('lodash');
 
 const nameToSlug = (name, options = { separator: '-' }) => slugify(name, options);
 
@@ -58,6 +59,8 @@ const joinBy = (joint, ...args) => {
   }, '');
 };
 
+const toKebabCase = value => kebabCase(value);
+
 module.exports = {
   nameToSlug,
   nameToCollectionName,
@@ -68,6 +71,7 @@ module.exports = {
   stringEquals,
   isCamelCase,
   isKebabCase,
+  toKebabCase,
   toRegressedEnumValue,
   startsWithANumber,
   joinBy,

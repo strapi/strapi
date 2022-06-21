@@ -36,23 +36,24 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     ];
     const attributesForRequest = _.omit(attributes, attributesToOmit);
 
-    const requiredAttributes = Object.entries(attributesForRequest)
-      .filter(([, attribute]) => attribute.required)
-      .map(([attributeName, attribute]) => {
-        return { [attributeName]: attribute };
-      });
+    // Get a list of required attribute names
+    const requiredAttributes = Object.entries(attributesForRequest).reduce((acc, attribute) => {
+      const [attributeKey, attributeValue] = attribute;
 
-    const requestAttributes =
-      routeMethods.includes('POST') && requiredAttributes.length
-        ? Object.assign({}, ...requiredAttributes)
-        : attributesForRequest;
+      if (attributeValue.required) {
+        acc.push(attributeKey);
+      }
+
+      return acc;
+    }, []);
 
     if (hasLocalizationPath) {
       schemas = {
         ...schemas,
         [`${pascalCase(uniqueName)}LocalizationRequest`]: {
+          required: [...requiredAttributes, 'locale'],
           type: 'object',
-          properties: cleanSchemaAttributes(requestAttributes, { isRequest: true }),
+          properties: cleanSchemaAttributes(attributesForRequest, { isRequest: true }),
         },
       };
     }
@@ -62,10 +63,12 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       ...schemas,
       [`${pascalCase(uniqueName)}Request`]: {
         type: 'object',
+        required: ['data'],
         properties: {
           data: {
+            required: requiredAttributes,
             type: 'object',
-            properties: cleanSchemaAttributes(requestAttributes, { isRequest: true }),
+            properties: cleanSchemaAttributes(attributesForRequest, { isRequest: true }),
           },
         },
       },
@@ -92,6 +95,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     schemas = {
       ...schemas,
       [`${pascalCase(uniqueName)}ListResponse`]: {
+        type: 'object',
         properties: {
           data: {
             type: 'array',
@@ -125,6 +129,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   schemas = {
     ...schemas,
     [`${pascalCase(uniqueName)}Response`]: {
+      type: 'object',
       properties: {
         data: {
           type: 'object',
