@@ -80,11 +80,11 @@ export const BrowseStep = ({
   const assetCount = assets.length;
   const folderCount = folders.length;
 
-  const handleClickFolderCard = id => {
+  const handleClickFolderCard = (...args) => {
     // Search query will always fetch the same results
     // we remove it here to allow navigating in a folder and see the result of this navigation
     onChangeSearch('');
-    onChangeFolder(id);
+    onChangeFolder(...args);
   };
 
   return (
