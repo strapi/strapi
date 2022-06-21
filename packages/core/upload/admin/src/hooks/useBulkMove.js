@@ -49,9 +49,6 @@ export const useBulkMove = () => {
         },
       });
     },
-    onError: error => {
-      toggleNotification({ type: 'warning', message: error.message });
-    },
   });
 
   const move = (destinationFolderId, filesAndFolders) =>
