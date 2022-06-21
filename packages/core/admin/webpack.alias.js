@@ -2,18 +2,19 @@
 
 const path = require('path');
 
-const alias = [
-  'object-assign',
-  'whatwg-fetch',
+const aliasExactMatch = [
+  '@strapi/design-system',
+  '@strapi/helper-plugin',
+  '@strapi/icons',
   '@fortawesome/fontawesome-svg-core',
   '@fortawesome/free-solid-svg-icons',
+  'date-fns',
+  'formik',
   'history',
-  'hoist-non-react-statics',
   'immer',
-  'invariant',
+  'qs',
   'lodash',
   'moment',
-  'qs',
   'react',
   'react-copy-to-clipboard',
   'react-dnd',
@@ -32,20 +33,29 @@ const alias = [
   'redux',
   'reselect',
   'styled-components',
+  'whatwg-fetch',
   'yup',
 ];
 
-module.exports = alias.reduce(
-  (acc, curr) => {
-    acc[`${curr}$`] = require.resolve(curr);
+const alias = [
+  'react-select/animated',
+  'react-select/async',
+  'react-select/async-creatable',
+  'react-select/base',
+  'react-select/creatable',
+];
+
+// See https://webpack.js.org/configuration/resolve/
+module.exports = {
+  ...alias.reduce((acc, name) => {
+    acc[name] = require.resolve(name);
     return acc;
-  },
-  {
-    'react-select/animated': require.resolve('react-select/animated'),
-    'react-select/async': require.resolve('react-select/async'),
-    'react-select/async-creatable': require.resolve('react-select/async-creatable'),
-    'react-select/base': require.resolve('react-select/base'),
-    'react-select/creatable': require.resolve('react-select/creatable'),
-    ee_else_ce: path.resolve(__dirname),
-  }
-);
+  }, {}),
+
+  ...aliasExactMatch.reduce((acc, name) => {
+    acc[`${name}$`] = require.resolve(name);
+    return acc;
+  }, {}),
+
+  ee_else_ce: path.resolve(__dirname),
+};
