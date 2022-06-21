@@ -11,7 +11,6 @@ import { Link } from '@strapi/design-system/Link';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Plus from '@strapi/icons/Plus';
 import { getTrad } from '../../../utils';
-import { FolderDefinition } from '../../../constants';
 
 export const Header = ({
   canCreate,
@@ -87,7 +86,15 @@ Header.defaultProps = {
 Header.propTypes = {
   assetCount: PropTypes.number.isRequired,
   canCreate: PropTypes.bool.isRequired,
-  folder: PropTypes.shape(FolderDefinition),
+  folder: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    createdAt: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    parent: PropTypes.number,
+    updatedAt: PropTypes.string.isRequired,
+    pathId: PropTypes.number.isRequired,
+    path: PropTypes.string.isRequired,
+  }),
   folderCount: PropTypes.number.isRequired,
   onToggleEditFolderDialog: PropTypes.func.isRequired,
   onToggleUploadAssetDialog: PropTypes.func.isRequired,
