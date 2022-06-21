@@ -64,6 +64,9 @@ export const FolderCard = forwardRef(
 
           <Stack
             hasRadius
+            borderStyle="solid"
+            borderWidth="1px"
+            borderColor="neutral150"
             background="neutral0"
             shadow="tableShadow"
             padding={3}
