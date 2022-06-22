@@ -8,6 +8,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { BulkMoveDialog } from '..';
 
 jest.mock('../../../hooks/useFolderStructure');
+jest.mock('../../../hooks/useBulkMove');
 
 const client = new QueryClient({
   defaultOptions: {
@@ -31,7 +32,7 @@ function ComponentFixture(props) {
   );
 }
 
-function setup(props = { onClose: jest.fn() }) {
+function setup(props = { onClose: jest.fn(), selected: [] }) {
   return render(<ComponentFixture {...props} />, { container: document.getElementById('app') });
 }
 
@@ -41,10 +42,7 @@ describe('BulkMoveDialog', () => {
   });
 
   test('renders and matches the snapshot', () => {
-    setup({
-      selected: [],
-      onClose: jest.fn(),
-    });
+    setup();
     expect(document.body).toMatchSnapshot();
   });
 });
