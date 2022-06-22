@@ -12,34 +12,32 @@ export const AssetSource = {
   Computer: 'computer',
 };
 
+const ParentFolderDefinition = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  createdAt: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  updatedAt: PropTypes.string.isRequired,
+  pathId: PropTypes.number.isRequired,
+  path: PropTypes.string.isRequired,
+});
+
 export const FolderDefinition = PropTypes.shape({
   id: PropTypes.number.isRequired,
   children: PropTypes.shape({
     count: PropTypes.number.isRequired,
-  }).isRequired,
+  }),
   createdAt: PropTypes.string.isRequired,
   createdBy: PropTypes.shape(),
   files: PropTypes.shape({
     count: PropTypes.number.isRequired,
-  }).isRequired,
+  }),
   name: PropTypes.string.isRequired,
-  parent: PropTypes.number,
+  parent: PropTypes.oneOf([ParentFolderDefinition, PropTypes.number]),
   updatedAt: PropTypes.string.isRequired,
   updatedBy: PropTypes.shape(),
   pathId: PropTypes.number.isRequired,
   path: PropTypes.string.isRequired,
 });
-
-export const FolderParentDefinition = PropTypes.shape({
-  id: PropTypes.number.isRequired,
-  createdAt: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  updatedAt: PropTypes.string.isRequired,
-  pathId: PropTypes.number.isRequired,
-  path: PropTypes.string.isRequired,
-});
-
-FolderParentDefinition.parent = FolderParentDefinition;
 
 const FolderStructure = PropTypes.shape({
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
