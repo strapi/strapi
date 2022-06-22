@@ -79,13 +79,11 @@ module.exports = async function optInTelemetry() {
 
   const packageObj = await readPackageJSON(packageJSONPath);
 
-  if (
-    packageObj.strapi &&
-    packageObj.strapi.uuid &&
-    packageObj.strapi.telemetryDisabled === false
-  ) {
-    console.log(`${chalk.yellow('Warning:')} telemetry is already enabled`);
-    process.exit(0);
+  if (packageObj.strapi && packageObj.strapi.uuid) {
+    if (packageObj.strapi.telemetryDisabled === false) {
+      console.log(`${chalk.yellow('Warning:')} telemetry is already enabled`);
+      process.exit(0);
+    }
   }
 
   const updatedPackageJSON = generateNewPackageJSON(packageObj);
