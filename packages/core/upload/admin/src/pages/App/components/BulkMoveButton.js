@@ -38,8 +38,12 @@ export const BulkMoveButton = ({ selected, onSuccess, parentFolder }) => {
   );
 };
 
+BulkMoveButton.defaultProps = {
+  parentFolder: undefined,
+};
+
 BulkMoveButton.propTypes = {
   onSuccess: PropTypes.func.isRequired,
-  parentFolder: FolderParentDefinition.isRequired,
+  parentFolder: FolderParentDefinition,
   selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
 };

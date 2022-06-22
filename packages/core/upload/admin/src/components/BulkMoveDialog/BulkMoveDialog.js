@@ -151,8 +151,12 @@ export const BulkMoveDialog = ({ onClose, selected, parentFolder }) => {
   );
 };
 
+BulkMoveDialog.defaultProps = {
+  parentFolder: undefined,
+};
+
 BulkMoveDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
-  parentFolder: FolderParentDefinition.isRequired,
+  parentFolder: FolderParentDefinition,
   selected: PropTypes.arrayOf(FolderDefinition, AssetDefinition).isRequired,
 };

@@ -34,8 +34,12 @@ export const BulkActions = ({ selected, onSuccess, parentFolder }) => {
   );
 };
 
+BulkActions.defaultProps = {
+  parentFolder: undefined,
+};
+
 BulkActions.propTypes = {
   onSuccess: PropTypes.func.isRequired,
-  parentFolder: FolderParentDefinition.isRequired,
+  parentFolder: FolderParentDefinition,
   selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
 };
