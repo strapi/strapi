@@ -30,6 +30,17 @@ export const FolderDefinition = PropTypes.shape({
   path: PropTypes.string.isRequired,
 });
 
+export const FolderParentDefinition = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  createdAt: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  updatedAt: PropTypes.string.isRequired,
+  pathId: PropTypes.number.isRequired,
+  path: PropTypes.string.isRequired,
+});
+
+FolderParentDefinition.parent = FolderParentDefinition;
+
 const FolderStructure = PropTypes.shape({
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   label: PropTypes.string.isRequired,
