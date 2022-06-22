@@ -35,7 +35,7 @@ export const BulkActions = ({ selected, onSuccess, parentFolder }) => {
 };
 
 BulkActions.defaultProps = {
-  parentFolder: null,
+  parentFolder: undefined,
 };
 
 BulkActions.propTypes = {

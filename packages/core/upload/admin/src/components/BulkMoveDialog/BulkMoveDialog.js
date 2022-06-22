@@ -152,7 +152,7 @@ export const BulkMoveDialog = ({ onClose, selected, parentFolder }) => {
 };
 
 BulkMoveDialog.defaultProps = {
-  parentFolder: null,
+  parentFolder: undefined,
 };
 
 BulkMoveDialog.propTypes = {

@@ -39,7 +39,7 @@ export const BulkMoveButton = ({ selected, onSuccess, parentFolder }) => {
 };
 
 BulkMoveButton.defaultProps = {
-  parentFolder: null,
+  parentFolder: undefined,
 };
 
 BulkMoveButton.propTypes = {
