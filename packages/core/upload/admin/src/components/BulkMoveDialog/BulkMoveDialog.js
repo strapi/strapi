@@ -22,9 +22,9 @@ import { useBulkMove } from '../../hooks/useBulkMove';
 import { getTrad } from '../../utils';
 import SelectTree from '../SelectTree';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
-import { FolderDefinition, AssetDefinition } from '../../constants';
+import { FolderDefinition, AssetDefinition, FolderParentDefinition } from '../../constants';
 
-export const BulkMoveDialog = ({ onClose, selected }) => {
+export const BulkMoveDialog = ({ onClose, selected, parentFolder }) => {
   const { formatMessage } = useIntl();
   const { data: folderStructure, isLoading } = useFolderStructure();
   const { move } = useBulkMove();
@@ -73,7 +73,10 @@ export const BulkMoveDialog = ({ onClose, selected }) => {
   }
 
   const initialFormData = {
-    destination: folderStructure[0],
+    destination: {
+      value: parentFolder?.id || undefined,
+      label: parentFolder?.name || folderStructure[0].label,
+    },
   };
 
   return (
@@ -148,9 +151,8 @@ export const BulkMoveDialog = ({ onClose, selected }) => {
   );
 };
 
-BulkMoveDialog.defaultProps = {};
-
 BulkMoveDialog.propTypes = {
-  selected: PropTypes.arrayOf(FolderDefinition, AssetDefinition).isRequired,
   onClose: PropTypes.func.isRequired,
+  parentFolder: FolderParentDefinition.isRequired,
+  selected: PropTypes.arrayOf(FolderDefinition, AssetDefinition).isRequired,
 };

@@ -67,6 +67,7 @@
   "modal.header.pending-assets": "Pending assets",
   "modal.header.select-files": "Selected files",
   "modal.header.go-back": "Go back",
+  "modal.folder.move.title": "Move elements to",
   "modal.nav.browse": "browse",
   "modal.nav.computer": "From computer",
   "modal.nav.selected": "selected",

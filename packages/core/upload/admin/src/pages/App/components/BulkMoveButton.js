@@ -5,9 +5,9 @@ import { Button } from '@strapi/design-system/Button';
 import Folder from '@strapi/icons/Folder';
 
 import { BulkMoveDialog } from '../../../components/BulkMoveDialog';
-import { AssetDefinition, FolderDefinition } from '../../../constants';
+import { AssetDefinition, FolderDefinition, FolderParentDefinition } from '../../../constants';
 
-export const BulkMoveButton = ({ selected, onSuccess }) => {
+export const BulkMoveButton = ({ selected, onSuccess, parentFolder }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
@@ -27,12 +27,19 @@ export const BulkMoveButton = ({ selected, onSuccess }) => {
         {formatMessage({ id: 'global.move', defaultMessage: 'Move' })}
       </Button>
 
-      {showConfirmDialog && <BulkMoveDialog onClose={handleConfirmMove} selected={selected} />}
+      {showConfirmDialog && (
+        <BulkMoveDialog
+          parentFolder={parentFolder}
+          onClose={handleConfirmMove}
+          selected={selected}
+        />
+      )}
     </>
   );
 };
 
 BulkMoveButton.propTypes = {
-  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
   onSuccess: PropTypes.func.isRequired,
+  parentFolder: FolderParentDefinition.isRequired,
+  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
 };

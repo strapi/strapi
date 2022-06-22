@@ -4,12 +4,12 @@ import { useIntl } from 'react-intl';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
 
-import { AssetDefinition, FolderDefinition } from '../../../constants';
+import { AssetDefinition, FolderDefinition, FolderParentDefinition } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
 import { BulkDeleteButton } from './BulkDeleteButton';
 import { BulkMoveButton } from './BulkMoveButton';
 
-export const BulkActions = ({ selected, onSuccess }) => {
+export const BulkActions = ({ selected, onSuccess, parentFolder }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -29,12 +29,13 @@ export const BulkActions = ({ selected, onSuccess }) => {
       </Typography>
 
       <BulkDeleteButton selected={selected} onSuccess={onSuccess} />
-      <BulkMoveButton selected={selected} onSuccess={onSuccess} />
+      <BulkMoveButton parentFolder={parentFolder} selected={selected} onSuccess={onSuccess} />
     </Stack>
   );
 };
 
 BulkActions.propTypes = {
-  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
   onSuccess: PropTypes.func.isRequired,
+  parentFolder: FolderParentDefinition.isRequired,
+  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
 };
