@@ -110,12 +110,8 @@ export const BulkMoveDialog = ({ onClose, selected }) => {
                       name="destination"
                       menuPortalTarget={document.querySelector('body')}
                       inputId="folder-destination"
-                      {...(errors.destination
-                        ? {
-                            'aria-errormessage': 'folder-destination-error',
-                            'aria-invalid': true,
-                          }
-                        : {})}
+                      error={errors?.destination}
+                      ariaErrorMessage="destination-error"
                     />
 
                     {errors.destination && (

@@ -87,7 +87,7 @@ Header.defaultProps = {
 Header.propTypes = {
   assetCount: PropTypes.number.isRequired,
   canCreate: PropTypes.bool.isRequired,
-  folder: PropTypes.shape(FolderDefinition),
+  folder: FolderDefinition,
   folderCount: PropTypes.number.isRequired,
   onToggleEditFolderDialog: PropTypes.func.isRequired,
   onToggleUploadAssetDialog: PropTypes.func.isRequired,
