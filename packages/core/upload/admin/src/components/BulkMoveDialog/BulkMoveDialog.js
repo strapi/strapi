@@ -22,7 +22,7 @@ import { useBulkMove } from '../../hooks/useBulkMove';
 import { getTrad } from '../../utils';
 import SelectTree from '../SelectTree';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
-import { FolderDefinition, AssetDefinition, FolderParentDefinition } from '../../constants';
+import { FolderDefinition, AssetDefinition } from '../../constants';
 
 export const BulkMoveDialog = ({ onClose, selected, parentFolder }) => {
   const { formatMessage } = useIntl();
@@ -157,6 +157,6 @@ BulkMoveDialog.defaultProps = {
 
 BulkMoveDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
-  parentFolder: FolderParentDefinition,
+  parentFolder: FolderDefinition,
   selected: PropTypes.arrayOf(FolderDefinition, AssetDefinition).isRequired,
 };

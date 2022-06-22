@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
 
-import { AssetDefinition, FolderDefinition, FolderParentDefinition } from '../../../constants';
+import { AssetDefinition, FolderDefinition } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
 import { BulkDeleteButton } from './BulkDeleteButton';
 import { BulkMoveButton } from './BulkMoveButton';
@@ -40,6 +40,6 @@ BulkActions.defaultProps = {
 
 BulkActions.propTypes = {
   onSuccess: PropTypes.func.isRequired,
-  parentFolder: FolderParentDefinition,
+  parentFolder: FolderDefinition,
   selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
 };
