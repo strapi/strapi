@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
