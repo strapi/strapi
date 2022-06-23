@@ -235,18 +235,9 @@ const EditViewDataManagerProvider = ({
 
       // Allow to reset text, string, email, uid, select/enum, date
       if (
-        (type === 'text' ||
-          type === 'string' ||
-          type === 'email' ||
-          type === 'uid' ||
-          type === 'select' ||
-          type === 'select-one') &&
-        value === ''
+        ['text', 'string', 'email', 'uid', 'select', 'select-one', 'number'].includes(type) &&
+        !value
       ) {
-        inputValue = null;
-      }
-
-      if (type === 'number' && !value) {
         inputValue = null;
       }
 
@@ -258,6 +249,8 @@ const EditViewDataManagerProvider = ({
 
         return;
       }
+
+      console.log({ name, inputValue });
 
       dispatch({
         type: 'ON_CHANGE',

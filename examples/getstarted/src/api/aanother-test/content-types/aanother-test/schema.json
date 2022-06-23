@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "aanother_tests",
+  "info": {
+    "singularName": "aanother-test",
+    "pluralName": "aanother-tests",
+    "displayName": "Aanother test"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "text": {
+      "type": "string",
+      "unique": true
+    },
+    "email": {
+      "type": "email",
+      "unique": true
+    },
+    "number": {
+      "unique": true,
+      "type": "integer"
+    },
+    "uid": {
+      "type": "uid"
+    },
+    "date": {
+      "unique": true,
+      "type": "date"
+    },
+    "enum": {
+      "type": "enumeration",
+      "enum": [
+        "this",
+        "or that"
+      ]
+    }
+  }
+}
