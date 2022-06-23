@@ -12,22 +12,32 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
   const dataRequestURL = getRequestUrl('files');
-  const { folder, ...paramsExceptFolder } = query;
-  const params = {
-    ...paramsExceptFolder,
-    filters: {
-      $and: [
-        ...(query?.filters?.$and ?? []),
-        {
-          folder: {
-            id: query?.folder ?? {
-              $null: true,
+  const { folder, _q, ...paramsExceptFolderAndQ } = query;
+
+  let params;
+
+  if (_q) {
+    params = {
+      ...paramsExceptFolderAndQ,
+      _q,
+    };
+  } else {
+    params = {
+      ...paramsExceptFolderAndQ,
+      filters: {
+        $and: [
+          ...(paramsExceptFolderAndQ?.filters?.$and ?? []),
+          {
+            folder: {
+              id: folder ?? {
+                $null: true,
+              },
             },
           },
-        },
-      ],
-    },
-  };
+        ],
+      },
+    };
+  }
 
   const getAssets = async () => {
     try {

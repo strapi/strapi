@@ -12,25 +12,38 @@ export const useFolders = ({ enabled = true, query = {} }) => {
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
   const dataRequestURL = getRequestUrl('folders');
-  const { folder, ...paramsExceptFolder } = query;
-  const params = {
-    ...paramsExceptFolder,
-    pagination: {
-      pageSize: -1,
-    },
-    filters: {
-      $and: [
-        ...(query?.filters?.$and ?? []),
-        {
-          parent: {
-            id: query?.folder ?? {
-              $null: true,
+  const { folder, _q, ...paramsExceptFolderAndQ } = query;
+
+  let params;
+
+  if (_q) {
+    params = {
+      ...paramsExceptFolderAndQ,
+      pagination: {
+        pageSize: -1,
+      },
+      _q,
+    };
+  } else {
+    params = {
+      ...paramsExceptFolderAndQ,
+      pagination: {
+        pageSize: -1,
+      },
+      filters: {
+        $and: [
+          ...(paramsExceptFolderAndQ?.filters?.$and ?? []),
+          {
+            parent: {
+              id: folder ?? {
+                $null: true,
+              },
             },
           },
-        },
-      ],
-    },
-  };
+        ],
+      },
+    };
+  }
 
   const fetchFolders = async () => {
     try {

@@ -262,8 +262,12 @@ export const MediaLibrary = () => {
                     const isSelected = !!selectedFolders.find(
                       currentFolder => currentFolder.id === folder.id
                     );
+
+                    // Search query will always fetch the same results
+                    // we remove it here to allow navigating in a folder and see the result of this navigation
+                    const { _q, ...queryParamsWithoutQ } = query;
                     const url = `${pathname}?${stringify({
-                      ...query,
+                      ...queryParamsWithoutQ,
                       folder: folder.id,
                     })}`;
 

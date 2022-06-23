@@ -79,7 +79,15 @@ const getSelectStyles = (theme, error) => {
         backgroundColor = theme.colors.primary100;
       }
 
-      return { ...base, lineHeight: theme.spaces[5], backgroundColor, borderRadius: 4 };
+      return {
+        ...base,
+        lineHeight: theme.spaces[5],
+        backgroundColor,
+        borderRadius: theme.borderRadius,
+        '&:active': {
+          backgroundColor: theme.colors.primary100,
+        },
+      };
     },
     placeholder: base => ({ ...base, marginLeft: 0 }),
     singleValue: base => ({ ...base, marginLeft: 0, color: theme.colors.neutral800 }),
