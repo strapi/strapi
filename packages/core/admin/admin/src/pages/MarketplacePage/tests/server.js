@@ -1002,5 +1002,4 @@ const handlers = [
 
 const server = setupServer(...handlers);
 
-export { rest };
 export default server;
