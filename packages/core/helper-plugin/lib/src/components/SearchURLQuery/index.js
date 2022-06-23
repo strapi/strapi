@@ -8,7 +8,7 @@ import { Icon } from '@strapi/design-system/Icon';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
 
-const SearchURLQuery = ({ label, placeholder, trackedEvent }) => {
+const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails }) => {
   const wrapperRef = useRef(null);
   const iconButtonRef = useRef(null);
 
@@ -38,7 +38,11 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent }) => {
 
     if (value) {
       if (trackedEvent) {
-        trackUsage(trackedEvent);
+        if (trackedEventDetails) {
+          trackUsage(trackedEvent, trackedEventDetails);
+        } else {
+          trackUsage(trackedEvent);
+        }
       }
       setQuery({ _q: value, page: 1 });
     } else {
@@ -79,12 +83,14 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent }) => {
 
 SearchURLQuery.defaultProps = {
   placeholder: undefined,
+  trackedEventDetails: undefined,
   trackedEvent: null,
 };
 
 SearchURLQuery.propTypes = {
   label: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
+  trackedEventDetails: PropTypes.object,
   trackedEvent: PropTypes.string,
 };
 

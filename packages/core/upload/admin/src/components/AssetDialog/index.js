@@ -44,6 +44,7 @@ export const AssetDialog = ({
   initiallySelectedAssets,
   trackedLocation,
 }) => {
+  console.log('AssetDialog, appears in CM');
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [folderToEdit, setFolderToEdit] = useState(undefined);
   const { formatMessage } = useIntl();
@@ -155,7 +156,13 @@ export const AssetDialog = ({
   }
 
   if (folderToEdit) {
-    return <EditFolderDialog folder={folderToEdit} onClose={() => setFolderToEdit(undefined)} />;
+    return (
+      <EditFolderDialog
+        folder={folderToEdit}
+        onClose={() => setFolderToEdit(undefined)}
+        location="content-manager"
+      />
+    );
   }
 
   const handleMoveItem = (hoverIndex, destIndex) => {

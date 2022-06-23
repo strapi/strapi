@@ -11,6 +11,7 @@ import {
   SearchURLQuery,
   useSelectionState,
   useQueryParams,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -71,6 +72,7 @@ export const MediaLibrary = () => {
   const currentFolderToEditRef = useRef();
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
+  const { trackUsage } = useTracking();
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
 
@@ -122,6 +124,10 @@ export const MediaLibrary = () => {
   };
 
   const handleChangeSort = value => {
+    trackUsage('didSortMediaLibraryElements', {
+      location: 'upload',
+      sort: value,
+    });
     setQuery({ sort: value });
   };
 
@@ -175,7 +181,10 @@ export const MediaLibrary = () => {
                       (assetCount > 0 || folderCount > 0) &&
                       selected.length === assetCount + folderCount
                     }
-                    onChange={() => {
+                    onChange={e => {
+                      if (e.target.checked) {
+                        trackUsage('didSelectAllMediaLibraryElements');
+                      }
                       selectAll([
                         ...assets.map(asset => ({ ...asset, type: 'asset' })),
                         ...folders.map(folder => ({ ...folder, type: 'folder' })),
@@ -194,6 +203,8 @@ export const MediaLibrary = () => {
                 id: getTrad('search.label'),
                 defaultMessage: 'Search for an asset',
               })}
+              trackedEvent="didSearchMediaLibraryElements"
+              trackedEventDetails={{ location: 'upload' }}
             />
           }
         />
@@ -385,6 +396,7 @@ export const MediaLibrary = () => {
           onClose={handleEditFolderClose}
           folder={folderToEdit}
           parentFolderId={query?.folder}
+          location="upload"
         />
       )}
 
