@@ -85,7 +85,17 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
             }),
       });
 
-      if (!isEditing) {
+      if (isEditing) {
+        const didChangeLocation = parentFolderId
+          ? parseInt(parentFolderId, 10) !== values.parent.value
+          : parentFolderId === null && !!values.parent.value;
+
+        trackUsage('didEditMediaLibraryElements', {
+          location,
+          type: 'folder',
+          changeLocation: didChangeLocation,
+        });
+      } else {
         trackUsage('didAddMediaLibraryFolders', { location });
       }
 

@@ -44,7 +44,6 @@ export const AssetDialog = ({
   initiallySelectedAssets,
   trackedLocation,
 }) => {
-  console.log('AssetDialog, appears in CM');
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [folderToEdit, setFolderToEdit] = useState(undefined);
   const { formatMessage } = useIntl();

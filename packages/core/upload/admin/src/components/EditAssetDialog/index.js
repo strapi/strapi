@@ -17,7 +17,7 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Button } from '@strapi/design-system/Button';
 import { FieldLabel } from '@strapi/design-system/Field';
 import { TextInput } from '@strapi/design-system/TextInput';
-import { getFileExtension, Form, pxToRem } from '@strapi/helper-plugin';
+import { getFileExtension, Form, pxToRem, useTracking } from '@strapi/helper-plugin';
 import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 import { Formik } from 'formik';
 import * as yup from 'yup';
@@ -54,6 +54,7 @@ export const EditAssetDialog = ({
   trackedLocation,
 }) => {
   const { formatMessage, formatDate } = useIntl();
+  const { trackUsage } = useTracking();
   const submitButtonRef = useRef(null);
   const [isCropping, setIsCropping] = useState(false);
   const [replacementFile, setReplacementFile] = useState();
@@ -69,6 +70,16 @@ export const EditAssetDialog = ({
     if (asset.isLocal) {
       onClose(nextAsset);
     } else {
+      const assetType = asset?.mime.split('/')[0];
+      const didChangeLocation = asset?.folder?.id
+        ? asset.folder.id !== values.parent.value
+        : asset.folder === null && !!values.parent.value;
+      trackUsage('didEditMediaLibraryElements', {
+        location: trackedLocation,
+        type: assetType,
+        changeLocation: didChangeLocation,
+      });
+
       const editedAsset = await editAsset(nextAsset, replacementFile);
       onClose(editedAsset);
     }
