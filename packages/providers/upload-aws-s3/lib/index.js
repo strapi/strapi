@@ -34,7 +34,11 @@ module.exports = {
             }
 
             // set the bucket file url
-            file.url = data.Location;
+            if (config.cdn) {
+              file.url = `${config.cdn}${data.Key}`;
+            } else {
+              file.url = data.Location;
+            }
 
             resolve();
           }
