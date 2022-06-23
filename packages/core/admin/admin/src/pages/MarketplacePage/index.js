@@ -262,6 +262,7 @@ const MarketPlacePage = () => {
                 ) : (
                   <NpmPackagesGrid
                     npmPackages={providerSearchResults}
+                    installedPackageNames={installedPackageNames}
                     useYarn={useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
                     npmPackageType="provider"
