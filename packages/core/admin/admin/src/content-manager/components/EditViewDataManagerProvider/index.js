@@ -250,8 +250,6 @@ const EditViewDataManagerProvider = ({
         return;
       }
 
-      console.log({ name, inputValue });
-
       dispatch({
         type: 'ON_CHANGE',
         keys: name.split('.'),
