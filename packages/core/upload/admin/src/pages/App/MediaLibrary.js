@@ -200,7 +200,7 @@ export const MediaLibrary = () => {
 
         <ContentLayout>
           {selected.length > 0 && (
-            <BulkActions parentFolder={currentFolder} selected={selected} onSuccess={selectAll} />
+            <BulkActions currentFolder={currentFolder} selected={selected} onSuccess={selectAll} />
           )}
 
           {isLoading && <LoadingIndicatorPage />}

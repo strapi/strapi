@@ -105,7 +105,7 @@ describe('BulkMoveButton', () => {
     expect(screen.getByText('Media Library')).toBeInTheDocument();
   });
 
-  test('set default form values with parentFolder', () => {
+  test('set default form values with currentFolder', () => {
     const FIXTURE_PARENT_FOLDER = {
       id: 2,
       name: 'default folder name',
@@ -116,7 +116,7 @@ describe('BulkMoveButton', () => {
       pathId: 2,
     };
     const { getByText } = setup({
-      parentFolder: FIXTURE_PARENT_FOLDER,
+      currentFolder: FIXTURE_PARENT_FOLDER,
       onClose: jest.fn(),
       selected: [],
       onSuccess: jest.fn(),
