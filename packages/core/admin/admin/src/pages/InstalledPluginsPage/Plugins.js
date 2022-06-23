@@ -6,7 +6,7 @@ import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layou
 import { Main } from '@strapi/design-system/Main';
 import { Typography } from '@strapi/design-system/Typography';
 import { Table, Thead, Tbody, Tr, Td, Th } from '@strapi/design-system/Table';
-import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
+import useFetchEnabledPlugins from '../../hooks/useFetchEnabledPlugins';
 
 const Plugins = () => {
   const { formatMessage } = useIntl();
@@ -30,7 +30,7 @@ const Plugins = () => {
     );
   };
 
-  const { status, data } = useFetchInstalledPlugins(notifyPluginPageLoad);
+  const { status, data } = useFetchEnabledPlugins(notifyPluginPageLoad);
 
   const isLoading = status !== 'success' && status !== 'error';
 

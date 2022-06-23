@@ -29,7 +29,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   pxToRem: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-  useAppInfos: jest.fn(() => ({ autoReload: true })),
+  useAppInfos: jest.fn(() => ({
+    autoReload: true,
+    dependencies: { '@strapi/plugin-documentation': '4.2.0' },
+    useYarn: true,
+  })),
 }));
 
 const client = new QueryClient({
@@ -136,7 +140,7 @@ describe('Marketplace page', () => {
 
   it('handles production environment', () => {
     // Simulate production environment
-    useAppInfos.mockImplementation(() => ({ autoReload: false }));
+    useAppInfos.mockImplementation(() => ({ autoReload: false, dependencies: {}, useYarn: true }));
     const { queryByText } = render(App);
 
     // Should display notification
