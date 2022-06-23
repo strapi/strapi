@@ -91,8 +91,7 @@ const MarketPlacePage = () => {
   }, []);
 
   useEffect(() => {
-    // Not using !isInDevelopmentMode to avoid matching the condition when it's null
-    if (isInDevelopmentMode === false) {
+    if (!isInDevelopmentMode) {
       toggleNotification({
         type: 'info',
         message: {
