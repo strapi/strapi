@@ -161,7 +161,11 @@ class MysqlSchemaInspector {
         ret[index.Key_name] = {
           columns: [index.Column_name],
           name: index.Key_name,
-          type: !index.Non_unique ? 'unique' : null,
+          type: !index.Non_unique
+            ? 'unique'
+            : index.Index_type === 'FULLTEXT'
+            ? 'fulltext'
+            : null,
         };
       } else {
         ret[index.Key_name].columns.push(index.Column_name);
