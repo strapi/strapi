@@ -7,7 +7,7 @@ import Folder from '@strapi/icons/Folder';
 import { BulkMoveDialog } from '../../../components/BulkMoveDialog';
 import { AssetDefinition, FolderDefinition } from '../../../constants';
 
-export const BulkMoveButton = ({ selected, onSuccess }) => {
+export const BulkMoveButton = ({ selected, onSuccess, currentFolder }) => {
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
@@ -27,12 +27,23 @@ export const BulkMoveButton = ({ selected, onSuccess }) => {
         {formatMessage({ id: 'global.move', defaultMessage: 'Move' })}
       </Button>
 
-      {showConfirmDialog && <BulkMoveDialog onClose={handleConfirmMove} selected={selected} />}
+      {showConfirmDialog && (
+        <BulkMoveDialog
+          currentFolder={currentFolder}
+          onClose={handleConfirmMove}
+          selected={selected}
+        />
+      )}
     </>
   );
 };
 
+BulkMoveButton.defaultProps = {
+  currentFolder: undefined,
+};
+
 BulkMoveButton.propTypes = {
-  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
   onSuccess: PropTypes.func.isRequired,
+  currentFolder: FolderDefinition,
+  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
 };
