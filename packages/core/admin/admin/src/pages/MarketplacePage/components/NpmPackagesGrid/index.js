@@ -11,7 +11,7 @@ const NpmPackagesGrid = ({
   npmPackageType,
 }) => {
   // Check if an individual package is in the dependencies
-  const checkAlreadyInstalled = useCallback(
+  const isAlreadyInstalled = useCallback(
     npmPackageName => installedPackageNames.includes(npmPackageName),
     [installedPackageNames]
   );
@@ -22,7 +22,7 @@ const NpmPackagesGrid = ({
         <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={npmPackage.id}>
           <NpmPackageCard
             npmPackage={npmPackage}
-            isInstalled={checkAlreadyInstalled(npmPackage.attributes.npmPackageName)}
+            isInstalled={isAlreadyInstalled(npmPackage.attributes.npmPackageName)}
             useYarn={useYarn}
             isInDevelopmentMode={isInDevelopmentMode}
             npmPackageType={npmPackageType}
