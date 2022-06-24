@@ -233,7 +233,7 @@ const EditViewDataManagerProvider = ({
     ({ target: { name, value, type } }, shouldSetInitialValue = false) => {
       let inputValue = value;
 
-      // Allow to reset text, string, email, uid, select/enum, date
+      // Allow to reset text, email, uid, select/enum, and number
       if (
         ['text', 'string', 'email', 'uid', 'select', 'select-one', 'number'].includes(type) &&
         !value
