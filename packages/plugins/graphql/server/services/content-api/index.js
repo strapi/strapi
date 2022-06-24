@@ -99,11 +99,17 @@ module.exports = ({ strapi }) => {
 
   const buildMergedSchema = ({ registry }) => {
     // Here we extract types, plugins & typeDefs from a temporary generated
-    // extension since there won't be any addition allowed after schemas generation
-    const { types, typeDefs = [] } = extensionService.generate({ typeRegistry: registry });
+    // extension since there won't be any addition allowed after schemas generation.
+    const { types, typeDefs = [], plugins = [] } = extensionService.generate({
+      typeRegistry: registry,
+    });
 
     // Nexus schema built with user-defined & shadow CRUD auto generated Nexus types
-    const nexusSchema = makeSchema({ types: [registry.definitions, types] });
+    // Apply user-defined plugins to make them available in user-defined type extensions.
+    const nexusSchema = makeSchema({
+      types: [registry.definitions, types],
+      plugins,
+    });
 
     // Merge type definitions with the Nexus schema
     return mergeSchemas({
