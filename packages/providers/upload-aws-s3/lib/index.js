@@ -34,7 +34,13 @@ module.exports = {
             }
 
             // set the bucket file url
-            file.url = data.Location;
+            if (config.publicUrl) {
+              // write the url using the public url instead of S3 location
+              file.url = `${config.publicUrl.replace(/\/+$/, '')}/${data.Key}`;
+            } else {
+              // use the S3 location if there's no public url given
+              file.url = data.Location;
+            }
 
             resolve();
           }
