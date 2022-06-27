@@ -7,7 +7,7 @@ const { Umzug } = require('umzug');
 const createStorage = require('./storage');
 
 const wrapTransaction = db => fn => () =>
-  db.getConnection().transaction(trx => Promise.resolve(fn(trx)));
+  db.connection.transaction(trx => Promise.resolve(fn(trx)));
 
 // TODO: check multiple commands in one sql statement
 const migrationResolver = ({ name, path, context }) => {
