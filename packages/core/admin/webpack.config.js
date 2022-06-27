@@ -8,6 +8,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const WebpackBar = require('webpackbar');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
 const { requirePackage } = require('./pnp');
@@ -202,7 +204,8 @@ module.exports = ({
       new webpack.DefinePlugin(envVariables),
 
       new NodePolyfillPlugin(),
+      !isProduction && process.env.REACT_REFRESH !== 'false' && new ReactRefreshWebpackPlugin(),
       ...webpackPlugins,
-    ],
+    ].filter(Boolean),
   };
 };

@@ -1,19 +1,23 @@
 'use strict';
 const path = require('path');
-const {requirePackage, adminAliases} = require('./pnp')
+const { requirePackage, adminAliases } = require('./pnp');
+
 const alias = [
   'object-assign',
   'whatwg-fetch',
   '@fortawesome/fontawesome-free',
+  '@strapi/design-system',
+  '@strapi/helper-plugin',
+  '@strapi/icons',
   '@fortawesome/fontawesome-svg-core',
   '@fortawesome/free-solid-svg-icons',
+  'date-fns',
+  'formik',
   'history',
-  'hoist-non-react-statics',
   'immer',
-  'invariant',
+  'qs',
   'lodash',
   'moment',
-  'qs',
   'react',
   'react-copy-to-clipboard',
   'react-dnd',
@@ -24,6 +28,7 @@ const alias = [
   'react-helmet',
   'react-is',
   'react-intl',
+  'react-query',
   'react-redux',
   'react-router',
   'react-router-dom',
@@ -32,6 +37,7 @@ const alias = [
   'redux',
   'reselect',
   'styled-components',
+  'whatwg-fetch',
   'yup',
   'axios',
   'prop-types',
@@ -42,24 +48,20 @@ const alias = [
   'match-sorter',
   '@fortawesome/react-fontawesome',
   'date-fns',
-  "markdown-it",
-    "markdown-it-abbr",
-    "markdown-it-container",
-    "markdown-it-deflist",
-    "markdown-it-emoji",
-    "markdown-it-footnote",
-    "markdown-it-ins",
-    "markdown-it-mark",
-    "markdown-it-sub",
-    "markdown-it-sup",
-    "match-sorter",
-    
-    "sanitize-html",
-    "@fingerprintjs/fingerprintjs"
-    
-    
-  
-  
+  'markdown-it',
+  'markdown-it-abbr',
+  'markdown-it-container',
+  'markdown-it-deflist',
+  'markdown-it-emoji',
+  'markdown-it-footnote',
+  'markdown-it-ins',
+  'markdown-it-mark',
+  'markdown-it-sub',
+  'markdown-it-sup',
+  'match-sorter',
+
+  'sanitize-html',
+  '@fingerprintjs/fingerprintjs',
 ];
 
 module.exports = alias.reduce(

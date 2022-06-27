@@ -75,6 +75,8 @@
     "@storybook/builder-webpack5": "6.4.10",
     "@storybook/manager-webpack5": "6.4.10",
     "@storybook/react": "^6.3.7",
+    "@strapi/design-system": "1.2.0",
+    "@strapi/icons": "1.2.0",
     "babel-loader": "^8.2.2",
     "cross-env": "^7.0.3",
     "react": "^17.0.2",
@@ -92,8 +94,6 @@
     "@babel/preset-react": "7.16.7",
     "@babel/runtime": "7.16.7",
     "@strapi/admin": "^4.2.0",
-    "@strapi/design-system": "1.1.1",
-    "@strapi/icons": "1.1.1",
     "@strapi/strapi": "^4.2.0",
     "webpack": "5.65.0"
   },
