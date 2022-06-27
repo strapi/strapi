@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const loadFile = require('./load-config-file');
 
-const VALID_EXTENSIONS = ['.js', '.json', '.ts'];
+const VALID_EXTENSIONS = ['.js', '.json'];
 
 module.exports = dir => {
   if (!fs.existsSync(dir)) return {};
