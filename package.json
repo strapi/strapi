@@ -87,7 +87,7 @@
     "eslint-config-prettier": "6.15.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-jsdoc": "36.1.1",
-    "eslint-plugin-jsx-a11y": "6.5.1",
+    "eslint-plugin-jsx-a11y": "6.6.0",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-react": "7.30.1",
     "eslint-plugin-react-hooks": "4.6.0",
