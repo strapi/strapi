@@ -31,7 +31,10 @@ jest.mock('@strapi/helper-plugin', () => ({
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useAppInfos: jest.fn(() => ({
     autoReload: true,
-    dependencies: { '@strapi/plugin-documentation': '4.2.0' },
+    dependencies: {
+      '@strapi/plugin-documentation': '4.2.0',
+      '@strapi/provider-upload-cloudinary': '4.2.0',
+    },
     useYarn: true,
   })),
 }));
