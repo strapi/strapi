@@ -9,7 +9,7 @@ const EmptyPluginCard = styled(Box)`
   opacity: 0.33;
 `;
 
-export const EmptyPluginGrid = () => {
+export const EmptyNpmPackageGrid = () => {
   return (
     <GridLayout>
       {Array(12)

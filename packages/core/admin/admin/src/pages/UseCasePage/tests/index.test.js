@@ -11,6 +11,11 @@ jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => 
   localeNames: ['en'],
   messages: ['test'],
 }));
+jest.mock('../../../hooks/useConfigurations', () => () => ({
+  logos: {
+    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+  },
+}));
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -782,6 +787,7 @@ describe('Admin | UseCasePage', () => {
                       alt=""
                       aria-hidden="true"
                       class="c15"
+                      src="defaultAuthLogo.png"
                     />
                     <div
                       class="c16"
