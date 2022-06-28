@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+import pluralize from 'pluralize';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
@@ -47,10 +48,9 @@ const NpmPackageCard = ({
     defaultMessage: 'Made by Strapi',
   });
 
-  const npmPackageHref =
-    npmPackageType === 'provider'
-      ? attributes.npmPackageUrl
-      : `https://market.strapi.io/plugins/${attributes.slug}`;
+  const npmPackageHref = `https://market.strapi.io/${pluralize.plural(npmPackageType)}/${
+    attributes.slug
+  }`;
 
   return (
     <Flex
