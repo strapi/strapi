@@ -63,6 +63,7 @@ const NpmPackageCard = ({
       shadow="tableShadow"
       height="100%"
       alignItems="normal"
+      data-testid="npm-package-card"
     >
       <Box>
         <Box

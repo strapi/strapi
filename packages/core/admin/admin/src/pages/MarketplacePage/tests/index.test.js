@@ -64,7 +64,7 @@ describe('Marketplace page', () => {
 
   afterAll(() => server.close());
 
-  it('renders and matches the plugin tab snapshot', async () => {
+  it.only('renders and matches the plugin tab snapshot', async () => {
     const { container, getByTestId, getByRole } = render(App);
     await waitForElementToBeRemoved(() => getByTestId('loader'));
     await waitFor(() => expect(getByRole('heading', { name: /marketplace/i })).toBeInTheDocument());
@@ -209,5 +209,22 @@ describe('Marketplace page', () => {
     expect(providerCardText).toBeVisible();
     expect(submitProviderText).toBeVisible();
     expect(pluginCardText).toEqual(null);
+  });
+
+  it.only('does not show install button when plugin already installed', async () => {
+    render(App);
+
+    const npmPackageCard = await screen.getAllByTestId('npm-package-card');
+    npmPackageCard.forEach(npmPackageCard => {
+      const installedPluginName = queryByText(npmPackageCard, /^documentation$/i);
+      const installedText = queryByText(npmPackageCard, /installed/i);
+
+      if (installedPluginName) {
+        // Plugin should already be installed
+        expect(installedText).toBeVisible();
+      } else {
+        expect(installedText).toBeNull();
+      }
+    });
   });
 });
