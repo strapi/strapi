@@ -1357,7 +1357,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 class="c61"
                                 id="email_confirmation_redirection"
                                 name="email_confirmation_redirection"
-                                placeholder="ex: https://youtfrontend.com/reset-password"
+                                placeholder="ex: https://youtfrontend.com/email-confirmation"
                                 type="text"
                                 value=""
                               />
