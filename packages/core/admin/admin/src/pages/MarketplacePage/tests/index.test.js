@@ -211,20 +211,19 @@ describe('Marketplace page', () => {
     expect(pluginCardText).toEqual(null);
   });
 
-  it.only('does not show install button when plugin already installed', async () => {
+  it.only('only show install button for plugins or providers already installed', async () => {
     render(App);
 
-    const npmPackageCard = await screen.getAllByTestId('npm-package-card');
-    npmPackageCard.forEach(npmPackageCard => {
-      const installedPluginName = queryByText(npmPackageCard, /^documentation$/i);
-      const installedText = queryByText(npmPackageCard, /installed/i);
+    // Plugin that's already installed
+    const alreadyInstalledName = screen.getByRole('heading', { name: /^documentation/i });
+    const alreadyInstalledCard = alreadyInstalledName.closest('[data-testid="npm-package-card"]');
+    const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
+    expect(alreadyInstalledText).toBeVisible();
 
-      if (installedPluginName) {
-        // Plugin should already be installed
-        expect(installedText).toBeVisible();
-      } else {
-        expect(installedText).toBeNull();
-      }
-    });
+    // Plugin that's not installed
+    const notInstalledName = screen.getByRole('heading', { name: /^comments/i });
+    const notInstalledCard = notInstalledName.closest('[data-testid="npm-package-card"]');
+    const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
+    expect(notInstalledText).toBeVisible();
   });
 });
