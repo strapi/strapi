@@ -136,6 +136,7 @@ const ApiTokenCreateView = () => {
           name: apiToken?.name || '',
           description: apiToken?.description || '',
           type: apiToken?.type || 'read-only',
+          duration: apiToken?.duration || '7',
         }}
         onSubmit={handleSubmit}
       >
@@ -237,6 +238,54 @@ const ApiTokenCreateView = () => {
                           >
                             {values.description}
                           </Textarea>
+                        </GridItem>
+                        <GridItem key="duration" col={6} xs={12}>
+                          <Select
+                            name="duration"
+                            label={formatMessage({
+                              id: 'Settings.apiTokens.form.type',
+                              defaultMessage: 'Token type',
+                            })}
+                            value={values.duration}
+                            error={
+                              errors.duration
+                                ? formatMessage(
+                                    errors.duration?.id
+                                      ? errors.duration
+                                      : { id: errors.duration, defaultMessage: errors.duration }
+                                  )
+                                : null
+                            }
+                            onChange={value => {
+                              handleChange({ target: { name: 'duration', value } });
+                            }}
+                            required
+                          >
+                            <Option value="7">
+                              {formatMessage({
+                                id: 'Settings.apiTokens.duration.7-days',
+                                defaultMessage: '7 days',
+                              })}
+                            </Option>
+                            <Option value="30">
+                              {formatMessage({
+                                id: 'Settings.apiTokens.duration.30-days',
+                                defaultMessage: '30 days',
+                              })}
+                            </Option>
+                            <Option value="90">
+                              {formatMessage({
+                                id: 'Settings.apiTokens.duration.90-days',
+                                defaultMessage: '90 days',
+                              })}
+                            </Option>
+                            <Option value="unlimited">
+                              {formatMessage({
+                                id: 'Settings.apiTokens.duration.unlimited',
+                                defaultMessage: 'Unlimited',
+                              })}
+                            </Option>
+                          </Select>
                         </GridItem>
                         <GridItem key="type" col={6} xs={12}>
                           <Select
