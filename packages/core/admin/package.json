@@ -54,7 +54,7 @@
     "@strapi/helper-plugin": "4.1.12",
     "@strapi/icons": "1.1.1",
     "@strapi/utils": "4.1.12",
-    "@strapi/telemetry-be": "4.1.12",
+    "@strapi/telemetry-server": "4.1.12",
     "axios": "0.24.0",
     "babel-loader": "8.2.3",
     "babel-plugin-styled-components": "2.0.2",

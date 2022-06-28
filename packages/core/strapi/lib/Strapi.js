@@ -5,7 +5,7 @@ const { isFunction } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 const { createAsyncParallelHook } = require('@strapi/utils').hooks;
-const { ampli, createCoreTelemetryInstance } = require('@strapi/telemetry-be');
+const { ampli, createCoreTelemetryInstance } = require('@strapi/telemetry-server');
 
 const loadConfiguration = require('./core/app-configuration');
 

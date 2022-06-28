@@ -1,6 +1,6 @@
 'use strict';
 
-const { ampli } = require('@strapi/telemetry-be');
+const { ampli } = require('@strapi/telemetry-server');
 const { getService } = require('../utils');
 
 const sendDidInviteUser = async () => {

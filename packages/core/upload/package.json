@@ -26,7 +26,7 @@
     "@strapi/helper-plugin": "4.1.12",
     "@strapi/provider-upload-local": "4.1.12",
     "@strapi/utils": "4.1.12",
-    "@strapi/telemetry-be": "4.1.12",
+    "@strapi/telemetry-server": "4.1.12",
     "byte-size": "7.0.1",
     "cropperjs": "1.5.11",
     "fs-extra": "10.0.0",

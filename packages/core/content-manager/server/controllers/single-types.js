@@ -1,7 +1,7 @@
 'use strict';
 
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
-const { ampli } = require('@strapi/telemetry-be');
+const { ampli } = require('@strapi/telemetry-server');
 
 const { getService, pickWritableAttributes } = require('../utils');
 

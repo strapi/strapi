@@ -1,5 +1,5 @@
 {
-  "name": "@strapi/telemetry-be",
+  "name": "@strapi/telemetry-server",
   "version": "4.1.12",
   "description": "Strapi backend telemetry package",
   "homepage": "https://strapi.io",

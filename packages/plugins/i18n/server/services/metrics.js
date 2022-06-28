@@ -1,7 +1,7 @@
 'use strict';
 
 const { reduce } = require('lodash/fp');
-const { ampli } = require('@strapi/telemetry-be');
+const { ampli } = require('@strapi/telemetry-server');
 const { getService } = require('../utils');
 
 const sendDidInitializeEvent = async () => {

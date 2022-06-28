@@ -2,7 +2,7 @@
 
 const { intersection, prop } = require('lodash/fp');
 const { getRelationalFields } = require('@strapi/utils').relations;
-const { ampli } = require('@strapi/telemetry-be');
+const { ampli } = require('@strapi/telemetry-server');
 
 module.exports = ({ strapi }) => {
   const sendDidConfigureListView = async (contentType, configuration) => {

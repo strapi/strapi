@@ -6,7 +6,7 @@ const pluralize = require('pluralize');
 
 const { nameToSlug, nameToCollectionName } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
-const { ampli } = require('@strapi/telemetry-be');
+const { ampli } = require('@strapi/telemetry-server');
 const { isConfigurable } = require('../../utils/attributes');
 const createSchemaHandler = require('./schema-handler');
 

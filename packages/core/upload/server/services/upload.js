@@ -19,7 +19,7 @@ const {
   webhook: webhookUtils,
 } = require('@strapi/utils');
 const { NotFoundError } = require('@strapi/utils').errors;
-const { ampli } = require('@strapi/telemetry-be');
+const { ampli } = require('@strapi/telemetry-server');
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 

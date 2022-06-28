@@ -3,7 +3,7 @@
 const passport = require('koa-passport');
 const compose = require('koa-compose');
 const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
-const { ampli } = require('@strapi/telemetry-be');
+const { ampli } = require('@strapi/telemetry-server');
 const { getService } = require('../utils');
 const {
   validateRegistrationInput,

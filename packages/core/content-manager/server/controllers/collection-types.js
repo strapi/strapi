@@ -3,7 +3,7 @@
 const { prop, pick } = require('lodash/fp');
 const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
-const { ampli } = require('@strapi/telemetry-be');
+const { ampli } = require('@strapi/telemetry-server');
 
 const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput, validatePagination } = require('./validation');

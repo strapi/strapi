@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { ampli } = require('@strapi/telemetry-be');
+const { ampli } = require('@strapi/telemetry-server');
 
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { getService } = require('../utils');
