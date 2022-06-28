@@ -1,6 +1,6 @@
 {
   "name": "@strapi/telemetry-server",
-  "version": "4.1.12",
+  "version": "4.2.0",
   "description": "Strapi backend telemetry package",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -29,7 +29,7 @@
   },
   "scripts": {},
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   },
   "dependencies": {
