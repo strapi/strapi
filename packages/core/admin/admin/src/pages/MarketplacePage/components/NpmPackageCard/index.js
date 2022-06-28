@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+import pluralize from 'pluralize';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
@@ -25,12 +26,18 @@ const EllipsisText = styled(Typography)`
   overflow: hidden;
 `;
 
-const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode }) => {
-  const { attributes } = plugin;
+const NpmPackageCard = ({
+  npmPackage,
+  installedPackageNames,
+  useYarn,
+  isInDevelopmentMode,
+  npmPackageType,
+}) => {
+  const { attributes } = npmPackage;
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const isInstalled = installedPluginNames.includes(attributes.npmPackageName);
+  const isInstalled = installedPackageNames.includes(attributes.npmPackageName);
 
   const commandToCopy = useYarn
     ? `yarn add ${attributes.npmPackageName}`
@@ -40,6 +47,10 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode
     id: 'admin.pages.MarketPlacePage.plugin.tooltip.madeByStrapi',
     defaultMessage: 'Made by Strapi',
   });
+
+  const npmPackageHref = `https://market.strapi.io/${pluralize.plural(npmPackageType)}/${
+    attributes.slug
+  }`;
 
   return (
     <Flex
@@ -107,7 +118,7 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode
       <Stack horizontal spacing={2} style={{ alignSelf: 'flex-end' }} paddingTop={6}>
         <LinkButton
           size="S"
-          href={`https://market.strapi.io/plugins/${attributes.slug}`}
+          href={npmPackageHref}
           isExternal
           endIcon={<ExternalLink />}
           aria-label={formatMessage(
@@ -135,12 +146,12 @@ const PluginCard = ({ plugin, installedPluginNames, useYarn, isInDevelopmentMode
   );
 };
 
-PluginCard.defaultProps = {
+NpmPackageCard.defaultProps = {
   isInDevelopmentMode: false,
 };
 
-PluginCard.propTypes = {
-  plugin: PropTypes.shape({
+NpmPackageCard.propTypes = {
+  npmPackage: PropTypes.shape({
     id: PropTypes.string.isRequired,
     attributes: PropTypes.shape({
       name: PropTypes.string.isRequired,
@@ -153,12 +164,13 @@ PluginCard.propTypes = {
       developerName: PropTypes.string.isRequired,
       validated: PropTypes.bool.isRequired,
       madeByStrapi: PropTypes.bool.isRequired,
-      strapiCompatibility: PropTypes.oneOf(['v3', 'v4']).isRequired,
+      strapiCompatibility: PropTypes.oneOf(['v3', 'v4']),
     }).isRequired,
   }).isRequired,
-  installedPluginNames: PropTypes.arrayOf(PropTypes.string).isRequired,
+  installedPackageNames: PropTypes.arrayOf(PropTypes.string).isRequired,
   useYarn: PropTypes.bool.isRequired,
   isInDevelopmentMode: PropTypes.bool,
+  npmPackageType: PropTypes.string.isRequired,
 };
 
-export default PluginCard;
+export default NpmPackageCard;

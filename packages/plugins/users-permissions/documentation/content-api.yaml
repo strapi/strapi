@@ -1,0 +1,813 @@
+tags:
+  - name: 'Users-Permissions - Auth'
+    description: 'Authentication endpoints'
+    externalDocs:
+      description: 'Find out more'
+      url: 'https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html'
+
+  - name: 'Users-Permissions - Users & Roles'
+    description: 'Users, roles, and permissions endpoints'
+    externalDocs:
+      description: 'Find out more'
+      url: 'https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html'
+
+paths:
+  '/connect/(.*)':
+    get:
+      tags:
+        - Users-Permissions - Auth
+      summary: Login with a provider
+      description: Redirects to provider login before being redirect to /auth/{provider}/callback
+      responses:
+        301:
+          description: Redirect response
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/local:
+    post:
+      tags:
+        - Users-Permissions - Auth
+      summary: Local login
+      description: Returns a jwt token and user info
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identifier:
+                  type: string
+                password:
+                  type: string
+            example:
+              identier: foobar
+              password: Test1234
+        required: true
+      responses:
+        200:
+          description: Connection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-UserRegistration'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/local/register:
+    post:
+      tags:
+        - Users-Permissions - Auth
+      summary: Register a user
+      description: Returns a jwt token and user info
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+            example:
+              username: foobar
+              email: foo.bar@strapi.io
+              password: Test1234
+        required: true
+      responses:
+        200:
+          description: Successfull registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-UserRegistration'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/{provider}/callback:
+    get:
+      tags:
+        - Users-Permissions - Auth
+      summary: Default Callback from provider auth
+      responses:
+        200:
+          description: Returns a jwt token and user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-UserRegistration'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/forgot-password:
+    post:
+      tags:
+        - Users-Permissions - Auth
+      summary: Send rest password email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+            example:
+              email: foo.bar@strapi.io
+      responses:
+        200:
+          description: Returns ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: enum
+                    enum: [true]
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/reset-password:
+    post:
+      tags:
+        - Users-Permissions - Auth
+      summary: Rest user password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                passwordConfirmation:
+                  type: string
+                code:
+                  type: string
+            example:
+              password: Test1234
+              passwordConfirmation: Test1234
+              code: zertyoaizndoianzodianzdonaizdoinaozdnia
+      responses:
+        200:
+          description: Returns a jwt token and user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-UserRegistration'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/email-confirmation:
+    get:
+      tags:
+        - Users-Permissions - Auth
+      summary: Confirm user email
+      parameters:
+        - in: query
+          name: confirmation
+          type: string
+          description: confirmation token received by email
+      responses:
+        301:
+          description: Redirects to the configure email confirmation redirect url
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/send-email-confirmation:
+    post:
+      tags:
+        - Users-Permissions - Auth
+      summary: Send confirmation email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        200:
+          description: Returns email and boolean to confirm email was sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                  sent:
+                    type: enum
+                    enum: [true]
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users-permissions/permissions:
+    get:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Get default generated permissions
+      responses:
+        200:
+          description: Returns the permissions tree
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permissions:
+                    $ref: '#/components/schemas/Users-Permissions-PermissionsTree'
+              example:
+                permissions:
+                  api::content-type.content-type:
+                    controllers:
+                      controllerA:
+                        find:
+                          enabled: false
+                          policy: ''
+                        findOne:
+                          enabled: false
+                          policy: ''
+                        create:
+                          enabled: false
+                          policy: ''
+                      controllerB:
+                        find:
+                          enabled: false
+                          policy: ''
+                        findOne:
+                          enabled: false
+                          policy: ''
+                        create:
+                          enabled: false
+                          policy: ''
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users-permissions/roles:
+    get:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: List roles
+      responses:
+        200:
+          description: Returns list of roles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Users-Permissions-Role'
+                        - type: object
+                          properties:
+                            nb_users:
+                              type: number
+              example:
+                roles:
+                  - id: 1
+                    name: Public
+                    description: Default role given to unauthenticated user.
+                    type: public
+                    createdAt: 2022-05-19T17:35:35.097Z
+                    updatedAt: 2022-05-31T16:05:36.603Z
+                    nb_users: 0
+
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Create a role
+      requestBody:
+        $ref: '#/components/schemas/Users-Permissions-RoleRequest'
+      responses:
+        200:
+          description: Returns ok if the role was create
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: enum
+                    enum: [true]
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users-permissions/roles/{id}:
+    get:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Get a role
+      parameters:
+        - in: path
+          name: id
+          type: string
+          description: role Id
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  role:
+                    $ref: '#/components/schemas/Users-Permissions-Role'
+              example:
+                role:
+                  id: 1
+                  name: Public
+                  description: Default role given to unauthenticated user.
+                  type: public
+                  createdAt: 2022-05-19T17:35:35.097Z
+                  updatedAt: 2022-05-31T16:05:36.603Z
+                  permissions:
+                    api::content-type.content-type:
+                      controllers:
+                        controllerA:
+                          find:
+                            enabled: true
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users-permissions/roles/{role}:
+    put:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Update a role
+      parameters:
+        - in: path
+          name: role
+          type: string
+          description: role Id
+      requestBody:
+        $ref: '#/components/schemas/Users-Permissions-RoleRequest'
+      responses:
+        200:
+          description: Returns ok if the role was udpated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: enum
+                    enum: [true]
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Delete a role
+      parameters:
+        - in: path
+          name: role
+          type: string
+          description: role Id
+      responses:
+        200:
+          description: Returns ok if the role was delete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: enum
+                    enum: [true]
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users:
+    get:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Get list of users
+      responses:
+        200:
+          summary: Returns an array of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Users-Permissions-User'
+              example:
+                - id: 9
+                  username: foao@strapi.io
+                  email: foao@strapi.io
+                  provider: local
+                  confirmed: false
+                  blocked: false
+                  createdAt: 2022-06-01T18:32:35.211Z
+                  updatedAt: 2022-06-01T18:32:35.217Z
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Create a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  required: true
+                username:
+                  type: string
+                  required: true
+                password:
+                  type: string
+                  required: true
+
+            example:
+              username: foo
+              email: foo@strapi.io
+              password: foo-password
+      responses:
+        201:
+          description: Returns created user info
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Users-Permissions-User'
+                  - type: object
+                    properties:
+                      role:
+                        $ref: '#/components/schemas/Users-Permissions-Role'
+              example:
+                id: 1
+                username: foo
+                email: foo@strapi.io
+                provider: local
+                confirmed: false
+                blocked: false
+                createdAt: 2022-05-19T17:35:35.096Z
+                updatedAt: 2022-05-19T17:35:35.096Z
+                role:
+                  id: 1
+                  name: X
+                  description: Default role given to authenticated user.
+                  type: authenticated
+                  createdAt: 2022-05-19T17:35:35.096Z
+                  updatedAt: 2022-06-04T07:11:59.551Z
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{id}:
+    get:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Get a user
+      parameters:
+        - in: path
+          name: id
+          type: string
+          description: user Id
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-User'
+              example:
+                id: 1
+                username: foo
+                email: foo@strapi.io
+                provider: local
+                confirmed: false
+                blocked: false
+                createdAt: 2022-05-19T17:35:35.096Z
+                updatedAt: 2022-05-19T17:35:35.096Z
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Update a user
+      parameters:
+        - in: path
+          name: id
+          type: string
+          description: user Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  required: true
+                username:
+                  type: string
+                  required: true
+                password:
+                  type: string
+                  required: true
+
+            example:
+              username: foo
+              email: foo@strapi.io
+              password: foo-password
+      responses:
+        200:
+          description: Returns updated user info
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Users-Permissions-User'
+                  - type: object
+                    properties:
+                      role:
+                        $ref: '#/components/schemas/Users-Permissions-Role'
+              example:
+                id: 1
+                username: foo
+                email: foo@strapi.io
+                provider: local
+                confirmed: false
+                blocked: false
+                createdAt: 2022-05-19T17:35:35.096Z
+                updatedAt: 2022-05-19T17:35:35.096Z
+                role:
+                  id: 1
+                  name: X
+                  description: Default role given to authenticated user.
+                  type: authenticated
+                  createdAt: 2022-05-19T17:35:35.096Z
+                  updatedAt: 2022-06-04T07:11:59.551Z
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Delete a user
+      responses:
+        200:
+          description: Returns deleted user info
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Users-Permissions-User'
+              example:
+                id: 1
+                username: foo
+                email: foo@strapi.io
+                provider: local
+                confirmed: false
+                blocked: false
+                createdAt: 2022-05-19T17:35:35.096Z
+                updatedAt: 2022-05-19T17:35:35.096Z
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /users/me:
+    get:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Get authenticated user info
+      responses:
+        200:
+          description: Returns user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-User'
+              example:
+                id: 1
+                username: foo
+                email: foo@strapi.io
+                provider: local
+                confirmed: false
+                blocked: false
+                createdAt: 2022-05-19T17:35:35.096Z
+                updatedAt: 2022-05-19T17:35:35.096Z
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/count:
+    get:
+      tags:
+        - Users-Permissions - Users & Roles
+      summary: Get user count
+      responses:
+        200:
+          description: Returns a number
+          content:
+            application/json:
+              schema:
+                type: number
+              example: 1
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Users-Permissions-Role:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        createdAt:
+          type: datetime
+        updatedAt:
+          type: datetime
+
+    Users-Permissions-User:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        username:
+          type: string
+          example: 'foo.bar'
+        email:
+          type: string
+          example: 'foo.bar@strapi.io'
+        provider:
+          type: string
+          example: 'local'
+        confirmed:
+          type: boolean
+          example: true
+        blocked:
+          type: boolean
+          example: false
+        createdAt:
+          type: datetime
+          example: '2022-06-02T08:32:06.258Z'
+        updatedAt:
+          type: datetime
+          example: '2022-06-02T08:32:06.267Z'
+
+    Users-Permissions-UserRegistration:
+      type: object
+      properties:
+        jwt:
+          type: string
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+        user:
+          $ref: '#/components/schemas/Users-Permissions-User'
+
+    Users-Permissions-PermissionsTree:
+      type: object
+      additionalProperties:
+        type: object
+        description: every api
+        properties:
+          controllers:
+            description: every controller of the api
+            type: object
+            additionalProperties:
+              type: object
+              additionalProperties:
+                description: every action of every controller
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                  policy:
+                    type: string
+
+    Users-Permissions-RoleRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              type:
+                type: string
+              permissions:
+                $ref: '#/components/schemas/Users-Permissions-PermissionsTree'
+          example:
+            name: foo
+            description: role foo
+            permissions:
+              api::content-type.content-type:
+                controllers:
+                  controllerA:
+                    find:
+                      enabled: true
+
+  parameters:
+  responses:
+  examples:
+  requestBodies:
