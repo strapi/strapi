@@ -7,7 +7,7 @@
  * To update run 'ampli pull strapi-backend'
  *
  * Required dependencies: @amplitude/node@^1.10.0
- * Tracking Plan Version: 13
+ * Tracking Plan Version: 14
  * Build: 1.0.0
  * Runtime: node.js:javascript-ampli
  *
@@ -88,10 +88,10 @@ const ApiKey = {
  */
 const DefaultOptions = {
   plan: {
-    version: '13',
+    version: '14',
     branch: 'main',
     source: 'strapi-backend',
-    versionId: 'f06e3f4a-ae74-4742-bfc1-444b46985e49',
+    versionId: 'f11ec09a-74dd-4c24-9d91-29505a2583e1',
   },
 };
 

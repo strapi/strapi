@@ -5,7 +5,7 @@
   "SourceId": "40f7e1bb-4ca2-4f64-93cd-6c3484fcd5a6",
   "Runtime": "node.js:javascript-ampli",
   "Branch": "main",
-  "Version": "13.0.0",
-  "VersionId": "f06e3f4a-ae74-4742-bfc1-444b46985e49",
+  "Version": "14.0.0",
+  "VersionId": "f11ec09a-74dd-4c24-9d91-29505a2583e1",
   "Path": "./lib/ampli"
 }
