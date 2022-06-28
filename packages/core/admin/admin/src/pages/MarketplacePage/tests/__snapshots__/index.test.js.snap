@@ -2699,6 +2699,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                   >
                     <div
                       class="c38 c39"
+                      data-testid="npm-package-card"
                       height="100%"
                     >
                       <div
@@ -2830,6 +2831,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                   >
                     <div
                       class="c38 c39"
+                      data-testid="npm-package-card"
                       height="100%"
                     >
                       <div
@@ -2961,6 +2963,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                   >
                     <div
                       class="c38 c39"
+                      data-testid="npm-package-card"
                       height="100%"
                     >
                       <div
@@ -3082,6 +3085,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                   >
                     <div
                       class="c38 c39"
+                      data-testid="npm-package-card"
                       height="100%"
                     >
                       <div
@@ -3213,6 +3217,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                   >
                     <div
                       class="c38 c39"
+                      data-testid="npm-package-card"
                       height="100%"
                     >
                       <div
@@ -3344,6 +3349,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                   >
                     <div
                       class="c38 c39"
+                      data-testid="npm-package-card"
                       height="100%"
                     >
                       <div
@@ -3475,6 +3481,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                   >
                     <div
                       class="c38 c39"
+                      data-testid="npm-package-card"
                       height="100%"
                     >
                       <div
@@ -3606,6 +3613,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                   >
                     <div
                       class="c38 c39"
+                      data-testid="npm-package-card"
                       height="100%"
                     >
                       <div
@@ -3737,6 +3745,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                   >
                     <div
                       class="c38 c39"
+                      data-testid="npm-package-card"
                       height="100%"
                     >
                       <div

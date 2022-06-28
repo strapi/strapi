@@ -64,7 +64,7 @@ describe('Marketplace page', () => {
 
   afterAll(() => server.close());
 
-  it.only('renders and matches the plugin tab snapshot', async () => {
+  it('renders and matches the plugin tab snapshot', async () => {
     const { container, getByTestId, getByRole } = render(App);
     await waitForElementToBeRemoved(() => getByTestId('loader'));
     await waitFor(() => expect(getByRole('heading', { name: /marketplace/i })).toBeInTheDocument());
@@ -143,7 +143,11 @@ describe('Marketplace page', () => {
 
   it('handles production environment', () => {
     // Simulate production environment
-    useAppInfos.mockImplementation(() => ({ autoReload: false, dependencies: {}, useYarn: true }));
+    useAppInfos.mockImplementationOnce(() => ({
+      autoReload: false,
+      dependencies: {},
+      useYarn: true,
+    }));
     const { queryByText } = render(App);
 
     // Should display notification
@@ -211,8 +215,10 @@ describe('Marketplace page', () => {
     expect(pluginCardText).toEqual(null);
   });
 
-  it.only('only show install button for plugins or providers already installed', async () => {
+  it('only show install button for plugins already installed', async () => {
     render(App);
+    const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
+    fireEvent.click(pluginsTab);
 
     // Plugin that's already installed
     const alreadyInstalledName = screen.getByRole('heading', { name: /^documentation/i });
@@ -222,6 +228,25 @@ describe('Marketplace page', () => {
 
     // Plugin that's not installed
     const notInstalledName = screen.getByRole('heading', { name: /^comments/i });
+    const notInstalledCard = notInstalledName.closest('[data-testid="npm-package-card"]');
+    const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
+    expect(notInstalledText).toBeVisible();
+  });
+
+  it('only show install button for providers already installed', async () => {
+    // Open providers tab
+    render(App);
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    fireEvent.click(providersTab);
+
+    // Provider that's already installed
+    const alreadyInstalledName = screen.getByRole('heading', { name: /cloudinary/i });
+    const alreadyInstalledCard = alreadyInstalledName.closest('[data-testid="npm-package-card"]');
+    const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
+    expect(alreadyInstalledText).toBeVisible();
+
+    // Provider that's not installed
+    const notInstalledName = screen.getByRole('heading', { name: /rackspace/i });
     const notInstalledCard = notInstalledName.closest('[data-testid="npm-package-card"]');
     const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
     expect(notInstalledText).toBeVisible();
