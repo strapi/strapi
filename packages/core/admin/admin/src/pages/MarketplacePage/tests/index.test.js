@@ -221,14 +221,16 @@ describe('Marketplace page', () => {
     fireEvent.click(pluginsTab);
 
     // Plugin that's already installed
-    const alreadyInstalledName = screen.getByRole('heading', { name: /^documentation/i });
-    const alreadyInstalledCard = alreadyInstalledName.closest('[data-testid="npm-package-card"]');
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find(div => div.innerHTML.includes('Documentation'));
     const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
     expect(alreadyInstalledText).toBeVisible();
 
     // Plugin that's not installed
-    const notInstalledName = screen.getByRole('heading', { name: /^comments/i });
-    const notInstalledCard = notInstalledName.closest('[data-testid="npm-package-card"]');
+    const notInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find(div => div.innerHTML.includes('Comments'));
     const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
     expect(notInstalledText).toBeVisible();
   });
@@ -240,14 +242,16 @@ describe('Marketplace page', () => {
     fireEvent.click(providersTab);
 
     // Provider that's already installed
-    const alreadyInstalledName = screen.getByRole('heading', { name: /cloudinary/i });
-    const alreadyInstalledCard = alreadyInstalledName.closest('[data-testid="npm-package-card"]');
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find(div => div.innerHTML.includes('Cloudinary'));
     const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
     expect(alreadyInstalledText).toBeVisible();
 
     // Provider that's not installed
-    const notInstalledName = screen.getByRole('heading', { name: /rackspace/i });
-    const notInstalledCard = notInstalledName.closest('[data-testid="npm-package-card"]');
+    const notInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find(div => div.innerHTML.includes('Rackspace'));
     const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
     expect(notInstalledText).toBeVisible();
   });
