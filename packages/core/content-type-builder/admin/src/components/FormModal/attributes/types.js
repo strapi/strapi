@@ -5,7 +5,6 @@ import getTrad from '../../../utils/getTrad';
 import getRelationType from '../../../utils/getRelationType';
 import toRegressedEnumValue from '../../../utils/toRegressedEnumValue';
 import startsWithANumber from '../../../utils/startsWithANumber';
-import matchRegex from '../../../utils/matchRegex';
 import {
   alreadyUsedAttributeNames,
   createTextShape,
@@ -177,7 +176,7 @@ const types = {
         .test({
           name: 'matchesRegex',
           message: getTrad('error.validation.match-regex'),
-          test: values => values.every(matchRegex),
+          test: values => values.every(ENUM_REGEX.test),
         }),
 
       enumName: yup.string().nullable(),
