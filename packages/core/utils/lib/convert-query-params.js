@@ -164,6 +164,10 @@ const convertPopulateObject = (populate, schema) => {
     const attribute = attributes[key];
 
     if (!attribute) {
+      // this will fix the problem of field not displayed after save with same field name 
+      if (populate[key])
+        acc[key]=populate[key];
+      
       return acc;
     }
 
