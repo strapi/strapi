@@ -215,7 +215,7 @@ describe('Marketplace page', () => {
     expect(pluginCardText).toEqual(null);
   });
 
-  it('only show install button for plugins already installed', async () => {
+  it('shows the installed text for installed plugins', async () => {
     render(App);
     const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
     fireEvent.click(pluginsTab);
@@ -233,7 +233,7 @@ describe('Marketplace page', () => {
     expect(notInstalledText).toBeVisible();
   });
 
-  it('only show install button for providers already installed', async () => {
+  it('shows the installed text for installed providers', async () => {
     // Open providers tab
     render(App);
     const providersTab = screen.getByRole('tab', { name: /providers/i });
