@@ -29,6 +29,7 @@ import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
 import { axiosInstance } from '../../../../../core/utils';
 import schema from './utils/schema';
+import getDateOfExpiration from './utils/getDateOfExpiration';
 import LoadingView from './components/LoadingView';
 import HeaderContentBox from './components/ContentBox';
 
@@ -90,7 +91,11 @@ const ApiTokenCreateView = () => {
         data: { data: response },
       } = isCreating
         ? await axiosInstance.post(`/admin/api-tokens`, body)
-        : await axiosInstance.put(`/admin/api-tokens/${id}`, body);
+        : await axiosInstance.put(`/admin/api-tokens/${id}`, {
+            name: body.name,
+            description: body.description,
+            type: body.type,
+          });
 
       apiToken = response;
 
@@ -243,8 +248,8 @@ const ApiTokenCreateView = () => {
                           <Select
                             name="duration"
                             label={formatMessage({
-                              id: 'Settings.apiTokens.form.type',
-                              defaultMessage: 'Token type',
+                              id: 'Settings.apiTokens.form.duration',
+                              defaultMessage: 'Token duration',
                             })}
                             value={values.duration}
                             error={
@@ -260,6 +265,7 @@ const ApiTokenCreateView = () => {
                               handleChange({ target: { name: 'duration', value } });
                             }}
                             required
+                            disabled={!isCreating}
                           >
                             <Option value="7">
                               {formatMessage({
@@ -286,6 +292,13 @@ const ApiTokenCreateView = () => {
                               })}
                             </Option>
                           </Select>
+                          <Typography variant="pi" textColor="neutral600">
+                            {!isCreating &&
+                              `${formatMessage({
+                                id: 'Settings.apiTokens.duration.expiration-date',
+                                defaultMessage: 'Expiration date',
+                              })}: ${getDateOfExpiration(apiToken?.createdAt, values.duration)}`}
+                          </Typography>
                         </GridItem>
                         <GridItem key="type" col={6} xs={12}>
                           <Select
