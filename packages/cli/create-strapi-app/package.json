@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-app",
-  "version": "4.2.0",
+  "version": "4.2.2",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "create-strapi-app",
@@ -38,7 +38,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@strapi/generate-new": "4.2.0",
+    "@strapi/generate-new": "4.2.2",
     "commander": "6.1.0",
     "inquirer": "8.2.0"
   },

@@ -106,6 +106,7 @@ module.exports = {
     const currentEnvironment = strapi.config.get('environment');
     const autoReload = strapi.config.get('autoReload', false);
     const strapiVersion = strapi.config.get('info.strapi', null);
+    const dependencies = strapi.config.get('info.dependencies', {});
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
     const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
@@ -115,6 +116,7 @@ module.exports = {
         currentEnvironment,
         autoReload,
         strapiVersion,
+        dependencies,
         nodeVersion,
         communityEdition,
         useYarn,
