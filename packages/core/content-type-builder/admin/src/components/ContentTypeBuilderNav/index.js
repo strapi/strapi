@@ -37,8 +37,8 @@ const ContentTypeBuilderNav = () => {
           defaultMessage: 'Content-Types Builder',
         })}
         searchLabel={formatMessage({
-          id: 'content-manager.components.LeftMenu.Search.label',
-          defaultMessage: 'Search for a content type',
+          id: 'global.search',
+          defaultMessage: 'Search',
         })}
       />
       <SubNavSections>
