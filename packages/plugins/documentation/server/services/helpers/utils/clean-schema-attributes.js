@@ -7,7 +7,7 @@ const pascalCase = require('./pascal-case');
  * @description - Converts types found on attributes to OpenAPI acceptable data types
  *
  * @param {object} attributes - The attributes found on a contentType
- * @param {{ typeMap: Map, isRequest: boolean }} opts
+ * @param {{ typeMap: Map, isRequest: boolean, addSchema: function, componentSchemaRefName: string }} opts
  * @returns Attributes using OpenAPI acceptable data types
  */
 const cleanSchemaAttributes = (
