@@ -20,6 +20,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   // Store response and request schemas in an object
   let schemas = {};
   let componentSchemas = {};
+  // adds a ComponentSchema to the Schemas so it can be used as Ref
   const addSchema = (schemaName, schema) => {
     if (!Object.keys(schema) || !Object.keys(schema.properties)) {
       return false;
