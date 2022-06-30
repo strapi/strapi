@@ -27,7 +27,7 @@
     "@strapi/provider-upload-local": "4.2.2",
     "@strapi/utils": "4.2.2",
     "byte-size": "7.0.1",
-    "cropperjs": "1.5.11",
+    "cropperjs": "1.5.12",
     "fs-extra": "10.0.0",
     "immer": "9.0.6",
     "koa-range": "0.3.0",
