@@ -21,15 +21,15 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   let schemas = {};
   let componentSchemas = {};
   const addSchema = (schemaName, schema) => {
-    if(!Object.keys(schema) || !Object.keys(schema.properties)) {
+    if (!Object.keys(schema) || !Object.keys(schema.properties)) {
       return false;
     }
     componentSchemas = {
       ...componentSchemas,
-      [schemaName]: schema
-    }
+      [schemaName]: schema,
+    };
     return true;
-  }
+  };
   // Get all the route methods
   const routeMethods = routeInfo.routes.map(route => route.method);
   // Check for localized paths
@@ -105,26 +105,37 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     // Build the list response schema
     schemas = {
       ...schemas,
-      [`${pascalCase(uniqueName)}ListResponseDataItem`]:{
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            attributes: { type: 'object', properties: cleanSchemaAttributes(attributes, { addSchema, dataTypeName: `#/components/schemas/${pascalCase(uniqueName)}ListResponseDataItemLocalized`}) },
+      [`${pascalCase(uniqueName)}ListResponseDataItem`]: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          attributes: {
+            type: 'object',
+            properties: cleanSchemaAttributes(attributes, {
+              addSchema,
+              componentSchemaRefName: `#/components/schemas/${pascalCase(
+                uniqueName
+              )}ListResponseDataItemLocalized`,
+            }),
           },
         },
-      [`${pascalCase(uniqueName)}ListResponseDataItemLocalized`]:  {
+      },
+      [`${pascalCase(uniqueName)}ListResponseDataItemLocalized`]: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          attributes: {
             type: 'object',
-            properties: {
-              id: { type: 'string' },
-              attributes: { type: 'object', properties: cleanSchemaAttributes(attributes, { addSchema }) },
-            },
+            properties: cleanSchemaAttributes(attributes, { addSchema }),
+          },
         },
+      },
       [`${pascalCase(uniqueName)}ListResponse`]: {
         properties: {
           data: {
             type: 'array',
             items: {
-              "$ref": `#/components/schemas/${pascalCase(uniqueName)}ListResponseDataItem`
+              $ref: `#/components/schemas/${pascalCase(uniqueName)}ListResponseDataItem`,
             },
           },
           meta: {
@@ -149,29 +160,40 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   schemas = {
     ...schemas,
     [`${pascalCase(uniqueName)}ResponseDataObject`]: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        attributes: {
           type: 'object',
-          properties: {
-            id: { type: 'string' },
-            attributes: { type: 'object', properties: cleanSchemaAttributes(attributes, { addSchema, dataTypeName: `#/components/schemas/${pascalCase(uniqueName)}ResponseDataObjectLocalized` }) },
-          },
+          properties: cleanSchemaAttributes(attributes, {
+            addSchema,
+            componentSchemaRefName: `#/components/schemas/${pascalCase(
+              uniqueName
+            )}ResponseDataObjectLocalized`,
+          }),
         },
+      },
+    },
     [`${pascalCase(uniqueName)}ResponseDataObjectLocalized`]: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        attributes: {
           type: 'object',
-          properties: {
-            id: { type: 'string' },
-            attributes: { type: 'object', properties: cleanSchemaAttributes(attributes, { addSchema }) },
-          },
+          properties: cleanSchemaAttributes(attributes, { addSchema }),
         },
+      },
+    },
     [`${pascalCase(uniqueName)}Response`]: {
       properties: {
         data: {
-          "$ref": `#/components/schemas/${pascalCase(uniqueName)}ResponseDataObject`
+          $ref: `#/components/schemas/${pascalCase(uniqueName)}ResponseDataObject`,
         },
         meta: { type: 'object' },
       },
     },
   };
-  return {...schemas, ...componentSchemas};
+  return { ...schemas, ...componentSchemas };
 };
 
 const buildComponentSchema = api => {

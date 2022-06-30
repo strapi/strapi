@@ -10,7 +10,10 @@ const pascalCase = require('./pascal-case');
  * @param {{ typeMap: Map, isRequest: boolean }} opts
  * @returns Attributes using OpenAPI acceptable data types
  */
-const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = false, addSchema = () => {}, dataTypeName = "" } = {}, ) => {
+const cleanSchemaAttributes = (
+  attributes,
+  { typeMap = new Map(), isRequest = false, addSchema = () => {}, componentSchemaRefName = '' } = {}
+) => {
   const attributesCopy = _.cloneDeep(attributes);
 
   for (const prop in attributesCopy) {
@@ -86,67 +89,49 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
       }
       case 'component': {
         const componentAttributes = strapi.components[attribute.component].attributes;
-        const componentExists = addSchema(pascalCase(attribute.component),{
-            type: 'object',
-            properties: {
-              ...(isRequest ? {} : { id: { type: 'string' } }),
-              ...cleanSchemaAttributes(componentAttributes, {
-                typeMap,
-                isRequest,
-              }),
-            },
-          })
+        const rawComponentSchema = {
+          type: 'object',
+          properties: {
+            ...(isRequest ? {} : { id: { type: 'string' } }),
+            ...cleanSchemaAttributes(componentAttributes, {
+              typeMap,
+              isRequest,
+            }),
+          },
+        };
+        const refComponentSchema = {
+          $ref: `#/components/schemas/${`${pascalCase(attribute.component)}Component`}`,
+        };
+        const componentExists = addSchema(
+          `${pascalCase(attribute.component)}Component`,
+          rawComponentSchema
+        );
+        const finalComponentSchema = componentExists ? refComponentSchema : rawComponentSchema;
         if (attribute.repeatable) {
           attributesCopy[prop] = {
             type: 'array',
-            items: componentExists ? 
-              {"$ref": `#/components/schemas/${pascalCase(attribute.component)}`} 
-              : {
-                  type: 'object',
-                  properties: {
-                    ...(isRequest ? {} : { id: { type: 'string' } }),
-                    ...cleanSchemaAttributes(componentAttributes, {
-                      typeMap,
-                      isRequest,
-                    }),
-                  },
-                }
-            };
+            items: finalComponentSchema,
+          };
         } else {
-          attributesCopy[prop] =  componentExists ? 
-            {"$ref": `#/components/schemas/${pascalCase(attribute.component)}`} 
-            : {
-              type: 'object',
-              properties: {
-                ...(isRequest ? {} : { id: { type: 'string' } }),
-                ...cleanSchemaAttributes(componentAttributes, {
-                  typeMap,
-                  isRequest,
-                }),
-              },
-            };
+          attributesCopy[prop] = finalComponentSchema;
         }
         break;
       }
       case 'dynamiczone': {
         const components = attribute.components.map(component => {
           const componentAttributes = strapi.components[component].attributes;
-          const componentExists = addSchema(pascalCase(component),{
+          const rawComponentSchema = {
             type: 'object',
             properties: {
               ...(isRequest ? {} : { id: { type: 'string' } }),
               __component: { type: 'string' },
               ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest, addSchema }),
             },
-          })
-          return componentExists ? {"$ref": `#/components/schemas/${pascalCase(component)}`} : {
-            type: 'object',
-            properties: {
-              ...(isRequest ? {} : { id: { type: 'string' } }),
-              __component: { type: 'string' },
-              ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest, addSchema }),
-            },
-          }
+          };
+          const refComponentSchema = { $ref: `#/components/schemas/${pascalCase(component)}` };
+          const componentExists = addSchema(pascalCase(component), rawComponentSchema);
+          const finalComponentSchema = componentExists ? refComponentSchema : rawComponentSchema;
+          return finalComponentSchema;
         });
 
         attributesCopy[prop] = {
@@ -196,10 +181,12 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
         if (prop === 'localizations') {
           attributesCopy[prop] = {
             type: 'object',
-            properties: { data: {
-              type: 'array',
-              items: dataTypeName.length ? { '$ref' : dataTypeName } : {}
-            } },
+            properties: {
+              data: {
+                type: 'array',
+                items: componentSchemaRefName.length ? { $ref: componentSchemaRefName } : {},
+              },
+            },
           };
           break;
         }
