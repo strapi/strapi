@@ -7,17 +7,13 @@ import {
   RequiredOption,
 } from './base';
 
-export type RichTextAttribute = Attribute<'richtext'> extends infer T
-  ? T extends Attribute
-    ? T &
-        // Options
-        ConfigurableOption &
-        DefaultOption<T> &
-        MinMaxLengthOption &
-        PrivateOption &
-        RequiredOption
-    : never
-  : never;
+export type RichTextAttribute = Attribute<'richtext'> &
+  // Options
+  ConfigurableOption &
+  DefaultOption<RichTextValue> &
+  MinMaxLengthOption &
+  PrivateOption &
+  RequiredOption;
 
 export type RichTextValue = string;
 

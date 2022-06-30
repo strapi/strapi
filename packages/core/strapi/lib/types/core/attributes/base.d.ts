@@ -55,8 +55,8 @@ export interface UniqueOption {
   unique?: boolean;
 }
 
-export interface DefaultOption<T extends Attribute> {
-  default?: GetAttributeValue<T>;
+export interface DefaultOption<T> {
+  default?: T;
 }
 
 export interface ConfigurableOption {

@@ -7,17 +7,13 @@ import {
   RequiredOption,
 } from './base';
 
-export type BigIntegerAttribute = Attribute<'biginteger'> extends infer T
-  ? T extends Attribute
-    ? T &
-        // Options
-        ConfigurableOption &
-        DefaultOption<T> &
-        MinMaxOption<string> &
-        PrivateOption &
-        RequiredOption
-    : never
-  : never;
+export type BigIntegerAttribute = Attribute<'biginteger'> &
+  // Options
+  ConfigurableOption &
+  DefaultOption<BigIntegerValue> &
+  MinMaxOption<string> &
+  PrivateOption &
+  RequiredOption;
 
 export type BigIntegerValue = string;
 

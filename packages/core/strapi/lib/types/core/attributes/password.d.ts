@@ -7,19 +7,13 @@ import {
   RequiredOption,
 } from './base';
 
-// export interface PasswordAttribute extends BaseStringAttribute<'password'> {}
-
-export type PasswordAttribute = Attribute<'password'> extends infer T
-  ? T extends Attribute
-    ? T &
-        // Options
-        ConfigurableOption &
-        DefaultOption<T> &
-        MinMaxLengthOption &
-        PrivateOption &
-        RequiredOption
-    : never
-  : never;
+export type PasswordAttribute = Attribute<'password'> &
+  // Options
+  ConfigurableOption &
+  DefaultOption<PasswordValue> &
+  MinMaxLengthOption &
+  PrivateOption &
+  RequiredOption;
 
 export type PasswordValue = string;
 

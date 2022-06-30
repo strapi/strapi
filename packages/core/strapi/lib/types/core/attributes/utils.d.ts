@@ -3,7 +3,6 @@ import {
   Attribute,
   AttributeType,
   GetBigIntegerAttributeValue,
-  GetComponentAttributeValue,
   GetBooleanAttributeValue,
   GetDecimalAttributeValue,
   GetDynamicZoneAttributeValue,
@@ -18,7 +17,8 @@ import {
   GetStringAttributeValue,
   GetTextAttributeValue,
   GetUIDAttributeValue,
-  BigIntegerAttribute,
+  GetComponentAttributeValue,
+  GetEmailAttributeValue,
 } from '.';
 import { GetDateAttributeValue } from './date';
 import { GetDateTimeAttributeValue } from './date-time';
@@ -54,6 +54,7 @@ export type GetAttributeValue<T extends Attribute> =
   | GetDecimalAttributeValue<T>
   | GetDynamicZoneAttributeValue<T>
   | GetEnumerationAttributeValue<T>
+  | GetEmailAttributeValue<T>
   | GetFloatAttributeValue<T>
   | GetIntegerAttributeValue<T>
   | GetJsonAttributeValue<T>

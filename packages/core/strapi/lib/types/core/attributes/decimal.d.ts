@@ -7,17 +7,13 @@ import {
   RequiredOption,
 } from './base';
 
-export type DecimalAttribute = Attribute<'decimal'> extends infer T
-  ? T extends Attribute
-    ? T &
-        // Options
-        ConfigurableOption &
-        DefaultOption<T> &
-        MinMaxOption &
-        PrivateOption &
-        RequiredOption
-    : never
-  : never;
+export type DecimalAttribute = Attribute<'decimal'> &
+  // Options
+  ConfigurableOption &
+  DefaultOption<DecimalValue> &
+  MinMaxOption &
+  PrivateOption &
+  RequiredOption;
 
 export type DecimalValue = number;
 
