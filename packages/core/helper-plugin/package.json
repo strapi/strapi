@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.1.12",
+  "version": "4.2.2",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -45,12 +45,10 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
     "axios": "0.25.0",
-    "babel-plugin-styled-components": "2.0.2",
     "formik": "2.2.9",
     "invariant": "^2.2.1",
     "lodash": "4.17.21",
     "match-sorter": "^4.0.2",
-    "mini-css-extract-plugin": "2.4.4",
     "moment": "^2.29.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -76,8 +74,8 @@
     "@storybook/builder-webpack5": "6.4.10",
     "@storybook/manager-webpack5": "6.4.10",
     "@storybook/react": "^6.3.7",
-    "@strapi/design-system": "1.1.1",
-    "@strapi/icons": "1.1.1",
+    "@strapi/design-system": "1.2.0",
+    "@strapi/icons": "1.2.0",
     "babel-loader": "^8.2.2",
     "cross-env": "^7.0.3",
     "date-fns": "2.22.1",
@@ -90,7 +88,7 @@
     "react-select": "^4.0.2"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   }
 }

@@ -44,6 +44,9 @@ describe('DocAssetCard', () => {
       .c0 {
         background: #ffffff;
         border-radius: 4px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #eaeaef;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
