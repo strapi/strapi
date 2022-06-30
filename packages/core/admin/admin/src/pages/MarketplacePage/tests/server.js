@@ -551,75 +551,6 @@ const handlers = [
     );
   }),
 
-  rest.get('*/admin/plugins', (req, res, ctx) => {
-    return res(
-      ctx.delay(100),
-      ctx.status(200),
-      ctx.json({
-        plugins: [
-          {
-            name: 'content-manager',
-            displayName: 'Content Manager',
-            description: 'Quick way to see, edit and delete the data in your database.',
-          },
-          {
-            name: 'content-type-builder',
-            displayName: 'Content Type Builder',
-            description:
-              'Modelize the data structure of your API. Create new fields and relations in just a minute. The files are automatically created and updated in your project.',
-          },
-          {
-            name: 'email',
-            displayName: 'Email',
-            description: 'Configure your application to send emails.',
-          },
-          {
-            name: 'upload',
-            displayName: 'Media Library',
-            description: 'Media file management.',
-          },
-          {
-            name: 'graphql',
-            displayName: 'GraphQL',
-            description: 'Adds GraphQL endpoint with default API methods.',
-            packageName: '@strapi/plugin-graphql',
-          },
-          {
-            name: 'documentation',
-            displayName: 'Documentation',
-            description: 'Create an OpenAPI Document and visualize your API with SWAGGER UI.',
-            packageName: '@strapi/plugin-documentation',
-          },
-          {
-            name: 'my-plugin',
-            displayName: 'my-plugin',
-            description: 'Description of my plugin.',
-          },
-          {
-            name: 'i18n',
-            displayName: 'Internationalization',
-            description:
-              'This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API.',
-            packageName: '@strapi/plugin-i18n',
-          },
-          {
-            name: 'sentry',
-            displayName: 'Sentry',
-            description: 'Send Strapi error events to Sentry.',
-            packageName: '@strapi/plugin-sentry',
-          },
-          {
-            name: 'users-permissions',
-            displayName: 'Roles & Permissions',
-            description:
-              'Protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.',
-            packageName: '@strapi/plugin-users-permissions',
-          },
-        ],
-      })
-    );
-  }),
-
   rest.get('*/admin/information', (req, res, ctx) => {
     return res(
       ctx.delay(100),
@@ -629,6 +560,9 @@ const handlers = [
           currentEnvironment: 'development',
           autoReload: true,
           strapiVersion: '4.1.0',
+          dependencies: {
+            '@strapi/plugin-documentation': '4.1.0',
+          },
           nodeVersion: 'v14.18.1',
           communityEdition: true,
           useYarn: false,

@@ -14,7 +14,7 @@ module.exports = ({ strapi }) => {
     const extension = strapi.plugin('graphql').service('extension');
 
     const { getFiltersInputTypeName, getScalarFilterInputTypeName } = utils.naming;
-    const { isStrapiScalar, isRelation } = utils.attributes;
+    const { isStrapiScalar, isRelation, isComponent } = utils.attributes;
 
     const { attributes } = contentType;
 
@@ -51,6 +51,11 @@ module.exports = ({ strapi }) => {
           else if (isRelation(attribute)) {
             addRelationalAttribute(t, attributeName, attribute);
           }
+
+          // Handle components
+          else if (isComponent(attribute)) {
+            addComponentAttribute(t, attributeName, attribute);
+          }
         }
 
         // Conditional clauses
@@ -85,6 +90,22 @@ module.exports = ({ strapi }) => {
     if (extension.shadowCRUD(model.uid).isDisabled()) return;
 
     builder.field(attributeName, { type: getFiltersInputTypeName(model) });
+  };
+
+  const addComponentAttribute = (builder, attributeName, attribute) => {
+    const utils = strapi.plugin('graphql').service('utils');
+    const extension = strapi.plugin('graphql').service('extension');
+    const { getFiltersInputTypeName } = utils.naming;
+
+    const component = strapi.getModel(attribute.component);
+
+    // If there is no component corresponding to the attribute configuration, then ignore it
+    if (!component) return;
+
+    // If the component is disabled, then ignore it too
+    if (extension.shadowCRUD(component.uid).isDisabled()) return;
+
+    builder.field(attributeName, { type: getFiltersInputTypeName(component) });
   };
 
   return {

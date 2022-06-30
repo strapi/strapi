@@ -1,6 +1,5 @@
 const webpack = require('webpack');
 const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const packageJson = require('./package.json');
 
 const nodeModules = [];
@@ -35,11 +34,6 @@ module.exports = {
         exclude: /(node_modules)/,
       },
       {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
-      },
-
-      {
         test: /\.(png|svg|jpg|gif)$/,
         type: 'asset',
         parser: {
@@ -57,9 +51,6 @@ module.exports = {
   plugins: [
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
-    }),
-    new MiniCssExtractPlugin({
-      filename: 'style.css',
     }),
   ],
 };
