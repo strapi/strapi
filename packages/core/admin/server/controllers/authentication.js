@@ -2,6 +2,7 @@
 
 const passport = require('koa-passport');
 const compose = require('koa-compose');
+const { v4: uuidv4 } = require('uuid');
 const { ApplicationError, ValidationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 const {
@@ -86,6 +87,8 @@ module.exports = {
 
     await validateRegistrationInput(input);
 
+    input.uniqueAdminID = uuidv4();
+
     const user = await getService('user').register(input);
 
     ctx.body = {
@@ -120,6 +123,7 @@ module.exports = {
       registrationToken: null,
       isActive: true,
       roles: superAdminRole ? [superAdminRole.id] : [],
+      uniqueAdminID: uuidv4(),
     });
 
     strapi.telemetry.send('didCreateFirstAdmin');

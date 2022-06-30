@@ -3,6 +3,7 @@
 const { yup } = require('@strapi/utils');
 const _ = require('lodash');
 const inquirer = require('inquirer');
+const uuid = require('uuid');
 const strapi = require('../index');
 
 const emailValidator = yup
@@ -106,6 +107,7 @@ async function createAdmin({ email, password, firstname, lastname }) {
     firstname,
     lastname,
     isActive: true,
+    uniqueAdminID: uuid(),
     roles: [superAdminRole.id],
     ...(password && { password, registrationToken: null }),
   });

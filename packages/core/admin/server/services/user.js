@@ -157,7 +157,7 @@ const findRegistrationInfo = async registrationToken => {
  * @param {Object} params.registrationToken registration token
  * @param {Object} params.userInfo user info
  */
-const register = async ({ registrationToken, userInfo }) => {
+const register = async ({ registrationToken, userInfo, uniqueAdminID }) => {
   const matchingUser = await strapi.query('admin::user').findOne({ where: { registrationToken } });
 
   if (!matchingUser) {
@@ -170,6 +170,7 @@ const register = async ({ registrationToken, userInfo }) => {
     lastname: userInfo.lastname,
     registrationToken: null,
     isActive: true,
+    uniqueAdminID,
   });
 };
 

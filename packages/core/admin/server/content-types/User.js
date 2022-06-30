@@ -73,6 +73,11 @@ module.exports = {
       configurable: false,
       private: true,
     },
+    uniqueAdminID: {
+      type: 'string',
+      configurable: false,
+      private: true,
+    },
     roles: {
       configurable: false,
       private: true,
