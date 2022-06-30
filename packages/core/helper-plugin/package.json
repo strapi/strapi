@@ -70,7 +70,7 @@
     "@babel/runtime": "7.16.7",
     "@storybook/addon-actions": "6.4.10",
     "@storybook/addon-essentials": "6.4.10",
-    "@storybook/addon-links": "6.4.10",
+    "@storybook/addon-links": "6.5.9",
     "@storybook/builder-webpack5": "6.4.10",
     "@storybook/manager-webpack5": "6.4.10",
     "@storybook/react": "^6.3.7",
