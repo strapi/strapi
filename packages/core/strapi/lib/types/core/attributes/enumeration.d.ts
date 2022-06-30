@@ -12,16 +12,12 @@ export interface EnumerationAttributeProperties<T extends string[] = []> {
 }
 
 export type EnumerationAttribute<T extends string[] = []> = Attribute<'enumeration'> &
-  EnumerationAttributeProperties<T> extends infer U
-  ? U extends Attribute
-    ? U &
-        // Options
-        ConfigurableOption &
-        DefaultOption<U> &
-        PrivateOption &
-        RequiredOption
-    : never
-  : never;
+  EnumerationAttributeProperties<T> &
+  // Options
+  ConfigurableOption &
+  DefaultOption<T> &
+  PrivateOption &
+  RequiredOption;
 
 export type EnumerationValue<T extends string[]> = GetArrayValues<T>;
 

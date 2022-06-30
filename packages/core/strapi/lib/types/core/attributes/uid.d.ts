@@ -40,17 +40,15 @@ export type UIDAttribute<
   U extends T extends SchemaUID
     ? GetAttributesKeysByType<T, 'string' | 'text'>
     : undefined = undefined
-> = Attribute<'uid'> & UIDAttributeProperties<S, T, U> extends infer P
-  ? P extends Attribute
-    ? P &
-        // Options
-        ConfigurableOption &
-        DefaultOption<P> &
-        MinMaxLengthOption &
-        PrivateOption &
-        RequiredOption
-    : never
-  : never;
+> = Attribute<'uid'> &
+  // Properties
+  UIDAttributeProperties<S, T, U> &
+  // Options
+  ConfigurableOption &
+  DefaultOption<UIDValue> &
+  MinMaxLengthOption &
+  PrivateOption &
+  RequiredOption;
 
 export type UIDValue = string;
 

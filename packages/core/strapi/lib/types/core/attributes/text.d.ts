@@ -14,18 +14,14 @@ export interface TextAttributeProperties {
 
 export type TextAttribute = Attribute<'text'> &
   // Properties
-  TextAttributeProperties extends infer U
-  ? U extends Attribute
-    ? U &
-        // Options
-        ConfigurableOption &
-        DefaultOption<U> &
-        MinMaxLengthOption &
-        PrivateOption &
-        UniqueOption &
-        RequiredOption
-    : never
-  : never;
+  TextAttributeProperties &
+  // Options
+  ConfigurableOption &
+  DefaultOption<TextValue> &
+  MinMaxLengthOption &
+  PrivateOption &
+  UniqueOption &
+  RequiredOption;
 
 export type TextValue = string;
 

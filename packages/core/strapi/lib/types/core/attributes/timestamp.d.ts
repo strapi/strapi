@@ -7,17 +7,13 @@ import {
   UniqueOption,
 } from './base';
 
-export type TimestampAttribute = Attribute<'timestamp'> extends infer T
-  ? T extends Attribute
-    ? T &
-        // Options
-        ConfigurableOption &
-        DefaultOption<T> &
-        PrivateOption &
-        RequiredOption &
-        UniqueOption
-    : never
-  : never;
+export type TimestampAttribute = Attribute<'timestamp'> &
+  // Options
+  ConfigurableOption &
+  DefaultOption<TimestampValue> &
+  PrivateOption &
+  RequiredOption &
+  UniqueOption;
 
 export type TimestampValue = string;
 

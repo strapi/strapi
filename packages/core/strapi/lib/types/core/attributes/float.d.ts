@@ -7,17 +7,13 @@ import {
   RequiredOption,
 } from './base';
 
-export type FloatAttribute = Attribute<'float'> extends infer T
-  ? T extends Attribute
-    ? T &
-        // Options
-        ConfigurableOption &
-        DefaultOption<T> &
-        MinMaxOption &
-        PrivateOption &
-        RequiredOption
-    : never
-  : never;
+export type FloatAttribute = Attribute<'float'> &
+  // Options
+  ConfigurableOption &
+  DefaultOption<FloatValue> &
+  MinMaxOption &
+  PrivateOption &
+  RequiredOption;
 
 export type FloatValue = number;
 

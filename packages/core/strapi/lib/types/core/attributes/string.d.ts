@@ -14,18 +14,14 @@ export interface StringAttributeProperties {
 
 export type StringAttribute = Attribute<'string'> &
   // Properties
-  StringAttributeProperties extends infer U
-  ? U extends Attribute
-    ? U &
-        // Options
-        ConfigurableOption &
-        DefaultOption<U> &
-        MinMaxLengthOption &
-        PrivateOption &
-        UniqueOption &
-        RequiredOption
-    : never
-  : never;
+  StringAttributeProperties &
+  // Options
+  ConfigurableOption &
+  DefaultOption<StringValue> &
+  MinMaxLengthOption &
+  PrivateOption &
+  UniqueOption &
+  RequiredOption;
 
 export type StringValue = string;
 

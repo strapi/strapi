@@ -7,17 +7,13 @@ import {
   RequiredOption,
 } from './base';
 
-export type IntegerAttribute = Attribute<'integer'> extends infer T
-  ? T extends Attribute
-    ? T &
-        // Options
-        ConfigurableOption &
-        DefaultOption<T> &
-        MinMaxOption &
-        PrivateOption &
-        RequiredOption
-    : never
-  : never;
+export type IntegerAttribute = Attribute<'integer'> &
+  // Options
+  ConfigurableOption &
+  DefaultOption<IntegerValue> &
+  MinMaxOption &
+  PrivateOption &
+  RequiredOption;
 
 export type IntegerValue = number;
 
