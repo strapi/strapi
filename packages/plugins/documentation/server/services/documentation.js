@@ -11,7 +11,17 @@ const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
 module.exports = ({ strapi }) => {
   const config = strapi.config.get('plugin.documentation');
 
+  const registeredDocs = [];
+
   return {
+    registerDoc(doc) {
+      // parseYaml
+      if (typeof doc === 'string') {
+        doc = require('yaml').parse(doc);
+      }
+      // receive an object we can register it directly
+      registeredDocs.push(doc);
+    },
     getDocumentationVersion() {
       return _.get(config, 'info.version');
     },
@@ -174,8 +184,26 @@ module.exports = ({ strapi }) => {
       const customConfig = await this.getCustomConfig();
       const config = _.merge(defaultConfig, customConfig);
 
+      const finalDoc = { ...config, paths };
+
+      registeredDocs.forEach(doc => {
+        // Add tags
+        finalDoc.tags = finalDoc.tags || [];
+        finalDoc.tags.push(...(doc.tags || []));
+
+        // Add Paths
+        _.assign(finalDoc.paths, doc.paths);
+
+        // Add components
+        _.forEach(doc.components || {}, (val, key) => {
+          finalDoc.components[key] = finalDoc.components[key] || {};
+
+          _.assign(finalDoc.components[key], val);
+        });
+      });
+
       await fs.ensureFile(fullDocJsonPath);
-      await fs.writeJson(fullDocJsonPath, { ...config, paths }, { spaces: 2 });
+      await fs.writeJson(fullDocJsonPath, finalDoc, { spaces: 2 });
     },
   };
 };

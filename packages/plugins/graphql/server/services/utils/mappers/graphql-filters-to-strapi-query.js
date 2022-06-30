@@ -42,7 +42,7 @@ module.exports = ({ strapi }) => {
      * @return {object | object[]}
      */
     graphQLFiltersToStrapiQuery(filters, contentType = {}) {
-      const { isStrapiScalar, isMedia, isRelation } = getService('utils').attributes;
+      const { isStrapiScalar, isMedia, isRelation, isComponent } = getService('utils').attributes;
       const { operators } = getService('builders').filters;
 
       const ROOT_LEVEL_OPERATORS = [operators.and, operators.or, operators.not];
@@ -85,6 +85,16 @@ module.exports = ({ strapi }) => {
             // Recursively apply the mapping to the value using the fetched model,
             // and update the value within `resultMap`
             resultMap[key] = this.graphQLFiltersToStrapiQuery(value, relModel);
+          }
+
+          // If it's a deep filter on a component
+          else if (isComponent(attribute)) {
+            // Fetch the model from the component attribute
+            const componentModel = strapi.getModel(attribute.component);
+
+            // Recursively apply the mapping to the value using the fetched model,
+            // and update the value within `resultMap`
+            resultMap[key] = this.graphQLFiltersToStrapiQuery(value, componentModel);
           }
         }
 
