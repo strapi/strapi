@@ -184,6 +184,9 @@ describe('MediaLibrary / AssetList', () => {
       .c1 {
         background: #ffffff;
         border-radius: 4px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #eaeaef;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
@@ -311,6 +314,8 @@ describe('MediaLibrary / AssetList', () => {
         height: 10.25rem;
         width: 100%;
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
       }
 
       .c15 {

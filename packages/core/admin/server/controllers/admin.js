@@ -8,6 +8,11 @@ const { ValidationError } = require('@strapi/utils').errors;
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
 
+const {
+  validateUpdateProjectSettings,
+  validateUpdateProjectSettingsFiles,
+  validateUpdateProjectSettingsImagesDimensions,
+} = require('../validation/project-settings');
 const { getService } = require('../utils');
 
 const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
@@ -39,6 +44,7 @@ module.exports = {
   async init() {
     let uuid = strapi.config.get('uuid', false);
     const hasAdmin = await getService('user').exists();
+    const { menuLogo } = await getService('project-settings').getProjectSettings();
     // set to null if telemetryDisabled flag not avaialble in package.json
     const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled', null);
 
@@ -46,13 +52,40 @@ module.exports = {
       uuid = false;
     }
 
-    return { data: { uuid, hasAdmin } };
+    return {
+      data: {
+        uuid,
+        hasAdmin,
+        menuLogo: menuLogo ? menuLogo.url : null,
+      },
+    };
+  },
+
+  async getProjectSettings() {
+    return getService('project-settings').getProjectSettings();
+  },
+
+  async updateProjectSettings(ctx) {
+    const projectSettingsService = getService('project-settings');
+
+    const {
+      request: { files, body },
+    } = ctx;
+
+    await validateUpdateProjectSettings(body);
+    await validateUpdateProjectSettingsFiles(files);
+
+    const formatedFiles = await projectSettingsService.parseFilesData(files);
+    await validateUpdateProjectSettingsImagesDimensions(formatedFiles);
+
+    return projectSettingsService.updateProjectSettings({ ...body, ...formatedFiles });
   },
 
   async information() {
     const currentEnvironment = strapi.config.get('environment');
     const autoReload = strapi.config.get('autoReload', false);
     const strapiVersion = strapi.config.get('info.strapi', null);
+    const dependencies = strapi.config.get('info.dependencies', {});
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
     const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
@@ -62,6 +95,7 @@ module.exports = {
         currentEnvironment,
         autoReload,
         strapiVersion,
+        dependencies,
         nodeVersion,
         communityEdition,
         useYarn,

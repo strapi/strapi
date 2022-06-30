@@ -28,7 +28,7 @@ module.exports = ({ strapi }) => {
         });
 
         // Manually add transaction name
-        scope.setTag('transaction', `${ctx.method} ${ctx.request.url}`);
+        scope.setTag('transaction', `${ctx.method} ${ctx._matchedRoute}`);
         // Manually add Strapi version
         scope.setTag('strapi_version', strapi.config.info.strapi);
         scope.setTag('method', ctx.method);
