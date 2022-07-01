@@ -16,7 +16,7 @@ export const EditorStylesContainer = styled.div`
     height: ${({ isExpandMode }) => (isExpandMode ? '100%' : '290px')};
     color: ${({ theme }) => theme.colors.neutral800};
     direction: ltr;
-    font-family: --apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
       'Open Sans', 'Helvetica Neue', sans-serif;
   }
 

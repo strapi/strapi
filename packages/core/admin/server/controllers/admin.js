@@ -21,7 +21,7 @@ const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
 /**
  * Validates a plugin name format
  */
-const isValidPluginName = (plugin) => {
+const isValidPluginName = plugin => {
   return _.isString(plugin) && !_.isEmpty(plugin) && PLUGIN_NAME_REGEX.test(plugin);
 };
 
@@ -106,6 +106,7 @@ module.exports = {
     const currentEnvironment = strapi.config.get('environment');
     const autoReload = strapi.config.get('autoReload', false);
     const strapiVersion = strapi.config.get('info.strapi', null);
+    const dependencies = strapi.config.get('info.dependencies', {});
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
     const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
@@ -115,6 +116,7 @@ module.exports = {
         currentEnvironment,
         autoReload,
         strapiVersion,
+        dependencies,
         nodeVersion,
         communityEdition,
         useYarn,
