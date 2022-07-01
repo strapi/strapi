@@ -2,28 +2,53 @@
 
 const { yup, validateYupSchema } = require('@strapi/utils');
 
-const callbackBodySchema = yup.object().shape({
+const callbackSchema = yup.object({
   identifier: yup.string().required(),
   password: yup.string().required(),
 });
 
-const registerBodySchema = yup.object().shape({
+const registerSchema = yup.object({
   email: yup
     .string()
     .email()
     .required(),
+  username: yup.string().required(),
   password: yup.string().required(),
 });
 
-const sendEmailConfirmationBodySchema = yup.object().shape({
+const sendEmailConfirmationSchema = yup.object({
   email: yup
     .string()
     .email()
     .required(),
 });
 
+const validateEmailConfirmationSchema = yup.object({
+  confirmation: yup.string().required(),
+});
+
+const forgotPasswordSchema = yup
+  .object({
+    email: yup
+      .string()
+      .email()
+      .required(),
+  })
+  .noUnknown();
+
+const resetPasswordSchema = yup
+  .object({
+    password: yup.string().required(),
+    passwordConfirmation: yup.string().required(),
+    code: yup.string().required(),
+  })
+  .noUnknown();
+
 module.exports = {
-  validateCallbackBody: validateYupSchema(callbackBodySchema),
-  validateRegisterBody: validateYupSchema(registerBodySchema),
-  validateSendEmailConfirmationBody: validateYupSchema(sendEmailConfirmationBodySchema),
+  validateCallbackBody: validateYupSchema(callbackSchema),
+  validateRegisterBody: validateYupSchema(registerSchema),
+  validateSendEmailConfirmationBody: validateYupSchema(sendEmailConfirmationSchema),
+  validateEmailConfirmationBody: validateYupSchema(validateEmailConfirmationSchema),
+  validateForgotPasswordBody: validateYupSchema(forgotPasswordSchema),
+  validateResetPasswordBody: validateYupSchema(resetPasswordSchema),
 };

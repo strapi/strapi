@@ -12,7 +12,7 @@
   "EditForm.inputToggle.label.email-confirmation-redirection": "Redirection url",
   "EditForm.inputToggle.label.email-reset-password": "Reset password page",
   "EditForm.inputToggle.label.sign-up": "Enable sign-ups",
-  "EditForm.inputToggle.placeholder.email-confirmation-redirection": "ex: https://yourfrontend.com/confirmation-redirection",
+  "EditForm.inputToggle.placeholder.email-confirmation-redirection": "ex: https://yourfrontend.com/email-confirmation-redirection",
   "EditForm.inputToggle.placeholder.email-reset-password": "ex: https://yourfrontend.com/reset-password",
   "EditPage.form.roles": "Role details",
   "Email.template.data.loaded": "Email templates has been loaded",
