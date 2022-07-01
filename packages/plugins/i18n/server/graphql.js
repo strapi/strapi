@@ -66,6 +66,10 @@ module.exports = ({ strapi }) => ({
           ...createLocalizationResolversConfig,
           // locale arg transformation for localized createEntity mutations
           ...getLocalizedCreateMutationsResolversConfigs({ typeRegistry }),
+
+          // Modify the default scope associated to find and findOne locale queries to match the actual action name
+          'Query.i18NLocale': { auth: { scope: 'plugin::i18n.locales.listLocales' } },
+          'Query.i18NLocales': { auth: { scope: 'plugin::i18n.locales.listLocales' } },
         },
       };
     });
