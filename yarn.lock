@@ -8961,10 +8961,10 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
   integrity sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
 
-codemirror@^5.61.0:
-  version "5.65.2"
-  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.65.2.tgz#5799a70cb3d706e10f60e267245e3a75205d3dd9"
-  integrity sha512-SZM4Zq7XEC8Fhroqe3LxbEEX1zUPWH1wMr5zxiBuiUF64iYOUH/JI88v4tBag8MiBS8B8gRv8O1pPXGYXQ4ErA==
+codemirror@^5.65.6:
+  version "5.65.6"
+  resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.65.6.tgz#fc313797331cbeb3bcab0652d1ec9d0f40c23ab5"
+  integrity sha512-zNihMSMoDxK9Gqv9oEyDT8oM51rcRrQ+IEo2zyS48gJByBq5Fj8XuNEguMra+MuIOuh6lkpnLUJeL70DoTt6yw==
 
 collapse-white-space@^1.0.2:
   version "1.0.6"
