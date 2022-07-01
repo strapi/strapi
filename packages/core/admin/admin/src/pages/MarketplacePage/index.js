@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
-import { useQuery } from 'react-query';
 import matchSorter from 'match-sorter';
 import {
   AnErrorOccurred,
@@ -23,8 +22,6 @@ import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/
 
 import EmptyNpmPackageSearch from './components/EmptyNpmPackageSearch';
 import PageHeader from './components/PageHeader';
-import { fetchAppInformation } from './utils/api';
-import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
 import useFetchMarketplaceProviders from '../../hooks/useFetchMarketplaceProviders';
 import useFetchMarketplacePlugins from '../../hooks/useFetchMarketplacePlugins';
 import adminPermissions from '../../permissions';
@@ -53,7 +50,7 @@ const MarketPlacePage = () => {
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
   const [npmPackageType, setNpmPackageType] = useState('plugin');
-  const { autoReload: isInDevelopmentMode } = useAppInfos();
+  const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
   const isOnline = useNavigatorOnLine();
 
   useFocusWhenNavigate();
@@ -85,37 +82,9 @@ const MarketPlacePage = () => {
     data: marketplaceProvidersResponse,
   } = useFetchMarketplaceProviders(notifyMarketplaceLoad);
 
-  const {
-    status: installedPluginsStatus,
-    data: installedPluginsResponse,
-  } = useFetchInstalledPlugins();
+  const isLoading = [marketplacePluginsStatus, marketplaceProvidersStatus].includes('loading');
 
-  const { data: appInfoResponse, status: appInfoStatus } = useQuery(
-    'app-information',
-    fetchAppInformation,
-    {
-      onError: () => {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
-      },
-    }
-  );
-
-  const isLoading = [
-    marketplacePluginsStatus,
-    marketplaceProvidersStatus,
-    installedPluginsStatus,
-    appInfoStatus,
-  ].includes('loading');
-
-  const hasFailed = [
-    marketplacePluginsStatus,
-    marketplaceProvidersStatus,
-    installedPluginsStatus,
-    appInfoStatus,
-  ].includes('error');
+  const hasFailed = [marketplacePluginsStatus, marketplaceProvidersStatus].includes('error');
 
   useEffect(() => {
     trackUsageRef.current('didGoToMarketplace');
@@ -208,8 +177,8 @@ const MarketPlacePage = () => {
     setNpmPackageType(packageType);
   };
 
-  // Check if plugins are installed already
-  const installedPluginNames = installedPluginsResponse.plugins.map(plugin => plugin.packageName);
+  // Check if plugins and providers are installed already
+  const installedPackageNames = Object.keys(dependencies);
 
   return (
     <Layout>
@@ -278,8 +247,8 @@ const MarketPlacePage = () => {
                 ) : (
                   <NpmPackagesGrid
                     npmPackages={pluginSearchResults}
-                    installedPackageNames={installedPluginNames}
-                    useYarn={appInfoResponse.data.useYarn}
+                    installedPackageNames={installedPackageNames}
+                    useYarn={useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
                     npmPackageType="plugin"
                   />
@@ -292,7 +261,8 @@ const MarketPlacePage = () => {
                 ) : (
                   <NpmPackagesGrid
                     npmPackages={providerSearchResults}
-                    useYarn={appInfoResponse.data.useYarn}
+                    installedPackageNames={installedPackageNames}
+                    useYarn={useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
                     npmPackageType="provider"
                   />

@@ -29,7 +29,14 @@ jest.mock('@strapi/helper-plugin', () => ({
   pxToRem: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-  useAppInfos: jest.fn(() => ({ autoReload: true })),
+  useAppInfos: jest.fn(() => ({
+    autoReload: true,
+    dependencies: {
+      '@strapi/plugin-documentation': '4.2.0',
+      '@strapi/provider-upload-cloudinary': '4.2.0',
+    },
+    useYarn: true,
+  })),
 }));
 
 const client = new QueryClient({
@@ -136,7 +143,11 @@ describe('Marketplace page', () => {
 
   it('handles production environment', () => {
     // Simulate production environment
-    useAppInfos.mockImplementation(() => ({ autoReload: false }));
+    useAppInfos.mockImplementationOnce(() => ({
+      autoReload: false,
+      dependencies: {},
+      useYarn: true,
+    }));
     const { queryByText } = render(App);
 
     // Should display notification
@@ -202,5 +213,46 @@ describe('Marketplace page', () => {
     expect(providerCardText).toBeVisible();
     expect(submitProviderText).toBeVisible();
     expect(pluginCardText).toEqual(null);
+  });
+
+  it('shows the installed text for installed plugins', async () => {
+    render(App);
+    const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
+    fireEvent.click(pluginsTab);
+
+    // Plugin that's already installed
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find(div => div.innerHTML.includes('Documentation'));
+    const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
+    expect(alreadyInstalledText).toBeVisible();
+
+    // Plugin that's not installed
+    const notInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find(div => div.innerHTML.includes('Comments'));
+    const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
+    expect(notInstalledText).toBeVisible();
+  });
+
+  it('shows the installed text for installed providers', async () => {
+    // Open providers tab
+    render(App);
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    fireEvent.click(providersTab);
+
+    // Provider that's already installed
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find(div => div.innerHTML.includes('Cloudinary'));
+    const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
+    expect(alreadyInstalledText).toBeVisible();
+
+    // Provider that's not installed
+    const notInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find(div => div.innerHTML.includes('Rackspace'));
+    const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
+    expect(notInstalledText).toBeVisible();
   });
 });
