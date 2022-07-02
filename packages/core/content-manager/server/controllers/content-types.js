@@ -107,6 +107,18 @@ module.exports = {
 
     await metricsService.sendDidConfigureListView(contentType, newConfiguration);
 
-    ctx.body = { data: newConfiguration };
+    const confWithUpdatedMetadata = {
+      ...newConfiguration,
+      metadatas: mapValues(assocMainField, newConfiguration.metadatas),
+    };
+
+    const components = await contentTypeService.findComponentsConfigurations(contentType);
+
+    ctx.body = {
+      data: {
+        contentType: confWithUpdatedMetadata,
+        components,
+      },
+    };
   },
 };
