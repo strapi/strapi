@@ -28,7 +28,7 @@ const registerModelHooks = () => {
     afterCreate: sendDidChangeInterfaceLanguage,
     afterDelete: sendDidChangeInterfaceLanguage,
     afterUpdate({ params }) {
-      if (params.data.preferedLanguage) {
+      if (params.data.preferredLanguage) {
         sendDidChangeInterfaceLanguage();
       }
     },

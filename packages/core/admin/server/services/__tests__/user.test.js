@@ -707,15 +707,15 @@ describe('User', () => {
         Promise.resolve([
           {
             id: 1,
-            preferedLanguage: 'en',
+            preferredLanguage: 'en',
           },
           {
             id: 2,
-            preferedLanguage: 'fr',
+            preferredLanguage: 'fr',
           },
           {
             id: 3,
-            preferedLanguage: 'en',
+            preferredLanguage: 'en',
           },
         ])
       );

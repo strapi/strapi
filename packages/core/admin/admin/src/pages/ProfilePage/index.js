@@ -96,11 +96,11 @@ const ProfilePage = () => {
       await queryClient.invalidateQueries('user');
 
       auth.setUserInfo(
-        pick(data, ['email', 'firstname', 'lastname', 'username', 'preferedLanguage'])
+        pick(data, ['email', 'firstname', 'lastname', 'username', 'preferredLanguage'])
       );
       const userDisplayName = data.username || getFullName(data.firstname, data.lastname);
       setUserDisplayName(userDisplayName);
-      changeLocale(data.preferedLanguage);
+      changeLocale(data.preferredLanguage);
       onChangeTheme(data.currentTheme);
       trackUsage('didChangeMode', { newMode: data.currentTheme });
 
@@ -146,7 +146,7 @@ const ProfilePage = () => {
     'firstname',
     'lastname',
     'username',
-    'preferedLanguage',
+    'preferredLanguage',
   ];
 
   const initialData = pick({ ...data, currentTheme }, fieldsToPick);
@@ -485,17 +485,17 @@ const ProfilePage = () => {
                               })}
                               onClear={() => {
                                 handleChange({
-                                  target: { name: 'preferedLanguage', value: null },
+                                  target: { name: 'preferredLanguage', value: null },
                                 });
                               }}
                               clearLabel={formatMessage({
                                 id: 'Settings.profile.form.section.experience.clear.select',
                                 defaultMessage: 'Clear the interface language selected',
                               })}
-                              value={values.preferedLanguage}
+                              value={values.preferredLanguage}
                               onChange={e => {
                                 handleChange({
-                                  target: { name: 'preferedLanguage', value: e },
+                                  target: { name: 'preferredLanguage', value: e },
                                 });
                               }}
                             >

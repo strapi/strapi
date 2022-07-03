@@ -318,9 +318,9 @@ const displayWarningIfUsersDontHaveRole = async () => {
  * @returns {Promise<Array<string>>}
  */
 const getLanguagesInUse = async () => {
-  const users = await strapi.query('admin::user').findMany({ select: ['preferedLanguage'] });
+  const users = await strapi.query('admin::user').findMany({ select: ['preferredLanguage'] });
 
-  return users.map(user => user.preferedLanguage || 'en');
+  return users.map(user => user.preferredLanguage || 'en');
 };
 
 module.exports = {

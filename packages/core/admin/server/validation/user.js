@@ -11,7 +11,7 @@ const userCreationSchema = yup
     firstname: validators.firstname.required(),
     lastname: validators.lastname,
     roles: validators.roles.min(1),
-    preferedLanguage: yup.string().nullable(),
+    preferredLanguage: yup.string().nullable(),
   })
   .noUnknown();
 
@@ -27,7 +27,7 @@ const profileUpdateSchema = yup
       .string()
       .when('password', (password, schema) => (!isUndefined(password) ? schema.required() : schema))
       .notNull(),
-    preferedLanguage: yup.string().nullable(),
+    preferredLanguage: yup.string().nullable(),
   })
   .noUnknown();
 

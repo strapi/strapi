@@ -21,7 +21,7 @@ module.exports = {
       'lastname',
       'email',
       'roles',
-      'preferedLanguage',
+      'preferredLanguage',
     ]);
 
     const userAlreadyExists = await getService('user').exists({

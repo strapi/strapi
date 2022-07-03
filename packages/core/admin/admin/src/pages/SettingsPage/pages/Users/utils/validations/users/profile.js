@@ -34,7 +34,7 @@ const schema = {
         ? passSchema.required(translatedErrors.required)
         : passSchema;
     }),
-  preferedLanguage: yup.string().nullable(),
+  preferredLanguage: yup.string().nullable(),
 };
 
 export default schema;

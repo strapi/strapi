@@ -12,7 +12,7 @@ const handlers = [
           firstname: 'michoko',
           lastname: 'ronronscelestes',
           username: 'yolo',
-          preferedLanguage: 'en',
+          preferredLanguage: 'en',
         },
       })
     );

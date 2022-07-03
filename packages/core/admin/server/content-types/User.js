@@ -89,7 +89,7 @@ module.exports = {
       configurable: false,
       private: true,
     },
-    preferedLanguage: {
+    preferredLanguage: {
       type: 'string',
       configurable: false,
       required: false,
