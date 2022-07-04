@@ -282,12 +282,8 @@ export const EditAssetDialog = ({
                         menuPortalTarget={document.querySelector('body')}
                         inputId="asset-folder"
                         disabled={formDisabled}
-                        {...(errors.parent
-                          ? {
-                              'aria-errormessage': 'folder-parent-error',
-                              'aria-invalid': true,
-                            }
-                          : {})}
+                        error={errors?.parent}
+                        ariaErrorMessage="folder-parent-error"
                       />
                     </Stack>
                   </Stack>

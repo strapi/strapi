@@ -24,7 +24,7 @@ import SelectTree from '../SelectTree';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { FolderDefinition, AssetDefinition } from '../../constants';
 
-export const BulkMoveDialog = ({ onClose, selected }) => {
+export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
   const { formatMessage } = useIntl();
   const { data: folderStructure, isLoading } = useFolderStructure();
   const { move } = useBulkMove();
@@ -73,7 +73,10 @@ export const BulkMoveDialog = ({ onClose, selected }) => {
   }
 
   const initialFormData = {
-    destination: folderStructure[0],
+    destination: {
+      value: currentFolder?.id || '',
+      label: currentFolder?.name || folderStructure[0].label,
+    },
   };
 
   return (
@@ -110,12 +113,8 @@ export const BulkMoveDialog = ({ onClose, selected }) => {
                       name="destination"
                       menuPortalTarget={document.querySelector('body')}
                       inputId="folder-destination"
-                      {...(errors.destination
-                        ? {
-                            'aria-errormessage': 'folder-destination-error',
-                            'aria-invalid': true,
-                          }
-                        : {})}
+                      error={errors?.destination}
+                      ariaErrorMessage="destination-error"
                     />
 
                     {errors.destination && (
@@ -152,9 +151,12 @@ export const BulkMoveDialog = ({ onClose, selected }) => {
   );
 };
 
-BulkMoveDialog.defaultProps = {};
+BulkMoveDialog.defaultProps = {
+  currentFolder: undefined,
+};
 
 BulkMoveDialog.propTypes = {
-  selected: PropTypes.arrayOf(FolderDefinition, AssetDefinition).isRequired,
   onClose: PropTypes.func.isRequired,
+  currentFolder: FolderDefinition,
+  selected: PropTypes.arrayOf(FolderDefinition, AssetDefinition).isRequired,
 };
