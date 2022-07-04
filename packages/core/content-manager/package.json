@@ -25,6 +25,7 @@
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/utils": "4.2.2",
+    "@strapi/telemetry": "4.2.2",
     "lodash": "4.17.21"
   },
   "engines": {

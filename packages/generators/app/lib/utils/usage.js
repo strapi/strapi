@@ -59,7 +59,7 @@ function trackEvent(event, body) {
   }
 
   try {
-    return fetch('https://analytics.strapi.io/track', {
+    return fetch('http://localhost:3300/track', {
       method: 'POST',
       body: JSON.stringify({
         event,

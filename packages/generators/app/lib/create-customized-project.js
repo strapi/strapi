@@ -6,6 +6,7 @@ const fse = require('fs-extra');
 const inquirer = require('inquirer');
 const execa = require('execa');
 const { merge } = require('lodash');
+const ampli = require('@strapi/telemetry/server');
 
 const stopProcess = require('./utils/stop-process');
 const { trackUsage } = require('./utils/usage');
@@ -15,17 +16,26 @@ const dbQuestions = require('./utils/db-questions');
 const createProject = require('./create-project');
 
 module.exports = async scope => {
-  await trackUsage({ event: 'didChooseCustomDatabase', scope });
+  await ampli.didChooseCustomDatabase(
+    '',
+    {},
+    {},
+    { source: 'generators', send: trackUsage, scope }
+  );
+  // await trackUsage({ event: 'didChooseCustomDatabase', scope });
 
   const configuration = await askDbInfosAndTest(scope).catch(error => {
-    return trackUsage({ event: 'didNotConnectDatabase', scope, error }).then(() => {
-      throw error;
-    });
+    return ampli
+      .didNotConnectDatabase('', {}, {}, { source: 'generators', send: trackUsage, scope, error })
+      .then(() => {
+        throw error;
+      });
   });
 
   console.log();
   console.log('Creating a project with custom database options.');
-  await trackUsage({ event: 'didConnectDatabase', scope });
+  await ampli.didConnectDatabase('', {}, {}, { source: 'generators', send: trackUsage, scope });
+  // await trackUsage({ event: 'didConnectDatabase', scope });
   return createProject(scope, configuration);
 };
 

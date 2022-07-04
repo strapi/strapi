@@ -1,6 +1,7 @@
 'use strict';
 
 const execa = require('execa');
+const ampli = require('@strapi/telemetry/server');
 // FIXME
 /* eslint-disable import/extensions */
 const { trackUsage, captureStderr } = require('./utils/usage');
@@ -10,7 +11,8 @@ const createProject = require('./create-project');
 
 module.exports = async function createQuickStartProject(scope) {
   console.log('Creating a quickstart project.');
-  await trackUsage({ event: 'didChooseQuickstart', scope });
+  await ampli.didChooseQuickstart('', {}, {}, { source: 'generators', send: trackUsage, scope });
+  // await trackUsage({ event: 'didChooseQuickstart', scope });
 
   // get default sqlite config
   const client = 'sqlite';
@@ -27,7 +29,8 @@ module.exports = async function createQuickStartProject(scope) {
   console.log(`Running your Strapi application.`);
 
   try {
-    await trackUsage({ event: 'willStartServer', scope });
+    await ampli.willStartServer('', {}, {}, { source: 'generators', send: trackUsage, scope });
+    // await trackUsage({ event: 'willStartServer', scope });
 
     await execa('npm', ['run', 'develop'], {
       stdio: 'inherit',
@@ -37,11 +40,12 @@ module.exports = async function createQuickStartProject(scope) {
       },
     });
   } catch (error) {
-    await trackUsage({
-      event: 'didNotStartServer',
-      scope,
-      error,
-    });
+    await ampli.didNotStartServer('', {}, {}, { source: 'generators', send: trackUsage, scope });
+    // await trackUsage({
+    //   event: 'didNotStartServer',
+    //   scope,
+    //   error,
+    // });
 
     await captureStderr('didNotStartServer', error);
     process.exit(1);

@@ -4,6 +4,7 @@
  * Module dependencies
  */
 
+const ampli = require('@strapi/telemetry/server');
 const { trackUsage } = require('./utils/usage');
 const checkInstallPath = require('./utils/check-install-path');
 const createCLIDatabaseProject = require('./create-cli-db-project');
@@ -16,7 +17,8 @@ module.exports = async scope => {
   // check rootPath is empty
   checkInstallPath(scope.rootPath);
 
-  await trackUsage({ event: 'willCreateProject', scope });
+  await ampli.willCreateProject('', {}, {}, { source: 'generators', send: trackUsage, scope });
+  // await trackUsage({ event: 'willCreateProject', scope });
 
   // if database config is provided don't test the connection and create the project directly
   if (hasDatabaseConfig) {

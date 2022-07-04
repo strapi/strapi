@@ -40,6 +40,7 @@ const buildAdmin = async () => {
 
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
+      console.log(err);
       let messages;
       if (err) {
         if (!err.message) {

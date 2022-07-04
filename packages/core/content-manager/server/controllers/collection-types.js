@@ -3,6 +3,7 @@
 const { prop, pick } = require('lodash/fp');
 const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
+const ampli = require('@strapi/telemetry/server');
 
 const { getService, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput, validatePagination } = require('./validation');
@@ -87,7 +88,12 @@ module.exports = {
     ctx.body = await permissionChecker.sanitizeOutput(entity);
 
     if (totalEntries === 0) {
-      strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      ampli.didCreateFirstContentTypeEntry(
+        '',
+        { model },
+        {},
+        { source: 'core', send: strapi.telemetry.send }
+      );
     }
   },
 

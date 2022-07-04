@@ -9,6 +9,7 @@ const chalk = require('chalk');
 const execa = require('execa');
 const ora = require('ora');
 const _ = require('lodash');
+const ampli = require('@strapi/telemetry/server');
 
 const stopProcess = require('./utils/stop-process');
 const { trackUsage, captureStderr } = require('./utils/usage');
@@ -38,7 +39,8 @@ module.exports = async function createProject(scope, { client, connection, depen
       })
     );
 
-    await trackUsage({ event: 'didCopyProjectFiles', scope });
+    await ampli.didCopyProjectFiles('', {}, {}, { source: 'generators', send: trackUsage, scope });
+    // await trackUsage({ event: 'didCopyProjectFiles', scope });
 
     // copy templates
     await fse.writeJSON(
@@ -56,7 +58,8 @@ module.exports = async function createProject(scope, { client, connection, depen
       }
     );
 
-    await trackUsage({ event: 'didWritePackageJSON', scope });
+    await ampli.didWritePackageJson('', {}, {}, { source: 'generators', send: trackUsage, scope });
+    // await trackUsage({ event: 'didWritePackageJSON', scope });
 
     // ensure node_modules is created
     await fse.ensureDir(join(rootPath, 'node_modules'));
@@ -71,7 +74,13 @@ module.exports = async function createProject(scope, { client, connection, depen
     );
 
     // create config/server.js
-    await trackUsage({ event: 'didCopyConfigurationFiles', scope });
+    await ampli.didCopyConfigurationFiles(
+      '',
+      {},
+      {},
+      { source: 'generators', send: trackUsage, scope }
+    );
+    // await trackUsage({ event: 'didCopyConfigurationFiles', scope });
 
     // merge template files if a template is specified
     const hasTemplate = Boolean(scope.template);
@@ -87,7 +96,13 @@ module.exports = async function createProject(scope, { client, connection, depen
     throw err;
   }
 
-  await trackUsage({ event: 'willInstallProjectDependencies', scope });
+  await ampli.willInstallProjectDependencies(
+    '',
+    {},
+    {},
+    { source: 'generators', send: trackUsage, scope }
+  );
+  // await trackUsage({ event: 'willInstallProjectDependencies', scope });
 
   const installPrefix = chalk.yellow('Installing dependencies:');
   const loader = ora(installPrefix).start();
@@ -112,14 +127,26 @@ module.exports = async function createProject(scope, { client, connection, depen
     loader.stop();
     console.log(`Dependencies installed ${chalk.green('successfully')}.`);
 
-    await trackUsage({ event: 'didInstallProjectDependencies', scope });
+    await ampli.didInstallProjectDependencies(
+      '',
+      {},
+      {},
+      { source: 'generators', send: trackUsage, scope }
+    );
+    // await trackUsage({ event: 'didInstallProjectDependencies', scope });
   } catch (error) {
     loader.stop();
-    await trackUsage({
-      event: 'didNotInstallProjectDependencies',
-      scope,
-      error: error.stderr.slice(-1024),
-    });
+    await ampli.didNotInstallProjectDependencies(
+      '',
+      {},
+      {},
+      { source: 'generators', send: trackUsage, scope, error: error.stderr.slice(-1024) }
+    );
+    // await trackUsage({
+    //   event: 'didNotInstallProjectDependencies',
+    //   scope,
+    //   error: error.stderr.slice(-1024),
+    // });
 
     console.error(`${chalk.red('Error')} while installing dependencies:`);
     console.error(error.stderr);
@@ -146,7 +173,8 @@ module.exports = async function createProject(scope, { client, connection, depen
     stopProcess();
   }
 
-  await trackUsage({ event: 'didCreateProject', scope });
+  await ampli.didCreateProject('', {}, {}, { source: 'generators', send: trackUsage, scope });
+  // await trackUsage({ event: 'didCreateProject', scope });
 
   console.log();
   console.log(`Your application was created at ${chalk.green(rootPath)}.\n`);

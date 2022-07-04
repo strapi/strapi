@@ -6,6 +6,7 @@ const pluralize = require('pluralize');
 
 const { nameToSlug, nameToCollectionName } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
+const ampli = require('@strapi/telemetry/server');
 const { isConfigurable } = require('../../utils/attributes');
 const createSchemaHandler = require('./schema-handler');
 
@@ -58,9 +59,9 @@ module.exports = function createComponentBuilder() {
         .setAttributes(this.convertAttributes(infos.attributes));
 
       if (this.components.size === 0) {
-        strapi.telemetry.send('didCreateFirstComponent');
+        ampli.didCreateFirstComponent('', {}, {}, { source: 'core', send: strapi.telemetry.send });
       } else {
-        strapi.telemetry.send('didCreateComponent');
+        ampli.didCreateComponent('', {}, {}, { source: 'core', send: strapi.telemetry.send });
       }
 
       this.components.set(uid, handler);

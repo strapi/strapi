@@ -4,6 +4,8 @@ const frontPaths = [
   'packages/**/ee/admin/**/*.js',
   'packages/core/helper-plugin/**/*.js',
   'packages/**/tests/front/**/*.js',
+  'packages/core/telemetry/admin/index.js',
+  'packages/core/telemetry/admin/src/ampli/index.js',
   'test/config/front/**/*.js',
 ];
 

@@ -1,12 +1,7 @@
 {
-  "name": "@strapi/generate-new",
+  "name": "@strapi/telemetry",
   "version": "4.2.2",
-  "description": "Generate a new Strapi application.",
-  "keywords": [
-    "generate",
-    "generator",
-    "strapi"
-  ],
+  "description": "Strapi telemetry package",
   "homepage": "https://strapi.io",
   "bugs": {
     "url": "https://github.com/strapi/strapi/issues"
@@ -28,29 +23,22 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "./lib/index.js",
   "directories": {
-    "lib": "./lib"
+    "server": "./server",
+    "admin": "./admin"
   },
-  "scripts": {
-    "test": "echo \"no tests yet\""
-  },
-  "dependencies": {
-    "@sentry/node": "6.19.6",
-    "@strapi/telemetry": "4.2.2",
-    "chalk": "^4.1.1",
-    "execa": "^1.0.0",
-    "fs-extra": "10.0.0",
-    "inquirer": "8.2.0",
-    "lodash": "4.17.21",
-    "node-fetch": "^2.6.1",
-    "node-machine-id": "^1.1.10",
-    "ora": "^5.4.0",
-    "tar": "6.1.11",
-    "uuid": "^3.3.2"
-  },
+  "scripts": {},
   "engines": {
     "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
+  },
+  "dependencies": {
+    "amplitude-js": "8.18.5",
+    "@amplitude/node": "^1.10.0",
+    "@amplitude/types": "^1.10.0",
+    "@amplitude/identify": "^1.10.0"
+  },
+  "devDependencies": {
+    "@amplitude/ampli": "1.9.0"
   }
 }
