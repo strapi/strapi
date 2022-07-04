@@ -70,17 +70,21 @@ export const EditAssetDialog = ({
     if (asset.isLocal) {
       onClose(nextAsset);
     } else {
+      const editedAsset = await editAsset(nextAsset, replacementFile);
+
       const assetType = asset?.mime.split('/')[0];
+      // if the folder parent was the root of Media Library, its id is null
+      // we know it changed location if the new parent value exists
       const didChangeLocation = asset?.folder?.id
         ? asset.folder.id !== values.parent.value
         : asset.folder === null && !!values.parent.value;
+
       trackUsage('didEditMediaLibraryElements', {
         location: trackedLocation,
         type: assetType,
         changeLocation: didChangeLocation,
       });
 
-      const editedAsset = await editAsset(nextAsset, replacementFile);
       onClose(editedAsset);
     }
   };
