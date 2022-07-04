@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { useTracking } from '@strapi/helper-plugin';
 import { ModalHeader, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
 import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
@@ -30,14 +31,27 @@ export const PendingAssetStep = ({
   onClickAddAsset,
   onCancelUpload,
   onUploadSucceed,
+  trackedLocation,
 }) => {
   const assetCountRef = useRef(0);
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const [uploadStatus, setUploadStatus] = useState(Status.Idle);
 
   const handleSubmit = async e => {
     e.preventDefault();
     e.stopPropagation();
+
+    const assetsCountByType = assets.reduce(
+      (acc, cur) => {
+        const type = cur.type;
+        acc[type] += 1;
+
+        return acc;
+      },
+      { doc: 0, audio: 0, video: 0, image: 0 }
+    );
+    trackUsage('willAddMediaLibraryAssets', { ...assetsCountByType, location: trackedLocation });
 
     setUploadStatus(Status.Uploading);
   };
@@ -166,6 +180,7 @@ export const PendingAssetStep = ({
 PendingAssetStep.defaultProps = {
   addUploadedFiles: undefined,
   folderId: null,
+  trackedLocation: undefined,
 };
 
 PendingAssetStep.propTypes = {
@@ -178,4 +193,5 @@ PendingAssetStep.propTypes = {
   onClickAddAsset: PropTypes.func.isRequired,
   onUploadSucceed: PropTypes.func.isRequired,
   onCancelUpload: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };
