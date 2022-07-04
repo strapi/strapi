@@ -1,28 +1,5 @@
-import { Database } from '@strapi/database';
-import { EntityService } from './services/entity-service';
+import './global';
 
-import * as Core from './types/strapi';
-export * as factories from './factories';
-
-export type { Core };
-
-// Alias to resolve the Strapi global type easily
-export type Strapi = Core.Strapi;
-
-export interface StrapiInterface extends Core.Strapi {};
-
-declare global {
-  interface AllTypes {}
-}
-
-declare global {
-  export interface Global {
-    strapi: StrapiInterface;
-  }
-
-  export type Strapi = StrapiInterface;
-
-  const strapi: StrapiInterface;
-}
+export * from './types';
 
 export default function(opts): Strapi;
