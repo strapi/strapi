@@ -6,7 +6,6 @@ const { ampli } = require('./src/ampli');
 if (!ampli.amplitude) ampli.load({ environment: 'production' });
 
 const ampliBackendTelemetryMiddleware = async payload => {
-  console.log(payload);
   switch (payload.extra.source) {
     case 'core':
       console.log(payload);

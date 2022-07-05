@@ -3,8 +3,6 @@ import { ampli } from './src/ampli/index.js'; // eslint-disable-line
 // Loads ampli sdk for the correct environment, checks if processing should be disabled or not
 if (!ampli.amplitude) ampli.load({ environment: 'production' });
 
-console.log(ampli);
-
 const ampliAdminTelemetryMiddleware = async payload => {
   try {
     fetch('http://localhost:3300/track', {
