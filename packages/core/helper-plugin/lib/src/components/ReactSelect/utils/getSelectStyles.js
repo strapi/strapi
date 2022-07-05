@@ -7,24 +7,17 @@ const getSelectStyles = (theme, error) => {
       lineHeight: 'normal',
     }),
     control: (base, state) => {
-      let border;
-      let borderBottom;
+      let border = `1px solid ${theme.colors.neutral200} !important`;
       let backgroundColor;
 
       if (state.isFocused) {
-        border = `1px solid ${theme.colors.primary600} !important`;
+        border = `1px solid ${theme.colors.primary200} !important`;
       } else if (error) {
         border = `1px solid ${theme.colors.danger600} !important`;
-      } else {
-        border = `1px solid ${theme.colors.neutral200} !important`;
-      }
-
-      if (state.menuIsOpen === true) {
-        borderBottom = `1px solid ${theme.colors.primary600} !important`;
       }
 
       if (state.isDisabled) {
-        backgroundColor = '#fafafb !important';
+        backgroundColor = `${theme.colors.neutral150} !important`;
       }
 
       return {
@@ -35,7 +28,6 @@ const getSelectStyles = (theme, error) => {
         outline: 0,
         boxShadow: 0,
         borderRadius: '2px !important',
-        borderBottom,
         backgroundColor,
         borderTopLeftRadius: '4px !important',
         borderTopRightRadius: '4px !important',
@@ -90,7 +82,15 @@ const getSelectStyles = (theme, error) => {
       };
     },
     placeholder: base => ({ ...base, marginLeft: 0 }),
-    singleValue: base => ({ ...base, marginLeft: 0, color: theme.colors.neutral800 }),
+    singleValue: (base, state) => {
+      let color = theme.colors.neutral800;
+
+      if (state.isDisabled) {
+        color = theme.colors.neutral600;
+      }
+
+      return { ...base, marginLeft: 0, color };
+    },
     valueContainer: base => ({
       ...base,
       padding: 0,
