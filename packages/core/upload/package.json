@@ -35,7 +35,7 @@
     "lodash": "4.17.21",
     "mime-types": "2.1.35",
     "react": "^17.0.2",
-    "react-copy-to-clipboard": "^5.0.3",
+    "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^17.0.2",
     "react-intl": "5.20.2",
     "react-redux": "7.2.3",
