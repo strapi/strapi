@@ -121,9 +121,9 @@ module.exports = ({ strapi }) => ({
     );
     currentFile.getStream = () => fs.createReadStream(file.path);
 
-    const { optimize, isSupportedImage } = strapi.plugin('upload').service('image-manipulation');
+    const { optimize, isOptimizableImage } = strapi.plugin('upload').service('image-manipulation');
 
-    if (!(await isSupportedImage(currentFile))) {
+    if (!(await isOptimizableImage(currentFile))) {
       return currentFile;
     }
 
@@ -166,27 +166,30 @@ module.exports = ({ strapi }) => ({
       getDimensions,
       generateThumbnail,
       generateResponsiveFormats,
-      isSupportedImage,
+      isImage,
+      isOptimizableImage,
     } = getService('image-manipulation');
     await getService('provider').upload(fileData);
 
-    if (await isSupportedImage(fileData)) {
-      const thumbnailFile = await generateThumbnail(fileData);
-      if (thumbnailFile) {
-        await getService('provider').upload(thumbnailFile);
-        _.set(fileData, 'formats.thumbnail', thumbnailFile);
-      }
+    if (await isImage(fileData)) {
+      if (await isOptimizableImage(fileData)) {
+        const thumbnailFile = await generateThumbnail(fileData);
+        if (thumbnailFile) {
+          await getService('provider').upload(thumbnailFile);
+          _.set(fileData, 'formats.thumbnail', thumbnailFile);
+        }
 
-      const formats = await generateResponsiveFormats(fileData);
-      if (Array.isArray(formats) && formats.length > 0) {
-        for (const format of formats) {
-          if (!format) continue;
+        const formats = await generateResponsiveFormats(fileData);
+        if (Array.isArray(formats) && formats.length > 0) {
+          for (const format of formats) {
+            if (!format) continue;
 
-          const { key, file } = format;
+            const { key, file } = format;
 
-          await getService('provider').upload(file);
+            await getService('provider').upload(file);
 
-          _.set(fileData, ['formats', key], file);
+            _.set(fileData, ['formats', key], file);
+          }
         }
       }
 
@@ -197,6 +200,7 @@ module.exports = ({ strapi }) => ({
         height,
       });
     }
+
     _.set(fileData, 'provider', config.provider);
 
     return this.add(fileData, { user });
@@ -263,30 +267,32 @@ module.exports = ({ strapi }) => ({
         }
       }
 
-      getService('provider').upload(fileData);
+      await getService('provider').upload(fileData);
 
       // clear old formats
       _.set(fileData, 'formats', {});
 
-      const { isSupportedImage } = getService('image-manipulation');
+      const { isImage, isOptimizableImage } = getService('image-manipulation');
 
-      if (await isSupportedImage(fileData)) {
-        const thumbnailFile = await generateThumbnail(fileData);
-        if (thumbnailFile) {
-          getService('provider').upload(thumbnailFile);
-          _.set(fileData, 'formats.thumbnail', thumbnailFile);
-        }
+      if (await isImage(fileData)) {
+        if (await isOptimizableImage(fileData)) {
+          const thumbnailFile = await generateThumbnail(fileData);
+          if (thumbnailFile) {
+            await getService('provider').upload(thumbnailFile);
+            _.set(fileData, 'formats.thumbnail', thumbnailFile);
+          }
 
-        const formats = await generateResponsiveFormats(fileData);
-        if (Array.isArray(formats) && formats.length > 0) {
-          for (const format of formats) {
-            if (!format) continue;
+          const formats = await generateResponsiveFormats(fileData);
+          if (Array.isArray(formats) && formats.length > 0) {
+            for (const format of formats) {
+              if (!format) continue;
 
-            const { key, file } = format;
+              const { key, file } = format;
 
-            getService('provider').upload(file);
+              await getService('provider').upload(file);
 
-            _.set(fileData, ['formats', key], file);
+              _.set(fileData, ['formats', key], file);
+            }
           }
         }
 

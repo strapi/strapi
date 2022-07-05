@@ -13,8 +13,185 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   width: 1px;
 }
 
-.c34 {
-  padding-top: 4px;
+.c0 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
+}
+
+.c6 {
+  padding: 32px;
+}
+
+.c2 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c55 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c4 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c4 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c4 svg > g,
+.c4 svg path {
+  fill: #ffffff;
+}
+
+.c4[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c4:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c4:focus-visible {
+  outline: none;
+}
+
+.c4:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c5 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c5 svg > g,
+.c5 svg path {
+  fill: #8e8ea9;
+}
+
+.c5:hover svg > g,
+.c5:hover svg path {
+  fill: #666687;
+}
+
+.c5:active svg > g,
+.c5:active svg path {
+  fill: #a5a5ba;
+}
+
+.c5[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c5[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c1 {
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #eaeaef;
+}
+
+.c54 {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #eaeaef;
+}
+
+.c56 > * + * {
+  margin-left: 8px;
+}
+
+.c7 {
+  overflow: auto;
+  max-height: 60vh;
+}
+
+.c3 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c12 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c13 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c17 {
@@ -599,6 +776,9 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 .c20 {
   background: #ffffff;
   border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #eaeaef;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
   height: 100%;
 }
@@ -727,6 +907,8 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   height: 5.5rem;
   width: 100%;
   background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
 }
 
 .c35 {

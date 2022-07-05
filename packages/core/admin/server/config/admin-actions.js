@@ -146,5 +146,19 @@ module.exports = {
       section: 'settings',
       category: 'api tokens',
     },
+    {
+      uid: 'project-settings.update',
+      displayName: 'Update the project level settings',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'project',
+    },
+    {
+      uid: 'project-settings.read',
+      displayName: 'Read the project level settings',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'project',
+    },
   ],
 };

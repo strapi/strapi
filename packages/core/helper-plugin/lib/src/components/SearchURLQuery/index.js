@@ -75,7 +75,7 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails 
     <IconButton
       ref={iconButtonRef}
       icon={<Icon as={SearchIcon} color="neutral800" />}
-      label="Search"
+      label={formatMessage({ id: 'global.search', defaultMessage: 'Search' })}
       onClick={handleToggle}
     />
   );

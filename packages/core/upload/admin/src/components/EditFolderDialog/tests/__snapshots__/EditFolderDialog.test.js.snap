@@ -474,10 +474,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 }
 
 .c10 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
+  padding: 32px;
 }
 
 .c1 {
