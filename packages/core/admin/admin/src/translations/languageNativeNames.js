@@ -27,8 +27,8 @@ const languageNativeNames = {
   uk: 'Українська',
   vi: 'Tiếng Việt',
   'zh-Hans': '中文 (简体)',
-  zh: '中文 (繁體)'
-  sa: 'संस्कृत'
+  zh: '中文 (繁體)',
+  sa: 'संस्कृत',
   hi:'हिन्दी',
 };
 
