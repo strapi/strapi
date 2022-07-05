@@ -1,12 +1,12 @@
 {
-  "name": "mycustomfield",
+  "name": "mycustomfields",
   "version": "0.0.0",
   "description": "This is the description of the plugin.",
   "strapi": {
-    "name": "mycustomfield",
-    "description": "Description of Mycustomfield plugin",
+    "name": "mycustomfields",
+    "description": "Description of Mycustomfields plugin",
     "kind": "plugin",
-    "displayName": "Mycustomfield"
+    "displayName": "Mycustomfields"
   },
   "dependencies": {},
   "author": {
