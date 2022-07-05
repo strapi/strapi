@@ -76,7 +76,7 @@
     "@storybook/react": "^6.3.7",
     "@strapi/design-system": "1.2.0",
     "@strapi/icons": "1.2.0",
-    "babel-loader": "^8.2.2",
+    "babel-loader": "^8.2.5",
     "cross-env": "^7.0.3",
     "date-fns": "2.22.1",
     "rimraf": "3.0.2"
