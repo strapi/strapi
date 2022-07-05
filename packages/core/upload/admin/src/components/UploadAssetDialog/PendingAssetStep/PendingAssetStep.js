@@ -51,7 +51,14 @@ export const PendingAssetStep = ({
       },
       { doc: 0, audio: 0, video: 0, image: 0 }
     );
-    trackUsage('willAddMediaLibraryAssets', { ...assetsCountByType, location: trackedLocation });
+    // value stringified because Amplitude ignores number values
+    trackUsage('willAddMediaLibraryAssets', {
+      location: trackedLocation,
+      doc: JSON.stringify(assetsCountByType.doc),
+      audio: JSON.stringify(assetsCountByType.audio),
+      video: JSON.stringify(assetsCountByType.video),
+      image: JSON.stringify(assetsCountByType.image),
+    });
 
     setUploadStatus(Status.Uploading);
   };
