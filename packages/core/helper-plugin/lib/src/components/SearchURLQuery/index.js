@@ -38,11 +38,7 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails 
 
     if (value) {
       if (trackedEvent) {
-        if (trackedEventDetails) {
-          trackUsage(trackedEvent, trackedEventDetails);
-        } else {
-          trackUsage(trackedEvent);
-        }
+        trackUsage(trackedEvent, trackedEventDetails);
       }
       setQuery({ _q: value, page: 1 });
     } else {

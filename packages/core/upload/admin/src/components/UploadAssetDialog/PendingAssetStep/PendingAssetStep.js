@@ -42,22 +42,23 @@ export const PendingAssetStep = ({
     e.preventDefault();
     e.stopPropagation();
 
-    const assetsCountByType = assets.reduce(
-      (acc, cur) => {
-        const type = cur.type;
-        acc[type] += 1;
+    const assetsCountByType = assets.reduce((acc, asset) => {
+      const { type } = asset;
 
-        return acc;
-      },
-      { doc: 0, audio: 0, video: 0, image: 0 }
-    );
-    // value stringified because Amplitude ignores number values
+      if (!acc[type]) {
+        acc[type] = 0;
+      }
+
+      // values need to be stringified because Amplitude ignores number values
+      acc[type] = parseInt(acc[type], 10) + 1;
+      acc[type] = acc[type].toString();
+
+      return acc;
+    }, {});
+
     trackUsage('willAddMediaLibraryAssets', {
       location: trackedLocation,
-      doc: JSON.stringify(assetsCountByType.doc),
-      audio: JSON.stringify(assetsCountByType.audio),
-      video: JSON.stringify(assetsCountByType.video),
-      image: JSON.stringify(assetsCountByType.image),
+      ...assetsCountByType,
     });
 
     setUploadStatus(Status.Uploading);
