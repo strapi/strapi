@@ -28,4 +28,8 @@ module.exports = () => ({
       testConf: 3,
     },
   },
+  mycustomfields: {
+    enabled: true,
+    resolve: `./src/plugins/mycustomfields`,
+  },
 });

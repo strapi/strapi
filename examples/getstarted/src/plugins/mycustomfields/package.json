@@ -1,0 +1,25 @@
+{
+  "name": "mycustomfield",
+  "version": "0.0.0",
+  "description": "This is the description of the plugin.",
+  "strapi": {
+    "name": "mycustomfield",
+    "description": "Description of Mycustomfield plugin",
+    "kind": "plugin",
+    "displayName": "Mycustomfield"
+  },
+  "dependencies": {},
+  "author": {
+    "name": "A Strapi developer"
+  },
+  "maintainers": [
+    {
+      "name": "A Strapi developer"
+    }
+  ],
+  "engines": {
+    "node": ">=14.19.1 <=16.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT"
+}
