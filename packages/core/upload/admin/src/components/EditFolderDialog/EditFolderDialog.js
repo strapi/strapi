@@ -201,6 +201,7 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
                         onChange={value => {
                           setFieldValue('parent', value);
                         }}
+                        isDisabled={formDisabled}
                         defaultValue={values.parent}
                         name="parent"
                         menuPortalTarget={document.querySelector('body')}

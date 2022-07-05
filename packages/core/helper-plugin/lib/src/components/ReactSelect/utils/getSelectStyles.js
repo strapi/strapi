@@ -15,6 +15,8 @@ const getSelectStyles = (theme, error) => {
         border = `1px solid ${theme.colors.primary600} !important`;
       } else if (error) {
         border = `1px solid ${theme.colors.danger600} !important`;
+      } else if (state.isDisabled) {
+        border = `1px solid ${theme.colors.neutral200} !important`;
       } else {
         border = `1px solid ${theme.colors.neutral200} !important`;
       }
@@ -24,7 +26,7 @@ const getSelectStyles = (theme, error) => {
       }
 
       if (state.isDisabled) {
-        backgroundColor = '#fafafb !important';
+        backgroundColor = `${theme.colors.neutral150} !important`;
       }
 
       return {
@@ -90,7 +92,17 @@ const getSelectStyles = (theme, error) => {
       };
     },
     placeholder: base => ({ ...base, marginLeft: 0 }),
-    singleValue: base => ({ ...base, marginLeft: 0, color: theme.colors.neutral800 }),
+    singleValue: (base, state) => {
+      let color;
+
+      if (state.isDisabled) {
+        color = theme.colors.neutral600;
+      } else {
+        color = theme.colors.neutral800;
+      }
+
+      return { ...base, marginLeft: 0, color };
+    },
     valueContainer: base => ({
       ...base,
       padding: 0,

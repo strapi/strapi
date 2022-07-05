@@ -270,7 +270,7 @@ export const EditAssetDialog = ({
                         }}
                         menuPortalTarget={document.querySelector('body')}
                         inputId="asset-folder"
-                        disabled={formDisabled}
+                        isDisabled={formDisabled}
                         error={errors?.parent}
                         ariaErrorMessage="folder-parent-error"
                       />
