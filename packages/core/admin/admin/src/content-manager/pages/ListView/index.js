@@ -309,8 +309,8 @@ function ListView({
                     { target: headerLayoutTitle }
                   )}
                   placeholder={formatMessage({
-                    id: 'app.component.search.placeholder',
-                    defaultMessage: 'Search...',
+                    id: 'global.search',
+                    defaultMessage: 'Search',
                   })}
                   trackedEvent="didSearch"
                 />

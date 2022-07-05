@@ -1,6 +1,6 @@
 {
   "name": "@strapi/strapi",
-  "version": "4.1.12",
+  "version": "4.2.2",
   "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MySQL, MariaDB, PostgreSQL, SQLite",
   "keywords": [
     "strapi",
@@ -80,16 +80,16 @@
   "dependencies": {
     "@koa/cors": "3.1.0",
     "@koa/router": "10.1.1",
-    "@strapi/admin": "4.1.12",
-    "@strapi/database": "4.1.12",
-    "@strapi/generate-new": "4.1.12",
-    "@strapi/generators": "4.1.12",
-    "@strapi/logger": "4.1.12",
-    "@strapi/plugin-content-manager": "4.1.12",
-    "@strapi/plugin-content-type-builder": "4.1.12",
-    "@strapi/plugin-email": "4.1.12",
-    "@strapi/plugin-upload": "4.1.12",
-    "@strapi/utils": "4.1.12",
+    "@strapi/admin": "4.2.2",
+    "@strapi/database": "4.2.2",
+    "@strapi/generate-new": "4.2.2",
+    "@strapi/generators": "4.2.2",
+    "@strapi/logger": "4.2.2",
+    "@strapi/plugin-content-manager": "4.2.2",
+    "@strapi/plugin-content-type-builder": "4.2.2",
+    "@strapi/plugin-email": "4.2.2",
+    "@strapi/plugin-upload": "4.2.2",
+    "@strapi/utils": "4.2.2",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
@@ -104,8 +104,8 @@
     "execa": "5.1.1",
     "fs-extra": "10.0.0",
     "glob": "7.2.0",
-    "http-errors": "1.8.0",
-    "inquirer": "8.2.0",
+    "http-errors": "1.8.1",
+    "inquirer": "8.2.4",
     "is-docker": "2.2.1",
     "koa": "2.13.3",
     "koa-body": "4.2.0",
@@ -134,7 +134,7 @@
     "supertest": "^6.1.6"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   }
 }
