@@ -8,12 +8,15 @@ const getSelectStyles = (theme, error) => {
     }),
     control: (base, state) => {
       let border = `1px solid ${theme.colors.neutral200} !important`;
+      let boxShadow = 0;
       let backgroundColor;
 
       if (state.isFocused) {
-        border = `1px solid ${theme.colors.primary200} !important`;
+        border = `1px solid ${theme.colors.primary600} !important`;
+        boxShadow = `${theme.colors.primary600} 0px 0px 0px 2px`;
       } else if (error) {
         border = `1px solid ${theme.colors.danger600} !important`;
+        boxShadow = `${theme.colors.danger600} 0px 0px 0px 2px`;
       }
 
       if (state.isDisabled) {
@@ -26,13 +29,13 @@ const getSelectStyles = (theme, error) => {
         height: 40,
         border,
         outline: 0,
-        boxShadow: 0,
         borderRadius: '2px !important',
         backgroundColor,
         borderTopLeftRadius: '4px !important',
         borderTopRightRadius: '4px !important',
         borderBottomLeftRadius: '4px !important',
         borderBottomRightRadius: '4px !important',
+        boxShadow,
       };
     },
     indicatorContainer: base => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
