@@ -32,6 +32,7 @@ const hooksRegistry = require('./core/registries/hooks');
 const controllersRegistry = require('./core/registries/controllers');
 const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
+const customFieldsRegistry = require('./core/registries/custom-fields');
 const createConfigProvider = require('./core/registries/config');
 const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
@@ -63,6 +64,7 @@ class Strapi {
     this.container.register('controllers', controllersRegistry(this));
     this.container.register('modules', modulesRegistry(this));
     this.container.register('plugins', pluginsRegistry(this));
+    this.container.register('custom-fields', customFieldsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
     this.container.register('sanitizers', sanitizersRegistry(this));
@@ -137,6 +139,10 @@ class Strapi {
 
   plugin(name) {
     return this.container.get('plugins').get(name);
+  }
+
+  get customFields() {
+    return this.container.get('custom-fields');
   }
 
   get hooks() {
