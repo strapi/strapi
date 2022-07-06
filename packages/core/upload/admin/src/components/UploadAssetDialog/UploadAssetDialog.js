@@ -107,6 +107,7 @@ export const UploadAssetDialog = ({
           initialAssetsToAdd={initialAssetsToAdd}
           addUploadedFiles={addUploadedFiles}
           folderId={folderId}
+          trackedLocation={trackedLocation}
         />
       )}
 

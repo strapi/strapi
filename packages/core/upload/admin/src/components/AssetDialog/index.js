@@ -155,7 +155,13 @@ export const AssetDialog = ({
   }
 
   if (folderToEdit) {
-    return <EditFolderDialog folder={folderToEdit} onClose={() => setFolderToEdit(undefined)} />;
+    return (
+      <EditFolderDialog
+        folder={folderToEdit}
+        onClose={() => setFolderToEdit(undefined)}
+        location="content-manager"
+      />
+    );
   }
 
   const handleMoveItem = (hoverIndex, destIndex) => {

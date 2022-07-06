@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useTracking } from '@strapi/helper-plugin';
 
 import { stringify } from 'qs';
 
 const useModalQueryParams = initialState => {
+  const { trackUsage } = useTracking();
   const [queryObject, setQueryObject] = useState({
     page: 1,
     sort: 'updatedAt:DESC',
@@ -14,6 +16,10 @@ const useModalQueryParams = initialState => {
   });
 
   const handleChangeFilters = nextFilters => {
+    trackUsage('didFilterMediaLibraryElements', {
+      location: 'content-manager',
+      filter: Object.keys(nextFilters[nextFilters.length - 1])[0],
+    });
     setQueryObject(prev => ({ ...prev, page: 1, filters: { $and: nextFilters } }));
   };
 
@@ -26,6 +32,10 @@ const useModalQueryParams = initialState => {
   };
 
   const handleChangeSort = sort => {
+    trackUsage('didSortMediaLibraryElements', {
+      location: 'content-manager',
+      sort,
+    });
     setQueryObject(prev => ({ ...prev, sort }));
   };
 

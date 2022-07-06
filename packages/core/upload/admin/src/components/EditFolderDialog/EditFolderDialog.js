@@ -13,7 +13,7 @@ import { Loader } from '@strapi/design-system/Loader';
 import { Stack } from '@strapi/design-system/Stack';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Typography } from '@strapi/design-system/Typography';
-import { Form, useNotification, getAPIInnerErrors } from '@strapi/helper-plugin';
+import { Form, useNotification, getAPIInnerErrors, useTracking } from '@strapi/helper-plugin';
 
 import { getTrad, findRecursiveFolderByValue } from '../../utils';
 import { FolderDefinition } from '../../constants';
@@ -36,13 +36,14 @@ const folderSchema = yup.object({
     .nullable(true),
 });
 
-export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
+export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) => {
   const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure({
     enabled: true,
   });
   const { canCreate, isLoading: isLoadingPermissions, canUpdate } = useMediaLibraryPermissions();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { formatMessage, formatDate } = useIntl();
+  const { trackUsage } = useTracking();
   const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();
   const { remove } = useBulkRemove();
   const toggleNotification = useNotification();
@@ -83,6 +84,20 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
               defaultMessage: 'Folder successfully created',
             }),
       });
+
+      if (isEditing) {
+        const didChangeLocation = parentFolderId
+          ? parseInt(parentFolderId, 10) !== values.parent.value
+          : parentFolderId === null && !!values.parent.value;
+
+        trackUsage('didEditMediaLibraryElements', {
+          location,
+          type: 'folder',
+          changeLocation: didChangeLocation,
+        });
+      } else {
+        trackUsage('didAddMediaLibraryFolders', { location });
+      }
 
       onClose({ created: true });
     } catch (err) {
@@ -277,11 +292,13 @@ export const EditFolderDialog = ({ onClose, folder, parentFolderId }) => {
 
 EditFolderDialog.defaultProps = {
   folder: undefined,
+  location: undefined,
   parentFolderId: null,
 };
 
 EditFolderDialog.propTypes = {
   folder: FolderDefinition,
+  location: PropTypes.string,
   onClose: PropTypes.func.isRequired,
   parentFolderId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };

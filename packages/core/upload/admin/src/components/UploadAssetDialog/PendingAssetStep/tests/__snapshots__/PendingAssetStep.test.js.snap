@@ -13,6 +13,414 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   width: 1px;
 }
 
+.c34 {
+  padding-top: 4px;
+}
+
+.c17 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c14 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c14 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c14 svg > g,
+.c14 svg path {
+  fill: #ffffff;
+}
+
+.c14[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c14:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c14:focus-visible {
+  outline: none;
+}
+
+.c14:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c15 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c15 .sc-iseIHH {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c15 .c16 {
+  color: #ffffff;
+}
+
+.c15[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c15[aria-disabled='true'] .c16 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true'] svg > g,
+.c15[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c15[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c15[aria-disabled='true']:active .c16 {
+  color: #666687;
+}
+
+.c15[aria-disabled='true']:active svg > g,
+.c15[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c15:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c15:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c15 svg > g,
+.c15 svg path {
+  fill: #ffffff;
+}
+
+.c57 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c57 .sc-iseIHH {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c57 .c16 {
+  color: #ffffff;
+}
+
+.c57[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c57[aria-disabled='true'] .c16 {
+  color: #666687;
+}
+
+.c57[aria-disabled='true'] svg > g,
+.c57[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c57[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c57[aria-disabled='true']:active .c16 {
+  color: #666687;
+}
+
+.c57[aria-disabled='true']:active svg > g,
+.c57[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c57:hover {
+  background-color: #f6f6f9;
+}
+
+.c57:active {
+  background-color: #eaeaef;
+}
+
+.c57 .c16 {
+  color: #32324d;
+}
+
+.c57 svg > g,
+.c57 svg path {
+  fill: #32324d;
+}
+
+.c43 {
+  width: 100%;
+  height: 5.5rem;
+}
+
+.c10 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c27 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c27 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c27 svg > g,
+.c27 svg path {
+  fill: #ffffff;
+}
+
+.c27[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c27:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c27:focus-visible {
+  outline: none;
+}
+
+.c27:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c28 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c28 svg > g,
+.c28 svg path {
+  fill: #8e8ea9;
+}
+
+.c28:hover svg > g,
+.c28:hover svg path {
+  fill: #666687;
+}
+
+.c28:active svg > g,
+.c28:active svg path {
+  fill: #a5a5ba;
+}
+
+.c28[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c28[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c8 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c9 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c9 > * + * {
+  margin-top: 32px;
+}
+
+.c11 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c3 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c12 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c13 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c49 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c0 {
   background: #f6f6f9;
   padding-top: 16px;
@@ -174,300 +582,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   max-height: 60vh;
 }
 
-.c3 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c12 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c13 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c17 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c14 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c14 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c14 svg > g,
-.c14 svg path {
-  fill: #ffffff;
-}
-
-.c14[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c14:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c14:focus-visible {
-  outline: none;
-}
-
-.c14:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c15 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-}
-
-.c15 .sc-hcupDf {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c15 .c16 {
-  color: #ffffff;
-}
-
-.c15[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c15[aria-disabled='true'] .c16 {
-  color: #666687;
-}
-
-.c15[aria-disabled='true'] svg > g,
-.c15[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c15[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c15[aria-disabled='true']:active .c16 {
-  color: #666687;
-}
-
-.c15[aria-disabled='true']:active svg > g,
-.c15[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c15:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c15:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c15 svg > g,
-.c15 svg path {
-  fill: #ffffff;
-}
-
-.c57 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c57 .sc-hcupDf {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c57 .c16 {
-  color: #ffffff;
-}
-
-.c57[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c57[aria-disabled='true'] .c16 {
-  color: #666687;
-}
-
-.c57[aria-disabled='true'] svg > g,
-.c57[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c57[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c57[aria-disabled='true']:active .c16 {
-  color: #666687;
-}
-
-.c57[aria-disabled='true']:active svg > g,
-.c57[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c57:hover {
-  background-color: #f6f6f9;
-}
-
-.c57:active {
-  background-color: #eaeaef;
-}
-
-.c57 .c16 {
-  color: #32324d;
-}
-
-.c57 svg > g,
-.c57 svg path {
-  fill: #32324d;
-}
-
-.c43 {
-  width: 100%;
-  height: 5.5rem;
-}
-
-.c10 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c44 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c8 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c9 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c9 > * + * {
-  margin-top: 32px;
-}
-
-.c11 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
 .c18 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
@@ -477,120 +591,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 .c19 {
   grid-column: span 4;
   max-width: 100%;
-}
-
-.c34 {
-  padding-top: 4px;
-}
-
-.c27 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c27 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c27 svg > g,
-.c27 svg path {
-  fill: #ffffff;
-}
-
-.c27[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c27:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c27:focus-visible {
-  outline: none;
-}
-
-.c27:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c28 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c28 svg > g,
-.c28 svg path {
-  fill: #8e8ea9;
-}
-
-.c28:hover svg > g,
-.c28:hover svg path {
-  fill: #666687;
-}
-
-.c28:active svg > g,
-.c28:active svg path {
-  fill: #a5a5ba;
-}
-
-.c28[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c28[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c49 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 .c20 {

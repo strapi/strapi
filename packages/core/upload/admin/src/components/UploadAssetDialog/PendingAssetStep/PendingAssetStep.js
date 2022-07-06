@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { useTracking } from '@strapi/helper-plugin';
 import { ModalHeader, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
 import { Typography } from '@strapi/design-system/Typography';
 import { Button } from '@strapi/design-system/Button';
@@ -30,14 +31,34 @@ export const PendingAssetStep = ({
   onClickAddAsset,
   onCancelUpload,
   onUploadSucceed,
+  trackedLocation,
 }) => {
   const assetCountRef = useRef(0);
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const [uploadStatus, setUploadStatus] = useState(Status.Idle);
 
   const handleSubmit = async e => {
     e.preventDefault();
     e.stopPropagation();
+
+    const assetsCountByType = assets.reduce((acc, asset) => {
+      const { type } = asset;
+
+      if (!acc[type]) {
+        acc[type] = 0;
+      }
+
+      // values need to be stringified because Amplitude ignores number values
+      acc[type] = `${parseInt(acc[type], 10) + 1}`;
+
+      return acc;
+    }, {});
+
+    trackUsage('willAddMediaLibraryAssets', {
+      location: trackedLocation,
+      ...assetsCountByType,
+    });
 
     setUploadStatus(Status.Uploading);
   };
@@ -166,6 +187,7 @@ export const PendingAssetStep = ({
 PendingAssetStep.defaultProps = {
   addUploadedFiles: undefined,
   folderId: null,
+  trackedLocation: undefined,
 };
 
 PendingAssetStep.propTypes = {
@@ -178,4 +200,5 @@ PendingAssetStep.propTypes = {
   onClickAddAsset: PropTypes.func.isRequired,
   onUploadSucceed: PropTypes.func.isRequired,
   onCancelUpload: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
 };

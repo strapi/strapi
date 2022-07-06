@@ -59,16 +59,18 @@ describe('useModalQueryParams', () => {
     const { result } = setup();
 
     act(() => {
-      result.current[1].onChangeFilters({ some: 'thing' });
+      result.current[1].onChangeFilters([{ some: 'thing' }]);
     });
 
     expect(result.current[0].queryObject).toStrictEqual({
       ...FIXTURE_QUERY,
       filters: {
         ...FIXTURE_QUERY.filters,
-        $and: {
-          some: 'thing',
-        },
+        $and: [
+          {
+            some: 'thing',
+          },
+        ],
       },
     });
   });
