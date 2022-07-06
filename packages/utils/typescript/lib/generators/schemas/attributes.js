@@ -37,99 +37,6 @@ const attributeToPropertySignature = (schema, attributeName, attribute) => {
  * @returns {object}
  */
 const getAttributeType = (attributeName, attribute, uid) => {
-  const mappers = {
-    string() {
-      return ['StringAttribute'];
-    },
-    text() {
-      return ['TextAttribute'];
-    },
-    richtext() {
-      return ['RichTextAttribute'];
-    },
-    password() {
-      return ['PasswordAttribute'];
-    },
-    email() {
-      return ['EmailAttribute'];
-    },
-    date() {
-      return ['DateAttribute'];
-    },
-    time() {
-      return ['TimeAttribute'];
-    },
-    datetime() {
-      return ['DateTimeAttribute'];
-    },
-    timestamp() {
-      return ['TimestampAttribute'];
-    },
-    integer() {
-      return ['IntegerAttribute'];
-    },
-    biginteger() {
-      return ['BigIntegerAttribute'];
-    },
-    float() {
-      return ['FloatAttribute'];
-    },
-    decimal() {
-      return ['DecimalAttribute'];
-    },
-    uid() {
-      return ['UIDAttribute'];
-    },
-    enumeration() {
-      return ['EnumerationAttribute'];
-    },
-    boolean() {
-      return ['BooleanAttribute'];
-    },
-    json() {
-      return ['JSONAttribute'];
-    },
-    media() {
-      return ['MediaAttribute'];
-    },
-    relation() {
-      const { relation, target } = attribute;
-
-      if (relation.includes('morph') | relation.includes('Morph')) {
-        return [
-          'RelationAttribute',
-          [factory.createStringLiteral(uid, true), factory.createStringLiteral(relation, true)],
-        ];
-      }
-
-      return [
-        'RelationAttribute',
-        [
-          factory.createStringLiteral(uid, true),
-          factory.createStringLiteral(relation, true),
-          factory.createStringLiteral(target, true),
-        ],
-      ];
-    },
-    component() {
-      const target = attribute.component;
-      const params = [factory.createStringLiteral(target, true)];
-
-      if (attribute.repeatable) {
-        params.push(factory.createTrue());
-      }
-
-      return ['ComponentAttribute', params];
-    },
-    dynamiczone() {
-      const componentsParam = factory.createTupleTypeNode(
-        attribute.components.map(component => factory.createStringLiteral(component))
-      );
-
-      return ['DynamicZoneAttribute', [componentsParam]];
-    },
-  };
-
   if (!Object.keys(mappers).includes(attribute.type)) {
     console.warning(
       `"${attributeName}" attribute from "${uid}" has an invalid type: "${attribute.type}"`
@@ -138,7 +45,7 @@ const getAttributeType = (attributeName, attribute, uid) => {
     return null;
   }
 
-  const [attributeType, typeParams] = mappers[attribute.type]();
+  const [attributeType, typeParams] = mappers[attribute.type]({ uid, attribute, attributeName });
 
   addImport(attributeType);
 
@@ -236,6 +143,99 @@ const getAttributeModifiers = (_attributeName, attribute) => {
   }
 
   return modifiers;
+};
+
+const mappers = {
+  string() {
+    return ['StringAttribute'];
+  },
+  text() {
+    return ['TextAttribute'];
+  },
+  richtext() {
+    return ['RichTextAttribute'];
+  },
+  password() {
+    return ['PasswordAttribute'];
+  },
+  email() {
+    return ['EmailAttribute'];
+  },
+  date() {
+    return ['DateAttribute'];
+  },
+  time() {
+    return ['TimeAttribute'];
+  },
+  datetime() {
+    return ['DateTimeAttribute'];
+  },
+  timestamp() {
+    return ['TimestampAttribute'];
+  },
+  integer() {
+    return ['IntegerAttribute'];
+  },
+  biginteger() {
+    return ['BigIntegerAttribute'];
+  },
+  float() {
+    return ['FloatAttribute'];
+  },
+  decimal() {
+    return ['DecimalAttribute'];
+  },
+  uid() {
+    return ['UIDAttribute'];
+  },
+  enumeration() {
+    return ['EnumerationAttribute'];
+  },
+  boolean() {
+    return ['BooleanAttribute'];
+  },
+  json() {
+    return ['JSONAttribute'];
+  },
+  media() {
+    return ['MediaAttribute'];
+  },
+  relation({ uid, attribute }) {
+    const { relation, target } = attribute;
+
+    if (relation.includes('morph') | relation.includes('Morph')) {
+      return [
+        'RelationAttribute',
+        [factory.createStringLiteral(uid, true), factory.createStringLiteral(relation, true)],
+      ];
+    }
+
+    return [
+      'RelationAttribute',
+      [
+        factory.createStringLiteral(uid, true),
+        factory.createStringLiteral(relation, true),
+        factory.createStringLiteral(target, true),
+      ],
+    ];
+  },
+  component({ attribute }) {
+    const target = attribute.component;
+    const params = [factory.createStringLiteral(target, true)];
+
+    if (attribute.repeatable) {
+      params.push(factory.createTrue());
+    }
+
+    return ['ComponentAttribute', params];
+  },
+  dynamiczone({ attribute }) {
+    const componentsParam = factory.createTupleTypeNode(
+      attribute.components.map(component => factory.createStringLiteral(component))
+    );
+
+    return ['DynamicZoneAttribute', [componentsParam]];
+  },
 };
 
 module.exports = attributeToPropertySignature;
