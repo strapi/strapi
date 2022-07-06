@@ -1,12 +1,14 @@
 'use strict';
 
+const ts = require('typescript');
 const { factory } = require('typescript');
 const {
   pipe,
   replace,
   camelCase,
   upperFirst,
-  isObject,
+  isUndefined,
+  isNull,
   isString,
   isNumber,
   isArray,
@@ -70,11 +72,19 @@ const getTypeNode = (typeName, params = []) => {
 };
 
 /**
- * Transform a regular JavaScript object into an object litteral expression
- * @param {object} data
- * @returns {ts.ObjectLiteralExpression}
+ * Transform a regular JavaScript object or scalar value into a litteral expression
+ * @param data
+ * @returns {ts.TypeNode}
  */
 const toTypeLitteral = data => {
+  if (isUndefined(data)) {
+    return factory.createLiteralTypeNode(ts.SyntaxKind.UndefinedKeyword);
+  }
+
+  if (isNull(data)) {
+    return factory.createLiteralTypeNode(ts.SyntaxKind.NullKeyword);
+  }
+
   if (isString(data)) {
     return factory.createStringLiteral(data, true);
   }
@@ -91,8 +101,8 @@ const toTypeLitteral = data => {
     return factory.createTupleTypeNode(data.map(item => toTypeLitteral(item)));
   }
 
-  if (!isObject(data)) {
-    throw new Error('Cannot convert to object litteral. Unknown type', typeof data);
+  if (typeof data !== 'object') {
+    throw new Error(`Cannot convert to object litteral. Unknown type "${typeof data}"`);
   }
 
   const entries = Object.entries(data);
