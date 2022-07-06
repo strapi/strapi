@@ -8,15 +8,15 @@ export default {
     // TODO: Uncomment for EXPANSION-235
     // app.customFields.register({
     //   name: 'color',
-    //   pluginId: 'color-picker',
+    //   pluginId: 'mycustomfields',
     //   type: 'text',
     //   icon: ColorPickerIcon,
     //   intlLabel: {
-    //     id: 'color-picker.color.label',
+    //     id: 'mycustomfields.color.label',
     //     defaultMessage: 'Color',
     //   },
     //   intlDescription: {
-    //     id: 'color-picker.color.description',
+    //     id: 'mycustomfields.color.description',
     //     defaultMessage: 'Select any color',
     //   },
     //   components: {

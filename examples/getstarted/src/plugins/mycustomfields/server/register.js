@@ -5,7 +5,7 @@ module.exports = ({ strapi }) => {
   // TODO: Uncomment for EXPANSION-234
   // strapi.customFields.register({
   //   name: 'color',
-  //   plugin: 'color-picker',
+  //   plugin: 'mycustomfields',
   //   type: 'text',
   // });
 };
