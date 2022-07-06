@@ -43,6 +43,18 @@ const generateSchemasDefinitions = async (options = {}) => {
     definition: generateSchemaDefinition(schema),
   }));
 
+  const formattedSchemasDefinitions = schemasDefinitions.reduce((acc, def) => {
+    acc.push(
+      // Definition
+      def.definition,
+
+      // Add a newline between each interface declaration
+      factory.createIdentifier('\n')
+    );
+
+    return acc;
+  }, []);
+
   const allDefinitions = [
     // Imports
     generateImportDefinition(),
@@ -51,15 +63,7 @@ const generateSchemasDefinitions = async (options = {}) => {
     factory.createIdentifier('\n'),
 
     // Schemas
-    ...schemasDefinitions.reduce(
-      (acc, def) => [
-        ...acc,
-        def.definition,
-        // Add a newline between each interface declaration
-        factory.createIdentifier('\n'),
-      ],
-      []
-    ),
+    ...formattedSchemasDefinitions,
 
     // Global
     generateGlobalDefinition(schemasDefinitions),
