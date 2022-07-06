@@ -50,8 +50,7 @@ export const PendingAssetStep = ({
       }
 
       // values need to be stringified because Amplitude ignores number values
-      acc[type] = parseInt(acc[type], 10) + 1;
-      acc[type] = acc[type].toString();
+      acc[type] = `${parseInt(acc[type], 10) + 1}`;
 
       return acc;
     }, {});
