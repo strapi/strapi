@@ -45,7 +45,7 @@ export default function hasContent(type, content, metadatas, fieldSchema) {
       return !isEmpty(content);
     }
 
-    return content.count > 0;
+    return content?.count > 0;
   }
 
   /* 

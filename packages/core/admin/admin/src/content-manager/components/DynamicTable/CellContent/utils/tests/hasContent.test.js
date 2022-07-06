@@ -227,15 +227,22 @@ describe('hasContent', () => {
   });
 
   describe('relations', () => {
-    it('extracts content from multiple relations with content', () => {
+    it('extracts content from multiple relations with count=1', () => {
       const normalizedContent = hasContent('relation', { count: 1 }, undefined, {
         relation: 'manyToMany',
       });
       expect(normalizedContent).toEqual(true);
     });
 
-    it('extracts content from multiple relations without content', () => {
+    it('extracts content from multiple relations with count=0', () => {
       const normalizedContent = hasContent('relation', { count: 0 }, undefined, {
+        relation: 'manyToMany',
+      });
+      expect(normalizedContent).toEqual(false);
+    });
+
+    it('extracts content from multiple relations without content', () => {
+      const normalizedContent = hasContent('relation', undefined, undefined, {
         relation: 'manyToMany',
       });
       expect(normalizedContent).toEqual(false);
