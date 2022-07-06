@@ -1,7 +1,7 @@
 'use strict';
 
 const { factory } = require('typescript');
-const fp = require('lodash/fp');
+const _ = require('lodash/fp');
 
 const { addImport } = require('./imports');
 const { getTypeNode, toTypeLitteral } = require('./utils');
@@ -186,7 +186,7 @@ const getAttributeModifiers = (_attributeName, attribute) => {
   }
 
   // Plugin Options
-  if (!fp.isEmpty(attribute.pluginOptions)) {
+  if (!_.isEmpty(attribute.pluginOptions)) {
     addImport('SetPluginOptions');
 
     modifiers.push(
@@ -199,10 +199,10 @@ const getAttributeModifiers = (_attributeName, attribute) => {
   }
 
   // Min / Max
-  if (!fp.isNil(attribute.min) || !fp.isNil(attribute.max)) {
+  if (!_.isNil(attribute.min) || !_.isNil(attribute.max)) {
     addImport('SetMinMax');
 
-    const minMaxProperties = fp.pick(['min', 'max'], attribute);
+    const minMaxProperties = _.pick(['min', 'max'], attribute);
 
     modifiers.push(
       factory.createTypeReferenceNode(factory.createIdentifier('SetMinMax'), [
@@ -212,10 +212,10 @@ const getAttributeModifiers = (_attributeName, attribute) => {
   }
 
   // Min length / Max length
-  if (!fp.isNil(attribute.minLength) || !fp.isNil(attribute.maxLength)) {
+  if (!_.isNil(attribute.minLength) || !_.isNil(attribute.maxLength)) {
     addImport('SetMinMaxLength');
 
-    const minMaxProperties = fp.pick(['minLength', 'maxLength'], attribute);
+    const minMaxProperties = _.pick(['minLength', 'maxLength'], attribute);
 
     modifiers.push(
       factory.createTypeReferenceNode(factory.createIdentifier('SetMinMaxLength'), [
@@ -225,7 +225,7 @@ const getAttributeModifiers = (_attributeName, attribute) => {
   }
 
   // Default
-  if (!fp.isNil(attribute.default)) {
+  if (!_.isNil(attribute.default)) {
     addImport('DefaultTo');
 
     const defaultLitteral = toTypeLitteral(attribute.default);
