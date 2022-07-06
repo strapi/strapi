@@ -31,10 +31,10 @@ const DEFAULT_OUT_FILENAME = 'schemas.d.ts';
  * @param {{ distDir: string; appDir: string; }} options.dirs
  * @param {string} [options.outDir]
  * @param {string} [options.file]
- * @param {boolean} [options.debug]
+ * @param {boolean} [options.verbose]
  */
 const generateSchemasDefinitions = async (options = {}) => {
-  const { strapi, outDir = process.cwd(), file = DEFAULT_OUT_FILENAME, debug = false } = options;
+  const { strapi, outDir = process.cwd(), file = DEFAULT_OUT_FILENAME, verbose = false } = options;
 
   const schemas = getAllStrapiSchemas(strapi);
 
@@ -70,7 +70,7 @@ const generateSchemasDefinitions = async (options = {}) => {
 
   const definitionFilepath = await saveDefinitionToFileSystem(outDir, file, formattedOutput);
 
-  if (debug) {
+  if (verbose) {
     logDebugInformation(schemasDefinitions, { filepath: definitionFilepath });
   }
 };
