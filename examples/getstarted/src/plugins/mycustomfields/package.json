@@ -1,12 +1,12 @@
 {
   "name": "mycustomfields",
   "version": "0.0.0",
-  "description": "This is the description of the plugin.",
+  "description": "A plugin dedicated to developing and testing Custom Fields",
   "strapi": {
     "name": "mycustomfields",
-    "description": "Description of Mycustomfields plugin",
+    "description": "A plugin dedicated to developing and testing Custom Fields",
     "kind": "plugin",
-    "displayName": "Mycustomfields"
+    "displayName": "My Custom Fields"
   },
   "dependencies": {},
   "author": {
