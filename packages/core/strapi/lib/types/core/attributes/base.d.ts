@@ -29,7 +29,7 @@ export type AttributeType =
 /**
  * Most basic shape of a schema attribute
  */
-export interface Attribute<T extends AttributeType = AttributeType, U extends {} = {}> {
+export interface Attribute<T extends AttributeType = AttributeType> {
   /**
    * Type of the attribute
    */
