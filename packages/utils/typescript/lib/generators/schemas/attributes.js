@@ -203,7 +203,9 @@ const mappers = {
   relation({ uid, attribute }) {
     const { relation, target } = attribute;
 
-    if (relation.includes('morph') | relation.includes('Morph')) {
+    const isMorphRelation = relation.toLowerCase().includes('morph');
+
+    if (isMorphRelation) {
       return [
         'RelationAttribute',
         [factory.createStringLiteral(uid, true), factory.createStringLiteral(relation, true)],
