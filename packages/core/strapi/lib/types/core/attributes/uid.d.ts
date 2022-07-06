@@ -18,31 +18,31 @@ export interface UIDAttributeOptions {
 }
 
 export interface UIDAttributeProperties<
-  // UID options
-  S extends UIDAttributeOptions = UIDAttributeOptions,
   // Own Schema Reference
   T extends SchemaUID | undefined = undefined,
   // Target attribute
   U extends T extends SchemaUID
     ? GetAttributesKeysByType<T, 'string' | 'text'>
-    : undefined = undefined
+    : undefined = undefined,
+  // UID options
+  S extends UIDAttributeOptions = UIDAttributeOptions
 > {
   targetField?: U;
-  options?: S;
+  options?: UIDAttributeOptions & S;
 }
 
 export type UIDAttribute<
-  // UID options
-  S extends UIDAttributeOptions = UIDAttributeOptions,
   // Own Schema Reference
   T extends SchemaUID | undefined = undefined,
   // Target attribute
   U extends T extends SchemaUID
     ? GetAttributesKeysByType<T, 'string' | 'text'>
-    : undefined = undefined
+    : undefined = undefined,
+  // UID options
+  S extends UIDAttributeOptions = UIDAttributeOptions
 > = Attribute<'uid'> &
   // Properties
-  UIDAttributeProperties<S, T, U> &
+  UIDAttributeProperties<T, U, S> &
   // Options
   ConfigurableOption &
   DefaultOption<UIDValue> &

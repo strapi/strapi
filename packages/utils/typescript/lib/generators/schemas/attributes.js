@@ -1,5 +1,6 @@
 'use strict';
 
+const ts = require('typescript');
 const { factory } = require('typescript');
 const _ = require('lodash/fp');
 
@@ -185,8 +186,34 @@ const mappers = {
   decimal() {
     return ['DecimalAttribute'];
   },
-  uid() {
-    return ['UIDAttribute'];
+  uid({ attribute, uid }) {
+    const { targetField, options } = attribute;
+
+    // If there are no params to compute, then return the attribute type alone
+    if (targetField === undefined && options === undefined) {
+      return ['UIDAttribute'];
+    }
+
+    const params = [];
+
+    // If the targetField property is defined, then reference it,
+    // otherwise, put `undefined` keyword type nodes as placeholders
+    const targetFieldParams = _.isUndefined(targetField)
+      ? [
+          factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
+          factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
+        ]
+      : [factory.createStringLiteral(uid), factory.createStringLiteral(targetField)];
+
+    params.push(...targetFieldParams);
+
+    // If the options property is defined, transform it to
+    // a type literral node and add it to the params list
+    if (_.isObject(options)) {
+      params.push(toTypeLitteral(options));
+    }
+
+    return ['UIDAttribute', params];
   },
   enumeration() {
     return ['EnumerationAttribute'];
