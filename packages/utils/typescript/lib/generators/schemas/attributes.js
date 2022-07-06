@@ -5,7 +5,7 @@ const { factory } = require('typescript');
 const _ = require('lodash/fp');
 
 const { addImport } = require('./imports');
-const { getTypeNode, toTypeLitteral } = require('./utils');
+const { getTypeNode, toTypeLiteral } = require('./utils');
 
 /**
  * Generate a property signature node for a given attribute
@@ -100,8 +100,8 @@ const getAttributeModifiers = (_attributeName, attribute) => {
     modifiers.push(
       factory.createTypeReferenceNode(
         factory.createIdentifier('SetPluginOptions'),
-        // Transform the pluginOptions object into an object litteral expression
-        [toTypeLitteral(attribute.pluginOptions)]
+        // Transform the pluginOptions object into an object literal expression
+        [toTypeLiteral(attribute.pluginOptions)]
       )
     );
   }
@@ -114,7 +114,7 @@ const getAttributeModifiers = (_attributeName, attribute) => {
 
     modifiers.push(
       factory.createTypeReferenceNode(factory.createIdentifier('SetMinMax'), [
-        toTypeLitteral(minMaxProperties),
+        toTypeLiteral(minMaxProperties),
       ])
     );
   }
@@ -127,7 +127,7 @@ const getAttributeModifiers = (_attributeName, attribute) => {
 
     modifiers.push(
       factory.createTypeReferenceNode(factory.createIdentifier('SetMinMaxLength'), [
-        toTypeLitteral(minMaxProperties),
+        toTypeLiteral(minMaxProperties),
       ])
     );
   }
@@ -136,10 +136,10 @@ const getAttributeModifiers = (_attributeName, attribute) => {
   if (!_.isNil(attribute.default)) {
     addImport('DefaultTo');
 
-    const defaultLitteral = toTypeLitteral(attribute.default);
+    const defaultLiteral = toTypeLiteral(attribute.default);
 
     modifiers.push(
-      factory.createTypeReferenceNode(factory.createIdentifier('DefaultTo'), [defaultLitteral])
+      factory.createTypeReferenceNode(factory.createIdentifier('DefaultTo'), [defaultLiteral])
     );
   }
 
@@ -210,7 +210,7 @@ const mappers = {
     // If the options property is defined, transform it to
     // a type literral node and add it to the params list
     if (_.isObject(options)) {
-      params.push(toTypeLitteral(options));
+      params.push(toTypeLiteral(options));
     }
 
     return ['UIDAttribute', params];

@@ -4,7 +4,7 @@ const ts = require('typescript');
 const { factory } = require('typescript');
 const { isEmpty } = require('lodash/fp');
 
-const { getSchemaExtendsTypeName, getSchemaInterfaceName, toTypeLitteral } = require('./utils');
+const { getSchemaExtendsTypeName, getSchemaInterfaceName, toTypeLiteral } = require('./utils');
 const attributeToPropertySignature = require('./attributes');
 const { addImport } = require('./imports');
 
@@ -24,18 +24,18 @@ const generateSchemaDefinition = schema => {
   // Make sure the extended interface are imported
   addImport(parentType);
 
-  // Properties whose values can be mapped to a litteral type expression
-  const litteralPropertiesDefinitions = ['info', 'options', 'pluginOptions']
+  // Properties whose values can be mapped to a literal type expression
+  const literalPropertiesDefinitions = ['info', 'options', 'pluginOptions']
     // Ignore non-existent or empty declarations
     .filter(key => !isEmpty(schema[key]))
-    // Generate litteral definition for each property
-    .map(generatePropertyLitteralDefinitionFactory(schema));
+    // Generate literal definition for each property
+    .map(generatePropertyLiteralDefinitionFactory(schema));
 
-  // Generate the `attributes` litteral type definition
+  // Generate the `attributes` literal type definition
   const attributesProp = generateAttributePropertySignature(schema);
 
   // Merge every schema's definition in a single list
-  const schemaProperties = [...litteralPropertiesDefinitions, attributesProp];
+  const schemaProperties = [...literalPropertiesDefinitions, attributesProp];
 
   // Generate the schema's interface declaration
   const schemaType = factory.createInterfaceDeclaration(
@@ -75,12 +75,12 @@ const generateAttributePropertySignature = schema => {
   );
 };
 
-const generatePropertyLitteralDefinitionFactory = schema => key => {
+const generatePropertyLiteralDefinitionFactory = schema => key => {
   return factory.createPropertySignature(
     undefined,
     factory.createIdentifier(key),
     undefined,
-    toTypeLitteral(schema[key])
+    toTypeLiteral(schema[key])
   );
 };
 

@@ -10,7 +10,7 @@ const {
   getSchemaInterfaceName,
   getSchemaModelType,
   getTypeNode,
-  toTypeLitteral,
+  toTypeLiteral,
 } = require('../../../generators/schemas/utils');
 
 describe('Utils', () => {
@@ -213,52 +213,52 @@ describe('Utils', () => {
     });
   });
 
-  describe('To Type Litteral', () => {
+  describe('To Type Literal', () => {
     test('String', () => {
-      const node = toTypeLitteral('foo');
+      const node = toTypeLiteral('foo');
 
       expect(node.kind).toBe(ts.SyntaxKind.StringLiteral);
       expect(node.text).toBe('foo');
     });
 
     test('Number', () => {
-      const node = toTypeLitteral(42);
+      const node = toTypeLiteral(42);
 
       expect(node.kind).toBe(ts.SyntaxKind.FirstLiteralToken);
       expect(node.text).toBe('42');
     });
 
     test('Boolean', () => {
-      const trueNode = toTypeLitteral(true);
-      const falseNode = toTypeLitteral(false);
+      const trueNode = toTypeLiteral(true);
+      const falseNode = toTypeLiteral(false);
 
       expect(trueNode.kind).toBe(ts.SyntaxKind.TrueKeyword);
       expect(falseNode.kind).toBe(ts.SyntaxKind.FalseKeyword);
     });
 
     test('undefined', () => {
-      const node = toTypeLitteral(undefined);
+      const node = toTypeLiteral(undefined);
 
       expect(node.kind).toBe(ts.SyntaxKind.LiteralType);
       expect(node.literal).toBe(ts.SyntaxKind.UndefinedKeyword);
     });
 
     test('null', () => {
-      const node = toTypeLitteral(null);
+      const node = toTypeLiteral(null);
 
       expect(node.kind).toBe(ts.SyntaxKind.LiteralType);
       expect(node.literal).toBe(ts.SyntaxKind.NullKeyword);
     });
 
     test('Array (empty)', () => {
-      const node = toTypeLitteral([]);
+      const node = toTypeLiteral([]);
 
       expect(node.kind).toBe(ts.SyntaxKind.TupleType);
       expect(node.elements).toHaveLength(0);
     });
 
     test('Array (with elements)', () => {
-      const node = toTypeLitteral(['foo', 2]);
+      const node = toTypeLiteral(['foo', 2]);
 
       expect(node.kind).toBe(ts.SyntaxKind.TupleType);
       expect(node.elements).toHaveLength(2);
@@ -271,7 +271,7 @@ describe('Utils', () => {
     });
 
     test('Array (nested)', () => {
-      const node = toTypeLitteral(['foo', ['bar', 'foobar']]);
+      const node = toTypeLiteral(['foo', ['bar', 'foobar']]);
 
       expect(node.kind).toBe(ts.SyntaxKind.TupleType);
       expect(node.elements).toHaveLength(2);
@@ -290,7 +290,7 @@ describe('Utils', () => {
     });
 
     test('Array (with object)', () => {
-      const node = toTypeLitteral([{ foo: 'bar', bar: true }]);
+      const node = toTypeLiteral([{ foo: 'bar', bar: true }]);
 
       expect(node.kind).toBe(ts.SyntaxKind.TupleType);
       expect(node.elements).toHaveLength(1);
@@ -311,7 +311,7 @@ describe('Utils', () => {
     });
 
     test('Object', () => {
-      const node = toTypeLitteral({ foo: ['bar', true, 2], bar: null });
+      const node = toTypeLiteral({ foo: ['bar', true, 2], bar: null });
 
       expect(node.kind).toBe(ts.SyntaxKind.TypeLiteral);
       expect(node.members).toHaveLength(2);
@@ -333,7 +333,7 @@ describe('Utils', () => {
     });
 
     test('Object with complex keys', () => {
-      const node = toTypeLitteral({ 'foo-bar': 'foobar', foo: 'bar' });
+      const node = toTypeLiteral({ 'foo-bar': 'foobar', foo: 'bar' });
 
       expect(node.kind).toBe(ts.SyntaxKind.TypeLiteral);
       expect(node.members).toHaveLength(2);
@@ -354,8 +354,8 @@ describe('Utils', () => {
     });
 
     test('Invalid data type supplied (function)', () => {
-      expect(() => toTypeLitteral(() => {})).toThrowError(
-        'Cannot convert to object litteral. Unknown type "function"'
+      expect(() => toTypeLiteral(() => {})).toThrowError(
+        'Cannot convert to object literal. Unknown type "function"'
       );
     });
   });

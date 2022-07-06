@@ -72,11 +72,11 @@ const getTypeNode = (typeName, params = []) => {
 };
 
 /**
- * Transform a regular JavaScript object or scalar value into a litteral expression
+ * Transform a regular JavaScript object or scalar value into a literal expression
  * @param data
  * @returns {ts.TypeNode}
  */
-const toTypeLitteral = data => {
+const toTypeLiteral = data => {
   if (isUndefined(data)) {
     return factory.createLiteralTypeNode(ts.SyntaxKind.UndefinedKeyword);
   }
@@ -98,11 +98,11 @@ const toTypeLitteral = data => {
   }
 
   if (isArray(data)) {
-    return factory.createTupleTypeNode(data.map(item => toTypeLitteral(item)));
+    return factory.createTupleTypeNode(data.map(item => toTypeLiteral(item)));
   }
 
   if (typeof data !== 'object') {
-    throw new Error(`Cannot convert to object litteral. Unknown type "${typeof data}"`);
+    throw new Error(`Cannot convert to object literal. Unknown type "${typeof data}"`);
   }
 
   const entries = Object.entries(data);
@@ -120,7 +120,7 @@ const toTypeLitteral = data => {
         undefined,
         identifier,
         undefined,
-        toTypeLitteral(value)
+        toTypeLiteral(value)
       ),
     ];
   }, []);
@@ -151,5 +151,5 @@ module.exports = {
   getSchemaModelType,
   getDefinitionAttributesCount,
   getTypeNode,
-  toTypeLitteral,
+  toTypeLiteral,
 };

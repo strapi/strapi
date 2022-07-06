@@ -22,22 +22,22 @@ declare global {
     interface Schemas {}
 
     /**
-     * Litteral union type of every content type registered in Strapi.Schemas
+     * Literal union type of every content type registered in Strapi.Schemas
      */
     type ContentTypeUIDs = KeysBy<Schemas, ContentTypeSchema>;
 
     /**
-     * Litteral union type of every collection type registered in Strapi.Schemas
+     * Literal union type of every collection type registered in Strapi.Schemas
      */
     type CollectionTypeUIDs = KeysBy<Schemas, CollectionTypeSchema>;
 
     /**
-     * Litteral union type of every single type registered in Strapi.Schemas
+     * Literal union type of every single type registered in Strapi.Schemas
      */
     type SingleTypeUIDs = KeysBy<Schemas, SingleTypeSchema>;
 
     /**
-     * Litteral union type of every component registered in Strapi.Schemas
+     * Literal union type of every component registered in Strapi.Schemas
      */
      type ComponentUIDs = KeysBy<Schemas, ComponentSchema>;
 

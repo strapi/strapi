@@ -2,12 +2,12 @@ import { Attribute, ComponentAttribute } from '../attributes';
 import { KeysBy, StringRecord } from '../../utils';
 
 /**
- * Litteral union type representing the possible natures of a content type
+ * Literal union type representing the possible natures of a content type
  */
 export type ContentTypeKind = 'singleType' | 'collectionType';
 
 /**
- * Litteral union type representing the possible types of a model
+ * Literal union type representing the possible types of a model
  */
 export type SchemaModelType = 'contentType' | 'component';
 
