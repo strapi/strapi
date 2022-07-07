@@ -10,7 +10,6 @@ import {
   LoadingIndicatorPage,
   useNotification,
   useAppInfos,
-  useCustomFields,
 } from '@strapi/helper-plugin';
 import { Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -55,9 +54,6 @@ const MarketPlacePage = () => {
   const isOnline = useNavigatorOnLine();
 
   useFocusWhenNavigate();
-
-  const { customFields } = useCustomFields();
-  console.log('customFields', customFields);
 
   const marketplaceTitle = formatMessage({
     id: 'global.marketplace',
