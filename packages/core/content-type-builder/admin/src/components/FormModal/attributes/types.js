@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import uniq from 'lodash/uniq';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
@@ -153,12 +153,11 @@ const types = {
           name: 'areEnumValuesUnique',
           message: getTrad('error.validation.enum-duplicate'),
           test(values) {
-            const normalizedEnum = values.map(toRegressedEnumValue);
-            const duplicates = _(normalizedEnum)
-              .groupBy()
-              .pickBy(x => x.length > 1)
-              .keys()
-              .value();
+            const duplicates = uniq(
+              values
+                .map(toRegressedEnumValue)
+                .filter((value, index, values) => values.indexOf(value) !== index)
+            );
 
             return !duplicates.length;
           },
