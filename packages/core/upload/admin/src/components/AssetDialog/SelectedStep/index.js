@@ -15,7 +15,7 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) 
         <Typography variant="pi" fontWeight="bold" textColor="neutral800">
           {formatMessage(
             {
-              id: getTrad('list.assets.selected'),
+              id: getTrad('list.assets.to-upload'),
               defaultMessage:
                 '{number, plural, =0 {No asset} one {1 asset} other {# assets}} ready to upload',
             },

@@ -55,6 +55,7 @@
     "react-intl": "5.20.2",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
+    "react-select": "4.0.2",
     "styled-components": "5.3.3",
     "whatwg-fetch": "^3.6.2"
   },

@@ -22,7 +22,7 @@ module.exports = {
 
     const permissionQuery = permissionChecker.buildReadQuery(query);
 
-    const { results, pagination } = await entityManager.findWithRelationCounts(
+    const { results, pagination } = await entityManager.findWithRelationCountsPage(
       permissionQuery,
       model
     );
