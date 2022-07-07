@@ -233,9 +233,13 @@ const EditViewDataManagerProvider = ({
     ({ target: { name, value, type } }, shouldSetInitialValue = false) => {
       let inputValue = value;
 
-      // Empty string is not a valid date,
-      // Set the date to null when it's empty
-      if (type === 'date' && value === '') {
+      // Allow to reset text, textarea, email, uid, select/enum, and number
+      if (
+        ['text', 'textarea', 'string', 'email', 'uid', 'select', 'select-one', 'number'].includes(
+          type
+        ) &&
+        !value
+      ) {
         inputValue = null;
       }
 
@@ -246,16 +250,6 @@ const EditViewDataManagerProvider = ({
         });
 
         return;
-      }
-
-      // Allow to reset enum
-      if (type === 'select-one' && value === '') {
-        inputValue = null;
-      }
-
-      // Allow to reset number input
-      if (type === 'number' && value === '') {
-        inputValue = null;
       }
 
       dispatch({
