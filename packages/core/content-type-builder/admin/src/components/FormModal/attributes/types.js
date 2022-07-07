@@ -131,14 +131,15 @@ const types = {
     return yup.object(shape);
   },
   enumeration: (usedAttributeNames, reservedNames) => {
-    const ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
+    // See GraphQL Spec https://spec.graphql.org/June2018/#sec-Names
+    const GRAPHQL_ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
 
     const shape = {
       name: yup
         .string()
         .test(alreadyUsedAttributeNames(usedAttributeNames))
         .test(isNameAllowed(reservedNames))
-        .matches(ENUM_REGEX, errorsTrads.regex)
+        .matches(GRAPHQL_ENUM_REGEX, errorsTrads.regex)
         .required(errorsTrads.required),
       type: validators.type(),
       default: validators.default(),
@@ -170,7 +171,8 @@ const types = {
         .test({
           name: 'doesMatchRegex',
           message: getTrad('error.validation.enum-regex'),
-          test: values => values.map(toRegressedEnumValue).every(value => ENUM_REGEX.test(value)),
+          test: values =>
+            values.map(toRegressedEnumValue).every(value => GRAPHQL_ENUM_REGEX.test(value)),
         }),
       enumName: yup.string().nullable(),
     };

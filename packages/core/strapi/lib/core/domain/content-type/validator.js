@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, toRegressedEnumValue, startsWithANumber } = require('@strapi/utils');
+const { yup, toRegressedEnumValue } = require('@strapi/utils');
 
 const LIFECYCLES = [
   'beforeCreate',
@@ -23,6 +23,9 @@ const LIFECYCLES = [
   'beforeDeleteMany',
   'afterDeleteMany',
 ];
+
+// See GraphQL Spec https://spec.graphql.org/June2018/#sec-Names
+const GRAPHQL_ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
 
 const lifecyclesShape = _.mapValues(_.keyBy(LIFECYCLES), () =>
   yup
@@ -54,9 +57,11 @@ const contentTypeSchemaValidator = yup.object().shape({
         for (const attrName in attributes) {
           const attr = attributes[attrName];
           if (attr.type === 'enumeration') {
-            // should not start by a number
-            if (attr.enum.some(startsWithANumber)) {
-              const message = `Enum values should not start with a number. Please modify your enumeration '${attrName}'.`;
+            // should match the GraphQL regex
+            if (
+              !attr.enum.map(toRegressedEnumValue).every(value => GRAPHQL_ENUM_REGEX.test(value))
+            ) {
+              const message = `Invalid enumervarion value. Values should always have an alphabetical character preceding any number. Update your enumeration '${attrName}'.`;
 
               return this.createError({ message });
             }
