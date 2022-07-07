@@ -57,20 +57,25 @@ const contentTypeSchemaValidator = yup.object().shape({
         for (const attrName in attributes) {
           const attr = attributes[attrName];
           if (attr.type === 'enumeration') {
+            const regressedValues = attr.enum.map(toRegressedEnumValue);
+
             // should match the GraphQL regex
-            if (
-              !attr.enum.map(toRegressedEnumValue).every(value => GRAPHQL_ENUM_REGEX.test(value))
-            ) {
+            if (!regressedValues.every(value => GRAPHQL_ENUM_REGEX.test(value))) {
               const message = `Invalid enumervarion value. Values should always have an alphabetical character preceding any number. Update your enumeration '${attrName}'.`;
 
               return this.createError({ message });
             }
 
+            // should not contain empty values
+            if (regressedValues.some(value => value === '')) {
+              return this.createError({
+                message: `At least one value of the enumeration '${attrName}' appears to be empty.`,
+              });
+            }
+
             // should not collide
             const duplicates = _.uniq(
-              attr.enum
-                .map(toRegressedEnumValue)
-                .filter((value, index, values) => values.indexOf(value) !== index)
+              regressedValues.filter((value, index, values) => values.indexOf(value) !== index)
             );
 
             if (duplicates.length) {

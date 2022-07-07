@@ -165,7 +165,7 @@ const types = {
         .test({
           name: 'doesNotHaveEmptyValues',
           message: getTrad('error.validation.enum-empty-string'),
-          test: values => !values.some(val => val === ''),
+          test: values => !values.map(toRegressedEnumValue).some(val => val === ''),
         })
         .test({
           name: 'doesMatchRegex',
