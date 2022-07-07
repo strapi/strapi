@@ -54,6 +54,7 @@ const LocalePicker = () => {
     setSelected(code);
 
     setQuery({
+      page: 1,
       plugins: { ...query.plugins, i18n: { locale: code } },
     });
   };

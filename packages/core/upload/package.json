@@ -27,7 +27,7 @@
     "@strapi/provider-upload-local": "4.2.2",
     "@strapi/utils": "4.2.2",
     "byte-size": "7.0.1",
-    "cropperjs": "1.5.11",
+    "cropperjs": "1.5.12",
     "fs-extra": "10.0.0",
     "immer": "9.0.6",
     "koa-range": "0.3.0",
@@ -35,13 +35,13 @@
     "lodash": "4.17.21",
     "mime-types": "2.1.35",
     "react": "^17.0.2",
-    "react-copy-to-clipboard": "^5.0.3",
+    "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^17.0.2",
     "react-intl": "5.20.2",
-    "react-redux": "7.2.3",
+    "react-redux": "7.2.8",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "sharp": "0.30.6"
+    "sharp": "0.30.7"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",

@@ -604,7 +604,7 @@
   "content-type-builder.menu.section.single-types.name": "单一类型",
   "content-type-builder.plugin.name": "模型构建器",
   "form.button.done": "完成",
-  "global.Search": "搜索",
+  "global.search": "搜索",
   "global.back": "返回",
   "global.content-manager": "内容管理",
   "global.delete-target": "删除 {target}",
