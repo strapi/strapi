@@ -17,6 +17,11 @@ const { getTypeNode, toTypeLiteral } = require('./utils');
  */
 const attributeToPropertySignature = (schema, attributeName, attribute) => {
   const baseType = getAttributeType(attributeName, attribute, schema.uid);
+
+  if (baseType === null) {
+    return null;
+  }
+
   const modifiers = getAttributeModifiers(attributeName, attribute);
 
   const nodes = [baseType, ...modifiers];
@@ -39,7 +44,7 @@ const attributeToPropertySignature = (schema, attributeName, attribute) => {
  */
 const getAttributeType = (attributeName, attribute, uid) => {
   if (!Object.keys(mappers).includes(attribute.type)) {
-    console.warning(
+    console.warn(
       `"${attributeName}" attribute from "${uid}" has an invalid type: "${attribute.type}"`
     );
 
@@ -215,7 +220,13 @@ const mappers = {
 
     return ['UIDAttribute', params];
   },
-  enumeration() {
+  enumeration({ attribute }) {
+    const { enum: enumValues } = attribute;
+
+    if (Array.isArray(enumValues)) {
+      return ['EnumerationAttribute', [toTypeLiteral(enumValues)]];
+    }
+
     return ['EnumerationAttribute'];
   },
   boolean() {
@@ -268,3 +279,7 @@ const mappers = {
 };
 
 module.exports = attributeToPropertySignature;
+
+module.exports.mappers = mappers;
+module.exports.getAttributeType = getAttributeType;
+module.exports.getAttributeModifiers = getAttributeModifiers;
