@@ -4,7 +4,6 @@ import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import getRelationType from '../../../utils/getRelationType';
 import toRegressedEnumValue from '../../../utils/toRegressedEnumValue';
-import startsWithANumber from '../../../utils/startsWithANumber';
 import {
   alreadyUsedAttributeNames,
   createTextShape,
@@ -169,9 +168,9 @@ const types = {
           test: values => !values.some(val => val === ''),
         })
         .test({
-          name: 'doesNotStartWithANumber',
-          message: getTrad('error.validation.enum-number'),
-          test: values => !values.some(startsWithANumber),
+          name: 'doesMatchRegex',
+          message: getTrad('error.validation.enum-regex'),
+          test: values => values.map(toRegressedEnumValue).every(value => ENUM_REGEX.test(value)),
         }),
       enumName: yup.string().nullable(),
     };
