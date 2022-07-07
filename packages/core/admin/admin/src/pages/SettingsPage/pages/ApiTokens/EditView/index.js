@@ -297,7 +297,11 @@ const ApiTokenCreateView = () => {
                               `${formatMessage({
                                 id: 'Settings.apiTokens.duration.expiration-date',
                                 defaultMessage: 'Expiration date',
-                              })}: ${getDateOfExpiration(apiToken?.createdAt, values.duration)}`}
+                              })}: ${getDateOfExpiration(
+                                apiToken?.createdAt,
+                                values.duration,
+                                localStorage.getItem('strapi-admin-language')
+                              )}`}
                           </Typography>
                         </GridItem>
                         <GridItem key="type" col={6} xs={12}>
