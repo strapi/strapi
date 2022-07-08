@@ -650,21 +650,13 @@
     "@babel/helper-plugin-utils" "^7.16.7"
     "@babel/plugin-syntax-dynamic-import" "^7.8.3"
 
-"@babel/plugin-proposal-export-default-from@7.16.7":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-export-default-from/-/plugin-proposal-export-default-from-7.16.7.tgz#a40ab158ca55627b71c5513f03d3469026a9e929"
-  integrity sha512-+cENpW1rgIjExn+o5c8Jw/4BuH4eGKKYvkMB8/0ZxFQ9mC0t4z09VsPIwNg6waF69QYC81zxGeAsREGuqQoKeg==
+"@babel/plugin-proposal-export-default-from@7.18.6", "@babel/plugin-proposal-export-default-from@^7.12.1":
+  version "7.18.6"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-export-default-from/-/plugin-proposal-export-default-from-7.18.6.tgz#121b3ba0152d0020865bc86271c8150e5115abc7"
+  integrity sha512-oTvzWB16T9cB4j5kX8c8DuUHo/4QtR2P9vnUNKed9xqFP8Jos/IRniz1FiIryn6luDYoltDJSYF7RCpbm2doMg==
   dependencies:
-    "@babel/helper-plugin-utils" "^7.16.7"
-    "@babel/plugin-syntax-export-default-from" "^7.16.7"
-
-"@babel/plugin-proposal-export-default-from@^7.12.1":
-  version "7.17.12"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-export-default-from/-/plugin-proposal-export-default-from-7.17.12.tgz#df785e638618d8ffa14e08c78c44d9695d083b73"
-  integrity sha512-LpsTRw725eBAXXKUOnJJct+SEaOzwR78zahcLuripD2+dKc2Sj+8Q2DzA+GC/jOpOu/KlDXuxrzG214o1zTauQ==
-  dependencies:
-    "@babel/helper-plugin-utils" "^7.17.12"
-    "@babel/plugin-syntax-export-default-from" "^7.16.7"
+    "@babel/helper-plugin-utils" "^7.18.6"
+    "@babel/plugin-syntax-export-default-from" "^7.18.6"
 
 "@babel/plugin-proposal-export-namespace-from@^7.16.7":
   version "7.16.7"
@@ -897,12 +889,12 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.8.0"
 
-"@babel/plugin-syntax-export-default-from@^7.16.7":
-  version "7.16.7"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-export-default-from/-/plugin-syntax-export-default-from-7.16.7.tgz#fa89cf13b60de2c3f79acdc2b52a21174c6de060"
-  integrity sha512-4C3E4NsrLOgftKaTYTULhHsuQrGv3FHrBzOMDiS7UYKIpgGBkAdawg4h+EI8zPeK9M0fiIIh72hIwsI24K7MbA==
+"@babel/plugin-syntax-export-default-from@^7.18.6":
+  version "7.18.6"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-export-default-from/-/plugin-syntax-export-default-from-7.18.6.tgz#8df076711a4818c4ce4f23e61d622b0ba2ff84bc"
+  integrity sha512-Kr//z3ujSVNx6E9z9ih5xXXMqK07VVTuqPmqGe6Mss/zW5XPeLZeSDZoP9ab/hT4wPKqAgjl2PnhPrcpk8Seew==
   dependencies:
-    "@babel/helper-plugin-utils" "^7.16.7"
+    "@babel/helper-plugin-utils" "^7.18.6"
 
 "@babel/plugin-syntax-export-namespace-from@^7.8.3":
   version "7.8.3"
