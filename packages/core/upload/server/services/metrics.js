@@ -11,7 +11,7 @@ module.exports = ({ strapi }) => {
   let running = false;
 
   return {
-    async computeMetrics() {
+    async computeWeeklyMetrics() {
       // Folder metrics
       const pathColName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
       const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
@@ -45,13 +45,14 @@ module.exports = ({ strapi }) => {
           maxDepth = folderLevel.depth;
         }
       }
-      const averageDepth = product / folderNumber;
+      const averageDepth = folderNumber !== 0 ? product / folderNumber : 0;
 
       let sumOfDeviation = 0;
       for (const folderLevel of folderLevelsArray) {
-        sumOfDeviation += Math.abs(folderLevel.depth * folderLevel.occurence - averageDepth);
+        sumOfDeviation += Math.abs(folderLevel.depth - averageDepth) * folderLevel.occurence;
       }
-      const averageDeviationDepth = sumOfDeviation / folderNumber;
+
+      const averageDeviationDepth = folderNumber !== 0 ? sumOfDeviation / folderNumber : 0;
 
       // File metrics
       const assetNumber = await strapi.entityService.count(FILE_MODEL_UID);
@@ -72,7 +73,7 @@ module.exports = ({ strapi }) => {
       running = true;
 
       const pingCron = scheduleJob(getCronRandomWeekly(), async () => {
-        const metrics = await this.computeMetrics();
+        const metrics = await this.computeWeeklyMetrics();
         strapi.telemetry.send('didSendUploadPropertiesOnceAWeek', metrics);
       });
 
