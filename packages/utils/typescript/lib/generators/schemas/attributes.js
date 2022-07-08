@@ -22,7 +22,7 @@ const attributeToPropertySignature = (schema, attributeName, attribute) => {
     return null;
   }
 
-  const modifiers = getAttributeModifiers(attributeName, attribute);
+  const modifiers = getAttributeModifiers(attribute);
 
   const nodes = [baseType, ...modifiers];
 
@@ -61,11 +61,10 @@ const getAttributeType = (attributeName, attribute, uid) => {
 /**
  * Collect every modifier node from an attribute
  *
- * @param {string} _attributeName
  * @param {object} attribute
  * @returns {object[]}
  */
-const getAttributeModifiers = (_attributeName, attribute) => {
+const getAttributeModifiers = attribute => {
   const modifiers = [];
 
   // Required
@@ -112,6 +111,7 @@ const getAttributeModifiers = (_attributeName, attribute) => {
   }
 
   // Min / Max
+  // TODO: Always provide a second type argument for min/max (ie: resolve the attribute scalar type with a `GetAttributeType<${mappers[attribute][0]}>` (useful for biginter (string values)))
   if (!_.isNil(attribute.min) || !_.isNil(attribute.max)) {
     addImport('SetMinMax');
 
@@ -223,11 +223,7 @@ const mappers = {
   enumeration({ attribute }) {
     const { enum: enumValues } = attribute;
 
-    if (Array.isArray(enumValues)) {
-      return ['EnumerationAttribute', [toTypeLiteral(enumValues)]];
-    }
-
-    return ['EnumerationAttribute'];
+    return ['EnumerationAttribute', [toTypeLiteral(enumValues)]];
   },
   boolean() {
     return ['BooleanAttribute'];
