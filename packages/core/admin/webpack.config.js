@@ -38,10 +38,6 @@ module.exports = ({
 
   const webpackPlugins = isProduction
     ? [
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^\.\/locale$/,
-          contextRegExp: /moment$/,
-        }),
         new MiniCssExtractPlugin({
           filename: '[name].[chunkhash].css',
           chunkFilename: '[name].[chunkhash].chunkhash.css',
