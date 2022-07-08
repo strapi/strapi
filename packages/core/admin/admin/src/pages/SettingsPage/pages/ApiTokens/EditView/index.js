@@ -9,6 +9,7 @@ import {
   useTracking,
   useGuidedTour,
   Link,
+  usePersistentState,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -43,6 +44,7 @@ const ApiTokenCreateView = () => {
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
+  const [lang] = usePersistentState('strapi-admin-language', 'en');
 
   const {
     params: { id },
@@ -300,7 +302,7 @@ const ApiTokenCreateView = () => {
                               })}: ${getDateOfExpiration(
                                 apiToken?.createdAt,
                                 values.duration,
-                                localStorage.getItem('strapi-admin-language')
+                                lang
                               )}`}
                           </Typography>
                         </GridItem>
