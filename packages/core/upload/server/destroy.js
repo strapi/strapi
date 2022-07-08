@@ -3,5 +3,5 @@
 const { getService } = require('./utils');
 
 module.exports = () => {
-  getService('metrics').destroy();
+  getService('metrics').stopRegularMetricsUpdate();
 };

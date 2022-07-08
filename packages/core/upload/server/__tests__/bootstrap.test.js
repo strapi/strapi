@@ -35,7 +35,13 @@ describe('Upload plugin bootstrap function', () => {
         },
       },
       plugins: {
-        upload: {},
+        upload: {
+          services: {
+            metrics: {
+              startRegularMetricsUpdate() {},
+            },
+          },
+        },
       },
       plugin() {
         return {};

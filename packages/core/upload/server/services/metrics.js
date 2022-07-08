@@ -8,7 +8,7 @@ const getCronRandomWeekly = () => `${rand(60)} ${rand(60)} ${rand(24)} * * ${ran
 
 module.exports = ({ strapi }) => {
   const crons = [];
-  let started = false;
+  let running = false;
 
   return {
     async computeMetrics() {
@@ -66,10 +66,10 @@ module.exports = ({ strapi }) => {
     },
 
     async startRegularMetricsUpdate() {
-      if (started) {
-        throw new Error('Upload metrics already started');
+      if (running) {
+        throw new Error('Regular metrics updates are already running');
       }
-      started = true;
+      running = true;
 
       const pingCron = scheduleJob(getCronRandomWeekly(), async () => {
         const metrics = await this.computeMetrics();
@@ -79,8 +79,9 @@ module.exports = ({ strapi }) => {
       crons.push(pingCron);
     },
 
-    destroy() {
+    stopRegularMetricsUpdate() {
       crons.forEach(cron => cron.cancel());
+      running = false;
     },
   };
 };
