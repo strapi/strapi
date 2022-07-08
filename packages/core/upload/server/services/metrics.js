@@ -4,7 +4,7 @@ const { scheduleJob } = require('node-schedule');
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 
 const rand = max => Math.floor(Math.random() * max);
-const getCronRandomHour = () => `${rand(60)} ${rand(60)} ${rand(24)} ${rand(7)} * *`;
+const getCronRandomWeekly = () => `${rand(60)} ${rand(60)} ${rand(24)} * * ${rand(7)}`;
 
 module.exports = ({ strapi }) => {
   const crons = [];
@@ -71,9 +71,9 @@ module.exports = ({ strapi }) => {
       }
       started = true;
 
-      const pingCron = scheduleJob(getCronRandomHour(), async () => {
+      const pingCron = scheduleJob(getCronRandomWeekly(), async () => {
         const metrics = await this.computeMetrics();
-        strapi.telemetry.send('mediaLibraryMetrics', metrics);
+        strapi.telemetry.send('didSendUploadPropertiesOnceAWeek', metrics);
       });
 
       crons.push(pingCron);
