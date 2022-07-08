@@ -29,7 +29,7 @@ const languageNativeNames = {
   'zh-Hans': '中文 (简体)',
   zh: '中文 (繁體)',
   sa: 'संस्कृत',
-  hi:'हिन्दी',
+  hi: 'हिन्दी',
 };
 
 export default languageNativeNames;
