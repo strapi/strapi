@@ -34,7 +34,7 @@ module.exports = {
             }
 
             // set the bucket file url
-            file.url = data.Location;
+            file.url = config.publicURL ? new URL(data.Key, config.publicURL).toString() : data.Location;
 
             resolve();
           }
