@@ -43,7 +43,7 @@
     "@babel/preset-react": "7.18.6",
     "@babel/runtime": "7.16.7",
     "@casl/ability": "^5.4.3",
-    "@fingerprintjs/fingerprintjs": "3.3.2",
+    "@fingerprintjs/fingerprintjs": "3.3.3",
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
