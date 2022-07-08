@@ -209,6 +209,76 @@ describe('ADMIN | StrapiApp', () => {
     });
   });
 
+  describe('Custom fields api', () => {
+    it('should register a custom field', () => {
+      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const field = {
+        name: 'pluginCustomField',
+        pluginId: 'myplugin',
+        type: 'text',
+        icon: jest.fn(),
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      app.customFields.register(field);
+      const namespace = 'plugin::myplugin.pluginCustomField';
+      expect(app.customFields.customFields[namespace]).toEqual(field);
+    });
+
+    it('should register a custom field without pluginId', () => {
+      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const field = {
+        name: 'appCustomField',
+        type: 'text',
+        icon: jest.fn(),
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      app.customFields.register(field);
+      const namespace = 'global::global.appCustomField';
+      expect(app.customFields.customFields[namespace]).toEqual(field);
+    });
+
+    it('should prevent registering same custom field twice', () => {
+      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const field = {
+        name: 'redundantCustomField',
+        pluginId: 'myplugin',
+        type: 'text',
+        icon: jest.fn(),
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      // Second register call should throw
+      app.customFields.register(field);
+      expect(() => app.customFields.register(field)).toThrowError(
+        /a similar custom field already exists/i
+      );
+    });
+
+    it('should prevent registering incomplete custom field', () => {
+      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const field = {
+        name: 'incompleteCustomField',
+        pluginId: 'myplugin',
+      };
+
+      expect(() => app.customFields.register(field)).toThrowError(/(a|an) .* must be provided/i);
+    });
+  });
+
   describe('Menu api', () => {
     it('the menu should be defined', () => {
       const app = StrapiApp({ middlewares, reducers, library, customFields });

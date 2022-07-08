@@ -8,6 +8,7 @@ class CustomFields {
   register(customField) {
     const { name, pluginId, type, intlLabel, intlDescription, components } = customField;
 
+    // Ensure required attributes are provided
     invariant(name, 'A name must be provided');
     invariant(type, 'A type must be provided');
     invariant(intlLabel, 'An intlLabel must be provided');
@@ -17,6 +18,12 @@ class CustomFields {
 
     // When no plugin is specified, default to the global namespace
     const namespace = pluginId ? `plugin::${pluginId}.${name}` : `global::global.${name}`;
+
+    // if (this.customFields[namespace] != null) {
+    //   throw Error('already exists');
+    // }
+    // Ensure the namespace is unique
+    invariant(this.customFields[namespace] === undefined, 'A similar custom field already exists');
 
     this.customFields[namespace] = customField;
   }
