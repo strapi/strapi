@@ -1,13 +1,18 @@
 'use strict';
 
 const { Job } = require('node-schedule');
-const { isFunction } = require('lodash/fp');
+const { isFunction, forEach } = require('lodash/fp');
 
 const createCronService = () => {
-  let jobsSpecs = [];
+  let jobsSpecsMap = {};
 
   return {
-    add(tasks = {}) {
+    add(tasks = {}, namespace) {
+      if (!namespace) {
+        throw new Error('Tasks should be attached to a namespace.');
+      }
+      jobsSpecsMap[namespace] = jobsSpecsMap[namespace] || [];
+
       for (const taskExpression in tasks) {
         const taskValue = tasks[taskExpression];
 
@@ -28,24 +33,42 @@ const createCronService = () => {
         const fnWithStrapi = (...args) => fn({ strapi }, ...args);
 
         const job = new Job(null, fnWithStrapi);
-        jobsSpecs.push({ job, options });
+        jobsSpecsMap[namespace].push({ job, options });
       }
       return this;
     },
-    start() {
-      if (!strapi.config.get('server.cron.enabled')) {
-        return;
+
+    start(namespace) {
+      if (namespace && !jobsSpecsMap[namespace]) {
+        throw new Error('namespace not found');
       }
-      jobsSpecs.forEach(({ job, options }) => job.schedule(options));
+
+      if (!namespace) {
+        forEach(jobs => jobs.forEach(({ job, options }) => job.schedule(options)))(jobsSpecsMap);
+        return this;
+      }
+
+      jobsSpecsMap[namespace].forEach(({ job, options }) => job.schedule(options));
       return this;
     },
-    stop() {
-      jobsSpecs.forEach(({ job }) => job.cancel());
+
+    stop(namespace) {
+      if (namespace && !jobsSpecsMap[namespace]) {
+        throw new Error('namespace not found');
+      }
+
+      if (!namespace) {
+        forEach(jobs => jobs.forEach(({ job }) => job.cancel()))(jobsSpecsMap);
+        return this;
+      }
+
+      jobsSpecsMap[namespace].forEach(({ job }) => job.cancel());
       return this;
     },
+
     destroy() {
       this.stop();
-      jobsSpecs = [];
+      jobsSpecsMap = {};
       return this;
     },
   };
