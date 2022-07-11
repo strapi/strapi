@@ -15,7 +15,7 @@ describe('WorkerQueue', () => {
 
     q.enqueue(input);
 
-    process.nextTick(() => {
+    setTimeout(() => {
       expect(fn).toHaveBeenCalledWith(input);
       expect(fn).toHaveBeenCalledTimes(1);
     });
@@ -35,7 +35,7 @@ describe('WorkerQueue', () => {
     q.enqueue(input);
     q.enqueue(input);
 
-    process.nextTick(() => {
+    setTimeout(() => {
       expect(fn).toHaveBeenCalledWith(input);
       expect(fn).toHaveBeenCalledTimes(3);
     });
