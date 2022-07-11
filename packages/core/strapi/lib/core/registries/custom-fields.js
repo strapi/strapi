@@ -14,11 +14,11 @@ const customFieldsRegistry = strapi => {
       const customFieldList = Array.isArray(customField) ? customField : [customField];
 
       for (const cf of customFieldList) {
-        const { name, plugin, type } = cf;
-        if (!name || !type) {
+        if (!has('name', cf) || !has('type', cf)) {
           throw new Error(`Custom fields require a 'name' and 'type' key`);
         }
 
+        const { name, plugin, type } = cf;
         if (!has(type, validators)) {
           throw new Error(`Custom field type: '${type}' is not a valid Strapi type`);
         }
