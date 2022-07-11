@@ -19,9 +19,6 @@ class CustomFields {
     // When no plugin is specified, default to the global namespace
     const namespace = pluginId ? `plugin::${pluginId}.${name}` : `global::global.${name}`;
 
-    // if (this.customFields[namespace] != null) {
-    //   throw Error('already exists');
-    // }
     // Ensure the namespace is unique
     invariant(this.customFields[namespace] === undefined, 'A similar custom field already exists');
 
