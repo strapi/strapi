@@ -1,6 +1,6 @@
 'use strict';
 
-const customFieldRegistry = require('../custom-fields');
+const customFieldsRegistry = require('../custom-fields');
 
 const strapi = {
   plugins: { plugintest: 'foo' },
@@ -15,7 +15,7 @@ describe('Custom fields registry', () => {
       type: 'text',
     };
 
-    const customFields = customFieldRegistry(strapi);
+    const customFields = customFieldsRegistry(strapi);
     customFields.add(mockCF);
 
     const expected = {
@@ -30,7 +30,7 @@ describe('Custom fields registry', () => {
       type: 'text',
     };
 
-    const customFields = customFieldRegistry(strapi);
+    const customFields = customFieldsRegistry(strapi);
     customFields.add(mockCF);
 
     const expected = {
@@ -44,7 +44,7 @@ describe('Custom fields registry', () => {
       type: 'test',
     };
 
-    const customFields = customFieldRegistry(strapi);
+    const customFields = customFieldsRegistry(strapi);
 
     expect(() => customFields.add(mockCF)).toThrowError(
       `Custom fields require a 'name' and 'type' key`
@@ -56,7 +56,7 @@ describe('Custom fields registry', () => {
       name: 'test',
     };
 
-    const customFields = customFieldRegistry(strapi);
+    const customFields = customFieldsRegistry(strapi);
 
     expect(() => customFields.add(mockCF)).toThrowError(
       `Custom fields require a 'name' and 'type' key`
@@ -69,7 +69,7 @@ describe('Custom fields registry', () => {
       type: 'text',
     };
 
-    const customFields = customFieldRegistry(strapi);
+    const customFields = customFieldsRegistry(strapi);
 
     expect(() => customFields.add(mockCF)).toThrowError(
       `Custom field name: 'test.boom' is not a valid object key`
@@ -82,7 +82,7 @@ describe('Custom fields registry', () => {
       type: 'geojson',
     };
 
-    const customFields = customFieldRegistry(strapi);
+    const customFields = customFieldsRegistry(strapi);
 
     expect(() => customFields.add(mockCF)).toThrowError(
       `Custom field type: 'geojson' is not a valid Strapi type`
@@ -96,7 +96,7 @@ describe('Custom fields registry', () => {
       type: 'text',
     };
 
-    const customFields = customFieldRegistry(strapi);
+    const customFields = customFieldsRegistry(strapi);
 
     customFields.add(mockCF);
     expect(() => customFields.add(mockCF)).toThrowError(
