@@ -21,6 +21,7 @@ const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const createAuth = require('./services/auth');
+const createCustomFields = require('./services/custom-fields');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
 const ee = require('./utils/ee');
@@ -142,7 +143,7 @@ class Strapi {
   }
 
   get customFields() {
-    return this.container.get('custom-fields');
+    return createCustomFields(this);
   }
 
   get hooks() {
