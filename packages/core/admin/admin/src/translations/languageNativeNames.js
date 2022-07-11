@@ -7,6 +7,7 @@ const languageNativeNames = {
   en: 'English',
   es: 'Español',
   fr: 'Français',
+  gu: 'Gujarati',
   he: 'עברית',
   hu: 'Magyar',
   id: 'Indonesian',
