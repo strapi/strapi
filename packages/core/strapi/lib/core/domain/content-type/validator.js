@@ -61,7 +61,7 @@ const contentTypeSchemaValidator = yup.object().shape({
 
             // should match the GraphQL regex
             if (!regressedValues.every(value => GRAPHQL_ENUM_REGEX.test(value))) {
-              const message = `Invalid enumervarion value. Values should always have an alphabetical character preceding any number. Update your enumeration '${attrName}'.`;
+              const message = `Invalid enumeration value. Values should start with an alphabetical character preceeding the first occurence of a number. Update your enumeration '${attrName}'.`;
 
               return this.createError({ message });
             }
@@ -79,7 +79,7 @@ const contentTypeSchemaValidator = yup.object().shape({
             );
 
             if (duplicates.length) {
-              const message = `Some enum values of the field '${attrName}' collide when normalized: ${duplicates.join(
+              const message = `Some enumeration values of the field '${attrName}' collide when normalized: ${duplicates.join(
                 ', '
               )}. Please modify your enumeration.`;
 
