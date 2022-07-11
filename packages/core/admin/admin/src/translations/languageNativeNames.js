@@ -14,6 +14,7 @@ const languageNativeNames = {
   it: 'Italiano',
   ja: '日本語',
   ko: '한국어',
+  ml: 'Malayalam',
   ms: 'Melayu',
   nl: 'Nederlands',
   no: 'Norwegian',
