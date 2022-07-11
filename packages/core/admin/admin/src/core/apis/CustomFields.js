@@ -20,7 +20,8 @@ class CustomFields {
     const namespace = pluginId ? `plugin::${pluginId}.${name}` : `global::global.${name}`;
 
     // Ensure the namespace is unique
-    invariant(this.customFields[namespace] === undefined, 'A similar custom field already exists');
+    const namespaceAlreadyUsed = Object.prototype.hasOwnProperty.call(this.customFields, namespace);
+    invariant(!namespaceAlreadyUsed, 'A similar custom field already exists');
 
     this.customFields[namespace] = customField;
   }
