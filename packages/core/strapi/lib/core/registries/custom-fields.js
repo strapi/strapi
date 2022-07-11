@@ -1,42 +1,45 @@
 'use strict';
 
 const { has } = require('lodash/fp');
+const validators = require('../../services/entity-validator/validators');
 
-const customFieldsRegistry = () => {
+const customFieldsRegistry = strapi => {
   const customFields = {};
 
   return {
     getAll() {
       return customFields;
     },
-    register(customField) {
-      const registerCustomField = customField => {
-        const { name, plugin, type } = customField;
+    add(customField) {
+      const customFieldList = Array.isArray(customField) ? customField : [customField];
+
+      for (const cf of customFieldList) {
+        const { name, plugin, type } = cf;
         if (!name || !type) {
-          throw new Error(`Custom fields require a 'name' and 'type' property`);
+          throw new Error(`Custom fields require a 'name' and 'type' key`);
         }
+
+        if (!has(type, validators)) {
+          throw new Error(`Custom field type: '${type}' is not a valid Strapi type`);
+        }
+
+        const isValidObjectKey = /^(?![0-9])[a-zA-Z0-9$_-]+$/g;
+        if (!isValidObjectKey.test(name)) {
+          throw new Error(`Custom field name: '${name}' is not a valid object key`);
+        }
+
         // When no plugin is specified, or it isn't found in Strapi,
         // default to the global namespace using the parent application's uuid
         const namespace = strapi.plugin(plugin)
           ? `plugin::${plugin}.${name}`
-          : `global::${strapi.config.uuid}.${name}`;
+          : `global::global.${name}`;
 
         if (has(namespace, customFields)) {
-          throw new Error(`Custom field '${namespace}' has already been registered.`);
+          throw new Error(`Custom field: '${namespace}' has already been registered`);
         }
 
-        customFields[namespace] = customField;
-      };
-
-      if (Array.isArray(customField)) {
-        for (const cf of customField) {
-          registerCustomField(cf);
-        }
-
-        return;
+        customFields[namespace] = cf;
       }
-
-      return registerCustomField(customField);
     },
   };
 };
