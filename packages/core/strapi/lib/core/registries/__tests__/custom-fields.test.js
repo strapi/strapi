@@ -7,7 +7,7 @@ const strapi = {
   plugin: jest.fn(plugin => strapi.plugins[plugin]),
 };
 
-describe('custom fields', () => {
+describe('Custom fields registry', () => {
   it('adds a custom field registered in a plugin', () => {
     const mockCF = {
       name: 'test',
