@@ -28,8 +28,7 @@ const customFieldsRegistry = strapi => {
           throw new Error(`Custom field name: '${name}' is not a valid object key`);
         }
 
-        // When no plugin is specified, or it isn't found in Strapi,
-        // default to the global namespace using the parent application's uuid
+        // When no plugin is specified, or it isn't found in Strapi, default to global
         const namespace = strapi.plugin(plugin)
           ? `plugin::${plugin}.${name}`
           : `global::global.${name}`;
