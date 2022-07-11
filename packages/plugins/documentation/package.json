@@ -42,7 +42,7 @@
     "react-router-dom": "5.2.0",
     "redux": "^4.0.1",
     "reselect": "^4.0.0",
-    "swagger-ui-dist": "4.11.1",
+    "swagger-ui-dist": "4.12.0",
     "yaml": "1.10.2"
   },
   "peerDependencies": {
