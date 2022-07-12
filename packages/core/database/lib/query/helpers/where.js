@@ -13,7 +13,7 @@ const OPERATORS = [
   '$in',
   '$notIn',
   '$eq',
-  '$eqsi',
+  '$eqi',
   '$ne',
   '$gt',
   '$gte',
@@ -223,7 +223,7 @@ const applyOperator = (qb, column, operator, value) => {
       break;
     }
 
-    case '$eqsi': {
+    case '$eqi': {
       if (value === null) {
         qb.whereNull(column);
         break;

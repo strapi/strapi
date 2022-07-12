@@ -168,14 +168,14 @@ describe('Filtering API', () => {
       });
     });
     describe('Filter equals with case insensitive', () => {
-      test('Should be usable with eqsi suffix', async () => {
+      test('Should be usable with eqi suffix', async () => {
         const res = await rq({
           method: 'GET',
           url: '/products',
           qs: {
             filters: {
               name: {
-                $eqsi: 'PRODuct 1',
+                $eqi: 'PRODuct 1',
               },
             },
           },
@@ -192,7 +192,7 @@ describe('Filtering API', () => {
           qs: {
             filters: {
               name: {
-                $eqsi: 'Product non existant',
+                $eqi: 'Product non existant',
               },
             },
           },
