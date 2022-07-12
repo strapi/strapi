@@ -264,7 +264,25 @@ describe('ADMIN | StrapiApp', () => {
       // Second register call should throw
       app.customFields.register(field);
       expect(() => app.customFields.register(field)).toThrowError(
-        /a similar custom field already exists/i
+        "Custom field: 'plugin::myplugin.redundantCustomField' has already been registered"
+      );
+    });
+
+    it('should validate the name can be used as an object key', () => {
+      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const field = {
+        name: 'test.boom',
+        pluginId: 'myplugin',
+        type: 'text',
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      expect(() => app.customFields.register(field)).toThrowError(
+        "Custom field name: 'test.boom' is not a valid object key"
       );
     });
 

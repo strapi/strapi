@@ -16,12 +16,19 @@ class CustomFields {
     invariant(components, 'A components object must be provided');
     invariant(components.Input, 'An Input component must be provided');
 
+    // Ensure name has no special characters
+    const isValidObjectKey = /^(?![0-9])[a-zA-Z0-9$_-]+$/g;
+    invariant(
+      isValidObjectKey.test(name),
+      `Custom field name: '${name}' is not a valid object key`
+    );
+
     // When no plugin is specified, default to the global namespace
     const uid = pluginId ? `plugin::${pluginId}.${name}` : `global::${name}`;
 
-    // Ensure the namespace is unique
+    // Ensure the uid is unique
     const uidAlreadyUsed = Object.prototype.hasOwnProperty.call(this.customFields, uid);
-    invariant(!uidAlreadyUsed, 'A similar custom field already exists');
+    invariant(!uidAlreadyUsed, `Custom field: '${uid}' has already been registered`);
 
     this.customFields[uid] = customField;
   }
