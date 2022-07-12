@@ -229,6 +229,38 @@ describe('ADMIN | StrapiApp', () => {
       expect(app.customFields.customFields[uid]).toEqual(field);
     });
 
+    it('should register several custom fields at once', () => {
+      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const fields = [
+        {
+          name: 'field1',
+          pluginId: 'myplugin',
+          type: 'text',
+          icon: jest.fn(),
+          intlLabel: { id: 'foo', defaultMessage: 'foo' },
+          intlDescription: { id: 'foo', defaultMessage: 'foo' },
+          components: {
+            Input: jest.fn(),
+          },
+        },
+        {
+          name: 'field2',
+          pluginId: 'myplugin',
+          type: 'text',
+          icon: jest.fn(),
+          intlLabel: { id: 'foo', defaultMessage: 'foo' },
+          intlDescription: { id: 'foo', defaultMessage: 'foo' },
+          components: {
+            Input: jest.fn(),
+          },
+        },
+      ];
+
+      app.customFields.register(fields);
+      expect(app.customFields.customFields['plugin::myplugin.field1']).toEqual(fields[0]);
+      expect(app.customFields.customFields['plugin::myplugin.field2']).toEqual(fields[1]);
+    });
+
     it('should register a custom field without pluginId', () => {
       const app = StrapiApp({ middlewares, reducers, library, customFields });
       const field = {
