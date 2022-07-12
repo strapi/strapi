@@ -225,8 +225,8 @@ describe('ADMIN | StrapiApp', () => {
       };
 
       app.customFields.register(field);
-      const namespace = 'plugin::myplugin.pluginCustomField';
-      expect(app.customFields.customFields[namespace]).toEqual(field);
+      const uid = 'plugin::myplugin.pluginCustomField';
+      expect(app.customFields.customFields[uid]).toEqual(field);
     });
 
     it('should register a custom field without pluginId', () => {
@@ -243,8 +243,8 @@ describe('ADMIN | StrapiApp', () => {
       };
 
       app.customFields.register(field);
-      const namespace = 'global::global.appCustomField';
-      expect(app.customFields.customFields[namespace]).toEqual(field);
+      const uid = 'global::appCustomField';
+      expect(app.customFields.customFields[uid]).toEqual(field);
     });
 
     it('should prevent registering same custom field twice', () => {

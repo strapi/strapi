@@ -17,13 +17,13 @@ class CustomFields {
     invariant(components.Input, 'An Input component must be provided');
 
     // When no plugin is specified, default to the global namespace
-    const namespace = pluginId ? `plugin::${pluginId}.${name}` : `global::global.${name}`;
+    const uid = pluginId ? `plugin::${pluginId}.${name}` : `global::${name}`;
 
     // Ensure the namespace is unique
-    const namespaceAlreadyUsed = Object.prototype.hasOwnProperty.call(this.customFields, namespace);
-    invariant(!namespaceAlreadyUsed, 'A similar custom field already exists');
+    const uidAlreadyUsed = Object.prototype.hasOwnProperty.call(this.customFields, uid);
+    invariant(!uidAlreadyUsed, 'A similar custom field already exists');
 
-    this.customFields[namespace] = customField;
+    this.customFields[uid] = customField;
   }
 }
 
