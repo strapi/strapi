@@ -29,15 +29,13 @@ const customFieldsRegistry = strapi => {
         }
 
         // When no plugin is specified, or it isn't found in Strapi, default to global
-        const namespace = strapi.plugin(plugin)
-          ? `plugin::${plugin}.${name}`
-          : `global::global.${name}`;
+        const uid = strapi.plugin(plugin) ? `plugin::${plugin}.${name}` : `global::${name}`;
 
-        if (has(namespace, customFields)) {
-          throw new Error(`Custom field: '${namespace}' has already been registered`);
+        if (has(uid, customFields)) {
+          throw new Error(`Custom field: '${uid}' has already been registered`);
         }
 
-        customFields[namespace] = cf;
+        customFields[uid] = cf;
       }
     },
   };
