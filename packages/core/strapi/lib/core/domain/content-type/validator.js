@@ -24,7 +24,18 @@ const LIFECYCLES = [
   'afterDeleteMany',
 ];
 
-// See GraphQL Spec https://spec.graphql.org/June2018/#sec-Names
+/**
+ * For enumerations the least common denomiator is GraphQL, where
+ * values needs to match the secure name regex:
+ * GraphQL Spec https://spec.graphql.org/June2018/#sec-Names
+ *
+ * Therefore we need to make sure our users only use values, which
+ * can be returned by GraphQL, by checking the regressed values
+ * agains the GraphQL regex.
+ *
+ * TODO V5: check if we can avoid this coupling by moving this logic
+ * into the GraphQL plugin.
+ */
 const GRAPHQL_ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
 
 const lifecyclesShape = _.mapValues(_.keyBy(LIFECYCLES), () =>
