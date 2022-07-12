@@ -83,6 +83,8 @@ class Strapi {
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
 
+    this.customFields = createCustomFields(this);
+
     createUpdateNotifier(this).notify();
   }
 
@@ -140,10 +142,6 @@ class Strapi {
 
   plugin(name) {
     return this.container.get('plugins').get(name);
-  }
-
-  get customFields() {
-    return createCustomFields(this);
   }
 
   get hooks() {
