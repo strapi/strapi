@@ -2,10 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { stringify } from 'qs';
-import { useLocation } from 'react-router-dom';
+import { useLocation, NavLink } from 'react-router-dom';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { HeaderLayout } from '@strapi/design-system/Layout';
 import { Button } from '@strapi/design-system/Button';
+import { Breadcrumbs, CrumbLink, Crumb } from '@strapi/design-system/v2/Breadcrumbs';
 import { Stack } from '@strapi/design-system/Stack';
 import { Link } from '@strapi/design-system/Link';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
@@ -18,8 +19,6 @@ export const Header = ({
   onToggleEditFolderDialog,
   onToggleUploadAssetDialog,
   folder,
-  assetCount,
-  folderCount,
 }) => {
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
@@ -28,22 +27,29 @@ export const Header = ({
     ...query,
     folder: folder?.parent?.id ?? undefined,
   };
-  const name = folder?.name?.length > 30 ? `${folder.name.slice(0, 30)}...` : folder?.name;
+  const nameCurrentFolder =
+    folder?.name?.length > 30 ? `${folder.name.slice(0, 30)}...` : folder?.name;
+  const nameParentFolder = folder?.parent?.name;
 
   return (
     <HeaderLayout
       title={`${formatMessage({
         id: getTrad('plugin.name'),
         defaultMessage: `Media Library`,
-      })}${name ? ` - ${name}` : ''}`}
-      subtitle={formatMessage(
-        {
-          id: getTrad('header.content.assets'),
-          defaultMessage:
-            '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}',
-        },
-        { numberAssets: assetCount, numberFolders: folderCount }
-      )}
+      })}${nameCurrentFolder ? ` - ${nameCurrentFolder}` : ''}`}
+      subtitle={
+        <Breadcrumbs as="nav" label="Folder navigation">
+          <CrumbLink as={NavLink} to={pathname}>
+            Media Library
+          </CrumbLink>
+          {nameParentFolder && (
+            <CrumbLink as={NavLink} to={`${pathname}?${stringify(backQuery, { encode: false })}`}>
+              {nameParentFolder}
+            </CrumbLink>
+          )}
+          {nameCurrentFolder && <Crumb>{nameCurrentFolder}</Crumb>}
+        </Breadcrumbs>
+      }
       navigationAction={
         folder && (
           <Link
@@ -85,10 +91,8 @@ Header.defaultProps = {
 };
 
 Header.propTypes = {
-  assetCount: PropTypes.number.isRequired,
   canCreate: PropTypes.bool.isRequired,
   folder: FolderDefinition,
-  folderCount: PropTypes.number.isRequired,
   onToggleEditFolderDialog: PropTypes.func.isRequired,
   onToggleUploadAssetDialog: PropTypes.func.isRequired,
 };
