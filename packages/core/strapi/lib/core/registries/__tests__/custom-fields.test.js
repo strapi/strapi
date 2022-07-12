@@ -34,7 +34,7 @@ describe('Custom fields registry', () => {
     customFields.add(mockCF);
 
     const expected = {
-      'global::global.test': mockCF,
+      'global::test': mockCF,
     };
     expect(customFields.getAll()).toEqual(expected);
   });
