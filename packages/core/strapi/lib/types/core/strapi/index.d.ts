@@ -1,4 +1,5 @@
 import type Koa from 'koa';
+import { Database } from '@strapi/database';
 
 import type { StringMap } from './utils';
 import type { GenericController } from '../core-api/controller'
@@ -335,6 +336,26 @@ export interface Strapi {
    * Telemetry util used to collect anonymous data on the application usage
    */
   telemetry: any;
+
+  /**
+   * Strapi DB layer instance
+   */
+  db: Database;
+
+  /**
+   * Core Store accessor
+   */
+  store: any;
+
+  /**
+   * Entity Validator instance
+   */
+  entityValidator: any;
+
+  /**
+   * Entity Service instance
+   */
+  entityService: any;  
 }
 
 export interface Lifecycles {
