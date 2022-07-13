@@ -84,6 +84,9 @@ function App() {
                 event: 'didInitializeAdministration',
                 uuid,
                 deviceId,
+                properties: {
+                  environment: process.env.NODE_ENV
+                }
               }),
               headers: {
                 'Content-Type': 'application/json',
