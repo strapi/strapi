@@ -143,7 +143,7 @@ const ApiTokenCreateView = () => {
           name: apiToken?.name || '',
           description: apiToken?.description || '',
           type: apiToken?.type || 'read-only',
-          duration: apiToken?.duration || '7',
+          duration: apiToken?.duration,
         }}
         onSubmit={handleSubmit}
       >
@@ -253,7 +253,7 @@ const ApiTokenCreateView = () => {
                               id: 'Settings.apiTokens.form.duration',
                               defaultMessage: 'Token duration',
                             })}
-                            value={values.duration}
+                            value={isCreating ? values.duration : '7'}
                             error={
                               errors.duration
                                 ? formatMessage(
@@ -268,6 +268,7 @@ const ApiTokenCreateView = () => {
                             }}
                             required
                             disabled={!isCreating}
+                            placeholder="Select"
                           >
                             <Option value="7">
                               {formatMessage({
@@ -301,7 +302,7 @@ const ApiTokenCreateView = () => {
                                 defaultMessage: 'Expiration date',
                               })}: ${getDateOfExpiration(
                                 apiToken?.createdAt,
-                                values.duration,
+                                values.duration || '7',
                                 lang
                               )}`}
                           </Typography>
