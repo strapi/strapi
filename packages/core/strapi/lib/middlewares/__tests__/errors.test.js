@@ -4,7 +4,7 @@ const koa = require('koa');
 const request = require('supertest');
 
 describe('Errors middleware', () => {
-  test('_explicitStatus still exists', done => {
+  test('_explicitStatus still exists', async () => {
     // Since we are using an internal variable of koa in our code,
     // we check that it doesn't change in newer updates
     const app = new koa();
@@ -16,8 +16,6 @@ describe('Errors middleware', () => {
 
     expect.assertions(1);
 
-    request(app.callback())
-      .get('/')
-      .end(done);
+    await request(app.callback()).get('/');
   });
 });
