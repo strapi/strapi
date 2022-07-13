@@ -19,17 +19,25 @@ export const Header = ({
   onToggleEditFolderDialog,
   onToggleUploadAssetDialog,
   folder,
+  folderParentsArray,
 }) => {
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const [{ query }] = useQueryParams();
+  const [currentFolder, parentFolder, ...rest] = [
+    folderParentsArray.pop(),
+    folderParentsArray.pop(),
+    ...folderParentsArray,
+  ];
+  const nameCurrentFolder =
+    currentFolder?.label?.length > 30
+      ? `${currentFolder.label.slice(0, 30)}...`
+      : currentFolder?.label;
+  const nameParentFolder = parentFolder?.label;
   const backQuery = {
     ...query,
-    folder: folder?.parent?.id ?? undefined,
+    folder: parentFolder?.id ?? undefined,
   };
-  const nameCurrentFolder =
-    folder?.name?.length > 30 ? `${folder.name.slice(0, 30)}...` : folder?.name;
-  const nameParentFolder = folder?.parent?.name;
 
   return (
     <HeaderLayout
@@ -42,12 +50,13 @@ export const Header = ({
           <CrumbLink as={NavLink} to={pathname}>
             Media Library
           </CrumbLink>
-          {nameParentFolder && (
+          {rest.length > 0 && <Crumb>...</Crumb>}
+          {parentFolder && (
             <CrumbLink as={NavLink} to={`${pathname}?${stringify(backQuery, { encode: false })}`}>
               {nameParentFolder}
             </CrumbLink>
           )}
-          {nameCurrentFolder && <Crumb>{nameCurrentFolder}</Crumb>}
+          {currentFolder && <Crumb>{nameCurrentFolder}</Crumb>}
         </Breadcrumbs>
       }
       navigationAction={
@@ -88,11 +97,15 @@ export const Header = ({
 
 Header.defaultProps = {
   folder: null,
+  folderParentsArray: null,
 };
 
 Header.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   folder: FolderDefinition,
+  folderParentsArray: PropTypes.arrayOf(
+    PropTypes.shape({ id: PropTypes.number, label: PropTypes.string })
+  ),
   onToggleEditFolderDialog: PropTypes.func.isRequired,
   onToggleUploadAssetDialog: PropTypes.func.isRequired,
 };

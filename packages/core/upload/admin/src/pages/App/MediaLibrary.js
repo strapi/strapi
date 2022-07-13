@@ -99,8 +99,6 @@ export const MediaLibrary = () => {
 
   const folderParentsArray = getFolderParents(folderStructure?.[0], query?.folder);
 
-  console.log(folderParentsArray);
-
   // Folder was not found: redirect to the media library root
   if (currentFolderError?.response?.status === 404) {
     push(pathname);
@@ -168,7 +166,8 @@ export const MediaLibrary = () => {
           canCreate={canCreate}
           onToggleEditFolderDialog={toggleEditFolderDialog}
           onToggleUploadAssetDialog={toggleUploadAssetDialog}
-          // folder={currentFolder}
+          folder={currentFolder}
+          folderParentsArray={folderParentsArray}
         />
         <ActionLayout
           startActions={
