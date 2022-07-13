@@ -10,6 +10,9 @@ const customFieldsRegistry = strapi => {
     getAll() {
       return customFields;
     },
+    get(customField) {
+      return customFields[customField];
+    },
     add(customField) {
       const customFieldList = Array.isArray(customField) ? customField : [customField];
 
