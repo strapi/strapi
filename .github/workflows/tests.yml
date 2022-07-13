@@ -13,6 +13,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16]
+        shard: ['1/2', '2/2']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -42,7 +43,7 @@ jobs:
         with:
           globalPackages: codecov
       - name: Run tests
-        run: yarn run -s test:unit --coverage && codecov -C -F unit
+        run: yarn run -s test:unit --coverage --shard ${{matrix.shard}} && codecov -C -F unit
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
@@ -65,7 +66,7 @@ jobs:
       - name: Build
         run: yarn build
       - name: Run test
-        run: yarn run -s test:front --coverage && codecov -C -F front
+        run: yarn run -s test:front --coverage --shard ${{matrix.shard}} && codecov -C -F front
 
   e2e_ce_pg:
     runs-on: ubuntu-latest
