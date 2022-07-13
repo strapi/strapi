@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom';
-import { Components, CustomFields, Fields, Middlewares, Reducers } from './core/apis';
+import { Components, Fields, Middlewares, Reducers } from './core/apis';
 import { axiosInstance } from './core/utils';
 import appCustomisations from './app';
 // eslint-disable-next-line import/extensions
@@ -23,7 +23,6 @@ const library = {
 };
 const middlewares = Middlewares();
 const reducers = Reducers({ appReducers });
-const customFields = CustomFields();
 
 const MOUNT_NODE = document.getElementById('app');
 
@@ -58,7 +57,6 @@ const run = async () => {
     bootstrap: customConfig,
     middlewares,
     reducers,
-    customFields,
   });
 
   await app.bootstrapAdmin();

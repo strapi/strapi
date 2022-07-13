@@ -40,6 +40,14 @@ class CustomFields {
       this.customFields[uid] = customFields;
     }
   }
+
+  getAll() {
+    return this.customFields;
+  }
+
+  get(uid) {
+    return this.customFields[uid];
+  }
 }
 
 export default () => new CustomFields();

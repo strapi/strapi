@@ -1,17 +1,16 @@
 import { render } from '@testing-library/react';
 import { fixtures } from '../../../../../admin-test-utils';
-import { Components, CustomFields, Fields } from '../core/apis';
+import { Components, Fields } from '../core/apis';
 import StrapiApp from '../StrapiApp';
 import appReducers from '../reducers';
 
 const library = { fields: Fields(), components: Components() };
 const middlewares = { middlewares: [] };
 const reducers = { reducers: appReducers };
-const customFields = CustomFields();
 
 describe('ADMIN | StrapiApp', () => {
   it('should render the app without plugins', () => {
-    const app = StrapiApp({ middlewares, reducers, library, customFields });
+    const app = StrapiApp({ middlewares, reducers, library });
     const { container } = render(app.render());
 
     expect(container.firstChild).toMatchInlineSnapshot(`
@@ -56,7 +55,7 @@ describe('ADMIN | StrapiApp', () => {
   });
 
   it('should create a valid store', () => {
-    const app = StrapiApp({ middlewares, reducers, library, customFields });
+    const app = StrapiApp({ middlewares, reducers, library });
 
     const store = app.createStore();
 
@@ -65,7 +64,7 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Hook api', () => {
     it('runs the "moto" hooks in series', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -83,7 +82,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in series asynchronously', async () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -101,7 +100,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in waterfall', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -117,7 +116,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in waterfall asynchronously', async () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -133,7 +132,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in parallel', async () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -153,14 +152,14 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Settings api', () => {
     it('the settings should be defined', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       expect(app.settings).toBeDefined();
       expect(app.settings.global).toBeDefined();
     });
 
     it('should creates a new section', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
       const section = { id: 'foo', intlLabel: { id: 'foo', defaultMessage: 'foo' } };
       const links = [
         {
@@ -177,7 +176,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should add a link correctly to the global section', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
       const link = {
         Component: jest.fn(),
         to: '/bar',
@@ -192,7 +191,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should add an array of links correctly to the global section', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
       const links = [
         {
           Component: jest.fn(),
@@ -211,7 +210,7 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Custom fields api', () => {
     it('should register a custom field', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
       const field = {
         name: 'pluginCustomField',
         pluginId: 'myplugin',
@@ -225,12 +224,14 @@ describe('ADMIN | StrapiApp', () => {
       };
 
       app.customFields.register(field);
-      const uid = 'plugin::myplugin.pluginCustomField';
-      expect(app.customFields.customFields[uid]).toEqual(field);
+      expect(app.customFields.get('plugin::myplugin.pluginCustomField')).toEqual(field);
+      expect(app.customFields.getAll()).toEqual({
+        'plugin::myplugin.pluginCustomField': field,
+      });
     });
 
     it('should register several custom fields at once', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
       const fields = [
         {
           name: 'field1',
@@ -257,12 +258,12 @@ describe('ADMIN | StrapiApp', () => {
       ];
 
       app.customFields.register(fields);
-      expect(app.customFields.customFields['plugin::myplugin.field1']).toEqual(fields[0]);
-      expect(app.customFields.customFields['plugin::myplugin.field2']).toEqual(fields[1]);
+      expect(app.customFields.get('plugin::myplugin.field1')).toEqual(fields[0]);
+      expect(app.customFields.get('plugin::myplugin.field2')).toEqual(fields[1]);
     });
 
     it('should register a custom field without pluginId', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
       const field = {
         name: 'appCustomField',
         type: 'text',
@@ -276,11 +277,11 @@ describe('ADMIN | StrapiApp', () => {
 
       app.customFields.register(field);
       const uid = 'global::appCustomField';
-      expect(app.customFields.customFields[uid]).toEqual(field);
+      expect(app.customFields.get(uid)).toEqual(field);
     });
 
     it('should prevent registering same custom field twice', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
       const field = {
         name: 'redundantCustomField',
         pluginId: 'myplugin',
@@ -301,7 +302,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should validate the name can be used as an object key', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
       const field = {
         name: 'test.boom',
         pluginId: 'myplugin',
@@ -319,7 +320,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should prevent registering incomplete custom field', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
       const field = {
         name: 'incompleteCustomField',
         pluginId: 'myplugin',
@@ -331,14 +332,14 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Menu api', () => {
     it('the menu should be defined', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       expect(app.menu).toBeDefined();
       expect(Array.isArray(app.menu)).toBe(true);
     });
 
     it('addMenuLink should add a link to the menu', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
       const link = {
         Component: jest.fn(),
         to: '/plugins/bar',
@@ -354,7 +355,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('addCorePluginMenuLink should add a link to the menu', () => {
-      const app = StrapiApp({ middlewares, reducers, library, customFields });
+      const app = StrapiApp({ middlewares, reducers, library });
       const link = {
         to: '/plugins/content-type-builder',
         icon: () => 'book',

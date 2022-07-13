@@ -8,7 +8,7 @@ import invariant from 'invariant';
 import { Helmet } from 'react-helmet';
 import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
-import { Plugin } from './core/apis';
+import { CustomFields, Plugin } from './core/apis';
 import App from './pages/App';
 import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
 import MenuLogo from './assets/images/logo_strapi_menu.png';
@@ -24,7 +24,7 @@ import injectionZones from './injectionZones';
 import favicon from './favicon.ico';
 
 class StrapiApp {
-  constructor({ adminConfig, appPlugins, library, middlewares, reducers, customFields }) {
+  constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
     this.customConfigurations = adminConfig.config;
     this.customBootstrapConfiguration = adminConfig.bootstrap;
     this.configurations = {
@@ -47,7 +47,7 @@ class StrapiApp {
     this.admin = {
       injectionZones,
     };
-    this.customFields = customFields;
+    this.customFields = CustomFields();
 
     this.menu = [];
     this.settings = {
@@ -281,18 +281,7 @@ class StrapiApp {
 
   async initialize() {
     Object.keys(this.appPlugins).forEach(plugin => {
-      this.appPlugins[plugin].register({
-        addComponents: this.addComponents,
-        addCorePluginMenuLink: this.addCorePluginMenuLink,
-        addFields: this.addFields,
-        addMenuLink: this.addMenuLink,
-        addMiddlewares: this.addMiddlewares,
-        addReducers: this.addReducers,
-        createHook: this.createHook,
-        createSettingSection: this.createSettingSection,
-        registerPlugin: this.registerPlugin,
-        customFields: this.customFields,
-      });
+      this.appPlugins[plugin].register(this);
     });
   }
 
@@ -426,14 +415,13 @@ class StrapiApp {
       components: { components },
       fields: { fields },
     } = this.library;
-    const { customFields } = this.customFields;
 
     return (
       <Providers
         authLogo={this.configurations.authLogo}
         components={components}
         fields={fields}
-        customFields={customFields}
+        customFields={this.customFields}
         localeNames={localeNames}
         getAdminInjectedComponents={this.getAdminInjectedComponents}
         getPlugin={this.getPlugin}
@@ -471,5 +459,5 @@ class StrapiApp {
   }
 }
 
-export default ({ adminConfig = {}, appPlugins, library, middlewares, reducers, customFields }) =>
-  new StrapiApp({ adminConfig, appPlugins, library, middlewares, reducers, customFields });
+export default ({ adminConfig = {}, appPlugins, library, middlewares, reducers }) =>
+  new StrapiApp({ adminConfig, appPlugins, library, middlewares, reducers });
