@@ -34,7 +34,8 @@ import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
-import { getTrad, containsAssetFilter } from '../../utils';
+import { useFolderStructure } from '../../hooks/useFolderStructure';
+import { getTrad, containsAssetFilter, getFolderParents } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useFolder } from '../../hooks/useFolder';
@@ -94,6 +95,12 @@ export const MediaLibrary = () => {
     enabled: canRead && !!query?.folder,
   });
 
+  const { data: folderStructure, isLoading: isFolderStructureLoading } = useFolderStructure();
+
+  const folderParentsArray = getFolderParents(folderStructure?.[0], query?.folder);
+
+  console.log(folderParentsArray);
+
   // Folder was not found: redirect to the media library root
   if (currentFolderError?.response?.status === 404) {
     push(pathname);
@@ -102,7 +109,12 @@ export const MediaLibrary = () => {
   const folderCount = folders?.length || 0;
   const assets = assetsData?.results;
   const assetCount = assets?.length ?? 0;
-  const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
+  const isLoading =
+    isFolderStructureLoading ||
+    isCurrentFolderLoading ||
+    foldersLoading ||
+    permissionsLoading ||
+    assetsLoading;
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
@@ -156,7 +168,7 @@ export const MediaLibrary = () => {
           canCreate={canCreate}
           onToggleEditFolderDialog={toggleEditFolderDialog}
           onToggleUploadAssetDialog={toggleUploadAssetDialog}
-          folder={currentFolder}
+          // folder={currentFolder}
         />
         <ActionLayout
           startActions={
