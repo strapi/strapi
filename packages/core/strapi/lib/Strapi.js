@@ -21,6 +21,7 @@ const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const createAuth = require('./services/auth');
+const createCustomFields = require('./services/custom-fields');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
 const ee = require('./utils/ee');
@@ -32,6 +33,7 @@ const hooksRegistry = require('./core/registries/hooks');
 const controllersRegistry = require('./core/registries/controllers');
 const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
+const customFieldsRegistry = require('./core/registries/custom-fields');
 const createConfigProvider = require('./core/registries/config');
 const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
@@ -63,6 +65,7 @@ class Strapi {
     this.container.register('controllers', controllersRegistry(this));
     this.container.register('modules', modulesRegistry(this));
     this.container.register('plugins', pluginsRegistry(this));
+    this.container.register('custom-fields', customFieldsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
     this.container.register('sanitizers', sanitizersRegistry(this));
@@ -79,6 +82,8 @@ class Strapi {
     this.log = createLogger(this.config.get('logger', {}));
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
+
+    this.customFields = createCustomFields(this);
 
     createUpdateNotifier(this).notify();
   }
