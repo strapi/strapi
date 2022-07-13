@@ -3833,19 +3833,19 @@
     read-package-json-fast "^2.0.3"
     which "^2.0.2"
 
-"@nrwl/cli@14.3.6":
-  version "14.3.6"
-  resolved "https://registry.yarnpkg.com/@nrwl/cli/-/cli-14.3.6.tgz#bf9d36822bbe9db42c250f4151df2b496ae7f13f"
-  integrity sha512-MNCBzM3ZDsujEc5crltH/kEyNBKx6DofLHdpzY1EoiY+yF57W7E1B6ERkVUGDc52sR4snEUKpQLXdVFjwP+z8A==
+"@nrwl/cli@14.4.2":
+  version "14.4.2"
+  resolved "https://registry.yarnpkg.com/@nrwl/cli/-/cli-14.4.2.tgz#5ec1a7a10087ef5bdd5b57bf5e3c5221fb7938e0"
+  integrity sha512-JNV4kP9goZD4BlTQGKdKhCRc1bhiWYp1TaDJHdk4ZfhiLt1NzXNxxgc/eX2obFZ3Hw+KdM/gM5F7KfWBbtSGSw==
   dependencies:
-    nx "14.3.6"
+    nx "14.4.2"
 
-"@nrwl/tao@14.3.6":
-  version "14.3.6"
-  resolved "https://registry.yarnpkg.com/@nrwl/tao/-/tao-14.3.6.tgz#cb9ac487397dd1c399add2fd8564bc6debc0fec4"
-  integrity sha512-g3y6VRq4wNtbFZIclJwRR/1hcTesx6h64g7h80VWtyRw0pVq/0zAjb8abeQSTDLM15uc1pQJYPEfsR/KgI3Sow==
+"@nrwl/tao@14.4.2":
+  version "14.4.2"
+  resolved "https://registry.yarnpkg.com/@nrwl/tao/-/tao-14.4.2.tgz#36b4d133740abdaf5c222b4e732d0d7020c9def5"
+  integrity sha512-Ygw3skKZfFhi4MBHZKQ8A67pDQxeyDdY78tFWViMN0SEn9ExL41Q8V9aSMfir8VZYGca6ZOXX5MRhbeHdcgMLQ==
   dependencies:
-    nx "14.3.6"
+    nx "14.4.2"
 
 "@octokit/auth-token@^2.4.4":
   version "2.5.0"
@@ -17877,13 +17877,13 @@ nwsapi@^2.2.0:
   resolved "https://registry.yarnpkg.com/nwsapi/-/nwsapi-2.2.0.tgz#204879a9e3d068ff2a55139c2c772780681a38b7"
   integrity sha512-h2AatdwYH+JHiZpv7pt/gSX1XoRGb7L/qSIeuqA6GwYoF9w1vP1cw42TO0aI2pNyshRK5893hNSl+1//vHK7hQ==
 
-nx@14.3.6:
-  version "14.3.6"
-  resolved "https://registry.yarnpkg.com/nx/-/nx-14.3.6.tgz#0b30dbe96df2cd62cb68c9d3609e2dc3219b0a20"
-  integrity sha512-jBgqXEkRalo8PwXJzO4HVNN3P5pqyL5VawyNd34qPl+4t2XlDRqoK0J74i8liPGdKPBB1HjM2K1u+QNF2ROvQA==
+nx@14.4.2:
+  version "14.4.2"
+  resolved "https://registry.yarnpkg.com/nx/-/nx-14.4.2.tgz#48ac7f82caccdf26ecd77b76e110c550bcafe7ca"
+  integrity sha512-bYO//HuwQL4X8y+2BjUPtkPLDiYI1zMejQo6+uJl3+VdYPcsjwW/ca581tBPHiPH95XnHiBartnMrMJtn11grw==
   dependencies:
-    "@nrwl/cli" "14.3.6"
-    "@nrwl/tao" "14.3.6"
+    "@nrwl/cli" "14.4.2"
+    "@nrwl/tao" "14.4.2"
     "@parcel/watcher" "2.0.4"
     chalk "4.1.0"
     chokidar "^3.5.1"
@@ -24357,20 +24357,7 @@ yargs@^16.2.0:
     y18n "^5.0.5"
     yargs-parser "^20.2.2"
 
-yargs@^17.3.1:
-  version "17.4.0"
-  resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.4.0.tgz#9fc9efc96bd3aa2c1240446af28499f0e7593d00"
-  integrity sha512-WJudfrk81yWFSOkZYpAZx4Nt7V4xp7S/uJkX0CnxovMCt1wCE8LNftPpNuF9X/u9gN5nsD7ycYtRcDf2pL3UiA==
-  dependencies:
-    cliui "^7.0.2"
-    escalade "^3.1.1"
-    get-caller-file "^2.0.5"
-    require-directory "^2.1.1"
-    string-width "^4.2.3"
-    y18n "^5.0.5"
-    yargs-parser "^21.0.0"
-
-yargs@^17.4.0:
+yargs@^17.3.1, yargs@^17.4.0:
   version "17.5.1"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.5.1.tgz#e109900cab6fcb7fd44b1d8249166feb0b36e58e"
   integrity sha512-t6YAJcxDkNX7NFYiVtKvWUz8l+PaKTLiL63mJYWR2GnHq2gjEWISzsLp9wg3aY36dY1j+gfIEL3pIF+XlJJfbA==
