@@ -50,4 +50,5 @@ class CustomFields {
   }
 }
 
-export default () => new CustomFields();
+// Export an instance since it's a singleton
+export default new CustomFields();

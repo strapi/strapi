@@ -8,7 +8,7 @@ import invariant from 'invariant';
 import { Helmet } from 'react-helmet';
 import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
-import { CustomFields, Plugin } from './core/apis';
+import { customFields, Plugin } from './core/apis';
 import App from './pages/App';
 import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
 import MenuLogo from './assets/images/logo_strapi_menu.png';
@@ -47,7 +47,7 @@ class StrapiApp {
     this.admin = {
       injectionZones,
     };
-    this.customFields = CustomFields();
+    this.customFields = customFields;
 
     this.menu = [];
     this.settings = {
