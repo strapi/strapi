@@ -679,6 +679,7 @@
   "content-manager.apiError.This attribute must be unique": "{field} must be unique",
   "form.button.continue": "Continue",
   "form.button.done": "Done",
+  "global.search": "Search",
   "global.actions": "Actions",
   "global.back": "Back",
   "global.change-password": "Change password",

@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
+import pluralize from 'pluralize';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
@@ -27,7 +28,7 @@ const EllipsisText = styled(Typography)`
 
 const NpmPackageCard = ({
   npmPackage,
-  installedPackageNames,
+  isInstalled,
   useYarn,
   isInDevelopmentMode,
   npmPackageType,
@@ -35,8 +36,6 @@ const NpmPackageCard = ({
   const { attributes } = npmPackage;
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-
-  const isInstalled = installedPackageNames.includes(attributes.npmPackageName);
 
   const commandToCopy = useYarn
     ? `yarn add ${attributes.npmPackageName}`
@@ -47,10 +46,9 @@ const NpmPackageCard = ({
     defaultMessage: 'Made by Strapi',
   });
 
-  const npmPackageHref =
-    npmPackageType === 'provider'
-      ? attributes.npmPackageUrl
-      : `https://market.strapi.io/plugins/${attributes.slug}`;
+  const npmPackageHref = `https://market.strapi.io/${pluralize.plural(npmPackageType)}/${
+    attributes.slug
+  }`;
 
   return (
     <Flex
@@ -65,6 +63,7 @@ const NpmPackageCard = ({
       shadow="tableShadow"
       height="100%"
       alignItems="normal"
+      data-testid="npm-package-card"
     >
       <Box>
         <Box
@@ -167,7 +166,7 @@ NpmPackageCard.propTypes = {
       strapiCompatibility: PropTypes.oneOf(['v3', 'v4']),
     }).isRequired,
   }).isRequired,
-  installedPackageNames: PropTypes.arrayOf(PropTypes.string).isRequired,
+  isInstalled: PropTypes.bool.isRequired,
   useYarn: PropTypes.bool.isRequired,
   isInDevelopmentMode: PropTypes.bool,
   npmPackageType: PropTypes.string.isRequired,

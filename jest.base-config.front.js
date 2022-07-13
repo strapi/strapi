@@ -51,6 +51,7 @@ module.exports = {
     '<rootDir>/packages/admin-test-utils/lib/setup/styled-components.js',
     '<rootDir>/packages/admin-test-utils/lib/setup/strapi.js',
   ],
+  testEnvironment: 'jsdom',
   transform: {
     '^.+\\.js$': ['@swc-node/jest', { jsx: true, dynamicImport: true }],
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
@@ -58,5 +59,10 @@ module.exports = {
   },
   transformIgnorePatterns: ['node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend)/)'],
   testMatch: ['/**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
-  testURL: 'http://localhost:1337/admin',
+  testEnvironmentOptions: {
+    url: 'http://localhost:1337/admin',
+  },
+  // Use `jest-watch-typeahead` version 0.6.5. Newest version 1.0.0 does not support jest@26
+  // Reference: https://github.com/jest-community/jest-watch-typeahead/releases/tag/v1.0.0
+  watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
 };

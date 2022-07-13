@@ -1,11 +1,11 @@
 import { useQuery } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
-import { fetchInstalledPlugins } from './utils/api';
+import { fetchEnabledPlugins } from './utils/api';
 
-const useFetchInstalledPlugins = notifyLoad => {
+const useFetchEnabledPlugins = notifyLoad => {
   const toggleNotification = useNotification();
 
-  return useQuery('list-installed-plugins', () => fetchInstalledPlugins(), {
+  return useQuery('list-enabled-plugins', () => fetchEnabledPlugins(), {
     onSuccess: () => {
       if (notifyLoad) {
         notifyLoad();
@@ -20,4 +20,4 @@ const useFetchInstalledPlugins = notifyLoad => {
   });
 };
 
-export default useFetchInstalledPlugins;
+export default useFetchEnabledPlugins;

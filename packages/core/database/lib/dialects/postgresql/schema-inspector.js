@@ -3,71 +3,82 @@
 const buildSqlQueries = db => {
   return {
     TABLE_LIST: /* sql */ `
-    SELECT *
-    FROM information_schema.tables
-    WHERE
-      table_schema = ?
-      AND table_type = 'BASE TABLE'
-      AND table_name != 'geometry_columns'
-      AND table_name != 'spatial_ref_sys'
-      ${
-        db.config.settings.tablePrefix
-          ? `AND table_name LIKE '${db.config.settings.tablePrefix}%'`
-          : ''
-      };
+      SELECT *
+      FROM information_schema.tables
+      WHERE
+        table_schema = ?
+        AND table_type = 'BASE TABLE'
+        AND table_name != 'geometry_columns'
+        AND table_name != 'spatial_ref_sys'
+        ${
+          db.config.settings.tablePrefix
+            ? `AND table_name LIKE '${db.config.settings.tablePrefix}%'`
+            : ''
+        };
     `,
     LIST_COLUMNS: /* sql */ `
-    SELECT data_type, column_name, character_maximum_length, column_default, is_nullable
-    FROM information_schema.columns
-    WHERE table_schema = ? AND table_name = ?;
-  `,
+      SELECT data_type, column_name, character_maximum_length, column_default, is_nullable
+      FROM information_schema.columns
+      WHERE table_schema = ? AND table_name = ?;
+    `,
     INDEX_LIST: /* sql */ `
-    SELECT
-      ix.indexrelid,
-      i.relname as index_name,
-      a.attname as column_name,
-      ix.indisunique as is_unique,
-      ix.indisprimary as is_primary
-    FROM
-      pg_class t,
-      pg_namespace s,
-      pg_class i,
-      pg_index ix,
-      pg_attribute a
-    WHERE
-      t.oid = ix.indrelid
-      AND i.oid = ix.indexrelid
-      AND a.attrelid = t.oid
-      AND a.attnum = ANY(ix.indkey)
-      AND t.relkind = 'r'
-      AND t.relnamespace = s.oid
-      AND s.nspname = ?
-      AND t.relname = ?;
-  `,
+      SELECT
+        ix.indexrelid,
+        i.relname as index_name,
+        a.attname as column_name,
+        ix.indisunique as is_unique,
+        ix.indisprimary as is_primary
+      FROM
+        pg_class t,
+        pg_namespace s,
+        pg_class i,
+        pg_index ix,
+        pg_attribute a
+      WHERE
+        t.oid = ix.indrelid
+        AND i.oid = ix.indexrelid
+        AND a.attrelid = t.oid
+        AND a.attnum = ANY(ix.indkey)
+        AND t.relkind = 'r'
+        AND t.relnamespace = s.oid
+        AND s.nspname = ?
+        AND t.relname = ?;
+    `,
     FOREIGN_KEY_LIST: /* sql */ `
-    SELECT
-      tco."constraint_name" as constraint_name,
-      kcu."column_name" as column_name,
-      rel_kcu."table_name" as foreign_table,
-      rel_kcu."column_name" as fk_column_name,
+      SELECT
+        tco."constraint_name" as constraint_name
+      FROM information_schema.table_constraints tco
+      WHERE
+        tco.constraint_type = 'FOREIGN KEY'
+        AND tco.constraint_schema = ?
+        AND tco.table_name = ?
+    `,
+    FOREIGN_KEY_REFERENCES: /* sql */ `
+      SELECT
+        kcu."constraint_name" as constraint_name,
+        kcu."column_name" as column_name
+
+      FROM information_schema.key_column_usage kcu
+      WHERE kcu.constraint_name=ANY(?)
+      AND kcu.table_schema = ?
+      AND kcu.table_name = ?;
+    `,
+    FOREIGN_KEY_REFERENCES_CONSTRAIN: /* sql */ `
+      SELECT
       rco.update_rule as on_update,
-      rco.delete_rule as on_delete
-    FROM information_schema.table_constraints tco
-    JOIN information_schema.key_column_usage kcu
-      ON tco.constraint_schema = kcu.constraint_schema
-      AND tco.constraint_name = kcu.constraint_name
-    JOIN information_schema.referential_constraints rco
-      ON tco.constraint_schema = rco.constraint_schema
-      AND tco.constraint_name = rco.constraint_name
-    JOIN information_schema.key_column_usage rel_kcu
-      ON rco.unique_constraint_schema = rel_kcu.constraint_schema
-      AND rco.unique_constraint_name = rel_kcu.constraint_name
-      AND kcu.ordinal_position = rel_kcu.ordinal_position
-    WHERE
-      tco.constraint_type = 'FOREIGN KEY'
-      AND tco.constraint_schema = ?
-      AND tco.table_name = ?
-    ORDER BY kcu.table_schema, kcu.table_name, kcu.ordinal_position, kcu.constraint_name;
+      rco.delete_rule as on_delete,
+      rco."unique_constraint_name" as unique_constraint_name
+      FROM information_schema.referential_constraints rco
+      WHERE rco.constraint_name=ANY(?)
+      AND rco.constraint_schema = ?
+    `,
+    FOREIGN_KEY_REFERENCES_CONSTRAIN_RFERENCE: /* sql */ `
+      SELECT
+      rel_kcu."table_name" as foreign_table,
+      rel_kcu."column_name" as fk_column_name
+        FROM information_schema.key_column_usage rel_kcu
+        WHERE rel_kcu.constraint_name=?
+        AND rel_kcu.table_schema = ?
     `,
   };
 };
@@ -218,18 +229,45 @@ class PostgresqlSchemaInspector {
     const ret = {};
 
     for (const fk of rows) {
-      if (!ret[fk.constraint_name]) {
-        ret[fk.constraint_name] = {
-          name: fk.constraint_name,
-          columns: [fk.column_name],
-          referencedColumns: [fk.fk_column_name],
-          referencedTable: fk.foreign_table,
-          onUpdate: fk.on_update.toUpperCase(),
-          onDelete: fk.on_delete.toUpperCase(),
-        };
-      } else {
-        ret[fk.constraint_name].columns.push(fk.column_name);
-        ret[fk.constraint_name].referencedColumns.push(fk.fk_column_name);
+      ret[fk.constraint_name] = {
+        name: fk.constraint_name,
+        columns: [],
+        referencedColumns: [],
+        referencedTable: null,
+        onUpdate: null,
+        onDelete: null,
+      };
+    }
+    const constraintNames = Object.keys(ret);
+    const dbSchema = this.getDatabaseSchema();
+    if (constraintNames.length > 0) {
+      const { rows: fkReferences } = await this.db.connection.raw(
+        this.queries.FOREIGN_KEY_REFERENCES,
+        [[constraintNames], dbSchema, tableName]
+      );
+
+      for (const fkReference of fkReferences) {
+        ret[fkReference.constraint_name].columns.push(fkReference.column_name);
+
+        const { rows: fkReferencesConstraint } = await this.db.connection.raw(
+          this.queries.FOREIGN_KEY_REFERENCES_CONSTRAIN,
+          [[fkReference.constraint_name], dbSchema]
+        );
+
+        for (const fkReferenceC of fkReferencesConstraint) {
+          const { rows: fkReferencesConstraintReferece } = await this.db.connection.raw(
+            this.queries.FOREIGN_KEY_REFERENCES_CONSTRAIN_RFERENCE,
+            [fkReferenceC.unique_constraint_name, dbSchema]
+          );
+          for (const fkReferenceConst of fkReferencesConstraintReferece) {
+            ret[fkReference.constraint_name].referencedTable = fkReferenceConst.foreign_table;
+            ret[fkReference.constraint_name].referencedColumns.push(
+              fkReferenceConst.fk_column_name
+            );
+          }
+          ret[fkReference.constraint_name].onUpdate = fkReferenceC.on_update.toUpperCase();
+          ret[fkReference.constraint_name].onDelete = fkReferenceC.on_delete.toUpperCase();
+        }
       }
     }
 

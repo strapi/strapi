@@ -5,8 +5,8 @@ const { updateMissingKeysToJSON } = require('../add-missing-keys-to-other-langua
 
 describe('updateMissingKeysToJSON', () => {
   it('should add missing keys from en.json to translation file', async () => {
-    const TARGET_TRANSLATION_FILE_PATH = 'scripts/front/__tests__/vi.json';
-    const SOURCE_TRANSLATION_FILE_PATH = 'scripts/front/__tests__/en.json';
+    const TARGET_TRANSLATION_FILE_PATH = 'scripts/front/tests/vi.json';
+    const SOURCE_TRANSLATION_FILE_PATH = 'scripts/front/tests/en.json';
     // Save original `vi.json` file content
     const originalTargetTranslationFileContent = fs.readFileSync(
       TARGET_TRANSLATION_FILE_PATH,
