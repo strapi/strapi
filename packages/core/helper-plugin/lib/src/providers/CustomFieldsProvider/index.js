@@ -9,7 +9,14 @@ import CustomFieldsContext from '../../contexts/CustomFieldsContext';
 
 const CustomFieldsProvider = ({ children, customFields }) => {
   return (
-    <CustomFieldsContext.Provider value={customFields}>{children}</CustomFieldsContext.Provider>
+    <CustomFieldsContext.Provider
+      value={{
+        get: customFields.get.bind(customFields),
+        getAll: customFields.getAll.bind(customFields),
+      }}
+    >
+      {children}
+    </CustomFieldsContext.Provider>
   );
 };
 
