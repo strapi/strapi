@@ -5,7 +5,7 @@ const state = {
     collectionTypes: {
       'api::category': {
         create: true,
-        'find-one': true,
+        findOne: true,
         find: false,
         update: false,
         delete: false,
@@ -26,7 +26,7 @@ describe('ADMIN | Container | SettingsPage | ApiTokens | EditView | utils | togg
     expect(pathToValue).toEqual(['modifiedData', 'collectionTypes', 'api::category']);
     expect(updatedValues).toEqual({
       create: true,
-      'find-one': true,
+      findOne: true,
       find: true,
       update: true,
       delete: true,
@@ -39,12 +39,12 @@ describe('ADMIN | Container | SettingsPage | ApiTokens | EditView | utils | togg
       value: false,
     };
 
-    const { pathToValue, updatedValues } = togglePermissions(action, state, ['find', 'find-one']);
+    const { pathToValue, updatedValues } = togglePermissions(action, state, ['find', 'findOne']);
 
     expect(pathToValue).toEqual(['modifiedData', 'collectionTypes', 'api::category']);
     expect(updatedValues).toEqual({
       create: false,
-      'find-one': true,
+      findOne: true,
       find: true,
       update: false,
       delete: false,

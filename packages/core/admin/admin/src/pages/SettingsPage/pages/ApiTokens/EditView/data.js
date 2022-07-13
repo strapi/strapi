@@ -2,14 +2,14 @@ export const permissions = {
   collectionTypes: {
     'api::category': {
       create: true,
-      'find-one': true,
+      findOne: true,
       find: false,
       update: false,
       delete: false,
     },
     'api::country': {
       create: false,
-      'find-one': false,
+      findOne: false,
       find: false,
       update: false,
       delete: false,

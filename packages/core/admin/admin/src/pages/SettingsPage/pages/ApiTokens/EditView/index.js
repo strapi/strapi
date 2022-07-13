@@ -149,7 +149,7 @@ const ApiTokenCreateView = () => {
 
     const areCollectionTypesReadOnly = Object.values(collectionTypes).every(collectionTypeActions =>
       Object.keys(collectionTypeActions).every(action => {
-        if (action === 'find' || action === 'find-one') {
+        if (action === 'find' || action === 'findOne') {
           return collectionTypeActions[action] === true;
         }
 
@@ -159,8 +159,8 @@ const ApiTokenCreateView = () => {
 
     const areSingleTypesReadOnly = Object.values(singleTypes).every(singleTypeActions =>
       Object.keys(singleTypeActions).every(action => {
-        if (action === 'find' || action === 'find-one') {
-          return singleTypeActions[action] === true;
+        if (action === 'find' || action === 'findOne') {
+          return singleTypeActions[action];
         }
 
         return singleTypeActions[action] === false;
@@ -220,6 +220,7 @@ const ApiTokenCreateView = () => {
         dispatch({
           type: 'ON_CHANGE_READ_ONLY',
           keys: ['collectionTypes', collectionType],
+          value: false,
         });
       });
 
@@ -227,6 +228,7 @@ const ApiTokenCreateView = () => {
         dispatch({
           type: 'ON_CHANGE_READ_ONLY',
           keys: ['singleTypes', singleType],
+          value: false,
         });
       });
     }

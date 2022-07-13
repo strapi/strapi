@@ -25,7 +25,7 @@ const reducer = (state, action) =>
       case 'ON_CHANGE_READ_ONLY': {
         const { pathToValue, updatedValues } = togglePermissions(action, state, [
           'find',
-          'find-one',
+          'findOne',
         ]);
 
         set(draftState, pathToValue, { ...updatedValues });

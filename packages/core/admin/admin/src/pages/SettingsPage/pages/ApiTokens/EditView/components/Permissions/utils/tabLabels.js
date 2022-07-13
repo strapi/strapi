@@ -9,6 +9,11 @@ const TAB_LABELS = [
     id: 'singleTypes',
     defaultMessage: 'Single Types',
   },
+  {
+    labelId: 'Settings.apiTokens.types.custom',
+    id: 'custom',
+    defaultMessage: 'Custom',
+  },
 ];
 
 export default TAB_LABELS;

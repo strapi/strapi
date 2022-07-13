@@ -9,15 +9,16 @@ const ContentTypesSection = ({ section, name }) => {
 
   return (
     <Box padding={4} background="neutral0">
-      {Object.keys(section).map((contentType, index) => (
-        <CollapsableContentType
-          key={contentType}
-          label={contentType.split('::')[1]}
-          actions={section[contentType]}
-          orderNumber={index}
-          name={`${name}.${contentType}`}
-        />
-      ))}
+      {section &&
+        Object.keys(section).map((contentType, index) => (
+          <CollapsableContentType
+            key={contentType}
+            label={contentType.split('::')[1]}
+            actions={section[contentType]}
+            orderNumber={index}
+            name={`${name}.${contentType}`}
+          />
+        ))}
     </Box>
   );
 };

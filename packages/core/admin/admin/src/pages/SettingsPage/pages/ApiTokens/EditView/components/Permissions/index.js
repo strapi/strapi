@@ -33,6 +33,9 @@ const Permissions = () => {
         <TabPanel>
           <ContentTypesSection section={modifiedData?.singleTypes} name="singleTypes" />
         </TabPanel>
+        <TabPanel>
+          <ContentTypesSection section={modifiedData?.custom} name="custom" />
+        </TabPanel>
       </TabPanels>
     </TabGroup>
   );
