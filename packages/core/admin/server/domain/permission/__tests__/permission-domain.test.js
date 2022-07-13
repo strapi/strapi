@@ -273,7 +273,11 @@ describe('Permission Domain', () => {
 
       const permissionWithSanitizedConditions = sanitizeConditionsWithProvider(permission);
 
-      expect(permissionWithSanitizedConditions).toHaveProperty('conditions', expected);
+      if (expected === undefined) {
+        expect(permissionWithSanitizedConditions).not.toHaveProperty('conditions');
+      } else {
+        expect(permissionWithSanitizedConditions).toHaveProperty('conditions', expected);
+      }
     });
   });
 });

@@ -131,7 +131,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "supertest": "^6.1.6"
+    "supertest": "6.2.4"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",
