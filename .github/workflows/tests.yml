@@ -13,7 +13,6 @@ jobs:
     strategy:
       matrix:
         node: [14, 16]
-        shard: ['1/2', '2/2']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -33,6 +32,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16]
+        shard: ['1/2', '2/2']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -43,7 +43,7 @@ jobs:
         with:
           globalPackages: codecov
       - name: Run tests
-        run: yarn run -s test:unit --coverage --shard ${{matrix.shard}} && codecov -C -F unit
+        run: yarn run -s test:unit --coverage --shard ${{ matrix.shard }} && codecov -C -F unit
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
@@ -54,6 +54,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16]
+        shard: ['1/2', '2/2']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -66,7 +67,7 @@ jobs:
       - name: Build
         run: yarn build
       - name: Run test
-        run: yarn run -s test:front --coverage --shard ${{matrix.shard}} && codecov -C -F front
+        run: yarn run -s test:front --coverage --shard ${{ matrix.shard }} && codecov -C -F front
 
   e2e_ce_pg:
     runs-on: ubuntu-latest
@@ -75,6 +76,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16]
+        shard: ['1/2', '2/2']
     services:
       postgres:
         # Docker Hub image
@@ -111,6 +113,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16]
+        shard: ['1/2', '2/2']
     services:
       mysql:
         image: mysql
@@ -146,6 +149,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16]
+        shard: ['1/2', '2/2']
     services:
       mysql:
         image: mysql:5
@@ -182,6 +186,7 @@ jobs:
       matrix:
         node: [14, 16]
         sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
+        shard: ['1/2', '2/2']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -205,6 +210,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16]
+        shard: ['1/2', '2/2']
     services:
       postgres:
         # Docker Hub image
@@ -231,6 +237,8 @@ jobs:
           cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
+        env:
+          SHARD: ${{ matrix.shard }}
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
@@ -245,6 +253,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16]
+        shard: ['1/2', '2/2']
     services:
       mysql:
         image: mysql
@@ -270,6 +279,8 @@ jobs:
           cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
+        env:
+          SHARD: ${{ matrix.shard }}
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
@@ -285,6 +296,7 @@ jobs:
       matrix:
         node: [14, 16]
         sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
+        shard: ['1/2', '2/2']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -295,6 +307,7 @@ jobs:
       - uses: ./.github/actions/run-e2e-tests
         env:
           SQLITE_PKG: ${{ matrix.sqlite_pkg }}
+          SHARD: ${{ matrix.shard }}
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           runEE: true
