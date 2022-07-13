@@ -1,18 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { stringify } from 'qs';
 import { useLocation, NavLink } from 'react-router-dom';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { HeaderLayout } from '@strapi/design-system/Layout';
 import { Button } from '@strapi/design-system/Button';
-import { Breadcrumbs, CrumbLink, Crumb } from '@strapi/design-system/v2/Breadcrumbs';
+import {
+  Breadcrumbs,
+  CrumbLink,
+  Crumb,
+  CrumbSimpleMenu,
+} from '@strapi/design-system/v2/Breadcrumbs';
+import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
 import { Stack } from '@strapi/design-system/Stack';
 import { Link } from '@strapi/design-system/Link';
+import { IconButton } from '@strapi/design-system';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
+import CarretDown from '@strapi/icons/CarretDown';
 import Plus from '@strapi/icons/Plus';
 import { getTrad } from '../../../utils';
 import { FolderDefinition } from '../../../constants';
+
+const IconButtonCustom = styled(IconButton)`
+  height: ${({ theme }) => theme.spaces[3]};
+  background-color: transparent;
+`;
 
 export const Header = ({
   canCreate,
@@ -39,6 +53,8 @@ export const Header = ({
     folder: parentFolder?.id ?? undefined,
   };
 
+  console.log({ rest, currentFolder });
+
   return (
     <HeaderLayout
       title={`${formatMessage({
@@ -50,7 +66,32 @@ export const Header = ({
           <CrumbLink as={NavLink} to={pathname}>
             Media Library
           </CrumbLink>
-          {rest.length > 0 && <Crumb>...</Crumb>}
+          {rest.length > 0 && (
+            <CrumbSimpleMenu>
+              <SimpleMenu
+                noBorder
+                label="Previous folders"
+                as={IconButtonCustom}
+                icon={<CarretDown />}
+              >
+                {rest.map(parent => {
+                  const parentQuery = {
+                    ...query,
+                    folder: parent.id,
+                  };
+
+                  return (
+                    <MenuItem
+                      to={`${pathname}?${stringify(parentQuery, { encode: false })}`}
+                      key={parent.id}
+                    >
+                      {parent.label}
+                    </MenuItem>
+                  );
+                })}
+              </SimpleMenu>
+            </CrumbSimpleMenu>
+          )}
           {parentFolder && (
             <CrumbLink as={NavLink} to={`${pathname}?${stringify(backQuery, { encode: false })}`}>
               {nameParentFolder}
