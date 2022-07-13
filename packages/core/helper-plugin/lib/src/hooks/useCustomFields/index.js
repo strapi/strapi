@@ -8,11 +8,11 @@ import { useContext, useRef } from 'react';
 import CustomFieldsContext from '../../contexts/CustomFieldsContext';
 
 const useCustomFields = () => {
-  const customFieldsApi = useContext(CustomFieldsContext);
+  const customFields = useContext(CustomFieldsContext);
   // Use a ref so we can safely add the custom fields to a hook dependencies array
-  const customFieldsApiRef = useRef(customFieldsApi);
+  const customFieldsRef = useRef(customFields);
 
-  return customFieldsApiRef.current;
+  return customFieldsRef.current;
 };
 
 export default useCustomFields;
