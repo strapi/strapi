@@ -3,7 +3,7 @@
 const WorkerQueue = require('../worker-queue');
 
 describe('WorkerQueue', () => {
-  test('Executes worker', () => {
+  test('Executes worker', async () => {
     const fn = jest.fn();
     const input = 1;
 
@@ -15,13 +15,13 @@ describe('WorkerQueue', () => {
 
     q.enqueue(input);
 
-    setTimeout(() => {
-      expect(fn).toHaveBeenCalledWith(input);
-      expect(fn).toHaveBeenCalledTimes(1);
-    });
+    await new Promise(resolve => setTimeout(resolve));
+
+    expect(fn).toHaveBeenCalledWith(input);
+    expect(fn).toHaveBeenCalledTimes(1);
   });
 
-  test('Executes worker', () => {
+  test('Executes worker', async () => {
     const fn = jest.fn();
     const input = 1;
 
@@ -35,9 +35,9 @@ describe('WorkerQueue', () => {
     q.enqueue(input);
     q.enqueue(input);
 
-    setTimeout(() => {
-      expect(fn).toHaveBeenCalledWith(input);
-      expect(fn).toHaveBeenCalledTimes(3);
-    });
+    await new Promise(resolve => setTimeout(resolve));
+
+    expect(fn).toHaveBeenCalledWith(input);
+    expect(fn).toHaveBeenCalledTimes(3);
   });
 });

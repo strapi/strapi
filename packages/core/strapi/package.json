@@ -95,7 +95,7 @@
     "chalk": "4.1.2",
     "chokidar": "3.5.2",
     "ci-info": "3.2.0",
-    "cli-table3": "0.6.1",
+    "cli-table3": "0.6.2",
     "commander": "8.2.0",
     "configstore": "5.0.1",
     "debug": "4.3.2",
@@ -126,12 +126,12 @@
     "package-json": "7.0.0",
     "qs": "6.10.1",
     "resolve-cwd": "3.0.0",
-    "semver": "7.3.5",
+    "semver": "7.3.7",
     "statuses": "2.0.1",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "supertest": "^6.1.6"
+    "supertest": "6.2.4"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",
