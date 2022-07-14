@@ -8,6 +8,10 @@ const schema = yup.object().shape({
     .oneOf(['read-only', 'full-access', 'custom'])
     .required(translatedErrors.required),
   description: yup.string().nullable(),
+  duration: yup
+    .string(translatedErrors.string)
+    .oneOf(['7', '30', '90', 'unlimited'])
+    .required(translatedErrors.required),
 });
 
 export default schema;

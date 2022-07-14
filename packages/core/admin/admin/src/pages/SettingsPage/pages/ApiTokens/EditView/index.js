@@ -9,6 +9,7 @@ import {
   useTracking,
   useGuidedTour,
   Link,
+  usePersistentState,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -29,6 +30,7 @@ import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
 import { axiosInstance } from '../../../../../core/utils';
 import schema from './utils/schema';
+import getDateOfExpiration from './utils/getDateOfExpiration';
 import LoadingView from './components/LoadingView';
 import HeaderContentBox from './components/ContentBox';
 import Permissions from './components/Permissions';
@@ -48,6 +50,7 @@ const ApiTokenCreateView = () => {
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
   const [state, dispatch] = useReducer(reducer, initialState, state => init(state, permissions));
+  const [lang] = usePersistentState('strapi-admin-language', 'en');
 
   const {
     params: { id },
@@ -96,7 +99,11 @@ const ApiTokenCreateView = () => {
         data: { data: response },
       } = isCreating
         ? await axiosInstance.post(`/admin/api-tokens`, body)
-        : await axiosInstance.put(`/admin/api-tokens/${id}`, body);
+        : await axiosInstance.put(`/admin/api-tokens/${id}`, {
+            name: body.name,
+            description: body.description,
+            type: body.type,
+          });
 
       apiToken = response;
 
@@ -257,6 +264,7 @@ const ApiTokenCreateView = () => {
             name: apiToken?.name || '',
             description: apiToken?.description || '',
             type: apiToken?.type || 'read-only',
+            duration: apiToken?.duration,
           }}
           onSubmit={handleSubmit}
         >
@@ -359,6 +367,68 @@ const ApiTokenCreateView = () => {
                               {values.description}
                             </Textarea>
                           </GridItem>
+                          <GridItem key="duration" col={6} xs={12}>
+                            <Select
+                              name="duration"
+                              label={formatMessage({
+                                id: 'Settings.apiTokens.form.duration',
+                                defaultMessage: 'Token duration',
+                              })}
+                              value={isCreating ? values.duration : '7'}
+                              error={
+                                errors.duration
+                                  ? formatMessage(
+                                      errors.duration?.id
+                                        ? errors.duration
+                                        : { id: errors.duration, defaultMessage: errors.duration }
+                                    )
+                                  : null
+                              }
+                              onChange={value => {
+                                handleChange({ target: { name: 'duration', value } });
+                              }}
+                              required
+                              disabled={!isCreating}
+                              placeholder="Select"
+                            >
+                              <Option value="7">
+                                {formatMessage({
+                                  id: 'Settings.apiTokens.duration.7-days',
+                                  defaultMessage: '7 days',
+                                })}
+                              </Option>
+                              <Option value="30">
+                                {formatMessage({
+                                  id: 'Settings.apiTokens.duration.30-days',
+                                  defaultMessage: '30 days',
+                                })}
+                              </Option>
+                              <Option value="90">
+                                {formatMessage({
+                                  id: 'Settings.apiTokens.duration.90-days',
+                                  defaultMessage: '90 days',
+                                })}
+                              </Option>
+                              <Option value="unlimited">
+                                {formatMessage({
+                                  id: 'Settings.apiTokens.duration.unlimited',
+                                  defaultMessage: 'Unlimited',
+                                })}
+                              </Option>
+                            </Select>
+                            <Typography variant="pi" textColor="neutral600">
+                              {!isCreating &&
+                                `${formatMessage({
+                                  id: 'Settings.apiTokens.duration.expiration-date',
+                                  defaultMessage: 'Expiration date',
+                                })}: ${getDateOfExpiration(
+                                  apiToken?.createdAt,
+                                  values.duration || '7',
+                                  lang
+                                )}`}
+                            </Typography>
+                          </GridItem>
+
                           <GridItem key="type" col={6} xs={12}>
                             <Select
                               name="type"

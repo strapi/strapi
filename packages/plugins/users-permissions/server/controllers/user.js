@@ -55,10 +55,9 @@ module.exports = {
 
     const user = {
       ...ctx.request.body,
+      email: email.toLowerCase(),
       provider: 'local',
     };
-
-    user.email = _.toLower(user.email);
 
     if (!role) {
       const defaultRole = await strapi
@@ -94,7 +93,6 @@ module.exports = {
     if (!user) {
       throw new NotFoundError(`User not found`);
     }
-    
 
     await validateUpdateUserBody(ctx.request.body);
 
@@ -186,11 +184,14 @@ module.exports = {
    * @return {Object|Array}
    */
   async me(ctx) {
-    const user = ctx.state.user;
+    const authUser = ctx.state.user;
+    const { query } = ctx;
 
-    if (!user) {
+    if (!authUser) {
       return ctx.unauthorized();
     }
+
+    const user = await getService('user').fetch(authUser.id, query);
 
     ctx.body = await sanitizeOutput(user, ctx);
   },

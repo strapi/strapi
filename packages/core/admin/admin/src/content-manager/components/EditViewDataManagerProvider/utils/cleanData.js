@@ -57,6 +57,7 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
           } else {
             cleanedData = value ? recursiveCleanData(value, componentsSchema[component]) : value;
           }
+
           break;
         case 'dynamiczone':
           cleanedData = value.map(componentData => {

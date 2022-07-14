@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generators",
-  "version": "4.1.12",
+  "version": "4.2.2",
   "description": "Interactive API generator.",
   "keywords": [
     "strapi",
@@ -30,7 +30,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/utils": "4.1.12",
+    "@strapi/utils": "4.2.2",
     "chalk": "4.1.2",
     "fs-extra": "10.0.0",
     "node-plop": "0.26.3",
@@ -38,7 +38,7 @@
     "pluralize": "8.0.0"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   }
 }
