@@ -107,7 +107,7 @@
     "http-errors": "1.8.1",
     "inquirer": "8.2.4",
     "is-docker": "2.2.1",
-    "koa": "2.13.3",
+    "koa": "2.13.4",
     "koa-body": "4.2.0",
     "koa-compose": "4.1.0",
     "koa-compress": "5.1.0",

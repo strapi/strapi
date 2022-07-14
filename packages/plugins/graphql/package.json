@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "koa": "^2.13.1"
+    "koa": "^2.13.4"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.0.0"
