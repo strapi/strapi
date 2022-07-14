@@ -28,13 +28,19 @@ const Permissions = () => {
       </Tabs>
       <TabPanels style={{ position: 'relative' }}>
         <TabPanel>
-          <ContentTypesSection section={modifiedData?.collectionTypes} name="collectionTypes" />
+          {modifiedData?.singleTypes && (
+            <ContentTypesSection section={modifiedData?.collectionTypes} name="collectionTypes" />
+          )}
         </TabPanel>
         <TabPanel>
-          <ContentTypesSection section={modifiedData?.singleTypes} name="singleTypes" />
+          {modifiedData?.singleTypes && (
+            <ContentTypesSection section={modifiedData?.singleTypes} name="singleTypes" />
+          )}
         </TabPanel>
         <TabPanel>
-          <ContentTypesSection section={modifiedData?.custom} name="custom" />
+          {modifiedData?.custom && (
+            <ContentTypesSection section={modifiedData?.custom} name="custom" />
+          )}
         </TabPanel>
       </TabPanels>
     </TabGroup>

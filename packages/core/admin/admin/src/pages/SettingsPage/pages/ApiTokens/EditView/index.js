@@ -135,46 +135,36 @@ const ApiTokenCreateView = () => {
 
   const hasAllActionsSelected = useMemo(() => {
     const {
-      modifiedData: { collectionTypes, singleTypes },
+      modifiedData: { collectionTypes, singleTypes, custom },
     } = state;
 
-    const areAllCollectionTypesSelected = Object.values(
-      collectionTypes
-    ).every(collectionTypeActions => Object.values(collectionTypeActions).every(action => action));
+    const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
 
-    const areAllSingleTypesSelected = Object.values(singleTypes).every(singleTypeActions =>
-      Object.values(singleTypeActions).every(action => action)
+    const areAllActionsSelected = Object.values(dataToCheck).every(actions =>
+      Object.values(actions).every(action => action)
     );
 
-    return areAllCollectionTypesSelected && areAllSingleTypesSelected;
+    return areAllActionsSelected;
   }, [state]);
 
   const hasReadOnlyActionsSelected = useMemo(() => {
     const {
-      modifiedData: { collectionTypes, singleTypes },
+      modifiedData: { collectionTypes, singleTypes, custom },
     } = state;
 
-    const areCollectionTypesReadOnly = Object.values(collectionTypes).every(collectionTypeActions =>
-      Object.keys(collectionTypeActions).every(action => {
+    const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
+
+    const areAllActionsReadOnly = Object.values(dataToCheck).every(actions =>
+      Object.values(actions).every(action => {
         if (action === 'find' || action === 'findOne') {
-          return collectionTypeActions[action] === true;
+          return actions[action];
         }
 
-        return collectionTypeActions[action] === false;
+        return actions[action] === false;
       })
     );
 
-    const areSingleTypesReadOnly = Object.values(singleTypes).every(singleTypeActions =>
-      Object.keys(singleTypeActions).every(action => {
-        if (action === 'find' || action === 'findOne') {
-          return singleTypeActions[action];
-        }
-
-        return singleTypeActions[action] === false;
-      })
-    );
-
-    return areCollectionTypesReadOnly && areSingleTypesReadOnly;
+    return areAllActionsReadOnly;
   }, [state]);
 
   const tokenTypeValue = useMemo(() => {

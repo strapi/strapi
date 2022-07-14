@@ -2,11 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import CollapsableContentType from '../CollapsableContentType';
-// import { useIntl } from 'react-intl';
 
 const ContentTypesSection = ({ section, name }) => {
-  //   const { formatMessage } = useIntl();
-
   return (
     <Box padding={4} background="neutral0">
       {section &&
