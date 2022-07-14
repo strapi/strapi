@@ -24,4 +24,4 @@ jobs:
       - uses: preactjs/compressed-size-action@v2
         with:
           pattern: '**/build/**/*.{js,html,woff,woff2,svg,png}'
-          strip-hash: "\\.(\\w{5})\\.chunk\\.js$"
+          strip-hash: "\\.((\\w{8})\\.(chunk))|(\\.\\w{8})"
