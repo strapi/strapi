@@ -10,6 +10,7 @@ on:
       - 'packages/core/email/admin/src/**.js'
       - 'packages/core/helper-plugin/**.js'
       - 'packages/core/upload/admin/**.js'
+      - '**/translations/**.json'
       - 'yarn.lock'
 
 jobs:
