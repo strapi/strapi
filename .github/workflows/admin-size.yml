@@ -15,8 +15,6 @@ on:
 jobs:
   admin_size:
     runs-on: ubuntu-latest
-    env:
-      NODE_ENV: production
 
     steps:
       - uses: actions/checkout@v2
@@ -24,5 +22,8 @@ jobs:
           fetch-depth: 0
 
       - uses: preactjs/compressed-size-action@v2
+        env:
+          NODE_ENV: production
+
         with:
           pattern: './packages/core/admin/build/*.js'
