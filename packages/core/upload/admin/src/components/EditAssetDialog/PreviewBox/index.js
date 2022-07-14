@@ -218,7 +218,7 @@ export const PreviewBox = ({
             name={asset.name}
             url={hasCropIntent ? assetUrl : thumbnailUrl}
             onLoad={() => {
-              if (asset.isLocal ? true : hasCropIntent) {
+              if (asset.isLocal || hasCropIntent) {
                 setIsCropImageReady(true);
               }
             }}
