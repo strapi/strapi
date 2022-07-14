@@ -1,0 +1,23 @@
+name: Size of admin bundle
+
+on:
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'packages/core/admin/admin/**.js'
+      - 'packages/core/content-type-builder/admin/src/**.js'
+      - 'packages/core/email/admin/src/**.js'
+      - 'packages/core/helper-plugin/**.js'
+      - 'packages/core/upload/admin/**.js'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: preactjs/compressed-size-action@v2
+        with:
+          cwd: 'examples/getstarted'
+          pattern: './build/*.js'
