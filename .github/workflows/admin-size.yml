@@ -22,7 +22,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: nrwl/nx-set-shas@v2
+      - name: yarn
+        run: yarn
 
       - uses: preactjs/compressed-size-action@v2
         with:
