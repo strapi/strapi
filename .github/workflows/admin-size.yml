@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install nx
-        run: yarn add -D -W nx@latest
+        run: npm i nx --save-dev
 
       - uses: preactjs/compressed-size-action@v2
         with:
