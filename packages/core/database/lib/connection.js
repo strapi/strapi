@@ -6,7 +6,7 @@ const knex = require('knex');
 
 const SqliteClient = require('knex/lib/dialects/sqlite3/index');
 
-const trySqlitePackage = packageName => {
+const tryPackage = packageName => {
   try {
     require.resolve(packageName);
     return packageName;
@@ -37,11 +37,12 @@ const getSqlitePackageName = () => {
 
   // NOTE: this tries to find the best sqlite module possible to use
   // while keeping retro compatibility
-  return (
-    trySqlitePackage('better-sqlite3') ||
-    trySqlitePackage('@vscode/sqlite3') ||
-    trySqlitePackage('sqlite3')
-  );
+  return tryPackage('better-sqlite3') || tryPackage('@vscode/sqlite3') || tryPackage('sqlite3');
+};
+
+const getMysqlPackageName = () => {
+  // Try the best mysql package
+  return tryPackage('mysql2') || tryPackage('mysql');
 };
 
 const createConnection = config => {
@@ -50,6 +51,10 @@ const createConnection = config => {
     const sqlitePackageName = getSqlitePackageName();
 
     knexConfig.client = clientMap[sqlitePackageName];
+  }
+
+  if (knexConfig.client === 'mysql') {
+    knexConfig.client = getMysqlPackageName();
   }
 
   const knexInstance = knex(knexConfig);
