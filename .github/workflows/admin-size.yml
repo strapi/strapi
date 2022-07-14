@@ -22,8 +22,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install nx
-        run: npm i nx --save-dev
+      - uses: nrwl/nx-set-shas@v2
 
       - uses: preactjs/compressed-size-action@v2
         with:
