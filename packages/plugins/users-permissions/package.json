@@ -46,7 +46,7 @@
     "url-join": "4.0.1"
   },
   "devDependencies": {
-    "koa": "^2.13.1"
+    "koa": "^2.13.4"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",
