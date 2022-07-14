@@ -10,6 +10,7 @@ on:
       - 'packages/core/email/admin/src/**.js'
       - 'packages/core/helper-plugin/**.js'
       - 'packages/core/upload/admin/**.js'
+      - 'yarn.lock'
 
 jobs:
   admin_size:
@@ -21,9 +22,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-
-      - name: yarn
-        run: yarn
 
       - uses: preactjs/compressed-size-action@v2
         with:
