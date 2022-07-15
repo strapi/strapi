@@ -23,13 +23,15 @@ CrumbSwitch.propTypes = {
 };
 
 export const Breadcrumbs = ({ breadcrumbs, ...props }) => (
-  <ol {...props}>
-    {breadcrumbs.map(crumb => (
-      <li key={`breadcrumb-${crumb?.id ?? 'root'}`}>
-        <CrumbSwitch crumb={crumb} />
-      </li>
-    ))}
-  </ol>
+  <nav>
+    <ol {...props}>
+      {breadcrumbs.map(crumb => (
+        <li key={`breadcrumb-${crumb?.id ?? 'root'}`}>
+          <CrumbSwitch crumb={crumb} />
+        </li>
+      ))}
+    </ol>
+  </nav>
 );
 
 Breadcrumbs.propTypes = {

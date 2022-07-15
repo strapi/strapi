@@ -150,7 +150,6 @@ export const MediaLibrary = () => {
     <Layout>
       <Main aria-busy={isLoading}>
         <Header
-          assetCount={assetCount}
           breadcrumbs={
             !isCurrentFolderLoading && getBreadcrumData(currentFolder, { pathname, query })
           }
@@ -263,10 +262,13 @@ export const MediaLibrary = () => {
                 <FolderList
                   title={
                     (((isFiltering && assetCount > 0) || !isFiltering) &&
-                      formatMessage({
-                        id: getTrad('list.folders.title'),
-                        defaultMessage: 'Folders',
-                      })) ||
+                      formatMessage(
+                        {
+                          id: getTrad('list.folders.title'),
+                          defaultMessage: 'Folders ({count})',
+                        },
+                        { count: folderCount }
+                      )) ||
                     ''
                   }
                 >
@@ -361,10 +363,13 @@ export const MediaLibrary = () => {
                     title={
                       ((!isFiltering || (isFiltering && folderCount > 0)) &&
                         assetsData?.pagination?.page === 1 &&
-                        formatMessage({
-                          id: getTrad('list.assets.title'),
-                          defaultMessage: 'Assets',
-                        })) ||
+                        formatMessage(
+                          {
+                            id: getTrad('list.assets.title'),
+                            defaultMessage: 'Assets ({count})',
+                          },
+                          { count: assetCount }
+                        )) ||
                       ''
                     }
                   />

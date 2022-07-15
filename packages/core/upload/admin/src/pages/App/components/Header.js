@@ -20,9 +20,7 @@ export const Header = ({
   onToggleEditFolderDialog,
   onToggleUploadAssetDialog,
   folder,
-  assetCount,
   breadcrumbs,
-  folderCount,
 }) => {
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
@@ -34,56 +32,45 @@ export const Header = ({
   const name = folder?.name?.length > 30 ? `${folder.name.slice(0, 30)}...` : folder?.name;
 
   return (
-    <>
-      {breadcrumbs && <Breadcrumbs breadcrumbs={breadcrumbs} />}
-
-      <HeaderLayout
-        title={`${formatMessage({
-          id: getTrad('plugin.name'),
-          defaultMessage: `Media Library`,
-        })}${name ? ` - ${name}` : ''}`}
-        subtitle={formatMessage(
-          {
-            id: getTrad('header.content.assets'),
-            defaultMessage:
-              '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}',
-          },
-          { numberAssets: assetCount, numberFolders: folderCount }
-        )}
-        navigationAction={
-          folder && (
-            <Link
-              startIcon={<ArrowLeft />}
-              to={`${pathname}?${stringify(backQuery, { encode: false })}`}
-            >
+    <HeaderLayout
+      title={`${formatMessage({
+        id: getTrad('plugin.name'),
+        defaultMessage: `Media Library`,
+      })}${name ? ` - ${name}` : ''}`}
+      subtitle={breadcrumbs && <Breadcrumbs breadcrumbs={breadcrumbs} />}
+      navigationAction={
+        folder && (
+          <Link
+            startIcon={<ArrowLeft />}
+            to={`${pathname}?${stringify(backQuery, { encode: false })}`}
+          >
+            {formatMessage({
+              id: getTrad('header.actions.folder-level-up'),
+              defaultMessage: 'Back',
+            })}
+          </Link>
+        )
+      }
+      primaryAction={
+        canCreate && (
+          <Stack horizontal spacing={2}>
+            <Button startIcon={<Plus />} variant="secondary" onClick={onToggleEditFolderDialog}>
               {formatMessage({
-                id: getTrad('header.actions.folder-level-up'),
-                defaultMessage: 'Back',
+                id: getTrad('header.actions.add-folder'),
+                defaultMessage: 'Add new folder',
               })}
-            </Link>
-          )
-        }
-        primaryAction={
-          canCreate && (
-            <Stack horizontal spacing={2}>
-              <Button startIcon={<Plus />} variant="secondary" onClick={onToggleEditFolderDialog}>
-                {formatMessage({
-                  id: getTrad('header.actions.add-folder'),
-                  defaultMessage: 'Add new folder',
-                })}
-              </Button>
+            </Button>
 
-              <Button startIcon={<Plus />} onClick={onToggleUploadAssetDialog}>
-                {formatMessage({
-                  id: getTrad('header.actions.add-assets'),
-                  defaultMessage: 'Add new assets',
-                })}
-              </Button>
-            </Stack>
-          )
-        }
-      />
-    </>
+            <Button startIcon={<Plus />} onClick={onToggleUploadAssetDialog}>
+              {formatMessage({
+                id: getTrad('header.actions.add-assets'),
+                defaultMessage: 'Add new assets',
+              })}
+            </Button>
+          </Stack>
+        )
+      }
+    />
   );
 };
 
@@ -93,11 +80,9 @@ Header.defaultProps = {
 };
 
 Header.propTypes = {
-  assetCount: PropTypes.number.isRequired,
   breadcrumbs: PropTypes.oneOfType([BreadcrumbsDefinition, PropTypes.bool]),
   canCreate: PropTypes.bool.isRequired,
   folder: FolderDefinition,
-  folderCount: PropTypes.number.isRequired,
   onToggleEditFolderDialog: PropTypes.func.isRequired,
   onToggleUploadAssetDialog: PropTypes.func.isRequired,
 };
