@@ -29,8 +29,7 @@ import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
 import { axiosInstance } from '../../../../../core/utils';
-import schema from './utils/schema';
-import getDateOfExpiration from './utils/getDateOfExpiration';
+import { getDateOfExpiration, schema, getActionsState } from './utils';
 import LoadingView from './components/LoadingView';
 import HeaderContentBox from './components/ContentBox';
 import Permissions from './components/Permissions';
@@ -140,11 +139,21 @@ const ApiTokenCreateView = () => {
 
     const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
 
-    const areAllActionsSelected = Object.values(dataToCheck).every(actions =>
-      Object.values(actions).every(action => action)
-    );
+    const areAllActionsSelected = getActionsState(dataToCheck, true);
 
     return areAllActionsSelected;
+  }, [state]);
+
+  const hasAllActionsNotSelected = useMemo(() => {
+    const {
+      modifiedData: { collectionTypes, singleTypes, custom },
+    } = state;
+
+    const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
+
+    const areAllActionsNotSelected = getActionsState(dataToCheck, false);
+
+    return areAllActionsNotSelected;
   }, [state]);
 
   const hasReadOnlyActionsSelected = useMemo(() => {
@@ -154,15 +163,7 @@ const ApiTokenCreateView = () => {
 
     const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
 
-    const areAllActionsReadOnly = Object.values(dataToCheck).every(actions =>
-      Object.values(actions).every(action => {
-        if (action === 'find' || action === 'findOne') {
-          return actions[action];
-        }
-
-        return actions[action] === false;
-      })
-    );
+    const areAllActionsReadOnly = getActionsState(dataToCheck, false, ['find', 'findOne']);
 
     return areAllActionsReadOnly;
   }, [state]);
@@ -172,8 +173,10 @@ const ApiTokenCreateView = () => {
 
     if (hasReadOnlyActionsSelected) return 'read-only';
 
+    if (hasAllActionsNotSelected) return null;
+
     return 'custom';
-  }, [hasAllActionsSelected, hasReadOnlyActionsSelected]);
+  }, [hasAllActionsSelected, hasReadOnlyActionsSelected, hasAllActionsNotSelected]);
 
   const handleChangeCheckbox = ({ target: { name, value } }) => {
     dispatch({
@@ -191,41 +194,27 @@ const ApiTokenCreateView = () => {
     });
 
   const handleChangeSelectApiTokenType = ({ target: { value } }) => {
-    const {
-      modifiedData: { collectionTypes, singleTypes },
-    } = state;
+    const { modifiedData } = state;
 
     if (value === 'full-access') {
-      Object.keys(collectionTypes).forEach(collectionType => {
-        dispatch({
-          type: 'ON_CHANGE_SELECT_ALL',
-          keys: ['collectionTypes', collectionType],
-          value: true,
-        });
-      });
-
-      Object.keys(singleTypes).forEach(singleType => {
-        dispatch({
-          type: 'ON_CHANGE_SELECT_ALL',
-          keys: ['singleTypes', singleType],
-          value: true,
+      Object.keys(modifiedData).forEach(contentTypes => {
+        Object.keys(modifiedData[contentTypes]).forEach(contentType => {
+          dispatch({
+            type: 'ON_CHANGE_SELECT_ALL',
+            keys: [contentTypes, contentType],
+            value: true,
+          });
         });
       });
     }
     if (value === 'read-only') {
-      Object.keys(collectionTypes).forEach(collectionType => {
-        dispatch({
-          type: 'ON_CHANGE_READ_ONLY',
-          keys: ['collectionTypes', collectionType],
-          value: false,
-        });
-      });
-
-      Object.keys(singleTypes).forEach(singleType => {
-        dispatch({
-          type: 'ON_CHANGE_READ_ONLY',
-          keys: ['singleTypes', singleType],
-          value: false,
+      Object.keys(modifiedData).forEach(contentTypes => {
+        Object.keys(modifiedData[contentTypes]).forEach(contentType => {
+          dispatch({
+            type: 'ON_CHANGE_READ_ONLY',
+            keys: [contentTypes, contentType],
+            value: false,
+          });
         });
       });
     }
@@ -253,7 +242,7 @@ const ApiTokenCreateView = () => {
           initialValues={{
             name: apiToken?.name || '',
             description: apiToken?.description || '',
-            type: apiToken?.type || 'read-only',
+            type: apiToken?.type,
             duration: apiToken?.duration,
           }}
           onSubmit={handleSubmit}
@@ -440,6 +429,7 @@ const ApiTokenCreateView = () => {
                                 handleChangeSelectApiTokenType({ target: { value } });
                                 handleChange({ target: { name: 'type', value } });
                               }}
+                              placeholder="Select"
                               required
                             >
                               <Option value="read-only">

@@ -1,8 +1,8 @@
 export const permissions = {
   collectionTypes: {
     'api::category': {
-      create: true,
-      findOne: true,
+      create: false,
+      findOne: false,
       find: false,
       update: false,
       delete: false,
