@@ -89,6 +89,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
 
   return (
     <MainNav condensed={condensed}>
+      I am adding some text here, which should be reflected in a size change and being reported.
       <NavBrand
         as={RouterNavLink}
         workplace={formatMessage({
@@ -106,9 +107,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
           />
         }
       />
-
       <Divider />
-
       <NavSections>
         <NavLink as={RouterNavLink} to="/content-manager" icon={<Write />}>
           {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
@@ -150,7 +149,6 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
           </NavSection>
         ) : null}
       </NavSections>
-
       <NavUser
         id="main-nav-user-button"
         ref={buttonRef}
@@ -190,7 +188,6 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
           </FocusTrap>
         </LinkUserWrapper>
       )}
-
       <NavCondense onClick={() => setCondensed(s => !s)}>
         {condensed
           ? formatMessage({
