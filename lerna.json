@@ -5,6 +5,5 @@
     "examples/*"
   ],
   "npmClient": "yarn",
-  "useWorkspaces": true,
-  "useNx": true
+  "useWorkspaces": true
 }
