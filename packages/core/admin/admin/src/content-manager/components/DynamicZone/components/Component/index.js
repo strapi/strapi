@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import isEqual from 'react-fast-compare';
@@ -16,6 +16,7 @@ import { useContentTypeLayout } from '../../../../hooks';
 import { getTrad } from '../../../../utils';
 import FieldComponent from '../../../FieldComponent';
 import Rectangle from './Rectangle';
+import ConfirmDialogDelete from '../../../DynamicTable/ConfirmDialogDelete';
 
 const ActionStack = styled(Stack)`
   svg {
@@ -68,7 +69,13 @@ const Component = ({
 
   const handleMoveComponentUp = () => moveComponentUp(name, index);
 
-  const handleRemove = () => removeComponentFromDynamicZone(name, index);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const onConfirm = () => {
+    removeComponentFromDynamicZone(name, index);
+    setIsDeleteDialogOpen(false);
+  };
+  const onToggleDialog = () => setIsDeleteDialogOpen(false);
+  const handleRemove = () => setIsDeleteDialogOpen(true);
 
   const downLabel = formatMessage({
     id: getTrad('components.DynamicZone.move-down-label'),
@@ -110,6 +117,12 @@ const Component = ({
   return (
     <Box>
       <Rectangle />
+      <ConfirmDialogDelete
+        isConfirmButtonLoading={false}
+        isOpen={isDeleteDialogOpen}
+        onToggleDialog={onToggleDialog}
+        onConfirm={onConfirm}
+      />
       <StyledBox hasRadius>
         <Accordion expanded={isOpen} onToggle={() => onToggle(index)} size="S" error={errorMessage}>
           <AccordionToggle
