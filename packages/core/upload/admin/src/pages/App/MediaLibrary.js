@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { useLocation, useHistory } from 'react-router-dom';
-import { stringify } from 'qs';
 import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
@@ -34,7 +33,7 @@ import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
-import { getTrad, containsAssetFilter } from '../../utils';
+import { getTrad, containsAssetFilter, getBreadcrumData, getFolderURL } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useFolder } from '../../hooks/useFolder';
@@ -152,6 +151,9 @@ export const MediaLibrary = () => {
       <Main aria-busy={isLoading}>
         <Header
           assetCount={assetCount}
+          breadcrumbs={
+            !isCurrentFolderLoading && getBreadcrumData(currentFolder, { pathname, query })
+          }
           folderCount={folderCount}
           canCreate={canCreate}
           onToggleEditFolderDialog={toggleEditFolderDialog}
@@ -274,13 +276,7 @@ export const MediaLibrary = () => {
                       currentFolder => currentFolder.id === folder.id
                     );
 
-                    // Search query will always fetch the same results
-                    // we remove it here to allow navigating in a folder and see the result of this navigation
-                    const { _q, ...queryParamsWithoutQ } = query;
-                    const url = `${pathname}?${stringify({
-                      ...queryParamsWithoutQ,
-                      folder: folder.id,
-                    })}`;
+                    const url = getFolderURL(pathname, query, folder);
 
                     return (
                       <GridItem col={3} key={`folder-${folder.id}`}>
