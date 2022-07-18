@@ -208,6 +208,128 @@ describe('ADMIN | StrapiApp', () => {
     });
   });
 
+  describe('Custom fields api', () => {
+    it('should register a custom field', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'pluginCustomField',
+        pluginId: 'myplugin',
+        type: 'text',
+        icon: jest.fn(),
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      app.customFields.register(field);
+      expect(app.customFields.get('plugin::myplugin.pluginCustomField')).toEqual(field);
+      expect(app.customFields.getAll()).toEqual({
+        'plugin::myplugin.pluginCustomField': field,
+      });
+    });
+
+    it('should register several custom fields at once', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const fields = [
+        {
+          name: 'field1',
+          pluginId: 'myplugin',
+          type: 'text',
+          icon: jest.fn(),
+          intlLabel: { id: 'foo', defaultMessage: 'foo' },
+          intlDescription: { id: 'foo', defaultMessage: 'foo' },
+          components: {
+            Input: jest.fn(),
+          },
+        },
+        {
+          name: 'field2',
+          pluginId: 'myplugin',
+          type: 'text',
+          icon: jest.fn(),
+          intlLabel: { id: 'foo', defaultMessage: 'foo' },
+          intlDescription: { id: 'foo', defaultMessage: 'foo' },
+          components: {
+            Input: jest.fn(),
+          },
+        },
+      ];
+
+      app.customFields.register(fields);
+      expect(app.customFields.get('plugin::myplugin.field1')).toEqual(fields[0]);
+      expect(app.customFields.get('plugin::myplugin.field2')).toEqual(fields[1]);
+    });
+
+    it('should register a custom field without pluginId', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'appCustomField',
+        type: 'text',
+        icon: jest.fn(),
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      app.customFields.register(field);
+      const uid = 'global::appCustomField';
+      expect(app.customFields.get(uid)).toEqual(field);
+    });
+
+    it('should prevent registering same custom field twice', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'redundantCustomField',
+        pluginId: 'myplugin',
+        type: 'text',
+        icon: jest.fn(),
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      // Second register call should throw
+      app.customFields.register(field);
+      expect(() => app.customFields.register(field)).toThrowError(
+        "Custom field: 'plugin::myplugin.redundantCustomField' has already been registered"
+      );
+    });
+
+    it('should validate the name can be used as an object key', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'test.boom',
+        pluginId: 'myplugin',
+        type: 'text',
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+      };
+
+      expect(() => app.customFields.register(field)).toThrowError(
+        "Custom field name: 'test.boom' is not a valid object key"
+      );
+    });
+
+    it('should prevent registering incomplete custom field', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'incompleteCustomField',
+        pluginId: 'myplugin',
+      };
+
+      expect(() => app.customFields.register(field)).toThrowError(/(a|an) .* must be provided/i);
+    });
+  });
+
   describe('Menu api', () => {
     it('the menu should be defined', () => {
       const app = StrapiApp({ middlewares, reducers, library });
