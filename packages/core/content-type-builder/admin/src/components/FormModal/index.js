@@ -891,8 +891,6 @@ const FormModal = () => {
     advancedFormInputNames.includes(key)
   );
 
-  const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
-
   return (
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
@@ -907,13 +905,7 @@ const FormModal = () => {
           targetUid={targetUid}
           attributeType={attributeType}
         />
-        {isPickingAttribute && (
-          <AttributeOptions
-            attributes={displayedAttributes}
-            forTarget={forTarget}
-            kind={schemaKind || 'collectionType'}
-          />
-        )}
+        {isPickingAttribute && <AttributeOptions attributes={displayedAttributes} />}
         {!isPickingAttribute && (
           <form onSubmit={handleSubmit}>
             <ModalBody>
