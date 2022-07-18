@@ -100,7 +100,10 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
       </Card>
       {error ? (
         <Typography variant="pi" fontWeight="bold" textColor="danger600">
-          {error.message}
+          {formatMessage({
+            id: getTrad(`apiError.${error.response.data.error.message}`),
+            defaultMessage: error.response.data.error.message,
+          })}
         </Typography>
       ) : (
         undefined
