@@ -62,7 +62,6 @@ module.exports = async ({ strapi }) => {
         : ApolloServerPluginLandingPageGraphQLPlayground(),
     ],
 
-    // Required from version 3.9 https://www.apollographql.com/docs/apollo-server/performance/cache-backends/
     cache: 'bounded'
   };
 
