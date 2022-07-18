@@ -164,7 +164,7 @@
   "plugin.description.short": "Modelize the data structure of your API.",
   "plugin.name": "Content-Type Builder",
   "popUpForm.navContainer.advanced": "Advanced settings",
-  "popUpForm.navContainer.base": "Base settings",
+  "popUpForm.navContainer.base": "Basic settings",
   "popUpWarning.bodyMessage.cancel-modifications": "Are you sure you want to cancel your modifications?",
   "popUpWarning.bodyMessage.cancel-modifications.with-components": "Are you sure you want to cancel your modifications? Some components have been created or modified...",
   "popUpWarning.bodyMessage.category.delete": "Are you sure you want to delete this category? All the components will also be deleted.",
