@@ -2,8 +2,6 @@ name: Admin bundle-size
 
 on:
   pull_request:
-    branches:
-      - '**'
     paths:
       - '**/admin/src/**.js'
       - '**/helper-plugin/lib/src/**.js'
