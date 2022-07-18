@@ -34,7 +34,7 @@ import LoadingView from './components/LoadingView';
 import HeaderContentBox from './components/ContentBox';
 import Permissions from './components/Permissions';
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
-import { permissions } from './data';
+import { data as permissions } from './utils/tests/dataMock';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
