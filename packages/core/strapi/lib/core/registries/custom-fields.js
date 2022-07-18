@@ -11,7 +11,12 @@ const customFieldsRegistry = strapi => {
       return customFields;
     },
     get(customField) {
-      return customFields[customField];
+      const registeredCustomField = customFields[customField];
+      if (!registeredCustomField) {
+        throw new Error(`Could not find Custom Field: ${customField}`);
+      }
+
+      return registeredCustomField;
     },
     add(customField) {
       const customFieldList = Array.isArray(customField) ? customField : [customField];
