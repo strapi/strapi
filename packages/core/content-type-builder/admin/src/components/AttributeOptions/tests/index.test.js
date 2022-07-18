@@ -51,7 +51,11 @@ const makeApp = () => {
         <Theme>
           <Router history={history}>
             <FormModalNavigationProvider>
-              <AttributeOptions attributes={mockAttributes} />
+              <AttributeOptions
+                attributes={mockAttributes}
+                forTarget="contentType"
+                kind="collectionType"
+              />
             </FormModalNavigationProvider>
           </Router>
         </Theme>
