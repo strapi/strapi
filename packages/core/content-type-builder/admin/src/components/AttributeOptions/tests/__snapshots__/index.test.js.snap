@@ -110,8 +110,10 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
 }
 
 .c0 {
-  padding: 12px;
+  padding: 32px;
+  padding-top: 12px;
   padding-right: 24px;
+  padding-bottom: 16px;
   padding-left: 24px;
 }
 
