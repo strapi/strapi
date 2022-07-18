@@ -539,7 +539,10 @@ const ProfilePage = () => {
                                     defaultMessage: '{name} mode',
                                   },
                                   {
-                                    name: upperFirst(theme),
+                                    name: formatMessage({
+                                      id: String(upperFirst(theme)).toLowerCase(),
+                                      defaultMessage: upperFirst(theme),
+                                    }),
                                   }
                                 );
 
