@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AttributeOptions renders and matches the snapshot 1`] = `
+exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 .c26 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
@@ -216,7 +216,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
         <h2
           class="c3"
         >
-          Select a field for your collection type
+          Select a field
         </h2>
         <div
           aria-label="Attribute type tabs"
@@ -336,7 +336,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Text
+                                text
                               </span>
                             </div>
                             <div
@@ -345,7 +345,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                Small or long text like title or description
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -403,7 +403,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Email
+                                email
                               </span>
                             </div>
                             <div
@@ -412,7 +412,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                Email field with validations format
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -472,7 +472,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Rich text
+                                richtext
                               </span>
                             </div>
                             <div
@@ -481,7 +481,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                A rich text editor with formatting options
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -535,7 +535,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Password
+                                password
                               </span>
                             </div>
                             <div
@@ -544,7 +544,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                Password field with encryption
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -602,7 +602,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Number
+                                number
                               </span>
                             </div>
                             <div
@@ -611,7 +611,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                Numbers (integer, float, decimal)
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -671,7 +671,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Enumeration
+                                enumeration
                               </span>
                             </div>
                             <div
@@ -680,7 +680,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                List of values, then pick one
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -736,7 +736,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Date
+                                date
                               </span>
                             </div>
                             <div
@@ -745,7 +745,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                A date picker with hours, minutes and seconds
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -805,7 +805,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Media
+                                media
                               </span>
                             </div>
                             <div
@@ -814,7 +814,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                Files like images, videos, etc
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -872,7 +872,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Boolean
+                                boolean
                               </span>
                             </div>
                             <div
@@ -881,7 +881,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                Yes or no, 1 or 0, true or false
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -941,7 +941,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                JSON
+                                json
                               </span>
                             </div>
                             <div
@@ -950,7 +950,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                Data in JSON format
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -1006,7 +1006,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Relation
+                                relation
                               </span>
                             </div>
                             <div
@@ -1015,7 +1015,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                Refers to a Collection Type
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -1069,7 +1069,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                UID
+                                uid
                               </span>
                             </div>
                             <div
@@ -1078,7 +1078,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                Unique identifier
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -1146,7 +1146,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Component
+                                component
                               </span>
                             </div>
                             <div
@@ -1155,7 +1155,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                Group of fields that you can repeat or reuse
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
@@ -1213,7 +1213,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c23"
                               >
-                                Dynamic zone
+                                dynamiczone
                               </span>
                             </div>
                             <div
@@ -1222,7 +1222,7 @@ exports[`AttributeOptions renders and matches the snapshot 1`] = `
                               <span
                                 class="c24"
                               >
-                                Dynamically pick component when editing content
+                                A type for modeling data
                               </span>
                             </div>
                           </div>
