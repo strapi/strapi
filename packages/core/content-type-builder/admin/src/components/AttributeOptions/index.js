@@ -30,7 +30,14 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
 
   return (
     <ModalBody padding={6}>
-      <TabGroup label="Attribute type tabs" id="attribute-type-tabs" variant="simple">
+      <TabGroup
+        label={formatMessage({
+          id: 'modalForm.tab-group.label',
+          defaultMessage: 'Default and Custom types tabs',
+        })}
+        id="attribute-type-tabs"
+        variant="simple"
+      >
         <Flex justifyContent="space-between">
           <Typography variant="beta" as="h2">
             {formatMessage({ id: titleId, defaultMessage: 'Select a field' })}

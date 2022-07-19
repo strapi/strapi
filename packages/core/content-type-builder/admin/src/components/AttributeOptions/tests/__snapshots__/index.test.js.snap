@@ -219,7 +219,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
           Select a field
         </h2>
         <div
-          aria-label="Attribute type tabs"
+          aria-label="Default and Custom types tabs"
           role="tablist"
         >
           <button
