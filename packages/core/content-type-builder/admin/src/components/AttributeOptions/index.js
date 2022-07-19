@@ -22,8 +22,8 @@ import AttributeOption from './AttributeOption';
 const AttributeOptions = ({ attributes, forTarget, kind }) => {
   const { formatMessage } = useIntl();
 
-  const defaultTabId = getTrad(`modalForm.tabs.default`);
-  const customTabId = getTrad(`modalForm.tabs.custom`);
+  const defaultTabId = getTrad('modalForm.tabs.default');
+  const customTabId = getTrad('modalForm.tabs.custom');
 
   const titleIdSuffix = forTarget.includes('component') ? 'component' : kind;
   const titleId = getTrad(`modalForm.sub-header.chooseAttribute.${titleIdSuffix}`);
