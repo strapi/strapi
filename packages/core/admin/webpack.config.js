@@ -52,7 +52,7 @@ module.exports = ({
   return {
     mode: isProduction ? 'production' : 'development',
     bail: isProduction ? true : false,
-    devtool: false,
+    devtool: isProduction ? false : 'eval-source-map',
     experiments: {
       topLevelAwait: true,
     },
