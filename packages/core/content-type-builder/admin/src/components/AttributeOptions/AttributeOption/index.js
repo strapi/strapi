@@ -42,7 +42,10 @@ const AttributeOption = ({ type }) => {
 
           <Flex>
             <Typography variant="pi" textColor="neutral600">
-              {formatMessage({ id: getTrad(`attribute.${type}.description`) })}
+              {formatMessage({
+                id: getTrad(`attribute.${type}.description`),
+                defaultMessage: 'A type for modeling data',
+              })}
             </Typography>
           </Flex>
         </Box>
