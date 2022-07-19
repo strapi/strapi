@@ -1,0 +1,26 @@
+name: Admin bundle-size
+
+on:
+  pull_request:
+    paths:
+      - '**/admin/src/**.js'
+      - '**/helper-plugin/lib/src/**.js'
+      - '**/translations/**.json'
+      - 'yarn.lock'
+
+jobs:
+  admin_size:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: yarn
+
+      - uses: preactjs/compressed-size-action@v2
+        with:
+          pattern: '**/build/**/*.{js,css,html,svg}'
+          strip-hash: "\\.(?:(\\w{8})\\.chunk)|(?:\\.(\\w{8}))"
