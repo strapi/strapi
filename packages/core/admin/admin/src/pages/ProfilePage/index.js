@@ -357,6 +357,7 @@ const ProfilePage = () => {
                               })}
                               name="password"
                               type={passwordShown ? 'text' : 'password'}
+                              autoComplete="new-password"
                               endAction={
                                 <FieldActionWrapper
                                   onClick={e => {
@@ -398,6 +399,7 @@ const ProfilePage = () => {
                               })}
                               name="confirmPassword"
                               type={passwordConfirmShown ? 'text' : 'password'}
+                              autoComplete="new-password"
                               endAction={
                                 <FieldActionWrapper
                                   onClick={e => {
