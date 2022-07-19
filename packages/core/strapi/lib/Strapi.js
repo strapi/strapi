@@ -42,6 +42,8 @@ const sanitizersRegistry = require('./core/registries/sanitizers');
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
 
+console.log('HELLO PAUL');
+
 const LIFECYCLES = {
   REGISTER: 'register',
   BOOTSTRAP: 'bootstrap',
