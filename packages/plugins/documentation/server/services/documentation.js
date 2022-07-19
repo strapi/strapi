@@ -37,7 +37,7 @@ module.exports = ({ strapi }) => {
     getDocumentationVersions() {
       return fs
         .readdirSync(this.getFullDocumentationPath())
-        .map((version) => {
+        .map(version => {
           try {
             const doc = JSON.parse(
               fs.readFileSync(
@@ -51,7 +51,7 @@ module.exports = ({ strapi }) => {
             return null;
           }
         })
-        .filter((x) => x);
+        .filter(x => x);
     },
 
     /**
@@ -98,7 +98,7 @@ module.exports = ({ strapi }) => {
 
     getPluginAndApiInfo() {
       const plugins = _.get(config, 'x-strapi-config.plugins');
-      const pluginsToDocument = plugins.map((plugin) => {
+      const pluginsToDocument = plugins.map(plugin => {
         return {
           name: plugin,
           getter: 'plugin',
@@ -106,7 +106,7 @@ module.exports = ({ strapi }) => {
         };
       });
 
-      const apisToDocument = Object.keys(strapi.api).map((api) => {
+      const apisToDocument = Object.keys(strapi.api).map(api => {
         return {
           name: api,
           getter: 'api',
@@ -185,7 +185,7 @@ module.exports = ({ strapi }) => {
 
       const finalDoc = { ...config, paths };
 
-      registeredDocs.forEach((doc) => {
+      registeredDocs.forEach(doc => {
         // Add tags
         finalDoc.tags = finalDoc.tags || [];
         finalDoc.tags.push(...(doc.tags || []));

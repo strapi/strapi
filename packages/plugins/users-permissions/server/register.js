@@ -17,6 +17,9 @@ module.exports = ({ strapi }) => {
     const specPath = path.join(__dirname, '../documentation/content-api.yaml');
     const spec = fs.readFileSync(specPath, 'utf8');
 
-    strapi.plugin('documentation').service('documentation').registerDoc(spec);
+    strapi
+      .plugin('documentation')
+      .service('documentation')
+      .registerDoc(spec);
   }
 };
