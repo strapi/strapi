@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { get } from 'lodash';
+import { get, capitalize } from 'lodash';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -45,7 +45,7 @@ const CollapsableContentType = ({ actions, label, orderNumber, name }) => {
       onToggle={() => setExpanded(s => !s)}
       variant={orderNumber % 2 ? 'primary' : 'secondary'}
     >
-      <AccordionToggle title={label} />
+      <AccordionToggle title={capitalize(label)} />
       <AccordionContent>
         <Flex justifyContent="space-between" alignItems="center" padding={4}>
           <Box paddingRight={4}>

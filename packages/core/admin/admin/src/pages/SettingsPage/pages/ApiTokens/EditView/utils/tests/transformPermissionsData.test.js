@@ -23,11 +23,16 @@ describe('ADMIN | Container | SettingsPage | ApiTokens | EditView | utils | tran
       singleTypes: {
         'api::homepage': {
           create: false,
-          delete: false,
+          find: false,
           update: false,
         },
       },
-      custom: {},
+      custom: {
+        'api::ticket': {
+          getTicket: false,
+          createTicket: false,
+        },
+      },
     });
   });
 });

@@ -1621,7 +1621,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c80 c82"
                             id="accordion-label-accordion-1"
                           >
-                            category
+                            Category
                           </span>
                         </span>
                       </button>
@@ -1681,7 +1681,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c80 c82"
                             id="accordion-label-accordion-2"
                           >
-                            country
+                            Country
                           </span>
                         </span>
                       </button>
@@ -3526,7 +3526,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c91 c93"
                             id="accordion-label-accordion-3"
                           >
-                            category
+                            Category
                           </span>
                         </span>
                       </button>
@@ -3586,7 +3586,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c91 c93"
                             id="accordion-label-accordion-4"
                           >
-                            country
+                            Country
                           </span>
                         </span>
                       </button>
