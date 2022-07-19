@@ -53,7 +53,7 @@ module.exports = auth => async ({ data, key, attribute }, { remove, set }) => {
   // Creator relations
   else if (isCreatorRelation) {
     // do nothing
-    // collections will transform/remove in api response based on populateCreatorFields
+    // allow 'private' flag to used instead of regular relation access
   }
 
   // Regular relations
