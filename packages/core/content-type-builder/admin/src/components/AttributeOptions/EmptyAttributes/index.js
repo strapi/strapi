@@ -1,0 +1,79 @@
+import React from 'react';
+import styled from 'styled-components';
+import { useIntl } from 'react-intl';
+import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+import { LinkButton } from '@strapi/design-system/LinkButton';
+import { Icon } from '@strapi/design-system/Icon';
+import Plus from '@strapi/icons/Plus';
+import EmptyStateDocument from '@strapi/icons/EmptyDocuments';
+import { getTrad } from '../../../utils';
+
+const EmptyCard = styled(Box)`
+  background: ${({ theme }) =>
+    `linear-gradient(180deg, rgba(234, 234, 239, 0) 0%, ${theme.colors.neutral150} 100%)`};
+  opacity: 0.33;
+`;
+
+export const EmptyCardGrid = () => {
+  return (
+    <Flex wrap="wrap" gap="16px">
+      {Array(4)
+        .fill(null)
+        .map((_, idx) => {
+          return (
+            <EmptyCard
+              // eslint-disable-next-line react/no-array-index-key
+              key={`empty-card-${idx}`}
+              height="138px"
+              width="375px"
+              hasRadius
+            />
+          );
+        })}
+    </Flex>
+  );
+};
+
+const EmptyAttributes = () => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Box position="relative">
+      <EmptyCardGrid />
+      <Box position="absolute" top={6} width="100%">
+        <Flex alignItems="center" justifyContent="center" direction="column">
+          <Icon as={EmptyStateDocument} color="" width="160px" height="88px" />
+          <Box paddingTop={6} paddingBottom={4}>
+            <Box textAlign="center">
+              <Typography variant="delta" as="p" textColor="neutral600">
+                {formatMessage({
+                  id: getTrad('modalForm.empty.heading'),
+                  defaultMessage: 'Nothing in here yet.',
+                })}
+              </Typography>
+              <Box paddingTop={4}>
+                <Typography variant="delta" as="p" textColor="neutral600" lineHeight="2.25">
+                  {formatMessage({
+                    id: getTrad('modalForm.empty.sub-heading'),
+                    defaultMessage:
+                      'Find what you are looking for through a wide range of extensions.',
+                  })}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+          <LinkButton to="/marketplace" variant="secondary" startIcon={<Plus />}>
+            {formatMessage({
+              id: getTrad('modalForm.empty.button'),
+              defaultMessage: 'Add custom fields',
+            })}
+          </LinkButton>
+        </Flex>
+      </Box>
+    </Box>
+  );
+};
+
+export default EmptyAttributes;
