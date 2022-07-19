@@ -15604,12 +15604,12 @@ koa-is-json@^1.0.0:
   resolved "https://registry.yarnpkg.com/koa-is-json/-/koa-is-json-1.0.0.tgz#273c07edcdcb8df6a2c1ab7d59ee76491451ec14"
   integrity sha1-JzwH7c3Ljfaiwat9We52SRRR7BQ=
 
-koa-passport@4.1.4:
-  version "4.1.4"
-  resolved "https://registry.yarnpkg.com/koa-passport/-/koa-passport-4.1.4.tgz#5f1665c1c2a37ace79af9f970b770885ca30ccfa"
-  integrity sha512-dJBCkl4X+zdYxbI2V2OtoGy0PUenpvp2ZLLWObc8UJhsId0iQpTFT8RVcuA0709AL2txGwRHnSPoT1bYNGa6Kg==
+koa-passport@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/koa-passport/-/koa-passport-5.0.0.tgz#66c8e91b06358969ab6129d90368fa07a06fafc0"
+  integrity sha512-eNGg3TGgZ4ydm9DYCOqaa0ySSA/44BS6X+v4CKjP/nHOoXlADRonHsZvS3QWok6EV0ZL0V7FhfWxRYfD2B5kTQ==
   dependencies:
-    passport "^0.4.0"
+    passport "^0.6.0"
 
 koa-range@0.3.0:
   version "0.3.0"
@@ -18675,13 +18675,14 @@ passport-strategy@1.x.x:
   resolved "https://registry.yarnpkg.com/passport-strategy/-/passport-strategy-1.0.0.tgz#b5539aa8fc225a3d1ad179476ddf236b440f52e4"
   integrity sha1-tVOaqPwiWj0a0XlHbd8ja0QPUuQ=
 
-passport@^0.4.0:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/passport/-/passport-0.4.1.tgz#941446a21cb92fc688d97a0861c38ce9f738f270"
-  integrity sha512-IxXgZZs8d7uFSt3eqNjM9NQ3g3uQCW5avD8mRNoXV99Yig50vjuaez6dQK2qC0kVWPRTujxY0dWgGfT09adjYg==
+passport@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/passport/-/passport-0.6.0.tgz#e869579fab465b5c0b291e841e6cc95c005fac9d"
+  integrity sha512-0fe+p3ZnrWRW74fe8+SvCyf4a3Pb2/h7gFkQ8yTJpAO50gDzlfjZUZTO1k5Eg9kUct22OxHLqDZoKUWRHOh9ug==
   dependencies:
     passport-strategy "1.x.x"
     pause "0.0.1"
+    utils-merge "^1.0.1"
 
 path-browserify@0.0.1:
   version "0.0.1"
@@ -23409,7 +23410,7 @@ utila@~0.4:
   resolved "https://registry.yarnpkg.com/utila/-/utila-0.4.0.tgz#8a16a05d445657a3aea5eecc5b12a4fa5379772c"
   integrity sha1-ihagXURWV6Oupe7MWxKk+lN5dyw=
 
-utils-merge@1.0.1, utils-merge@1.x.x:
+utils-merge@1.0.1, utils-merge@1.x.x, utils-merge@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
