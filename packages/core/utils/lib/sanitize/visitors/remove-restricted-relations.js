@@ -2,7 +2,8 @@
 
 const ACTIONS_TO_VERIFY = ['find'];
 
-// FIXME: Support populating creator fields
+const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = require('../../content-types').constants;
+
 module.exports = auth => async ({ data, key, attribute }, { remove, set }) => {
   const isRelation = attribute.type === 'relation';
 
@@ -42,10 +43,17 @@ module.exports = auth => async ({ data, key, attribute }, { remove, set }) => {
   };
 
   const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
+  const isCreatorRelation = [CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE].includes(key);
 
   // Polymorphic relations
   if (isMorphRelation) {
     await handleMorphRelation();
+  }
+
+  // Creator relations
+  else if (isCreatorRelation) {
+    // do nothing
+    // collections will transform/remove in api response based on populateCreatorFields
   }
 
   // Regular relations
