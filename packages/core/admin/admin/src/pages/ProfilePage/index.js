@@ -531,27 +531,23 @@ const ProfilePage = () => {
                                 });
                               }}
                             >
-                              {themesToDisplay.map(theme => {
-                                const label = formatMessage(
-                                  {
-                                    id:
-                                      'Settings.profile.form.section.experience.mode.option-label',
-                                    defaultMessage: '{name} mode',
-                                  },
-                                  {
-                                    name: formatMessage({
-                                      id: String(upperFirst(theme)).toLowerCase(),
-                                      defaultMessage: upperFirst(theme),
-                                    }),
-                                  }
-                                );
-
-                                return (
-                                  <Option value={theme} key={theme}>
-                                    {label}
-                                  </Option>
-                                );
-                              })}
+                              {themesToDisplay.map(theme => (
+                                <Option value={theme} key={theme}>
+                                  {formatMessage(
+                                    {
+                                      id:
+                                        'Settings.profile.form.section.experience.mode.option-label',
+                                      defaultMessage: '{name} mode',
+                                    },
+                                    {
+                                      name: formatMessage({
+                                        id: theme,
+                                        defaultMessage: upperFirst(theme),
+                                      }),
+                                    }
+                                  )}
+                                </Option>
+                              ))}
                             </Select>
                           </GridItem>
                         </Grid>

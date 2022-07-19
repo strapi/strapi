@@ -1,6 +1,6 @@
 export default {
   config: {
-    locales: ['fr', 'zh-Hans'],
+    locales: ['fr'],
   },
   bootstrap() {},
 };
