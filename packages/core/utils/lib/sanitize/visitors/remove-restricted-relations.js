@@ -4,7 +4,7 @@ const ACTIONS_TO_VERIFY = ['find'];
 
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = require('../../content-types').constants;
 
-module.exports = auth => async ({ data, key, attribute }, { remove, set }) => {
+module.exports = auth => async ({ data, key, attribute, schema }, { remove, set }) => {
   const isRelation = attribute.type === 'relation';
 
   if (!isRelation) {
@@ -51,7 +51,7 @@ module.exports = auth => async ({ data, key, attribute }, { remove, set }) => {
   }
 
   // Creator relations
-  else if (isCreatorRelation) {
+  else if (isCreatorRelation && schema.options.populateCreatorFields) {
     // do nothing
     // allow 'private' flag to used instead of regular relation access
   }
