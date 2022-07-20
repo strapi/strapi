@@ -53,7 +53,6 @@ module.exports = auth => async ({ data, key, attribute, schema }, { remove, set 
   // Creator relations
   else if (isCreatorRelation && schema.options.populateCreatorFields) {
     // do nothing
-    // allow 'private' flag to used instead of regular relation access
   }
 
   // Regular relations
