@@ -37,7 +37,7 @@ export const Header = ({
         id: getTrad('plugin.name'),
         defaultMessage: `Media Library`,
       })}${name ? ` - ${name}` : ''}`}
-      subtitle={breadcrumbs && <Breadcrumbs breadcrumbs={breadcrumbs} />}
+      subtitle={breadcrumbs && <Breadcrumbs label="Folders navigation" breadcrumbs={breadcrumbs} />}
       navigationAction={
         folder && (
           <Link

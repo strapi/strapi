@@ -1,6 +1,6 @@
 import getFolderURL from './getFolderURL';
 
-const getBreadcrumData = (folder, { pathname, query }) => {
+const getBreadcrumbData = (folder, { pathname, query }) => {
   let data = [
     {
       id: null,
@@ -31,4 +31,4 @@ const getBreadcrumData = (folder, { pathname, query }) => {
   return data;
 };
 
-export default getBreadcrumData;
+export default getBreadcrumbData;

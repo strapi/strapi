@@ -5,6 +5,6 @@ export { default as getTrad } from './getTrad';
 export { default as findRecursiveFolderByValue } from './findRecursiveFolderByValue';
 export { default as findRecursiveFolderMetadatas } from './findRecursiveFolderMetadatas';
 export { default as containsAssetFilter } from './containsAssetFilter';
-export { default as getBreadcrumData } from './getBreadcrumbData';
+export { default as getBreadcrumbData } from './getBreadcrumbData';
 export { default as getFolderURL } from './getFolderURL';
 export * from './formatDuration';
