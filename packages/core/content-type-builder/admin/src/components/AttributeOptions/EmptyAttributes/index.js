@@ -19,19 +19,17 @@ const EmptyCard = styled(Box)`
 export const EmptyCardGrid = () => {
   return (
     <Flex wrap="wrap" gap={4}>
-      {Array(4)
-        .fill(null)
-        .map((_, idx) => {
-          return (
-            <EmptyCard
-              // eslint-disable-next-line react/no-array-index-key
-              key={`empty-card-${idx}`}
-              height="138px"
-              width="375px"
-              hasRadius
-            />
-          );
-        })}
+      {[...Array(4)].map((_, idx) => {
+        return (
+          <EmptyCard
+            // eslint-disable-next-line react/no-array-index-key
+            key={`empty-card-${idx}`}
+            height="138px"
+            width="375px"
+            hasRadius
+          />
+        );
+      })}
     </Flex>
   );
 };
