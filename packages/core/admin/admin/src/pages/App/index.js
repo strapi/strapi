@@ -13,6 +13,7 @@ import {
   useNotification,
   TrackingContext,
   prefixFileUrlWithBackendUrl,
+  useAppInfos,
 } from '@strapi/helper-plugin';
 import { SkipToContent } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
@@ -34,6 +35,7 @@ function App() {
   const { updateProjectSettings } = useConfigurations();
   const { formatMessage } = useIntl();
   const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
+  const appInfo = useAppInfos();
 
   const authRoutes = useMemo(() => {
     return makeUniqueRoutes(
@@ -85,8 +87,8 @@ function App() {
                 uuid,
                 deviceId,
                 properties: {
-                  environment: process.env.NODE_ENV
-                }
+                  environment: appInfo.currentEnvironment,
+                },
               }),
               headers: {
                 'Content-Type': 'application/json',
@@ -107,6 +109,7 @@ function App() {
     };
 
     getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggleNotification, updateProjectSettings]);
 
   const setHasAdmin = hasAdmin => setState(prev => ({ ...prev, hasAdmin }));
