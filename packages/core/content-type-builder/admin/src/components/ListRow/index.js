@@ -20,6 +20,7 @@ import AttributeIcon from '../AttributeIcon';
 
 function ListRow({
   configurable,
+  customField,
   editTarget,
   firstLoopComponentUid,
   isFromDynamicZone,
@@ -38,7 +39,7 @@ function ListRow({
   const isMorph = type === 'relation' && relation.includes('morph');
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
 
-  let readableType = type;
+  let readableType = customField || type;
 
   if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
     readableType = 'number';
@@ -93,7 +94,7 @@ function ListRow({
       <td style={{ position: 'relative' }}>
         {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
         <Stack paddingLeft={2} spacing={4} horizontal>
-          <AttributeIcon key={src} type={src} />
+          <AttributeIcon type={src} customField={customField} />
           <Typography fontWeight="bold">{name}</Typography>
         </Stack>
       </td>
@@ -121,7 +122,7 @@ function ListRow({
           <Typography>
             {formatMessage({
               id: getTrad(`attribute.${readableType}`),
-              defaultMessage: type,
+              defaultMessage: customField ? 'Custom field' : type,
             })}
             &nbsp;
             {repeatable &&
@@ -184,6 +185,7 @@ function ListRow({
 
 ListRow.defaultProps = {
   configurable: true,
+  customField: null,
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
   onClick: () => {},
@@ -197,6 +199,7 @@ ListRow.defaultProps = {
 
 ListRow.propTypes = {
   configurable: PropTypes.bool,
+  customField: PropTypes.string,
   editTarget: PropTypes.string.isRequired,
   firstLoopComponentUid: PropTypes.string,
   isFromDynamicZone: PropTypes.bool,

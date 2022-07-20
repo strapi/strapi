@@ -4,6 +4,7 @@
   "attribute.boolean.description": "Yes or no, 1 or 0, true or false",
   "attribute.component": "Component",
   "attribute.component.description": "Group of fields that you can repeat or reuse",
+  "attribute.customField": "Custom field",
   "attribute.date": "Date",
   "attribute.date.description": "A date picker with hours, minutes and seconds",
   "attribute.datetime": "Datetime",
