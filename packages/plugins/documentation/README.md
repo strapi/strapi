@@ -84,7 +84,7 @@ Overriding the `full_documentation.json` is a bad idea since it will be regenera
 
 **_NOTE 2_**
 
-You can easily modify the description, summary, parameters of a path however, for a response like the `200` you will need to write the full object. Take a look at the `src/extensions/users-permissions/documentation/1.0.0/users-permissions.json` for a complete example.
+You can modify the `tags`, `paths`, and `components` keys on the generated documentation by providing replacement values. You can see how the API is used in the users-permissions plugin: `packages/plugins/users-permissions/server/register.js`
 
 ### FAQ
 
