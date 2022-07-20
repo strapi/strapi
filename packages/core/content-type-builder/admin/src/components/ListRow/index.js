@@ -17,6 +17,7 @@ import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
 import BoxWrapper from './BoxWrapper';
 import AttributeIcon from '../AttributeIcon';
+import DisplayedType from './DisplayedType';
 
 function ListRow({
   configurable,
@@ -39,7 +40,7 @@ function ListRow({
   const isMorph = type === 'relation' && relation.includes('morph');
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
 
-  let readableType = customField || type;
+  let readableType = type;
 
   if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
     readableType = 'number';
@@ -119,18 +120,11 @@ function ListRow({
             </span>
           </Typography>
         ) : (
-          <Typography>
-            {formatMessage({
-              id: getTrad(`attribute.${readableType}`),
-              defaultMessage: customField ? 'Custom field' : type,
-            })}
-            &nbsp;
-            {repeatable &&
-              formatMessage({
-                id: getTrad('component.repeatable'),
-                defaultMessage: '(repeatable)',
-              })}
-          </Typography>
+          <DisplayedType
+            customField={customField}
+            readableType={readableType}
+            repeatable={repeatable}
+          />
         )}
       </td>
       <td>
