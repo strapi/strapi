@@ -123,17 +123,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   margin: 0;
 }
 
-.c15 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 0px;
-}
-
-.c16 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
 .c0 {
   padding: 24px;
 }
@@ -173,6 +162,17 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 
 .c4[aria-disabled='true'] {
   cursor: not-allowed;
+}
+
+.c15 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
+}
+
+.c16 {
+  grid-column: span 6;
+  max-width: 100%;
 }
 
 .c21 {

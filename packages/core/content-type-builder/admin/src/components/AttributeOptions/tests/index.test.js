@@ -3,9 +3,17 @@ import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { render, screen, getByText, fireEvent } from '@testing-library/react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { useCustomFields } from '@strapi/helper-plugin';
 import { IntlProvider } from 'react-intl';
 import FormModalNavigationProvider from '../../FormModalNavigationProvider';
 import AttributeOptions from '../index';
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useCustomFields: jest.fn(() => ({
+    getAll: jest.fn(() => ({})),
+  })),
+}));
 
 const mockAttributes = [
   [
@@ -73,7 +81,7 @@ describe('<AttributeOptions />', () => {
     expect(comingSoonText).toEqual(null);
   });
 
-  it('switches to the custom tab', () => {
+  it('switches to the custom tab without custom fields', () => {
     const App = makeApp();
     render(App);
 
@@ -85,5 +93,42 @@ describe('<AttributeOptions />', () => {
 
     expect(customTabText).not.toBe(null);
     expect(comingSoonText).toBeVisible();
+  });
+
+  it('switches to the custom tab with custom fields', () => {
+    useCustomFields.mockImplementationOnce(
+      jest.fn(() => ({
+        getAll: jest.fn(() => ({
+          'plugin::mycustomfields.test': {
+            name: 'color',
+            pluginId: 'mycustomfields',
+            type: 'text',
+            intlLabel: {
+              id: 'mycustomfields.color.label',
+              defaultMessage: 'Color',
+            },
+            intlDescription: {
+              id: 'mycustomfields.color.description',
+              defaultMessage: 'Select any color',
+            },
+            components: {
+              Input: jest.fn(),
+            },
+          },
+        })),
+      }))
+    );
+
+    const App = makeApp();
+    render(App);
+
+    const customTab = screen.getByRole('tab', { selected: false });
+    fireEvent.click(customTab);
+    const customTabSelected = screen.getByRole('tab', { selected: true });
+    const customTabText = getByText(customTabSelected, 'Custom');
+    const customFieldText = screen.getByText('Color');
+
+    expect(customTabText).not.toBe(null);
+    expect(customFieldText).toBeVisible();
   });
 });
