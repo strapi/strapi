@@ -8,6 +8,23 @@ const FormModalNavigationProvider = ({ children }) => {
   const [state, setFormModalNavigationState] = useState(INITIAL_STATE_DATA);
   const { trackUsage } = useTracking();
 
+  const onClickSelectCustomField = ({ attributeType, customFieldUid }) => {
+    if (state.forTarget === 'contentType') {
+      trackUsage('didSelectContentTypeFieldType', { type: attributeType });
+    }
+
+    setFormModalNavigationState(prevState => {
+      return {
+        ...prevState,
+        actionType: 'create',
+        // TODO: Create a new modalType on EXPANSION-245
+        modalType: 'attribute',
+        attributeType,
+        customFieldUid,
+      };
+    });
+  };
+
   const onClickSelectField = ({ attributeType, step }) => {
     if (state.forTarget === 'contentType') {
       trackUsage('didSelectContentTypeFieldType', { type: attributeType });
@@ -146,6 +163,7 @@ const FormModalNavigationProvider = ({ children }) => {
       value={{
         ...state,
         onClickSelectField,
+        onClickSelectCustomField,
         onCloseModal,
         onNavigateToChooseAttributeModal,
         onNavigateToAddCompoToDZModal,
