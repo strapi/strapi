@@ -18,7 +18,7 @@ const EmptyCard = styled(Box)`
 
 export const EmptyCardGrid = () => {
   return (
-    <Flex wrap="wrap" gap="16px">
+    <Flex wrap="wrap" gap={4}>
       {Array(4)
         .fill(null)
         .map((_, idx) => {
@@ -54,7 +54,7 @@ const EmptyAttributes = () => {
                 })}
               </Typography>
               <Box paddingTop={4}>
-                <Typography variant="delta" as="p" textColor="neutral600" lineHeight="2.25">
+                <Typography variant="delta" as="p" textColor="neutral600">
                   {formatMessage({
                     id: getTrad('modalForm.empty.sub-heading'),
                     defaultMessage:
