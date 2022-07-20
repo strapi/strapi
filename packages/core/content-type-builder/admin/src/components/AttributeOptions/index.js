@@ -18,6 +18,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { getTrad } from '../../utils';
 import AttributeOption from './AttributeOption';
+import EmptyAttributes from './EmptyAttributes';
 
 const AttributeOptions = ({ attributes, forTarget, kind }) => {
   const { formatMessage } = useIntl();
@@ -32,7 +33,7 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
     <ModalBody padding={6}>
       <TabGroup
         label={formatMessage({
-          id: 'modalForm.tab-group.label',
+          id: getTrad('modalForm.tabs.label'),
           defaultMessage: 'Default and Custom types tabs',
         })}
         id="attribute-type-tabs"
@@ -84,7 +85,7 @@ const AttributeOptions = ({ attributes, forTarget, kind }) => {
             </KeyboardNavigable>
           </TabPanel>
           <TabPanel>
-            <Typography>Coming soon</Typography>
+            <EmptyAttributes />
           </TabPanel>
         </TabPanels>
       </TabGroup>
