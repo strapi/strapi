@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Stack } from '@strapi/design-system/Stack';
@@ -108,6 +108,21 @@ const DateTimePicker = ({
       onChange(dateToSet);
     }
   };
+
+  useEffect(() => {
+    if (value) {
+      const parsedData = parseDate(value);
+      setDateValue(parsedData);
+      setTimeValue(
+        parsedData
+          ? `${parsedData.getHours()}:${parsedData.getMinutes()}:${parsedData.getSeconds()}`
+          : null
+      );
+    } else if ((!value && dateValue) || timeValue) {
+      setDateValue(undefined);
+      setTimeValue(undefined);
+    }
+  }, [value, dateValue, timeValue]);
 
   return (
     <CustomField
