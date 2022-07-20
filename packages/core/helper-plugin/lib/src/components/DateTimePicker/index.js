@@ -118,11 +118,11 @@ const DateTimePicker = ({
           ? `${parsedData.getHours()}:${parsedData.getMinutes()}:${parsedData.getSeconds()}`
           : null
       );
-    } else if ((!value && dateValue) || timeValue) {
+    } else {
       setDateValue(undefined);
       setTimeValue(undefined);
     }
-  }, [value, dateValue, timeValue]);
+  }, [value]);
 
   return (
     <CustomField
