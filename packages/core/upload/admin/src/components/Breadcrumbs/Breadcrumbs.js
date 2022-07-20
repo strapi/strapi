@@ -1,21 +1,21 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import { Crumb, CrumbLink, CrumbSimpleMenu } from '@strapi/design-system/v2/Breadcrumbs';
+
 import { BreadcrumbsDefinition, CrumbMenuDefinition, CrumbDefinition } from '../../constants';
 
-const CrumbSwitch = ({ crumb }) => {
+// eslint-disable-next-line react/prop-types
+const CrumbSwitch = ({ crumb, isLast }) => {
   if (Array.isArray(crumb)) {
-    // <CrumbSimpleMenu />
-    return <button type="button">...</button>;
+    return <CrumbSimpleMenu />;
   }
 
   if (crumb.href) {
-    // <CrumbLink />
-    return <a href={crumb.href}>{crumb.label}</a>;
+    return <CrumbLink href={crumb.href}>{crumb.label}</CrumbLink>;
   }
 
-  // <CrumbLink isCurrent />
-  return <em aria-current>{crumb.label}</em>;
+  return <Crumb isCurrent={isLast}>{crumb.label}</Crumb>;
 };
 
 CrumbSwitch.propTypes = {
@@ -25,9 +25,9 @@ CrumbSwitch.propTypes = {
 export const Breadcrumbs = ({ breadcrumbs, ...props }) => (
   <nav>
     <ol {...props}>
-      {breadcrumbs.map(crumb => (
+      {breadcrumbs.map((crumb, index) => (
         <li key={`breadcrumb-${crumb?.id ?? 'root'}`}>
-          <CrumbSwitch crumb={crumb} />
+          <CrumbSwitch crumb={crumb} isLast={index + 1 === breadcrumbs.length} />
         </li>
       ))}
     </ol>
@@ -35,5 +35,5 @@ export const Breadcrumbs = ({ breadcrumbs, ...props }) => (
 );
 
 Breadcrumbs.propTypes = {
-  breadcrumbs: PropTypes.arrayOf(BreadcrumbsDefinition).isRequired,
+  breadcrumbs: BreadcrumbsDefinition.isRequired,
 };
