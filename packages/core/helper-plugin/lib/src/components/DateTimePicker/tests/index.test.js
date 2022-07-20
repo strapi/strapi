@@ -38,7 +38,7 @@ describe('DateTimePicker', () => {
     expect(screen.getByText('13:45')).toBeInTheDocument();
     const datepicker = screen.getByTestId('datetimepicker-date');
 
-    expect(datepicker.value).toBe('10/13/2021');
+    expect(datepicker.value).toBe('13/10/2021');
   });
 
   it('should rerender a new value passed as props', () => {
