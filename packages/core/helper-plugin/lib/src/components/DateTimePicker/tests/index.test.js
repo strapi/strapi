@@ -40,4 +40,67 @@ describe('DateTimePicker', () => {
 
     expect(datepicker.value).toBe('10/13/2021');
   });
+
+  it('should rerender a new value passed as props', () => {
+    const { rerender } = render(
+      <ThemeProvider theme={lightTheme}>
+        <DateTimePicker
+          value={new Date('2021-10-13T13:43:00.000Z')}
+          step={15}
+          onChange={() => {}}
+          name="datetimepicker"
+          label="Date time picker"
+          hint="This is a super description"
+        />
+      </ThemeProvider>
+    );
+
+    rerender(
+      <ThemeProvider theme={lightTheme}>
+        <DateTimePicker
+          value={new Date('2021-10-04T13:00:00.000Z')}
+          step={15}
+          onChange={() => {}}
+          name="datetimepicker"
+          label="Date time picker"
+          hint="This is a super description"
+        />
+      </ThemeProvider>
+    );
+
+    const datepicker = screen.getByTestId('datetimepicker-date');
+
+    expect(datepicker.value).toBe('4/10/2021');
+  });
+
+  it('should rerender an empty value if it is passed as props', () => {
+    const { rerender } = render(
+      <ThemeProvider theme={lightTheme}>
+        <DateTimePicker
+          value={new Date('2021-10-13T13:43:00.000Z')}
+          step={15}
+          onChange={() => {}}
+          name="datetimepicker"
+          label="Date time picker"
+          hint="This is a super description"
+        />
+      </ThemeProvider>
+    );
+
+    rerender(
+      <ThemeProvider theme={lightTheme}>
+        <DateTimePicker
+          step={15}
+          onChange={() => {}}
+          name="datetimepicker"
+          label="Date time picker"
+          hint="This is a super description"
+        />
+      </ThemeProvider>
+    );
+
+    const datepicker = screen.getByTestId('datetimepicker-date');
+
+    expect(datepicker.value).toBe('');
+  });
 });
