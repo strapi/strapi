@@ -19,24 +19,8 @@ const reducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
     const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
-    const layoutPathRelations = ['modifiedData', 'layouts', 'editRelations'];
 
     switch (action.type) {
-      case 'ADD_RELATION': {
-        const editRelationLayoutValue = get(state, layoutPathRelations, []);
-        set(draftState, layoutPathRelations, [...editRelationLayoutValue, action.name]);
-        break;
-      }
-      case 'MOVE_RELATION': {
-        const editRelationLayoutValue = get(state, layoutPathRelations, []);
-        const { fromIndex, toIndex } = action;
-        set(
-          draftState,
-          layoutPathRelations,
-          arrayMoveItem(editRelationLayoutValue, fromIndex, toIndex)
-        );
-        break;
-      }
       case 'MOVE_ROW': {
         const editFieldLayoutValue = get(state, layoutPathEdit, []);
         const { fromIndex, toIndex } = action;
@@ -107,15 +91,6 @@ const reducer = (state = initialState, action) =>
         }
         const updatedList = formatLayout(get(newState, layoutPathEdit, []));
         set(draftState, layoutPathEdit, updatedList);
-        break;
-      }
-      case 'REMOVE_RELATION': {
-        const relationList = get(state, layoutPathRelations, []);
-        set(
-          draftState,
-          layoutPathRelations,
-          relationList.filter((_, index) => action.index !== index)
-        );
         break;
       }
       case 'REORDER_DIFF_ROW': {

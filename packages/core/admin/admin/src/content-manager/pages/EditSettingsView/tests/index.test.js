@@ -41,7 +41,6 @@ const makeApp = (history, layout) => {
         ],
       ],
       list: ['postal_code', 'categories'],
-      editRelations: ['categories'],
     },
     metadatas: {
       postal_code: { edit: {}, list: { label: 'postal_code' } },
@@ -91,25 +90,6 @@ describe('EditSettingsView', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('should add relation', async () => {
-    const history = createMemoryHistory();
-
-    const { container } = render(makeApp(history), { container: document.body });
-
-    await waitFor(() =>
-      expect(screen.getByText('Configure the view - Address')).toBeInTheDocument()
-    );
-
-    fireEvent.mouseDown(screen.getByTestId('add-relation'));
-
-    await waitFor(() => expect(screen.getByText('categories')).toBeInTheDocument());
-
-    fireEvent.mouseDown(screen.getByText('categories'));
-    fireEvent.mouseDown(screen.getByTestId('add-relation'));
-
-    expect(container).toMatchSnapshot();
-  });
-
   it('should add field', async () => {
     const history = createMemoryHistory();
 
@@ -139,7 +119,6 @@ describe('EditSettingsView', () => {
       layouts: {
         edit: [[{ name: 'postal_code', size: 6 }]],
         list: ['postal_code'],
-        editRelations: [],
       },
       metadatas: {
         postal_code: { edit: {}, list: { label: 'postal_code' } },
