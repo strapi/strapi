@@ -127,8 +127,10 @@ describe('<AttributeOptions />', () => {
     const customTabSelected = screen.getByRole('tab', { selected: true });
     const customTabText = getByText(customTabSelected, 'Custom');
     const customFieldText = screen.getByText('Color');
+    const howToAddLink = screen.getByRole('link', { name: 'How to add custom fields' });
 
     expect(customTabText).not.toBe(null);
     expect(customFieldText).toBeVisible();
+    expect(howToAddLink).toBeVisible();
   });
 });

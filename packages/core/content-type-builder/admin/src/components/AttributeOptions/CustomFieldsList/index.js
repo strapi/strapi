@@ -4,11 +4,18 @@ import { Box } from '@strapi/design-system/Box';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
 import { Stack } from '@strapi/design-system/Stack';
+import { Link } from '@strapi/design-system/Link';
+import { useIntl } from 'react-intl';
 import EmptyAttributes from '../EmptyAttributes';
 import CustomFieldOption from '../CustomFieldOption';
 import getPadding from '../utils/getPadding';
+import { getTrad } from '../../../utils';
+
+const HOW_TO_CUSTOM_FIELDS_DOCS_LINK =
+  'https://docs.strapi.io/developer-docs/latest/getting-started/introduction.html';
 
 const CustomFieldsList = () => {
+  const { formatMessage } = useIntl();
   const customFields = useCustomFields();
   const registeredCustomFields = Object.entries(customFields.getAll());
 
@@ -21,7 +28,7 @@ const CustomFieldsList = () => {
 
   return (
     <KeyboardNavigable tagName="button">
-      <Stack spacing={8}>
+      <Stack spacing={3}>
         <Grid gap={0}>
           {sortedCustomFields.map(([uid, customField], index) => {
             const { paddingLeft, paddingRight } = getPadding(index);
@@ -40,6 +47,12 @@ const CustomFieldsList = () => {
             );
           })}
         </Grid>
+        <Link href={HOW_TO_CUSTOM_FIELDS_DOCS_LINK} isExternal>
+          {formatMessage({
+            id: getTrad('modalForm.tabs.custom.howToLink'),
+            defaultMessage: 'How to add custom fields',
+          })}
+        </Link>
       </Stack>
     </KeyboardNavigable>
   );
