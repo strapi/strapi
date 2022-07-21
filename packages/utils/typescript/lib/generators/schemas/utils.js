@@ -103,7 +103,7 @@ const toTypeLiteral = data => {
   }
 
   if (isDate(data)) {
-    return factory.createTypeReferenceNode('Date');
+    return factory.createStringLiteral(data.toISOString());
   }
 
   if (typeof data !== 'object') {
