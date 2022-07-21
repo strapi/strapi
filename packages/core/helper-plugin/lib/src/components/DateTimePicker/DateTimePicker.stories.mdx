@@ -4,7 +4,22 @@ import { useState } from 'react';
 import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
 import DateTimePicker from './index';
 
-<Meta title="components/DateTimePicker" component={DateTimePicker} />
+<Meta 
+  title="components/DateTimePicker" 
+  component={DateTimePicker}
+  argTypes={{
+    label: {
+      control: { 
+        type: 'text'
+      }
+    },
+    value: {
+      control: {
+        type: 'date'
+      }
+    }
+  }}
+/>
 
 # DateTimePicker
 
@@ -38,7 +53,6 @@ Description...
 <Canvas>
   <Story name="error">
     <DateTimePicker
-      label="Date time picker"
       hint="This is a super description"
       error="Very very very very very very very long error"
     />
@@ -54,7 +68,7 @@ Description...
     <DateTimePicker
       label="Date time picker"
       hint="This is a super description"
-      value="2021-10-13T10dd:00:00.000Z"
+      value="2021-10-13T10:00:00.000Z"
     />
   </Story>
 </Canvas>
