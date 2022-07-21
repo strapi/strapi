@@ -18,7 +18,7 @@ import SingleType from '@strapi/icons/SingleType';
 import Text from '@strapi/icons/Text';
 import Uid from '@strapi/icons/Uid';
 import Numbers from '@strapi/icons/Number';
-import { pxToRem } from '@strapi/helper-plugin';
+import { pxToRem, useCustomFields } from '@strapi/helper-plugin';
 
 const iconByTypes = {
   biginteger: Numbers,
@@ -52,14 +52,24 @@ const iconByTypes = {
   uid: Uid,
 };
 
-export const IconBox = styled(Box)`
+const IconBox = styled(Box)`
   width: ${pxToRem(32)};
   height: ${pxToRem(24)};
   box-sizing: content-box;
 `;
 
-const AttributeIcon = ({ type, ...rest }) => {
-  const Compo = iconByTypes[type];
+const AttributeIcon = ({ type, customField, ...rest }) => {
+  const customFieldsRegistry = useCustomFields();
+
+  let Compo = iconByTypes[type];
+
+  if (customField) {
+    const { icon } = customFieldsRegistry.get(customField);
+
+    if (icon) {
+      Compo = icon;
+    }
+  }
 
   if (!iconByTypes[type]) {
     return null;
@@ -68,8 +78,13 @@ const AttributeIcon = ({ type, ...rest }) => {
   return <IconBox as={Compo} {...rest} />;
 };
 
+AttributeIcon.defaultProps = {
+  customField: null,
+};
+
 AttributeIcon.propTypes = {
   type: PropTypes.string.isRequired,
+  customField: PropTypes.string,
 };
 
 export default AttributeIcon;

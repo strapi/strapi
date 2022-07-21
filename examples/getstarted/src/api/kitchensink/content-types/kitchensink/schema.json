@@ -130,6 +130,10 @@
     "morph_to_many": {
       "type": "relation",
       "relation": "morphToMany"
+    },
+    "custom_field": {
+      "type": "customField",
+      "customField": "plugin::mycustomfields.color"
     }
   }
 }
