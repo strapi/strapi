@@ -11,6 +11,7 @@ const {
   isNull,
   isString,
   isNumber,
+  isDate,
   isArray,
   isBoolean,
   propEq,
@@ -99,6 +100,10 @@ const toTypeLiteral = data => {
 
   if (isArray(data)) {
     return factory.createTupleTypeNode(data.map(item => toTypeLiteral(item)));
+  }
+
+  if (isDate(data)) {
+    return factory.createTypeReferenceNode('Date');
   }
 
   if (typeof data !== 'object') {
