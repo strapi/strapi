@@ -3,16 +3,37 @@ import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { render, screen, getByText, fireEvent } from '@testing-library/react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { useCustomFields } from '@strapi/helper-plugin';
 import { IntlProvider } from 'react-intl';
 import FormModalNavigationProvider from '../../FormModalNavigationProvider';
 import AttributeOptions from '../index';
 
+const mockCustomField = {
+  'plugin::mycustomfields.test': {
+    name: 'color',
+    pluginId: 'mycustomfields',
+    type: 'text',
+    icon: jest.fn(),
+    intlLabel: {
+      id: 'mycustomfields.color.label',
+      defaultMessage: 'Color',
+    },
+    intlDescription: {
+      id: 'mycustomfields.color.description',
+      defaultMessage: 'Select any color',
+    },
+    components: {
+      Input: jest.fn(),
+    },
+  },
+};
+
+const getAll = jest.fn().mockReturnValue({});
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useCustomFields: jest.fn(() => ({
-    getAll: jest.fn(() => ({})),
-  })),
+  useCustomFields: () => ({
+    get: jest.fn().mockReturnValue(mockCustomField),
+    getAll,
+  }),
 }));
 
 const mockAttributes = [
@@ -85,6 +106,8 @@ describe('<AttributeOptions />', () => {
     const App = makeApp();
     render(App);
 
+    getAll.mockReturnValueOnce({});
+
     const customTab = screen.getByRole('tab', { selected: false });
     fireEvent.click(customTab);
     const customTabSelected = screen.getByRole('tab', { selected: true });
@@ -96,29 +119,7 @@ describe('<AttributeOptions />', () => {
   });
 
   it('switches to the custom tab with custom fields', () => {
-    useCustomFields.mockImplementationOnce(
-      jest.fn(() => ({
-        getAll: jest.fn(() => ({
-          'plugin::mycustomfields.test': {
-            name: 'color',
-            pluginId: 'mycustomfields',
-            type: 'text',
-            intlLabel: {
-              id: 'mycustomfields.color.label',
-              defaultMessage: 'Color',
-            },
-            intlDescription: {
-              id: 'mycustomfields.color.description',
-              defaultMessage: 'Select any color',
-            },
-            components: {
-              Input: jest.fn(),
-            },
-          },
-        })),
-      }))
-    );
-
+    getAll.mockReturnValue(mockCustomField);
     const App = makeApp();
     render(App);
 
