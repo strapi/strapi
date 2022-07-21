@@ -21,6 +21,7 @@ const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const createAuth = require('./services/auth');
+const createContentAPI = require('./services/content-api');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
 const ee = require('./utils/ee');
@@ -65,6 +66,7 @@ class Strapi {
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
+    this.container.register('content-api', createContentAPI(this));
     this.container.register('sanitizers', sanitizersRegistry(this));
 
     this.dirs = utils.getDirs(rootDir, { strapi: this });
@@ -157,6 +159,10 @@ class Strapi {
 
   get auth() {
     return this.container.get('auth');
+  }
+
+  get contentAPI() {
+    return this.container.get('content-api');
   }
 
   get sanitizers() {
@@ -417,6 +423,8 @@ class Strapi {
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
     this.cron.start();
+
+    this.contentAPI.permissions.syncActions();
 
     return this;
   }
