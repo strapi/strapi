@@ -162,7 +162,7 @@ function Inputs({
     [fieldSchema, isRequired]
   );
 
-  const { label, description, placeholder, visible } = metadatas;
+  const { label, description, placeholder, visible, step: metadataStep } = metadatas;
 
   if (visible === false) {
     return null;
@@ -242,7 +242,7 @@ function Inputs({
       options={options}
       placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
       required={fieldSchema.required || false}
-      step={step}
+      step={metadataStep || step}
       type={inputType}
       // validations={validations}
       value={inputValue}
