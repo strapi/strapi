@@ -40,14 +40,6 @@ function ListRow({
   const isMorph = type === 'relation' && relation.includes('morph');
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
 
-  let readableType = type;
-
-  if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
-    readableType = 'number';
-  } else if (['string'].includes(type)) {
-    readableType = 'text';
-  }
-
   const contentType = get(contentTypes, [target], {});
   const contentTypeFriendlyName = get(contentType, ['schema', 'displayName'], '');
   const isPluginContentType = get(contentType, 'plugin');
@@ -120,11 +112,7 @@ function ListRow({
             </span>
           </Typography>
         ) : (
-          <DisplayedType
-            customField={customField}
-            readableType={readableType}
-            repeatable={repeatable}
-          />
+          <DisplayedType type={type} customField={customField} repeatable={repeatable} />
         )}
       </td>
       <td>

@@ -4,8 +4,16 @@ import { useIntl } from 'react-intl';
 import { Typography } from '@strapi/design-system/Typography';
 import getTrad from '../../utils/getTrad';
 
-const DisplayedType = ({ readableType, customField, repeatable }) => {
+const DisplayedType = ({ type, customField, repeatable }) => {
   const { formatMessage } = useIntl();
+
+  let readableType = type;
+
+  if (['integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+    readableType = 'number';
+  } else if (['string'].includes(type)) {
+    readableType = 'text';
+  }
 
   if (customField) {
     return (
@@ -22,7 +30,7 @@ const DisplayedType = ({ readableType, customField, repeatable }) => {
     <Typography>
       {formatMessage({
         id: getTrad(`attribute.${readableType}`),
-        defaultMessage: readableType,
+        defaultMessage: type,
       })}
       &nbsp;
       {repeatable &&
@@ -40,7 +48,7 @@ DisplayedType.defaultProps = {
 };
 
 DisplayedType.propTypes = {
-  readableType: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
   customField: PropTypes.bool,
   repeatable: PropTypes.bool,
 };
