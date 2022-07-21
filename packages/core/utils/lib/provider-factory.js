@@ -25,25 +25,9 @@ const createProviderHooksMap = () => ({
 });
 
 /**
- * A customizable item provider enhanced with register/delete hooks
- * @typedef {Object} Provider
- * @property hooks
- * @property register
- * @property delete
- * @property get
- * @property getWhere
- * @property values
- * @property keys
- * @property has
- * @property size
- * @property clear
- */
-
-/**
- * A {@link Provider} factory
+ * A Provider factory
  * @param {Object} [options] - The factory options
  * @param {boolean = true} options.throwOnDuplicates - Specify the wanted behaviour when encountering a duplicate key on register
- * @return {Provider}
  */
 const providerFactory = (options = {}) => {
   const { throwOnDuplicates = true } = options;
