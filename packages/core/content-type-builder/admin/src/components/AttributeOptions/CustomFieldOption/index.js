@@ -14,7 +14,7 @@ import OptionBoxWrapper from '../OptionBoxWrapper';
 import AttributeIcon from '../../AttributeIcon';
 import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
 
-const CustomFieldOption = ({ uid, customField }) => {
+const CustomFieldOption = ({ customFieldUid, customField }) => {
   const { type, intlLabel, intlDescription } = customField;
   const { formatMessage } = useIntl();
 
@@ -23,14 +23,14 @@ const CustomFieldOption = ({ uid, customField }) => {
   const handleClick = () => {
     onClickSelectCustomField({
       attributeType: type,
-      customFieldUid: uid,
+      customFieldUid,
     });
   };
 
   return (
     <OptionBoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
       <Flex>
-        <AttributeIcon type={type} customField={uid} />
+        <AttributeIcon type={type} customField={customFieldUid} />
         <Box paddingLeft={4}>
           <Flex>
             <Typography fontWeight="bold">{formatMessage(intlLabel)}</Typography>
@@ -47,7 +47,7 @@ const CustomFieldOption = ({ uid, customField }) => {
 };
 
 CustomFieldOption.propTypes = {
-  uid: PropTypes.string.isRequired,
+  customFieldUid: PropTypes.string.isRequired,
   customField: PropTypes.shape({
     type: PropTypes.string.isRequired,
     icon: PropTypes.func,

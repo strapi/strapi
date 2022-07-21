@@ -34,7 +34,7 @@ const CustomFieldsList = () => {
                   paddingBottom={1}
                   style={{ height: '100%' }}
                 >
-                  <CustomFieldOption key={uid} uid={uid} customField={customField} />
+                  <CustomFieldOption key={uid} customFieldUid={uid} customField={customField} />
                 </Box>
               </GridItem>
             );
