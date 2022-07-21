@@ -67,6 +67,15 @@ const formatAttribute = (key, attribute) => {
     };
   }
 
+  if (attribute.type === 'customField') {
+    const customField = strapi.container.get('custom-fields').get(attribute.customField);
+
+    return {
+      ...attribute,
+      type: customField.type,
+    };
+  }
+
   return attribute;
 };
 
