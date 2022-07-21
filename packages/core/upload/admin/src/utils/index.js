@@ -7,4 +7,5 @@ export { default as findRecursiveFolderMetadatas } from './findRecursiveFolderMe
 export { default as containsAssetFilter } from './containsAssetFilter';
 export { default as getBreadcrumbData } from './getBreadcrumbData';
 export { default as getFolderURL } from './getFolderURL';
+export { default as getFolderParents } from './getFolderParents';
 export * from './formatDuration';

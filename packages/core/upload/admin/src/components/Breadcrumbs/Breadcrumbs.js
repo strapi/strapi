@@ -4,17 +4,23 @@ import { NavLink } from 'react-router-dom';
 import {
   Crumb,
   CrumbLink,
-  CrumbSimpleMenu,
   Breadcrumbs as BaseBreadcrumbs,
 } from '@strapi/design-system/v2/Breadcrumbs';
-
+import { CrumbSimpleMenuAsync } from './CrumbSimpleMenuAsync';
 import { BreadcrumbsDefinition } from '../../constants';
 
 export const Breadcrumbs = ({ breadcrumbs, ...props }) => (
-  <BaseBreadcrumbs as="nav" {...props}>
+  <BaseBreadcrumbs {...props}>
     {breadcrumbs.map((crumb, index) => {
       if (Array.isArray(crumb)) {
-        return <CrumbSimpleMenu label="..." key={`breadcrumb-${crumb?.id ?? 'root'}`} />;
+        return (
+          <CrumbSimpleMenuAsync
+            parentsToOmit={[...breadcrumbs]
+              .splice(index + 1, breadcrumbs.length - 1)
+              .map(parent => parent.id)}
+            key={`breadcrumb-${crumb?.id ?? 'menu'}`}
+          />
+        );
       }
 
       if (crumb.href) {

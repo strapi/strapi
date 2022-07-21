@@ -26,6 +26,8 @@
   "header.actions.upload-assets": "Upload assets",
   "header.actions.upload-new-asset": "Upload new asset",
   "header.content.assets-empty": "No assets",
+  "header.breadcrumbs.menu.label": "Get more ascendants folders",
+  "header.breadcrumbs.nav.label": "Folders navigation",
   "input.button.label": "Browse files",
   "input.label": "Drag & Drop here or",
   "input.label-bold": "Drag & drop",
