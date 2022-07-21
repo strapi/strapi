@@ -11,11 +11,11 @@ import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 import OptionBoxWrapper from '../OptionBoxWrapper';
-import AttributeIcon, { IconBox } from '../../AttributeIcon';
+import AttributeIcon from '../../AttributeIcon';
 import useFormModalNavigation from '../../../hooks/useFormModalNavigation';
 
 const CustomFieldOption = ({ uid, customField }) => {
-  const { type, icon, intlLabel, intlDescription } = customField;
+  const { type, intlLabel, intlDescription } = customField;
   const { formatMessage } = useIntl();
 
   const { onClickSelectCustomField } = useFormModalNavigation();
@@ -30,7 +30,7 @@ const CustomFieldOption = ({ uid, customField }) => {
   return (
     <OptionBoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
       <Flex>
-        {icon ? <IconBox as={icon} /> : <AttributeIcon type={type} />}
+        <AttributeIcon type={type} customField={uid} />
         <Box paddingLeft={4}>
           <Flex>
             <Typography fontWeight="bold">{formatMessage(intlLabel)}</Typography>

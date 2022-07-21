@@ -1,6 +1,6 @@
 import React from 'react';
-import Puzzle from '@strapi/icons/Puzzle';
+import icon from './icon.svg';
 
-const ColorPickerIcon = () => <Puzzle />;
+const ColorPickerIcon = () => <img src={icon} />;
 
 export default ColorPickerIcon;
