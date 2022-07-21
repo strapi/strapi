@@ -34,7 +34,13 @@ const DEFAULT_OUT_FILENAME = 'schemas.d.ts';
  * @param {boolean} [options.verbose]
  */
 const generateSchemasDefinitions = async (options = {}) => {
-  const { strapi, outDir = process.cwd(), file = DEFAULT_OUT_FILENAME, verbose = false } = options;
+  const {
+    strapi,
+    outDir = process.cwd(),
+    file = DEFAULT_OUT_FILENAME,
+    verbose = false,
+    silent = false,
+  } = options;
 
   const schemas = getAllStrapiSchemas(strapi);
 
@@ -74,9 +80,7 @@ const generateSchemasDefinitions = async (options = {}) => {
 
   const definitionFilepath = await saveDefinitionToFileSystem(outDir, file, formattedOutput);
 
-  if (verbose) {
-    logDebugInformation(schemasDefinitions, { filepath: definitionFilepath });
-  }
+  logDebugInformation(schemasDefinitions, { filepath: definitionFilepath, verbose, silent });
 };
 
 const emitDefinitions = definitions => {
@@ -108,7 +112,7 @@ const saveDefinitionToFileSystem = async (dir, file, content) => {
  * Uses the existing config if one is defined in the project.
  *
  * @param {string} content
- * @returns {string}
+ * @returns {Promise<string>}
  */
 const format = async content => {
   const configFile = await prettier.resolveConfigFile();
@@ -127,51 +131,55 @@ const format = async content => {
 };
 
 const logDebugInformation = (definitions, options = {}) => {
-  const { filepath } = options;
+  const { filepath, verbose, silent } = options;
 
-  const table = new CLITable({
-    head: [
-      chalk.bold(chalk.green('Model Type')),
-      chalk.bold(chalk.blue('UID')),
-      chalk.bold(chalk.blue('Type')),
-      chalk.bold(chalk.gray('Attributes Count')),
-    ],
-    colAligns: ['center', 'left', 'left', 'center'],
-  });
+  if (verbose) {
+    const table = new CLITable({
+      head: [
+        chalk.bold(chalk.green('Model Type')),
+        chalk.bold(chalk.blue('UID')),
+        chalk.bold(chalk.blue('Type')),
+        chalk.bold(chalk.gray('Attributes Count')),
+      ],
+      colAligns: ['center', 'left', 'left', 'center'],
+    });
 
-  const sortedDefinitions = definitions.map(def => ({
-    ...def,
-    attributesCount: getDefinitionAttributesCount(def.definition),
-  }));
+    const sortedDefinitions = definitions.map(def => ({
+      ...def,
+      attributesCount: getDefinitionAttributesCount(def.definition),
+    }));
 
-  for (const { schema, attributesCount } of sortedDefinitions) {
-    const modelType = fp.upperFirst(getSchemaModelType(schema));
-    const interfaceType = getSchemaInterfaceName(schema.uid);
+    for (const { schema, attributesCount } of sortedDefinitions) {
+      const modelType = fp.upperFirst(getSchemaModelType(schema));
+      const interfaceType = getSchemaInterfaceName(schema.uid);
 
-    table.push([
-      chalk.greenBright(modelType),
-      chalk.blue(schema.uid),
-      chalk.blue(interfaceType),
-      chalk.grey(fp.isNil(attributesCount) ? 'N/A' : attributesCount),
-    ]);
+      table.push([
+        chalk.greenBright(modelType),
+        chalk.blue(schema.uid),
+        chalk.blue(interfaceType),
+        chalk.grey(fp.isNil(attributesCount) ? 'N/A' : attributesCount),
+      ]);
+    }
+
+    // Table
+    console.log(table.toString());
   }
 
-  // Table
-  console.log(table.toString());
+  if (!silent) {
+    // Metrics
+    console.log(
+      chalk.greenBright(
+        `Generated ${definitions.length} type definition for your Strapi application's schemas.`
+      )
+    );
 
-  // Metrics
-  console.log(
-    chalk.greenBright(
-      `Generated ${definitions.length} type definition for your Strapi application's schemas.`
-    )
-  );
+    // Filepath
+    const relativePath = path.relative(process.cwd(), filepath);
 
-  // Filepath
-  const relativePath = path.relative(process.cwd(), filepath);
-
-  console.log(
-    chalk.grey(`The definitions file has been generated here: ${chalk.bold(relativePath)}`)
-  );
+    console.log(
+      chalk.grey(`The definitions file has been generated here: ${chalk.bold(relativePath)}`)
+    );
+  }
 };
 
 module.exports = generateSchemasDefinitions;
