@@ -55,6 +55,8 @@ describe('Sanitize visitors util', () => {
         },
         { remove, set }
       );
+      expect(remove).toHaveBeenCalledWith(keyCreatedBy);
+
       await rrr(
         {
           data,
@@ -64,7 +66,8 @@ describe('Sanitize visitors util', () => {
         },
         { remove, set }
       );
-      expect(remove).toBeCalledTimes(2);
+      expect(remove).toHaveBeenCalledWith(keyCreatedBy);
+
       expect(set).toBeCalledTimes(0);
     });
   });
