@@ -160,6 +160,7 @@
   "modalForm.sub-header.chooseAttribute.component": "Select a field for your component",
   "modalForm.sub-header.chooseAttribute.singleType": "Select a field for your single type",
   "modalForm.tabs.custom": "Custom",
+  "modalForm.tabs.custom.howToLink": "How to add custom fields",
   "modalForm.tabs.default": "Default",
   "modalForm.tabs.label": "Default and Custom types tabs",
   "modelPage.attribute.relation-polymorphic": "Relation (polymorphic)",
