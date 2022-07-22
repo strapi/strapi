@@ -2,7 +2,6 @@
 
 const register = require('./register');
 const bootstrap = require('./bootstrap');
-const destroy = require('./destroy');
 const contentTypes = require('./content-types');
 const services = require('./services');
 const routes = require('./routes');
@@ -13,7 +12,6 @@ module.exports = () => {
   return {
     register,
     bootstrap,
-    destroy,
     config,
     routes,
     controllers,

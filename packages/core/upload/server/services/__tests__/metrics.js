@@ -3,7 +3,7 @@
 const metricsService = require('../metrics');
 
 describe('metrics', () => {
-  describe('computeWeeklyMetrics', () => {
+  describe('computeCronMetrics', () => {
     test.each([
       [[], 0, [0, 0, 0, 0, 0]],
       [
@@ -54,9 +54,9 @@ describe('metrics', () => {
       };
       strapi.db.connection.raw = raw;
 
-      const { computeWeeklyMetrics } = metricsService({ strapi });
+      const { computeCronMetrics } = metricsService({ strapi });
 
-      const results = await computeWeeklyMetrics();
+      const results = await computeCronMetrics();
       const [
         assetNumber,
         maxDepth,

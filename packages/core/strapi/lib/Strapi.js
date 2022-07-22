@@ -376,6 +376,11 @@ class Strapi {
       entityValidator: this.entityValidator,
     });
 
+    if (strapi.config.get('server.cron.enabled', true)) {
+      const cronTasks = this.config.get('server.cron.tasks', {});
+      this.cron.add(cronTasks);
+    }
+
     this.telemetry.bootstrap();
 
     let oldContentTypes;
@@ -413,11 +418,7 @@ class Strapi {
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
-    if (strapi.config.get('server.cron.enabled', true)) {
-      const cronTasks = this.config.get('server.cron.tasks', {});
-      this.cron.add(cronTasks, 'user');
-      this.cron.start('user');
-    }
+    this.cron.start();
 
     return this;
   }

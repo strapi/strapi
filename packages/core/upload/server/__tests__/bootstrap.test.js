@@ -38,7 +38,7 @@ describe('Upload plugin bootstrap function', () => {
         upload: {
           services: {
             metrics: {
-              startRegularMetricsUpdate() {},
+              registerCron() {},
             },
           },
         },

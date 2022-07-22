@@ -1,18 +1,14 @@
 'use strict';
 
 const { Job } = require('node-schedule');
-const { isFunction, forEach } = require('lodash/fp');
+const { isFunction } = require('lodash/fp');
 
 const createCronService = () => {
-  let jobsSpecsMap = {};
+  let jobsSpecs = [];
+  let running = false;
 
   return {
-    add(tasks = {}, namespace) {
-      if (!namespace) {
-        throw new Error('Tasks should be attached to a namespace.');
-      }
-      jobsSpecsMap[namespace] = jobsSpecsMap[namespace] || [];
-
+    add(tasks = {}) {
       for (const taskExpression in tasks) {
         const taskValue = tasks[taskExpression];
 
@@ -33,42 +29,27 @@ const createCronService = () => {
         const fnWithStrapi = (...args) => fn({ strapi }, ...args);
 
         const job = new Job(null, fnWithStrapi);
-        jobsSpecsMap[namespace].push({ job, options });
+        jobsSpecs.push({ job, options });
+
+        if (running) {
+          job.schedule(options);
+        }
       }
       return this;
     },
-
-    start(namespace) {
-      if (namespace && !jobsSpecsMap[namespace]) {
-        throw new Error('namespace not found');
-      }
-
-      if (!namespace) {
-        forEach(jobs => jobs.forEach(({ job, options }) => job.schedule(options)))(jobsSpecsMap);
-        return this;
-      }
-
-      jobsSpecsMap[namespace].forEach(({ job, options }) => job.schedule(options));
+    start() {
+      jobsSpecs.forEach(({ job, options }) => job.schedule(options));
+      running = true;
       return this;
     },
-
-    stop(namespace) {
-      if (namespace && !jobsSpecsMap[namespace]) {
-        throw new Error('namespace not found');
-      }
-
-      if (!namespace) {
-        forEach(jobs => jobs.forEach(({ job }) => job.cancel()))(jobsSpecsMap);
-        return this;
-      }
-
-      jobsSpecsMap[namespace].forEach(({ job }) => job.cancel());
+    stop() {
+      jobsSpecs.forEach(({ job }) => job.cancel());
+      running = false;
       return this;
     },
-
     destroy() {
       this.stop();
-      jobsSpecsMap = {};
+      jobsSpecs = [];
       return this;
     },
   };

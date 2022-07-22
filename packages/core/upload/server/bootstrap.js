@@ -21,7 +21,7 @@ module.exports = async ({ strapi }) => {
 
   await registerPermissionActions();
 
-  getService('metrics').startRegularMetricsUpdate();
+  getService('metrics').registerCron();
 };
 
 const registerPermissionActions = async () => {
