@@ -2487,10 +2487,10 @@
   resolved "https://registry.yarnpkg.com/@hutson/parse-repository-url/-/parse-repository-url-3.0.2.tgz#98c23c950a3d9b6c8f0daed06da6c3af06981340"
   integrity sha512-H9XAx3hc0BQHY6l+IFSWHDySypcXsvsuLhgYLUGywmJ5pswRVQJUHpOsobnLYp2ZUaUlKiKDrgWWhosOwAEM8Q==
 
-"@internationalized/number@^3.0.2":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@internationalized/number/-/number-3.0.6.tgz#ab8ff440268aaa119cf88b970621d51001bb624d"
-  integrity sha512-6rKYYY/7V2rm45gg9ugV7VAV/1p5mHudgc1QJxJAdSddRWKz9RmSemV02pwE4k0mbsgvRRsqin7NgEb3LQFX9A==
+"@internationalized/number@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@internationalized/number/-/number-3.1.1.tgz#160584316741de4381689ab759001603ee17b595"
+  integrity sha512-dBxCQKIxvsZvW2IBt3KsqrCfaw2nV6o6a8xsloJn/hjW0ayeyhKuiiMtTwW3/WGNPP7ZRyDbtuiUEjMwif1ENQ==
   dependencies:
     "@babel/runtime" "^7.6.2"
 
@@ -5474,19 +5474,19 @@
     regenerator-runtime "^0.13.7"
     resolve-from "^5.0.0"
 
-"@strapi/design-system@1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.2.0.tgz#d000cebbc4f6bb296544369346c3a1fec46945d1"
-  integrity sha512-8pFSWQwxmM1kazXX07xjqeJRmZyiaXzo+jfFA33JtZqyA8z6GULstGM9DrwDlxZQpGZMltJDugBvHrwSIAzgLg==
+"@strapi/design-system@1.2.1-beta.0":
+  version "1.2.1-beta.0"
+  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.2.1-beta.0.tgz#65e7ef08907378ac7cb17a31b7b388ba866c45b6"
+  integrity sha512-Sjr+KaEaQ5gGCeabQop6WqgktN1F88KOLC4+SqTiHpviLsSD0XsqCHaO6E5ZgSyNlGq0FEXFEIGNg69ZwOUp/A==
   dependencies:
-    "@internationalized/number" "^3.0.2"
+    "@internationalized/number" "^3.1.1"
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"
 
-"@strapi/icons@1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.2.0.tgz#94c2709696f674d907e399bd8c80e80f098d164a"
-  integrity sha512-y5k09/n+8ueZPp/JST7Grbac1014ANhZWefto+XoHNgpPMMiUNMWD5K+uWn6Wy5vgL/wxZ0lA0Nhe9b0cGouXw==
+"@strapi/icons@1.2.1-beta.0":
+  version "1.2.1-beta.0"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.2.1-beta.0.tgz#f04c4f3bbe4f2dbf6e7d9b51e5ba5f08c623a681"
+  integrity sha512-ndU0xMPGg6GIjlP0SWOYtNaeJm4csNeXO64w0FzT2ZKPp8d5jaFvijJpZOggp7/MFI5XDy0CNrFCHHfIQnKfvQ==
   dependencies:
     rimraf "^3.0.2"
 
