@@ -73,6 +73,7 @@ module.exports = ({
           css: true, // Apply minification to CSS assets
         }),
       ],
+      moduleIds: 'deterministic',
       runtimeChunk: true,
     },
     module: {

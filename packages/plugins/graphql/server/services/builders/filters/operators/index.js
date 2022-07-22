@@ -8,6 +8,7 @@ const operators = {
   not: require('./not'),
 
   eq: require('./eq'),
+  eqi: require('./eqi'),
   ne: require('./ne'),
 
   startsWith: require('./starts-with'),
