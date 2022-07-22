@@ -175,10 +175,13 @@ export const BrowseStep = ({
         <FolderList
           title={
             (((isSearchingOrFiltering && assetCount > 0) || !isSearchingOrFiltering) &&
-              formatMessage({
-                id: getTrad('list.folders.title'),
-                defaultMessage: 'Folders',
-              })) ||
+              formatMessage(
+                {
+                  id: getTrad('list.folders.title'),
+                  defaultMessage: 'Folders ({count})',
+                },
+                { count: folderCount }
+              )) ||
             ''
           }
         >
@@ -250,10 +253,13 @@ export const BrowseStep = ({
           title={
             ((!isSearchingOrFiltering || (isSearchingOrFiltering && folderCount > 0)) &&
               queryObject.page === 1 &&
-              formatMessage({
-                id: getTrad('list.assets.title'),
-                defaultMessage: 'Assets',
-              })) ||
+              formatMessage(
+                {
+                  id: getTrad('list.assets.title'),
+                  defaultMessage: 'Assets ({count})',
+                },
+                { count: assetCount }
+              )) ||
             ''
           }
         />

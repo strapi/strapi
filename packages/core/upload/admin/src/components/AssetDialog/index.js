@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { ModalLayout, ModalBody } from '@strapi/design-system/ModalLayout';
+import { useIntl } from 'react-intl';
+import { ModalLayout, ModalBody, ModalHeader } from '@strapi/design-system/ModalLayout';
 import { Flex } from '@strapi/design-system/Flex';
 import { Button } from '@strapi/design-system/Button';
 import { Divider } from '@strapi/design-system/Divider';
-import { useIntl } from 'react-intl';
+import { Typography } from '@strapi/design-system/Typography';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Badge } from '@strapi/design-system/Badge';
 import { Loader } from '@strapi/design-system/Loader';
@@ -21,7 +22,6 @@ import { useFolders } from '../../hooks/useFolders';
 import useModalQueryParams from '../../hooks/useModalQueryParams';
 import { AssetDefinition } from '../../constants';
 import getAllowedFiles from '../../utils/getAllowedFiles';
-import { DialogHeader } from './DialogHeader';
 import { DialogFooter } from './DialogFooter';
 import { EditAssetDialog } from '../EditAssetDialog';
 import { moveElement } from '../../utils/moveElement';
@@ -107,7 +107,14 @@ export const AssetDialog = ({
   if (isLoading) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
-        <DialogHeader />
+        <ModalHeader>
+          <Typography fontWeight="bold">
+            {formatMessage({
+              id: getTrad('header.actions.add-assets'),
+              defaultMessage: 'Add new assets',
+            })}
+          </Typography>
+        </ModalHeader>
         <LoadingBody justifyContent="center" paddingTop={4} paddingBottom={4}>
           <Loader>
             {formatMessage({
@@ -124,7 +131,14 @@ export const AssetDialog = ({
   if (hasError) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogHeader />
+        <ModalHeader>
+          <Typography fontWeight="bold">
+            {formatMessage({
+              id: getTrad('header.actions.add-assets'),
+              defaultMessage: 'Add new assets',
+            })}
+          </Typography>
+        </ModalHeader>
         <AnErrorOccurred />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
@@ -134,7 +148,14 @@ export const AssetDialog = ({
   if (!canRead) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogHeader />
+        <ModalHeader fontWeight="bold">
+          <Typography>
+            {formatMessage({
+              id: getTrad('header.actions.add-assets'),
+              defaultMessage: 'Add new assets',
+            })}
+          </Typography>
+        </ModalHeader>
         <NoPermissions />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
@@ -179,7 +200,14 @@ export const AssetDialog = ({
 
   return (
     <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={isLoading}>
-      <DialogHeader currentFolder={queryObject?.folder} onChangeFolder={handleFolderChange} />
+      <ModalHeader>
+        <Typography fontWeight="bold">
+          {formatMessage({
+            id: getTrad('header.actions.add-assets'),
+            defaultMessage: 'Add new assets',
+          })}
+        </Typography>
+      </ModalHeader>
 
       <TabGroup
         label={formatMessage({
