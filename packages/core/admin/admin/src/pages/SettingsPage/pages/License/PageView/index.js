@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useIntl } from 'react-intl';
 
-import moment from 'moment';
+import format from 'date-fns/format';
 
 import {
   request,
@@ -17,6 +17,7 @@ import {
   ContentBox,
   useAutoReloadOverlayBlocker,
   useNotification,
+  useAppInfos,
 } from '@strapi/helper-plugin';
 
 import { Box } from '@strapi/design-system/Box';
@@ -24,11 +25,9 @@ import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
 import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
-import { Tooltip } from '@strapi/design-system/Tooltip';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
 
 import Check from '@strapi/icons/Check';
-import Information from '@strapi/icons/Information';
 import InformationSquare from '@strapi/icons/InformationSquare';
 
 import adminPermissions from '../../../../../permissions';
@@ -39,40 +38,41 @@ const PageView = () => {
   } = useRBAC(adminPermissions.settings.license);
 
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
+  const { currentEnvironment } = useAppInfos();
 
   const [license, setLicense] = useState('');
   const [savedLicense, setSavedLicense] = useState('');
   const [shouldFetch, setShouldFetch] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [globalData, setGlobalData] = useState({ messageId: '', disabled: true, licenseInfo: {} });
+  const [globalData, setGlobalData] = useState({ messageId: '', licenseInfo: {} });
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
 
   useEffect(() => {
     if (canRead) {
+      const fetchLicense = async () => {
+        try {
+          const {
+            data: { messageId, licenseInfo },
+          } = await request(
+            '/admin/licenses',
+            {
+              method: 'GET',
+            },
+            true
+          );
+
+          setGlobalData({ messageId, licenseInfo });
+          setIsLoading(false);
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
       fetchLicense();
     }
   }, [shouldFetch, canRead]);
-
-  const fetchLicense = async () => {
-    try {
-      const {
-        data: { messageId, disabled, licenseInfo },
-      } = await request(
-        '/admin/licenses',
-        {
-          method: 'GET',
-        },
-        true
-      );
-
-      setGlobalData({ messageId, disabled, licenseInfo });
-      setIsLoading(false);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   const saveLicense = async () => {
     const body = {
@@ -115,7 +115,7 @@ const PageView = () => {
     }
   };
 
-  console.log(globalData.licenseInfo.expireAt);
+  console.log(globalData);
 
   return (
     <Layout>
@@ -132,12 +132,16 @@ const PageView = () => {
           })}
           primaryAction={
             <>
-              {globalData.disabled && canRead && canCreate ? (
+              {currentEnvironment !== 'development' && canRead && canCreate ? (
                 <></>
               ) : (
                 <Button
                   startIcon={<Check />}
-                  disabled={globalData.disabled || license.length <= 0 || license === savedLicense}
+                  disabled={
+                    currentEnvironment !== 'development' ||
+                    license.length <= 0 ||
+                    license === savedLicense
+                  }
                   variant="default"
                   onClick={saveLicense}
                   size="L"
@@ -158,28 +162,25 @@ const PageView = () => {
             </Box>
           ) : (
             <>
-              <Stack spacing={7}>
+              <Stack spacing={6}>
                 <Box background="neutral0" hasRadius shadow="filterShadow">
                   <ContentBox
                     title={formatMessage({
                       id: 'Settings.license.information',
                       defaultMessage: 'Information',
                     })}
-                    subtitle={`${formatMessage({
-                      id: globalData.messageId,
-                      defaultMessage: '',
-                    })}. ${
+                    subtitle={`${
                       globalData.licenseInfo
-                        ? `${formatMessage({
+                        ? `${globalData.licenseInfo?.type.toUpperCase()} ${formatMessage({
                             id: 'Settings.license.information.license.edition',
                             defaultMessage: 'Edition',
-                          })} ${globalData.licenseInfo.type} - ${formatMessage({
+                          })} - ${formatMessage({
                             id: 'Settings.license.information.license.expires_on',
                             defaultMessage: 'Expires on',
-                          })}: ${moment(globalData.licenseInfo.expireAt).format('MM/DD/YYYY')}`
+                          })}: ${format(globalData.licenseInfo?.expireAt, 'MM/dd/yyyy')}`
                         : `${formatMessage({
                             id: 'Settings.license.information.license.invalid',
-                            defaultMessage: 'Invalid license',
+                            defaultMessage: 'Community Edition',
                           })}`
                     }`}
                     icon={<InformationSquare />}
@@ -192,29 +193,30 @@ const PageView = () => {
                   shadow="filterShadow"
                   paddingTop={6}
                   paddingBottom={6}
-                  paddingLeft={7}
-                  paddingRight={7}
+                  paddingLeft={6}
+                  paddingRight={6}
                 >
                   <TextInput
                     placeholder={
-                      globalData.disabled
+                      currentEnvironment === 'development'
                         ? formatMessage({
-                            id: 'Settings.license.input.placeholder.disabled',
-                            defaultMessage: 'Update your license in a development environnment',
-                          })
-                        : formatMessage({
                             id: 'Settings.license.input.placeholder.enabled',
                             defaultMessage: 'ZGQzT1VRMG9CelRPS2JbC8xAwNGt6e...',
                           })
+                        : formatMessage({
+                            id: 'Settings.license.wrong-env',
+                            defaultMessage:
+                              'You can activate a license in a development environnment only',
+                          })
                     }
-                    disabled={globalData.disabled && canCreate}
+                    disabled={currentEnvironment !== 'development' && canCreate}
                     label={formatMessage({
                       id: 'Settings.license.input.label',
                       defaultMessage: 'License',
                     })}
                     name="license"
                     hint={
-                      globalData.disabled
+                      currentEnvironment !== 'development'
                         ? ''
                         : formatMessage({
                             id: 'Settings.license.input.hint',
@@ -223,26 +225,6 @@ const PageView = () => {
                     }
                     onChange={e => setLicense(e.target.value)}
                     value={license}
-                    labelAction={
-                      <Tooltip
-                        description={formatMessage({
-                          id: 'Settings.license.input.tolltip',
-                          defaultMessage:
-                            'A license.txt file containing the license will be generated at the root of your project and the server will restart automatically.',
-                        })}
-                      >
-                        <button
-                          type="button"
-                          style={{
-                            border: 'none',
-                            padding: 0,
-                            background: 'transparent',
-                          }}
-                        >
-                          <Information />
-                        </button>
-                      </Tooltip>
-                    }
                   />
                 </Box>
               </Stack>

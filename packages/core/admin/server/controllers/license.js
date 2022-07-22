@@ -14,21 +14,7 @@ module.exports = {
       licenseInfo = null;
     }
 
-    // Make the license field disabled if not in development env
-    if (process.env.NODE_ENV !== 'development') {
-      return (ctx.body = {
-        data: {
-          messageId: 'Settings.license.wrong-env',
-          disabled: true,
-          licenseInfo,
-        },
-      });
-    }
-
-    // License file path
-    const licenseFilePath = './license.txt';
-
-    // Default messageId & activationType
+    // Default messageId
     let messageId = 'Settings.license.no-license';
 
     if (process.env.STRAPI_LICENSE) {
@@ -37,7 +23,18 @@ module.exports = {
       if (process.env.STRAPI_LICENSE == '') {
         messageId = 'Settings.license.strapi-license.empty';
       }
+
+      return (ctx.body = {
+        data: {
+          messageId,
+          disabled: false,
+          licenseInfo,
+        },
+      });
     }
+
+    // License file path
+    const licenseFilePath = './license.txt';
 
     try {
       // If the file already exists
@@ -66,22 +63,53 @@ module.exports = {
   async generateLicenseFile(ctx) {
     strapi.reload.isWatching = false;
 
+    // Default result
     let result = { messageId: 'Settings.license.created', status: 'ok' };
 
+    // License received from the admin
     const {
       body: { license },
     } = ctx.request;
 
+    // Path of the .env root file
+    const dotEnvFile = './.env';
+
+    // Prefix for adding a newline or not in the .env file
+    let prefix = '';
+
     try {
-      fs.writeFileSync('license.txt', license, error => {
-        if (error) throw error;
-      });
+      if (fs.existsSync(dotEnvFile)) {
+        // Get the content of the .env file
+        const fileContent = fs.readFileSync(dotEnvFile, 'utf8');
 
-      await strapi.telemetry.send('didCreateLicenseFileFromAdmin');
+        // If the variable already exists we simply replace it and re-write the .env file
+        if (fileContent.includes('STRAPI_LICENSE')) {
+          const newDotEnvFile = fileContent.replace(/STRAPI_LICENSE.*/, ``);
+          fs.writeFileSync(dotEnvFile, newDotEnvFile, error => {
+            if (error) throw error;
+          });
+          if (fileContent[fileContent.length - 1] != '\n') {
+            prefix = '\n';
+          }
+          fs.appendFileSync(dotEnvFile, `${prefix}STRAPI_LICENSE=${license}`, error => {
+            if (error) throw error;
+          });
+        } else {
+          // Otherwise, we append the variable into the file directly with a newline or not
+          if (fileContent[fileContent.length - 1] != '\n') {
+            prefix = '\n';
+          }
+          fs.appendFileSync(dotEnvFile, `${prefix}STRAPI_LICENSE=${license}`, error => {
+            if (error) throw error;
+          });
+        }
+      }
 
-      setImmediate(() => strapi.reload());
+      // await strapi.telemetry.send('didActivateLicenseFromAdmin');
     } catch (error) {
       result = { messageId: 'Settings.license.not-created', status: 'error' };
+    } finally {
+      setImmediate(() => strapi.reload());
     }
     ctx.body = { data: result };
   },
