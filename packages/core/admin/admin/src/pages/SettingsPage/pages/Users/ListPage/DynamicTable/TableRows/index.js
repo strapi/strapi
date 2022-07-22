@@ -63,7 +63,7 @@ const TableRows = ({
               return (
                 <Td key={key}>
                   {typeof cellFormatter === 'function' ? (
-                    cellFormatter(data, { key, name, ...rest })
+                    cellFormatter(data, { key, name, formatMessage, ...rest })
                   ) : (
                     <Typography textColor="neutral800">{data[name] || '-'}</Typography>
                   )}
