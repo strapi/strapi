@@ -9,6 +9,7 @@ import ThemeToggleProvider from '../../../../components/ThemeToggleProvider';
 import NoContentType from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
   useFocusWhenNavigate: jest.fn(),
 }));
 
@@ -29,8 +30,45 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c0:focus-visible {
-        outline: none;
+      .c12 {
+        color: #666687;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c7 {
+        background: #ffffff;
+        padding: 64px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c9 {
+        padding-bottom: 24px;
+      }
+
+      .c11 {
+        padding-bottom: 16px;
+      }
+
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      .c10 svg {
+        height: 5.5rem;
       }
 
       .c18 {
@@ -105,7 +143,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
       .c14 {
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
+        border: 1px solid #4945ff;
         border-radius: 4px;
         border: 1px solid #d9d8ff;
         background: #f0f0ff;
@@ -187,6 +225,10 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         fill: #271fe0;
       }
 
+      .c0:focus-visible {
+        outline: none;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 40px;
@@ -201,6 +243,10 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
       }
 
       .c2 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -212,13 +258,13 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c3 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -226,10 +272,6 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c4 {
@@ -243,47 +285,6 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         color: #666687;
         font-size: 1rem;
         line-height: 1.5;
-      }
-
-      .c12 {
-        color: #666687;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c7 {
-        background: #ffffff;
-        padding: 64px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c9 {
-        padding-bottom: 24px;
-      }
-
-      .c11 {
-        padding-bottom: 16px;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
-      }
-
-      .c10 svg {
-        height: 5.5rem;
       }
 
       <main

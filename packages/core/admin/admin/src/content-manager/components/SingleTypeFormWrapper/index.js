@@ -143,8 +143,8 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   const displayErrors = useCallback(
     err => {
-      const errorPayload = err.response.payload;
-      let errorMessage = get(errorPayload, ['message'], 'Bad Request');
+      const errorPayload = err.response.data;
+      let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
 
       // TODO handle errors correctly when back-end ready
       if (Array.isArray(errorMessage)) {

@@ -8,6 +8,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const WebpackBar = require('webpackbar');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
 
@@ -36,10 +38,6 @@ module.exports = ({
 
   const webpackPlugins = isProduction
     ? [
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^\.\/locale$/,
-          contextRegExp: /moment$/,
-        }),
         new MiniCssExtractPlugin({
           filename: '[name].[chunkhash].css',
           chunkFilename: '[name].[chunkhash].chunkhash.css',
@@ -54,7 +52,7 @@ module.exports = ({
   return {
     mode: isProduction ? 'production' : 'development',
     bail: isProduction ? true : false,
-    devtool: false,
+    devtool: isProduction ? false : 'eval-source-map',
     experiments: {
       topLevelAwait: true,
     },
@@ -75,12 +73,13 @@ module.exports = ({
           css: true, // Apply minification to CSS assets
         }),
       ],
+      moduleIds: 'deterministic',
       runtimeChunk: true,
     },
     module: {
       rules: [
         {
-          test: /\.m?js$/,
+          test: /\.m?jsx?$/,
           include: cacheDir,
           oneOf: [
             // Use babel-loader for files that distinct the ee and ce code
@@ -143,7 +142,7 @@ module.exports = ({
           ],
         },
         {
-          test: /\.m?js$/,
+          test: /\.m?jsx?$/,
           include: pluginsPath,
           use: {
             loader: require.resolve('esbuild-loader'),
@@ -204,7 +203,8 @@ module.exports = ({
       new webpack.DefinePlugin(envVariables),
 
       new NodePolyfillPlugin(),
+      !isProduction && process.env.REACT_REFRESH !== 'false' && new ReactRefreshWebpackPlugin(),
       ...webpackPlugins,
-    ],
+    ].filter(Boolean),
   };
 };

@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { Portal } from '@strapi/design-system/Portal';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { IconButton } from '@strapi/design-system/IconButton';
-import { LinkButton } from '@strapi/design-system/LinkButton';
+import { LinkButton } from '@strapi/design-system/v2/LinkButton';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
@@ -104,7 +104,11 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
                   })}
                 </Typography>
               </Stack>
-              <LinkButton href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
+              <LinkButton
+                href="https://strapi.io/pricing-self-hosted"
+                isExternal
+                endIcon={<ExternalLink />}
+              >
                 {formatMessage({
                   id: 'app.components.UpgradePlanModal.button',
                   defaultMessage: 'Learn more',

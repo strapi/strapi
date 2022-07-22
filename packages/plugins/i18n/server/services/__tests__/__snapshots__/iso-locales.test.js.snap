@@ -287,6 +287,14 @@ Array [
     "name": "Central Kurdish (ckb)",
   },
   Object {
+    "code": "kmr",
+    "name": "Northern Kurdish (kmr)",
+  },
+  Object {
+    "code": "sdh",
+    "name": "Southern Kurdish (sdh)",
+  },
+  Object {
     "code": "tzm",
     "name": "Central Morocco Tamazight (tzm)",
   },
@@ -1021,6 +1029,10 @@ Array [
   Object {
     "code": "kn-IN",
     "name": "Kannada (India) (kn-IN)",
+  },
+  Object {
+    "code": "kaa",
+    "name": "Kara-Kalpak (kaa)",
   },
   Object {
     "code": "kk",

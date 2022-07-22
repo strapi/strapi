@@ -7,7 +7,7 @@ const utils = require('./string-formatting');
 const { YupValidationError } = require('./errors');
 const printValue = require('./print-value');
 
-const MixedSchemaType = yup.mixed;
+const MixedSchemaType = yup.MixedSchema;
 
 const isNotNilTest = value => !_.isNil(value);
 

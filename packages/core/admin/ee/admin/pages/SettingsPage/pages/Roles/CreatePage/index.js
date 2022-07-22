@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import moment from 'moment';
+import { format } from 'date-fns';
 import {
   CheckPagePermissions,
   Form,
@@ -9,13 +9,13 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
+  Link,
 } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Main } from '@strapi/design-system/Main';
-import { Link } from '@strapi/design-system/Link';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
@@ -40,7 +40,7 @@ const UsersRoleNumber = styled.div`
   color: ${({ theme }) => theme.colors.primary600};
   border-radius: ${({ theme }) => theme.borderRadius};
   font-size: ${12 / 16}rem;
-  font-width: bold;
+  font-weight: bold;
 `;
 
 const CreatePage = () => {
@@ -114,7 +114,7 @@ const CreatePage = () => {
   const defaultDescription = `${formatMessage({
     id: 'Settings.roles.form.created',
     defaultMessage: 'Created',
-  })} ${moment().format('LL')}`;
+  })} ${format(new Date(), 'PPP')}`;
 
   return (
     <Main>

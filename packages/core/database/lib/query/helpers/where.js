@@ -13,6 +13,7 @@ const OPERATORS = [
   '$in',
   '$notIn',
   '$eq',
+  '$eqi',
   '$ne',
   '$gt',
   '$gte',
@@ -133,7 +134,7 @@ const processWhere = (where, ctx) => {
     }
 
     if (isOperator(key)) {
-      throw new Error(`Only $and, $or and $not can by used as root level operators. Found ${key}.`);
+      throw new Error(`Only $and, $or and $not can only be used as root level operators. Found ${key}.`);
     }
 
     const attribute = meta.attributes[key];
@@ -219,6 +220,15 @@ const applyOperator = (qb, column, operator, value) => {
       }
 
       qb.where(column, value);
+      break;
+    }
+
+    case '$eqi': {
+      if (value === null) {
+        qb.whereNull(column);
+        break;
+      }
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}`]);
       break;
     }
     case '$ne': {

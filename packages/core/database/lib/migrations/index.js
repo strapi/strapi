@@ -2,24 +2,35 @@
 
 const path = require('path');
 const fse = require('fs-extra');
-const Umzug = require('umzug');
+const { Umzug } = require('umzug');
 
 const createStorage = require('./storage');
 
+const wrapTransaction = db => fn => () =>
+  db.connection.transaction(trx => Promise.resolve(fn(trx)));
+
 // TODO: check multiple commands in one sql statement
-const migrationResolver = path => {
+const migrationResolver = ({ name, path, context }) => {
+  const { db } = context;
+
   // if sql file run with knex raw
   if (path.match(/\.sql$/)) {
     const sql = fse.readFileSync(path, 'utf8');
 
     return {
-      up: knex => knex.raw(sql),
+      name,
+      up: wrapTransaction(db)(knex => knex.raw(sql)),
       down() {},
     };
   }
 
   // NOTE: we can add some ts register if we want to handle ts migration files at some point
-  return require(path);
+  const migration = require(path);
+  return {
+    name,
+    up: wrapTransaction(db)(migration.up),
+    down: wrapTransaction(db)(migration.down),
+  };
 };
 
 const createUmzugProvider = db => {
@@ -27,17 +38,12 @@ const createUmzugProvider = db => {
 
   fse.ensureDirSync(migrationDir);
 
-  const wrapFn = fn => db => db.getConnection().transaction(trx => Promise.resolve(fn(trx)));
-  const storage = createStorage({ db, tableName: 'strapi_migrations' });
-
   return new Umzug({
-    storage,
+    storage: createStorage({ db, tableName: 'strapi_migrations' }),
+    context: { db },
     migrations: {
-      path: migrationDir,
-      pattern: /\.(js|sql)$/,
-      params: [db],
-      wrap: wrapFn,
-      customResolver: migrationResolver,
+      glob: ['*.{js,sql}', { cwd: migrationDir }],
+      resolve: migrationResolver,
     },
   });
 };

@@ -4,8 +4,9 @@
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "{{ pluginName }}",
-    "description": "Description of {{ pluginName }} plugin",
-    "kind": "plugin"
+    "description": "Description of {{titleCase pluginName }} plugin",
+    "kind": "plugin",
+    "displayName": "{{titleCase pluginName }}"
   },
   "dependencies": {},
   "author": {
@@ -17,7 +18,7 @@
     }
   ],
   "engines": {
-    "node": ">=12.x.x <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   },
   "license": "MIT"

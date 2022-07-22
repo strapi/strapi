@@ -5,13 +5,23 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 const { getAbsoluteServerUrl } = require('@strapi/utils');
 
-const { builApiEndpointPath } = require('../utils/builders');
-const defaultConfig = require('../config/default-config');
+const defaultPluginConfig = require('../config/default-plugin-config');
+const { builApiEndpointPath, buildComponentSchema } = require('./helpers');
 
 module.exports = ({ strapi }) => {
   const config = strapi.config.get('plugin.documentation');
 
+  const registeredDocs = [];
+
   return {
+    registerDoc(doc) {
+      // parseYaml
+      if (typeof doc === 'string') {
+        doc = require('yaml').parse(doc);
+      }
+      // receive an object we can register it directly
+      registeredDocs.push(doc);
+    },
     getDocumentationVersion() {
       return _.get(config, 'info.version');
     },
@@ -27,7 +37,7 @@ module.exports = ({ strapi }) => {
     getDocumentationVersions() {
       return fs
         .readdirSync(this.getFullDocumentationPath())
-        .map(version => {
+        .map((version) => {
           try {
             const doc = JSON.parse(
               fs.readFileSync(
@@ -41,7 +51,7 @@ module.exports = ({ strapi }) => {
             return null;
           }
         })
-        .filter(x => x);
+        .filter((x) => x);
     },
 
     /**
@@ -88,7 +98,7 @@ module.exports = ({ strapi }) => {
 
     getPluginAndApiInfo() {
       const plugins = _.get(config, 'x-strapi-config.plugins');
-      const pluginsToDocument = plugins.map(plugin => {
+      const pluginsToDocument = plugins.map((plugin) => {
         return {
           name: plugin,
           getter: 'plugin',
@@ -96,7 +106,7 @@ module.exports = ({ strapi }) => {
         };
       });
 
-      const apisToDocument = Object.keys(strapi.api).map(api => {
+      const apisToDocument = Object.keys(strapi.api).map((api) => {
         return {
           name: api,
           getter: 'api',
@@ -107,7 +117,7 @@ module.exports = ({ strapi }) => {
       return [...apisToDocument, ...pluginsToDocument];
     },
 
-    async getCustomSettings() {
+    async getCustomConfig() {
       const customConfigPath = this.getCustomDocumentationPath();
       const pathExists = await fs.pathExists(customConfigPath);
       if (pathExists) {
@@ -122,23 +132,31 @@ module.exports = ({ strapi }) => {
      */
     async generateFullDoc(version = this.getDocumentationVersion()) {
       let paths = {};
-
+      let schemas = {};
       const apis = this.getPluginAndApiInfo();
       for (const api of apis) {
         const apiName = api.name;
         const apiDirPath = path.join(this.getApiDocumentationPath(api), version);
 
         const apiDocPath = path.join(apiDirPath, `${apiName}.json`);
-        const apiPathsObject = builApiEndpointPath(api);
 
-        if (!apiPathsObject) {
+        const apiPath = builApiEndpointPath(api);
+
+        if (!apiPath) {
           continue;
         }
 
         await fs.ensureFile(apiDocPath);
-        await fs.writeJson(apiDocPath, apiPathsObject, { spaces: 2 });
+        await fs.writeJson(apiDocPath, apiPath, { spaces: 2 });
 
-        paths = { ...paths, ...apiPathsObject.paths };
+        const componentSchema = buildComponentSchema(api);
+
+        schemas = {
+          ...schemas,
+          ...componentSchema,
+        };
+
+        paths = { ...paths, ...apiPath };
       }
 
       const fullDocJsonPath = path.join(
@@ -147,27 +165,44 @@ module.exports = ({ strapi }) => {
         'full_documentation.json'
       );
 
-      const defaultSettings = _.cloneDeep(defaultConfig);
+      const defaultConfig = _.cloneDeep(defaultPluginConfig);
 
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       const apiPath = strapi.config.get('api.rest.prefix');
 
-      _.set(defaultSettings, 'servers', [
+      _.set(defaultConfig, 'servers', [
         {
           url: `${serverUrl}${apiPath}`,
           description: 'Development server',
         },
       ]);
+      _.set(defaultConfig, ['info', 'x-generation-date'], new Date().toISOString());
+      _.set(defaultConfig, ['info', 'version'], version);
+      _.merge(defaultConfig.components, { schemas });
 
-      _.set(defaultSettings, ['info', 'x-generation-date'], new Date().toISOString());
-      _.set(defaultSettings, ['info', 'version'], version);
+      const customConfig = await this.getCustomConfig();
+      const config = _.merge(defaultConfig, customConfig);
 
-      const customSettings = await this.getCustomSettings();
+      const finalDoc = { ...config, paths };
 
-      const settings = _.merge(defaultSettings, customSettings);
+      registeredDocs.forEach((doc) => {
+        // Add tags
+        finalDoc.tags = finalDoc.tags || [];
+        finalDoc.tags.push(...(doc.tags || []));
+
+        // Add Paths
+        _.assign(finalDoc.paths, doc.paths);
+
+        // Add components
+        _.forEach(doc.components || {}, (val, key) => {
+          finalDoc.components[key] = finalDoc.components[key] || {};
+
+          _.assign(finalDoc.components[key], val);
+        });
+      });
 
       await fs.ensureFile(fullDocJsonPath);
-      await fs.writeJson(fullDocJsonPath, { ...settings, paths }, { spaces: 2 });
+      await fs.writeJson(fullDocJsonPath, finalDoc, { spaces: 2 });
     },
   };
 };

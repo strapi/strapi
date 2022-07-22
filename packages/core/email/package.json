@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-email",
-  "version": "4.1.8",
+  "version": "4.2.3",
   "description": "Easily configure your Strapi application to send emails.",
   "repository": {
     "type": "git",
@@ -26,15 +26,15 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
-    "@strapi/provider-email-sendmail": "4.1.8",
-    "@strapi/utils": "4.1.8",
+    "@strapi/provider-email-sendmail": "4.2.3",
+    "@strapi/utils": "4.2.3",
     "lodash": "4.17.21"
   },
   "devDependencies": {
-    "@strapi/helper-plugin": "4.1.8"
+    "@strapi/helper-plugin": "4.2.3"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

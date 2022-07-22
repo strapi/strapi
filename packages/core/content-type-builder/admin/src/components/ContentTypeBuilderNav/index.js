@@ -1,4 +1,7 @@
 import React from 'react';
+import upperFirst from 'lodash/upperFirst';
+import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
 import {
@@ -8,10 +11,8 @@ import {
   SubNavLinkSection,
   SubNavSection,
   SubNavSections,
-} from '@strapi/design-system/SubNav';
+} from '@strapi/design-system/v2/SubNav';
 import { TextButton } from '@strapi/design-system/TextButton';
-import upperFirst from 'lodash/upperFirst';
-import { useIntl } from 'react-intl';
 import useContentTypeBuilderMenu from './useContentTypeBuilderMenu';
 import getTrad from '../../utils/getTrad';
 
@@ -35,7 +36,10 @@ const ContentTypeBuilderNav = () => {
           id: `${getTrad('plugin.name')}`,
           defaultMessage: 'Content-Types Builder',
         })}
-        searchLabel="Search..."
+        searchLabel={formatMessage({
+          id: 'global.search',
+          defaultMessage: 'Search',
+        })}
       />
       <SubNavSections>
         {menu.map(section => {
@@ -53,7 +57,12 @@ const ContentTypeBuilderNav = () => {
                     return (
                       <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
                         {link.links.map(subLink => (
-                          <SubNavLink to={subLink.to} active={subLink.active} key={subLink.name}>
+                          <SubNavLink
+                            as={NavLink}
+                            to={subLink.to}
+                            active={subLink.active}
+                            key={subLink.name}
+                          >
                             {upperFirst(
                               formatMessage({ id: subLink.name, defaultMessage: subLink.title })
                             )}
@@ -64,7 +73,7 @@ const ContentTypeBuilderNav = () => {
                   }
 
                   return (
-                    <SubNavLink to={link.to} active={link.active} key={link.name}>
+                    <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
                       {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
                     </SubNavLink>
                   );

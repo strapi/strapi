@@ -284,6 +284,14 @@
     "name":"Central Kurdish (ckb)"
   },
   {
+    "code":"kmr",
+    "name":"Northern Kurdish (kmr)"
+  },
+  {
+    "code":"sdh",
+    "name":"Southern Kurdish (sdh)"
+  },
+  {
     "code":"tzm",
     "name":"Central Morocco Tamazight (tzm)"
   },
@@ -1018,6 +1026,10 @@
   {
     "code":"kn-IN",
     "name":"Kannada (India) (kn-IN)"
+  },
+  {
+    "code":"kaa",
+    "name":"Kara-Kalpak (kaa)"
   },
   {
     "code":"kk",

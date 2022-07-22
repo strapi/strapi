@@ -37,6 +37,7 @@ const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 const { destroyOnSignal } = require('./utils/signals');
+const sanitizersRegistry = require('./core/registries/sanitizers');
 
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
@@ -64,6 +65,7 @@ class Strapi {
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
+    this.container.register('sanitizers', sanitizersRegistry(this));
 
     this.dirs = utils.getDirs(rootDir, { strapi: this });
 
@@ -155,6 +157,10 @@ class Strapi {
 
   get auth() {
     return this.container.get('auth');
+  }
+
+  get sanitizers() {
+    return this.container.get('sanitizers');
   }
 
   async start() {
@@ -304,6 +310,10 @@ class Strapi {
     this.app = await loaders.loadSrcIndex(this);
   }
 
+  async loadSanitizers() {
+    await loaders.loadSanitizers(this);
+  }
+
   registerInternalHooks() {
     this.container.get('hooks').set('strapi::content-types.beforeSync', createAsyncParallelHook());
     this.container.get('hooks').set('strapi::content-types.afterSync', createAsyncParallelHook());
@@ -315,6 +325,7 @@ class Strapi {
   async register() {
     await Promise.all([
       this.loadApp(),
+      this.loadSanitizers(),
       this.loadPlugins(),
       this.loadAdmin(),
       this.loadAPIs(),

@@ -43,6 +43,10 @@ describe('<Notifications />', () => {
       }
 
       .c1 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -52,17 +56,17 @@ describe('<Notifications />', () => {
         flex-direction: column;
       }
 
-      .c1 > * {
+      .c2 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c1 > * + * {
+      .c2 > * + * {
         margin-top: 8px;
       }
 
       <div
-        class="c0 c1"
+        class="c0 c1 c2"
         spacing="2"
         width="31.25rem"
       />

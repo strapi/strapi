@@ -68,10 +68,10 @@ const useFetchContentTypeLayout = contentTypeUID => {
   }, [contentTypeUID, getData]);
 
   const updateLayout = useCallback(
-    newLayout => {
+    data => {
       dispatch({
         type: 'UPDATE_LAYOUT',
-        newLayout: formatLayouts({ contentType: newLayout, components: {} }, schemas),
+        newLayout: formatLayouts(data, schemas),
       });
     },
     [schemas]

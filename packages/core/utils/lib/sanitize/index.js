@@ -28,6 +28,11 @@ module.exports = {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
       }
 
+      // Apply sanitizers from registry if exists
+      strapi.sanitizers
+        .get('content-api.input')
+        .forEach(sanitizer => transforms.push(sanitizer(schema)));
+
       return pipeAsync(...transforms)(data);
     },
 
@@ -41,6 +46,11 @@ module.exports = {
       if (auth) {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
       }
+
+      // Apply sanitizers from registry if exists
+      strapi.sanitizers
+        .get('content-api.output')
+        .forEach(sanitizer => transforms.push(sanitizer(schema)));
 
       return pipeAsync(...transforms)(data);
     },

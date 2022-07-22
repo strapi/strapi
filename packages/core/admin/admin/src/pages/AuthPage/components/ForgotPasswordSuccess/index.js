@@ -1,9 +1,9 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
+import { Link } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Main } from '@strapi/design-system/Main';
 import { Flex } from '@strapi/design-system/Flex';
-import { Link } from '@strapi/design-system/Link';
 import { Typography } from '@strapi/design-system/Typography';
 import UnauthenticatedLayout, {
   Column,

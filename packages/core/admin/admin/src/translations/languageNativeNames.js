@@ -1,17 +1,20 @@
 const languageNativeNames = {
   ar: 'العربية',
+  ca: 'Català',
   cs: 'Čeština',
   de: 'Deutsch',
   dk: 'Dansk',
   en: 'English',
   es: 'Español',
   fr: 'Français',
+  gu: 'Gujarati',
   he: 'עברית',
   hu: 'Magyar',
   id: 'Indonesian',
   it: 'Italiano',
   ja: '日本語',
   ko: '한국어',
+  ml: 'Malayalam',
   ms: 'Melayu',
   nl: 'Nederlands',
   no: 'Norwegian',
@@ -27,6 +30,8 @@ const languageNativeNames = {
   vi: 'Tiếng Việt',
   'zh-Hans': '中文 (简体)',
   zh: '中文 (繁體)',
+  sa: 'संस्कृत',
+  hi: 'हिन्दी',
 };
 
 export default languageNativeNames;

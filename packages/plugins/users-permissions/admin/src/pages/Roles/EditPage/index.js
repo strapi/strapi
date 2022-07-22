@@ -1,4 +1,15 @@
 import React, { useState, useRef } from 'react';
+import { Formik } from 'formik';
+import { useIntl } from 'react-intl';
+import { useRouteMatch } from 'react-router-dom';
+import {
+  useOverlayBlocker,
+  SettingsPageTitle,
+  LoadingIndicatorPage,
+  Form,
+  useNotification,
+  Link,
+} from '@strapi/helper-plugin';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
@@ -9,18 +20,7 @@ import { Textarea } from '@strapi/design-system/Textarea';
 import { Typography } from '@strapi/design-system/Typography';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
-import { Link } from '@strapi/design-system/Link';
 import { GridItem, Grid } from '@strapi/design-system/Grid';
-import { Formik } from 'formik';
-import { useIntl } from 'react-intl';
-import { useRouteMatch } from 'react-router-dom';
-import {
-  useOverlayBlocker,
-  SettingsPageTitle,
-  LoadingIndicatorPage,
-  Form,
-  useNotification,
-} from '@strapi/helper-plugin';
 import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
