@@ -56,18 +56,20 @@ module.exports = {
      * @param {Permission} params.permission
      */
     const evaluate = async params => {
-      const { options, register, permission } = params;
+      const { options, register } = params;
 
       const preFormatValidation = await runValidationHook(
         'before-format::validate.permission',
-        createBeforeEvaluateContext(permission)
+        createBeforeEvaluateContext(params.permission)
       );
 
       if (preFormatValidation === false) {
         return;
       }
 
-      await state.hooks['format.permission'].call(createFormatContext(permission));
+      const permission = await state.hooks['format.permission'].call(
+        createFormatContext(params.permission)
+      );
 
       const postFormatValidation = await runValidationHook(
         'post-format::validate.permission',
@@ -114,11 +116,11 @@ module.exports = {
       const resultPropEq = _.propEq('result');
       const pickResults = _.map(_.prop('result'));
 
-      if (evaluatedConditions.every(resultPropEq(true))) {
+      if (evaluatedConditions.every(resultPropEq(false))) {
         return;
       }
 
-      if (_.isEmpty(evaluatedConditions) || evaluatedConditions.some(resultPropEq(false))) {
+      if (_.isEmpty(evaluatedConditions) || evaluatedConditions.some(resultPropEq(true))) {
         return register({ action, subject, properties });
       }
 

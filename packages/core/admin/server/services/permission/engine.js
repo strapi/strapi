@@ -45,8 +45,6 @@ module.exports = params => {
         permission
       );
 
-      console.log(permissionWithSanitizedProperties);
-
       return permissionWithSanitizedProperties;
     })
 
