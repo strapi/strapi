@@ -181,7 +181,7 @@ describe('FromComputerForm', () => {
         border: 1px solid #4945ff;
       }
 
-      .c13 .sc-gJbFto {
+      .c13 .sc-fGoOlv {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -251,7 +251,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c21 .sc-gJbFto {
+      .c21 .sc-fGoOlv {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

@@ -620,7 +620,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         padding-left: 32px;
       }
 
-      .c63 {
+      .c64 {
         background: #eaeaef;
         padding-top: 24px;
         padding-right: 32px;
@@ -650,25 +650,29 @@ describe('Admin | containers | RoleCreatePage', () => {
         max-width: 100%;
       }
 
-      .c62 {
+      .c63 {
         grid-column: span 5;
         max-width: 100%;
       }
 
-      .c54 {
+      .c56 {
         color: #4945ff;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c55 {
+      .c57 {
         color: #4a4a6a;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
       }
 
-      .c56 {
+      .c58 {
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -680,26 +684,39 @@ describe('Admin | containers | RoleCreatePage', () => {
 
       .c46 {
         background: #f6f6f9;
+        padding-top: 24px;
         padding-right: 24px;
+        padding-bottom: 24px;
         padding-left: 24px;
       }
 
       .c49 {
+        max-width: 100%;
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
       }
 
-      .c58 {
+      .c52 {
+        min-width: 0px;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c59 {
         background: #dcdce4;
         border-radius: 50%;
         cursor: pointer;
         width: 2rem;
         height: 2rem;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
         cursor: pointer;
       }
 
-      .c60 {
+      .c61 {
         color: #666687;
         width: 0.6875rem;
       }
@@ -736,7 +753,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         flex-direction: row;
       }
 
-      .c59 {
+      .c60 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -748,6 +765,9 @@ describe('Admin | containers | RoleCreatePage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
         -webkit-box-pack: center;
         -webkit-justify-content: center;
         -ms-flex-pack: center;
@@ -762,11 +782,11 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c44:hover:not([aria-disabled='true']) .sc-cWPeQZ {
+      .c44:hover:not([aria-disabled='true']) .sc-eHtaVP {
         color: #271fe0;
       }
 
-      .c44:hover:not([aria-disabled='true']) .c53 {
+      .c44:hover:not([aria-disabled='true']) .c55 {
         color: #4945ff;
       }
 
@@ -778,22 +798,22 @@ describe('Admin | containers | RoleCreatePage', () => {
         background: #d9d8ff;
       }
 
-      .c51 {
+      .c53 {
         background: transparent;
         border: none;
         position: relative;
         outline: none;
       }
 
-      .c51[aria-disabled='true'] {
+      .c53[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c51[aria-disabled='true'] svg path {
+      .c53[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c51 svg {
+      .c53 svg {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -801,11 +821,11 @@ describe('Admin | containers | RoleCreatePage', () => {
         font-size: 0.625rem;
       }
 
-      .c51 svg path {
+      .c53 svg path {
         fill: #4945ff;
       }
 
-      .c51:after {
+      .c53:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -820,11 +840,11 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 2px solid transparent;
       }
 
-      .c51:focus-visible {
+      .c53:focus-visible {
         outline: none;
       }
 
-      .c51:focus-visible:after {
+      .c53:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -835,34 +855,38 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c57 > * {
+      .c51 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c57 > * + * {
+      .c51 > * + * {
         margin-left: 12px;
       }
 
-      .c61 path {
+      .c62 path {
         fill: #666687;
       }
 
-      .c52 {
+      .c54 {
         text-align: left;
       }
 
-      .c52 svg {
+      .c54 > span {
+        max-width: 100%;
+      }
+
+      .c54 svg {
         width: 0.875rem;
         height: 0.875rem;
       }
 
-      .c52 svg path {
+      .c54 svg path {
         fill: #8e8ea9;
       }
 
       .c48 {
-        height: 5.5rem;
+        min-height: 5.5rem;
         border-radius: 4px;
       }
 
@@ -895,13 +919,13 @@ describe('Admin | containers | RoleCreatePage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c62 {
+        .c63 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c62 {
+        .c63 {
           grid-column: span;
         }
       }
@@ -1119,60 +1143,65 @@ describe('Admin | containers | RoleCreatePage', () => {
                             class="c45 c46 c47 c48"
                             cursor=""
                           >
-                            <button
-                              aria-controls="accordion-content-accordion-1"
-                              aria-disabled="false"
-                              aria-expanded="false"
-                              aria-labelledby="accordion-label-accordion-1"
-                              class="c45 c49 c50 c51 c52"
-                              data-strapi-accordion-toggle="true"
-                              type="button"
-                            >
-                              <span
-                                class="c53 c54"
-                              >
-                                <span
-                                  class="c53 c55"
-                                  id="accordion-label-accordion-1"
-                                >
-                                  Address
-                                </span>
-                                <p
-                                  class="c53 c56"
-                                  id="accordion-desc-accordion-1"
-                                >
-                                  Define all allowed actions for the api::address plugin.
-                                </p>
-                              </span>
-                            </button>
                             <div
-                              class="c45 c50 c57"
+                              class="c45 c49 c50 c51"
                               spacing="3"
                             >
-                              <span
-                                aria-hidden="true"
-                                class="c45 c58 c59"
-                                cursor="pointer"
-                                data-strapi-dropdown="true"
-                                height="2rem"
-                                width="2rem"
+                              <button
+                                aria-controls="accordion-content-accordion-1"
+                                aria-disabled="false"
+                                aria-expanded="false"
+                                aria-labelledby="accordion-label-accordion-1"
+                                class="c45 c52 c50 c53 c54"
+                                data-strapi-accordion-toggle="true"
+                                type="button"
                               >
-                                <svg
-                                  class="c60 c61"
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 14 8"
-                                  width="0.6875rem"
-                                  xmlns="http://www.w3.org/2000/svg"
+                                <span
+                                  class="c55 c56"
                                 >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
+                                  <span
+                                    class="c55 sc-eHtaVP c57"
+                                    id="accordion-label-accordion-1"
+                                  >
+                                    Address
+                                  </span>
+                                  <p
+                                    class="c55 c58"
+                                    id="accordion-desc-accordion-1"
+                                  >
+                                    Define all allowed actions for the api::address plugin.
+                                  </p>
+                                </span>
+                              </button>
+                              <div
+                                class="c45 c50 c51"
+                                spacing="3"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="c45 c59 c60"
+                                  cursor="pointer"
+                                  data-strapi-dropdown="true"
+                                  height="2rem"
+                                  width="2rem"
+                                >
+                                  <svg
+                                    class="c61 c62"
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 14 8"
+                                    width="0.6875rem"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1181,10 +1210,10 @@ describe('Admin | containers | RoleCreatePage', () => {
                   </div>
                 </div>
                 <div
-                  class="c62"
+                  class="c63"
                 >
                   <div
-                    class="c63"
+                    class="c64"
                     style="min-height: 100%;"
                   >
                     <div

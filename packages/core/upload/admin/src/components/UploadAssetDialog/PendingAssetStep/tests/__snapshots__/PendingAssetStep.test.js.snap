@@ -269,7 +269,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c15 .sc-hcupDf {
+.c15 .sc-hLVXRe {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -339,7 +339,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #ffffff;
 }
 
-.c52 .sc-hcupDf {
+.c52 .sc-hLVXRe {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
