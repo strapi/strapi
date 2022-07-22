@@ -40,6 +40,7 @@ const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 const { destroyOnSignal } = require('./utils/signals');
 const sanitizersRegistry = require('./core/registries/sanitizers');
+const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
@@ -173,6 +174,9 @@ class Strapi {
       if (!this.isLoaded) {
         await this.load();
       }
+
+      // Swap type customField for underlying data type
+      convertCustomFieldType(this);
 
       await this.listen();
 
