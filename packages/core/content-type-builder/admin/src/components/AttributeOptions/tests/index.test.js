@@ -1,7 +1,7 @@
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { render, screen, getByText, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import FormModalNavigationProvider from '../../FormModalNavigationProvider';
@@ -86,8 +86,8 @@ describe('<AttributeOptions />', () => {
     const App = makeApp();
     render(App);
 
-    const defaultTab = screen.getByRole('tab', { selected: true });
-    const customTab = screen.getByRole('tab', { selected: false });
+    const defaultTab = screen.getByRole('tab', { selected: true, name: 'Default' });
+    const customTab = screen.getByRole('tab', { selected: false, name: 'Custom' });
 
     expect(defaultTab).toBeVisible();
     expect(customTab).toBeVisible();
@@ -108,13 +108,12 @@ describe('<AttributeOptions />', () => {
 
     getAll.mockReturnValueOnce({});
 
-    const customTab = screen.getByRole('tab', { selected: false });
+    const customTab = screen.getByRole('tab', { selected: false, name: 'Custom' });
     fireEvent.click(customTab);
-    const customTabSelected = screen.getByRole('tab', { selected: true });
-    const customTabText = getByText(customTabSelected, 'Custom');
+    const customTabSelected = screen.getByRole('tab', { selected: true, name: 'Custom' });
     const comingSoonText = screen.getByText('Nothing in here yet.');
 
-    expect(customTabText).not.toBe(null);
+    expect(customTabSelected).toBeVisible();
     expect(comingSoonText).toBeVisible();
   });
 
@@ -123,14 +122,13 @@ describe('<AttributeOptions />', () => {
     const App = makeApp();
     render(App);
 
-    const customTab = screen.getByRole('tab', { selected: false });
+    const customTab = screen.getByRole('tab', { selected: false, name: 'Custom' });
     fireEvent.click(customTab);
-    const customTabSelected = screen.getByRole('tab', { selected: true });
-    const customTabText = getByText(customTabSelected, 'Custom');
+    const customTabSelected = screen.getByRole('tab', { selected: true, name: 'Custom' });
     const customFieldText = screen.getByText('Color');
     const howToAddLink = screen.getByRole('link', { name: 'How to add custom fields' });
 
-    expect(customTabText).not.toBe(null);
+    expect(customTabSelected).toBeVisible();
     expect(customFieldText).toBeVisible();
     expect(howToAddLink).toBeVisible();
   });
