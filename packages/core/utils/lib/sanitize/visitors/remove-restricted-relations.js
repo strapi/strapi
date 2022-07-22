@@ -48,17 +48,17 @@ module.exports = auth => async ({ data, key, attribute, schema }, { remove, set 
   // Polymorphic relations
   if (isMorphRelation) {
     await handleMorphRelation();
+    return;
   }
 
   // Creator relations
-  else if (isCreatorRelation && schema.options.populateCreatorFields) {
+  if (isCreatorRelation && schema.options.populateCreatorFields) {
     // do nothing
+    return;
   }
 
   // Regular relations
-  else {
-    await handleRegularRelation();
-  }
+  await handleRegularRelation();
 };
 
 const hasAccessToSomeScopes = async (scopes, auth) => {
