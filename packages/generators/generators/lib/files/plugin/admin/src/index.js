@@ -40,7 +40,9 @@ export default {
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map(locale => {
-        return import(`./translations/${locale}.json`)
+        return import(
+          /* webpackChunkName: "translation-[request]" */ `./translations/${locale}.json`
+        )
           .then(({ default: data }) => {
             return {
               data: prefixPluginTranslations(data, pluginId),
