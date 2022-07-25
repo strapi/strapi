@@ -9,10 +9,7 @@ const FormModalNavigationProvider = ({ children }) => {
   const { trackUsage } = useTracking();
 
   const onClickSelectCustomField = ({ attributeType, customFieldUid }) => {
-    if (state.forTarget === 'contentType') {
-      trackUsage('didSelectContentTypeFieldType', { type: attributeType });
-    }
-
+    // TODO: Add tracking for custom fields
     setFormModalNavigationState(prevState => {
       return {
         ...prevState,
@@ -64,7 +61,6 @@ const FormModalNavigationProvider = ({ children }) => {
         forTarget,
         targetUid,
         modalType: 'chooseAttribute',
-
         isOpen: true,
       };
     });
