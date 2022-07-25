@@ -77,7 +77,7 @@
     "hoist-non-react-statics": "^3.3.0",
     "html-loader": "3.1.2",
     "html-webpack-plugin": "5.5.0",
-    "immer": "9.0.6",
+    "immer": "9.0.15",
     "invariant": "^2.2.4",
     "js-cookie": "2.2.1",
     "jsonwebtoken": "8.5.1",
