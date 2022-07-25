@@ -175,9 +175,6 @@ class Strapi {
         await this.load();
       }
 
-      // Swap type customField for underlying data type
-      convertCustomFieldType(this);
-
       await this.listen();
 
       return this;
@@ -432,6 +429,8 @@ class Strapi {
 
   async load() {
     await this.register();
+    // Swap type customField for underlying data type
+    convertCustomFieldType(this);
     await this.bootstrap();
 
     this.isLoaded = true;
