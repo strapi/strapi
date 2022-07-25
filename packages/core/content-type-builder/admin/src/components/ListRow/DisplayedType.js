@@ -49,7 +49,7 @@ DisplayedType.defaultProps = {
 
 DisplayedType.propTypes = {
   type: PropTypes.string.isRequired,
-  customField: PropTypes.bool,
+  customField: PropTypes.string,
   repeatable: PropTypes.bool,
 };
 
