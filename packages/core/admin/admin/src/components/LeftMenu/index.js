@@ -115,7 +115,12 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         </NavLink>
 
         {pluginsSectionLinks.length > 0 ? (
-          <NavSection label="Plugins">
+          <NavSection
+            label={formatMessage({
+              id: 'app.components.LeftMenu.plugins',
+              defaultMessage: 'Plugins',
+            })}
+          >
             {pluginsSectionLinks.map(link => {
               const Icon = link.icon;
 
@@ -129,7 +134,12 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         ) : null}
 
         {generalSectionLinks.length > 0 ? (
-          <NavSection label="General">
+          <NavSection
+            label={formatMessage({
+              id: 'app.components.LeftMenu.general',
+              defaultMessage: 'General',
+            })}
+          >
             {generalSectionLinks.map(link => {
               const LinkIcon = link.icon;
 

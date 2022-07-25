@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "4.2.2",
+  "version": "4.2.3",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",

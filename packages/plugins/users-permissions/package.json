@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "4.2.2",
+  "version": "4.2.3",
   "description": "Protect your API with a full-authentication process based on JWT",
   "repository": {
     "type": "git",
@@ -27,8 +27,8 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
-    "@strapi/helper-plugin": "4.2.2",
-    "@strapi/utils": "4.2.2",
+    "@strapi/helper-plugin": "4.2.3",
+    "@strapi/utils": "4.2.3",
     "bcryptjs": "2.4.3",
     "grant-koa": "5.4.8",
     "jsonwebtoken": "^8.1.0",
@@ -46,7 +46,7 @@
     "url-join": "4.0.1"
   },
   "devDependencies": {
-    "koa": "^2.13.1"
+    "koa": "^2.13.4"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",

@@ -40,10 +40,6 @@ module.exports = ({
 
   const webpackPlugins = isProduction
     ? [
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^\.\/locale$/,
-          contextRegExp: /moment$/,
-        }),
         new MiniCssExtractPlugin({
           filename: '[name].[chunkhash].css',
           chunkFilename: '[name].[chunkhash].chunkhash.css',
@@ -61,7 +57,7 @@ module.exports = ({
   return {
     mode: isProduction ? 'production' : 'development',
     bail: isProduction ? true : false,
-    devtool: false,
+    devtool: isProduction ? false : 'eval-source-map',
     experiments: {
       topLevelAwait: true,
     },
@@ -82,6 +78,7 @@ module.exports = ({
           css: true, // Apply minification to CSS assets
         }),
       ],
+      moduleIds: 'deterministic',
       runtimeChunk: true,
     },
     module: {
