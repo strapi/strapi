@@ -2,13 +2,13 @@ import { Attribute, ComponentAttribute } from '../attributes';
 import { KeysBy, StringRecord } from '../../utils';
 
 /**
- * Litteral union type representing the possible natures of a content type
+ * Literal union type representing the possible natures of a content type
  */
- export type ContentTypeKind = 'singleType' | 'collectionType';
+export type ContentTypeKind = 'singleType' | 'collectionType';
 
- /**
-  * Litteral union type representing the possible types of a model
-  */
+/**
+ * Literal union type representing the possible types of a model
+ */
 export type SchemaModelType = 'contentType' | 'component';
 
 /**
@@ -58,12 +58,12 @@ export interface SchemaInfo {
   /**
    * Singular form of the content type name
    */
-  singularName: string;
+  singularName?: string;
 
   /**
    * Plural form of the collection type name
    */
-  pluralName: string;
+  pluralName?: string;
 
   /**
    * Description of the model
@@ -85,7 +85,7 @@ export interface SchemaAttributes extends StringRecord<Attribute> {}
  * Structure containing every core schema options and their associated value
  */
 export interface SchemaOptions {
-  draftAndPublish: boolean;
+  draftAndPublish?: boolean;
   populateCreatorFields?: boolean;
   comment?: string;
 }
@@ -101,7 +101,7 @@ export interface ContentTypeSchema extends Schema {
   /**
    * Determine the type of the content type (single-type or collection-type)
    */
-  kind: ContentTypeKind;  
+  kind: ContentTypeKind;
 }
 
 /**

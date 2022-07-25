@@ -72,7 +72,3 @@ export interface MinMaxLengthOption {
   minLength?: number;
   maxLength?: number;
 }
-
-export interface AttributePluginOption {
-  pluginOptions?: object;
-}
