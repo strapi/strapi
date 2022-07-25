@@ -1,12 +1,26 @@
 'use strict';
 
+const { defaultTo } = require('lodash/fp');
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
+const { getWeeklyCronScheduleAt } = require('../utils/cron');
 
-const rand = max => Math.floor(Math.random() * max);
-const getCronRandomWeekly = () => `${rand(60)} ${rand(60)} ${rand(24)} * * ${rand(7)}`;
+const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+const getMetricsStoreValue = async () => {
+  const value = await strapi.store.get({ type: 'plugin', name: 'upload', key: 'metrics' });
+  return defaultTo({}, value);
+};
+const setMetricsStoreValue = value =>
+  strapi.store.set({ type: 'plugin', name: 'upload', key: 'metrics', value });
+
+const addMinutes = (date, offset) => {
+  const newDate = new Date(date);
+  newDate.setMinutes(newDate.getMinutes() + offset);
+  return newDate;
+};
 
 module.exports = ({ strapi }) => ({
-  async computeCronMetrics() {
+  async computeMetrics() {
     // Folder metrics
     const pathColName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
     const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
@@ -81,12 +95,32 @@ module.exports = ({ strapi }) => ({
     };
   },
 
+  async sendMetrics() {
+    const metrics = await this.computeMetrics();
+    strapi.telemetry.send('didSendUploadPropertiesOnceAWeek', metrics);
+
+    const metricsInfoStored = await getMetricsStoreValue();
+    await setMetricsStoreValue({ ...metricsInfoStored, lastMetricsUpdate: new Date().getTime() });
+  },
+
+  async ensureWeeklyStoredCronSchedule() {
+    const metricsInfoStored = await getMetricsStoreValue();
+    const { cronSchedule: currCronSchedule, lastMetricsUpdate } = metricsInfoStored;
+
+    const now = new Date();
+    let cronSchedule = currCronSchedule;
+
+    if (!currCronSchedule || !lastMetricsUpdate || lastMetricsUpdate + ONE_WEEK < now.getTime()) {
+      cronSchedule = getWeeklyCronScheduleAt(addMinutes(now, 5));
+      await setMetricsStoreValue({ ...metricsInfoStored, cronSchedule });
+    }
+
+    return cronSchedule;
+  },
+
   async registerCron() {
-    strapi.cron.add({
-      [getCronRandomWeekly()]: async ({ strapi }) => {
-        const metrics = await this.computeCronMetrics();
-        strapi.telemetry.send('didSendUploadPropertiesOnceAWeek', metrics);
-      },
-    });
+    const cronSchedule = await this.ensureWeeklyStoredCronSchedule();
+
+    strapi.cron.add({ [cronSchedule]: this.sendMetrics.bind(this) });
   },
 });

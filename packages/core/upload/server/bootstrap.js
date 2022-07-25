@@ -21,7 +21,7 @@ module.exports = async ({ strapi }) => {
 
   await registerPermissionActions();
 
-  getService('metrics').registerCron();
+  await getService('metrics').registerCron();
 };
 
 const registerPermissionActions = async () => {
