@@ -27,6 +27,8 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
+    "@babel/preset-env": "7.18.9",
+    "@babel/preset-react": "7.18.6",
     "@strapi/helper-plugin": "4.2.3",
     "@strapi/utils": "4.2.3",
     "bcryptjs": "2.4.3",
