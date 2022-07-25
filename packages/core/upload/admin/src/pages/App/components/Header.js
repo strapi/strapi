@@ -17,10 +17,10 @@ import { BreadcrumbsDefinition, FolderDefinition } from '../../../constants';
 
 export const Header = ({
   canCreate,
+  breadcrumbs,
+  folder,
   onToggleEditFolderDialog,
   onToggleUploadAssetDialog,
-  folder,
-  breadcrumbs,
 }) => {
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
@@ -46,6 +46,7 @@ export const Header = ({
               defaultMessage: 'Folders navigation',
             })}
             breadcrumbs={breadcrumbs}
+            currentFolderId={folder?.id}
           />
         )
       }

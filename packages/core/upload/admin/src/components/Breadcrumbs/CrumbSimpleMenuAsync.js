@@ -10,14 +10,14 @@ import { Loader } from '@strapi/design-system/Loader';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getFolderParents, getFolderURL, getTrad } from '../../utils';
 
-export const CrumbSimpleMenuAsync = ({ parentsToOmit }) => {
+export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeFolder }) => {
   const [shouldFetch, setShouldFetch] = useState(false);
   const { data, isLoading } = useFolderStructure({ enabled: shouldFetch });
   const { pathname } = useLocation();
   const [{ query }] = useQueryParams();
   const { formatMessage } = useIntl();
 
-  const allAscendants = data && getFolderParents(data?.[0], query?.folder);
+  const allAscendants = data && getFolderParents(data?.[0], currentFolderId);
   const filteredAscendants =
     allAscendants && allAscendants.filter(ascendant => !parentsToOmit.includes(ascendant.id));
 
@@ -43,10 +43,18 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit }) => {
       )}
       {filteredAscendants &&
         filteredAscendants.map(ascendant => {
+          if (onChangeFolder) {
+            return (
+              <MenuItem as="button" onClick={() => onChangeFolder(ascendant.id)} key={ascendant.id}>
+                {ascendant.label}
+              </MenuItem>
+            );
+          }
+
           const url = getFolderURL(pathname, query, ascendant);
 
           return (
-            <MenuItem isLink as={NavLink} to={url} key={ascendant.id}>
+            <MenuItem aria-label={ascendant.label} isLink as={NavLink} to={url} key={ascendant.id}>
               {ascendant.label}
             </MenuItem>
           );
@@ -56,9 +64,13 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit }) => {
 };
 
 CrumbSimpleMenuAsync.defaultProps = {
+  currentFolderId: undefined,
+  onChangeFolder: undefined,
   parentsToOmit: [],
 };
 
 CrumbSimpleMenuAsync.propTypes = {
+  currentFolderId: PropTypes.number,
+  onChangeFolder: PropTypes.func,
   parentsToOmit: PropTypes.arrayOf(PropTypes.number),
 };

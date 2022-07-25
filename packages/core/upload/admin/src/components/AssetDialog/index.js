@@ -262,6 +262,7 @@ export const AssetDialog = ({
                 allowedTypes={allowedTypes}
                 assets={assets}
                 canCreate={canCreate}
+                canRead={canRead}
                 folders={folders}
                 onSelectAsset={handleSelectAsset}
                 selectedAssets={selectedAssets}

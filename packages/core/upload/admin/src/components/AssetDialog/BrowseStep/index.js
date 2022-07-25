@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import { Flex } from '@strapi/design-system/Flex';
-import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
 import { Divider } from '@strapi/design-system/Divider';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
@@ -17,11 +16,14 @@ import PlusIcon from '@strapi/icons/Plus';
 
 import { FolderDefinition, AssetDefinition } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
+import { getBreadcrumbData } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
 import { AssetList } from '../../AssetList';
 import { FolderList } from '../../FolderList';
 import { EmptyAssets } from '../../EmptyAssets';
+import { Breadcrumbs } from '../../Breadcrumbs';
 import SortPicker from '../../SortPicker';
+import { useFolder } from '../../../hooks/useFolder';
 import { FolderCard, FolderCardBody, FolderCardBodyAction } from '../../FolderCard';
 import { Filters } from './Filters';
 import PaginationFooter from './PaginationFooter';
@@ -48,6 +50,7 @@ export const BrowseStep = ({
   allowedTypes,
   assets,
   canCreate,
+  canRead,
   folders,
   multiple,
   onAddAsset,
@@ -66,6 +69,17 @@ export const BrowseStep = ({
   selectedAssets,
 }) => {
   const { formatMessage } = useIntl();
+
+  const { data: currentFolder, isLoading: isCurrentFolderLoading } = useFolder(
+    queryObject?.folder,
+    {
+      enabled: canRead && !!queryObject?.folder,
+    }
+  );
+
+  const breadcrumbs =
+    !isCurrentFolderLoading && getBreadcrumbData(currentFolder, { query: queryObject });
+
   const allAllowedAsset = getAllowedFiles(allowedTypes, assets);
   const areAllAssetSelected =
     allAllowedAsset.every(
@@ -88,48 +102,58 @@ export const BrowseStep = ({
   };
 
   return (
-    <Stack spacing={4}>
+    <Box>
       {onSelectAllAsset && (
         <Box>
-          <Box paddingBottom={4}>
-            <Flex justifyContent="space-between" alignItems="flex-start">
-              {(assetCount > 0 || folderCount > 0 || isFiltering) && (
-                <StartBlockActions wrap="wrap">
-                  {multiple && (
-                    <Flex
-                      paddingLeft={2}
-                      paddingRight={2}
-                      background="neutral0"
-                      hasRadius
-                      borderColor="neutral200"
-                      height={`${32 / 16}rem`}
-                    >
-                      <BaseCheckbox
-                        aria-label={formatMessage({
-                          id: getTrad('bulk.select.label'),
-                          defaultMessage: 'Select all assets',
-                        })}
-                        indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
-                        value={areAllAssetSelected}
-                        onChange={onSelectAllAsset}
-                      />
-                    </Flex>
-                  )}
-                  <SortPicker onChangeSort={onChangeSort} />
-                  <Filters
-                    appliedFilters={queryObject?.filters?.$and}
-                    onChangeFilters={onChangeFilters}
-                  />
-                </StartBlockActions>
-              )}
+          <Flex justifyContent="space-between" alignItems="flex-start">
+            {(assetCount > 0 || folderCount > 0 || isFiltering) && (
+              <StartBlockActions wrap="wrap">
+                {multiple && (
+                  <Flex
+                    paddingLeft={2}
+                    paddingRight={2}
+                    background="neutral0"
+                    hasRadius
+                    borderColor="neutral200"
+                    height={`${32 / 16}rem`}
+                  >
+                    <BaseCheckbox
+                      aria-label={formatMessage({
+                        id: getTrad('bulk.select.label'),
+                        defaultMessage: 'Select all assets',
+                      })}
+                      indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
+                      value={areAllAssetSelected}
+                      onChange={onSelectAllAsset}
+                    />
+                  </Flex>
+                )}
+                <SortPicker onChangeSort={onChangeSort} />
+                <Filters
+                  appliedFilters={queryObject?.filters?.$and}
+                  onChangeFilters={onChangeFilters}
+                />
+              </StartBlockActions>
+            )}
 
-              {(assetCount > 0 || folderCount > 0 || isSearching) && (
-                <EndBlockActions pullRight>
-                  <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
-                </EndBlockActions>
-              )}
-            </Flex>
-          </Box>
+            {(assetCount > 0 || folderCount > 0 || isSearching) && (
+              <EndBlockActions pullRight>
+                <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
+              </EndBlockActions>
+            )}
+          </Flex>
+        </Box>
+      )}
+
+      {canRead && !isCurrentFolderLoading && (
+        <Box paddingTop={3}>
+          <Breadcrumbs
+            onChangeFolder={onChangeFolder}
+            as="nav"
+            label="hello"
+            breadcrumbs={breadcrumbs}
+            currentFolderId={queryObject?.folder}
+          />
         </Box>
       )}
 
@@ -237,36 +261,38 @@ export const BrowseStep = ({
       )}
 
       {assetCount > 0 && folderCount > 0 && (
-        <Box paddingTop={2}>
+        <Box paddingTop={6}>
           <Divider />
         </Box>
       )}
 
       {assetCount > 0 && (
-        <AssetList
-          allowedTypes={allowedTypes}
-          size="S"
-          assets={assets}
-          onSelectAsset={onSelectAsset}
-          selectedAssets={selectedAssets}
-          onEditAsset={onEditAsset}
-          title={
-            ((!isSearchingOrFiltering || (isSearchingOrFiltering && folderCount > 0)) &&
-              queryObject.page === 1 &&
-              formatMessage(
-                {
-                  id: getTrad('list.assets.title'),
-                  defaultMessage: 'Assets ({count})',
-                },
-                { count: assetCount }
-              )) ||
-            ''
-          }
-        />
+        <Box paddingTop={6}>
+          <AssetList
+            allowedTypes={allowedTypes}
+            size="S"
+            assets={assets}
+            onSelectAsset={onSelectAsset}
+            selectedAssets={selectedAssets}
+            onEditAsset={onEditAsset}
+            title={
+              ((!isSearchingOrFiltering || (isSearchingOrFiltering && folderCount > 0)) &&
+                queryObject.page === 1 &&
+                formatMessage(
+                  {
+                    id: getTrad('list.assets.title'),
+                    defaultMessage: 'Assets ({count})',
+                  },
+                  { count: assetCount }
+                )) ||
+              ''
+            }
+          />
+        </Box>
       )}
 
       {pagination.pageCount > 0 && (
-        <Flex justifyContent="space-between">
+        <Flex justifyContent="space-between" paddingTop={4}>
           <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
           <PaginationFooter
             activePage={queryObject.page}
@@ -275,7 +301,7 @@ export const BrowseStep = ({
           />
         </Flex>
       )}
-    </Stack>
+    </Box>
   );
 };
 
@@ -292,6 +318,7 @@ BrowseStep.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
   assets: PropTypes.arrayOf(AssetDefinition).isRequired,
   canCreate: PropTypes.bool.isRequired,
+  canRead: PropTypes.bool.isRequired,
   folders: PropTypes.arrayOf(FolderDefinition),
   multiple: PropTypes.bool,
   onAddAsset: PropTypes.func.isRequired,
@@ -310,6 +337,7 @@ BrowseStep.propTypes = {
     page: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
     _q: PropTypes.string,
+    folder: PropTypes.number,
   }).isRequired,
   pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,

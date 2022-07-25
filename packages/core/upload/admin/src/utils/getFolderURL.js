@@ -1,6 +1,11 @@
 import { stringify } from 'qs';
 
 const getFolderURL = (pathname, query, folder) => {
+  // Content manager do not use pathname
+  if (!pathname) {
+    return folder ? folder.id : null;
+  }
+
   const { _q, ...queryParamsWithoutQ } = query;
   const queryParamsString = stringify(
     {
