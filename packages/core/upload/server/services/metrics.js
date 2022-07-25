@@ -1,6 +1,7 @@
 'use strict';
 
 const { defaultTo } = require('lodash/fp');
+const { add } = require('date-fns');
 const { FOLDER_MODEL_UID, FILE_MODEL_UID } = require('../constants');
 const { getWeeklyCronScheduleAt } = require('../utils/cron');
 
@@ -12,12 +13,6 @@ const getMetricsStoreValue = async () => {
 };
 const setMetricsStoreValue = value =>
   strapi.store.set({ type: 'plugin', name: 'upload', key: 'metrics', value });
-
-const addMinutes = (date, offset) => {
-  const newDate = new Date(date);
-  newDate.setMinutes(newDate.getMinutes() + offset);
-  return newDate;
-};
 
 module.exports = ({ strapi }) => ({
   async computeMetrics() {
@@ -100,27 +95,27 @@ module.exports = ({ strapi }) => ({
     strapi.telemetry.send('didSendUploadPropertiesOnceAWeek', metrics);
 
     const metricsInfoStored = await getMetricsStoreValue();
-    await setMetricsStoreValue({ ...metricsInfoStored, lastMetricsUpdate: new Date().getTime() });
+    await setMetricsStoreValue({ ...metricsInfoStored, lastWeeklyUpdate: new Date().getTime() });
   },
 
   async ensureWeeklyStoredCronSchedule() {
     const metricsInfoStored = await getMetricsStoreValue();
-    const { cronSchedule: currCronSchedule, lastMetricsUpdate } = metricsInfoStored;
+    const { weeklySchedule: currentSchedule, lastWeeklyUpdate } = metricsInfoStored;
 
     const now = new Date();
-    let cronSchedule = currCronSchedule;
+    let weeklySchedule = currentSchedule;
 
-    if (!currCronSchedule || !lastMetricsUpdate || lastMetricsUpdate + ONE_WEEK < now.getTime()) {
-      cronSchedule = getWeeklyCronScheduleAt(addMinutes(now, 5));
-      await setMetricsStoreValue({ ...metricsInfoStored, cronSchedule });
+    if (!currentSchedule || !lastWeeklyUpdate || lastWeeklyUpdate + ONE_WEEK < now.getTime()) {
+      weeklySchedule = getWeeklyCronScheduleAt(add(now, { minutes: 5 }));
+      await setMetricsStoreValue({ ...metricsInfoStored, weeklySchedule });
     }
 
-    return cronSchedule;
+    return weeklySchedule;
   },
 
   async registerCron() {
-    const cronSchedule = await this.ensureWeeklyStoredCronSchedule();
+    const weeklySchedule = await this.ensureWeeklyStoredCronSchedule();
 
-    strapi.cron.add({ [cronSchedule]: this.sendMetrics.bind(this) });
+    strapi.cron.add({ [weeklySchedule]: this.sendMetrics.bind(this) });
   },
 });
