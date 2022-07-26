@@ -29,7 +29,7 @@ describe('metrics', () => {
           root: process.cwd(),
         },
       },
-    }).register();
+    });
 
     metricsInstance.register();
 
@@ -60,7 +60,7 @@ describe('metrics', () => {
           root: process.cwd(),
         },
       },
-    }).register();
+    });
 
     metricsInstance.register();
 
