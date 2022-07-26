@@ -8,12 +8,18 @@ const fs = require('fs-extra');
 const getWebpackConfig = require('../webpack.config');
 
 const getCustomWebpackConfig = (dir, config) => {
-  const adminConfigPath = path.join(dir, 'src', 'admin', 'webpack.config.js');
+  const adminConfigPathJS = path.join(dir, 'src', 'admin', 'webpack.config.js');
+  const adminConfigPathTS = path.join(dir, 'src', 'admin', 'webpack.config.ts');
 
   let webpackConfig = getWebpackConfig(config);
 
-  if (fs.existsSync(adminConfigPath)) {
-    const webpackAdminConfig = require(path.resolve(adminConfigPath));
+  if (fs.existsSync(adminConfigPathJS) || fs.existsSync(adminConfigPathTS)) {
+    let webpackAdminConfig;
+    if (fs.existsSync(adminConfigPathJS)) {
+      webpackAdminConfig = require(path.resolve(adminConfigPathJS));
+    } else {
+      webpackAdminConfig = require(path.resolve(adminConfigPathTS));
+    }
 
     if (_.isFunction(webpackAdminConfig)) {
       // Expose the devServer configuration
