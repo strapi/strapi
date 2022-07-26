@@ -4,6 +4,7 @@ import {
   useTracking,
   useNotification,
   useStrapiApp,
+  useCustomFields,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
@@ -91,6 +92,7 @@ const FormModal = () => {
     kind,
     step,
     targetUid,
+    customFieldUid,
   } = useFormModalNavigation();
 
   const tabGroupRef = useRef();
@@ -103,6 +105,7 @@ const FormModal = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { getPlugin } = useStrapiApp();
+  const customFieldsRegistry = useCustomFields();
   const ctbPlugin = getPlugin(pluginId);
   const ctbFormsAPI = ctbPlugin.apis.forms;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
@@ -893,6 +896,13 @@ const FormModal = () => {
 
   const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
 
+  let customFieldName = null;
+
+  if (customFieldUid) {
+    const { name } = customFieldsRegistry.get(customFieldUid);
+    customFieldName = name;
+  }
+
   return (
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
@@ -906,6 +916,7 @@ const FormModal = () => {
           forTarget={forTarget}
           targetUid={targetUid}
           attributeType={attributeType}
+          customFieldUid={customFieldUid}
         />
         {isPickingAttribute && (
           <AttributeOptions
@@ -943,11 +954,12 @@ const FormModal = () => {
                       },
                       {
                         type: upperFirst(
-                          formatMessage({
-                            id: getTrad(`attribute.${attributeType}`),
-                          })
+                          customFieldName ||
+                            formatMessage({
+                              id: getTrad(`attribute.${attributeType}`),
+                            })
                         ),
-                        name: upperFirst(attributeName),
+                        name: upperFirst(customFieldName || attributeName),
                         step,
                       }
                     )}
