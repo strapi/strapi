@@ -247,7 +247,7 @@ export const EditAssetDialog = ({
                       })}
                       name="alternativeText"
                       hint={formatMessage({
-                        id: getTrad({ id: getTrad('form.input.decription.file-alt') }),
+                        id: getTrad('form.input.decription.file-alt'),
                         defaultMessage: 'This text will be displayed if the asset can’t be shown.',
                       })}
                       value={values.alternativeText}
@@ -309,7 +309,7 @@ export const EditAssetDialog = ({
           <ModalFooter
             startActions={
               <Button onClick={() => handleClose(values)} variant="tertiary">
-                {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+                {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
               </Button>
             }
             endActions={

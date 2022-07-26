@@ -4,12 +4,12 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
 import { useQueryParams, useSelectionState } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
+import { IntlProvider } from 'react-intl';
 
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useFolders } from '../../../hooks/useFolders';
 import { useAssets } from '../../../hooks/useAssets';
 import { MediaLibrary } from '../MediaLibrary';
-import en from '../../../translations/en.json';
 
 const FIXTURE_ASSET_PAGINATION = {
   pageCount: 1,
@@ -72,11 +72,6 @@ jest.mock('../../../utils', () => ({
   getTrad: x => x,
 }));
 
-jest.mock('react-intl', () => ({
-  FormattedMessage: ({ id }) => id,
-  useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || id) }),
-}));
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -89,11 +84,13 @@ const queryClient = new QueryClient({
 const renderML = () =>
   renderTL(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
-        <MemoryRouter>
-          <MediaLibrary />
-        </MemoryRouter>
-      </ThemeProvider>
+      <IntlProvider locale="en" messages={{}}>
+        <ThemeProvider theme={lightTheme}>
+          <MemoryRouter>
+            <MediaLibrary />
+          </MemoryRouter>
+        </ThemeProvider>
+      </IntlProvider>
     </QueryClientProvider>
   );
 
@@ -148,7 +145,7 @@ describe('Media library homepage', () => {
       it('shows the filters dropdown when the user is allowed to read', () => {
         renderML();
 
-        expect(screen.getByText('app.utils.filters')).toBeInTheDocument();
+        expect(screen.getByText('Filters')).toBeInTheDocument();
       });
 
       it('hides the filters dropdown when the user is not allowed to read', () => {
@@ -184,23 +181,23 @@ describe('Media library homepage', () => {
       });
 
       [
-        ['Most recent uploads', 'createdAt:DESC'],
-        ['Oldest uploads', 'createdAt:ASC'],
-        ['Alphabetical order (A to Z)', 'name:ASC'],
-        ['Reverse alphabetical order (Z to A)', 'name:DESC'],
-        ['Most recent updates', 'updatedAt:DESC'],
-        ['Oldest updates', 'updatedAt:ASC'],
-      ].forEach(([label, sortKey]) => {
-        it(`modifies the URL with the according params: ${label} ${sortKey}`, async () => {
+        'createdAt:DESC',
+        'createdAt:ASC',
+        'name:ASC',
+        'name:DESC',
+        'updatedAt:DESC',
+        'updatedAt:ASC',
+      ].forEach(sortKey => {
+        it(`modifies the URL with the according params: ${sortKey}`, async () => {
           const setQueryMock = jest.fn();
           useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: {} }, setQueryMock]);
 
           renderML();
 
           fireEvent.mouseDown(screen.getByText('Sort by'));
-          await waitFor(() => expect(screen.getByText(label)).toBeInTheDocument());
-          fireEvent.mouseDown(screen.getByText(label));
-          await waitFor(() => expect(screen.queryByText(label)).not.toBeInTheDocument());
+          await waitFor(() => expect(screen.getByText(sortKey)).toBeInTheDocument());
+          fireEvent.mouseDown(screen.getByText(sortKey));
+          await waitFor(() => expect(screen.queryByText(sortKey)).not.toBeInTheDocument());
 
           expect(setQueryMock).toBeCalledWith({ sort: sortKey });
         });
@@ -211,7 +208,7 @@ describe('Media library homepage', () => {
       it('shows the select all button when the user is allowed to update', () => {
         renderML();
 
-        expect(screen.getByLabelText('Select all assets')).toBeInTheDocument();
+        expect(screen.getByLabelText('Select all folders & assets')).toBeInTheDocument();
       });
 
       it('hides the select all button when the user is not allowed to update', () => {
@@ -337,8 +334,8 @@ describe('Media library homepage', () => {
     it('displays folders and folders title', () => {
       renderML();
 
-      expect(screen.queryByText('Folders')).toBeInTheDocument();
-      expect(screen.getByText('Folder 1')).toBeInTheDocument();
+      expect(screen.getByText('Folders (1)')).toBeInTheDocument();
+      expect(screen.getByText('1 folder, 1 asset')).toBeInTheDocument();
     });
 
     it('displays folder with checked checkbox when is selected', () => {
@@ -378,8 +375,8 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+      expect(screen.queryByText('1 folder, 1 asset')).not.toBeInTheDocument();
+      expect(screen.queryByText('Folders (1)')).not.toBeInTheDocument();
     });
 
     it('does display folders if a search is performed', () => {
@@ -387,17 +384,17 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      expect(screen.queryByText('Folders')).toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).toBeInTheDocument();
+      expect(screen.queryByText('1 folder, 1 asset')).toBeInTheDocument();
+      expect(screen.queryByText('Folders (1)')).toBeInTheDocument();
     });
 
-    it('does not display folders if the media library is being filtered', () => {
+    it('does display folders if the media library is being filtered', () => {
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { filters: 'true' } }, jest.fn()]);
 
       renderML();
 
-      expect(screen.queryByText('Folders')).toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).toBeInTheDocument();
+      expect(screen.queryByText('1 folder, 1 asset')).toBeInTheDocument();
+      expect(screen.queryByText('Folders (1)')).toBeInTheDocument();
     });
 
     it('does not fetch folders if the current page !== 1', () => {

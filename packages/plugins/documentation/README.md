@@ -16,7 +16,7 @@ This plugin automates your API documentation creation. It basically generates a 
 
 ### Config
 
-The plugin comes with a `settings.json` file located in `./my-project/plugins/documentation/config` folder where you can specify all your environment variables, licenses, external documentation and so one...
+Create a `settings.json` file located in `src/extensions/documentation/config` folder where you can specify all your environment variables, licenses, external documentation and so one...
 You can add all the entries listed in the [specification](https://swagger.io/specification/).
 
 _NOTE_ if you need to add a custom key you can do it by prefixing your key by `x-{something}`
@@ -47,7 +47,7 @@ When you start your server with this plugin installed it will automatically crea
 
 #### full_documentation.json
 
-The combined documentation is merged into the `full_documentation.json` file and it's located in `./plugins/documentation/{version}/full_documentation.json`
+The combined documentation is merged into the `full_documentation.json` file and it's located in `src/extensions/documentation/documentation/{version}/full_documentation.json`
 
 It has the following structure
 
@@ -83,7 +83,7 @@ Overriding the `full_documentation.json` is a bad idea since it will be regenera
 
 **_NOTE 2_**
 
-You can easily modify the description, summary, parameters of a path however, for a response like the `200` you will need to write the full object. Take a look at the `./plugins/users-permissions/documentation/overrides/1.0.0/users-permissions-User.json` for a complete example.
+You can modify the `tags`, `paths`, and `components` keys on the generated documentation by providing replacement values. You can see how the API is used in the users-permissions plugin: `packages/plugins/users-permissions/server/register.js`
 
 ### FAQ
 
