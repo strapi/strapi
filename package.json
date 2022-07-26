@@ -71,7 +71,8 @@
     "@babel/polyfill": "7.12.1"
   },
   "devDependencies": {
-    "@swc-node/jest": "1.5.0",
+    "@swc/core": "1.2.218",
+    "@swc/jest": "0.2.22",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
     "@testing-library/user-event": "13.5.0",
@@ -98,10 +99,10 @@
     "glob": "7.2.3",
     "husky": "3.1.0",
     "istanbul": "~0.4.2",
-    "jest": "28.1.2",
+    "jest": "28.1.3",
     "jest-circus": "28.1.3",
-    "jest-cli": "28.1.2",
-    "jest-environment-jsdom": "28.1.2",
+    "jest-cli": "28.1.3",
+    "jest-environment-jsdom": "28.1.3",
     "jest-watch-typeahead": "0.6.5",
     "lerna": "5.1.6",
     "lint-staged": "10.5.4",
