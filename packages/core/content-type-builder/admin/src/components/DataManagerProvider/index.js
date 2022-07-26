@@ -180,7 +180,7 @@ const DataManagerProvider = ({
     initialAttribute
   ) => {
     const actionType = isEditing ? EDIT_ATTRIBUTE : ADD_CUSTOM_FIELD_ATTRIBUTE;
-    console.log('calling addCustomFieldAttribute using', ADD_CUSTOM_FIELD_ATTRIBUTE);
+
     dispatch({
       type: actionType,
       attributeToSet,
