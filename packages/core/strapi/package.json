@@ -120,7 +120,7 @@
     "mime-types": "2.1.35",
     "node-fetch": "2.6.7",
     "node-machine-id": "1.1.12",
-    "node-schedule": "2.0.0",
+    "node-schedule": "2.1.0",
     "open": "8.4.0",
     "ora": "5.4.1",
     "package-json": "7.0.0",

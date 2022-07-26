@@ -32,7 +32,20 @@ module.exports = {
     const folderService = getService('folder');
 
     const deletedFiles = await fileService.deleteByIds(body.fileIds);
-    const deletedFolders = await folderService.deleteByIds(body.folderIds);
+    const {
+      folders: deletedFolders,
+      totalFolderNumber,
+      totalFileNumber,
+    } = await folderService.deleteByIds(body.folderIds);
+
+    if (deletedFiles.length + deletedFolders.length > 1) {
+      strapi.telemetry.send('didBulkDeleteMediaLibraryElements', {
+        rootFolderNumber: deletedFolders.length,
+        rootAssetNumber: deletedFiles.length,
+        totalFolderNumber,
+        totalAssetNumber: totalFileNumber + deletedFiles.length,
+      });
+    }
 
     ctx.body = {
       data: {
@@ -60,6 +73,9 @@ module.exports = {
 
     await validateMoveManyFoldersFiles(body);
     const { folderIds = [], fileIds = [], destinationFolderId } = body;
+
+    let totalFolderNumber = 0;
+    let totalFileNumber = 0;
 
     const trx = await strapi.db.transaction();
     try {
@@ -137,7 +153,7 @@ module.exports = {
           }
 
           // update path for folders themselves & folders below
-          await strapi.db
+          totalFolderNumber = await strapi.db
             .connection(folderTable)
             .transacting(trx)
             .where(pathColName, existingFolder.path)
@@ -152,7 +168,7 @@ module.exports = {
             );
 
           // update path of files below
-          await strapi.db
+          totalFileNumber = await strapi.db
             .connection(fileTable)
             .transacting(trx)
             .where(folderPathColName, existingFolder.path)
@@ -210,6 +226,13 @@ module.exports = {
     });
     const updatedFiles = await strapi.entityService.findMany(FILE_MODEL_UID, {
       filters: { id: { $in: fileIds } },
+    });
+
+    strapi.telemetry.send('didBulkMoveMediaLibraryElements', {
+      rootFolderNumber: updatedFolders.length,
+      rootAssetNumber: updatedFiles.length,
+      totalFolderNumber,
+      totalAssetNumber: totalFileNumber + updatedFiles.length,
     });
 
     ctx.body = {
