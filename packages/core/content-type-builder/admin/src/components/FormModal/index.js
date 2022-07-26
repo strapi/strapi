@@ -83,6 +83,7 @@ const FormModal = () => {
     actionType,
     attributeName,
     attributeType,
+    customFieldUid,
     categoryName,
     dynamicZoneTarget,
     forTarget,
@@ -109,6 +110,7 @@ const FormModal = () => {
 
   const {
     addAttribute,
+    addCustomFieldAttribute,
     addCreatedComponentToDynamicZone,
     allComponentsCategories,
     changeDynamicZoneComponents,
@@ -568,7 +570,17 @@ const FormModal = () => {
 
         // Normal fields like boolean relations or dynamic zone
         if (!isComponentAttribute) {
-          addAttribute(modifiedData, forTarget, targetUid, actionType === 'edit', initialData);
+          if (customFieldUid) {
+            addCustomFieldAttribute(
+              { ...modifiedData, customField: customFieldUid },
+              forTarget,
+              targetUid,
+              actionType === 'edit',
+              initialData
+            );
+          } else {
+            addAttribute(modifiedData, forTarget, targetUid, actionType === 'edit', initialData);
+          }
 
           if (shouldContinue) {
             onNavigateToChooseAttributeModal({

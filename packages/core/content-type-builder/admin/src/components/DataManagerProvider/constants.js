@@ -1,4 +1,6 @@
 export const ADD_ATTRIBUTE = 'ContentTypeBuilder/DataManagerProvider/ADD_ATTRIBUTE';
+export const ADD_CUSTOM_FIELD_ATTRIBUTE =
+  'ContentTypeBuilder/DataManagerProvider/ADD_CUSTOM_FIELD_ATTRIBUTE';
 export const ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE =
   'ContentTypeBuilder/DataManagerProvider/ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE';
 export const CHANGE_DYNAMIC_ZONE_COMPONENTS =
