@@ -8,9 +8,8 @@ describe('Sanitize visitors util', () => {
   describe('removeRestrictedRelations', () => {
     const auth = {};
     const data = {};
-    const keyCreatedBy = CREATED_BY_ATTRIBUTE;
-    const keyUpdatedBy = UPDATED_BY_ATTRIBUTE;
-
+    const creatorKeys = [CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE];
+    const rrrFunction = visitors.removeRestrictedRelations(auth);
     const attribute = {
       type: 'relation',
       relation: 'oneToOne',
@@ -18,18 +17,15 @@ describe('Sanitize visitors util', () => {
     };
 
     test('keeps creator relations with populateCreatorFields true', async () => {
-      const populateCreatorFields = true;
-      const creatorKeys = [keyCreatedBy, keyUpdatedBy];
       const remove = jest.fn();
       const set = jest.fn();
-      const rrr = visitors.removeRestrictedRelations(auth);
       const promises = creatorKeys.map(async key => {
-        await rrr(
+        await rrrFunction(
           {
             data,
             key,
             attribute,
-            schema: { options: { populateCreatorFields } },
+            schema: { options: { populateCreatorFields: true } },
           },
           { remove, set }
         );
@@ -39,19 +35,17 @@ describe('Sanitize visitors util', () => {
       expect(remove).toHaveBeenCalledTimes(0);
       expect(set).toBeCalledTimes(0);
     });
+
     test('removes creator relations with populateCreatorFields false', async () => {
-      const populateCreatorFields = false;
-      const creatorKeys = [keyCreatedBy, keyUpdatedBy];
       const remove = jest.fn();
       const set = jest.fn();
-      const rrr = visitors.removeRestrictedRelations(auth);
       const promises = creatorKeys.map(async key => {
-        await rrr(
+        await rrrFunction(
           {
             data,
             key,
             attribute,
-            schema: { options: { populateCreatorFields } },
+            schema: { options: { populateCreatorFields: false } },
           },
           { remove, set }
         );
