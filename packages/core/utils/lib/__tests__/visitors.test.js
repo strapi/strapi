@@ -57,6 +57,7 @@ describe('Sanitize visitors util', () => {
       );
       expect(remove).toHaveBeenCalledWith(keyCreatedBy);
 
+      remove.mockClear();
       await rrr(
         {
           data,
@@ -66,7 +67,7 @@ describe('Sanitize visitors util', () => {
         },
         { remove, set }
       );
-      expect(remove).toHaveBeenCalledWith(keyCreatedBy);
+      expect(remove).toHaveBeenCalledWith(keyUpdatedBy);
 
       expect(set).toBeCalledTimes(0);
     });
