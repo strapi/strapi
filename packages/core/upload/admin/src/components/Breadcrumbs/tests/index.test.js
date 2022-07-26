@@ -2,10 +2,10 @@ import React from 'react';
 import { render as renderTL, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { IntlProvider } from 'react-intl';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { Breadcrumbs } from '../index';
-import en from '../../../translations/en.json';
 
 jest.mock('../../../hooks/useFolderStructure');
 
@@ -19,10 +19,6 @@ jest.mock('@strapi/helper-plugin', () => ({
   useQueryParams: jest.fn().mockReturnValue([{ query: { folder: 22 } }]),
 }));
 
-jest.mock('react-intl', () => ({
-  useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id]) }),
-}));
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -32,7 +28,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const breadcrumbs = [
+const defaultBreadcrumbs = [
   {
     href: '/',
     id: null,
@@ -47,9 +43,11 @@ const setup = props =>
   renderTL(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
-        <ThemeProvider theme={lightTheme}>
-          <Breadcrumbs {...props} breadcrumbs={breadcrumbs} as="nav" />
-        </ThemeProvider>
+        <IntlProvider locale="en" messages={{}}>
+          <ThemeProvider theme={lightTheme}>
+            <Breadcrumbs breadcrumbs={defaultBreadcrumbs} as="nav" {...props} />
+          </ThemeProvider>
+        </IntlProvider>
       </MemoryRouter>
     </QueryClientProvider>
   );
