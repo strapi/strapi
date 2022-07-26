@@ -851,7 +851,7 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c49:hover:not([aria-disabled='true']) .sc-eHtaVP {
+      .c49:hover:not([aria-disabled='true']) .sc-uWCef {
         color: #271fe0;
       }
 
@@ -1263,7 +1263,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                   class="c60 c61"
                                 >
                                   <span
-                                    class="c60 sc-eHtaVP c62"
+                                    class="c60 sc-uWCef c62"
                                     id="accordion-label-accordion-1"
                                   >
                                     Address
