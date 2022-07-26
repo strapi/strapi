@@ -63,7 +63,7 @@ module.exports = ({ strapi }) => ({
     strapi.eventHub.emit(event, { media: sanitizedData });
   },
 
-  formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
+  async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const ext = path.extname(filename);
     const basename = path.basename(fileInfo.name || filename, ext);
 
@@ -73,7 +73,7 @@ module.exports = ({ strapi }) => ({
       name: usedName,
       alternativeText: fileInfo.alternativeText,
       caption: fileInfo.caption,
-      hash: generateFileName(basename),
+      hash: (await getService('provider').generateFileName(basename)) || generateFileName(basename),
       ext,
       mime: type,
       size: bytesToKbytes(size),
@@ -103,7 +103,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async enhanceFile(file, fileInfo = {}, metas = {}) {
-    const currentFile = this.formatFileInfo(
+    const currentFile = await this.formatFileInfo(
       {
         filename: file.name,
         type: file.type,
