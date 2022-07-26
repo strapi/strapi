@@ -310,7 +310,7 @@ const EditViewDataManagerProvider = ({
       } catch (err) {
         errors = {
           ...errors,
-          ...getAPIInnerErrors(err),
+          ...getAPIInnerErrors(err, { getTrad }),
         };
       }
 
@@ -346,7 +346,7 @@ const EditViewDataManagerProvider = ({
     } catch (err) {
       errors = {
         ...errors,
-        ...getAPIInnerErrors(err),
+        ...getAPIInnerErrors(err, { getTrad }),
       };
     }
 
