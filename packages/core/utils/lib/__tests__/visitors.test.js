@@ -18,59 +18,48 @@ describe('Sanitize visitors util', () => {
     };
 
     test('keeps creator relations with populateCreatorFields true', async () => {
+      const populateCreatorFields = true;
+      const creatorKeys = [keyCreatedBy, keyUpdatedBy];
       const remove = jest.fn();
       const set = jest.fn();
       const rrr = visitors.removeRestrictedRelations(auth);
-      await rrr(
-        {
-          data,
-          key: keyCreatedBy,
-          attribute,
-          schema: { options: { populateCreatorFields: true } },
-        },
-        { remove, set }
-      );
-      await rrr(
-        {
-          data,
-          key: keyUpdatedBy,
-          attribute,
-          schema: { options: { populateCreatorFields: true } },
-        },
-        { remove, set }
-      );
-      expect(remove).toBeCalledTimes(0);
+      const promises = creatorKeys.map(async key => {
+        await rrr(
+          {
+            data,
+            key,
+            attribute,
+            schema: { options: { populateCreatorFields } },
+          },
+          { remove, set }
+        );
+      });
+      await Promise.all(promises);
+
+      expect(remove).toHaveBeenCalledTimes(0);
       expect(set).toBeCalledTimes(0);
     });
     test('removes creator relations with populateCreatorFields false', async () => {
+      const populateCreatorFields = false;
+      const creatorKeys = [keyCreatedBy, keyUpdatedBy];
       const remove = jest.fn();
       const set = jest.fn();
       const rrr = visitors.removeRestrictedRelations(auth);
-      await rrr(
-        {
-          data,
-          key: keyCreatedBy,
-          attribute,
-          schema: { options: { populateCreatorFields: false } },
-        },
-        { remove, set }
-      );
-      expect(remove).toHaveBeenCalledTimes(1);
-      expect(remove).toHaveBeenCalledWith(keyCreatedBy);
+      const promises = creatorKeys.map(async key => {
+        await rrr(
+          {
+            data,
+            key,
+            attribute,
+            schema: { options: { populateCreatorFields } },
+          },
+          { remove, set }
+        );
+      });
+      await Promise.all(promises);
 
-      remove.mockClear();
-      await rrr(
-        {
-          data,
-          key: keyUpdatedBy,
-          attribute,
-          schema: { options: { populateCreatorFields: false } },
-        },
-        { remove, set }
-      );
-      expect(remove).toHaveBeenCalledTimes(1);
-      expect(remove).toHaveBeenCalledWith(keyUpdatedBy);
-
+      expect(remove).toHaveBeenCalledTimes(creatorKeys.length);
+      creatorKeys.forEach(key => expect(remove).toHaveBeenCalledWith(key));
       expect(set).toBeCalledTimes(0);
     });
   });
