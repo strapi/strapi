@@ -41,6 +41,42 @@ export default {
               /* webpackChunkName: "input-component" */ './components/ColorPicker/ColorPickerInput'
             ),
         },
+        options: {
+          base: [
+            {
+              intlLabel: {
+                id: 'color-picker.color.format.label',
+                defaultMessage: 'Color format',
+              },
+              name: 'options.format',
+              type: 'select',
+              value: 'hex',
+              options: [
+                {
+                  key: 'hex',
+                  value: 'hex',
+                  metadatas: {
+                    intlLabel: {
+                      id: 'color-picker.color.format.hex',
+                      defaultMessage: 'Hexadecimal',
+                    },
+                  },
+                },
+                {
+                  key: 'rgba',
+                  value: 'rgba',
+                  metadatas: {
+                    intlLabel: {
+                      id: 'color-picker.color.format.rgba',
+                      defaultMessage: 'RGBA',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+          advanced: [],
+        },
       },
     ]);
   },

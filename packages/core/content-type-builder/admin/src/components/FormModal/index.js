@@ -4,6 +4,7 @@ import {
   useTracking,
   useNotification,
   useStrapiApp,
+  useCustomFields,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
@@ -93,6 +94,7 @@ const FormModal = () => {
     step,
     targetUid,
   } = useFormModalNavigation();
+  const customField = useCustomFields().get(customFieldUid);
 
   const tabGroupRef = useRef();
 
@@ -543,6 +545,14 @@ const FormModal = () => {
         return;
         // Add/edit a field to a content type
         // Add/edit a field to a created component (the end modal is not step 2)
+      } else if (modalType === 'customField') {
+        addCustomFieldAttribute(
+          { ...modifiedData, customField: customFieldUid },
+          forTarget,
+          targetUid,
+          actionType === 'edit',
+          initialData
+        );
       } else if (isCreatingAttribute && !isCreatingComponentFromAView) {
         const isDynamicZoneAttribute = attributeType === 'dynamiczone';
 
@@ -570,18 +580,6 @@ const FormModal = () => {
 
         // Normal fields like boolean relations or dynamic zone
         if (!isComponentAttribute) {
-          if (customFieldUid) {
-            addCustomFieldAttribute(
-              { ...modifiedData, customField: customFieldUid },
-              forTarget,
-              targetUid,
-              actionType === 'edit',
-              initialData
-            );
-          } else {
-            addAttribute(modifiedData, forTarget, targetUid, actionType === 'edit', initialData);
-          }
-
           if (shouldContinue) {
             onNavigateToChooseAttributeModal({
               forTarget,
@@ -882,6 +880,7 @@ const FormModal = () => {
     extensions: ctbFormsAPI,
     forTarget,
     contentTypeSchema: allDataSchema.contentType || {},
+    customField,
   }).sections;
   const baseForm = formToDisplay.base({
     data: modifiedData,
@@ -892,6 +891,7 @@ const FormModal = () => {
     extensions: ctbFormsAPI,
     forTarget,
     contentTypeSchema: allDataSchema.contentType || {},
+    customField,
   }).sections;
 
   const baseFormInputNames = getFormInputNames(baseForm);
@@ -1022,6 +1022,7 @@ const FormModal = () => {
                   deleteComponent={deleteData}
                   categoryName={initialData.name}
                   isAttributeModal={modalType === 'attribute'}
+                  isCustomFieldModal={modalType === 'customField'}
                   isComponentToDzModal={modalType === 'addComponentToDynamicZone'}
                   isComponentAttribute={attributeType === 'component'}
                   isComponentModal={modalType === 'component'}

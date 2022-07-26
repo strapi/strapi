@@ -5,8 +5,41 @@ import { categoryForm, createCategorySchema } from '../category';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';
 import { createComponentSchema, componentForm } from '../component';
 import { dynamiczoneForm } from '../dynamicZone';
+import { nameField } from '../attributes/nameField';
 
 const forms = {
+  customField: {
+    form: {
+      base({ customField }) {
+        // All attributes should have a name
+        const sections = [{ sectionTitle: null, items: [nameField] }];
+
+        if (customField.options.base) {
+          // Loop all registered base inputs
+          customField.options.base.forEach(item => {
+            if (item.sectionTitle) {
+              // When there is a new sections add it to the sections array
+              sections.push(item);
+            } else {
+              // Otherwise add it to the existing section
+              sections[0].items.push(item);
+            }
+          });
+
+          return { sections };
+        }
+
+        return { sections: [] };
+      },
+      advanced({ customField }) {
+        if (customField.options.advanced) {
+          return { sections: customField.options.advanced };
+        }
+
+        return { sections: [] };
+      },
+    },
+  },
   attribute: {
     schema(
       currentSchema,
