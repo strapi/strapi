@@ -20,44 +20,6 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
     expect(reducer(state, {})).toEqual(expected);
   });
 
-  describe('ADD_RELATION', () => {
-    it('should add a relation to the editRelations layout', () => {
-      state.modifiedData.layouts = {
-        editRelations: ['likes'],
-      };
-      const expected = {
-        ...state,
-        modifiedData: {
-          layouts: {
-            editRelations: ['likes', 'categories'],
-          },
-        },
-      };
-      const action = { type: 'ADD_RELATION', name: 'categories' };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('MOVE_RELATION', () => {
-    it('should move the categories relation from the second place to the third', () => {
-      state.modifiedData.layouts = {
-        editRelations: ['likes', 'categories', 'users'],
-      };
-      const expected = {
-        ...state,
-        modifiedData: {
-          layouts: {
-            editRelations: ['likes', 'users', 'categories'],
-          },
-        },
-      };
-      const action = { type: 'MOVE_RELATION', fromIndex: 1, toIndex: 2 };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
   describe('MOVE_ROW', () => {
     it('should move the third field row to the first position', () => {
       state.modifiedData.layouts = {
@@ -381,25 +343,6 @@ describe('CONTENT MANAGER | CONTAINERS | EditSettingsView | reducer', () => {
       };
       const action = { type: 'REMOVE_FIELD', rowIndex: 0, fieldIndex: 1 };
       //
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('REMOVE_RELATION', () => {
-    it('should remove the first relation from the relation list', () => {
-      state.modifiedData.layouts = {
-        editRelations: ['likes', 'categories'],
-      };
-      const expected = {
-        ...state,
-        modifiedData: {
-          layouts: {
-            editRelations: ['categories'],
-          },
-        },
-      };
-      const action = { type: 'REMOVE_RELATION', index: 0 };
-
       expect(reducer(state, action)).toEqual(expected);
     });
   });
