@@ -25,29 +25,29 @@ describe('InternalErrorPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c12 {
+      .c11 {
         color: #666687;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
       }
 
-      .c7 {
+      .c6 {
         background: #ffffff;
         padding: 64px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c9 {
+      .c8 {
         padding-bottom: 24px;
       }
 
-      .c11 {
+      .c10 {
         padding-bottom: 16px;
       }
 
-      .c8 {
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -62,22 +62,22 @@ describe('InternalErrorPage', () => {
         text-align: center;
       }
 
-      .c10 svg {
+      .c9 svg {
         height: 5.5rem;
       }
 
-      .c16 {
+      .c15 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c18 {
+      .c17 {
         padding-left: 8px;
       }
 
-      .c13 {
+      .c12 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -91,21 +91,21 @@ describe('InternalErrorPage', () => {
         outline: none;
       }
 
-      .c13 svg {
+      .c12 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c13 svg > g,
-      .c13 svg path {
+      .c12 svg > g,
+      .c12 svg path {
         fill: #ffffff;
       }
 
-      .c13[aria-disabled='true'] {
+      .c12[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c13:after {
+      .c12:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -120,11 +120,11 @@ describe('InternalErrorPage', () => {
         border: 2px solid transparent;
       }
 
-      .c13:focus-visible {
+      .c12:focus-visible {
         outline: none;
       }
 
-      .c13:focus-visible:after {
+      .c12:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -135,7 +135,7 @@ describe('InternalErrorPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c14 {
+      .c13 {
         padding: 8px 16px;
         background: #4945ff;
         border: 1px solid #4945ff;
@@ -150,7 +150,7 @@ describe('InternalErrorPage', () => {
         text-decoration: none;
       }
 
-      .c14 .c17 {
+      .c13 .c16 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -161,62 +161,62 @@ describe('InternalErrorPage', () => {
         align-items: center;
       }
 
-      .c14 .c15 {
+      .c13 .c14 {
         color: #ffffff;
       }
 
-      .c14[aria-disabled='true'] {
+      .c13[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true'] .c15 {
+      .c13[aria-disabled='true'] .c14 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true'] svg > g,
-      .c14[aria-disabled='true'] svg path {
+      .c13[aria-disabled='true'] svg > g,
+      .c13[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c14[aria-disabled='true']:active {
+      .c13[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true']:active .c15 {
+      .c13[aria-disabled='true']:active .c14 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true']:active svg > g,
-      .c14[aria-disabled='true']:active svg path {
+      .c13[aria-disabled='true']:active svg > g,
+      .c13[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c14:hover {
+      .c13:hover {
         background-color: #ffffff;
       }
 
-      .c14:active {
+      .c13:active {
         background-color: #ffffff;
         border: 1px solid #4945ff;
       }
 
-      .c14:active .c15 {
+      .c13:active .c14 {
         color: #4945ff;
       }
 
-      .c14:active svg > g,
-      .c14:active svg path {
+      .c13:active svg > g,
+      .c13:active svg path {
         fill: #4945ff;
       }
 
-      .c14 .c15 {
+      .c13 .c14 {
         color: #271fe0;
       }
 
-      .c14 svg > g,
-      .c14 svg path {
+      .c13 svg > g,
+      .c13 svg path {
         fill: #271fe0;
       }
 
@@ -232,7 +232,7 @@ describe('InternalErrorPage', () => {
         padding-left: 56px;
       }
 
-      .c6 {
+      .c5 {
         padding-right: 56px;
         padding-left: 56px;
       }
@@ -276,12 +276,6 @@ describe('InternalErrorPage', () => {
         line-height: 1.25;
       }
 
-      .c5 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
       <main
         aria-labelledby="title"
         class="c0"
@@ -309,20 +303,17 @@ describe('InternalErrorPage', () => {
                 </h1>
               </div>
             </div>
-            <p
-              class="c5"
-            />
           </div>
         </div>
         <div
-          class="c6"
+          class="c5"
         >
           <div
-            class="c7 c8"
+            class="c6 c7"
           >
             <div
               aria-hidden="true"
-              class="c9 c10"
+              class="c8 c9"
             >
               <svg
                 fill="none"
@@ -401,10 +392,10 @@ describe('InternalErrorPage', () => {
               </svg>
             </div>
             <div
-              class="c11"
+              class="c10"
             >
               <p
-                class="c12"
+                class="c11"
               >
                 An error occured
               </p>
@@ -412,18 +403,18 @@ describe('InternalErrorPage', () => {
             <a
               aria-current="page"
               aria-disabled="false"
-              class="c13 c14 active"
+              class="c12 c13 active"
               href="/"
               variant="secondary"
             >
               <span
-                class="c15 c16"
+                class="c14 c15"
               >
                 Back to homepage
               </span>
               <div
                 aria-hidden="true"
-                class="c17 c18"
+                class="c16 c17"
               >
                 <svg
                   fill="none"

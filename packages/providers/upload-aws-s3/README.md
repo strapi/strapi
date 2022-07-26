@@ -58,6 +58,31 @@ module.exports = ({ env }) => ({
 });
 ```
 
+#### Configuration for S3 compatible services
+
+This plugin may work with S3 compatible services by using the `endpoint` option instead of `region`. Scaleway example:
+`./config/plugins.js`
+
+```js
+module.exports = ({ env }) => ({
+  // ...
+  upload: {
+    config: {
+      provider: 'aws-s3',
+      providerOptions: {
+        accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
+        secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
+        endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "s3.fr-par.scw.cloud"
+        params: {
+          Bucket: env('SCALEWAY_BUCKET'),
+        },
+      },
+    },
+  },
+  // ...
+});
+```
+
 ### Security Middleware Configuration
 
 Due to the default settings in the Strapi Security Middleware you will need to modify the `contentSecurityPolicy` settings to properly see thumbnail previews in the Media Library. You should replace `strapi::security` string with the object bellow instead as explained in the [middleware configuration](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/required/middlewares.html#loading-order) documentation.

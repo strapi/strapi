@@ -38,10 +38,6 @@ module.exports = ({
 
   const webpackPlugins = isProduction
     ? [
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^\.\/locale$/,
-          contextRegExp: /moment$/,
-        }),
         new MiniCssExtractPlugin({
           filename: '[name].[chunkhash].css',
           chunkFilename: '[name].[chunkhash].chunkhash.css',
@@ -56,7 +52,7 @@ module.exports = ({
   return {
     mode: isProduction ? 'production' : 'development',
     bail: isProduction ? true : false,
-    devtool: false,
+    devtool: isProduction ? false : 'eval-source-map',
     experiments: {
       topLevelAwait: true,
     },
@@ -77,6 +73,7 @@ module.exports = ({
           css: true, // Apply minification to CSS assets
         }),
       ],
+      moduleIds: 'deterministic',
       runtimeChunk: true,
     },
     module: {
@@ -107,10 +104,6 @@ module.exports = ({
                   cacheDirectory: true,
                   cacheCompression: isProduction,
                   compact: isProduction,
-                  presets: [
-                    require.resolve('@babel/preset-env'),
-                    require.resolve('@babel/preset-react'),
-                  ],
                   plugins: [
                     [
                       require.resolve('@strapi/babel-plugin-switch-ee-ce'),
@@ -119,15 +112,6 @@ module.exports = ({
                         roots,
                       },
                     ],
-
-                    [
-                      require.resolve('@babel/plugin-transform-runtime'),
-                      {
-                        helpers: true,
-                        regenerator: true,
-                      },
-                    ],
-                    [require.resolve('babel-plugin-styled-components'), { pure: true }],
                   ],
                 },
               },
