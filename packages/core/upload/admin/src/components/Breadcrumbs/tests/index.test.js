@@ -64,7 +64,7 @@ describe('Media Library | Breadcrumbs', () => {
   });
 
   test('should store other ascendants in simple menu', async () => {
-    const { getByRole } = setup();
+    const { getByRole } = setup({ currentFolderId: 22 });
 
     const simpleMenuButton = getByRole('button', { name: /get more ascendants folders/i });
     fireEvent.mouseDown(simpleMenuButton);

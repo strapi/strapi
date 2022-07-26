@@ -246,6 +246,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
       >
         <a
           aria-current="page"
+          aria-label="Media Library"
           class="c4 active"
           href="/"
         >
@@ -323,6 +324,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
       >
         <a
           aria-current="page"
+          aria-label="parent folder"
           class="c4 active"
           href="/"
         >

@@ -2,7 +2,9 @@ import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render, fireEvent, screen } from '@testing-library/react';
+import { NotificationsProvider } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClientProvider, QueryClient } from 'react-query';
 
 import { BrowseStep } from '..';
 
@@ -57,33 +59,45 @@ const FIXTURE_FOLDERS = [
   },
 ];
 
+const client = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
 const ComponentFixture = props => {
   return (
-    <ThemeProvider theme={lightTheme}>
-      <MemoryRouter>
-        <IntlProvider messages={{}} locale="en">
-          <BrowseStep
-            assets={[]}
-            canCreate
-            folders={FIXTURE_FOLDERS}
-            onAddAsset={jest.fn()}
-            onChangeFilters={jest.fn()}
-            onChangePage={jest.fn()}
-            onChangePageSize={jest.fn()}
-            onChangeSearch={jest.fn()}
-            onChangeSort={jest.fn()}
-            onChangeFolder={jest.fn()}
-            onEditAsset={jest.fn()}
-            onSelectAllAsset={jest.fn()}
-            onSelectAsset={jest.fn()}
-            pagination={{ pageCount: 1 }}
-            queryObject={{ page: 1, pageSize: 10, filters: { $and: [] } }}
-            selectedAssets={[]}
-            {...props}
-          />
-        </IntlProvider>
-      </MemoryRouter>
-    </ThemeProvider>
+    <QueryClientProvider client={client}>
+      <ThemeProvider theme={lightTheme}>
+        <MemoryRouter>
+          <IntlProvider messages={{}} locale="en">
+            <NotificationsProvider toggleNotification={() => {}}>
+              <BrowseStep
+                assets={[]}
+                canCreate
+                folders={FIXTURE_FOLDERS}
+                onAddAsset={jest.fn()}
+                onChangeFilters={jest.fn()}
+                onChangePage={jest.fn()}
+                onChangePageSize={jest.fn()}
+                onChangeSearch={jest.fn()}
+                onChangeSort={jest.fn()}
+                onChangeFolder={jest.fn()}
+                onEditAsset={jest.fn()}
+                onSelectAllAsset={jest.fn()}
+                onSelectAsset={jest.fn()}
+                pagination={{ pageCount: 1 }}
+                queryObject={{ page: 1, pageSize: 10, filters: { $and: [] } }}
+                selectedAssets={[]}
+                {...props}
+              />
+            </NotificationsProvider>
+          </IntlProvider>
+        </MemoryRouter>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 
@@ -170,7 +184,7 @@ describe('BrowseStep', () => {
       assets: FIXTURE_ASSETS,
     });
 
-    expect(screen.getByText('Folders')).toBeInTheDocument();
-    expect(screen.getByText('Assets')).toBeInTheDocument();
+    expect(screen.getByText('Folders (1)')).toBeInTheDocument();
+    expect(screen.getByText('Assets (1)')).toBeInTheDocument();
   });
 });
