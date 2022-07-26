@@ -55,6 +55,7 @@ describe('Sanitize visitors util', () => {
         },
         { remove, set }
       );
+      expect(remove).toHaveBeenCalledTimes(1);
       expect(remove).toHaveBeenCalledWith(keyCreatedBy);
 
       remove.mockClear();
@@ -67,6 +68,7 @@ describe('Sanitize visitors util', () => {
         },
         { remove, set }
       );
+      expect(remove).toHaveBeenCalledTimes(1);
       expect(remove).toHaveBeenCalledWith(keyUpdatedBy);
 
       expect(set).toBeCalledTimes(0);
