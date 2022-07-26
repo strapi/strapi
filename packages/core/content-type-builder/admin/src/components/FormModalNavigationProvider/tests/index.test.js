@@ -34,9 +34,8 @@ describe('FromModalNavigationProvider', () => {
     });
 
     const currentStateWithoutFunctions = removeFunctionsFromObject(result.current);
-
     const expected = {
-      ...currentStateWithoutFunctions,
+      ...INITIAL_STATE_DATA,
       actionType: 'create',
       modalType: 'attribute',
       attributeType: 'text',
