@@ -38,7 +38,7 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit }) => {
         <MenuItem>
           <Loader small>
             {formatMessage({
-              id: getTrad('list.asset.load'),
+              id: getTrad('content.isLoading'),
               defaultMessage: 'Content is loading.',
             })}
           </Loader>
