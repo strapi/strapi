@@ -102,7 +102,7 @@ module.exports = async ({ strapi }) => {
       method: 'ALL',
       path,
       handler: [
-        async (ctx, next) => {
+        (ctx, next) => {
           ctx.state.route = {
             info: {
               // Indicate it's a content API route
