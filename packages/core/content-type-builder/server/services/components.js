@@ -4,6 +4,7 @@ const _ = require('lodash');
 
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
+const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
 /**
  * Formats a component attributes
@@ -41,9 +42,11 @@ const createComponent = async ({ component, components = [] }) => {
   const uidMap = builder.createNewComponentUIDMap(components);
   const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
 
+  convertCustomFieldType(component.attributes);
   const newComponent = builder.createComponent(replaceTmpUIDs(component));
 
   components.forEach(component => {
+    convertCustomFieldType(component.attributes);
     if (!_.has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }
@@ -67,12 +70,14 @@ const editComponent = async (uid, { component, components = [] }) => {
   const uidMap = builder.createNewComponentUIDMap(components);
   const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
 
+  convertCustomFieldType(component.attributes);
   const updatedComponent = builder.editComponent({
     uid,
     ...replaceTmpUIDs(component),
   });
 
   components.forEach(component => {
+    convertCustomFieldType(component.attributes);
     if (!_.has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }

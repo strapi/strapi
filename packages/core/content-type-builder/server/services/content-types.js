@@ -8,6 +8,7 @@ const { ApplicationError } = require('@strapi/utils').errors;
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
 const { coreUids, pluginsUids } = require('./constants');
+const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
 const isContentTypeVisible = model =>
   getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
@@ -84,6 +85,7 @@ const createContentType = async ({ contentType, components = [] }, options = {})
 
   const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
 
+  convertCustomFieldType(contentType.attributes);
   const newContentType = builder.createContentType(replaceTmpUIDs(contentType));
 
   // allow components to target the new contentType
@@ -99,6 +101,7 @@ const createContentType = async ({ contentType, components = [] }, options = {})
   };
 
   components.forEach(component => {
+    convertCustomFieldType(component.attributes);
     const options = replaceTmpUIDs(targetContentType(component));
 
     if (!_.has(component, 'uid')) {
@@ -170,12 +173,15 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   const uidMap = builder.createNewComponentUIDMap(components);
   const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
 
+  convertCustomFieldType(contentType.attributes);
   const updatedContentType = builder.editContentType({
     uid,
     ...replaceTmpUIDs(contentType),
   });
 
   components.forEach(component => {
+    convertCustomFieldType(component.attributes);
+
     if (!_.has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }

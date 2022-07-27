@@ -37,7 +37,7 @@ describe('FromModalNavigationProvider', () => {
     const expected = {
       ...INITIAL_STATE_DATA,
       actionType: 'create',
-      modalType: 'attribute',
+      modalType: 'customField',
       attributeType: 'text',
       customFieldUid: 'plugin::mycustomfields.color',
     };
