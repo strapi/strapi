@@ -1057,6 +1057,7 @@ const FormModal = () => {
                   onSubmitCreateContentType={handleSubmit}
                   onSubmitCreateDz={handleSubmit}
                   onSubmitEditAttribute={handleSubmit}
+                  onSubmitEditCusomFieldAttribute={handleSubmit}
                   onSubmitEditCategory={handleSubmit}
                   onSubmitEditComponent={handleSubmit}
                   onSubmitEditContentType={handleSubmit}
