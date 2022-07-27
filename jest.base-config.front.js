@@ -51,7 +51,6 @@ module.exports = {
     '<rootDir>/packages/admin-test-utils/lib/setup/styled-components.js',
     '<rootDir>/packages/admin-test-utils/lib/setup/strapi.js',
   ],
-  testEnvironment: 'jsdom',
   transform: {
     '^.+\\.js$': ['@swc/jest', { jsc: { parser: { jsx: true, dynamicImport: true } } }],
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
