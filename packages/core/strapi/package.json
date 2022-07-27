@@ -1,6 +1,6 @@
 {
   "name": "@strapi/strapi",
-  "version": "4.2.3",
+  "version": "4.3.0",
   "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MySQL, MariaDB, PostgreSQL, SQLite",
   "keywords": [
     "strapi",
@@ -80,17 +80,17 @@
   "dependencies": {
     "@koa/cors": "3.1.0",
     "@koa/router": "10.1.1",
-    "@strapi/typescript-utils": "4.2.3",
-    "@strapi/admin": "4.2.3",
-    "@strapi/database": "4.2.3",
-    "@strapi/generate-new": "4.2.3",
-    "@strapi/generators": "4.2.3",
-    "@strapi/logger": "4.2.3",
-    "@strapi/plugin-content-manager": "4.2.3",
-    "@strapi/plugin-content-type-builder": "4.2.3",
-    "@strapi/plugin-email": "4.2.3",
-    "@strapi/plugin-upload": "4.2.3",
-    "@strapi/utils": "4.2.3",
+    "@strapi/admin": "4.3.0",
+    "@strapi/database": "4.3.0",
+    "@strapi/generate-new": "4.3.0",
+    "@strapi/generators": "4.3.0",
+    "@strapi/logger": "4.3.0",
+    "@strapi/plugin-content-manager": "4.3.0",
+    "@strapi/plugin-content-type-builder": "4.3.0",
+    "@strapi/plugin-email": "4.3.0",
+    "@strapi/plugin-upload": "4.3.0",
+    "@strapi/typescript-utils": "4.3.0",
+    "@strapi/utils": "4.3.0",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
@@ -132,8 +132,8 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "typescript": "4.6.2",
-    "supertest": "6.2.4"
+    "supertest": "6.2.4",
+    "typescript": "4.6.2"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",
