@@ -33,12 +33,14 @@ import validateSchema from './utils/validateSchema';
 
 import {
   ADD_ATTRIBUTE,
+  ADD_CUSTOM_FIELD_ATTRIBUTE,
   ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
   CHANGE_DYNAMIC_ZONE_COMPONENTS,
   CREATE_SCHEMA,
   CREATE_COMPONENT_SCHEMA,
   DELETE_NOT_SAVED_TYPE,
   EDIT_ATTRIBUTE,
+  EDIT_CUSTOM_FIELD_ATTRIBUTE,
   GET_DATA_SUCCEEDED,
   RELOAD_PLUGIN,
   REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
@@ -168,6 +170,24 @@ const DataManagerProvider = ({
       targetUid,
       initialAttribute,
       shouldAddComponentToData,
+    });
+  };
+
+  const addCustomFieldAttribute = (
+    attributeToSet,
+    forTarget,
+    targetUid,
+    isEditing = false,
+    initialAttribute
+  ) => {
+    const actionType = isEditing ? EDIT_CUSTOM_FIELD_ATTRIBUTE : ADD_CUSTOM_FIELD_ATTRIBUTE;
+
+    dispatch({
+      type: actionType,
+      attributeToSet,
+      forTarget,
+      targetUid,
+      initialAttribute,
     });
   };
 
@@ -425,6 +445,7 @@ const DataManagerProvider = ({
   const submitData = async additionalContentTypeData => {
     try {
       const isCreating = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
+
       const body = {
         components: getComponentsToPost(
           modifiedData.components,
@@ -539,6 +560,7 @@ const DataManagerProvider = ({
     <DataManagerContext.Provider
       value={{
         addAttribute,
+        addCustomFieldAttribute,
         addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(components, ['category']),
         allIcons,

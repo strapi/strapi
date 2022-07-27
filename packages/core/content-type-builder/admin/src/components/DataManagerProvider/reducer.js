@@ -40,6 +40,35 @@ const reducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
     switch (action.type) {
+      case actions.ADD_CUSTOM_FIELD_ATTRIBUTE: {
+        const {
+          attributeToSet: { name, ...rest },
+          forTarget,
+          targetUid,
+        } = action;
+        delete rest.createComponent;
+
+        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+          ? [forTarget]
+          : [forTarget, targetUid];
+
+        const currentAttributes = get(
+          state,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+          []
+        ).slice();
+
+        // Add the createdAttribute
+        const updatedAttributes = [...currentAttributes, { ...rest, name }];
+
+        set(
+          draftState,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+          updatedAttributes
+        );
+
+        break;
+      }
       case actions.ADD_ATTRIBUTE: {
         const {
           attributeToSet: { name, ...rest },
@@ -231,6 +260,27 @@ const reducer = (state = initialState, action) =>
         };
 
         draftState.contentTypes[action.uid] = newSchema;
+
+        break;
+      }
+      case actions.EDIT_CUSTOM_FIELD_ATTRIBUTE: {
+        const { attributeToSet, forTarget, targetUid, initialAttribute } = action;
+
+        const initialAttributeName = initialAttribute.name;
+        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+          ? [forTarget]
+          : [forTarget, targetUid];
+
+        const initialAttributeIndex = findAttributeIndex(
+          get(state, ['modifiedData', ...pathToDataToEdit]),
+          initialAttributeName
+        );
+
+        set(
+          draftState,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', initialAttributeIndex],
+          attributeToSet
+        );
 
         break;
       }

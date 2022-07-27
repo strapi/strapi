@@ -15,7 +15,7 @@ const FormModalNavigationProvider = ({ children }) => {
         ...prevState,
         actionType: 'create',
         // TODO: Create a new modalType on EXPANSION-245
-        modalType: 'attribute',
+        modalType: 'customField',
         attributeType,
         customFieldUid,
       };
@@ -79,6 +79,28 @@ const FormModalNavigationProvider = ({ children }) => {
         categoryName,
         actionType: 'edit',
         modalType: 'editCategory',
+        isOpen: true,
+      };
+    });
+  };
+
+  const onOpenModalEditCustomField = ({
+    forTarget,
+    targetUid,
+    attributeName,
+    attributeType,
+    customFieldUid,
+  }) => {
+    setFormModalNavigationState(prevState => {
+      return {
+        ...prevState,
+        modalType: 'customField',
+        customFieldUid,
+        actionType: 'edit',
+        forTarget,
+        targetUid,
+        attributeName,
+        attributeType,
         isOpen: true,
       };
     });
@@ -169,6 +191,7 @@ const FormModalNavigationProvider = ({ children }) => {
         onOpenModalCreateSchema,
         onOpenModalEditCategory,
         onOpenModalEditField,
+        onOpenModalEditCustomField,
         onOpenModalEditSchema,
         setFormModalNavigationState,
       }}

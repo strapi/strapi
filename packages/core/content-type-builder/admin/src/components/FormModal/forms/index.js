@@ -5,8 +5,36 @@ import { categoryForm, createCategorySchema } from '../category';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';
 import { createComponentSchema, componentForm } from '../component';
 import { dynamiczoneForm } from '../dynamicZone';
+import { nameField } from '../attributes/nameField';
+import addItemsToFormSection from './utils/addItemsToFormSection';
 
 const forms = {
+  customField: {
+    form: {
+      base({ customField }) {
+        // Default section with required name field
+        const sections = [{ sectionTitle: null, items: [nameField] }];
+
+        if (customField.options?.base) {
+          addItemsToFormSection(customField.options.base, sections);
+
+          return { sections };
+        }
+
+        return { sections };
+      },
+      advanced({ customField }) {
+        // Default section with no fields
+        const sections = [{ sectionTitle: null, items: [] }];
+
+        if (customField.options?.advanced) {
+          addItemsToFormSection(customField.options.advanced, sections);
+        }
+
+        return { sections };
+      },
+    },
+  },
   attribute: {
     schema(
       currentSchema,

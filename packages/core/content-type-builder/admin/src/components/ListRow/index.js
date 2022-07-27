@@ -62,7 +62,8 @@ function ListRow({
         // Name of the attribute
         name,
         // Type of the attribute
-        attrType
+        attrType,
+        customField
       );
     }
   };

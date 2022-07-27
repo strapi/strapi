@@ -84,6 +84,7 @@ const FormModal = () => {
     actionType,
     attributeName,
     attributeType,
+    customFieldUid,
     categoryName,
     dynamicZoneTarget,
     forTarget,
@@ -94,6 +95,7 @@ const FormModal = () => {
     targetUid,
     customFieldUid,
   } = useFormModalNavigation();
+  const customField = useCustomFields().get(customFieldUid);
 
   const tabGroupRef = useRef();
 
@@ -112,6 +114,7 @@ const FormModal = () => {
 
   const {
     addAttribute,
+    addCustomFieldAttribute,
     addCreatedComponentToDynamicZone,
     allComponentsCategories,
     changeDynamicZoneComponents,
@@ -302,6 +305,7 @@ const FormModal = () => {
   const isCreatingContentType = modalType === 'contentType';
   const isCreatingComponent = modalType === 'component';
   const isCreatingAttribute = modalType === 'attribute';
+  const isCreatingCustomFieldAttribute = modalType === 'customField';
   const isComponentAttribute = attributeType === 'component' && isCreatingAttribute;
   const isCreating = actionType === 'create';
   const isCreatingComponentFromAView =
@@ -544,6 +548,25 @@ const FormModal = () => {
         return;
         // Add/edit a field to a content type
         // Add/edit a field to a created component (the end modal is not step 2)
+      } else if (isCreatingCustomFieldAttribute) {
+        addCustomFieldAttribute(
+          { ...modifiedData, customField: customFieldUid },
+          forTarget,
+          targetUid,
+          actionType === 'edit',
+          initialData
+        );
+
+        if (shouldContinue) {
+          onNavigateToChooseAttributeModal({
+            forTarget,
+            targetUid: ctTargetUid,
+          });
+        } else {
+          onCloseModal();
+        }
+
+        return;
       } else if (isCreatingAttribute && !isCreatingComponentFromAView) {
         const isDynamicZoneAttribute = attributeType === 'dynamiczone';
 
@@ -873,6 +896,7 @@ const FormModal = () => {
     extensions: ctbFormsAPI,
     forTarget,
     contentTypeSchema: allDataSchema.contentType || {},
+    customField,
   }).sections;
   const baseForm = formToDisplay.base({
     data: modifiedData,
@@ -883,6 +907,7 @@ const FormModal = () => {
     extensions: ctbFormsAPI,
     forTarget,
     contentTypeSchema: allDataSchema.contentType || {},
+    customField,
   }).sections;
 
   const baseFormInputNames = getFormInputNames(baseForm);
@@ -1022,6 +1047,7 @@ const FormModal = () => {
                   deleteComponent={deleteData}
                   categoryName={initialData.name}
                   isAttributeModal={modalType === 'attribute'}
+                  isCustomFieldModal={modalType === 'customField'}
                   isComponentToDzModal={modalType === 'addComponentToDynamicZone'}
                   isComponentAttribute={attributeType === 'component'}
                   isComponentModal={modalType === 'component'}
@@ -1042,6 +1068,7 @@ const FormModal = () => {
                   onSubmitCreateContentType={handleSubmit}
                   onSubmitCreateDz={handleSubmit}
                   onSubmitEditAttribute={handleSubmit}
+                  onSubmitEditCusomFieldAttribute={handleSubmit}
                   onSubmitEditCategory={handleSubmit}
                   onSubmitEditComponent={handleSubmit}
                   onSubmitEditContentType={handleSubmit}
