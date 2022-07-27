@@ -28,16 +28,6 @@ const createValidateContext = permission => ({
 });
 
 /**
- * Create a context from a domain {@link Permission} used by the format hook
- * @param {Permission} permission
- * @return {{ readonly permission: Permission }}
- */
-const createFormatContext = permission => ({
-  get permission() {
-    return cloneDeep(permission);
-  },
-});
-/**
  * Create a context from a domain {@link Permission} used by the before valuate hook
  * @param {Permission} permission
  * @return {{readonly permission: Permission, addCondition(string): this}}
@@ -100,7 +90,6 @@ const createWillRegisterContext = ({ permission, options }) => ({
 module.exports = {
   createEngineHooks,
   createValidateContext,
-  createFormatContext,
   createBeforeEvaluateContext,
   createWillRegisterContext,
 };

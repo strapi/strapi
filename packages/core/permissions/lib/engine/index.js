@@ -8,7 +8,6 @@ const {
   createEngineHooks,
   createWillRegisterContext,
   createBeforeEvaluateContext,
-  createFormatContext,
   createValidateContext,
 } = require('./hooks');
 
@@ -67,9 +66,7 @@ module.exports = {
         return;
       }
 
-      const permission = await state.hooks['format.permission'].call(
-        createFormatContext(params.permission)
-      );
+      const permission = await state.hooks['format.permission'].call(params.permission);
 
       const postFormatValidation = await runValidationHook(
         'post-format::validate.permission',
