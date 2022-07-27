@@ -110,11 +110,8 @@ module.exports = async ({ strapi }) => {
             },
           };
 
-          try {
-            return await strapi.auth.authenticate(ctx, next);
-          } catch (error) {
-            return next();
-          }
+          if (ctx.request.method === 'GET') return next();
+          return strapi.auth.authenticate(ctx, next);
         },
 
         // Apollo Server
