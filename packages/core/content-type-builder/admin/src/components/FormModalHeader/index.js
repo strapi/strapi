@@ -92,7 +92,7 @@ const FormModalHeader = ({
     headers.push({ label: dynamicZoneTarget });
   }
 
-  if (modalType === 'attribute') {
+  if (modalType === 'attribute' || modalType === 'customField') {
     icon = attributeType;
     headers.push({ label: attributeName });
   }

@@ -93,7 +93,6 @@ const FormModal = () => {
     kind,
     step,
     targetUid,
-    customFieldUid,
   } = useFormModalNavigation();
   const customField = useCustomFields().get(customFieldUid);
 
@@ -107,7 +106,6 @@ const FormModal = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { getPlugin } = useStrapiApp();
-  const customFieldsRegistry = useCustomFields();
   const ctbPlugin = getPlugin(pluginId);
   const ctbFormsAPI = ctbPlugin.apis.forms;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
@@ -921,13 +919,6 @@ const FormModal = () => {
 
   const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
 
-  let customFieldName = null;
-
-  if (customFieldUid) {
-    const { name } = customFieldsRegistry.get(customFieldUid);
-    customFieldName = name;
-  }
-
   return (
     <>
       <ModalLayout onClose={handleClosed} labelledBy="title">
@@ -965,30 +956,51 @@ const FormModal = () => {
                 }}
               >
                 <Flex justifyContent="space-between">
-                  <Typography as="h2" variant="beta">
-                    {formatMessage(
-                      {
-                        id: getModalTitleSubHeader({
-                          actionType,
-                          forTarget,
-                          kind,
+                  {customField ? (
+                    <Typography as="h2" variant="beta">
+                      {formatMessage(
+                        {
+                          id: getModalTitleSubHeader({
+                            actionType,
+                            forTarget,
+                            kind,
+                            step,
+                            modalType,
+                          }),
+                          defaultMessage: 'Add new field',
+                        },
+                        {
+                          type: upperFirst(formatMessage(customField.intlLabel)),
+                          name: upperFirst(customField.name),
                           step,
-                          modalType,
-                        }),
-                        defaultMessage: 'Add new field',
-                      },
-                      {
-                        type: upperFirst(
-                          customFieldName ||
+                        }
+                      )}
+                    </Typography>
+                  ) : (
+                    <Typography as="h2" variant="beta">
+                      {formatMessage(
+                        {
+                          id: getModalTitleSubHeader({
+                            actionType,
+                            forTarget,
+                            kind,
+                            step,
+                            modalType,
+                          }),
+                          defaultMessage: 'Add new field',
+                        },
+                        {
+                          type: upperFirst(
                             formatMessage({
                               id: getTrad(`attribute.${attributeType}`),
                             })
-                        ),
-                        name: upperFirst(customFieldName || attributeName),
-                        step,
-                      }
-                    )}
-                  </Typography>
+                          ),
+                          name: upperFirst(attributeName),
+                          step,
+                        }
+                      )}
+                    </Typography>
+                  )}
                   <Tabs>
                     <Tab hasError={doesBaseFormHasError}>
                       {formatMessage({
