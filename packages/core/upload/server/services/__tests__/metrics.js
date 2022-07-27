@@ -2,6 +2,11 @@
 
 const metricsService = require('../metrics');
 
+// TODO: the matcher exists in jest@28
+const closeTo = (expected, precision = 2) => ({
+  asymmetricMatch: actual => Math.abs(expected - actual) < Math.pow(10, -precision) / 2,
+});
+
 describe('metrics', () => {
   describe('computeMetrics', () => {
     test.each([
@@ -96,9 +101,9 @@ describe('metrics', () => {
       expect(results).toMatchObject({
         assetNumber,
         folderNumber,
-        averageDepth: expect.toBeCloseTo(averageDepth, 3),
+        averageDepth: closeTo(averageDepth, 3),
         maxDepth,
-        averageDeviationDepth: expect.toBeCloseTo(averageDeviationDepth, 3),
+        averageDeviationDepth: closeTo(averageDeviationDepth, 3),
       });
     });
   });
