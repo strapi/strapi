@@ -1,14 +1,14 @@
 'use strict';
 
 const { machineIdSync } = require('node-machine-id');
-const uuid = require('uuid');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = () => {
   try {
     const deviceId = machineIdSync();
     return deviceId;
   } catch (error) {
-    const deviceId = uuid();
+    const deviceId = uuidv4();
     return deviceId;
   }
 };
