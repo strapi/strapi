@@ -44,11 +44,16 @@ const TableHead = ({
         {headers.map(({ name, metadatas: { sortable: isSortable, label } }) => {
           const isSorted = sortBy === name;
           const isUp = sortOrder === 'ASC';
+
+          const intlLabel = formatMessage({
+            id: `global.table.header.${name}`,
+            defaultMessage: label,
+          });
+
           const sortLabel = formatMessage(
             { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
-            { label }
+            { label: intlLabel }
           );
-          const intlLabel = formatMessage({ id: label || name, defaultMessage: label || name });
 
           const handleClickSort = (shouldAllowClick = true) => {
             if (isSortable && shouldAllowClick) {
@@ -65,15 +70,13 @@ const TableHead = ({
             <Th
               key={name}
               action={
-                isSorted ? (
+                isSorted && (
                   <IconButton
                     label={sortLabel}
                     onClick={handleClickSort}
-                    icon={isSorted ? <SortIcon isUp={isUp} /> : undefined}
+                    icon={isSorted && <SortIcon isUp={isUp} />}
                     noBorder
                   />
-                ) : (
-                  undefined
                 )
               }
             >
