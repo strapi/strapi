@@ -102,7 +102,7 @@ module.exports = async ({ strapi }) => {
       method: 'ALL',
       path,
       handler: [
-        (ctx, next) => {
+        async (ctx, next) => {
           ctx.state.route = {
             info: {
               // Indicate it's a content API route
@@ -110,7 +110,11 @@ module.exports = async ({ strapi }) => {
             },
           };
 
-          return strapi.auth.authenticate(ctx, next);
+          try {
+            return await strapi.auth.authenticate(ctx, next);
+          } catch (error) {
+            return next();
+          }
         },
 
         // Apollo Server

@@ -25,23 +25,19 @@ const authenticate = async ctx => {
   const apiTokenService = getService('api-token');
   const token = extractToken(ctx);
 
-  if (token) {
-    const apiToken = await apiTokenService.getBy({
-      accessKey: apiTokenService.hash(token),
-    });
-
-    if (!apiToken) {
-      return { authenticated: false };
-    }
-
-    return { authenticated: true, credentials: apiToken };
+  if (!token) {
+    return { authenticated: false };
   }
 
-  if (ctx.url === '/graphql' && !token) {
-    return { authenticated: true };
+  const apiToken = await apiTokenService.getBy({
+    accessKey: apiTokenService.hash(token),
+  });
+
+  if (!apiToken) {
+    return { authenticated: false };
   }
 
-  return { authenticated: false };
+  return { authenticated: true, credentials: apiToken };
 };
 
 /** @type {import('.').VerifyFunction} */

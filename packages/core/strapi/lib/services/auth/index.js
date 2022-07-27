@@ -64,7 +64,7 @@ const createAuthentication = () => {
         }
       }
 
-      return ctx.unauthorized('Missing or invalid credentials');
+      throw new UnauthorizedError('Missing or invalid credentials');
     },
     async verify(auth, config = {}) {
       if (config === false) {
