@@ -3,7 +3,7 @@
 const { join, resolve, basename } = require('path');
 const os = require('os');
 const crypto = require('crypto');
-const uuid = require('uuid').v4;
+const { v4: uuidv4 } = require('uuid');
 const sentry = require('@sentry/node');
 // FIXME
 /* eslint-disable import/extensions */
@@ -42,7 +42,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
       template: cliArguments.template,
       starter: cliArguments.starter,
     },
-    uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuid(),
+    uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuidv4(),
     docker: process.env.DOCKER === 'true',
     deviceId: machineID(),
     tmpPath,
