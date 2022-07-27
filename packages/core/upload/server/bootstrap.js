@@ -1,5 +1,7 @@
 'use strict';
 
+const { getService } = require('./utils');
+
 module.exports = async ({ strapi }) => {
   // set plugin store
   const configurator = strapi.store({ type: 'plugin', name: 'upload', key: 'settings' });
@@ -18,6 +20,8 @@ module.exports = async ({ strapi }) => {
   }
 
   await registerPermissionActions();
+
+  await getService('metrics').registerCron();
 };
 
 const registerPermissionActions = async () => {

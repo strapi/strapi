@@ -82,11 +82,19 @@ const Plugins = () => {
                   <Tr key={name}>
                     <Td>
                       <Typography textColor="neutral800" variant="omega" fontWeight="bold">
-                        {displayName}
+                        {formatMessage({
+                          id: `global.plugins.${name}`,
+                          defaultMessage: displayName,
+                        })}
                       </Typography>
                     </Td>
                     <Td>
-                      <Typography textColor="neutral800">{description}</Typography>
+                      <Typography textColor="neutral800">
+                        {formatMessage({
+                          id: `global.plugins.${name}.description`,
+                          defaultMessage: description,
+                        })}
+                      </Typography>
                     </Td>
                   </Tr>
                 );

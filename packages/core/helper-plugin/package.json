@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.2.2",
+  "version": "4.3.0",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
     }
   ],
   "main": "build/index.js",
-  "module": "lib/src/index.js",
   "files": [
     "build"
   ],
@@ -35,6 +34,7 @@
     "prepublishOnly": "npm run build",
     "storybook": "start-storybook -p 6006",
     "test:front": "jest --config ./jest.config.front.js",
+    "test:front:cov": "jest --config ./jest.config.front.js --coverage --collectCoverageFrom='<rootDir>/packages/core/helper-plugin/lib/src/**/*.js' --coverageDirectory='<rootDir>/packages/core/helper-plugin/coverage'",
     "test:front:watch": "jest --config ./jest.config.front.js --watchAll",
     "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
   },
@@ -49,13 +49,13 @@
     "invariant": "^2.2.1",
     "lodash": "4.17.21",
     "match-sorter": "^4.0.2",
-    "moment": "^2.29.4",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
     "react-intl": "5.20.2",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
+    "react-select": "4.0.2",
     "styled-components": "5.3.3",
     "whatwg-fetch": "^3.6.2"
   },

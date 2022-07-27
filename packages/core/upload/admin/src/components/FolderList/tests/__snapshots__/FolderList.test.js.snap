@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FolderList renders and match snapshots 1`] = `
+.c3 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c0 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.c2 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c1 {
+  font-weight: 500;
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+<div>
+  <div
+    class=""
+  >
+    <div
+      class="c0"
+    >
+      <h2
+        class="c1"
+      >
+        Folder list title
+      </h2>
+    </div>
+    <div
+      class="c2"
+    >
+      Folder list children
+    </div>
+  </div>
+  <div
+    class="c3"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;

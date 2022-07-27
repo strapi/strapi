@@ -15,6 +15,7 @@ describe('Errors middleware', () => {
     });
 
     expect.assertions(1);
+
     await request(app.callback()).get('/');
   });
 });
