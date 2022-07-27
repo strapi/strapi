@@ -831,7 +831,7 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c49:hover:not([aria-disabled='true']) .sc-cWPeQZ {
+      .c49:hover:not([aria-disabled='true']) .sc-eHtaVP {
         color: #271fe0;
       }
 

@@ -39,7 +39,13 @@ describe('Upload plugin bootstrap function', () => {
         },
       },
       plugins: {
-        upload: {},
+        upload: {
+          services: {
+            metrics: {
+              registerCron() {},
+            },
+          },
+        },
       },
       plugin() {
         return {};

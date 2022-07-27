@@ -4,6 +4,7 @@ const path = require('path');
 const os = require('os');
 const mime = require('mime-types');
 const fse = require('fs-extra');
+const { FILE_MODEL_UID } = require('./constants');
 const { getStreamSize } = require('./utils/file');
 
 const UPLOAD_MUTATION_NAME = 'upload';
@@ -29,7 +30,7 @@ module.exports = ({ strapi }) => {
   const { getTypeName, getEntityResponseName } = getGraphQLService('utils').naming;
   const { toEntityResponse } = getGraphQLService('format').returnTypes;
 
-  const fileModel = strapi.getModel('plugin::upload.file');
+  const fileModel = strapi.getModel(FILE_MODEL_UID);
   const fileTypeName = getTypeName(fileModel);
   const fileEntityResponseType = getEntityResponseName(fileModel);
 
@@ -46,7 +47,7 @@ module.exports = ({ strapi }) => {
   const formatFile = async (upload, extraInfo, metas) => {
     const uploadService = getUploadService('upload');
     const { filename, mimetype, createReadStream } = await upload;
-    const currentFile = uploadService.formatFileInfo(
+    const currentFile = await uploadService.formatFileInfo(
       {
         filename,
         /**
@@ -109,7 +110,12 @@ module.exports = ({ strapi }) => {
             let sanitizedEntity;
 
             try {
-              const { file: upload, info, ...metas } = args;
+              const { file: upload, info = {}, ...metas } = args;
+
+              const apiUploadFolderService = getUploadService('api-upload-folder');
+
+              const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+              info.folder = apiUploadFolder.id;
 
               const file = await formatFile(upload, info, { ...metas, tmpWorkingDirectory });
               const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file, {});
@@ -147,8 +153,18 @@ module.exports = ({ strapi }) => {
             try {
               const { files: uploads, ...metas } = args;
 
+              const apiUploadFolderService = getUploadService('api-upload-folder');
+
+              const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+
               const files = await Promise.all(
-                uploads.map(upload => formatFile(upload, {}, { ...metas, tmpWorkingDirectory }))
+                uploads.map(upload =>
+                  formatFile(
+                    upload,
+                    { folder: apiUploadFolder.id },
+                    { ...metas, tmpWorkingDirectory }
+                  )
+                )
               );
 
               const uploadService = getUploadService('upload');

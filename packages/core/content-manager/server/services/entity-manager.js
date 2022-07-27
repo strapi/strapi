@@ -143,11 +143,11 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.findPage(uid, params);
   },
 
-  findWithRelationCounts(opts, uid, populate) {
+  findWithRelationCountsPage(opts, uid, populate) {
     const counterPopulate = addCreatedByRolesPopulate(getCounterPopulate(uid, populate));
     const params = { ...opts, populate: counterPopulate };
 
-    return strapi.entityService.findWithRelationCounts(uid, params);
+    return strapi.entityService.findWithRelationCountsPage(uid, params);
   },
 
   async findOne(id, uid, populate) {

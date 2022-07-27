@@ -15,6 +15,7 @@ import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
 
 jest.mock('../../../utils/downloadFile');
+jest.mock('../../../hooks/useFolderStructure');
 
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
   acc[curr] = `upload.${en[curr]}`;
@@ -114,7 +115,7 @@ const renderCompo = (toggleNotification = jest.fn()) =>
         </ThemeProvider>
       </TrackingContext.Provider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: document.getElementById('app') }
   );
 
 describe('<EditAssetDialog />', () => {
@@ -129,9 +130,9 @@ describe('<EditAssetDialog />', () => {
   });
 
   it('renders and matches the snapshot', () => {
-    const { container } = renderCompo();
+    renderCompo();
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   describe('PreviewBox', () => {

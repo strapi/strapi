@@ -405,8 +405,10 @@ class Strapi {
       entityValidator: this.entityValidator,
     });
 
-    const cronTasks = this.config.get('server.cron.tasks', {});
-    this.cron.add(cronTasks);
+    if (strapi.config.get('server.cron.enabled', true)) {
+      const cronTasks = this.config.get('server.cron.tasks', {});
+      this.cron.add(cronTasks);
+    }
 
     this.telemetry.bootstrap();
 

@@ -9,6 +9,7 @@ import { EditAssetDialog } from '../index';
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
 
+jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../utils/downloadFile');
 
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
@@ -106,7 +107,7 @@ const renderCompo = (
         </ThemeProvider>
       </TrackingContext.Provider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: document.getElementById('app') }
   );
 
 describe('<EditAssetDialog />', () => {
@@ -125,9 +126,9 @@ describe('<EditAssetDialog />', () => {
   });
 
   it('renders and matches the snapshot', () => {
-    const { container } = renderCompo();
+    renderCompo();
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   describe('metadata form', () => {
@@ -267,14 +268,14 @@ describe('<EditAssetDialog />', () => {
       const fileList = [file];
       fileList.item = i => fileList[i];
 
-      const { container } = renderCompo({
+      renderCompo({
         canUpdate: true,
         canCopyLink: false,
         canDownload: false,
       });
 
-      fireEvent.change(container.querySelector('[type="file"]'), { target: { files: fileList } });
-      const img = container.querySelector('img');
+      fireEvent.change(document.querySelector('[type="file"]'), { target: { files: fileList } });
+      const img = document.querySelector('img');
 
       expect(img).toHaveAttribute('src', 'http://localhost:4000/assets/test.png');
     });
