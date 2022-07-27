@@ -303,6 +303,7 @@ const FormModal = () => {
   const isCreatingContentType = modalType === 'contentType';
   const isCreatingComponent = modalType === 'component';
   const isCreatingAttribute = modalType === 'attribute';
+  const isCreatingCustomFieldAttribute = modalType === 'customField';
   const isComponentAttribute = attributeType === 'component' && isCreatingAttribute;
   const isCreating = actionType === 'create';
   const isCreatingComponentFromAView =
@@ -545,7 +546,7 @@ const FormModal = () => {
         return;
         // Add/edit a field to a content type
         // Add/edit a field to a created component (the end modal is not step 2)
-      } else if (modalType === 'customField') {
+      } else if (isCreatingCustomFieldAttribute) {
         addCustomFieldAttribute(
           { ...modifiedData, customField: customFieldUid },
           forTarget,
@@ -553,6 +554,17 @@ const FormModal = () => {
           actionType === 'edit',
           initialData
         );
+
+        if (shouldContinue) {
+          onNavigateToChooseAttributeModal({
+            forTarget,
+            targetUid: ctTargetUid,
+          });
+        } else {
+          onCloseModal();
+        }
+
+        return;
       } else if (isCreatingAttribute && !isCreatingComponentFromAView) {
         const isDynamicZoneAttribute = attributeType === 'dynamiczone';
 
@@ -580,6 +592,8 @@ const FormModal = () => {
 
         // Normal fields like boolean relations or dynamic zone
         if (!isComponentAttribute) {
+          addAttribute(modifiedData, forTarget, targetUid, actionType === 'edit', initialData);
+
           if (shouldContinue) {
             onNavigateToChooseAttributeModal({
               forTarget,
