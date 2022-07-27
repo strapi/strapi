@@ -96,9 +96,9 @@ describe('metrics', () => {
       expect(results).toMatchObject({
         assetNumber,
         folderNumber,
-        averageDepth: expect.closeTo(averageDepth, 3),
+        averageDepth: expect.toBeCloseTo(averageDepth, 3),
         maxDepth,
-        averageDeviationDepth: expect.closeTo(averageDeviationDepth, 3),
+        averageDeviationDepth: expect.toBeCloseTo(averageDeviationDepth, 3),
       });
     });
   });
