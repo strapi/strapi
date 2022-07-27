@@ -1,6 +1,7 @@
 import React, { useState, useLayoutEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { useTracking } from '@strapi/helper-plugin';
 import { Searchbar, SearchForm } from '@strapi/design-system/Searchbar';
 import { IconButton } from '@strapi/design-system/IconButton';
 import SearchIcon from '@strapi/icons/Search';
@@ -8,6 +9,7 @@ import getTrad from '../../../../utils/getTrad';
 
 const SearchAsset = ({ onChangeSearch, queryValue }) => {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const [isOpen, setIsOpen] = useState(!!queryValue);
   const [value, setValue] = useState(queryValue || '');
   const wrapperRef = useRef(null);
@@ -33,6 +35,7 @@ const SearchAsset = ({ onChangeSearch, queryValue }) => {
     e.preventDefault();
     e.stopPropagation();
 
+    trackUsage('didSearchMediaLibraryElements', { location: 'content-manager' });
     onChangeSearch(value);
   };
 

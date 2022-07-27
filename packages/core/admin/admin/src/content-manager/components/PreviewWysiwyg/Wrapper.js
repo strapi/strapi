@@ -70,28 +70,22 @@ const Wrapper = styled.div`
   }
 
   table {
-    font-size: 13px;
     thead {
-      background: rgb(243, 243, 243);
-      tr {
-        height: 43px;
+      background: ${({ theme }) => theme.colors.neutral150};
+
+      th {
+        padding: ${({ theme }) => theme.spaces[4]};
       }
     }
     tr {
-      border: 1px solid #c6cbd1;
+      border: 1px solid ${({ theme }) => theme.colors.neutral200};
     }
     th,
     td {
-      padding: 0 25px;
-      border: 1px solid #c6cbd1;
+      padding: ${({ theme }) => theme.spaces[4]};
+      border: 1px solid ${({ theme }) => theme.colors.neutral200};
       border-bottom: 0;
       border-top: 0;
-    }
-
-    tbody {
-      tr {
-        height: 54px;
-      }
     }
   }
 

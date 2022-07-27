@@ -3,7 +3,7 @@
 const path = require('path');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { DuplicateReporterPlugin } = require('duplicate-dependencies-webpack-plugin');
-
+const getPluginsPath = require('./utils/get-plugins-path');
 const webpackConfig = require('./webpack.config');
 
 module.exports = () => {
@@ -19,14 +19,16 @@ module.exports = () => {
     backend: 'http://localhost:1337',
     adminPath: '/admin/',
   };
+  const pluginsPath = getPluginsPath();
 
   const args = {
     entry,
     cacheDir: __dirname,
-    pluginsPath: [path.resolve(__dirname, '../../../packages')],
+    pluginsPath,
     dest,
     env,
     options,
+    tsConfigFilePath: path.resolve(__dirname, 'admin', 'src', 'tsconfig.json'),
   };
 
   const config = webpackConfig(args);
@@ -41,27 +43,6 @@ module.exports = () => {
 
   return {
     ...config,
-    snapshot: {
-      managedPaths: [
-        path.resolve(__dirname, '../content-type-builder'),
-        path.resolve(__dirname, '../upload'),
-        path.resolve(__dirname, '../helper-plugin'),
-      ],
-      buildDependencies: {
-        hash: true,
-        timestamp: true,
-      },
-      module: {
-        timestamp: true,
-      },
-      resolve: {
-        timestamp: true,
-      },
-      resolveBuildDependencies: {
-        hash: true,
-        timestamp: true,
-      },
-    },
 
     devServer: {
       port: 4000,

@@ -71,7 +71,8 @@
     "@babel/polyfill": "7.12.1"
   },
   "devDependencies": {
-    "@swc-node/jest": "1.5.0",
+    "@swc/core": "1.2.218",
+    "@swc/jest": "0.2.22",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
     "@testing-library/user-event": "13.5.0",
@@ -107,7 +108,7 @@
     "lodash": "4.17.21",
     "msw": "0.42.3",
     "npm-run-all": "4.1.5",
-    "nx": "14.3.6",
+    "nx": "14.4.2",
     "plop": "2.7.6",
     "prettier": "1.19.1",
     "qs": "6.11.0",
@@ -119,7 +120,7 @@
     "stylelint-config-recommended": "3.0.0",
     "stylelint-config-styled-components": "0.1.1",
     "stylelint-processor-styled-components": "1.10.0",
-    "supertest": "5.0.0",
+    "supertest": "6.2.4",
     "yargs": "13.3.2"
   },
   "engines": {

@@ -1,21 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { KeyboardNavigable } from '@strapi/design-system/KeyboardNavigable';
+import { Typography } from '@strapi/design-system/Typography';
+
 import { AssetCard } from '../AssetCard/AssetCard';
 import { Draggable } from './Draggable';
-
-const GridColSize = {
-  S: 180,
-  M: 250,
-};
-
-const GridLayout = styled(Box)`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(${({ size }) => `${GridColSize[size]}px`}, 1fr));
-  grid-gap: ${({ theme }) => theme.spaces[4]};
-`;
 
 export const AssetList = ({
   allowedTypes,
@@ -25,51 +16,54 @@ export const AssetList = ({
   selectedAssets,
   size,
   onReorderAsset,
+  title,
 }) => {
   return (
     <KeyboardNavigable tagName="article">
-      <GridLayout size={size}>
+      {title && (
+        <Box paddingTop={2} paddingBottom={2}>
+          <Typography as="h2" variant="delta" fontWeight="semiBold">
+            {title}
+          </Typography>
+        </Box>
+      )}
+
+      <Grid gap={4}>
         {assets.map((asset, index) => {
-          const isSelected = Boolean(
-            selectedAssets.find(currentAsset => currentAsset.id === asset.id)
-          );
+          const isSelected = !!selectedAssets.find(currentAsset => currentAsset.id === asset.id);
 
           if (onReorderAsset) {
             return (
-              <Draggable key={asset.id} index={index} moveItem={onReorderAsset} id={asset.id}>
-                <AssetCard
-                  allowedTypes={allowedTypes}
-                  asset={asset}
-                  isSelected={isSelected}
-                  onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
-                  onSelect={() => onSelectAsset(asset)}
-                  size={size}
-                />
-              </Draggable>
+              <GridItem col={3} height="100%">
+                <Draggable key={asset.id} index={index} moveItem={onReorderAsset} id={asset.id}>
+                  <AssetCard
+                    allowedTypes={allowedTypes}
+                    asset={asset}
+                    isSelected={isSelected}
+                    onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
+                    onSelect={() => onSelectAsset({ ...asset, type: 'asset' })}
+                    size={size}
+                  />
+                </Draggable>
+              </GridItem>
             );
           }
 
           return (
-            <AssetCard
-              key={asset.id}
-              allowedTypes={allowedTypes}
-              asset={asset}
-              isSelected={isSelected}
-              onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
-              onSelect={() => onSelectAsset(asset)}
-              size={size}
-            />
+            <GridItem col={3} key={asset.id} height="100%">
+              <AssetCard
+                key={asset.id}
+                allowedTypes={allowedTypes}
+                asset={asset}
+                isSelected={isSelected}
+                onEdit={onEditAsset ? () => onEditAsset(asset) : undefined}
+                onSelect={() => onSelectAsset({ ...asset, type: 'asset' })}
+                size={size}
+              />
+            </GridItem>
           );
         })}
-
-        {/* TODO: Remove this when we have media queries */}
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
-        <div aria-hidden />
-      </GridLayout>
+      </Grid>
     </KeyboardNavigable>
   );
 };
@@ -79,6 +73,7 @@ AssetList.defaultProps = {
   onEditAsset: undefined,
   size: 'M',
   onReorderAsset: undefined,
+  title: null,
 };
 
 AssetList.propTypes = {
@@ -89,4 +84,5 @@ AssetList.propTypes = {
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   size: PropTypes.oneOf(['S', 'M']),
   onReorderAsset: PropTypes.func,
+  title: PropTypes.string,
 };

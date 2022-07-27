@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, toRegressedEnumValue, startsWithANumber } = require('@strapi/utils');
+const { yup, toRegressedEnumValue } = require('@strapi/utils');
 
 const LIFECYCLES = [
   'beforeCreate',
@@ -23,6 +23,20 @@ const LIFECYCLES = [
   'beforeDeleteMany',
   'afterDeleteMany',
 ];
+
+/**
+ * For enumerations the least common denomiator is GraphQL, where
+ * values needs to match the secure name regex:
+ * GraphQL Spec https://spec.graphql.org/June2018/#sec-Names
+ *
+ * Therefore we need to make sure our users only use values, which
+ * can be returned by GraphQL, by checking the regressed values
+ * agains the GraphQL regex.
+ *
+ * TODO V5: check if we can avoid this coupling by moving this logic
+ * into the GraphQL plugin.
+ */
+const GRAPHQL_ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
 
 const lifecyclesShape = _.mapValues(_.keyBy(LIFECYCLES), () =>
   yup
@@ -54,22 +68,29 @@ const contentTypeSchemaValidator = yup.object().shape({
         for (const attrName in attributes) {
           const attr = attributes[attrName];
           if (attr.type === 'enumeration') {
-            // should not start by a number
-            if (attr.enum.some(startsWithANumber)) {
-              const message = `Enum values should not start with a number. Please modify your enumeration '${attrName}'.`;
+            const regressedValues = attr.enum.map(toRegressedEnumValue);
+
+            // should match the GraphQL regex
+            if (!regressedValues.every(value => GRAPHQL_ENUM_REGEX.test(value))) {
+              const message = `Invalid enumeration value. Values should have at least one alphabetical character preceeding the first occurence of a number. Update your enumeration '${attrName}'.`;
 
               return this.createError({ message });
             }
 
+            // should not contain empty values
+            if (regressedValues.some(value => value === '')) {
+              return this.createError({
+                message: `At least one value of the enumeration '${attrName}' appears to be empty. Only alphanumerical characters are taken into account.`,
+              });
+            }
+
             // should not collide
             const duplicates = _.uniq(
-              attr.enum
-                .map(toRegressedEnumValue)
-                .filter((value, index, values) => values.indexOf(value) !== index)
+              regressedValues.filter((value, index, values) => values.indexOf(value) !== index)
             );
 
             if (duplicates.length) {
-              const message = `Some enum values of the field '${attrName}' collide when normalized: ${duplicates.join(
+              const message = `Some enumeration values of the field '${attrName}' collide when normalized: ${duplicates.join(
                 ', '
               )}. Please modify your enumeration.`;
 

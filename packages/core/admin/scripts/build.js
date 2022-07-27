@@ -3,7 +3,11 @@
 const path = require('path');
 const webpack = require('webpack');
 const { isObject } = require('lodash');
+// eslint-disable-next-line node/no-extraneous-require
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
+
 const webpackConfig = require('../webpack.config');
+const getPluginsPath = require('../utils/get-plugins-path');
 const {
   getCorePluginsPath,
   getPluginToInstallPath,
@@ -12,29 +16,41 @@ const {
 
 const PLUGINS_TO_INSTALL = ['i18n', 'users-permissions'];
 
+// Wrapper that outputs the webpack speed
+const smp = new SpeedMeasurePlugin();
+
 const buildAdmin = async () => {
   const entry = path.join(__dirname, '..', 'admin', 'src');
   const dest = path.join(__dirname, '..', 'build');
+  const tsConfigFilePath = path.join(__dirname, '..', 'admin', 'src', 'tsconfig.json');
+
   const corePlugins = getCorePluginsPath();
   const plugins = getPluginToInstallPath(PLUGINS_TO_INSTALL);
   const allPlugins = { ...corePlugins, ...plugins };
+  const pluginsPath = getPluginsPath();
 
   await createPluginsFile(allPlugins);
 
   const args = {
     entry,
     dest,
-    cacheDir: path.resolve(__dirname, '..'),
-    pluginsPath: [path.resolve(__dirname, '../../../../packages')],
+    cacheDir: path.join(__dirname, '..'),
+    pluginsPath,
     env: 'production',
     optimize: true,
     options: {
       backend: 'http://localhost:1337',
       adminPath: '/admin/',
     },
+    tsConfigFilePath,
   };
 
-  const compiler = webpack(webpackConfig(args));
+  const config =
+    process.env.MEASURE_BUILD_SPEED === 'true'
+      ? smp.wrap(webpackConfig(args))
+      : webpackConfig(args);
+
+  const compiler = webpack(config);
 
   console.log('Building the admin panel');
 

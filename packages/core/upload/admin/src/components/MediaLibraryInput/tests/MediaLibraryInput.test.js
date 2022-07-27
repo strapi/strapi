@@ -25,7 +25,16 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderCompo = (props = { intlLabel: { id: 'default', defaultMessage: 'default message' } }) =>
+const renderCompo = (
+  props = {
+    onChange: jest.fn(),
+    name: 'test',
+    intlLabel: {
+      id: 'default',
+      defaultMessage: 'default message',
+    },
+  }
+) =>
   render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
@@ -34,13 +43,13 @@ const renderCompo = (props = { intlLabel: { id: 'default', defaultMessage: 'defa
         </NotificationsProvider>
       </ThemeProvider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: document.getElementById('app') }
   );
 
 describe('<MediaLibraryInput />', () => {
   it('renders and matches the snapshot', () => {
-    const { container } = renderCompo();
+    renderCompo();
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

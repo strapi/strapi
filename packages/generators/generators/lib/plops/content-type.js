@@ -4,6 +4,7 @@ const { join } = require('path');
 const slugify = require('@sindresorhus/slugify');
 const fs = require('fs-extra');
 const { isKebabCase } = require('@strapi/utils');
+const tsUtils = require('@strapi/typescript-utils');
 
 const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
@@ -81,12 +82,14 @@ module.exports = plop => {
       }, {});
 
       const filePath = getFilePath(answers.destination);
+      const currentDir = process.cwd();
+      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions = [
         {
           type: 'add',
           path: `${filePath}/content-types/{{ singularName }}/schema.json`,
-          templateFile: 'templates/content-type.schema.json.hbs',
+          templateFile: `templates/${language}/content-type.schema.json.hbs`,
           data: {
             collectionName: slugify(answers.pluralName, { separator: '_' }),
           },
@@ -120,20 +123,20 @@ module.exports = plop => {
         baseActions.push(
           {
             type: 'add',
-            path: `${filePath}/controllers/{{singularName}}.js`,
-            templateFile: 'templates/core-controller.js.hbs',
+            path: `${filePath}/controllers/{{singularName}}.${language}`,
+            templateFile: `templates/${language}/core-controller.${language}.hbs`,
             data: { uid },
           },
           {
             type: 'add',
-            path: `${filePath}/services/{{singularName}}.js`,
-            templateFile: 'templates/core-service.js.hbs',
+            path: `${filePath}/services/{{singularName}}.${language}`,
+            templateFile: `templates/${language}/core-service.${language}.hbs`,
             data: { uid },
           },
           {
             type: 'add',
-            path: `${filePath}/routes/{{singularName}}.js`,
-            templateFile: `templates/core-router.js.hbs`,
+            path: `${filePath}/routes/{{singularName}}.${language}`,
+            templateFile: `templates/${language}/core-router.${language}.hbs`,
             data: { uid },
           }
         );

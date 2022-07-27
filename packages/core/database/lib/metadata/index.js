@@ -33,6 +33,7 @@ const createMetadata = (models = []) => {
         ...model.attributes,
       },
       lifecycles: model.lifecycles || {},
+      indexes: model.indexes || [],
     });
   }
 

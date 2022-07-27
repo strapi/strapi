@@ -45,7 +45,7 @@ export const ImageAssetCard = ({
     width && height ? `${thumbnail}?width=${width}&height=${height}` : thumbnail;
 
   return (
-    <Card>
+    <Card height="100%">
       <CardHeader>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
         {(onRemove || onEdit) && (
