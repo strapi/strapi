@@ -6,6 +6,11 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { BrowseStep } from '..';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+}));
+
 const FIXTURE_ASSETS = [
   {
     id: 77,

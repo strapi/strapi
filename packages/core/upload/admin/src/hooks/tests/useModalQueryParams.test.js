@@ -2,6 +2,11 @@ import { renderHook, act } from '@testing-library/react-hooks';
 
 import useModalQueryParams from '../useModalQueryParams';
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+}));
+
 const FIXTURE_QUERY = {
   page: 1,
   sort: 'updatedAt:DESC',
