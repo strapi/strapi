@@ -37,6 +37,7 @@ program
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Overwrite database content if any')
   .option('--template <templateurl>', 'Specify a Strapi template')
+  .option('--ts, --typescript', 'Use TypeScript to generate the project')
   .description('create a new application')
   .action(directory => {
     initProject(directory, program);

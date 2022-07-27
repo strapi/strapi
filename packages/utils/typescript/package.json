@@ -1,0 +1,38 @@
+{
+  "name": "@strapi/typescript-utils",
+  "version": "4.2.3",
+  "description": "Typescript support for Strapi",
+  "keywords": [
+    "strapi",
+    "generators"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./lib/index.js",
+  "directories": {
+    "lib": "./lib"
+  },
+  "dependencies": {
+    "typescript": "4.6.2",
+    "chalk": "4.1.2",
+    "cli-table3": "0.6.2",
+    "fs-extra": "10.0.1",
+    "lodash": "4.17.21",
+    "prettier": "2.7.1"
+  },
+  "engines": {
+    "node": ">=12.22.0 <=16.x.x",
+    "npm": ">=6.0.0"
+  }
+}

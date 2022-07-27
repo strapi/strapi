@@ -25,7 +25,7 @@ module.exports = ({ strapi }) => {
     {
       method: 'GET',
       path: '/uploads/(.*)',
-      handler: [range, koaStatic(strapi.dirs.public, { defer: true, ...localServerConfig })],
+      handler: [range, koaStatic(strapi.dirs.static.public, { defer: true, ...localServerConfig })],
       config: { auth: false },
     },
   ]);

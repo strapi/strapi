@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
-import { useRBAC, useQueryParams } from '@strapi/helper-plugin';
+import { useRBAC, useQueryParams, TrackingContext } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { rest } from 'msw';
 import { MediaLibrary } from '../MediaLibrary';
@@ -38,11 +38,13 @@ const queryClient = new QueryClient({
 const renderML = () =>
   renderTL(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
-        <MemoryRouter>
-          <MediaLibrary />
-        </MemoryRouter>
-      </ThemeProvider>
+      <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
+        <ThemeProvider theme={lightTheme}>
+          <MemoryRouter>
+            <MediaLibrary />
+          </MemoryRouter>
+        </ThemeProvider>
+      </TrackingContext.Provider>
     </QueryClientProvider>
   );
 
