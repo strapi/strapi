@@ -17,8 +17,6 @@ const forms = {
 
         if (customField.options?.base) {
           addItemsToFormSection(customField.options.base, sections);
-
-          return { sections };
         }
 
         return { sections };
