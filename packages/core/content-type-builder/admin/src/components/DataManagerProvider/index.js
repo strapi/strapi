@@ -40,6 +40,7 @@ import {
   CREATE_COMPONENT_SCHEMA,
   DELETE_NOT_SAVED_TYPE,
   EDIT_ATTRIBUTE,
+  EDIT_CUSTOM_FIELD_ATTRIBUTE,
   GET_DATA_SUCCEEDED,
   RELOAD_PLUGIN,
   REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
@@ -179,7 +180,7 @@ const DataManagerProvider = ({
     isEditing = false,
     initialAttribute
   ) => {
-    const actionType = isEditing ? EDIT_ATTRIBUTE : ADD_CUSTOM_FIELD_ATTRIBUTE;
+    const actionType = isEditing ? EDIT_CUSTOM_FIELD_ATTRIBUTE : ADD_CUSTOM_FIELD_ATTRIBUTE;
 
     dispatch({
       type: actionType,

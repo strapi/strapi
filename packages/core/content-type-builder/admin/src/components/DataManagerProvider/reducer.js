@@ -263,6 +263,27 @@ const reducer = (state = initialState, action) =>
 
         break;
       }
+      case actions.EDIT_CUSTOM_FIELD_ATTRIBUTE: {
+        const { attributeToSet, forTarget, targetUid, initialAttribute } = action;
+
+        const initialAttributeName = initialAttribute.name;
+        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+          ? [forTarget]
+          : [forTarget, targetUid];
+
+        const initialAttributeIndex = findAttributeIndex(
+          get(state, ['modifiedData', ...pathToDataToEdit]),
+          initialAttributeName
+        );
+
+        set(
+          draftState,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', initialAttributeIndex],
+          attributeToSet
+        );
+
+        break;
+      }
       case actions.EDIT_ATTRIBUTE: {
         const {
           attributeToSet: { name, ...rest },
