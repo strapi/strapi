@@ -27,11 +27,12 @@ module.exports = ({ strapi }) => {
     },
 
     getFullDocumentationPath() {
-      return path.join(strapi.dirs.extensions, 'documentation', 'documentation');
+      return path.join(strapi.dirs.app.extensions, 'documentation', 'documentation');
     },
 
     getCustomDocumentationPath() {
-      return path.join(strapi.dirs.extensions, 'documentation', 'config', 'settings.json');
+      // ??
+      return path.join(strapi.dirs.app.extensions, 'documentation', 'config', 'settings.json');
     },
 
     getDocumentationVersions() {
@@ -81,10 +82,10 @@ module.exports = ({ strapi }) => {
      */
     getApiDocumentationPath(api) {
       if (api.getter === 'plugin') {
-        return path.join(strapi.dirs.extensions, api.name, 'documentation');
+        return path.join(strapi.dirs.app.extensions, api.name, 'documentation');
       }
 
-      return path.join(strapi.dirs.api, api.name, 'documentation');
+      return path.join(strapi.dirs.app.api, api.name, 'documentation');
     },
 
     async deleteDocumentation(version) {

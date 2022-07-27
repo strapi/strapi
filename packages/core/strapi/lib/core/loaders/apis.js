@@ -5,6 +5,7 @@ const { existsSync } = require('fs-extra');
 const _ = require('lodash');
 const fse = require('fs-extra');
 const { isKebabCase } = require('@strapi/utils');
+const { importDefault } = require('../../utils');
 
 const DEFAULT_CONTENT_TYPE = {
   schema: {},
@@ -19,11 +20,11 @@ const isDirectory = fd => fd.isDirectory();
 const isDotFile = fd => fd.name.startsWith('.');
 
 module.exports = async strapi => {
-  if (!existsSync(strapi.dirs.api)) {
-    throw new Error('Missing api folder. Please create one at `./src/api`');
+  if (!existsSync(strapi.dirs.dist.api)) {
+    return;
   }
 
-  const apisFDs = await (await fse.readdir(strapi.dirs.api, { withFileTypes: true }))
+  const apisFDs = await (await fse.readdir(strapi.dirs.dist.api, { withFileTypes: true }))
     .filter(isDirectory)
     .filter(_.negate(isDotFile));
 
@@ -32,7 +33,7 @@ module.exports = async strapi => {
   // only load folders
   for (const apiFD of apisFDs) {
     const apiName = normalizeName(apiFD.name);
-    const api = await loadAPI(join(strapi.dirs.api, apiFD.name));
+    const api = await loadAPI(join(strapi.dirs.dist.api, apiFD.name));
 
     apis[apiName] = api;
   }
@@ -154,7 +155,7 @@ const loadFile = file => {
 
   switch (ext) {
     case '.js':
-      return require(file);
+      return importDefault(file);
     case '.json':
       return fse.readJSON(file);
     default:

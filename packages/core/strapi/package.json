@@ -80,6 +80,7 @@
   "dependencies": {
     "@koa/cors": "3.1.0",
     "@koa/router": "10.1.1",
+    "@strapi/typescript-utils": "4.2.3",
     "@strapi/admin": "4.2.3",
     "@strapi/database": "4.2.3",
     "@strapi/generate-new": "4.2.3",
@@ -131,6 +132,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "typescript": "4.6.2",
     "supertest": "6.2.4"
   },
   "engines": {

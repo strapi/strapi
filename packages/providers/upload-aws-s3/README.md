@@ -57,7 +57,9 @@ module.exports = ({ env }) => ({
   // ...
 });
 ```
+
 #### Configuration for S3 compatible services
+
 This plugin may work with S3 compatible services by using the `endpoint` option instead of `region`. Scaleway example:
 `./config/plugins.js`
 

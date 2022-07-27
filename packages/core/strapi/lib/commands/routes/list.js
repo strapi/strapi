@@ -7,7 +7,8 @@ const { toUpper } = require('lodash/fp');
 const strapi = require('../../index');
 
 module.exports = async function() {
-  const app = await strapi().load();
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   const list = app.server.listRoutes();
 

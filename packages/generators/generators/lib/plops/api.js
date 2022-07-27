@@ -2,6 +2,8 @@
 
 const { join } = require('path');
 const fs = require('fs-extra');
+const tsUtils = require('@strapi/typescript-utils');
+
 const validateInput = require('./utils/validate-input');
 
 module.exports = plop => {
@@ -46,17 +48,19 @@ module.exports = plop => {
     ],
     actions(answers) {
       const filePath = answers.isPluginApi && answers.plugin ? 'plugins/{{plugin}}' : 'api/{{id}}';
+      const currentDir = process.cwd();
+      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions = [
         {
           type: 'add',
-          path: `${filePath}/controllers/{{id}}.js`,
-          templateFile: 'templates/controller.js.hbs',
+          path: `${filePath}/controllers/{{id}}.${language}`,
+          templateFile: `templates/${language}/controller.${language}.hbs`,
         },
         {
           type: 'add',
-          path: `${filePath}/services/{{id}}.js`,
-          templateFile: 'templates/service.js.hbs',
+          path: `${filePath}/services/{{id}}.${language}`,
+          templateFile: `templates/${language}/service.${language}.hbs`,
         },
       ];
 
@@ -67,8 +71,8 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/routes/{{id}}.js`,
-          templateFile: `templates/single-route.js.hbs`,
+          path: `${filePath}/routes/{{id}}.${language}`,
+          templateFile: `templates/${language}/single-route.${language}.hbs`,
         },
         ...baseActions,
       ];

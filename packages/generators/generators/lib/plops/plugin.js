@@ -1,19 +1,30 @@
 'use strict';
 
 const chalk = require('chalk');
+const { isUsingTypeScriptSync } = require('@strapi/typescript-utils');
 const { isKebabCase, toKebabCase } = require('@strapi/utils');
+
 const validateInput = require('./utils/validate-input');
 
-const logInstructions = pluginName => {
+const LANGUAGES = {
+  javascript: 'JavaScript',
+  typescript: 'TypeScript',
+};
+
+const logInstructions = (pluginName, { language }) => {
   const maxLength = `    resolve: './src/plugins/${pluginName}'`.length;
   const separator = Array(maxLength)
     .fill('─')
     .join('');
 
+  const exportInstruction = language === 'js' ? 'module.exports =' : 'export default';
+
   return `
-You can now enable your plugin by adding the following in ${chalk.yellow('./config/plugins.js')}.
+You can now enable your plugin by adding the following in ${chalk.yellow(
+    `./config/plugins.${language}`
+  )}
 ${separator}
-module.exports = {
+${exportInstruction} {
   ${chalk.gray('// ...')}
   ${chalk.green(`'${pluginName}'`)}: {
     enabled: ${chalk.yellow(true)},
@@ -36,8 +47,19 @@ module.exports = plop => {
         message: 'Plugin name',
         validate: input => validateInput(input),
       },
+      {
+        type: 'list',
+        name: 'language',
+        message: 'Choose your preferred language',
+        choices: Object.values(LANGUAGES),
+        default: LANGUAGES.javascript,
+      },
     ],
     actions(answers) {
+      const isTypescript = answers.language === LANGUAGES.typescript;
+      const language = isTypescript ? 'ts' : 'js';
+      const projectLanguage = isUsingTypeScriptSync(process.cwd()) ? 'ts' : 'js';
+
       if (!isKebabCase(answers.pluginName)) {
         answers.pluginName = toKebabCase(answers.pluginName);
         console.log(
@@ -51,20 +73,20 @@ module.exports = plop => {
         {
           type: 'addMany',
           destination: 'plugins/{{ pluginName }}',
-          base: 'files/plugin',
-          templateFiles: 'files/plugin/**',
+          base: `files/${language}/plugin`,
+          templateFiles: `files/${language}/plugin/**`,
         },
         {
           type: 'add',
           path: 'plugins/{{ pluginName }}/README.md',
-          templateFile: 'templates/README.md.hbs',
+          templateFile: `templates/${language}/README.md.hbs`,
         },
         {
           type: 'add',
           path: 'plugins/{{ pluginName }}/package.json',
-          templateFile: 'templates/plugin-package.json.hbs',
+          templateFile: `templates/${language}/plugin-package.json.hbs`,
         },
-        () => plop.renderString(logInstructions(answers.pluginName)),
+        () => plop.renderString(logInstructions(answers.pluginName, { language: projectLanguage })),
       ];
     },
   });

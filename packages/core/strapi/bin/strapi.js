@@ -95,6 +95,7 @@ program
   .option('--dbssl <dbssl>', 'Database SSL')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Allow overwriting existing database content')
+  .option('-ts, --typescript', 'Create a typescript project')
   .description('Create a new application')
   .action(require('../lib/commands/new'));
 
@@ -238,5 +239,17 @@ program
   .command('telemetry:enable')
   .description('Enable anonymous telemetry and metadata sending to Strapi analytics')
   .action(getLocalScript('opt-in-telemetry'));
+
+program
+  .command('ts:generate-types')
+  .description(`Generate TypeScript typings for your schemas`)
+  .option(
+    '-o, --out-dir <outDir>',
+    'Specify a relative directory in which the schemas definitions will be generated'
+  )
+  .option('-f, --file <file>', 'Specify a filename to store the schemas definitions')
+  .option('--verbose', `Display more information about the types generation`, false)
+  .option('-s, --silent', `Run the generation silently, without any output`, false)
+  .action(getLocalScript('ts/generate-types'));
 
 program.parseAsync(process.argv);

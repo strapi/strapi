@@ -38,7 +38,7 @@ const createUpdateNotifier = strapi => {
     config = new Configstore(
       pkg.name,
       {},
-      { configPath: path.join(strapi.dirs.root, '.strapi-updater.json') }
+      { configPath: path.join(strapi.dirs.app.root, '.strapi-updater.json') }
     );
   } catch {
     // we don't have write access to the file system
