@@ -62,7 +62,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
           <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
             <Loader>
               {formatMessage({
-                id: getTrad('list.asset.load'),
+                id: getTrad('content.isLoading'),
                 defaultMessage: 'Content is loading.',
               })}
             </Loader>

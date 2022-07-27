@@ -17,9 +17,12 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
   const [{ query }] = useQueryParams();
   const { formatMessage } = useIntl();
 
-  const allAscendants = data && getFolderParents(data?.[0], currentFolderId);
+  const allAscendants = data && getFolderParents(data, currentFolderId);
   const filteredAscendants =
-    allAscendants && allAscendants.filter(ascendant => !parentsToOmit.includes(ascendant.id));
+    allAscendants &&
+    allAscendants.filter(
+      ascendant => !parentsToOmit.includes(ascendant.id) && ascendant.id !== null
+    );
 
   return (
     <CrumbSimpleMenu
@@ -35,7 +38,7 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
         <MenuItem>
           <Loader small>
             {formatMessage({
-              id: getTrad('list.asset.load'),
+              id: getTrad('content.isLoading'),
               defaultMessage: 'Content is loading.',
             })}
           </Loader>

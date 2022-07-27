@@ -1,29 +1,20 @@
-const buildRecursiveFolderParents = (results, node, searchedId) => {
-  let found = false;
+import flattenTree from '../components/SelectTree/utils/flattenTree';
 
-  if (node.value === parseInt(searchedId, 10)) {
-    found = true;
-  } else {
-    for (let i = 0; i < node.children.length && !found; i++) {
-      found = buildRecursiveFolderParents(results, node.children[i], searchedId);
+const getFolderParents = (folders, currentFolderId) => {
+  const parents = [];
+  const flatFolders = flattenTree(folders);
+  const currentFolder = flatFolders.find(folder => folder.value === currentFolderId);
 
-      if (found) {
-        results.push({ id: node.children[i].value, label: node.children[i].label });
-      }
-    }
+  let { parent } = currentFolder || {};
+
+  while (parent !== undefined) {
+    // eslint-disable-next-line no-loop-func
+    let parentToStore = flatFolders.find(({ value }) => value === parent);
+    parents.push({ id: parentToStore.value, label: parentToStore.label });
+    parent = parentToStore.parent;
   }
 
-  return found;
-};
-
-const getFolderParents = (folderNode, folder) => {
-  const results = [];
-
-  if (folderNode && folder) {
-    buildRecursiveFolderParents(results, folderNode, folder);
-  }
-
-  return results.reverse();
+  return parents.reverse();
 };
 
 export default getFolderParents;
