@@ -134,7 +134,9 @@ const processWhere = (where, ctx) => {
     }
 
     if (isOperator(key)) {
-      throw new Error(`Only $and, $or and $not can only be used as root level operators. Found ${key}.`);
+      throw new Error(
+        `Only $and, $or and $not can only be used as root level operators. Found ${key}.`
+      );
     }
 
     const attribute = meta.attributes[key];

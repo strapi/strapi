@@ -23,7 +23,7 @@ module.exports = function createBuilder() {
       plugin: compo.modelName,
       uid: compo.uid,
       filename: compo.__filename__,
-      dir: join(strapi.dirs.components, compo.category),
+      dir: join(strapi.dirs.app.components, compo.category),
       schema: compo.__schema__,
       config: compo.config,
     };
@@ -34,12 +34,17 @@ module.exports = function createBuilder() {
 
     const dir = contentType.plugin
       ? join(
-          strapi.dirs.extensions,
+          strapi.dirs.app.extensions,
           contentType.plugin,
           'content-types',
           contentType.info.singularName
         )
-      : join(strapi.dirs.api, contentType.apiName, 'content-types', contentType.info.singularName);
+      : join(
+          strapi.dirs.app.api,
+          contentType.apiName,
+          'content-types',
+          contentType.info.singularName
+        );
 
     return {
       modelName: contentType.modelName,

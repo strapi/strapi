@@ -57,7 +57,9 @@ module.exports = ({ env }) => ({
   // ...
 });
 ```
+
 #### Configuration for S3 compatible services
+
 This plugin may work with S3 compatible services by using the `endpoint` option instead of `region`. Scaleway example:
 `./config/plugins.js`
 
@@ -119,6 +121,7 @@ module.exports = [
   // ...
 ];
 ```
+
 If you use dots in your bucket name, the url of the ressource is in directory style (`s3.yourRegion.amazonaws.com/your.bucket.name/image.jpg`) instead of `yourBucketName.s3.yourRegion.amazonaws.com/image.jpg`. Then only add `s3.yourRegion.amazonaws.com` to img-src and media-src directives.
 
 ## Required AWS Policy Actions

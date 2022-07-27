@@ -12,7 +12,8 @@ const CHUNK_SIZE = 100;
 module.exports = async function({ file: filePath, pretty }) {
   const output = filePath ? fs.createWriteStream(filePath) : process.stdout;
 
-  const app = await strapi().load();
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   const count = await app.query('strapi::core-store').count();
 

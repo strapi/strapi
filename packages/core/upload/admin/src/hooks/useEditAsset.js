@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { useIntl } from 'react-intl';
 import { useNotification } from '@strapi/helper-plugin';
+
 import { axiosInstance, getTrad } from '../utils';
 import pluginId from '../pluginId';
 
@@ -20,6 +21,7 @@ const editAssetRequest = (asset, file, cancelToken, onProgress) => {
     JSON.stringify({
       alternativeText: asset.alternativeText,
       caption: asset.caption,
+      folder: asset.folder,
       name: asset.name,
     })
   );
@@ -46,8 +48,9 @@ export const useEditAsset = () => {
     ({ asset, file }) => editAssetRequest(asset, file, tokenRef.current, setProgress),
     {
       onSuccess: () => {
-        queryClient.refetchQueries(['assets'], { active: true });
-        queryClient.refetchQueries(['asset-count'], { active: true });
+        queryClient.refetchQueries([pluginId, 'assets'], { active: true });
+        queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+        queryClient.refetchQueries([pluginId, 'folders'], { active: true });
       },
       onError: reason => {
         if (reason.response.status === 403) {
