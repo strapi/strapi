@@ -36,59 +36,65 @@ const findAttributeIndex = (schema, attributeToFind) => {
   return schema.schema.attributes.findIndex(({ name }) => name === attributeToFind);
 };
 
+const getAddAttributeUpdate = (action, state) => {
+  const {
+    attributeToSet: { name, ...rest },
+    forTarget,
+    targetUid,
+  } = action;
+  delete rest.createComponent;
+
+  const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+    ? [forTarget]
+    : [forTarget, targetUid];
+
+  const currentAttributes = get(
+    state,
+    ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+    []
+  ).slice();
+
+  // Add the createdAttribute
+  const updatedAttributes = [...currentAttributes, { ...rest, name }];
+
+  return { pathToDataToEdit, updatedAttributes, attributeToSet: { ...rest, name } };
+};
+
+const getEditAttributeUpdate = (action, state) => {
+  const { forTarget, targetUid, initialAttribute } = action;
+
+  const initialAttributeName = initialAttribute.name;
+  const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+    ? [forTarget]
+    : [forTarget, targetUid];
+
+  const initialAttributeIndex = findAttributeIndex(
+    get(state, ['modifiedData', ...pathToDataToEdit]),
+    initialAttributeName
+  );
+
+  return { pathToDataToEdit, initialAttributeIndex };
+};
+
 const reducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
     switch (action.type) {
       case actions.ADD_CUSTOM_FIELD_ATTRIBUTE: {
-        const {
-          attributeToSet: { name, ...rest },
-          forTarget,
-          targetUid,
-        } = action;
-        delete rest.createComponent;
-
-        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
-          ? [forTarget]
-          : [forTarget, targetUid];
-
-        const currentAttributes = get(
-          state,
-          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
-          []
-        ).slice();
-
-        // Add the createdAttribute
-        const updatedAttributes = [...currentAttributes, { ...rest, name }];
-
+        const { pathToDataToEdit, updatedAttributes } = getAddAttributeUpdate(action, state);
         set(
           draftState,
           ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
           updatedAttributes
         );
-
         break;
       }
       case actions.ADD_ATTRIBUTE: {
         const {
+          pathToDataToEdit,
+          updatedAttributes,
           attributeToSet: { name, ...rest },
-          forTarget,
-          targetUid,
-        } = action;
-        delete rest.createComponent;
-
-        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
-          ? [forTarget]
-          : [forTarget, targetUid];
-
-        const currentAttributes = get(
-          state,
-          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
-          []
-        ).slice();
-
-        // Add the createdAttribute
-        const updatedAttributes = [...currentAttributes, { ...rest, name }];
+        } = getAddAttributeUpdate(action, state);
 
         set(
           draftState,
@@ -264,17 +270,9 @@ const reducer = (state = initialState, action) =>
         break;
       }
       case actions.EDIT_CUSTOM_FIELD_ATTRIBUTE: {
-        const { attributeToSet, forTarget, targetUid, initialAttribute } = action;
+        const { attributeToSet } = action;
 
-        const initialAttributeName = initialAttribute.name;
-        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
-          ? [forTarget]
-          : [forTarget, targetUid];
-
-        const initialAttributeIndex = findAttributeIndex(
-          get(state, ['modifiedData', ...pathToDataToEdit]),
-          initialAttributeName
-        );
+        const { pathToDataToEdit, initialAttributeIndex } = getEditAttributeUpdate(action, state);
 
         set(
           draftState,
@@ -287,20 +285,10 @@ const reducer = (state = initialState, action) =>
       case actions.EDIT_ATTRIBUTE: {
         const {
           attributeToSet: { name, ...rest },
-          forTarget,
-          targetUid,
           initialAttribute,
         } = action;
 
-        const initialAttributeName = initialAttribute.name;
-        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
-          ? [forTarget]
-          : [forTarget, targetUid];
-
-        const initialAttributeIndex = findAttributeIndex(
-          get(state, ['modifiedData', ...pathToDataToEdit]),
-          initialAttributeName
-        );
+        const { pathToDataToEdit, initialAttributeIndex } = getEditAttributeUpdate(action, state);
 
         const isEditingRelation = rest.type === 'relation';
 
