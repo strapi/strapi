@@ -120,7 +120,7 @@
     "react-router": "5.2.0",
     "react-router-dom": "5.2.0",
     "react-select": "^4.0.2",
-    "react-virtualized": "^9.22.3",
+    "react-window": "1.8.7",
     "redux": "^4.0.1",
     "redux-saga": "^0.16.0",
     "reselect": "^4.0.0",
