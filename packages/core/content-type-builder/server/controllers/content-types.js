@@ -93,13 +93,6 @@ module.exports = {
       return ctx.send({ error: 'contentType.notFound' }, 404);
     }
 
-    // Set the attribute.type to customField
-    Object.values(body.contentType.attributes).forEach(attribute => {
-      if (attribute.customField) {
-        attribute.type = 'customField';
-      }
-    });
-
     try {
       await validateUpdateContentTypeInput(body);
     } catch (error) {
