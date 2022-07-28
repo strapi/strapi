@@ -5,20 +5,30 @@ const permissions = require('../');
 describe('Permissions Engine', () => {
   const providers = {
     action: { get: jest.fn() },
-    condition: { get: jest.fn(() => []) },
+    condition: {
+      // TODO: mock these once I figure out how they actually work
+      get(condition) {
+        console.log('get conditions', JSON.stringify(condition));
+      },
+      values(condition) {
+        console.log('values', condition);
+      },
+      register(condition) {
+        console.log('register', condition);
+      },
+    },
   };
 
-  // const generateInvalidateActionHook = action => {
-  //   return params => {
-  //     if (params.action === action) return false;
-  //   };
-  // };
+  const generateInvalidateActionHook = action => {
+    return params => {
+      if (params.permission.action === action) return false;
+    };
+  };
 
   const buildEngine = (engineProviders = providers, engineHooks = []) => {
     const engine = permissions.engine.new({ providers: engineProviders });
-    // jest.spyOn(engine.generateAbility, 'register');
-    engineHooks.forEach(({ hookName, hookFn }) => {
-      engine.on(hookName, hookFn);
+    engineHooks.forEach(({ name, fn }) => {
+      engine.on(name, fn);
     });
     return engine;
   };
@@ -89,11 +99,78 @@ describe('Permissions Engine', () => {
           },
         ],
       });
+
       expect(ability.can('read')).toBeFalsy();
       expect(ability.can('read', 'user')).toBeFalsy();
+      expect(ability.can('read', 'article', 'name')).toBeFalsy();
+
       expect(ability.can('read', 'article')).toBeFalsy();
       expect(ability.can('read', 'article', 'title')).toBeFalsy();
-      expect(ability.can('read', 'article', 'name')).toBeFalsy();
     });
+  });
+
+  it.skip('register action when conditions are met', async () => {
+    const { ability } = await buildEngineWithAbility({
+      permissions: [
+        {
+          action: 'read',
+          subject: 'article',
+          properties: { fields: ['title'] },
+          conditions: ['isAuthor'],
+        },
+      ],
+    });
+
+    expect(ability.can('read')).toBeFalsy();
+    expect(ability.can('read', 'user')).toBeFalsy();
+    expect(ability.can('read', 'article', 'name')).toBeFalsy();
+
+    expect(ability.can('read', 'article')).toBeTruthy();
+    expect(ability.can('read', 'article', 'title')).toBeTruthy();
+  });
+
+  describe('hooks', () => {
+    it('before-format::validate.permission can prevent action register', async () => {
+      const { ability } = await buildEngineWithAbility({
+        permissions: [{ action: 'read', subject: 'article' }],
+        engineHooks: [
+          { name: 'before-format::validate.permission', fn: generateInvalidateActionHook('read') },
+        ],
+      });
+      expect(ability.can('read', 'article')).toBeFalsy();
+      expect(ability.can('read', 'user')).toBeFalsy();
+    });
+  });
+  it('post-format::validate.permission can prevent action register', async () => {
+    const { ability } = await buildEngineWithAbility({
+      permissions: [{ action: 'read', subject: 'article' }],
+      engineHooks: [
+        { name: 'post-format::validate.permission', fn: generateInvalidateActionHook('read') },
+      ],
+    });
+    expect(ability.can('read', 'article')).toBeFalsy();
+    expect(ability.can('read', 'user')).toBeFalsy();
+  });
+
+  it('before-evaluate.permission can prevent action register', async () => {
+    const { ability } = await buildEngineWithAbility({
+      permissions: [{ action: 'read', subject: 'article' }],
+      engineHooks: [
+        { name: 'before-evaluate.permission', fn: generateInvalidateActionHook('read') },
+      ],
+    });
+    expect(ability.can('read', 'article')).toBeFalsy();
+    expect(ability.can('read', 'user')).toBeFalsy();
+  });
+
+  it('before-register.permission can prevent action register', async () => {
+    const { ability } = await buildEngineWithAbility({
+      permissions: [{ action: 'read', subject: 'article' }],
+      engineHooks: [
+        { name: 'before-register.permission', fn: generateInvalidateActionHook('read') },
+      ],
+    });
+    expect(ability.can('read', 'article')).toBeFalsy();
+    expect(ability.can('read', 'user')).toBeFalsy();
   });
 });
