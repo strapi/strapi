@@ -31,9 +31,9 @@ export const Breadcrumbs = ({ breadcrumbs, onChangeFolder, currentFolderId, ...p
           <CrumbLink
             key={`breadcrumb-${crumb?.id ?? 'root'}`}
             as={onChangeFolder ? 'button' : NavLink}
+            type={onChangeFolder && 'button'}
             to={onChangeFolder ? undefined : crumb.href}
             onClick={onChangeFolder && (() => onChangeFolder(crumb.id))}
-            aria-label={crumb?.label}
           >
             {crumb.label}
           </CrumbLink>

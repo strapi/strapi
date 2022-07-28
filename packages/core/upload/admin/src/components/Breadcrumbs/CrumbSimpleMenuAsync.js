@@ -48,7 +48,12 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
         filteredAscendants.map(ascendant => {
           if (onChangeFolder) {
             return (
-              <MenuItem as="button" onClick={() => onChangeFolder(ascendant.id)} key={ascendant.id}>
+              <MenuItem
+                as="button"
+                type="button"
+                onClick={() => onChangeFolder(ascendant.id)}
+                key={ascendant.id}
+              >
                 {ascendant.label}
               </MenuItem>
             );
@@ -57,7 +62,7 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
           const url = getFolderURL(pathname, query, ascendant);
 
           return (
-            <MenuItem aria-label={ascendant.label} isLink as={NavLink} to={url} key={ascendant.id}>
+            <MenuItem isLink as={NavLink} to={url} key={ascendant.id}>
               {ascendant.label}
             </MenuItem>
           );
