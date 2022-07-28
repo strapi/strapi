@@ -29,7 +29,7 @@ module.exports = params => {
     /**
      * Remove invalid properties from the permission based on the action (applyToProperties)
      */
-    .on('format.permission', ({ permission }) => {
+    .on('format.permission', permission => {
       const action = providers.action.get(permission.action);
       const properties = permission.properties || {};
 

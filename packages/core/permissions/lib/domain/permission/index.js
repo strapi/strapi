@@ -7,7 +7,7 @@ const PERMISSION_FIELDS = ['action', 'subject', 'properties', 'conditions'];
 const sanitizePermissionFields = _.pick(PERMISSION_FIELDS);
 
 /**
- * @typedef {import('../../../index').Permission} Permission
+ * @typedef {import("../../..").Permission} Permission
  */
 
 /**
