@@ -31,7 +31,7 @@ ability.can('update', 'foo'); // false
 ability.can('update', 'bar'); // true
 ```
 
-- You need to give both an action and a condition provider as parameter when instanciating a new permission engine instance. They must be contained in a `providers` object property.
+- You need to give both an action and a condition provider as parameters when instantiating a new permission engine instance. They must be contained in a `providers` object property.
 - You can also pass an `abilityBuilderFactory` to customize what kind of ability the `generateAbility` method will return. By default it'll use a `@casl/ability` builder.
 
 You can also register to some hooks for each engine instance
