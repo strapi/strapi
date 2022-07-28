@@ -1,11 +1,40 @@
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { render, screen, getByText, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import FormModalNavigationProvider from '../../FormModalNavigationProvider';
 import AttributeOptions from '../index';
+
+const mockCustomField = {
+  'plugin::mycustomfields.test': {
+    name: 'color',
+    pluginId: 'mycustomfields',
+    type: 'text',
+    icon: jest.fn(),
+    intlLabel: {
+      id: 'mycustomfields.color.label',
+      defaultMessage: 'Color',
+    },
+    intlDescription: {
+      id: 'mycustomfields.color.description',
+      defaultMessage: 'Select any color',
+    },
+    components: {
+      Input: jest.fn(),
+    },
+  },
+};
+
+const getAll = jest.fn().mockReturnValue({});
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useCustomFields: () => ({
+    get: jest.fn().mockReturnValue(mockCustomField),
+    getAll,
+  }),
+}));
 
 const mockAttributes = [
   [
@@ -57,8 +86,8 @@ describe('<AttributeOptions />', () => {
     const App = makeApp();
     render(App);
 
-    const defaultTab = screen.getByRole('tab', { selected: true });
-    const customTab = screen.getByRole('tab', { selected: false });
+    const defaultTab = screen.getByRole('tab', { selected: true, name: 'Default' });
+    const customTab = screen.getByRole('tab', { selected: false, name: 'Custom' });
 
     expect(defaultTab).toBeVisible();
     expect(customTab).toBeVisible();
@@ -73,17 +102,34 @@ describe('<AttributeOptions />', () => {
     expect(comingSoonText).toEqual(null);
   });
 
-  it('switches to the custom tab', () => {
+  it('switches to the custom tab without custom fields', () => {
     const App = makeApp();
     render(App);
 
-    const customTab = screen.getByRole('tab', { selected: false });
+    getAll.mockReturnValueOnce({});
+
+    const customTab = screen.getByRole('tab', { selected: false, name: 'Custom' });
     fireEvent.click(customTab);
-    const customTabSelected = screen.getByRole('tab', { selected: true });
-    const customTabText = getByText(customTabSelected, 'Custom');
+    const customTabSelected = screen.getByRole('tab', { selected: true, name: 'Custom' });
     const comingSoonText = screen.getByText('Nothing in here yet.');
 
-    expect(customTabText).not.toBe(null);
+    expect(customTabSelected).toBeVisible();
     expect(comingSoonText).toBeVisible();
+  });
+
+  it('switches to the custom tab with custom fields', () => {
+    getAll.mockReturnValue(mockCustomField);
+    const App = makeApp();
+    render(App);
+
+    const customTab = screen.getByRole('tab', { selected: false, name: 'Custom' });
+    fireEvent.click(customTab);
+    const customTabSelected = screen.getByRole('tab', { selected: true, name: 'Custom' });
+    const customFieldText = screen.getByText('Color');
+    const howToAddLink = screen.getByRole('link', { name: 'How to add custom fields' });
+
+    expect(customTabSelected).toBeVisible();
+    expect(customFieldText).toBeVisible();
+    expect(howToAddLink).toBeVisible();
   });
 });
