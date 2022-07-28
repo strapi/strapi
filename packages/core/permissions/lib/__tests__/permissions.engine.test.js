@@ -3,67 +3,59 @@
 const permissions = require('../');
 
 describe('Permissions Engine', () => {
-  let engine;
-
   const providers = {
     action: { get: jest.fn() },
     condition: { values: jest.fn(() => []) },
   };
 
-  const permissionList = [
-    { action: 'read' },
-    { action: 'delete', subject: 'foo' },
-    { action: 'update', subject: 'bar', properties: { fields: ['foobar'] } },
-    {
-      action: 'create',
-      subject: 'foo',
-      properties: { fields: ['foobar'] },
-      conditions: ['isAuthor'],
-    },
-  ];
+  // const generateInvalidateActionHook = action => {
+  //   return params => {
+  //     if (params.action === action) return false;
+  //   };
+  // };
 
-  beforeEach(async () => {
-    engine = permissions.engine.new({ providers });
-    jest.spyOn(engine, 'generateAbility');
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe('generateAbility', () => {
-    it('successfully generates', async () => {
-      const ability = await engine.generateAbility(permissionList);
-      expect(ability).not.toBeUndefined();
-      expect(typeof ability).toBe('object');
+  const buildEngine = (engineProviders = providers, engineHooks = []) => {
+    const engine = permissions.engine.new(engineProviders);
+    // jest.spyOn(engine.generateAbility, 'register');
+    engineHooks.forEach(({ hookName, hookFn }) => {
+      engine.on(hookName, hookFn);
     });
-  });
+    return engine;
+  };
 
-  describe('ability', () => {
-    let ability;
-    beforeAll(async () => {
-      ability = await engine.generateAbility(permissionList);
-      expect(engine.generateAbility).toHaveBeenCalled();
-      jest.spyOn(ability, 'can');
+  const buildEngineWithAbility = async ({ permissions, engineProviders, engineHooks }) => {
+    const engine = buildEngine(engineProviders, engineHooks);
+    const ability = await engine.generateAbility(permissions);
+    return { engine, ability };
+  };
+
+  describe('registers', () => {
+    beforeEach(() => {
+      //
     });
 
-    describe('can', () => {
-      it('returns true when action matches', async () => {
-        expect(ability.can('read')).toBeTruthy();
+    it('action (with nothing else)', async () => {
+      const { ability } = await buildEngineWithAbility({
+        permissions: [{ action: 'read' }],
       });
-      it('returns false for actions that do not exist', async () => {
-        expect(ability.can('i_dont_exist')).toBeFalsy();
-        expect(ability.can('foo')).toBeFalsy();
-        expect(ability.can('bar')).toBeFalsy();
-        expect(ability.can('isAuthor')).toBeFalsy();
-        expect(ability.can('foobar')).toBeFalsy();
+      expect(ability.can('read')).toBeTruthy();
+      expect(ability.can('i_dont_exist')).toBeFalsy();
+      // expect(permissions.engine.new).toBeCalledTimes(1);
+    });
+
+    it('action with subject', async () => {
+      const { ability } = await buildEngineWithAbility({
+        permissions: [{ action: 'read', subject: 'article' }],
       });
-      it('returns false when subject does not match', async () => {
-        expect(ability.can('delete', 'bar')).toBeFalsy();
+      expect(ability.can('read', 'article')).toBeTruthy();
+      expect(ability.can('read', 'user')).toBeFalsy();
+    });
+
+    it('action with null subject', async () => {
+      const { ability } = await buildEngineWithAbility({
+        permissions: [{ action: 'read', subject: null, properties: {} }],
       });
-      it('returns true when subject matches', async () => {
-        expect(ability.can('delete', 'foo')).toBeTruthy();
-      });
+      expect(ability.can('read')).toBeTruthy();
     });
   });
 });
