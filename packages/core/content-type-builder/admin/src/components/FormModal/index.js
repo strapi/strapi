@@ -12,13 +12,11 @@ import get from 'lodash/get';
 import has from 'lodash/has';
 import set from 'lodash/set';
 import toLower from 'lodash/toLower';
-import upperFirst from 'lodash/upperFirst';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Divider } from '@strapi/design-system/Divider';
 import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
@@ -50,12 +48,7 @@ import TabForm from '../TabForm';
 import TextareaEnum from '../TextareaEnum';
 import findAttribute from '../../utils/findAttribute';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
-import {
-  canEditContentType,
-  getAttributesToDisplay,
-  getFormInputNames,
-  getModalTitleSubHeader,
-} from './utils';
+import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
 import forms from './forms';
 import { createComponentUid, createUid } from './utils/createUid';
 
@@ -71,6 +64,7 @@ import {
   RESET_PROPS_AND_SAVE_CURRENT_DATA,
   RESET_PROPS,
 } from './constants';
+import SubHeader from './SubHeader';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -956,51 +950,16 @@ const FormModal = () => {
                 }}
               >
                 <Flex justifyContent="space-between">
-                  {customField ? (
-                    <Typography as="h2" variant="beta">
-                      {formatMessage(
-                        {
-                          id: getModalTitleSubHeader({
-                            actionType,
-                            forTarget,
-                            kind,
-                            step,
-                            modalType,
-                          }),
-                          defaultMessage: 'Add new field',
-                        },
-                        {
-                          type: upperFirst(formatMessage(customField.intlLabel)),
-                          name: upperFirst(customField.name),
-                          step,
-                        }
-                      )}
-                    </Typography>
-                  ) : (
-                    <Typography as="h2" variant="beta">
-                      {formatMessage(
-                        {
-                          id: getModalTitleSubHeader({
-                            actionType,
-                            forTarget,
-                            kind,
-                            step,
-                            modalType,
-                          }),
-                          defaultMessage: 'Add new field',
-                        },
-                        {
-                          type: upperFirst(
-                            formatMessage({
-                              id: getTrad(`attribute.${attributeType}`),
-                            })
-                          ),
-                          name: upperFirst(attributeName),
-                          step,
-                        }
-                      )}
-                    </Typography>
-                  )}
+                  <SubHeader
+                    actionType={actionType}
+                    forTarget={forTarget}
+                    kind={kind}
+                    step={step}
+                    modalType={modalType}
+                    attributeType={attributeType}
+                    attributeName={attributeName}
+                    customFieldUid={customFieldUid}
+                  />
                   <Tabs>
                     <Tab hasError={doesBaseFormHasError}>
                       {formatMessage({

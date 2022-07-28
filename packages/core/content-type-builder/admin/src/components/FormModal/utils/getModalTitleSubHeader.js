@@ -8,8 +8,7 @@ const getModalTitleSubHeader = ({ modalType, forTarget, kind, actionType, step }
           forTarget.includes('component') ? 'component' : kind || 'collectionType'
         }`
       );
-    case 'attribute':
-    case 'customField': {
+    case 'attribute': {
       return getTrad(
         `modalForm.sub-header.attribute.${actionType}${
           step !== 'null' && step !== null && actionType !== 'edit' ? '.step' : ''
