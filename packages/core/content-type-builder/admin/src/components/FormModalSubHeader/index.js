@@ -2,12 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Typography } from '@strapi/design-system/Typography';
-import { useCustomFields } from '@strapi/helper-plugin';
 import upperFirst from 'lodash/upperFirst';
-import { getTrad } from '../../../utils';
-import { getModalTitleSubHeader } from '../utils';
+import { getTrad } from '../../utils';
+import getModalTitleSubHeader from './getModalTitleSubHeader';
 
-const SubHeader = ({
+const FormModalSubHeader = ({
   actionType,
   modalType,
   forTarget,
@@ -15,13 +14,12 @@ const SubHeader = ({
   step,
   attributeType,
   attributeName,
-  customFieldUid,
+  customField,
 }) => {
   const { formatMessage } = useIntl();
-  const customFielsRegistry = useCustomFields();
 
-  if (customFieldUid) {
-    const { intlLabel } = customFielsRegistry.get(customFieldUid);
+  if (customField) {
+    const { intlLabel } = customField;
 
     return (
       <Typography as="h2" variant="beta">
@@ -66,7 +64,7 @@ const SubHeader = ({
   );
 };
 
-SubHeader.defaultProps = {
+FormModalSubHeader.defaultProps = {
   actionType: null,
   modalType: null,
   forTarget: null,
@@ -74,10 +72,10 @@ SubHeader.defaultProps = {
   step: null,
   attributeType: null,
   attributeName: null,
-  customFieldUid: null,
+  customField: null,
 };
 
-SubHeader.propTypes = {
+FormModalSubHeader.propTypes = {
   actionType: PropTypes.string,
   modalType: PropTypes.string,
   forTarget: PropTypes.string,
@@ -85,7 +83,7 @@ SubHeader.propTypes = {
   step: PropTypes.string,
   attributeType: PropTypes.string,
   attributeName: PropTypes.string,
-  customFieldUid: PropTypes.string,
+  customField: PropTypes.object,
 };
 
-export default SubHeader;
+export default FormModalSubHeader;

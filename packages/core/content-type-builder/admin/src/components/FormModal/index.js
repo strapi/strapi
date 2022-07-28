@@ -29,6 +29,7 @@ import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
 import FormModalEndActions from '../FormModalEndActions';
+import FormModalSubHeader from '../FormModalSubHeader';
 
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import BooleanRadioGroup from '../BooleanRadioGroup';
@@ -64,7 +65,6 @@ import {
   RESET_PROPS_AND_SAVE_CURRENT_DATA,
   RESET_PROPS,
 } from './constants';
-import SubHeader from './SubHeader';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -950,7 +950,7 @@ const FormModal = () => {
                 }}
               >
                 <Flex justifyContent="space-between">
-                  <SubHeader
+                  <FormModalSubHeader
                     actionType={actionType}
                     forTarget={forTarget}
                     kind={kind}
@@ -958,7 +958,7 @@ const FormModal = () => {
                     modalType={modalType}
                     attributeType={attributeType}
                     attributeName={attributeName}
-                    customFieldUid={customFieldUid}
+                    customField={customField}
                   />
                   <Tabs>
                     <Tab hasError={doesBaseFormHasError}>
