@@ -21,7 +21,7 @@ describe('FromModalNavigationProvider', () => {
     expect(currentStateWithoutFunctions).toEqual(INITIAL_STATE_DATA);
   });
 
-  it('updates then state when selecting a custom field for a new attribute', () => {
+  it('updates the state when selecting a custom field for a new attribute', () => {
     const { result } = renderHook(() => useFormModalNavigation(), {
       wrapper: FormModalNavigationProvider,
     });
