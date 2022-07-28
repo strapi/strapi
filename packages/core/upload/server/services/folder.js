@@ -46,7 +46,11 @@ const create = async (folderData, { user } = {}) => {
 const deleteByIds = async (ids = []) => {
   const folders = await strapi.db.query(FOLDER_MODEL_UID).findMany({ where: { id: { $in: ids } } });
   if (folders.length === 0) {
-    return [];
+    return {
+      folders: [],
+      totalFolderNumber: 0,
+      totalFileNumber: 0,
+    };
   }
 
   const pathsToDelete = map('path', folders);
