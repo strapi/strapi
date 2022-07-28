@@ -137,6 +137,89 @@ describe('Bulk actions for folders & files', () => {
       data.folders.push(folder1, folder1b);
       data.files.push(file1b);
     });
+
+    test('Can delete only files', async () => {
+      const file = await createAFile(null);
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: {
+          fileIds: [file.id],
+        },
+      });
+
+      expect(res.body.data).toMatchObject({
+        files: [
+          {
+            alternativeText: null,
+            caption: null,
+            createdAt: expect.anything(),
+            ext: '.jpg',
+            folderPath: '/',
+            formats: null,
+            hash: expect.anything(),
+            height: 20,
+            id: file.id,
+            mime: 'image/jpeg',
+            name: 'rec.jpg',
+            previewUrl: null,
+            provider: 'local',
+            provider_metadata: null,
+            size: 0.27,
+            updatedAt: expect.anything(),
+            url: expect.anything(),
+            width: 20,
+          },
+        ],
+        folders: [],
+      });
+
+      const resFiles = await rq({
+        method: 'GET',
+        url: '/upload/files',
+        qs: {
+          pageSize: 100,
+        },
+      });
+
+      const existingfilesIds = resFiles.body.results.map(f => f.id);
+      expect(existingfilesIds).toEqual(expect.not.arrayContaining([file.id]));
+    });
+
+    test('Can delete only folders', async () => {
+      const folder = await createFolder('a random folder', null);
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: {
+          folderIds: [folder.id],
+        },
+      });
+
+      expect(res.body.data).toMatchObject({
+        files: [],
+        folders: [
+          {
+            id: folder.id,
+            name: 'a random folder',
+            path: expect.anything(),
+            pathId: expect.any(Number),
+            createdAt: expect.anything(),
+            updatedAt: expect.anything(),
+          },
+        ],
+      });
+
+      const resFolder = await rq({
+        method: 'GET',
+        url: '/upload/folders',
+      });
+
+      const existingfoldersIds = resFolder.body.data.map(f => f.id);
+      expect(existingfoldersIds).toEqual(expect.not.arrayContaining([folder.id]));
+    });
   });
 
   describe('move', () => {
