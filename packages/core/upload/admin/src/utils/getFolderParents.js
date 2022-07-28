@@ -5,7 +5,7 @@ const getFolderParents = (folders, currentFolderId) => {
   const flatFolders = flattenTree(folders);
   const currentFolder = flatFolders.find(folder => folder.value === currentFolderId);
 
-  let { parent } = currentFolder || {};
+  let { parent } = currentFolder;
 
   while (parent !== undefined) {
     // eslint-disable-next-line no-loop-func
