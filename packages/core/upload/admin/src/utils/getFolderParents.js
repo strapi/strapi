@@ -5,6 +5,10 @@ const getFolderParents = (folders, currentFolderId) => {
   const flatFolders = flattenTree(folders);
   const currentFolder = flatFolders.find(folder => folder.value === currentFolderId);
 
+  if (!currentFolder) {
+    return [];
+  }
+
   let { parent } = currentFolder;
 
   while (parent !== undefined) {
