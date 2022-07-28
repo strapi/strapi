@@ -119,7 +119,6 @@
     "react-refresh": "0.11.0",
     "react-router": "5.2.0",
     "react-router-dom": "5.2.0",
-    "react-select": "^4.0.2",
     "react-virtualized": "^9.22.3",
     "redux": "^4.0.1",
     "redux-saga": "^0.16.0",
