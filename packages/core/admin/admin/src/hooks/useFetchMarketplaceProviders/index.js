@@ -2,7 +2,7 @@ import { useQuery } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
 import { fetchMarketplacePlugins } from './utils/api';
 
-const useFetchMarketplaceProviders = (notifyLoad) => {
+const useFetchMarketplaceProviders = notifyLoad => {
   const toggleNotification = useNotification();
 
   return useQuery('list-marketplace-providers', () => fetchMarketplacePlugins(), {

@@ -1,14 +1,15 @@
 'use strict';
 
 const REPL = require('repl');
+
 const strapi = require('../index');
 
 /**
  * `$ strapi console`
  */
-module.exports = () => {
-  // Now load up the Strapi framework for real.
-  const app = strapi();
+module.exports = async () => {
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   app.start().then(() => {
     const repl = REPL.start(app.config.info.name + ' > ' || 'strapi > '); // eslint-disable-line prefer-template

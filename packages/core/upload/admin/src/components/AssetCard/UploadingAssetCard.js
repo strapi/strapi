@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
+
 import {
   Card,
   CardBody,
@@ -13,7 +15,7 @@ import {
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
-import { useIntl } from 'react-intl';
+
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
 import { useUpload } from '../../hooks/useUpload';
@@ -28,8 +30,14 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploadedFiles }) => {
-  const { upload, cancel, error, progress, status } = useUpload(asset);
+export const UploadingAssetCard = ({
+  asset,
+  onCancel,
+  onStatusChange,
+  addUploadedFiles,
+  folderId,
+}) => {
+  const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
 
   let badgeContent;
@@ -58,7 +66,7 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
 
   useEffect(() => {
     const uploadFile = async () => {
-      const files = await upload(asset);
+      const files = await upload(asset, folderId);
 
       if (addUploadedFiles) {
         addUploadedFiles(files);
@@ -100,7 +108,10 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
       </Card>
       {error ? (
         <Typography variant="pi" fontWeight="bold" textColor="danger600">
-          {error.message}
+          {formatMessage({
+            id: getTrad(`apiError.${error.response.data.error.message}`),
+            defaultMessage: error.response.data.error.message,
+          })}
         </Typography>
       ) : (
         undefined
@@ -111,6 +122,7 @@ export const UploadingAssetCard = ({ asset, onCancel, onStatusChange, addUploade
 
 UploadingAssetCard.defaultProps = {
   addUploadedFiles: undefined,
+  folderId: null,
 };
 
 UploadingAssetCard.propTypes = {
@@ -121,6 +133,7 @@ UploadingAssetCard.propTypes = {
     rawFile: PropTypes.instanceOf(File),
     type: PropTypes.oneOf(Object.values(AssetType)),
   }).isRequired,
+  folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onCancel: PropTypes.func.isRequired,
   onStatusChange: PropTypes.func.isRequired,
 };

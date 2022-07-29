@@ -26,7 +26,7 @@ const defaultPlugin = {
 };
 
 const applyUserExtension = async plugins => {
-  const extensionsDir = strapi.dirs.extensions;
+  const extensionsDir = strapi.dirs.dist.extensions;
   if (!(await fse.pathExists(extensionsDir))) {
     return;
   }

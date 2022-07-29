@@ -25,7 +25,11 @@ const mock = {
 };
 
 jest.mock('../../index', () => {
-  return jest.fn(() => mock);
+  const impl = jest.fn(() => mock);
+
+  impl.compile = jest.fn();
+
+  return impl;
 });
 
 const inquirer = require('inquirer');

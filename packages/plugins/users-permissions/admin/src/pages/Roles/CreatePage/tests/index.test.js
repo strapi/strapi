@@ -19,6 +19,7 @@ jest.mock('@strapi/helper-plugin', () => {
     ...jest.requireActual('@strapi/helper-plugin'),
     useNotification: mockUseNotification,
     useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
+    useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   };
 });
 
@@ -762,7 +763,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c44:hover:not([aria-disabled='true']) .sc-cWPeQZ {
+      .c44:hover:not([aria-disabled='true']) .sc-eHtaVP {
         color: #271fe0;
       }
 

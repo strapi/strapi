@@ -112,6 +112,9 @@ module.exports = async ({ strapi }) => {
             },
           };
 
+          // allow graphql playground to load without authentication
+          if (ctx.request.method === 'GET') return next();
+          
           return strapi.auth.authenticate(ctx, next);
         },
 
