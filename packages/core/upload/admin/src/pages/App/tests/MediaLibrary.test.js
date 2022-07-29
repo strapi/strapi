@@ -210,6 +210,24 @@ describe('Media library homepage', () => {
     });
 
     describe('select all', () => {
+      it('is not visible if there are not folders and assets', () => {
+        useAssets.mockReturnValueOnce({
+          isLoading: false,
+          error: null,
+          data: {},
+        });
+        useFolders.mockReturnValueOnce({
+          data: [],
+          isLoading: false,
+          error: null,
+        });
+        renderML();
+
+        expect(
+          screen.queryByText('There are no elements with the applied filters')
+        ).not.toBeInTheDocument();
+      });
+
       it('shows the select all button when the user is allowed to update', () => {
         renderML();
 
