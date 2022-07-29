@@ -65,15 +65,15 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c21 {
+      .c22 {
         color: #666687;
       }
 
-      .c22 path {
+      .c23 path {
         fill: #666687;
       }
 
-      .c24 {
+      .c25 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -87,21 +87,21 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         outline: none;
       }
 
-      .c24 svg {
+      .c25 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c24 svg > g,
-      .c24 svg path {
+      .c25 svg > g,
+      .c25 svg path {
         fill: #ffffff;
       }
 
-      .c24[aria-disabled='true'] {
+      .c25[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c24:after {
+      .c25:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -116,11 +116,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: 2px solid transparent;
       }
 
-      .c24:focus-visible {
+      .c25:focus-visible {
         outline: none;
       }
 
-      .c24:focus-visible:after {
+      .c25:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -131,7 +131,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: 2px solid #4945ff;
       }
 
-      .c25 {
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -149,59 +149,59 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: none;
       }
 
-      .c25 svg > g,
-      .c25 svg path {
+      .c26 svg > g,
+      .c26 svg path {
         fill: #8e8ea9;
       }
 
-      .c25:hover svg > g,
-      .c25:hover svg path {
+      .c26:hover svg > g,
+      .c26:hover svg path {
         fill: #666687;
       }
 
-      .c25:active svg > g,
-      .c25:active svg path {
+      .c26:active svg > g,
+      .c26:active svg path {
         fill: #a5a5ba;
       }
 
-      .c25[aria-disabled='true'] {
+      .c26[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c25[aria-disabled='true'] svg path {
+      .c26[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c6 {
+      .c7 {
         background: #ffffff;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c9 {
+      .c10 {
         padding-right: 24px;
         padding-left: 24px;
       }
 
-      .c14 {
+      .c15 {
         width: 1%;
       }
 
-      .c7 {
+      .c8 {
         overflow: hidden;
         border: 1px solid #eaeaef;
       }
 
-      .c11 {
+      .c12 {
         width: 100%;
         white-space: nowrap;
       }
 
-      .c8 {
+      .c9 {
         position: relative;
       }
 
-      .c8:before {
+      .c9:before {
         background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -211,7 +211,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         left: 0;
       }
 
-      .c8:after {
+      .c9:after {
         background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -222,39 +222,39 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         top: 0;
       }
 
-      .c10 {
+      .c11 {
         overflow-x: auto;
       }
 
-      .c20 tr:last-of-type {
+      .c21 tr:last-of-type {
         border-bottom: none;
-      }
-
-      .c12 {
-        border-bottom: 1px solid #eaeaef;
       }
 
       .c13 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c13 td,
-      .c13 th {
+      .c14 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c14 td,
+      .c14 th {
         padding: 16px;
       }
 
-      .c13 td:first-of-type,
-      .c13 th:first-of-type {
+      .c14 td:first-of-type,
+      .c14 th:first-of-type {
         padding: 0 4px;
       }
 
-      .c13 th {
+      .c14 th {
         padding-top: 0;
         padding-bottom: 0;
         height: 3.5rem;
       }
 
-      .c16 {
+      .c17 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -268,22 +268,22 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         flex-direction: row;
       }
 
-      .c15 {
+      .c16 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c15 input {
+      .c16 input {
         vertical-align: sub;
       }
 
-      .c18 svg {
+      .c19 svg {
         height: 0.25rem;
       }
 
-      .c19 {
+      .c20 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -291,13 +291,13 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         text-transform: uppercase;
       }
 
-      .c23 {
+      .c24 {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c17 {
+      .c18 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -321,7 +321,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         padding-left: 56px;
       }
 
-      .c5 {
+      .c6 {
         padding-right: 56px;
         padding-left: 56px;
       }
@@ -365,6 +365,12 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         line-height: 1.25;
       }
 
+      .c5 {
+        color: #666687;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
       <main
         aria-busy="false"
         aria-labelledby="main-content-title"
@@ -392,105 +398,108 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                 </h1>
               </div>
             </div>
+            <p
+              class="c5"
+            />
           </div>
         </div>
         <div
-          class="c5"
+          class="c6"
         >
           <div
-            class="c6 c7"
+            class="c7 c8"
           >
             <div
-              class="c8"
+              class="c9"
             >
               <div
-                class="c9 c10"
+                class="c10 c11"
               >
                 <table
                   aria-colcount="3"
                   aria-rowcount="3"
-                  class="c11"
+                  class="c12"
                 >
                   <thead
-                    class="c12"
+                    class="c13"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c13"
+                      class="c14"
                     >
                       <th
                         aria-colindex="1"
-                        class="c14 c15"
+                        class="c15 c16"
                         tabindex="0"
                         width="1%"
                       >
                         <div
-                          class="c16"
+                          class="c17"
                         >
                           <div
-                            class="c17"
+                            class="c18"
                           >
                             icon
                           </div>
                           <span
-                            class="c18"
+                            class="c19"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c15"
+                        class="c16"
                         tabindex="-1"
                       >
                         <div
-                          class="c16"
+                          class="c17"
                         >
                           <span
-                            class="c19"
+                            class="c20"
                           >
                             name
                           </span>
                           <span
-                            class="c18"
+                            class="c19"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c14 c15"
+                        class="c15 c16"
                         tabindex="-1"
                         width="1%"
                       >
                         <div
-                          class="c16"
+                          class="c17"
                         >
                           <div
-                            class="c17"
+                            class="c18"
                           >
                             action
                           </div>
                           <span
-                            class="c18"
+                            class="c19"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c20"
+                    class="c21"
                   >
                     <tr
                       aria-rowindex="2"
-                      class="c13"
+                      class="c14"
                       style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
-                        class="c15"
+                        class="c16"
                         tabindex="-1"
                       >
                         <div
-                          class="c21 c22"
+                          class="c22 c23"
                         >
                           <svg
                             aria-label="Reset password"
@@ -511,11 +520,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c15"
+                        class="c16"
                         tabindex="-1"
                       >
                         <span
-                          class="c23"
+                          class="c24"
                         >
                           Reset password
                         </span>
@@ -523,14 +532,14 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <td
                         aria-colindex="3"
                         aria-hidden="true"
-                        class="c15"
+                        class="c16"
                         role="button"
                       >
                         <span>
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-1"
-                            class="c24 c25"
+                            class="c25 c26"
                             tabindex="-1"
                             type="button"
                           >
@@ -554,16 +563,16 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                     </tr>
                     <tr
                       aria-rowindex="3"
-                      class="c13"
+                      class="c14"
                       style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
-                        class="c15"
+                        class="c16"
                         tabindex="-1"
                       >
                         <div
-                          class="c21 c22"
+                          class="c22 c23"
                         >
                           <svg
                             aria-label="Email address confirmation"
@@ -582,11 +591,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       </td>
                       <td
                         aria-colindex="2"
-                        class="c15"
+                        class="c16"
                         tabindex="-1"
                       >
                         <span
-                          class="c23"
+                          class="c24"
                         >
                           Email address confirmation
                         </span>
@@ -594,14 +603,14 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                       <td
                         aria-colindex="3"
                         aria-hidden="true"
-                        class="c15"
+                        class="c16"
                         role="button"
                       >
                         <span>
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-3"
-                            class="c24 c25"
+                            class="c25 c26"
                             tabindex="-1"
                             type="button"
                           >

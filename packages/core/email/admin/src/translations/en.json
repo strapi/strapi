@@ -1,5 +1,4 @@
 {
-  "link": "Link",
   "Settings.email.plugin.button.test-email": "Send test email",
   "Settings.email.plugin.label.defaultFrom": "Default sender email",
   "Settings.email.plugin.label.defaultReplyTo": "Default response  email",

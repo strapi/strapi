@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { format } from 'date-fns';
+import moment from 'moment';
 import {
   CheckPagePermissions,
   Form,
@@ -40,7 +40,7 @@ const UsersRoleNumber = styled.div`
   color: ${({ theme }) => theme.colors.primary600};
   border-radius: ${({ theme }) => theme.borderRadius};
   font-size: ${12 / 16}rem;
-  font-weight: bold;
+  font-width: bold;
 `;
 
 const CreatePage = () => {
@@ -114,7 +114,7 @@ const CreatePage = () => {
   const defaultDescription = `${formatMessage({
     id: 'Settings.roles.form.created',
     defaultMessage: 'Created',
-  })} ${format(new Date(), 'PPP')}`;
+  })} ${moment().format('LL')}`;
 
   return (
     <Main>

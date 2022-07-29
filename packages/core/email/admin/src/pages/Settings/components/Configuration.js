@@ -42,10 +42,7 @@ const Configuration = ({ config }) => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {formatMessage({
-                    id: getTrad('link'),
-                    defaultMessage: 'Link',
-                  })}
+                  link
                 </DocumentationLink>
               ),
             }

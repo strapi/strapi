@@ -357,7 +357,6 @@ const ProfilePage = () => {
                               })}
                               name="password"
                               type={passwordShown ? 'text' : 'password'}
-                              autoComplete="new-password"
                               endAction={
                                 <FieldActionWrapper
                                   onClick={e => {
@@ -399,7 +398,6 @@ const ProfilePage = () => {
                               })}
                               name="confirmPassword"
                               type={passwordConfirmShown ? 'text' : 'password'}
-                              autoComplete="new-password"
                               endAction={
                                 <FieldActionWrapper
                                   onClick={e => {
@@ -533,23 +531,24 @@ const ProfilePage = () => {
                                 });
                               }}
                             >
-                              {themesToDisplay.map(theme => (
-                                <Option value={theme} key={theme}>
-                                  {formatMessage(
-                                    {
-                                      id:
-                                        'Settings.profile.form.section.experience.mode.option-label',
-                                      defaultMessage: '{name} mode',
-                                    },
-                                    {
-                                      name: formatMessage({
-                                        id: theme,
-                                        defaultMessage: upperFirst(theme),
-                                      }),
-                                    }
-                                  )}
-                                </Option>
-                              ))}
+                              {themesToDisplay.map(theme => {
+                                const label = formatMessage(
+                                  {
+                                    id:
+                                      'Settings.profile.form.section.experience.mode.option-label',
+                                    defaultMessage: '{name} mode',
+                                  },
+                                  {
+                                    name: upperFirst(theme),
+                                  }
+                                );
+
+                                return (
+                                  <Option value={theme} key={theme}>
+                                    {label}
+                                  </Option>
+                                );
+                              })}
                             </Select>
                           </GridItem>
                         </Grid>

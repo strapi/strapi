@@ -62,7 +62,7 @@ const layout = [
         id: 'Auth.form.username.placeholder',
         defaultMessage: 'e.g. Kai_Doe',
       },
-      type: 'text',
+      type: 'email',
       size: {
         col: 6,
         xs: 12,
@@ -81,7 +81,6 @@ const layout = [
         col: 6,
         xs: 12,
       },
-      autoComplete: 'new-password',
     },
     {
       intlLabel: {
@@ -94,7 +93,6 @@ const layout = [
         col: 6,
         xs: 12,
       },
-      autoComplete: 'new-password',
     },
   ],
   [

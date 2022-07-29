@@ -48,7 +48,7 @@ const run = async () => {
 
   // We need to make sure to fetch the project type before importing the StrapiApp
   // otherwise the strapi-babel-plugin does not work correctly
-  const StrapiApp = await import(/* webpackChunkName: "admin-app" */ './StrapiApp');
+  const StrapiApp = await import('./StrapiApp');
 
   const app = StrapiApp.default({
     appPlugins: plugins,

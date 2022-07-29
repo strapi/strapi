@@ -8,7 +8,6 @@ import { useTracking } from '@strapi/helper-plugin';
 import { onChangeListHeaders } from '../actions';
 import { selectDisplayedHeaders } from '../selectors';
 import getAllAllowedHeaders from './utils/getAllAllowedHeader';
-import getTrad from '../../../utils/getTrad';
 
 const FieldPicker = ({ layout }) => {
   const dispatch = useDispatch();
@@ -51,14 +50,7 @@ const FieldPicker = ({ layout }) => {
         aria-label="change displayed fields"
         value={values}
         onChange={handleChange}
-        customizeContent={values =>
-          formatMessage(
-            {
-              id: getTrad('select.currently.selected'),
-              defaultMessage: '{count} currently selected',
-            },
-            { count: values.length }
-          )}
+        customizeContent={values => `${values.length} currently selected`}
         multi
         size="S"
       >

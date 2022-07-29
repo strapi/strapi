@@ -13,7 +13,6 @@ const OPERATORS = [
   '$in',
   '$notIn',
   '$eq',
-  '$eqi',
   '$ne',
   '$gt',
   '$gte',
@@ -222,15 +221,6 @@ const applyOperator = (qb, column, operator, value) => {
       }
 
       qb.where(column, value);
-      break;
-    }
-
-    case '$eqi': {
-      if (value === null) {
-        qb.whereNull(column);
-        break;
-      }
-      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `${value}`]);
       break;
     }
     case '$ne': {

@@ -14,6 +14,7 @@ const aliasExactMatch = [
   'immer',
   'qs',
   'lodash',
+  'moment',
   'react',
   'react-copy-to-clipboard',
   'react-dnd',

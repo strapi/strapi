@@ -32,29 +32,29 @@ describe('<NoPermissions />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c11 {
+      .c12 {
         color: #666687;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
       }
 
-      .c6 {
+      .c7 {
         background: #ffffff;
         padding: 64px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c8 {
+      .c9 {
         padding-bottom: 24px;
       }
 
-      .c10 {
+      .c11 {
         padding-bottom: 16px;
       }
 
-      .c7 {
+      .c8 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -69,7 +69,7 @@ describe('<NoPermissions />', () => {
         text-align: center;
       }
 
-      .c9 svg {
+      .c10 svg {
         height: 5.5rem;
       }
 
@@ -85,7 +85,7 @@ describe('<NoPermissions />', () => {
         padding-left: 56px;
       }
 
-      .c5 {
+      .c6 {
         padding-right: 56px;
         padding-left: 56px;
       }
@@ -129,6 +129,12 @@ describe('<NoPermissions />', () => {
         line-height: 1.25;
       }
 
+      .c5 {
+        color: #666687;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
       <main
         aria-labelledby="main-content-title"
         class="c0"
@@ -155,17 +161,20 @@ describe('<NoPermissions />', () => {
                 </h1>
               </div>
             </div>
+            <p
+              class="c5"
+            />
           </div>
         </div>
         <div
-          class="c5"
+          class="c6"
         >
           <div
-            class="c6 c7"
+            class="c7 c8"
           >
             <div
               aria-hidden="true"
-              class="c8 c9"
+              class="c9 c10"
             >
               <svg
                 fill="none"
@@ -241,10 +250,10 @@ describe('<NoPermissions />', () => {
               </svg>
             </div>
             <div
-              class="c10"
+              class="c11"
             >
               <p
-                class="c11"
+                class="c12"
               >
                 You don't have the permissions to access that content
               </p>

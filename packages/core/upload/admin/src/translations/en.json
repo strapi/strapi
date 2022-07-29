@@ -1,5 +1,4 @@
 {
-  "apiError.FileTooBig": "The uploaded file exceeds the maximum allowed asset size.",
   "bulk.select.label": "Select all assets",
   "button.next": "Next",
   "checkControl.crop-duplicate": "Duplicate & crop the asset",

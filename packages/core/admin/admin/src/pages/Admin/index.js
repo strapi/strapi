@@ -27,12 +27,8 @@ const InstalledPluginsPage = lazy(() =>
 const MarketplacePage = lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
 );
-const NotFoundPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_NotFoundPage" */ '../NotFoundPage')
-);
-const InternalErrorPage = lazy(() =>
-  import(/* webpackChunkName: "Admin_InternalErrorPage" */ '../InternalErrorPage')
-);
+const NotFoundPage = lazy(() => import('../NotFoundPage'));
+const InternalErrorPage = lazy(() => import('../InternalErrorPage'));
 
 const ProfilePage = lazy(() =>
   import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage')

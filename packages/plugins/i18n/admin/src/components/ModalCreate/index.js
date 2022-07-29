@@ -85,7 +85,7 @@ const ModalCreate = ({ onClose }) => {
                   <Tab>
                     {formatMessage({
                       id: getTrad('Settings.locales.modal.base'),
-                      defaultMessage: 'Basic settings',
+                      defaultMessage: 'Base settings',
                     })}
                   </Tab>
                   <Tab>

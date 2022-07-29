@@ -73,10 +73,7 @@ const SelectRoles = ({ disabled, error, onChange, value }) => {
       {(data || []).map(role => {
         return (
           <Option key={role.id} value={role.id}>
-            {formatMessage({
-              id: `global.${role.code}`,
-              defaultMessage: role.name,
-            })}
+            {role.name}
           </Option>
         );
       })}

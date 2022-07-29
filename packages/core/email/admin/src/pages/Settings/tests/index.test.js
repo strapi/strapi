@@ -770,7 +770,7 @@ describe('Email | Pages | Settings', () => {
                         rel="noopener noreferrer"
                         target="_blank"
                       >
-                        Link
+                        link
                       </a>
                        for the documentation.
                     </span>

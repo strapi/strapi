@@ -18,9 +18,7 @@ import RecursivePath from '../RecursivePath';
 import icons from './utils/icons.json';
 import ContentTypeBuilderNav from '../../components/ContentTypeBuilderNav';
 
-const ListView = lazy(() =>
-  import(/* webpackChunkName: "content-type-builder-list-view" */ '../ListView')
-);
+const ListView = lazy(() => import('../ListView'));
 
 const App = () => {
   const { formatMessage } = useIntl();

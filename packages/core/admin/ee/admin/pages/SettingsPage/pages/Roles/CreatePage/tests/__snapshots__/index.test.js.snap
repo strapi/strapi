@@ -97,7 +97,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c13 .sc-gJbFto {
+.c13 .sc-ezHhwS {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -177,7 +177,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c16 .sc-gJbFto {
+.c16 .sc-ezHhwS {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -774,7 +774,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   color: #4945ff;
   border-radius: 4px;
   font-size: 0.75rem;
-  font-weight: bold;
+  font-width: bold;
 }
 
 @media (max-width:68.75rem) {
@@ -1008,7 +1008,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                               id="textarea-1"
                               name="description"
                             >
-                              Created April 1st, 2020
+                              Created 2021–01–30T12:34:56+00:00
                             </textarea>
                           </div>
                         </div>

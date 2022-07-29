@@ -956,7 +956,7 @@ const FormModal = () => {
                     <Tab hasError={doesBaseFormHasError}>
                       {formatMessage({
                         id: getTrad('popUpForm.navContainer.base'),
-                        defaultMessage: 'Basic settings',
+                        defaultMessage: 'Base settings',
                       })}
                     </Tab>
                     <Tab

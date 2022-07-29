@@ -108,10 +108,7 @@ export const UploadingAssetCard = ({
       </Card>
       {error ? (
         <Typography variant="pi" fontWeight="bold" textColor="danger600">
-          {formatMessage({
-            id: getTrad(`apiError.${error.response.data.error.message}`),
-            defaultMessage: error.response.data.error.message,
-          })}
+          {error.message}
         </Typography>
       ) : (
         undefined
