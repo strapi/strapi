@@ -22,8 +22,6 @@ module.exports = () => ({
     '.cache/',
     '.tmp/',
 
-    // Do not include admin files in the server compilation
-    'src/admin/',
     // Do not include test files
     '**/*.test.ts',
     // Do not include plugins in the server compilation
