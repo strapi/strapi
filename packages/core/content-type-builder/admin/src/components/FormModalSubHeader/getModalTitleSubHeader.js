@@ -15,6 +15,9 @@ const getModalTitleSubHeader = ({ modalType, forTarget, kind, actionType, step }
         }`
       );
     }
+    case 'customField': {
+      return getTrad(`modalForm.sub-header.attribute.${actionType}`);
+    }
     case 'addComponentToDynamicZone':
       return getTrad('modalForm.sub-header.addComponentToDynamicZone');
     default:

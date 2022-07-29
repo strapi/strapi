@@ -17,25 +17,14 @@ const FormModalSubHeader = ({
   customField,
 }) => {
   const { formatMessage } = useIntl();
-
-  if (customField) {
-    const { intlLabel } = customField;
-
-    return (
-      <Typography as="h2" variant="beta">
-        {formatMessage(
-          {
-            id: getTrad(`modalForm.sub-header.attribute.${actionType}`),
-            defaultMessage: 'Add new custom field',
-          },
-          {
-            type: upperFirst(formatMessage(intlLabel)),
-            name: upperFirst(attributeName),
-          }
-        )}
-      </Typography>
-    );
-  }
+  const type =
+    modalType === 'customField'
+      ? upperFirst(formatMessage(customField.intlLabel))
+      : upperFirst(
+          formatMessage({
+            id: getTrad(`attribute.${attributeType}`),
+          })
+        );
 
   return (
     <Typography as="h2" variant="beta">
@@ -51,11 +40,7 @@ const FormModalSubHeader = ({
           defaultMessage: 'Add new field',
         },
         {
-          type: upperFirst(
-            formatMessage({
-              id: getTrad(`attribute.${attributeType}`),
-            })
-          ),
+          type,
           name: upperFirst(attributeName),
           step,
         }
