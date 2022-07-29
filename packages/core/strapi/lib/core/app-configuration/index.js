@@ -31,12 +31,13 @@ const defaultConfig = {
   },
 };
 
-module.exports = (dir, initialConfig = {}) => {
+module.exports = (dirs, initialConfig = {}) => {
+  const { appDir, distDir } = dirs;
   const { autoReload = false, serveAdminPanel = true } = initialConfig;
 
-  const pkgJSON = require(path.resolve(dir, 'package.json'));
+  const pkgJSON = require(path.resolve(appDir, 'package.json'));
 
-  const configDir = path.resolve(dir || process.cwd(), 'config');
+  const configDir = path.resolve(distDir || process.cwd(), 'config');
 
   const rootConfig = {
     launchedAt: Date.now(),

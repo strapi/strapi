@@ -46,7 +46,11 @@ const create = async (folderData, { user } = {}) => {
 const deleteByIds = async (ids = []) => {
   const folders = await strapi.db.query(FOLDER_MODEL_UID).findMany({ where: { id: { $in: ids } } });
   if (folders.length === 0) {
-    return [];
+    return {
+      folders: [],
+      totalFolderNumber: 0,
+      totalFileNumber: 0,
+    };
   }
 
   const pathsToDelete = map('path', folders);
@@ -61,13 +65,17 @@ const deleteByIds = async (ids = []) => {
   await Promise.all(filesToDelete.map(file => getService('upload').remove(file)));
 
   // delete folders
-  await strapi.db.query(FOLDER_MODEL_UID).deleteMany({
+  const { count: totalFolderNumber } = await strapi.db.query(FOLDER_MODEL_UID).deleteMany({
     where: {
       $or: pathsToDelete.map(path => ({ path: { $startsWith: path } })),
     },
   });
 
-  return folders;
+  return {
+    folders,
+    totalFolderNumber,
+    totalFileNumber: filesToDelete.length,
+  };
 };
 
 /**

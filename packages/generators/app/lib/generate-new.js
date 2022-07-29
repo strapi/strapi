@@ -7,7 +7,7 @@
 const { trackUsage } = require('./utils/usage');
 const checkInstallPath = require('./utils/check-install-path');
 const createCLIDatabaseProject = require('./create-cli-db-project');
-const createCustomizeProject = require('./create-customized-project');
+const createCustomizedProject = require('./create-customized-project');
 const createQuickStartProject = require('./create-quickstart-project');
 
 module.exports = async scope => {
@@ -28,5 +28,5 @@ module.exports = async scope => {
     return createQuickStartProject(scope);
   }
   // create a project with full list of questions
-  return createCustomizeProject(scope);
+  return createCustomizedProject(scope);
 };

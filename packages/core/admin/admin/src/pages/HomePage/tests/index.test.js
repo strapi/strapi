@@ -9,6 +9,7 @@ import { useModels } from '../../../hooks';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useGuidedTour: jest.fn(() => ({
     isGuidedTourVisible: false,
     guidedTourState: {

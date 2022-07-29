@@ -29,7 +29,7 @@ const aliasExactMatch = [
   'react-redux',
   'react-router',
   'react-router-dom',
-  'react-virtualized',
+  'react-window',
   'react-select',
   'redux',
   'reselect',

@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
-import { useQueryParams, useSelectionState } from '@strapi/helper-plugin';
+import { useSelectionState, useQueryParams, TrackingContext } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 
@@ -85,11 +85,13 @@ const renderML = () =>
   renderTL(
     <QueryClientProvider client={queryClient}>
       <IntlProvider locale="en" messages={{}}>
-        <ThemeProvider theme={lightTheme}>
-          <MemoryRouter>
-            <MediaLibrary />
-          </MemoryRouter>
-        </ThemeProvider>
+        <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
+          <ThemeProvider theme={lightTheme}>
+            <MemoryRouter>
+              <MediaLibrary />
+            </MemoryRouter>
+          </ThemeProvider>
+        </TrackingContext.Provider>
       </IntlProvider>
     </QueryClientProvider>
   );
@@ -205,6 +207,24 @@ describe('Media library homepage', () => {
     });
 
     describe('select all', () => {
+      it('is not visible if there are not folders and assets', () => {
+        useAssets.mockReturnValueOnce({
+          isLoading: false,
+          error: null,
+          data: {},
+        });
+        useFolders.mockReturnValueOnce({
+          data: [],
+          isLoading: false,
+          error: null,
+        });
+        renderML();
+
+        expect(
+          screen.queryByText('There are no elements with the applied filters')
+        ).not.toBeInTheDocument();
+      });
+
       it('shows the select all button when the user is allowed to update', () => {
         renderML();
 

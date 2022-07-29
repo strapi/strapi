@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { NotificationsProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider, TrackingContext } from '@strapi/helper-plugin';
 import { EditAssetDialog } from '../index';
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
@@ -83,14 +83,6 @@ const asset = {
   updatedAt: '2021-10-04T09:42:31.670Z',
 };
 
-const FIXTURE_FOLDER_STRUCTURE = [
-  {
-    value: null,
-    label: 'Media Library',
-    children: [],
-  },
-];
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -105,18 +97,15 @@ const renderCompo = (
 ) =>
   render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
-        <NotificationsProvider toggleNotification={toggleNotification}>
-          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-            <EditAssetDialog
-              asset={asset}
-              onClose={jest.fn()}
-              folderStructure={FIXTURE_FOLDER_STRUCTURE}
-              {...props}
-            />
-          </IntlProvider>
-        </NotificationsProvider>
-      </ThemeProvider>
+      <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
+        <ThemeProvider theme={lightTheme}>
+          <NotificationsProvider toggleNotification={toggleNotification}>
+            <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+              <EditAssetDialog asset={asset} onClose={jest.fn()} {...props} />
+            </IntlProvider>
+          </NotificationsProvider>
+        </ThemeProvider>
+      </TrackingContext.Provider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
   );

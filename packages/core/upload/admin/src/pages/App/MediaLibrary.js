@@ -162,7 +162,7 @@ export const MediaLibrary = () => {
         <ActionLayout
           startActions={
             <>
-              {canUpdate && (
+              {canUpdate && (assetCount > 0 || folderCount > 0) && (
                 <BoxWithHeight
                   paddingLeft={2}
                   paddingRight={2}

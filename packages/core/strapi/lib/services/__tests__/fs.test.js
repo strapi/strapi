@@ -11,7 +11,7 @@ const fs = require('../fs');
 
 describe('Strapi fs utils', () => {
   const strapi = {
-    dirs: { root: '/tmp' },
+    dirs: { dist: { root: '/tmp' }, app: { root: '/tmp' } },
   };
 
   test('Provides new functions', () => {

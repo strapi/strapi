@@ -19,6 +19,7 @@ jest.mock('../../../utils/axiosInstance', () => ({
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useQueryParams: jest.fn().mockReturnValue([{ query: {} }]),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 jest.mock('../../../hooks/useMediaLibraryPermissions');

@@ -1,6 +1,6 @@
 {
   "name": "admin-development",
-  "version": "1.0.0",
+  "version": "4.3.0",
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
@@ -34,7 +34,6 @@
     "babel-plugin-polyfill-corejs3": "0.5.2",
     "core-js": "3.21.1"
   },
-  "dependencies": {},
   "scripts": {
     "storybook": "start-storybook -p 6007",
     "build-storybook": "build-storybook"
