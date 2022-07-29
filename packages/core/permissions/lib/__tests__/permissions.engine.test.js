@@ -91,8 +91,8 @@ describe('Permissions Engine', () => {
     expect(ability.can('read', 'article', 'name')).toBeFalsy();
   });
 
-  describe('conditions', () => {
-    it.skip('does not register action when conditions not met', async () => {
+  describe.skip('conditions', () => {
+    it('does not register action when conditions not met', async () => {
       const { ability } = await buildEngineWithAbility({
         permissions: [
           {
@@ -111,26 +111,26 @@ describe('Permissions Engine', () => {
       expect(ability.can('read', 'article')).toBeFalsy();
       expect(ability.can('read', 'article', 'title')).toBeFalsy();
     });
-  });
 
-  it.skip('register action when conditions are met', async () => {
-    const { ability } = await buildEngineWithAbility({
-      permissions: [
-        {
-          action: 'read',
-          subject: 'article',
-          properties: { fields: ['title'] },
-          conditions: ['isAuthor'],
-        },
-      ],
+    it('register action when conditions are met', async () => {
+      const { ability } = await buildEngineWithAbility({
+        permissions: [
+          {
+            action: 'read',
+            subject: 'article',
+            properties: { fields: ['title'] },
+            conditions: ['isAuthor'],
+          },
+        ],
+      });
+
+      expect(ability.can('read')).toBeFalsy();
+      expect(ability.can('read', 'user')).toBeFalsy();
+      expect(ability.can('read', 'article', 'name')).toBeFalsy();
+
+      expect(ability.can('read', 'article')).toBeTruthy();
+      expect(ability.can('read', 'article', 'title')).toBeTruthy();
     });
-
-    expect(ability.can('read')).toBeFalsy();
-    expect(ability.can('read', 'user')).toBeFalsy();
-    expect(ability.can('read', 'article', 'name')).toBeFalsy();
-
-    expect(ability.can('read', 'article')).toBeTruthy();
-    expect(ability.can('read', 'article', 'title')).toBeTruthy();
   });
 
   // TODO: test all hooks are called at the right time and bail correctly
@@ -161,6 +161,7 @@ describe('Permissions Engine', () => {
       expect(ability.can('view', 'article')).toBeTruthy();
     });
 
+    // TODO: rewrite with mocks
     it('validate hooks are called at the right time', async () => {
       const { ability } = await buildEngineWithAbility({
         permissions: [{ action: 'update' }, { action: 'delete' }, { action: 'view' }],
@@ -223,8 +224,6 @@ describe('Permissions Engine', () => {
     });
   });
 
-  it.skip('before-format::validate.permission run before format.permission', () => {});
-
   it('post-format::validate.permission can prevent action register', async () => {
     const { ability } = await buildEngineWithAbility({
       permissions: [{ action: 'read', subject: 'article' }],
@@ -236,24 +235,36 @@ describe('Permissions Engine', () => {
     expect(ability.can('read', 'user')).toBeFalsy();
   });
 
-  it.skip('post-format::validate.permission runs after format.permission', () => {});
+  // TODO: mocks
+  it('before-evaluate and before-register are called in the right order', async () => {
+    let called = '';
+    const beforeEvaluateFn = jest.fn(() => {
+      called = 'beforeEvaluate';
+    });
+    const beforeRegisterFn = jest.fn(() => {
+      expect(called).toEqual('beforeEvaluate');
+      called = 'beforeRegister';
+    });
+    await buildEngineWithAbility({
+      permissions: [{ action: 'read', subject: 'article' }],
+      engineHooks: [
+        {
+          name: 'before-evaluate.permission',
+          fn: beforeEvaluateFn,
+        },
+        {
+          name: 'before-register.permission',
+          fn: beforeRegisterFn,
+        },
+      ],
+    });
 
-  it.skip('before-evaluate.permission is called ', async () => {
-    // const { ability } = await buildEngineWithAbility({
-    //   permissions: [{ action: 'read', subject: 'article' }],
-    //   engineHooks: [
-    //     {
-    //       name: 'before-evaluate.permission',
-    //       fn(permissions) {
-    //         console.log('permissions', permissions);
-    //         return;
-    //       },
-    //     },
-    //   ],
-    // });
+    expect(beforeEvaluateFn).toBeCalledTimes(1);
+    expect(beforeEvaluateFn).toBeCalledTimes(1);
+    expect(called).toEqual('beforeRegister');
   });
 
-  it.skip('before-register.permission is called ', async () => {
+  it.skip('before-register.permission is called', async () => {
     // const { ability } = await buildEngineWithAbility({
     //   permissions: [{ action: 'read', subject: 'article' }],
     //   engineHooks: [
