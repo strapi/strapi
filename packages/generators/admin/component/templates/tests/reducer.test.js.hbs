@@ -9,12 +9,12 @@ describe('{{camelCase name}}Reducer', () => {
   beforeEach(() => {
     state = {
       ...fixtures.store.state,
-      '{{plugin}}_{{camelCase name}}': initialState,
+      '{{ plugin }}_{{camelCase name}}': initialState,
     };
   });
 
   it('returns the initial state', () => {
-    const expectedResult = state['{{plugin}}_{{camelCase name}}'];
+    const expectedResult = state['{{ plugin }}_{{camelCase name}}'];
 
     expect({{camelCase name}}Reducer(undefined, {})).toEqual(expectedResult);
   });

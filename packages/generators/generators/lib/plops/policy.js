@@ -27,7 +27,7 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/policies/{{id}}.${language}`,
+          path: `${filePath}/policies/{{ id }}.${language}`,
           templateFile: `templates/${language}/policy.${language}.hbs`,
         },
       ];

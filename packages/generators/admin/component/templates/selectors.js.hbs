@@ -4,13 +4,13 @@ import { initialState } from './reducer';
 {{/unless}}
 
 /**
- * Direct selector to the {{name}} state domain
+ * Direct selector to the {{ name }} state domain
  */
 
 // eslint-disable-next-line import/prefer-default-export
-export const select{{name}}Domain = state => state[`
+export const select{{ name }}Domain = state => state[`
 {{~#if plugin "===" "admin"~}}
-  {{plugin}}
+  {{ plugin }}
 {{~else~}}
   ${pluginId}
 {{~/if~}}

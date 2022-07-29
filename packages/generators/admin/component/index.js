@@ -63,7 +63,7 @@ const actions = answers => {
   answers.plugin = plugin;
   const templatesFolder = 'component/templates';
   const pattern = useRedux ? '**/**.hbs' : '**/index.*.hbs';
-  const path = join(packagesFolder, pluginFolder, '{{plugin}}/admin/src/components/{{name}}');
+  const path = join(packagesFolder, pluginFolder, '{{ plugin }}/admin/src/components/{{ name }}');
   return [
     {
       type: 'addMany',

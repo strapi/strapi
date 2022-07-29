@@ -47,19 +47,19 @@ module.exports = plop => {
       },
     ],
     actions(answers) {
-      const filePath = answers.isPluginApi && answers.plugin ? 'plugins/{{plugin}}' : 'api/{{id}}';
+      const filePath = answers.isPluginApi && answers.plugin ? 'plugins/{{ plugin }}' : 'api/{{ id }}';
       const currentDir = process.cwd();
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions = [
         {
           type: 'add',
-          path: `${filePath}/controllers/{{id}}.${language}`,
+          path: `${filePath}/controllers/{{ id }}.${language}`,
           templateFile: `templates/${language}/controller.${language}.hbs`,
         },
         {
           type: 'add',
-          path: `${filePath}/services/{{id}}.${language}`,
+          path: `${filePath}/services/{{ id }}.${language}`,
           templateFile: `templates/${language}/service.${language}.hbs`,
         },
       ];
@@ -71,7 +71,7 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/routes/{{id}}.${language}`,
+          path: `${filePath}/routes/{{ id }}.${language}`,
           templateFile: `templates/${language}/single-route.${language}.hbs`,
         },
         ...baseActions,
