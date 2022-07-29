@@ -23,9 +23,7 @@ describe('Permissions Engine', () => {
 
   const generateInvalidateActionHook = action => {
     return params => {
-      console.log('params.permission', params.permission, action);
       if (params.permission.action === action) {
-        console.log('invalidating');
         return false;
       }
     };
@@ -142,16 +140,25 @@ describe('Permissions Engine', () => {
   // 'before-evaluate.permission': hooks.createAsyncSeriesHook(),
   // 'before-register.permission': hooks.createAsyncSeriesHook(),
   describe('hooks', () => {
-    it.skip('format.permission can modify permissions', () => {
-      //   .on('format.permission', permission => {
-      //     if (permission.action === 'modifyMe') {
-      //       return {
-      //         ...permission,
-      //         action: 'modifedAction',
-      //       };
-      //     }
-      //     return permission;
-      //   });
+    it('format.permission can modify permissions', async () => {
+      const { ability } = await buildEngineWithAbility({
+        permissions: [{ action: 'read', subject: 'article' }],
+        engineHooks: [
+          {
+            name: 'format.permission',
+            fn(permission) {
+              return {
+                ...permission,
+                action: 'view',
+              };
+            },
+          },
+        ],
+      });
+
+      expect(ability.can('read')).toBeFalsy();
+      expect(ability.can('read')).toBeFalsy();
+      expect(ability.can('view', 'article')).toBeTruthy();
     });
 
     it('before-format::validate.permission can prevent action register', async () => {
