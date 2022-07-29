@@ -79,12 +79,12 @@ const engine = permissions.engine
     }
   })
   .on('post-format::validate.permission', ({ permission }) => {
-    if (permission.action === 'create') {
+    if (permission.action === 'update') {
       return false;
     }
   })
   .on('format.permission', ({ permission }) => {
-    if (permission.action === 'create') {
+    if (permission.action === 'update') {
       return {
         ...permission,
         action: 'modify',
@@ -99,11 +99,11 @@ const engine = permissions.engine
     return permission;
   });
 
-const ability = await engine.generateAbility([{ action: 'create' }, { action: 'delete' }]);
+const ability = await engine.generateAbility([{ action: 'update' }, { action: 'delete' }]);
 
-ability.can('create'); // false
+ability.can('update'); // false
 ability.can('modify'); // true, because create was changed to 'modify'
 
 ability.can('delete'); // false, doesn't exist because it was changed by format.permission
-ability.can('remove'); // true, pre-format::validate.permission runs before format.permission
+ability.can('remove'); // true, pre-format::validate.permission validates before format.permission changed it
 ```

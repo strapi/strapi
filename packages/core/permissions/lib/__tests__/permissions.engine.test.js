@@ -161,6 +161,56 @@ describe('Permissions Engine', () => {
       expect(ability.can('view', 'article')).toBeTruthy();
     });
 
+    it('validate hooks are called at the right time', async () => {
+      const { ability } = await buildEngineWithAbility({
+        permissions: [{ action: 'update' }, { action: 'delete' }, { action: 'view' }],
+        engineHooks: [
+          {
+            name: 'format.permission',
+            fn(permission) {
+              if (permission.action === 'update') {
+                return {
+                  ...permission,
+                  action: 'modify',
+                };
+              }
+              if (permission.action === 'delete') {
+                return {
+                  ...permission,
+                  action: 'remove',
+                };
+              }
+              if (permission.action === 'view') {
+                return {
+                  ...permission,
+                  action: 'read',
+                };
+              }
+              return permission;
+            },
+          },
+          {
+            name: 'before-format::validate.permission',
+            fn: generateInvalidateActionHook('modify'),
+          },
+          {
+            name: 'before-format::validate.permission',
+            fn: generateInvalidateActionHook('view'),
+          },
+          {
+            name: 'post-format::validate.permission',
+            fn: generateInvalidateActionHook('update'),
+          },
+        ],
+      });
+
+      expect(ability.can('update')).toBeFalsy();
+      expect(ability.can('modify')).toBeTruthy();
+      expect(ability.can('delete')).toBeFalsy();
+      expect(ability.can('remove')).toBeTruthy();
+      expect(ability.can('view')).toBeFalsy();
+    });
+
     it('before-format::validate.permission can prevent action register', async () => {
       const { ability } = await buildEngineWithAbility({
         permissions: [{ action: 'read', subject: 'article' }],
