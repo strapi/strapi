@@ -5,18 +5,20 @@ const permissions = require('../');
 // TODO: test abilityBuilderFactory
 // TODO: test generateAbility with options
 describe('Permissions Engine', () => {
+  const allowedCondition = 'isAuthor';
+  const deniedCondition = 'isAdmin';
   const providers = {
     action: { get: jest.fn() },
     condition: {
-      // TODO: mock these once I figure out how they actually work
-      get(condition) {
-        console.log('get conditions', JSON.stringify(condition));
-      },
-      values(condition) {
-        console.log('values', condition);
-      },
-      register(condition) {
-        console.log('register', condition);
+      // TODO: mock these
+      get() {
+        return {
+          async handler({ permission }) {
+            if (permission.conditions.includes(deniedCondition)) return false;
+            if (permission.conditions.includes(allowedCondition)) return true;
+            return false;
+          },
+        };
       },
     },
   };
@@ -47,7 +49,7 @@ describe('Permissions Engine', () => {
     //
   });
 
-  it('register action', async () => {
+  it('registers action (string)', async () => {
     const { ability } = await buildEngineWithAbility({
       permissions: [{ action: 'read' }],
     });
@@ -91,7 +93,7 @@ describe('Permissions Engine', () => {
     expect(ability.can('read', 'article', 'name')).toBeFalsy();
   });
 
-  describe.skip('conditions', () => {
+  describe('conditions', () => {
     it('does not register action when conditions not met', async () => {
       const { ability } = await buildEngineWithAbility({
         permissions: [
@@ -99,7 +101,7 @@ describe('Permissions Engine', () => {
             action: 'read',
             subject: 'article',
             properties: { fields: ['title'] },
-            conditions: ['isAuthor'],
+            conditions: [deniedCondition],
           },
         ],
       });
@@ -119,7 +121,7 @@ describe('Permissions Engine', () => {
             action: 'read',
             subject: 'article',
             properties: { fields: ['title'] },
-            conditions: ['isAuthor'],
+            conditions: [allowedCondition],
           },
         ],
       });
@@ -262,20 +264,5 @@ describe('Permissions Engine', () => {
     expect(beforeEvaluateFn).toBeCalledTimes(1);
     expect(beforeEvaluateFn).toBeCalledTimes(1);
     expect(called).toEqual('beforeRegister');
-  });
-
-  it.skip('before-register.permission is called', async () => {
-    // const { ability } = await buildEngineWithAbility({
-    //   permissions: [{ action: 'read', subject: 'article' }],
-    //   engineHooks: [
-    //     {
-    //       name: 'before-evaluate.permission',
-    //       fn(permissions) {
-    //         console.log('permissions', permissions);
-    //         return;
-    //       },
-    //     },
-    //   ],
-    // });
   });
 });
