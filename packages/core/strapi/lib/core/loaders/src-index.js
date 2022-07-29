@@ -4,6 +4,8 @@ const { resolve } = require('path');
 const { statSync, existsSync } = require('fs');
 const { yup } = require('@strapi/utils');
 
+const { importDefault } = require('../../utils');
+
 const srcSchema = yup
   .object()
   .shape({
@@ -18,16 +20,16 @@ const validateSrcIndex = srcIndex => {
 };
 
 module.exports = strapi => {
-  if (!existsSync(strapi.dirs.src)) {
-    throw new Error('Missing src folder. Please create one at `./src`');
+  if (!existsSync(strapi.dirs.dist.src)) {
+    return;
   }
 
-  const pathToSrcIndex = resolve(strapi.dirs.src, 'index.js');
+  const pathToSrcIndex = resolve(strapi.dirs.dist.src, 'index.js');
   if (!existsSync(pathToSrcIndex) || statSync(pathToSrcIndex).isDirectory()) {
     return {};
   }
 
-  const srcIndex = require(pathToSrcIndex);
+  const srcIndex = importDefault(pathToSrcIndex);
 
   try {
     validateSrcIndex(srcIndex);

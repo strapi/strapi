@@ -12,10 +12,12 @@ import isEmpty from 'lodash/isEmpty';
 import { getTrad } from '../../utils';
 
 const StyledBullet = styled.div`
+  flex-shrink: 0;
   width: ${pxToRem(6)};
   height: ${pxToRem(6)};
   margin-right: ${({ theme }) => theme.spaces[2]};
-  background: ${({ theme, isDraft }) => theme.colors[isDraft ? 'secondary700' : 'success200']};
+  background-color: ${({ theme, isDraft }) =>
+    theme.colors[isDraft ? 'secondary600' : 'success600']};
   border-radius: 50%;
   cursor: pointer;
 `;

@@ -238,7 +238,8 @@ const EditViewDataManagerProvider = ({
         ['text', 'textarea', 'string', 'email', 'uid', 'select', 'select-one', 'number'].includes(
           type
         ) &&
-        !value
+        !value &&
+        value !== 0
       ) {
         inputValue = null;
       }
@@ -310,7 +311,7 @@ const EditViewDataManagerProvider = ({
       } catch (err) {
         errors = {
           ...errors,
-          ...getAPIInnerErrors(err),
+          ...getAPIInnerErrors(err, { getTrad }),
         };
       }
 
@@ -346,7 +347,7 @@ const EditViewDataManagerProvider = ({
     } catch (err) {
       errors = {
         ...errors,
-        ...getAPIInnerErrors(err),
+        ...getAPIInnerErrors(err, { getTrad }),
       };
     }
 

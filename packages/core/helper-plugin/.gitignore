@@ -13,3 +13,4 @@ yarn-error.log
 npm-debug.log
 .idea
 stats.html
+coverage

@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const _ = require('lodash');
+
 const strapi = require('../index');
 
 /**
@@ -12,7 +13,8 @@ const strapi = require('../index');
 module.exports = async function({ file: filePath, strategy = 'replace' }) {
   const input = filePath ? fs.readFileSync(filePath) : await readStdin(process.stdin);
 
-  const app = await strapi().load();
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   let dataToImport;
   try {
