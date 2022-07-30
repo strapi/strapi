@@ -107,7 +107,7 @@ export const AssetDialog = ({
   if (isLoading) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
-        <DialogHeader />
+        <DialogHeader canRead={canRead} />
         <LoadingBody justifyContent="center" paddingTop={4} paddingBottom={4}>
           <Loader>
             {formatMessage({
@@ -124,7 +124,7 @@ export const AssetDialog = ({
   if (hasError) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogHeader />
+        <DialogHeader canRead={canRead} />
         <AnErrorOccurred />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
@@ -134,7 +134,7 @@ export const AssetDialog = ({
   if (!canRead) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogHeader />
+        <DialogHeader canRead={canRead} />
         <NoPermissions />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
@@ -179,7 +179,11 @@ export const AssetDialog = ({
 
   return (
     <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={isLoading}>
-      <DialogHeader currentFolder={queryObject?.folder} onChangeFolder={handleFolderChange} />
+      <DialogHeader
+        currentFolder={queryObject?.folder}
+        onChangeFolder={handleFolderChange}
+        canRead={canRead}
+      />
 
       <TabGroup
         label={formatMessage({
