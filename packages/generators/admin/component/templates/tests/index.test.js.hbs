@@ -25,7 +25,7 @@ import {{ name }} from '../index';
     ui,
     {
       preloadedState = initialState,
-      store = createStore(rootReducer, { '{{ plugin }}_{{camelCase name}}': preloadedState }),
+      store = createStore(rootReducer, { '{{ plugin }}_{{ camelCase name }}': preloadedState }),
       ...renderOptions
     } = {},
   ) => {

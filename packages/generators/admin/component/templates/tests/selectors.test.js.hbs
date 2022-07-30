@@ -5,13 +5,13 @@ describe('select{{ name }}Domain', () => {
   let store;
 
   beforeEach(() => {
-    store = { ...fixtures.store.state, '{{ plugin }}_{{camelCase name}}': {} };
+    store = { ...fixtures.store.state, '{{ plugin }}_{{ camelCase name }}': {} };
   });
 
   it('expects to have unit tests specified', () => {
     const actual = select{{ name }}Domain(store);
 
 		// TBC
-		expect(actual).toEqual(store['{{ plugin }}_{{camelCase name}}']);
+		expect(actual).toEqual(store['{{ plugin }}_{{ camelCase name }}']);
   });
 });
