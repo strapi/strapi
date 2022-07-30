@@ -30,13 +30,13 @@ const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constan
 
 const randomSuffix = () => crypto.randomBytes(5).toString('hex');
 
-const generateFileName = name => {
+const generateFileName = (name) => {
   const baseName = nameToSlug(name, { separator: '_', lowercase: false });
 
   return `${baseName}_${randomSuffix()}`;
 };
 
-const sendMediaMetrics = data => {
+const sendMediaMetrics = (data) => {
   if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
     strapi.telemetry.send('didSaveMediaWithCaption');
   }
@@ -46,11 +46,11 @@ const sendMediaMetrics = data => {
   }
 };
 
-const createAndAssignTmpWorkingDirectoryToFiles = async files => {
+const createAndAssignTmpWorkingDirectoryToFiles = async (files) => {
   const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
 
   Array.isArray(files)
-    ? files.forEach(file => (file.tmpWorkingDirectory = tmpWorkingDirectory))
+    ? files.forEach((file) => (file.tmpWorkingDirectory = tmpWorkingDirectory))
     : (files.tmpWorkingDirectory = tmpWorkingDirectory);
 
   return tmpWorkingDirectory;
@@ -159,6 +159,10 @@ module.exports = ({ strapi }) => ({
     return uploadedFiles;
   },
 
+  /**
+   * Upload a file. If it is an image it will generate a thumbnail
+   * and responsive formats (if enabled).
+   */
   async uploadFileAndPersist(fileData, { user } = {}) {
     const config = strapi.config.get('plugin.upload');
 
@@ -169,9 +173,24 @@ module.exports = ({ strapi }) => ({
       isImage,
       isOptimizableImage,
     } = getService('image-manipulation');
-    await getService('provider').upload(fileData);
 
-    if (await isImage(fileData)) {
+    const isFileAnImage = await isImage(fileData);
+
+    if (!isFileAnImage) {
+      // Upload directly if it is not an image
+      await getService('provider').upload(fileData);
+    } else {
+      // Store width and height of image
+      const { width, height } = await getDimensions(fileData);
+
+      _.assign(fileData, {
+        width,
+        height,
+      });
+
+      await getService('provider').upload(fileData);
+
+      // Generate thumbnail and responsive formats
       if (await isOptimizableImage(fileData)) {
         const thumbnailFile = await generateThumbnail(fileData);
         if (thumbnailFile) {
@@ -192,17 +211,11 @@ module.exports = ({ strapi }) => ({
           }
         }
       }
-
-      const { width, height } = await getDimensions(fileData);
-
-      _.assign(fileData, {
-        width,
-        height,
-      });
     }
 
     _.set(fileData, 'provider', config.provider);
 
+    // Persist file(s)
     return this.add(fileData, { user });
   },
 
@@ -230,9 +243,8 @@ module.exports = ({ strapi }) => ({
   async replace(id, { data, file }, { user } = {}) {
     const config = strapi.config.get('plugin.upload');
 
-    const { getDimensions, generateThumbnail, generateResponsiveFormats } = getService(
-      'image-manipulation'
-    );
+    const { getDimensions, generateThumbnail, generateResponsiveFormats } =
+      getService('image-manipulation');
 
     const dbFile = await this.findOne(id);
     if (!dbFile) {
@@ -260,7 +272,7 @@ module.exports = ({ strapi }) => ({
 
         if (dbFile.formats) {
           await Promise.all(
-            Object.keys(dbFile.formats).map(key => {
+            Object.keys(dbFile.formats).map((key) => {
               return strapi.plugin('upload').provider.delete(dbFile.formats[key]);
             })
           );
@@ -362,7 +374,7 @@ module.exports = ({ strapi }) => ({
 
       if (file.formats) {
         await Promise.all(
-          Object.keys(file.formats).map(key => {
+          Object.keys(file.formats).map((key) => {
             return strapi.plugin('upload').provider.delete(file.formats[key]);
           })
         );
@@ -392,7 +404,7 @@ module.exports = ({ strapi }) => ({
 
     try {
       const enhancedFiles = await Promise.all(
-        arr.map(file => {
+        arr.map((file) => {
           return this.enhanceFile(
             file,
             { folder: apiUploadFolder.id },
@@ -405,7 +417,7 @@ module.exports = ({ strapi }) => ({
         })
       );
 
-      await Promise.all(enhancedFiles.map(file => this.uploadFileAndPersist(file)));
+      await Promise.all(enhancedFiles.map((file) => this.uploadFileAndPersist(file)));
     } finally {
       // delete temporary folder
       await fse.remove(tmpWorkingDirectory);
