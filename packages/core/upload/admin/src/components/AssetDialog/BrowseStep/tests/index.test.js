@@ -2,7 +2,9 @@ import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render, fireEvent, screen } from '@testing-library/react';
+import { NotificationsProvider } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClientProvider, QueryClient } from 'react-query';
 
 import { BrowseStep } from '..';
 
@@ -62,38 +64,50 @@ const FIXTURE_FOLDERS = [
   },
 ];
 
+const client = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
 const ComponentFixture = props => {
   return (
-    <ThemeProvider theme={lightTheme}>
-      <MemoryRouter>
-        <IntlProvider messages={{}} locale="en">
-          <BrowseStep
-            assets={[]}
-            canCreate
-            folders={FIXTURE_FOLDERS}
-            onAddAsset={jest.fn()}
-            onChangeFilters={jest.fn()}
-            onChangePage={jest.fn()}
-            onChangePageSize={jest.fn()}
-            onChangeSearch={jest.fn()}
-            onChangeSort={jest.fn()}
-            onChangeFolder={jest.fn()}
-            onEditAsset={jest.fn()}
-            onSelectAllAsset={jest.fn()}
-            onSelectAsset={jest.fn()}
-            pagination={{ pageCount: 1 }}
-            queryObject={{ page: 1, pageSize: 10, filters: { $and: [] } }}
-            selectedAssets={[]}
-            {...props}
-          />
-        </IntlProvider>
-      </MemoryRouter>
-    </ThemeProvider>
+    <QueryClientProvider client={client}>
+      <ThemeProvider theme={lightTheme}>
+        <MemoryRouter>
+          <IntlProvider messages={{}} locale="en">
+            <NotificationsProvider toggleNotification={() => {}}>
+              <BrowseStep
+                assets={[]}
+                canCreate
+                canRead
+                folders={FIXTURE_FOLDERS}
+                onAddAsset={jest.fn()}
+                onChangeFilters={jest.fn()}
+                onChangePage={jest.fn()}
+                onChangePageSize={jest.fn()}
+                onChangeSearch={jest.fn()}
+                onChangeSort={jest.fn()}
+                onChangeFolder={jest.fn()}
+                onEditAsset={jest.fn()}
+                onSelectAllAsset={jest.fn()}
+                onSelectAsset={jest.fn()}
+                pagination={{ pageCount: 1 }}
+                queryObject={{ page: 1, pageSize: 10, filters: { $and: [] } }}
+                selectedAssets={[]}
+                {...props}
+              />
+            </NotificationsProvider>
+          </IntlProvider>
+        </MemoryRouter>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 
 const setup = props => render(<ComponentFixture {...props} />);
-
 describe('BrowseStep', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -101,14 +115,12 @@ describe('BrowseStep', () => {
 
   it('renders and match snapshot', () => {
     const { container } = setup();
-
     expect(container).toMatchSnapshot();
   });
 
   it('calls onAddAsset callback', () => {
     const spy = jest.fn();
     const { getByText } = setup({ onAddAsset: spy, folders: [] });
-
     fireEvent.click(getByText('Add new assets'));
     expect(spy).toHaveBeenCalled();
   });
@@ -116,19 +128,16 @@ describe('BrowseStep', () => {
   it('calls onChangeFolder callback', () => {
     const spy = jest.fn();
     const { getByRole } = setup({ onChangeFolder: spy });
-
     fireEvent.click(
       getByRole('button', {
         name: /folder 1 : 1 folder, 1 asset/i,
       })
     );
-
     expect(spy).toHaveBeenCalled();
   });
 
   it('does display empty state upload first assets if no folder or assets', () => {
     setup({ folders: [], assets: [] });
-
     expect(screen.getByText('Upload your first assets...')).toBeInTheDocument();
   });
 
@@ -138,7 +147,6 @@ describe('BrowseStep', () => {
       assets: [],
       queryObject: { page: 1, pageSize: 10, filters: { $and: [] }, _q: 'true' },
     });
-
     expect(screen.getByText('There are no assets with the applied filters')).toBeInTheDocument();
   });
 
@@ -148,7 +156,6 @@ describe('BrowseStep', () => {
       assets: [],
       queryObject: { page: 1, pageSize: 10, filters: { $and: [{ mime: 'audio' }] }, _q: '' },
     });
-
     expect(screen.getByText('Filters')).toBeInTheDocument();
   });
 
@@ -158,7 +165,6 @@ describe('BrowseStep', () => {
       assets: FIXTURE_ASSETS,
       queryObject: { page: 1, pageSize: 10, filters: { $and: [] }, _q: 'true' },
     });
-
     expect(screen.queryByText('Assets')).not.toBeInTheDocument();
   });
 
@@ -166,7 +172,6 @@ describe('BrowseStep', () => {
     setup({
       queryObject: { page: 1, pageSize: 10, filters: { $and: [] }, _q: 'true' },
     });
-
     expect(screen.queryByText('Folders')).not.toBeInTheDocument();
   });
 
@@ -175,7 +180,7 @@ describe('BrowseStep', () => {
       assets: FIXTURE_ASSETS,
     });
 
-    expect(screen.getByText('Folders')).toBeInTheDocument();
-    expect(screen.getByText('Assets')).toBeInTheDocument();
+    expect(screen.getByText('Folders (1)')).toBeInTheDocument();
+    expect(screen.getByText('Assets (1)')).toBeInTheDocument();
   });
 });

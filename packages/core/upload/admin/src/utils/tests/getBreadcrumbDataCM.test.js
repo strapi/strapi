@@ -1,4 +1,4 @@
-import { getBreadcrumbData } from '..';
+import { getBreadcrumbDataML } from '..';
 
 const FIXTURE_PATHNAME = '/media-library';
 const FIXTURE_QUERY = {
@@ -10,10 +10,10 @@ const FIXTURE_FOLDER = {
   name: 'first-level',
 };
 
-describe('getBreadcrumData', () => {
+describe('getBreadcrumbDataML', () => {
   test('return one item at the root of the media library', () => {
     expect(
-      getBreadcrumbData(null, { pathname: FIXTURE_PATHNAME, query: FIXTURE_QUERY })
+      getBreadcrumbDataML(null, { pathname: FIXTURE_PATHNAME, query: FIXTURE_QUERY })
     ).toStrictEqual([
       {
         href: undefined,
@@ -25,7 +25,7 @@ describe('getBreadcrumData', () => {
 
   test('returns two items for the first level of the media library', () => {
     expect(
-      getBreadcrumbData(FIXTURE_FOLDER, { pathname: FIXTURE_PATHNAME, query: FIXTURE_QUERY })
+      getBreadcrumbDataML(FIXTURE_FOLDER, { pathname: FIXTURE_PATHNAME, query: FIXTURE_QUERY })
     ).toStrictEqual([
       {
         href: '/media-library?some=thing',
@@ -42,7 +42,7 @@ describe('getBreadcrumData', () => {
 
   test('returns three items for the second level of the media library', () => {
     expect(
-      getBreadcrumbData(
+      getBreadcrumbDataML(
         { ...FIXTURE_FOLDER, parent: { id: 2, name: 'second-level' } },
         { pathname: FIXTURE_PATHNAME, query: FIXTURE_QUERY }
       )
@@ -68,7 +68,7 @@ describe('getBreadcrumData', () => {
 
   test('returns four items for the third level of the media library', () => {
     expect(
-      getBreadcrumbData(
+      getBreadcrumbDataML(
         {
           ...FIXTURE_FOLDER,
           parent: { id: 2, name: 'second-level', parent: { id: 3, name: 'third-level' } },
