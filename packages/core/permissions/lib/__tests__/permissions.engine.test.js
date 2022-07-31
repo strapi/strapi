@@ -1,21 +1,26 @@
 'use strict';
 
+const { subject } = require('@casl/ability');
+
 const permissions = require('../');
 
-// TODO: test abilityBuilderFactory
-// TODO: test generateAbility with options
 describe('Permissions Engine', () => {
   const allowedCondition = 'isAuthor';
   const deniedCondition = 'isAdmin';
+
   const providers = {
-    action: { get: jest.fn() },
+    action: {
+      get(params) {
+        console.log('action', params);
+      },
+    },
     condition: {
       // TODO: mock these
-      get() {
+      get(condition) {
         return {
-          async handler({ permission }) {
-            if (permission.conditions.includes(deniedCondition)) return false;
-            if (permission.conditions.includes(allowedCondition)) return true;
+          name: condition,
+          async handler(params) {
+            if (params.permission.conditions.includes(allowedCondition)) return true;
             return false;
           },
         };
@@ -23,6 +28,13 @@ describe('Permissions Engine', () => {
     },
   };
 
+  /**
+   * Create an engine hook function that rejects a specific action
+   *
+   * @param {string} action
+   *
+   * @return {(params) => boolean | undefined)}
+   */
   const generateInvalidateActionHook = action => {
     return params => {
       if (params.permission.action === action) {
@@ -31,37 +43,73 @@ describe('Permissions Engine', () => {
     };
   };
 
-  const buildEngine = (engineProviders = providers, engineHooks = []) => {
-    const engine = permissions.engine.new({ providers: engineProviders });
+  /**
+   * build an engine and add all given hooks
+   *
+   * @param {PermissionEngineParams} params
+   * @param {string} action
+   *
+   * @return {PermissionEngine}
+   */
+  const buildEngineWithHooks = (params = { providers }, engineHooks = []) => {
+    const engine = permissions.engine.new(params);
     engineHooks.forEach(({ name, fn }) => {
       engine.on(name, fn);
     });
     return engine;
   };
 
-  const buildEngineWithAbility = async ({ permissions, engineProviders, engineHooks }) => {
-    const engine = buildEngine(engineProviders, engineHooks);
-    const ability = await engine.generateAbility(permissions);
-    return { engine, ability };
+  /**
+   * build an engine, add all given hooks, and generate an ability
+   *
+   * @param {PermissionEngineParams} params
+   * @param {string} action
+   *
+   * @return {{
+   *   engine: PermissionEngine,
+   *   ability: string,
+   *   createRegisterFunction: jest.Mock<jest.Mock<any, any[]>, [can?: any, options?: any]>,
+   *   registerFunction: jest.Mock<Function, [import('../../').Permission]>
+   * }}
+   */
+  const buildEngineWithAbility = async ({
+    permissions,
+    engineProviders = providers,
+    engineHooks,
+  }) => {
+    let registerFunction;
+    const createRegisterFunction = jest.fn((can, options) => {
+      registerFunction = jest.fn(engine.createRegisterFunction(can, options));
+      return registerFunction;
+    });
+    const engine = buildEngineWithHooks({ providers: engineProviders }, engineHooks);
+    const ability = await engine.generateAbility(permissions, { createRegisterFunction });
+    return {
+      engine,
+      ability,
+      createRegisterFunction,
+      registerFunction,
+    };
   };
 
-  beforeEach(() => {
-    //
-  });
-
-  it('registers action (string)', async () => {
-    const { ability } = await buildEngineWithAbility({
+  it('registers action', async () => {
+    const { ability, registerFunction, createRegisterFunction } = await buildEngineWithAbility({
       permissions: [{ action: 'read' }],
     });
+
     expect(ability.can('read')).toBeTruthy();
     expect(ability.can('i_dont_exist')).toBeFalsy();
+
+    expect(createRegisterFunction).toBeCalledTimes(1);
+    expect(registerFunction).nthCalledWith(1, { action: 'read' });
   });
 
   it('registers action with null subject', async () => {
-    const { ability } = await buildEngineWithAbility({
+    const { ability, registerFunction } = await buildEngineWithAbility({
       permissions: [{ action: 'read', subject: null }],
     });
     expect(ability.can('read')).toBeTruthy();
+    expect(registerFunction).nthCalledWith(1, { action: 'read', subject: null });
   });
 
   it('registers action with subject', async () => {
@@ -69,18 +117,8 @@ describe('Permissions Engine', () => {
       permissions: [{ action: 'read', subject: 'article' }],
     });
     expect(ability.can('read', 'article')).toBeTruthy();
-    expect(ability.can('read', 'user')).toBeFalsy();
+    expect(ability.can('read', subject('article', { id: 123 }))).toBeTruthy();
   });
-
-  // TODO: I noticed another test checking this. Looks like we just test === on subject, so primitives or
-  // objects passed by reference will work but object values will not work
-  // it('requires subject to be string ', async () => {
-  //   const subject = { id: 123 };
-  //   const { ability } = await buildEngineWithAbility({
-  //     permissions: [{ action: 'read', subject }],
-  //   });
-  //   expect(ability.can('read', subject)).toBeFalsy();
-  // });
 
   it('registers action with subject and properties', async () => {
     const { ability } = await buildEngineWithAbility({
@@ -133,6 +171,14 @@ describe('Permissions Engine', () => {
       expect(ability.can('read', 'article')).toBeTruthy();
       expect(ability.can('read', 'article', 'title')).toBeTruthy();
     });
+
+    // it.only('registers action when conditions are met with subject', async () => {
+    //   const { ability } = await buildEngineWithAbility({
+    //     permissions: [{ action: 'read', subject: 'article', conditions: ['isOwner'] }],
+    //   });
+    //   expect(ability.can('read', 'article')).toBeTruthy();
+    //   expect(ability.can('read', subject('article', { id: 123 }))).toBeTruthy();
+    // });
   });
 
   // TODO: test all hooks are called at the right time and bail correctly
