@@ -135,28 +135,28 @@ module.exports = {
       });
     };
 
-    /**
-     * Create a register function that wraps a `can` function
-     * used to register a permission in the ability builder
-     *
-     * @param {Function} can
-     * @param {object} options
-     *
-     * @return {Function}
-     */
-    const createRegisterFunction = (can, options) => {
-      return async permission => {
-        const hookContext = createWillRegisterContext({ options, permission });
-
-        await state.hooks['before-register.permission'].call(hookContext);
-
-        return can(permission);
-      };
-    };
-
     return {
       get hooks() {
         return state.hooks;
+      },
+
+      /**
+       * Create a register function that wraps a `can` function
+       * used to register a permission in the ability builder
+       *
+       * @param {Function} can
+       * @param {object} options
+       *
+       * @return {Function}
+       */
+      createRegisterFunction(can, options) {
+        return async permission => {
+          const hookContext = createWillRegisterContext({ options, permission });
+
+          await state.hooks['before-register.permission'].call(hookContext);
+
+          return can(permission);
+        };
       },
 
       /**
@@ -195,6 +195,10 @@ module.exports = {
        */
       async generateAbility(permissions, options = {}) {
         const { can, build } = abilityBuilderFactory();
+
+        let createRegisterFunction = this.createRegisterFunction;
+        if (_.isFunction(options.createRegisterFunction))
+          createRegisterFunction = options.createRegisterFunction;
 
         for (const permission of permissions) {
           const register = createRegisterFunction(can, options);
