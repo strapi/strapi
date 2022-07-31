@@ -38,7 +38,7 @@
   "dependencies": {
     "@strapi/utils": "4.3.0",
     "form-data": "^4.0.0",
-    "mailgun.js": "5.0.2"
+    "mailgun.js": "7.0.0"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",
