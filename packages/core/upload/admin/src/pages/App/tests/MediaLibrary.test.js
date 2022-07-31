@@ -4,12 +4,12 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
 import { useSelectionState, useQueryParams, TrackingContext } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
+import { IntlProvider } from 'react-intl';
 
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useFolders } from '../../../hooks/useFolders';
 import { useAssets } from '../../../hooks/useAssets';
 import { MediaLibrary } from '../MediaLibrary';
-import en from '../../../translations/en.json';
 
 const FIXTURE_ASSET_PAGINATION = {
   pageCount: 1,
@@ -56,7 +56,6 @@ jest.mock('../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../hooks/useFolders');
 jest.mock('../../../hooks/useFolder');
 jest.mock('../../../hooks/useAssets');
-
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useRBAC: jest.fn(),
@@ -66,15 +65,9 @@ jest.mock('@strapi/helper-plugin', () => ({
     .fn()
     .mockReturnValue([[], { selectOne: jest.fn(), selectAll: jest.fn() }]),
 }));
-
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
   getTrad: x => x,
-}));
-
-jest.mock('react-intl', () => ({
-  FormattedMessage: ({ id }) => id,
-  useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || id) }),
 }));
 
 const queryClient = new QueryClient({
@@ -89,13 +82,15 @@ const queryClient = new QueryClient({
 const renderML = () =>
   renderTL(
     <QueryClientProvider client={queryClient}>
-      <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
-        <ThemeProvider theme={lightTheme}>
-          <MemoryRouter>
-            <MediaLibrary />
-          </MemoryRouter>
-        </ThemeProvider>
-      </TrackingContext.Provider>
+      <IntlProvider locale="en" messages={{}}>
+        <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
+          <ThemeProvider theme={lightTheme}>
+            <MemoryRouter>
+              <MediaLibrary />
+            </MemoryRouter>
+          </ThemeProvider>
+        </TrackingContext.Provider>
+      </IntlProvider>
     </QueryClientProvider>
   );
 
@@ -107,7 +102,6 @@ describe('Media library homepage', () => {
   describe('navigation', () => {
     it('focuses the title when mounting the component', () => {
       renderML();
-
       expect(screen.getByRole('main')).toHaveFocus();
     });
   });
@@ -119,27 +113,21 @@ describe('Media library homepage', () => {
         canCreate: false,
         canRead: false,
       });
-
       renderML();
-
       expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('true');
       expect(screen.getByText('Loading content.')).toBeInTheDocument();
     });
 
     it('shows a loader while resolving assets', () => {
       useAssets.mockReturnValueOnce({ isLoading: true });
-
       renderML();
-
       expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('true');
       expect(screen.getByText('Loading content.')).toBeInTheDocument();
     });
 
     it('shows a loader while resolving folders', () => {
       useFolders.mockReturnValueOnce({ isLoading: true });
-
       renderML();
-
       expect(screen.getByRole('main').getAttribute('aria-busy')).toBe('true');
       expect(screen.getByText('Loading content.')).toBeInTheDocument();
     });
@@ -150,7 +138,7 @@ describe('Media library homepage', () => {
       it('shows the filters dropdown when the user is allowed to read', () => {
         renderML();
 
-        expect(screen.getByText('app.utils.filters')).toBeInTheDocument();
+        expect(screen.getByText('Filters')).toBeInTheDocument();
       });
 
       it('hides the filters dropdown when the user is not allowed to read', () => {
@@ -159,9 +147,7 @@ describe('Media library homepage', () => {
           canRead: false,
           canCreate: false,
         });
-
         renderML();
-
         expect(screen.queryByText('app.utils.filters')).not.toBeInTheDocument();
       });
     });
@@ -169,7 +155,6 @@ describe('Media library homepage', () => {
     describe('sort by', () => {
       it('shows the sort by dropdown when the user is allowed to read', () => {
         renderML();
-
         expect(screen.getByText('Sort by')).toBeInTheDocument();
       });
 
@@ -179,30 +164,28 @@ describe('Media library homepage', () => {
           canRead: false,
           canCreate: false,
         });
-
         renderML();
-
         expect(screen.queryByText('Sort by')).not.toBeInTheDocument();
       });
 
       [
-        ['Most recent uploads', 'createdAt:DESC'],
-        ['Oldest uploads', 'createdAt:ASC'],
-        ['Alphabetical order (A to Z)', 'name:ASC'],
-        ['Reverse alphabetical order (Z to A)', 'name:DESC'],
-        ['Most recent updates', 'updatedAt:DESC'],
-        ['Oldest updates', 'updatedAt:ASC'],
-      ].forEach(([label, sortKey]) => {
-        it(`modifies the URL with the according params: ${label} ${sortKey}`, async () => {
+        'createdAt:DESC',
+        'createdAt:ASC',
+        'name:ASC',
+        'name:DESC',
+        'updatedAt:DESC',
+        'updatedAt:ASC',
+      ].forEach(sortKey => {
+        it(`modifies the URL with the according params: ${sortKey}`, async () => {
           const setQueryMock = jest.fn();
           useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: {} }, setQueryMock]);
 
           renderML();
 
           fireEvent.mouseDown(screen.getByText('Sort by'));
-          await waitFor(() => expect(screen.getByText(label)).toBeInTheDocument());
-          fireEvent.mouseDown(screen.getByText(label));
-          await waitFor(() => expect(screen.queryByText(label)).not.toBeInTheDocument());
+          await waitFor(() => expect(screen.getByText(sortKey)).toBeInTheDocument());
+          fireEvent.mouseDown(screen.getByText(sortKey));
+          await waitFor(() => expect(screen.queryByText(sortKey)).not.toBeInTheDocument());
 
           expect(setQueryMock).toBeCalledWith({ sort: sortKey });
         });
@@ -210,28 +193,10 @@ describe('Media library homepage', () => {
     });
 
     describe('select all', () => {
-      it('is not visible if there are not folders and assets', () => {
-        useAssets.mockReturnValueOnce({
-          isLoading: false,
-          error: null,
-          data: {},
-        });
-        useFolders.mockReturnValueOnce({
-          data: [],
-          isLoading: false,
-          error: null,
-        });
-        renderML();
-
-        expect(
-          screen.queryByText('There are no elements with the applied filters')
-        ).not.toBeInTheDocument();
-      });
-
       it('shows the select all button when the user is allowed to update', () => {
         renderML();
 
-        expect(screen.getByLabelText('Select all assets')).toBeInTheDocument();
+        expect(screen.getByLabelText('Select all folders & assets')).toBeInTheDocument();
       });
 
       it('hides the select all button when the user is not allowed to update', () => {
@@ -241,9 +206,7 @@ describe('Media library homepage', () => {
           canCreate: true,
           canUpdate: false,
         });
-
         renderML();
-
         expect(screen.queryByLabelText('Select all assets')).not.toBeInTheDocument();
       });
     });
@@ -255,9 +218,7 @@ describe('Media library homepage', () => {
           canRead: false,
           canCreate: false,
         });
-
         renderML();
-
         await waitFor(() => expect(screen.queryByText(`Add new assets`)).not.toBeInTheDocument());
       });
 
@@ -267,9 +228,7 @@ describe('Media library homepage', () => {
           canRead: true,
           canCreate: true,
         });
-
         renderML();
-
         await waitFor(() => expect(screen.getByText(`Add new assets`)).toBeInTheDocument());
       });
     });
@@ -277,7 +236,6 @@ describe('Media library homepage', () => {
     describe('create folder', () => {
       it('shows the create button if the user has create permissions', () => {
         renderML();
-
         expect(screen.getByText('Add new folder')).toBeInTheDocument();
       });
 
@@ -286,9 +244,7 @@ describe('Media library homepage', () => {
           isLoading: false,
           canCreate: false,
         });
-
         renderML();
-
         expect(screen.queryByText('Add new folder')).not.toBeInTheDocument();
       });
     });
@@ -301,13 +257,13 @@ describe('Media library homepage', () => {
         isLoading: false,
         error: null,
       });
+
       useAssets.mockReturnValueOnce({
         isLoading: false,
         error: null,
         data: {},
       });
       renderML();
-
       expect(screen.queryByText('Upload your first assets...')).toBeInTheDocument();
     });
 
@@ -324,7 +280,6 @@ describe('Media library homepage', () => {
       });
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
       renderML();
-
       expect(
         screen.queryByText('There are no elements with the applied filters')
       ).toBeInTheDocument();
@@ -338,7 +293,6 @@ describe('Media library homepage', () => {
       });
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
       renderML();
-
       expect(screen.queryByText('Assets')).not.toBeInTheDocument();
     });
 
@@ -350,15 +304,14 @@ describe('Media library homepage', () => {
       });
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
       renderML();
-
       expect(screen.queryByText('Folders')).not.toBeInTheDocument();
     });
 
     it('displays folders and folders title', () => {
       renderML();
 
-      expect(screen.queryByText('Folders')).toBeInTheDocument();
-      expect(screen.getByText('Folder 1')).toBeInTheDocument();
+      expect(screen.getByText('Folders (1)')).toBeInTheDocument();
+      expect(screen.getByText('1 folder, 1 asset')).toBeInTheDocument();
     });
 
     it('displays folder with checked checkbox when is selected', () => {
@@ -379,13 +332,11 @@ describe('Media library homepage', () => {
         { selectOne: jest.fn(), selectAll: jest.fn() },
       ]);
       renderML();
-
       expect(screen.getByTestId('folder-checkbox-1')).toBeChecked();
     });
 
     it('doest not displays folder with checked checkbox when is not selected', () => {
       renderML();
-
       expect(screen.getByTestId('folder-checkbox-1')).not.toBeChecked();
     });
 
@@ -398,8 +349,8 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      expect(screen.queryByText('list.folders.title')).not.toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).not.toBeInTheDocument();
+      expect(screen.queryByText('1 folder, 1 asset')).not.toBeInTheDocument();
+      expect(screen.queryByText('Folders (1)')).not.toBeInTheDocument();
     });
 
     it('does display folders if a search is performed', () => {
@@ -407,17 +358,17 @@ describe('Media library homepage', () => {
 
       renderML();
 
-      expect(screen.queryByText('Folders')).toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).toBeInTheDocument();
+      expect(screen.queryByText('1 folder, 1 asset')).toBeInTheDocument();
+      expect(screen.queryByText('Folders (1)')).toBeInTheDocument();
     });
 
-    it('does not display folders if the media library is being filtered', () => {
+    it('does display folders if the media library is being filtered', () => {
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { filters: 'true' } }, jest.fn()]);
 
       renderML();
 
-      expect(screen.queryByText('Folders')).toBeInTheDocument();
-      expect(screen.queryByText('Folder 1')).toBeInTheDocument();
+      expect(screen.queryByText('1 folder, 1 asset')).toBeInTheDocument();
+      expect(screen.queryByText('Folders (1)')).toBeInTheDocument();
     });
 
     it('does not fetch folders if the current page !== 1', () => {
@@ -434,9 +385,7 @@ describe('Media library homepage', () => {
         },
       });
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
-
       renderML();
-
       expect(useFolders).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
     });
 
@@ -457,15 +406,12 @@ describe('Media library homepage', () => {
         { rawQuery: '', query: { _q: '', filters: { $and: { mime: 'audio' } } } },
         jest.fn(),
       ]);
-
       renderML();
-
       expect(useFolders).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
     });
 
     it('displays assets', () => {
       renderML();
-
       expect(screen.getByText('3874873.jpg')).toBeInTheDocument();
     });
 
@@ -475,9 +421,7 @@ describe('Media library homepage', () => {
         canRead: false,
         canCreate: false,
       });
-
       renderML();
-
       expect(screen.queryByText('3874873.jpg')).not.toBeInTheDocument();
     });
 
@@ -489,14 +433,11 @@ describe('Media library homepage', () => {
           results: [],
         },
       });
-
       useFolders.mockReturnValueOnce({
         isLoading: false,
         data: [],
       });
-
       renderML();
-
       expect(screen.queryByText('Upload your first assets...')).toBeInTheDocument();
     });
 
@@ -514,9 +455,7 @@ describe('Media library homepage', () => {
           results: FIXTURE_ASSETS,
         },
       });
-
       renderML();
-
       expect(screen.queryByText('header.actions.add-assets')).not.toBeInTheDocument();
     });
 
@@ -530,15 +469,12 @@ describe('Media library homepage', () => {
           results: [],
         },
       });
-
       useFolders.mockReturnValueOnce({
         isLoading: false,
         error: null,
         data: [],
       });
-
       renderML();
-
       expect(
         screen.queryByText('There are no elements with the applied filters')
       ).toBeInTheDocument();

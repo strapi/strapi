@@ -81,7 +81,9 @@ describe('useFolder', () => {
     await waitFor(() => result.current.isSuccess);
     await waitForNextUpdate();
 
-    expect(axiosInstance.get).toBeCalledWith(`/upload/folders/1?populate=parent`);
+    expect(axiosInstance.get).toBeCalledWith(
+      '/upload/folders/1?populate[parent][populate][parent]=*'
+    );
   });
 
   test('it does not fetch, if enabled is set to false', async () => {

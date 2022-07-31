@@ -10,7 +10,9 @@ export const useFolder = (id, { enabled = true }) => {
 
   const fetchFolder = async () => {
     try {
-      const { data } = await axiosInstance.get(`${dataRequestURL}/${id}?populate=parent`);
+      const { data } = await axiosInstance.get(
+        `${dataRequestURL}/${id}?populate[parent][populate][parent]=*`
+      );
 
       return data.data;
     } catch (err) {

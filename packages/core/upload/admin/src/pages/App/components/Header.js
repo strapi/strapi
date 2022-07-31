@@ -11,15 +11,15 @@ import { Link } from '@strapi/design-system/Link';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Plus from '@strapi/icons/Plus';
 import { getTrad } from '../../../utils';
-import { FolderDefinition } from '../../../constants';
+import { FolderDefinition, BreadcrumbsDefinition } from '../../../constants';
+import { Breadcrumbs } from '../../../components/Breadcrumbs';
 
 export const Header = ({
+  breadcrumbs,
   canCreate,
   onToggleEditFolderDialog,
   onToggleUploadAssetDialog,
   folder,
-  assetCount,
-  folderCount,
 }) => {
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
@@ -36,14 +36,18 @@ export const Header = ({
         id: getTrad('plugin.name'),
         defaultMessage: `Media Library`,
       })}${name ? ` - ${name}` : ''}`}
-      subtitle={formatMessage(
-        {
-          id: getTrad('header.content.assets'),
-          defaultMessage:
-            '{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}',
-        },
-        { numberAssets: assetCount, numberFolders: folderCount }
-      )}
+      subtitle={
+        breadcrumbs && (
+          <Breadcrumbs
+            as="nav"
+            label={formatMessage({
+              id: getTrad('header.breadcrumbs.nav.label'),
+              defaultMessage: 'Folders navigation',
+            })}
+            breadcrumbs={breadcrumbs}
+          />
+        )
+      }
       navigationAction={
         folder && (
           <Link
@@ -81,14 +85,14 @@ export const Header = ({
 };
 
 Header.defaultProps = {
+  breadcrumbs: false,
   folder: null,
 };
 
 Header.propTypes = {
-  assetCount: PropTypes.number.isRequired,
+  breadcrumbs: PropTypes.oneOfType([BreadcrumbsDefinition, PropTypes.bool]),
   canCreate: PropTypes.bool.isRequired,
   folder: FolderDefinition,
-  folderCount: PropTypes.number.isRequired,
   onToggleEditFolderDialog: PropTypes.func.isRequired,
   onToggleUploadAssetDialog: PropTypes.func.isRequired,
 };

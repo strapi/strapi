@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { useLocation, useHistory } from 'react-router-dom';
-import { stringify } from 'qs';
 import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
@@ -34,7 +33,7 @@ import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
-import { getTrad, containsAssetFilter } from '../../utils';
+import { getTrad, containsAssetFilter, getBreadcrumbData, getFolderURL } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useFolder } from '../../hooks/useFolder';
@@ -151,8 +150,9 @@ export const MediaLibrary = () => {
     <Layout>
       <Main aria-busy={isLoading}>
         <Header
-          assetCount={assetCount}
-          folderCount={folderCount}
+          breadcrumbs={
+            !isCurrentFolderLoading && getBreadcrumbData(currentFolder, { pathname, query })
+          }
           canCreate={canCreate}
           onToggleEditFolderDialog={toggleEditFolderDialog}
           onToggleUploadAssetDialog={toggleUploadAssetDialog}
@@ -261,10 +261,13 @@ export const MediaLibrary = () => {
                 <FolderList
                   title={
                     (((isFiltering && assetCount > 0) || !isFiltering) &&
-                      formatMessage({
-                        id: getTrad('list.folders.title'),
-                        defaultMessage: 'Folders',
-                      })) ||
+                      formatMessage(
+                        {
+                          id: getTrad('list.folders.title'),
+                          defaultMessage: 'Folders ({count})',
+                        },
+                        { count: folderCount }
+                      )) ||
                     ''
                   }
                 >
@@ -274,13 +277,7 @@ export const MediaLibrary = () => {
                       currentFolder => currentFolder.id === folder.id
                     );
 
-                    // Search query will always fetch the same results
-                    // we remove it here to allow navigating in a folder and see the result of this navigation
-                    const { _q, ...queryParamsWithoutQ } = query;
-                    const url = `${pathname}?${stringify({
-                      ...queryParamsWithoutQ,
-                      folder: folder.id,
-                    })}`;
+                    const url = getFolderURL(pathname, query, folder);
 
                     return (
                       <GridItem col={3} key={`folder-${folder.id}`}>
@@ -365,10 +362,13 @@ export const MediaLibrary = () => {
                     title={
                       ((!isFiltering || (isFiltering && folderCount > 0)) &&
                         assetsData?.pagination?.page === 1 &&
-                        formatMessage({
-                          id: getTrad('list.assets.title'),
-                          defaultMessage: 'Assets',
-                        })) ||
+                        formatMessage(
+                          {
+                            id: getTrad('list.assets.title'),
+                            defaultMessage: 'Assets ({count})',
+                          },
+                          { count: assetCount }
+                        )) ||
                       ''
                     }
                   />
