@@ -24,6 +24,10 @@ module.exports = {
           config.filename = `${file.hash}${file.ext}`;
         }
 
+        if (file.path) {
+          config.folder = file.path;
+        }
+
         const upload_stream = cloudinary.uploader.upload_stream(
           { ...config, ...customConfig },
           (err, image) => {
