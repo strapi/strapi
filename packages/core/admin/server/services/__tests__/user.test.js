@@ -333,8 +333,6 @@ describe('User', () => {
 
       const res = await userService.deleteByIds([2, 3]);
 
-      console.log({ res });
-
       expect(deleteFn).toHaveBeenNthCalledWith(1, { where: { id: 2 }, populate: ['roles'] });
       expect(deleteFn).toHaveBeenNthCalledWith(2, { where: { id: 3 }, populate: ['roles'] });
 

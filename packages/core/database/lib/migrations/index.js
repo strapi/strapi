@@ -7,7 +7,7 @@ const { Umzug } = require('umzug');
 const createStorage = require('./storage');
 
 const wrapTransaction = db => fn => () =>
-  db.getConnection().transaction(trx => Promise.resolve(fn(trx)));
+  db.connection.transaction(trx => Promise.resolve(fn(trx)));
 
 // TODO: check multiple commands in one sql statement
 const migrationResolver = ({ name, path, context }) => {
@@ -34,7 +34,7 @@ const migrationResolver = ({ name, path, context }) => {
 };
 
 const createUmzugProvider = db => {
-  const migrationDir = path.join(strapi.dirs.root, 'database/migrations');
+  const migrationDir = path.join(strapi.dirs.app.root, 'database/migrations');
 
   fse.ensureDirSync(migrationDir);
 

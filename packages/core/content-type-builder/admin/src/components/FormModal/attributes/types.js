@@ -1,10 +1,9 @@
-import _ from 'lodash';
+import uniq from 'lodash/uniq';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import getRelationType from '../../../utils/getRelationType';
 import toRegressedEnumValue from '../../../utils/toRegressedEnumValue';
-import startsWithANumber from '../../../utils/startsWithANumber';
 import {
   alreadyUsedAttributeNames,
   createTextShape,
@@ -132,14 +131,26 @@ const types = {
     return yup.object(shape);
   },
   enumeration: (usedAttributeNames, reservedNames) => {
-    const ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
+    /**
+     * For enumerations the least common denomiator is GraphQL, where
+     * values needs to match the secure name regex:
+     * GraphQL Spec https://spec.graphql.org/June2018/#sec-Names
+     *
+     * Therefore we need to make sure our users only use values, which
+     * can be returned by GraphQL, by checking the regressed values
+     * agains the GraphQL regex.
+     *
+     * TODO V5: check if we can avoid this coupling by moving this logic
+     * into the GraphQL plugin.
+     */
+    const GRAPHQL_ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
 
     const shape = {
       name: yup
         .string()
         .test(alreadyUsedAttributeNames(usedAttributeNames))
         .test(isNameAllowed(reservedNames))
-        .matches(ENUM_REGEX, errorsTrads.regex)
+        .matches(GRAPHQL_ENUM_REGEX, errorsTrads.regex)
         .required(errorsTrads.required),
       type: validators.type(),
       default: validators.default(),
@@ -153,12 +164,11 @@ const types = {
           name: 'areEnumValuesUnique',
           message: getTrad('error.validation.enum-duplicate'),
           test(values) {
-            const normalizedEnum = values.map(toRegressedEnumValue);
-            const duplicates = _(normalizedEnum)
-              .groupBy()
-              .pickBy(x => x.length > 1)
-              .keys()
-              .value();
+            const duplicates = uniq(
+              values
+                .map(toRegressedEnumValue)
+                .filter((value, index, values) => values.indexOf(value) !== index)
+            );
 
             return !duplicates.length;
           },
@@ -166,12 +176,13 @@ const types = {
         .test({
           name: 'doesNotHaveEmptyValues',
           message: getTrad('error.validation.enum-empty-string'),
-          test: values => !values.some(val => val === ''),
+          test: values => !values.map(toRegressedEnumValue).some(val => val === ''),
         })
         .test({
-          name: 'doesNotStartWithANumber',
-          message: getTrad('error.validation.enum-number'),
-          test: values => !values.some(startsWithANumber),
+          name: 'doesMatchRegex',
+          message: getTrad('error.validation.enum-regex'),
+          test: values =>
+            values.map(toRegressedEnumValue).every(value => GRAPHQL_ENUM_REGEX.test(value)),
         }),
       enumName: yup.string().nullable(),
     };

@@ -5,6 +5,7 @@ const { isFunction } = require('lodash/fp');
 
 const createCronService = () => {
   let jobsSpecs = [];
+  let running = false;
 
   return {
     add(tasks = {}) {
@@ -29,18 +30,21 @@ const createCronService = () => {
 
         const job = new Job(null, fnWithStrapi);
         jobsSpecs.push({ job, options });
+
+        if (running) {
+          job.schedule(options);
+        }
       }
       return this;
     },
     start() {
-      if (!strapi.config.get('server.cron.enabled')) {
-        return;
-      }
       jobsSpecs.forEach(({ job, options }) => job.schedule(options));
+      running = true;
       return this;
     },
     stop() {
       jobsSpecs.forEach(({ job }) => job.cancel());
+      running = false;
       return this;
     },
     destroy() {

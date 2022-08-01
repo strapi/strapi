@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-rackspace",
-  "version": "4.2.2",
+  "version": "4.3.0",
   "description": "Rackspace provider for strapi upload",
   "repository": {
     "type": "git",

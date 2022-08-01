@@ -1,4 +1,3 @@
-import moment from 'moment';
 import removeKeyInObject from '../removeKeyInObject';
 
 const testGeoJson = {
@@ -170,25 +169,5 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
     };
 
     expect(removeKeyInObject(data, '__temp_key__')).toEqual(expected);
-  });
-
-  it('should not corrupt moment objects', () => {
-    const momentObject = moment();
-
-    const data = {
-      id: 1,
-      comment_date_time: momentObject,
-      __temp_key__: 0,
-    };
-
-    const expected = {
-      id: 1,
-      comment_date_time: momentObject,
-    };
-
-    const result = removeKeyInObject(data, '__temp_key__');
-
-    expect(result).toEqual(expected);
-    expect(result.comment_date_time instanceof moment).toBeTruthy();
   });
 });

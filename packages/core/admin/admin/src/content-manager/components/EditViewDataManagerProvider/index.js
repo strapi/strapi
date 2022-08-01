@@ -15,12 +15,12 @@ import {
   useOverlayBlocker,
   useTracking,
   getYupInnerErrors,
+  getAPIInnerErrors,
 } from '@strapi/helper-plugin';
 
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema } from './utils';
-import { getAPIInnerError } from './utils/getAPIInnerError';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -233,9 +233,14 @@ const EditViewDataManagerProvider = ({
     ({ target: { name, value, type } }, shouldSetInitialValue = false) => {
       let inputValue = value;
 
-      // Empty string is not a valid date,
-      // Set the date to null when it's empty
-      if (type === 'date' && value === '') {
+      // Allow to reset text, textarea, email, uid, select/enum, and number
+      if (
+        ['text', 'textarea', 'string', 'email', 'uid', 'select', 'select-one', 'number'].includes(
+          type
+        ) &&
+        !value &&
+        value !== 0
+      ) {
         inputValue = null;
       }
 
@@ -246,16 +251,6 @@ const EditViewDataManagerProvider = ({
         });
 
         return;
-      }
-
-      // Allow to reset enum
-      if (type === 'select-one' && value === '') {
-        inputValue = null;
-      }
-
-      // Allow to reset number input
-      if (type === 'number' && value === '') {
-        inputValue = null;
       }
 
       dispatch({
@@ -316,7 +311,7 @@ const EditViewDataManagerProvider = ({
       } catch (err) {
         errors = {
           ...errors,
-          ...getAPIInnerError(err),
+          ...getAPIInnerErrors(err, { getTrad }),
         };
       }
 
@@ -352,7 +347,7 @@ const EditViewDataManagerProvider = ({
     } catch (err) {
       errors = {
         ...errors,
-        ...getAPIInnerError(err),
+        ...getAPIInnerErrors(err, { getTrad }),
       };
     }
 

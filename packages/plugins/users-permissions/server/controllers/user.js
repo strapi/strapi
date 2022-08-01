@@ -138,7 +138,7 @@ module.exports = {
   async find(ctx) {
     const users = await getService('user').fetchAll(ctx.query);
 
-    ctx.body = await Promise.all(users.map((user) => sanitizeOutput(user, ctx)));
+    ctx.body = await Promise.all(users.map(user => sanitizeOutput(user, ctx)));
   },
 
   /**

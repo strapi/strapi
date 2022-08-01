@@ -12,6 +12,7 @@ const createQueryBuilder = (uid, db) => {
     type: 'select',
     select: [],
     count: null,
+    max: null,
     first: false,
     data: null,
     where: [],
@@ -19,6 +20,8 @@ const createQueryBuilder = (uid, db) => {
     populate: null,
     limit: null,
     offset: null,
+    transaction: null,
+    forUpdate: false,
     orderBy: [],
     groupBy: [],
   };
@@ -75,6 +78,13 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
+    max(column) {
+      state.type = 'max';
+      state.max = column;
+
+      return this;
+    },
+
     where(where = {}) {
       if (!_.isPlainObject(where)) {
         throw new Error('Where must be an object');
@@ -112,6 +122,16 @@ const createQueryBuilder = (uid, db) => {
 
     search(query) {
       state.search = query;
+      return this;
+    },
+
+    transacting(transaction) {
+      state.transaction = transaction;
+      return this;
+    },
+
+    forUpdate() {
+      state.forUpdate = true;
       return this;
     },
 
@@ -281,7 +301,15 @@ const createQueryBuilder = (uid, db) => {
           break;
         }
         case 'count': {
-          qb.count({ count: state.count });
+          const dbColumnName =
+            state.count === '*' ? '*' : this.aliasColumn(helpers.toColumnName(meta, state.count));
+
+          qb.count({ count: dbColumnName });
+          break;
+        }
+        case 'max': {
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.max));
+          qb.max({ max: dbColumnName });
           break;
         }
         case 'insert': {
@@ -306,6 +334,14 @@ const createQueryBuilder = (uid, db) => {
           db.truncate();
           break;
         }
+      }
+
+      if (state.transaction) {
+        qb.transacting(state.transaction);
+      }
+
+      if (state.forUpdate) {
+        qb.forUpdate();
       }
 
       if (state.limit) {
