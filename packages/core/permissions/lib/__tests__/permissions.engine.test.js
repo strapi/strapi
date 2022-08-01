@@ -2,8 +2,6 @@
 
 const _ = require('lodash');
 const { subject } = require('@casl/ability');
-
-// const createConditionProvider = require('../../../admin/server/domain/condition/provider');
 const permissions = require('../');
 
 describe('Permissions Engine', () => {
@@ -27,17 +25,23 @@ describe('Permissions Engine', () => {
         return new Promise(resolve => resolve(false));
       },
     },
+    {
+      plugin: 'test',
+      name: 'hasId123',
+      category: 'default',
+      async handler(params) {
+        return new Promise(resolve => resolve(params.id === 123));
+      },
+    },
   ];
 
   const providers = {
     condition: {
-      // TODO: mock these
       get(condition) {
         const c = conditions.find(c => c.name === condition);
         if (c) return c;
         return {
-          async handler(params) {
-            console.log('missing condition', params);
+          async handler() {
             return true;
           },
         };
@@ -93,6 +97,7 @@ describe('Permissions Engine', () => {
     permissions,
     engineProviders = providers,
     engineHooks,
+    abilityOptions,
   }) => {
     /** @type {import('../engine').ConditionProvider} */
     // const conditionProvider = createConditionProvider();
@@ -106,7 +111,11 @@ describe('Permissions Engine', () => {
       return registerFunction;
     });
     const engine = buildEngineWithHooks({ providers: engineProviders }, engineHooks);
-    const ability = await engine.generateAbility(permissions, { createRegisterFunction });
+    const ability = await engine.generateAbility(
+      permissions,
+      abilityOptions,
+      createRegisterFunction
+    );
     return {
       engine,
       ability,
@@ -126,8 +135,8 @@ describe('Permissions Engine', () => {
    *   fields: [string]
    * }}
    */
-  const expectedAbilityRules = permissions =>
-    permissions.map(permission => {
+  const expectedAbilityRules = permissions => {
+    return permissions.map(permission => {
       const rules = _.omit(permission, ['properties', 'conditions']);
       if (permission.properties && permission.properties.fields)
         rules.fields = permission.properties.fields;
@@ -135,6 +144,7 @@ describe('Permissions Engine', () => {
 
       return rules;
     });
+  };
 
   beforeEach(async () => {
     global.strapi = {
@@ -142,7 +152,7 @@ describe('Permissions Engine', () => {
     };
   });
 
-  it('registers actions without subject', async () => {
+  it('registers action without subject', async () => {
     const permissions = [{ action: 'read' }, { action: 'write' }];
     const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility({
       permissions,
@@ -156,19 +166,50 @@ describe('Permissions Engine', () => {
     expect(registerFunctions[1]).toBeCalledWith(permissions[1]);
   });
 
-  it('registers action with null subject', async () => {
-    const permissions = [{ action: 'read', subject: null }];
-    const { ability, registerFunctions } = await buildEngineWithAbility({ permissions });
+  it(`registers action without subject with subject 'all'`, async () => {
+    const permissions = [
+      { action: 'read', subject: null },
+      { action: 'read', subject: undefined },
+    ];
+    const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility({
+      permissions,
+    });
+
     expect(ability.can('read')).toBeTruthy();
+
+    expect(createRegisterFunction).toBeCalledTimes(2);
     expect(registerFunctions[0]).toBeCalledWith(permissions[0]);
+    expect(registerFunctions[1]).toBeCalledWith(permissions[1]);
+
+    expect(ability.rules).toMatchObject(expectedAbilityRules(permissions));
   });
 
-  it('registers action with subject', async () => {
+  it('registers action with subject string', async () => {
     const permissions = [{ action: 'read', subject: 'article' }];
     const { ability, registerFunctions } = await buildEngineWithAbility({ permissions });
     expect(ability.can('read', 'article')).toBeTruthy();
     expect(ability.can('read', subject('article', { id: 123 }))).toBeTruthy();
     expect(registerFunctions[0]).toBeCalledWith(permissions[0]);
+  });
+
+  it('registers action with subject object', async () => {
+    const permissions = [
+      {
+        action: 'read',
+        subject: 'article',
+        properties: { fields: ['**'] },
+        conditions: ['hasId123'],
+      },
+    ];
+    const user = subject('article', { id: 123 });
+    const { ability, registerFunctions } = await buildEngineWithAbility({
+      permissions,
+      abilityOptions: user,
+    });
+
+    expect(ability.can('read', 'article')).toBeTruthy();
+
+    expect(registerFunctions[0]).toBeCalledWith(_.omit(permissions[0], ['conditions']));
   });
 
   it('registers action with subject and properties', async () => {
@@ -187,6 +228,7 @@ describe('Permissions Engine', () => {
   it('throws on empty fields array', async () => {
     const permissions = [{ action: 'read', subject: 'article', properties: { fields: [] } }];
     await expect(buildEngineWithAbility({ permissions })).rejects.toThrow(
+      // from casl/ability
       '`rawRule.fields` cannot be an empty array. https://bit.ly/390miLa'
     );
   });
@@ -217,63 +259,58 @@ describe('Permissions Engine', () => {
     expect(registerFunctions[1]).toBeCalledWith(permissions[1]);
   });
 
-  describe('conditions', () => {
-    it('does not register action when conditions not met', async () => {
-      const permissions = [
-        {
-          action: 'read',
-          subject: 'article',
-          properties: { fields: ['title'] },
-          conditions: [deniedCondition],
-        },
-      ];
-      const expectedPermissions = [];
+  it('does not register action when conditions not met', async () => {
+    const permissions = [
+      {
+        action: 'read',
+        subject: 'article',
+        properties: { fields: ['title'] },
+        conditions: [deniedCondition],
+      },
+    ];
+    const expectedPermissions = [];
 
-      const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility({
-        permissions,
-      });
-
-      expect(ability.rules).toMatchObject(expectedAbilityRules(expectedPermissions));
-
-      expect(ability.can('read')).toBeFalsy();
-      expect(ability.can('read', 'user')).toBeFalsy();
-      expect(ability.can('read', 'article', 'name')).toBeFalsy();
-
-      expect(ability.can('read', 'article')).toBeFalsy();
-      expect(ability.can('read', 'article', 'title')).toBeFalsy();
-
-      expect(createRegisterFunction).toBeCalledTimes(1);
-      expect(registerFunctions[0]).toBeCalledTimes(0);
+    const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility({
+      permissions,
     });
 
-    it('register action when conditions are met', async () => {
-      const permissions = [
-        {
-          action: 'read',
-          subject: 'article',
-          properties: { fields: ['title'] },
-          conditions: [allowedCondition],
-        },
-      ];
-      const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility({
-        permissions,
-      });
+    expect(ability.rules).toMatchObject(expectedAbilityRules(expectedPermissions));
 
-      expect(ability.rules).toMatchObject(expectedAbilityRules(permissions));
+    expect(ability.can('read')).toBeFalsy();
+    expect(ability.can('read', 'user')).toBeFalsy();
+    expect(ability.can('read', 'article', 'name')).toBeFalsy();
 
-      expect(ability.can('read')).toBeFalsy();
-      expect(ability.can('read', 'user')).toBeFalsy();
-      expect(ability.can('read', 'article', 'name')).toBeFalsy();
+    expect(ability.can('read', 'article')).toBeFalsy();
+    expect(ability.can('read', 'article', 'title')).toBeFalsy();
 
-      expect(ability.can('read', 'article')).toBeTruthy();
-      expect(ability.can('read', 'article', 'title')).toBeTruthy();
+    expect(createRegisterFunction).toBeCalledTimes(1);
+    expect(registerFunctions[0]).toBeCalledTimes(0);
+  });
 
-      expect(createRegisterFunction).toBeCalledTimes(1);
-      expect(registerFunctions[0]).toBeCalledWith({
-        ...permissions[0],
-        conditions: undefined,
-      });
+  it('register action when conditions are met', async () => {
+    const permissions = [
+      {
+        action: 'read',
+        subject: 'article',
+        properties: { fields: ['title'] },
+        conditions: [allowedCondition],
+      },
+    ];
+    const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility({
+      permissions,
     });
+
+    expect(ability.rules).toMatchObject(expectedAbilityRules(permissions));
+
+    expect(ability.can('read')).toBeFalsy();
+    expect(ability.can('read', 'user')).toBeFalsy();
+    expect(ability.can('read', 'article', 'name')).toBeFalsy();
+
+    expect(ability.can('read', 'article')).toBeTruthy();
+    expect(ability.can('read', 'article', 'title')).toBeTruthy();
+
+    expect(createRegisterFunction).toBeCalledTimes(1);
+    expect(registerFunctions[0]).toBeCalledWith(_.omit(permissions[0], ['conditions']));
   });
 
   describe('hooks', () => {
@@ -432,8 +469,7 @@ describe('Permissions Engine', () => {
     expect(beforeRegisterFn).toBeCalledTimes(1);
     expect(beforeRegisterFn).toBeCalledWith({
       condition: expect.any(Object),
-      createRegisterFunction: expect.anything(),
-      permission: { ...permissions[0], conditions: undefined },
+      permission: { ...permissions[0], conditions: undefined, properties: undefined },
     });
     expect(called).toEqual('beforeRegister');
   });
