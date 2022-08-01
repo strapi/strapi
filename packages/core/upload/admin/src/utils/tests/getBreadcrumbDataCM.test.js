@@ -1,22 +1,14 @@
-import { getBreadcrumbDataML } from '..';
+import { getBreadcrumbDataCM } from '..';
 
-const FIXTURE_PATHNAME = '/media-library';
-const FIXTURE_QUERY = {
-  _q: 'search',
-  some: 'thing',
-};
 const FIXTURE_FOLDER = {
   id: 1,
   name: 'first-level',
 };
 
-describe('getBreadcrumbDataML', () => {
+describe('getBreadcrumbDataCM', () => {
   test('return one item at the root of the media library', () => {
-    expect(
-      getBreadcrumbDataML(null, { pathname: FIXTURE_PATHNAME, query: FIXTURE_QUERY })
-    ).toStrictEqual([
+    expect(getBreadcrumbDataCM(null)).toStrictEqual([
       {
-        href: undefined,
         id: null,
         label: 'Media Library',
       },
@@ -24,15 +16,11 @@ describe('getBreadcrumbDataML', () => {
   });
 
   test('returns two items for the first level of the media library', () => {
-    expect(
-      getBreadcrumbDataML(FIXTURE_FOLDER, { pathname: FIXTURE_PATHNAME, query: FIXTURE_QUERY })
-    ).toStrictEqual([
+    expect(getBreadcrumbDataCM(FIXTURE_FOLDER)).toStrictEqual([
       {
-        href: '/media-library?some=thing',
         id: null,
         label: 'Media Library',
       },
-
       {
         id: 1,
         label: 'first-level',
@@ -42,21 +30,16 @@ describe('getBreadcrumbDataML', () => {
 
   test('returns three items for the second level of the media library', () => {
     expect(
-      getBreadcrumbDataML(
-        { ...FIXTURE_FOLDER, parent: { id: 2, name: 'second-level' } },
-        { pathname: FIXTURE_PATHNAME, query: FIXTURE_QUERY }
-      )
+      getBreadcrumbDataCM({ ...FIXTURE_FOLDER, parent: { id: 2, name: 'second-level' } })
     ).toStrictEqual([
       {
         id: null,
         label: 'Media Library',
-        href: '/media-library?some=thing',
       },
 
       {
         id: 2,
         label: 'second-level',
-        href: '/media-library?some=thing&folder=2',
       },
 
       {
@@ -68,28 +51,20 @@ describe('getBreadcrumbDataML', () => {
 
   test('returns four items for the third level of the media library', () => {
     expect(
-      getBreadcrumbDataML(
-        {
-          ...FIXTURE_FOLDER,
-          parent: { id: 2, name: 'second-level', parent: { id: 3, name: 'third-level' } },
-        },
-        { pathname: FIXTURE_PATHNAME, query: FIXTURE_QUERY }
-      )
+      getBreadcrumbDataCM({
+        ...FIXTURE_FOLDER,
+        parent: { id: 2, name: 'second-level', parent: { id: 3, name: 'third-level' } },
+      })
     ).toStrictEqual([
       {
         id: null,
         label: 'Media Library',
-        href: '/media-library?some=thing',
       },
-
       [],
-
       {
         id: 2,
         label: 'second-level',
-        href: '/media-library?some=thing&folder=2',
       },
-
       {
         id: 1,
         label: 'first-level',
