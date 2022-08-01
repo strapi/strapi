@@ -301,10 +301,8 @@ const createQueryBuilder = (uid, db) => {
           break;
         }
         case 'count': {
-          const dbColumnName =
-            state.count === '*' ? '*' : this.aliasColumn(helpers.toColumnName(meta, state.count));
-
-          qb.count({ count: dbColumnName });
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, 'id'));
+          qb.countDistinct({ count: dbColumnName });
           break;
         }
         case 'max': {
