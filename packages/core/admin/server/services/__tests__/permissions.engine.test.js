@@ -5,7 +5,7 @@ const { subject } = require('@casl/ability');
 const createConditionProvider = require('../../domain/condition/provider');
 const createPermissionsEngine = require('../permission/engine');
 
-describe('Permissions Engine', () => {
+describe.skip('Permissions Engine', () => {
   let conditionProvider;
   let engine;
 
