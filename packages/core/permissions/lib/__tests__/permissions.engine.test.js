@@ -185,22 +185,8 @@ describe('Permissions Engine', () => {
         conditions: undefined,
       });
     });
-
-    // it.only('registers action when conditions are met with subject', async () => {
-    //   const { ability } = await buildEngineWithAbility({
-    //     permissions: [{ action: 'read', subject: 'article', conditions: ['isOwner'] }],
-    //   });
-    //   expect(ability.can('read', 'article')).toBeTruthy();
-    //   expect(ability.can('read', subject('article', { id: 123 }))).toBeTruthy();
-    // });
   });
 
-  // TODO: test all hooks are called at the right time and bail correctly
-  // 'before-format::validate.permission': hooks.createAsyncBailHook(),
-  // 'format.permission': hooks.createAsyncSeriesWaterfallHook(),
-  // 'post-format::validate.permission': hooks.createAsyncBailHook(),
-  // 'before-evaluate.permission': hooks.createAsyncSeriesHook(),
-  // 'before-register.permission': hooks.createAsyncSeriesHook(),
   describe('hooks', () => {
     it('format.permission can modify permissions', async () => {
       const permissions = [{ action: 'read', subject: 'article' }];
@@ -224,8 +210,7 @@ describe('Permissions Engine', () => {
       expect(registerFunctions[0]).toBeCalledWith(replacePermission);
     });
 
-    // TODO: rewrite with mocks
-    it('validate hooks are called at the right time', async () => {
+    it('validate hooks are called in the right order', async () => {
       const permissions = [{ action: 'update' }, { action: 'delete' }, { action: 'view' }];
       const { ability } = await buildEngineWithAbility({
         permissions,
@@ -314,7 +299,7 @@ describe('Permissions Engine', () => {
       expect(called).toEqual('beforeEvaluate');
       called = 'beforeRegister';
     });
-    const permissions = [{ action: 'read', subject: 'article' }];
+    const permissions = [{ action: 'read', subject: 'article', conditions: [allowedCondition] }];
     await buildEngineWithAbility({
       permissions,
       engineHooks: [
@@ -338,7 +323,7 @@ describe('Permissions Engine', () => {
     expect(beforeRegisterFn).toBeCalledWith({
       condition: expect.any(Object),
       createRegisterFunction: expect.anything(),
-      permission: permissions[0],
+      permission: { ...permissions[0], conditions: undefined },
     });
     expect(called).toEqual('beforeRegister');
   });
