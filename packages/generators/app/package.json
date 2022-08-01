@@ -42,7 +42,7 @@
     "fs-extra": "10.0.0",
     "inquirer": "8.2.4",
     "lodash": "4.17.21",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.2.10",
     "node-machine-id": "^1.1.10",
     "ora": "^5.4.0",
     "tar": "6.1.11",
