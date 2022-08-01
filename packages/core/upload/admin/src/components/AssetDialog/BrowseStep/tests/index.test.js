@@ -6,7 +6,10 @@ import { NotificationsProvider } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from 'react-query';
 
+import { useFolder } from '../../../../hooks/useFolder';
 import { BrowseStep } from '..';
+
+jest.mock('../../../../hooks/useFolder');
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -116,6 +119,18 @@ describe('BrowseStep', () => {
   it('renders and match snapshot', () => {
     const { container } = setup();
     expect(container).toMatchSnapshot();
+  });
+
+  it('should not fetch folder if the user does not have the permission', () => {
+    const spy = jest.fn().mockReturnValueOnce({ isLoading: false });
+    useFolder.mockImplementationOnce(spy);
+
+    setup({
+      canRead: false,
+      queryObject: { folder: 1, page: 1, pageSize: 10, filters: { $and: [] } },
+    });
+
+    expect(spy).toHaveBeenCalledWith(1, { enabled: false });
   });
 
   it('calls onAddAsset callback', () => {
