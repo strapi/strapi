@@ -281,7 +281,7 @@ describe('Permissions Engine', () => {
     expect(registerFunctions[1]).toBeCalledWith(permissions[1]);
   });
 
-  it('does not register action when conditions not met', async () => {
+  it(`doesn't register action when conditions not met`, async () => {
     const permissions = [
       {
         action: 'read',
@@ -309,7 +309,7 @@ describe('Permissions Engine', () => {
     expect(registerFunctions[0]).toBeCalledTimes(0);
   });
 
-  it('register action when conditions are met', async () => {
+  it('registers an action when conditions are met', async () => {
     const permissions = [
       {
         action: 'read',
@@ -336,163 +336,183 @@ describe('Permissions Engine', () => {
   });
 
   describe('hooks', () => {
-    it('format.permission can modify permissions', async () => {
-      const permissions = [{ action: 'read', subject: 'article' }];
-      const newPermissions = [{ action: 'view', subject: 'article' }];
-      const { ability, registerFunctions } = await buildEngineWithAbility({
-        permissions,
-        engineHooks: [
-          {
-            name: 'format.permission',
-            // eslint-disable-next-line no-unused-vars
-            fn(permission) {
-              return newPermissions[0];
+    describe('format.permission', () => {
+      it('modifies permissions correctly', async () => {
+        const permissions = [{ action: 'read', subject: 'article' }];
+        const newPermissions = [{ action: 'view', subject: 'article' }];
+        const { ability, registerFunctions } = await buildEngineWithAbility({
+          permissions,
+          engineHooks: [
+            {
+              name: 'format.permission',
+              // eslint-disable-next-line no-unused-vars
+              fn(permission) {
+                return newPermissions[0];
+              },
             },
-          },
-        ],
+          ],
+        });
+
+        expect(ability.rules).toMatchObject(expectedAbilityRules(newPermissions));
+
+        expect(ability.can('read')).toBeFalsy();
+        expect(ability.can('read')).toBeFalsy();
+        expect(ability.can('view', 'article')).toBeTruthy();
+        expect(registerFunctions[0]).toBeCalledWith(newPermissions[0]);
       });
-
-      expect(ability.rules).toMatchObject(expectedAbilityRules(newPermissions));
-
-      expect(ability.can('read')).toBeFalsy();
-      expect(ability.can('read')).toBeFalsy();
-      expect(ability.can('view', 'article')).toBeTruthy();
-      expect(registerFunctions[0]).toBeCalledWith(newPermissions[0]);
     });
 
-    it('validate hooks are called in the right order', async () => {
-      const permissions = [{ action: 'update' }, { action: 'delete' }, { action: 'view' }];
-      const newPermissions = [{ action: 'modify' }, { action: 'remove' }];
+    describe('before-format::validate.permission', () => {
+      it('before-format::validate.permission can prevent action register', async () => {
+        const permissions = [{ action: 'read', subject: 'article' }];
+        const newPermissions = [];
+        const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility(
+          {
+            permissions,
+            engineHooks: [
+              {
+                name: 'before-format::validate.permission',
+                fn: generateInvalidateActionHook('read'),
+              },
+            ],
+          }
+        );
 
-      const { ability } = await buildEngineWithAbility({
-        permissions,
-        engineHooks: [
-          {
-            name: 'format.permission',
-            fn(permission) {
-              if (permission.action === 'update') {
-                return {
-                  ...permission,
-                  action: 'modify',
-                };
-              }
-              if (permission.action === 'delete') {
-                return {
-                  ...permission,
-                  action: 'remove',
-                };
-              }
-              if (permission.action === 'view') {
-                return {
-                  ...permission,
-                  action: 'read',
-                };
-              }
-              return permission;
-            },
-          },
-          {
-            name: 'before-format::validate.permission',
-            fn: generateInvalidateActionHook('modify'),
-          },
-          {
-            name: 'before-format::validate.permission',
-            fn: generateInvalidateActionHook('view'),
-          },
-          {
-            name: 'post-format::validate.permission',
-            fn: generateInvalidateActionHook('update'),
-          },
-        ],
+        expect(ability.rules).toMatchObject(expectedAbilityRules(newPermissions));
+
+        expect(ability.can('read', 'article')).toBeFalsy();
+        expect(ability.can('read', 'user')).toBeFalsy();
+        expect(createRegisterFunction).toBeCalledTimes(1);
+        expect(registerFunctions[0]).toBeCalledTimes(0);
       });
-
-      expect(ability.rules).toMatchObject(expectedAbilityRules(newPermissions));
-
-      expect(ability.can('update')).toBeFalsy();
-      expect(ability.can('modify')).toBeTruthy();
-      expect(ability.can('delete')).toBeFalsy();
-      expect(ability.can('remove')).toBeTruthy();
-      expect(ability.can('view')).toBeFalsy();
     });
 
-    it('before-format::validate.permission can prevent action register', async () => {
-      const permissions = [{ action: 'read', subject: 'article' }];
-      const newPermissions = [];
-      const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility({
-        permissions,
-        engineHooks: [
-          { name: 'before-format::validate.permission', fn: generateInvalidateActionHook('read') },
-        ],
+    describe('post-format::validate.permission', () => {
+      it('can prevent action register', async () => {
+        const permissions = [
+          { action: 'read', subject: 'article' },
+          { action: 'read', subject: 'user' },
+          { action: 'write', subject: 'article' },
+        ];
+        const newPermissions = [{ action: 'write', subject: 'article' }];
+        const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility(
+          {
+            permissions,
+            engineHooks: [
+              {
+                name: 'post-format::validate.permission',
+                fn: generateInvalidateActionHook('read'),
+              },
+            ],
+          }
+        );
+
+        expect(ability.rules).toMatchObject(expectedAbilityRules(newPermissions));
+
+        expect(ability.can('read', 'article')).toBeFalsy();
+        expect(ability.can('read', 'user')).toBeFalsy();
+        expect(ability.can('write', 'article')).toBeTruthy();
+        expect(createRegisterFunction).toBeCalledTimes(3);
+        expect(registerFunctions[0]).toBeCalledTimes(0);
+        expect(registerFunctions[1]).toBeCalledTimes(0);
+        expect(registerFunctions[2]).toBeCalledTimes(1);
       });
+    });
 
-      expect(ability.rules).toMatchObject(expectedAbilityRules(newPermissions));
+    describe('*validate* hooks', () => {
+      it('execute in the correct order', async () => {
+        const permissions = [{ action: 'update' }, { action: 'delete' }, { action: 'view' }];
+        const newPermissions = [{ action: 'modify' }, { action: 'remove' }];
 
-      expect(ability.can('read', 'article')).toBeFalsy();
-      expect(ability.can('read', 'user')).toBeFalsy();
-      expect(createRegisterFunction).toBeCalledTimes(1);
-      expect(registerFunctions[0]).toBeCalledTimes(0);
+        const { ability } = await buildEngineWithAbility({
+          permissions,
+          engineHooks: [
+            {
+              name: 'format.permission',
+              fn(permission) {
+                if (permission.action === 'update') {
+                  return {
+                    ...permission,
+                    action: 'modify',
+                  };
+                }
+                if (permission.action === 'delete') {
+                  return {
+                    ...permission,
+                    action: 'remove',
+                  };
+                }
+                if (permission.action === 'view') {
+                  return {
+                    ...permission,
+                    action: 'read',
+                  };
+                }
+                return permission;
+              },
+            },
+            {
+              name: 'before-format::validate.permission',
+              fn: generateInvalidateActionHook('modify'),
+            },
+            {
+              name: 'before-format::validate.permission',
+              fn: generateInvalidateActionHook('view'),
+            },
+            {
+              name: 'post-format::validate.permission',
+              fn: generateInvalidateActionHook('update'),
+            },
+          ],
+        });
+
+        expect(ability.rules).toMatchObject(expectedAbilityRules(newPermissions));
+
+        expect(ability.can('update')).toBeFalsy();
+        expect(ability.can('modify')).toBeTruthy();
+        expect(ability.can('delete')).toBeFalsy();
+        expect(ability.can('remove')).toBeTruthy();
+        expect(ability.can('view')).toBeFalsy();
+      });
     });
   });
 
-  it('post-format::validate.permission can prevent action register', async () => {
-    const permissions = [
-      { action: 'read', subject: 'article' },
-      { action: 'read', subject: 'user' },
-      { action: 'write', subject: 'article' },
-    ];
-    const newPermissions = [{ action: 'write', subject: 'article' }];
-    const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility({
-      permissions,
-      engineHooks: [
-        { name: 'post-format::validate.permission', fn: generateInvalidateActionHook('read') },
-      ],
-    });
+  describe('before-* hooks', () => {
+    it('execute in the correct order', async () => {
+      let called = '';
+      const beforeEvaluateFn = jest.fn(() => {
+        called = 'beforeEvaluate';
+      });
+      const beforeRegisterFn = jest.fn(() => {
+        expect(called).toEqual('beforeEvaluate');
+        called = 'beforeRegister';
+      });
+      const permissions = [{ action: 'read', subject: 'article', conditions: [allowedCondition] }];
+      await buildEngineWithAbility({
+        permissions,
+        engineHooks: [
+          {
+            name: 'before-evaluate.permission',
+            fn: beforeEvaluateFn,
+          },
+          {
+            name: 'before-register.permission',
+            fn: beforeRegisterFn,
+          },
+        ],
+      });
 
-    expect(ability.rules).toMatchObject(expectedAbilityRules(newPermissions));
-
-    expect(ability.can('read', 'article')).toBeFalsy();
-    expect(ability.can('read', 'user')).toBeFalsy();
-    expect(ability.can('write', 'article')).toBeTruthy();
-    expect(createRegisterFunction).toBeCalledTimes(3);
-    expect(registerFunctions[0]).toBeCalledTimes(0);
-    expect(registerFunctions[1]).toBeCalledTimes(0);
-    expect(registerFunctions[2]).toBeCalledTimes(1);
-  });
-
-  it('before-evaluate and before-register are called in the right order', async () => {
-    let called = '';
-    const beforeEvaluateFn = jest.fn(() => {
-      called = 'beforeEvaluate';
+      expect(beforeEvaluateFn).toBeCalledTimes(1);
+      expect(beforeEvaluateFn).toBeCalledWith({
+        addCondition: expect.any(Function),
+        permission: permissions[0],
+      });
+      expect(beforeRegisterFn).toBeCalledTimes(1);
+      expect(beforeRegisterFn).toBeCalledWith({
+        condition: expect.any(Object),
+        permission: { ...permissions[0], conditions: undefined, properties: undefined },
+      });
+      expect(called).toEqual('beforeRegister');
     });
-    const beforeRegisterFn = jest.fn(() => {
-      expect(called).toEqual('beforeEvaluate');
-      called = 'beforeRegister';
-    });
-    const permissions = [{ action: 'read', subject: 'article', conditions: [allowedCondition] }];
-    await buildEngineWithAbility({
-      permissions,
-      engineHooks: [
-        {
-          name: 'before-evaluate.permission',
-          fn: beforeEvaluateFn,
-        },
-        {
-          name: 'before-register.permission',
-          fn: beforeRegisterFn,
-        },
-      ],
-    });
-
-    expect(beforeEvaluateFn).toBeCalledTimes(1);
-    expect(beforeEvaluateFn).toBeCalledWith({
-      addCondition: expect.any(Function),
-      permission: permissions[0],
-    });
-    expect(beforeRegisterFn).toBeCalledTimes(1);
-    expect(beforeRegisterFn).toBeCalledWith({
-      condition: expect.any(Object),
-      permission: { ...permissions[0], conditions: undefined, properties: undefined },
-    });
-    expect(called).toEqual('beforeRegister');
   });
 });
