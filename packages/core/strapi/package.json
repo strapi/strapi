@@ -119,7 +119,7 @@
     "koa-static": "5.0.0",
     "lodash": "4.17.21",
     "mime-types": "2.1.35",
-    "node-fetch": "2.6.7",
+    "node-fetch": "3.2.10",
     "node-machine-id": "1.1.12",
     "node-schedule": "2.1.0",
     "open": "8.4.0",
