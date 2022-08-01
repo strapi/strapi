@@ -201,15 +201,37 @@ describe('Permissions Engine', () => {
         conditions: ['hasId123'],
       },
     ];
-    const user = subject('article', { id: 123 });
+
     const { ability, registerFunctions } = await buildEngineWithAbility({
       permissions,
-      abilityOptions: user,
+      abilityOptions: subject('article', { id: 123 }),
     });
 
     expect(ability.can('read', 'article')).toBeTruthy();
+    expect(ability.can('read', 'article', 'name')).toBeTruthy();
 
     expect(registerFunctions[0]).toBeCalledWith(_.omit(permissions[0], ['conditions']));
+  });
+
+  it(`doesn't register action when subject object doesn't meet condition`, async () => {
+    const permissions = [
+      {
+        action: 'read',
+        subject: 'article',
+        properties: { fields: ['**'] },
+        conditions: ['hasId123'],
+      },
+    ];
+
+    const { ability, registerFunctions } = await buildEngineWithAbility({
+      permissions,
+      abilityOptions: subject('article', { id: 124 }),
+    });
+
+    expect(ability.can('read', 'article')).toBeFalsy();
+    expect(ability.can('read', 'article', 'name')).toBeFalsy();
+
+    expect(registerFunctions[0]).toBeCalledTimes(0);
   });
 
   it('registers action with subject and properties', async () => {
