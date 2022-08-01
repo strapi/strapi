@@ -3,41 +3,46 @@
 const _ = require('lodash');
 const { subject } = require('@casl/ability');
 
-const createConditionProvider = require('../../../admin/server/domain/condition/provider');
+// const createConditionProvider = require('../../../admin/server/domain/condition/provider');
 const permissions = require('../');
 
 describe('Permissions Engine', () => {
-  const allowedCondition = 'isAuthor';
-  const deniedCondition = 'isAdmin';
+  const allowedCondition = 'plugin::test.isAuthor';
+  const deniedCondition = 'plugin::test.isAdmin';
 
   const conditions = [
     {
       plugin: 'test',
-      name: 'isId',
+      name: 'plugin::test.isAuthor',
       category: 'default',
-      handler: async params => new Promise(resolve => resolve(params.id === '123')),
+      async handler() {
+        return new Promise(resolve => resolve(true));
+      },
+    },
+    {
+      plugin: 'test',
+      name: 'plugin::test.isAdmin',
+      category: 'default',
+      async handler() {
+        return new Promise(resolve => resolve(false));
+      },
     },
   ];
 
   const providers = {
-    // action: {
-    //   get(params) {
-    //     console.log('action', params);
-    //   },
-    // },
-    // condition: {
-    //   // TODO: mock these
-    //   get(condition) {
-    //     console.log('condition', condition);
-    //     return {
-    //       name: condition,
-    //       async handler(params) {
-    //         if (params.permission.conditions.includes(allowedCondition)) return true;
-    //         return false;
-    //       },
-    //     };
-    //   },
-    // },
+    condition: {
+      // TODO: mock these
+      get(condition) {
+        const c = conditions.find(c => c.name === condition);
+        if (c) return c;
+        return {
+          async handler(params) {
+            console.log('missing condition', params);
+            return true;
+          },
+        };
+      },
+    },
   };
 
   /**
@@ -89,9 +94,10 @@ describe('Permissions Engine', () => {
     engineProviders = providers,
     engineHooks,
   }) => {
-    const conditionProvider = createConditionProvider();
-    await conditionProvider.registerMany(conditions);
-    engineProviders.condition = conditionProvider;
+    /** @type {import('../engine').ConditionProvider} */
+    // const conditionProvider = createConditionProvider();
+    // await conditionProvider.registerMany(conditions);
+    // engineProviders.condition = conditionProvider;
 
     let registerFunctions = [];
     const createRegisterFunction = jest.fn((can, options) => {
@@ -122,7 +128,7 @@ describe('Permissions Engine', () => {
    */
   const expectedAbilityRules = permissions =>
     permissions.map(permission => {
-      const rules = _.omit(permission, ['properties']);
+      const rules = _.omit(permission, ['properties', 'conditions']);
       if (permission.properties && permission.properties.fields)
         rules.fields = permission.properties.fields;
       if (!permission.subject) rules.subject = 'all';
@@ -178,6 +184,13 @@ describe('Permissions Engine', () => {
     expect(registerFunctions[0]).toBeCalledWith(permissions[0]);
   });
 
+  it('throws on empty fields array', async () => {
+    const permissions = [{ action: 'read', subject: 'article', properties: { fields: [] } }];
+    await expect(buildEngineWithAbility({ permissions })).rejects.toThrow(
+      '`rawRule.fields` cannot be an empty array. https://bit.ly/390miLa'
+    );
+  });
+
   it('properties wildcards work correctly', async () => {
     const permissions = [
       { action: 'read', subject: 'article', properties: { fields: ['**'] } },
@@ -205,7 +218,7 @@ describe('Permissions Engine', () => {
   });
 
   describe('conditions', () => {
-    it.skip('does not register action when conditions not met', async () => {
+    it('does not register action when conditions not met', async () => {
       const permissions = [
         {
           action: 'read',
@@ -214,11 +227,13 @@ describe('Permissions Engine', () => {
           conditions: [deniedCondition],
         },
       ];
+      const expectedPermissions = [];
+
       const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility({
         permissions,
       });
 
-      expect(ability.rules).toMatchObject(expectedAbilityRules(permissions));
+      expect(ability.rules).toMatchObject(expectedAbilityRules(expectedPermissions));
 
       expect(ability.can('read')).toBeFalsy();
       expect(ability.can('read', 'user')).toBeFalsy();
@@ -231,7 +246,7 @@ describe('Permissions Engine', () => {
       expect(registerFunctions[0]).toBeCalledTimes(0);
     });
 
-    it.skip('register action when conditions are met', async () => {
+    it('register action when conditions are met', async () => {
       const permissions = [
         {
           action: 'read',
@@ -385,7 +400,7 @@ describe('Permissions Engine', () => {
     expect(registerFunctions[2]).toBeCalledTimes(1);
   });
 
-  it.skip('before-evaluate and before-register are called in the right order', async () => {
+  it('before-evaluate and before-register are called in the right order', async () => {
     let called = '';
     const beforeEvaluateFn = jest.fn(() => {
       called = 'beforeEvaluate';
