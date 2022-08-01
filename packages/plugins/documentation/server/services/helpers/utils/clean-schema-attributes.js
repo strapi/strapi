@@ -7,12 +7,12 @@ const pascalCase = require('./pascal-case');
  * @description - Converts types found on attributes to OpenAPI acceptable data types
  *
  * @param {object} attributes - The attributes found on a contentType
- * @param {{ typeMap: Map, isRequest: boolean, addSchema: function, componentSchemaRefName: string }} opts
+ * @param {{ typeMap: Map, isRequest: boolean, addComponentSchema: function, componentSchemaRefName: string }} opts
  * @returns Attributes using OpenAPI acceptable data types
  */
 const cleanSchemaAttributes = (
   attributes,
-  { typeMap = new Map(), isRequest = false, addSchema = () => {}, componentSchemaRefName = '' } = {}
+  { typeMap = new Map(), isRequest = false, addComponentSchema = () => {}, componentSchemaRefName = '' } = {}
 ) => {
   const attributesCopy = _.cloneDeep(attributes);
 
@@ -100,9 +100,9 @@ const cleanSchemaAttributes = (
           },
         };
         const refComponentSchema = {
-          $ref: `#/components/schemas/${`${pascalCase(attribute.component)}Component`}`,
+          $ref: `#/components/schemas/${pascalCase(attribute.component)}Component`,
         };
-        const componentExists = addSchema(
+        const componentExists = addComponentSchema(
           `${pascalCase(attribute.component)}Component`,
           rawComponentSchema
         );
@@ -125,11 +125,11 @@ const cleanSchemaAttributes = (
             properties: {
               ...(isRequest ? {} : { id: { type: 'string' } }),
               __component: { type: 'string' },
-              ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest, addSchema }),
+              ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest, addComponentSchema }),
             },
           };
           const refComponentSchema = { $ref: `#/components/schemas/${pascalCase(component)}` };
-          const componentExists = addSchema(pascalCase(component), rawComponentSchema);
+          const componentExists = addComponentSchema(pascalCase(component), rawComponentSchema);
           const finalComponentSchema = componentExists ? refComponentSchema : rawComponentSchema;
           return finalComponentSchema;
         });

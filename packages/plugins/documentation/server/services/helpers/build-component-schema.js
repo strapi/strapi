@@ -21,7 +21,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
   let schemas = {};
   let componentSchemas = {};
   // adds a ComponentSchema to the Schemas so it can be used as Ref
-  const addSchema = (schemaName, schema) => {
+  const addComponentSchema = (schemaName, schema) => {
     if (!Object.keys(schema) || !Object.keys(schema.properties)) {
       return false;
     }
@@ -65,7 +65,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         [`${pascalCase(uniqueName)}LocalizationRequest`]: {
           required: [...requiredAttributes, 'locale'],
           type: 'object',
-          properties: cleanSchemaAttributes(attributesForRequest, { isRequest: true, addSchema }),
+          properties: cleanSchemaAttributes(attributesForRequest, { isRequest: true, addComponentSchema }),
         },
       };
     }
@@ -80,7 +80,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
           data: {
             required: requiredAttributes,
             type: 'object',
-            properties: cleanSchemaAttributes(attributesForRequest, { isRequest: true, addSchema }),
+            properties: cleanSchemaAttributes(attributesForRequest, { isRequest: true, addComponentSchema }),
           },
         },
       },
@@ -94,7 +94,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         type: 'object',
         properties: {
           id: { type: 'string' },
-          ...cleanSchemaAttributes(attributes, { addSchema }),
+          ...cleanSchemaAttributes(attributes, { addComponentSchema }),
         },
       },
     };
@@ -113,7 +113,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
           attributes: {
             type: 'object',
             properties: cleanSchemaAttributes(attributes, {
-              addSchema,
+              addComponentSchema,
               componentSchemaRefName: `#/components/schemas/${pascalCase(
                 uniqueName
               )}ListResponseDataItemLocalized`,
@@ -127,7 +127,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
           id: { type: 'string' },
           attributes: {
             type: 'object',
-            properties: cleanSchemaAttributes(attributes, { addSchema }),
+            properties: cleanSchemaAttributes(attributes, { addComponentSchema }),
           },
         },
       },
@@ -167,7 +167,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         attributes: {
           type: 'object',
           properties: cleanSchemaAttributes(attributes, {
-            addSchema,
+            addComponentSchema,
             componentSchemaRefName: `#/components/schemas/${pascalCase(
               uniqueName
             )}ResponseDataObjectLocalized`,
@@ -181,7 +181,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         id: { type: 'string' },
         attributes: {
           type: 'object',
-          properties: cleanSchemaAttributes(attributes, { addSchema }),
+          properties: cleanSchemaAttributes(attributes, { addComponentSchema }),
         },
       },
     },
