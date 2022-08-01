@@ -49,7 +49,7 @@ const setup = props =>
 
 describe('Media Library | Breadcrumbs', () => {
   test('should render and match snapshot', () => {
-    const { container } = setup();
+    const { container } = setup({ currentFolderId: 22 });
 
     expect(container.querySelector('nav')).toBeInTheDocument();
     expect(screen.getByText('parent folder')).toBeInTheDocument();
@@ -59,7 +59,7 @@ describe('Media Library | Breadcrumbs', () => {
   });
 
   test('should store other ascendants in simple menu', async () => {
-    const { getByRole } = setup();
+    const { getByRole } = setup({ currentFolderId: 22 });
 
     const simpleMenuButton = getByRole('button', { name: /get more ascendants folders/i });
     fireEvent.mouseDown(simpleMenuButton);

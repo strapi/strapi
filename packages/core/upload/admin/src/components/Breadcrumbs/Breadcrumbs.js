@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 
 import {
@@ -9,7 +10,7 @@ import {
 import { CrumbSimpleMenuAsync } from './CrumbSimpleMenuAsync';
 import { BreadcrumbsDefinition } from '../../constants';
 
-export const Breadcrumbs = ({ breadcrumbs, ...props }) => (
+export const Breadcrumbs = ({ breadcrumbs, onChangeFolder, currentFolderId, ...props }) => (
   <BaseBreadcrumbs {...props}>
     {breadcrumbs.map((crumb, index) => {
       if (Array.isArray(crumb)) {
@@ -19,13 +20,23 @@ export const Breadcrumbs = ({ breadcrumbs, ...props }) => (
               .splice(index + 1, breadcrumbs.length - 1)
               .map(parent => parent.id)}
             key={`breadcrumb-${crumb?.id ?? 'menu'}`}
+            currentFolderId={currentFolderId}
+            onChangeFolder={onChangeFolder}
           />
         );
       }
 
-      if (crumb.href) {
+      const isCurrentFolderMediaLibrary = crumb.id === null && currentFolderId === undefined;
+
+      if (currentFolderId !== crumb.id && !isCurrentFolderMediaLibrary) {
         return (
-          <CrumbLink key={`breadcrumb-${crumb?.id ?? 'root'}`} as={NavLink} to={crumb.href}>
+          <CrumbLink
+            key={`breadcrumb-${crumb?.id ?? 'root'}`}
+            as={onChangeFolder ? 'button' : NavLink}
+            type={onChangeFolder && 'button'}
+            to={onChangeFolder ? undefined : crumb.href}
+            onClick={onChangeFolder && (() => onChangeFolder(crumb.id))}
+          >
             {crumb.label}
           </CrumbLink>
         );
@@ -43,6 +54,13 @@ export const Breadcrumbs = ({ breadcrumbs, ...props }) => (
   </BaseBreadcrumbs>
 );
 
+Breadcrumbs.defaultProps = {
+  currentFolderId: undefined,
+  onChangeFolder: undefined,
+};
+
 Breadcrumbs.propTypes = {
   breadcrumbs: BreadcrumbsDefinition.isRequired,
+  currentFolderId: PropTypes.number,
+  onChangeFolder: PropTypes.func,
 };

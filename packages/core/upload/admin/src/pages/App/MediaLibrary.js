@@ -33,7 +33,7 @@ import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
-import { getTrad, containsAssetFilter, getBreadcrumbData, getFolderURL } from '../../utils';
+import { getTrad, containsAssetFilter, getBreadcrumbDataML, getFolderURL } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useFolder } from '../../hooks/useFolder';
@@ -151,7 +151,7 @@ export const MediaLibrary = () => {
       <Main aria-busy={isLoading}>
         <Header
           breadcrumbs={
-            !isCurrentFolderLoading && getBreadcrumbData(currentFolder, { pathname, query })
+            !isCurrentFolderLoading && getBreadcrumbDataML(currentFolder, { pathname, query })
           }
           canCreate={canCreate}
           onToggleEditFolderDialog={toggleEditFolderDialog}

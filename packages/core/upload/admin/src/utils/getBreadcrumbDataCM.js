@@ -1,11 +1,8 @@
-import getFolderURL from './getFolderURL';
-
-const getBreadcrumbData = (folder, { pathname, query }) => {
+const getBreadcrumbDataML = folder => {
   let data = [
     {
       id: null,
       label: 'Media Library',
-      href: folder ? getFolderURL(pathname, query) : undefined,
     },
   ];
 
@@ -17,7 +14,6 @@ const getBreadcrumbData = (folder, { pathname, query }) => {
     data.push({
       id: folder.parent.id,
       label: folder.parent.name,
-      href: getFolderURL(pathname, query, folder.parent),
     });
   }
 
@@ -31,4 +27,4 @@ const getBreadcrumbData = (folder, { pathname, query }) => {
   return data;
 };
 
-export default getBreadcrumbData;
+export default getBreadcrumbDataML;
