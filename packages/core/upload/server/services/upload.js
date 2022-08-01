@@ -176,6 +176,8 @@ module.exports = ({ strapi }) => ({
     // Store width and height of the original image
     const { width, height } = await getDimensions(fileData);
 
+    // Make sure this is assigned before calling upload
+    // That way it can mutate the width and height
     _.assign(fileData, {
       width,
       height,
