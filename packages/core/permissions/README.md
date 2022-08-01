@@ -59,7 +59,7 @@ const ability = await engine.generateAbility([
   },
 ]);
 
-ability.can('read'); // false since we didn't register the read permission because of the validation hook
+ability.can('read'); // false since the validation hook prevents the engine from registering the permission
 ability.can('publish'); // false
 ability.can('update', 'foo'); // false
 ability.can('update', 'bar'); // true

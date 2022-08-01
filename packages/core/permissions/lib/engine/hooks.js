@@ -11,7 +11,7 @@ const domain = require('../domain');
 const createEngineHooks = () => ({
   'before-format::validate.permission': hooks.createAsyncBailHook(),
   'format.permission': hooks.createAsyncSeriesWaterfallHook(),
-  'post-format::validate.permission': hooks.createAsyncBailHook(),
+  'after-format::validate.permission': hooks.createAsyncBailHook(),
   'before-evaluate.permission': hooks.createAsyncSeriesHook(),
   'before-register.permission': hooks.createAsyncSeriesHook(),
 });

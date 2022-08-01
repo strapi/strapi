@@ -51,7 +51,7 @@ module.exports = params => {
     /**
      * Ignore the permission if the fields property is an empty array (access to no field)
      */
-    .on('post-format::validate.permission', ({ permission }) => {
+    .on('after-format::validate.permission', ({ permission }) => {
       const { fields } = permission.properties;
 
       if (isArray(fields) && isEmpty(fields)) {

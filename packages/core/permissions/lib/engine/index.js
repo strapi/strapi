@@ -68,12 +68,12 @@ module.exports = {
 
       const permission = await state.hooks['format.permission'].call(params.permission);
 
-      const postFormatValidation = await runValidationHook(
-        'post-format::validate.permission',
+      const afterFormatValidation = await runValidationHook(
+        'after-format::validate.permission',
         createValidateContext(permission)
       );
 
-      if (postFormatValidation === false) {
+      if (afterFormatValidation === false) {
         return;
       }
 
