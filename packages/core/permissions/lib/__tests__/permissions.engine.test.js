@@ -135,7 +135,7 @@ describe('Permissions Engine', () => {
   });
 
   describe('conditions', () => {
-    it.skip('does not register action when conditions not met', async () => {
+    it('does not register action when conditions not met', async () => {
       const permissions = [
         {
           action: 'read',
@@ -144,7 +144,9 @@ describe('Permissions Engine', () => {
           conditions: [deniedCondition],
         },
       ];
-      const { ability, registerFunctions } = await buildEngineWithAbility({ permissions });
+      const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility({
+        permissions,
+      });
 
       expect(ability.can('read')).toBeFalsy();
       expect(ability.can('read', 'user')).toBeFalsy();
@@ -153,10 +155,11 @@ describe('Permissions Engine', () => {
       expect(ability.can('read', 'article')).toBeFalsy();
       expect(ability.can('read', 'article', 'title')).toBeFalsy();
 
-      expect(registerFunctions[0]).toBeCalledWith(permissions[0]);
+      expect(createRegisterFunction).toBeCalledTimes(1);
+      expect(registerFunctions[0]).toBeCalledTimes(0);
     });
 
-    it.skip('register action when conditions are met', async () => {
+    it('register action when conditions are met', async () => {
       const permissions = [
         {
           action: 'read',
@@ -165,7 +168,9 @@ describe('Permissions Engine', () => {
           conditions: [allowedCondition],
         },
       ];
-      const { ability, registerFunctions } = await buildEngineWithAbility({ permissions });
+      const { ability, registerFunctions, createRegisterFunction } = await buildEngineWithAbility({
+        permissions,
+      });
 
       expect(ability.can('read')).toBeFalsy();
       expect(ability.can('read', 'user')).toBeFalsy();
@@ -174,7 +179,11 @@ describe('Permissions Engine', () => {
       expect(ability.can('read', 'article')).toBeTruthy();
       expect(ability.can('read', 'article', 'title')).toBeTruthy();
 
-      expect(registerFunctions[0]).toBeCalledWith(permissions[0]);
+      expect(createRegisterFunction).toBeCalledTimes(1);
+      expect(registerFunctions[0]).toBeCalledWith({
+        ...permissions[0],
+        conditions: undefined,
+      });
     });
 
     // it.only('registers action when conditions are met with subject', async () => {
