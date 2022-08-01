@@ -38,6 +38,7 @@ const pagination = require('./pagination');
 const sanitize = require('./sanitize');
 const traverseEntity = require('./traverse-entity');
 const pipeAsync = require('./pipe-async');
+const hashAdminUser = require('./unique-admin-hash');
 
 module.exports = {
   yup,
@@ -79,4 +80,5 @@ module.exports = {
   errors,
   validateYupSchema,
   validateYupSchemaSync,
+  hashAdminUser,
 };
