@@ -987,7 +987,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c71:hover:not([aria-disabled='true']) .sc-eaPPdL {
+.c71:hover:not([aria-disabled='true']) .sc-inrDdN {
   color: #271fe0;
 }
 
@@ -1011,7 +1011,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c88:hover:not([aria-disabled='true']) .sc-eaPPdL {
+.c88:hover:not([aria-disabled='true']) .sc-inrDdN {
   color: #271fe0;
 }
 
@@ -2845,7 +2845,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c82:hover:not([aria-disabled='true']) .sc-eaPPdL {
+.c82:hover:not([aria-disabled='true']) .sc-inrDdN {
   color: #271fe0;
 }
 
@@ -2869,7 +2869,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c99:hover:not([aria-disabled='true']) .sc-eaPPdL {
+.c99:hover:not([aria-disabled='true']) .sc-inrDdN {
   color: #271fe0;
 }
 
