@@ -3,6 +3,7 @@
   "version": "4.3.0",
   "main": "index.js",
   "license": "MIT",
+  "private": true,
   "devDependencies": {
     "@babel/core": "^7.16.7",
     "@babel/plugin-proposal-class-properties": "7.16.7",
