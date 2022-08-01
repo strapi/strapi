@@ -170,17 +170,13 @@ const convertPopulateObject = (populate, schema) => {
     // FIXME: This is a temporary solution for dynamic zones that should be
     // fixed when we'll implement a more accurate way to query them
     if (attribute.type === 'dynamiczone') {
-      const generatedFakeDynamicZoneSchema = {
-        uid: `${schema.uid}.${key}`,
-        attributes: attribute.components
-          .sort()
-          .map(uid => strapi.getModel(uid).attributes)
-          .reduce((acc, componentAttributes) => ({ ...acc, ...componentAttributes }), {}),
-      };
+      const attributeComponents = attribute.components
+        .sort()
+        .map(uid => strapi.getModel(uid).attributes);
 
       return {
         ...acc,
-        [key]: convertNestedPopulate(subPopulate, generatedFakeDynamicZoneSchema),
+        [key]: convertDynamicZonePopulate(`${schema.uid}.${key}`, subPopulate, attributeComponents),
       };
     }
 
@@ -209,6 +205,17 @@ const convertPopulateObject = (populate, schema) => {
       ...acc,
       [key]: convertNestedPopulate(subPopulate, targetSchema),
     };
+  }, {});
+};
+
+const convertDynamicZonePopulate = (uid, subPopulate, components) => {
+  return components.reduce((result, componet) => {
+    const generatedFakeDynamicZoneSchema = {
+      uid,
+      attributes: componet,
+    };
+    const componetPopulate = convertNestedPopulate(subPopulate, generatedFakeDynamicZoneSchema);
+    return _.merge(result, componetPopulate);
   }, {});
 };
 
