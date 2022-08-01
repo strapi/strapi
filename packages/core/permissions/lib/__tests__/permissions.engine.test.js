@@ -305,7 +305,6 @@ describe('Permissions Engine', () => {
     expect(registerFunctions[0]).toBeCalledTimes(0);
   });
 
-  // TODO: mocks
   it('before-evaluate and before-register are called in the right order', async () => {
     let called = '';
     const beforeEvaluateFn = jest.fn(() => {
@@ -315,8 +314,9 @@ describe('Permissions Engine', () => {
       expect(called).toEqual('beforeEvaluate');
       called = 'beforeRegister';
     });
+    const permissions = [{ action: 'read', subject: 'article' }];
     await buildEngineWithAbility({
-      permissions: [{ action: 'read', subject: 'article' }],
+      permissions,
       engineHooks: [
         {
           name: 'before-evaluate.permission',
@@ -330,7 +330,16 @@ describe('Permissions Engine', () => {
     });
 
     expect(beforeEvaluateFn).toBeCalledTimes(1);
-    expect(beforeEvaluateFn).toBeCalledTimes(1);
+    expect(beforeEvaluateFn).toBeCalledWith({
+      addCondition: expect.any(Function),
+      permission: permissions[0],
+    });
+    expect(beforeRegisterFn).toBeCalledTimes(1);
+    expect(beforeRegisterFn).toBeCalledWith({
+      condition: expect.any(Object),
+      createRegisterFunction: expect.anything(),
+      permission: permissions[0],
+    });
     expect(called).toEqual('beforeRegister');
   });
 });
