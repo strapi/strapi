@@ -100,22 +100,18 @@ describe('Permissions Engine', () => {
     abilityOptions,
   }) => {
     /** @type {import('../engine').ConditionProvider} */
-    // const conditionProvider = createConditionProvider();
-    // await conditionProvider.registerMany(conditions);
-    // engineProviders.condition = conditionProvider;
-
     let registerFunctions = [];
-    const createRegisterFunction = jest.fn((can, options) => {
-      const registerFunction = jest.fn(engine.createRegisterFunction(can, options));
-      registerFunctions.push(registerFunction);
-      return registerFunction;
-    });
     const engine = buildEngineWithHooks({ providers: engineProviders }, engineHooks);
-    const ability = await engine.generateAbility(
-      permissions,
-      abilityOptions,
-      createRegisterFunction
-    );
+    const crf = engine.createRegisterFunction;
+    const createRegisterFunction = jest
+      .spyOn(engine, 'createRegisterFunction')
+      .mockImplementation((can, options) => {
+        const registerFunction = jest.fn(crf(can, options));
+        registerFunctions.push(registerFunction);
+        return registerFunction;
+      });
+
+    const ability = await engine.generateAbility(permissions, abilityOptions);
     return {
       engine,
       ability,
