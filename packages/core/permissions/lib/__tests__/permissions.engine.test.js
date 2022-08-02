@@ -10,7 +10,6 @@ describe('Permissions Engine', () => {
 
   const conditions = [
     {
-      plugin: 'test',
       name: 'plugin::test.isAuthor',
       category: 'default',
       async handler() {
@@ -18,7 +17,6 @@ describe('Permissions Engine', () => {
       },
     },
     {
-      plugin: 'test',
       name: 'plugin::test.isAdmin',
       category: 'default',
       async handler() {
@@ -26,11 +24,10 @@ describe('Permissions Engine', () => {
       },
     },
     {
-      plugin: 'test',
-      name: 'hasId123',
+      name: 'hasId125',
       category: 'default',
-      async handler(params) {
-        return new Promise(resolve => resolve(params.id === 123));
+      async handler() {
+        return { id: 125 };
       },
     },
   ];
@@ -99,14 +96,13 @@ describe('Permissions Engine', () => {
     engineHooks,
     abilityOptions,
   }) => {
-    /** @type {import('../engine').ConditionProvider} */
     let registerFunctions = [];
     const engine = buildEngineWithHooks({ providers: engineProviders }, engineHooks);
-    const crf = engine.createRegisterFunction;
+    const engineCrf = engine.createRegisterFunction;
     const createRegisterFunction = jest
       .spyOn(engine, 'createRegisterFunction')
       .mockImplementation((can, options) => {
-        const registerFunction = jest.fn(crf(can, options));
+        const registerFunction = jest.fn(engineCrf(can, options));
         registerFunctions.push(registerFunction);
         return registerFunction;
       });
@@ -194,40 +190,34 @@ describe('Permissions Engine', () => {
         action: 'read',
         subject: 'article',
         properties: { fields: ['**'] },
-        conditions: ['hasId123'],
+        conditions: ['hasId125'],
       },
     ];
 
     const { ability, registerFunctions } = await buildEngineWithAbility({
       permissions,
-      abilityOptions: subject('article', { id: 123 }),
     });
 
     expect(ability.can('read', 'article')).toBeTruthy();
     expect(ability.can('read', 'article', 'name')).toBeTruthy();
+    expect(ability.can('read', subject('article', { id: 123 }))).toBeFalsy();
+    expect(ability.can('read', subject('article', { id: 125 }))).toBeTruthy();
+    expect(ability.can('read', subject('user', { id: 125 }))).toBeFalsy();
 
-    expect(registerFunctions[0]).toBeCalledWith(_.omit(permissions[0], ['conditions']));
-  });
-
-  it(`doesn't register action when subject object doesn't meet condition`, async () => {
-    const permissions = [
-      {
-        action: 'read',
-        subject: 'article',
-        properties: { fields: ['**'] },
-        conditions: ['hasId123'],
+    expect(registerFunctions[0]).toBeCalledWith({
+      ..._.omit(permissions[0], ['conditions']),
+      condition: {
+        $and: [
+          {
+            $or: [
+              {
+                id: 125,
+              },
+            ],
+          },
+        ],
       },
-    ];
-
-    const { ability, registerFunctions } = await buildEngineWithAbility({
-      permissions,
-      abilityOptions: subject('article', { id: 124 }),
     });
-
-    expect(ability.can('read', 'article')).toBeFalsy();
-    expect(ability.can('read', 'article', 'name')).toBeFalsy();
-
-    expect(registerFunctions[0]).toBeCalledTimes(0);
   });
 
   it('registers action with subject and properties', async () => {
