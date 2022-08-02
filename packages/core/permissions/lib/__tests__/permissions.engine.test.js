@@ -241,7 +241,7 @@ describe('Permissions Engine', () => {
     );
   });
 
-  it('properties wildcards work correctly', async () => {
+  it('handles nested properties correctly', async () => {
     const permissions = [
       { action: 'read', subject: 'article', properties: { fields: ['**'] } },
       { action: 'post', subject: 'article', properties: { fields: ['*'] } },
