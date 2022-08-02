@@ -47,7 +47,7 @@ const productWithDz = {
   collectionName: '',
 };
 
-describe('Core API - Basic + dz', () => {
+describe('CM API - Basic + dz', () => {
   beforeAll(async () => {
     await builder
       .addComponent(compo)
