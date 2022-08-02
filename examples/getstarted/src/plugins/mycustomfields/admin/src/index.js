@@ -1,3 +1,4 @@
+import * as yup from 'yup';
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginId from './pluginId';
 import ColorPickerIcon from './components/ColorPicker/ColorPickerIcon';
@@ -48,7 +49,7 @@ export default {
                 id: 'color-picker.color.format.label',
                 defaultMessage: 'Color format',
               },
-              name: 'options.format',
+              name: 'options.color-picker.format',
               type: 'select',
               value: 'hex',
               options: [
@@ -109,6 +110,14 @@ export default {
               ],
             },
           ],
+          validator: args => ({
+            'color-picker': yup.object().shape({
+              format: yup.string().required({
+                id: 'options.color-picker.format.error',
+                defaultMessage: 'The color format is required',
+              }),
+            }),
+          }),
         },
       },
     ]);

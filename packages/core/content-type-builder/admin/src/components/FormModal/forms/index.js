@@ -8,8 +8,39 @@ import { dynamiczoneForm } from '../dynamicZone';
 import { nameField } from '../attributes/nameField';
 import addItemsToFormSection from './utils/addItemsToFormSection';
 
+const getUsedAttributeNames = (attributes, schemaData) => {
+  return attributes
+    .filter(({ name }) => {
+      return name !== schemaData.initialData.name;
+    })
+    .map(({ name }) => name);
+};
+
 const forms = {
   customField: {
+    schema({
+      schemaAttributes,
+      attributeType,
+      customFieldValidator,
+      reservedNames,
+      schemaData,
+      ctbFormsAPI,
+    }) {
+      const usedAttributeNames = getUsedAttributeNames(schemaAttributes, schemaData);
+
+      const attributeShape = attributeTypes[attributeType](
+        usedAttributeNames,
+        reservedNames.attributes
+      );
+
+      return ctbFormsAPI.makeCustomFieldValidator(
+        attributeShape,
+        customFieldValidator,
+        usedAttributeNames,
+        reservedNames.attributes,
+        schemaData
+      );
+    },
     form: {
       base({ customField }) {
         // Default section with required name field
@@ -42,13 +73,9 @@ const forms = {
       options,
       extensions
     ) {
+      // Get the attributes object on the schema
       const attributes = get(currentSchema, ['schema', 'attributes'], []);
-
-      const usedAttributeNames = attributes
-        .filter(({ name }) => {
-          return name !== options.initialData.name;
-        })
-        .map(({ name }) => name);
+      const usedAttributeNames = getUsedAttributeNames(attributes, options);
 
       try {
         let attributeShape = attributeTypes[attributeType](
