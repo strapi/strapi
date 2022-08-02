@@ -172,10 +172,7 @@ module.exports = ({ strapi }) => ({
 
     // Register actions into the content API action provider
     // TODO: do this in the content API bootstrap phase instead
-    allActions
-      // 'api::foo.foo.find' => { action: 'find', subject: 'api.foo.foo' } => 'find';
-      .map(action => getService('permission').toContentAPIPermission({ action }).action)
-      .forEach(action => strapi.contentAPI.permissions.providers.action.register(action));
+    allActions.forEach(action => strapi.contentAPI.permissions.providers.action.register(action));
 
     await Promise.all(
       toDelete.map(action => {

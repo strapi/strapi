@@ -99,11 +99,7 @@ const verify = async (auth, config) => {
     // Make sure we're dealing with an array
     castArray,
     // Transform the scope array into an action array
-    map(scope => ({ action: scope })),
-    // Map the users-permissions permissions into content API permissions
-    map(getService('permission').toContentAPIPermission),
-    // Check that every required scope is allowed by the ability
-    every(({ action, subject }) => ability.can(action, subject))
+    every(scope => ability.can(scope))
   )(config.scope);
 
   if (!isAllowed) {

@@ -30,26 +30,16 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * Transform a Users-Permissions' permission into a content API one
-   *
-   * @example
-   * const upPermission = { action: 'api::foo.foo.find' };
-   *
-   * const permission = toContentAPIPermission(upPermission);
-   * // ^? { action: 'find', subject: 'api::foo.foo' }
+   * Transform a Users-Permissions' action into a content API one
    *
    * @param {object} permission
    * @param {string} permission.action
    *
-   * @return {{ action: string, subject: string }}
+   * @return {{ action: string }}
    */
   toContentAPIPermission(permission) {
     const { action } = permission;
-    const actionIndex = action.lastIndexOf('.');
 
-    return {
-      action: action.slice(actionIndex + 1),
-      subject: action.slice(0, actionIndex),
-    };
+    return { action };
   },
 });
