@@ -61,6 +61,8 @@ module.exports = async ({ strapi }) => {
         ? ApolloServerPluginLandingPageDisabled()
         : ApolloServerPluginLandingPageGraphQLPlayground(),
     ],
+
+    cache: 'bounded'
   };
 
   const serverConfig = merge(defaultServerConfig, config('apolloServer'));
