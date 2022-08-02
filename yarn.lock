@@ -2208,7 +2208,7 @@
   resolved "https://registry.yarnpkg.com/@hutson/parse-repository-url/-/parse-repository-url-3.0.2.tgz#98c23c950a3d9b6c8f0daed06da6c3af06981340"
   integrity sha512-H9XAx3hc0BQHY6l+IFSWHDySypcXsvsuLhgYLUGywmJ5pswRVQJUHpOsobnLYp2ZUaUlKiKDrgWWhosOwAEM8Q==
 
-"@internationalized/number@^3.0.2":
+"@internationalized/number@^3.0.2", "@internationalized/number@^3.1.1":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@internationalized/number/-/number-3.1.1.tgz#160584316741de4381689ab759001603ee17b595"
   integrity sha512-dBxCQKIxvsZvW2IBt3KsqrCfaw2nV6o6a8xsloJn/hjW0ayeyhKuiiMtTwW3/WGNPP7ZRyDbtuiUEjMwif1ENQ==
@@ -5756,6 +5756,15 @@
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"
 
+"@strapi/design-system@1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.2.1.tgz#d0e611709ab10930e8723960813b60ce1ef80890"
+  integrity sha512-Jrlk3xzwM+Cskt1hjgYy0MwN0NQ7lramBoS6lAvHW1AFOGv2vnshU+jcZNXtIYU1N7/Xjko4oimBWXxXry0g/Q==
+  dependencies:
+    "@internationalized/number" "^3.1.1"
+    compute-scroll-into-view "^1.0.17"
+    prop-types "^15.7.2"
+
 "@strapi/generate-new@4.2.2":
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/@strapi/generate-new/-/generate-new-4.2.2.tgz#046868784d982645e6c3ab23ab15d564bcd961f6"
@@ -5842,6 +5851,13 @@
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.2.0.tgz#94c2709696f674d907e399bd8c80e80f098d164a"
   integrity sha512-y5k09/n+8ueZPp/JST7Grbac1014ANhZWefto+XoHNgpPMMiUNMWD5K+uWn6Wy5vgL/wxZ0lA0Nhe9b0cGouXw==
+  dependencies:
+    rimraf "^3.0.2"
+
+"@strapi/icons@1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.2.1.tgz#780e74a8284bc18c268e61b37ff8a1b75d49c9b3"
+  integrity sha512-MJ3GAHfsKwviR/ZxfCs7AA2uZ4nZ7It9NT9JTUOatR3H0ehG8TIh1ky7NgwN26KPbqBWHqXd1zSb/Wbpo5KqVQ==
   dependencies:
     rimraf "^3.0.2"
 
