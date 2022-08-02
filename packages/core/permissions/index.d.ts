@@ -29,8 +29,6 @@ interface PermissionEngineHooks {
   'before-register.permission': ReturnType<typeof hooks.createAsyncSeriesHook>;
 }
 
-type PermissionEngineHookCreator = () => PermissionEngineHooks;
-
 type PermissionEngineHookName = keyof PermissionEngineHooks;
 
 interface PermissionEngine {
