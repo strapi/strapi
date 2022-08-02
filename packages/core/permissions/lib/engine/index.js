@@ -193,14 +193,11 @@ module.exports = {
        *
        * @return {object}
        */
-      async generateAbility(permissions, options = {}, createRegisterFn = undefined) {
+      async generateAbility(permissions, options = {}) {
         const { can, build } = abilityBuilderFactory();
 
-        let createRegisterFunction = this.createRegisterFunction;
-        if (_.isFunction(createRegisterFn)) createRegisterFunction = createRegisterFn;
-
         for (const permission of permissions) {
-          const register = createRegisterFunction(can, options);
+          const register = this.createRegisterFunction(can, options);
 
           await evaluate({ permission, options, register });
         }
