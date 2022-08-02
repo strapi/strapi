@@ -10092,14 +10092,14 @@ cloudinary-core@^2.10.2:
   resolved "https://registry.yarnpkg.com/cloudinary-core/-/cloudinary-core-2.12.3.tgz#6482e472944214ff905c4852da0a4afce14dec2b"
   integrity sha512-Ll4eDzcrIVn4zCttMh3Mdi+KNz07p5EEjBT2PQSRx8Eok1lKPt3uBBenOk/w88RKK3B8SFIWcEe/mN4BHQ0p8A==
 
-cloudinary@^1.25.1:
-  version "1.29.0"
-  resolved "https://registry.yarnpkg.com/cloudinary/-/cloudinary-1.29.0.tgz#4e93bc6b8d710015d7ecea1829c869341d8e85bf"
-  integrity sha512-twqQvC5R5/RHenDVCbGc3ebww/HB/lBaxgoyy2aW2O/5bTzK7VbGpYsTGyV5zoiodlK8Z9SO0my9Gv92y+3K+g==
+cloudinary@^1.30.1:
+  version "1.30.1"
+  resolved "https://registry.yarnpkg.com/cloudinary/-/cloudinary-1.30.1.tgz#eb63ae8460b93cdf8cd027573df11ea333fcb25a"
+  integrity sha512-Vri+R4VZXZUQWJ3vOoB5b0vjigxI/INRhzZF8E0A1O07bBNrwWAvodtDyumIk3RvEcgxzjvnqq83CPqoUyzEtA==
   dependencies:
     cloudinary-core "^2.10.2"
     core-js "3.6.5"
-    lodash "^4.17.11"
+    lodash "^4.17.21"
     q "^1.5.1"
   optionalDependencies:
     proxy-agent "^5.0.0"
