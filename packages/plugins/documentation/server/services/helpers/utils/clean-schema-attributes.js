@@ -19,11 +19,6 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
       delete attributesCopy[prop].default;
     }
 
-    if (attribute.type === 'customField') {
-      const customField = strapi.container.get('custom-fields').get(attribute.customField);
-      attribute.type = customField.type;
-    }
-
     switch (attribute.type) {
       case 'password': {
         if (!isRequest) {
