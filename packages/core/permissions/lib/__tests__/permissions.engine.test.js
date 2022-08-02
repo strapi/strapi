@@ -130,9 +130,13 @@ describe('Permissions Engine', () => {
   const expectedAbilityRules = permissions => {
     return permissions.map(permission => {
       const rules = _.omit(permission, ['properties', 'conditions']);
-      if (permission.properties && permission.properties.fields)
+
+      if (permission.properties && permission.properties.fields) {
         rules.fields = permission.properties.fields;
-      if (!permission.subject) rules.subject = 'all';
+      }
+      if (!permission.subject) {
+        rules.subject = 'all';
+      }
 
       return rules;
     });
