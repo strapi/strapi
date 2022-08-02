@@ -11,7 +11,7 @@ const getConfigPath = require('./get-config-path');
  * @returns {boolean}
  */
 module.exports = (dir, filename = undefined) => {
-  const filePath = getConfigPath(dir, filename);
+  const filePath = getConfigPath(dir, { filename });
 
   return fse.pathExistsSync(filePath);
 };
