@@ -62,6 +62,7 @@ const ContentTypeBuilderNav = () => {
                             to={subLink.to}
                             active={subLink.active}
                             key={subLink.name}
+                            isSubSectionChild
                           >
                             {upperFirst(
                               formatMessage({ id: subLink.name, defaultMessage: subLink.title })
@@ -81,7 +82,11 @@ const ContentTypeBuilderNav = () => {
               </SubNavSection>
               {section.customLink && (
                 <Box paddingLeft={7}>
-                  <TextButton onClick={section.customLink.onClick} startIcon={<Plus />}>
+                  <TextButton
+                    onClick={section.customLink.onClick}
+                    startIcon={<Plus />}
+                    marginTop={2}
+                  >
                     {formatMessage({
                       id: section.customLink.id,
                       defaultMessage: section.customLink.defaultMessage,
