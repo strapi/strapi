@@ -338,6 +338,15 @@ const FormModal = () => {
         get(allDataSchema, [...pathToSchema, 'uid'], null),
         ctbFormsAPI
       );
+    } else if (isCreatingCustomFieldAttribute) {
+      schema = forms.customField.schema({
+        schemaAttributes: get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], []),
+        attributeType: customField.type,
+        reservedNames,
+        schemaData: { modifiedData, initialData },
+        ctbFormsAPI,
+        customFieldValidator: customField.options.validator,
+      });
 
       // Check for validity for creating a component
       // This is happening when the user creates a component "on the fly"
@@ -903,10 +912,12 @@ const FormModal = () => {
   }).sections;
 
   const baseFormInputNames = getFormInputNames(baseForm);
+
   const advancedFormInputNames = getFormInputNames(advancedForm);
   const doesBaseFormHasError = Object.keys(formErrors).some(key =>
     baseFormInputNames.includes(key)
   );
+
   const doesAdvancedFormHasError = Object.keys(formErrors).some(key =>
     advancedFormInputNames.includes(key)
   );
