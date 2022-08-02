@@ -42,61 +42,56 @@ const ContentTypeBuilderNav = () => {
         })}
       />
       <SubNavSections>
-        {menu.map(section => {
-          const title = section.title.id;
-
-          return (
-            <React.Fragment key={section.name}>
-              <SubNavSection
-                label={formatMessage({ id: title, defaultMessage: title })}
-                collapsable
-                badgeLabel={section.links.length.toString()}
-              >
-                {section.links.map(link => {
-                  if (link.links) {
-                    return (
-                      <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
-                        {link.links.map(subLink => (
-                          <SubNavLink
-                            as={NavLink}
-                            to={subLink.to}
-                            active={subLink.active}
-                            key={subLink.name}
-                            isSubSectionChild
-                          >
-                            {upperFirst(
-                              formatMessage({ id: subLink.name, defaultMessage: subLink.title })
-                            )}
-                          </SubNavLink>
-                        ))}
-                      </SubNavLinkSection>
-                    );
-                  }
-
+        {menu.map(section => (
+          <React.Fragment key={section.name}>
+            <SubNavSection
+              label={formatMessage({
+                id: section.title.id,
+                defaultMessage: section.title.defaultMessage,
+              })}
+              collapsable
+              badgeLabel={section.links.length.toString()}
+            >
+              {section.links.map(link => {
+                if (link.links) {
                   return (
-                    <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
-                      {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
-                    </SubNavLink>
+                    <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
+                      {link.links.map(subLink => (
+                        <SubNavLink
+                          as={NavLink}
+                          to={subLink.to}
+                          active={subLink.active}
+                          key={subLink.name}
+                          isSubSectionChild
+                        >
+                          {upperFirst(
+                            formatMessage({ id: subLink.name, defaultMessage: subLink.title })
+                          )}
+                        </SubNavLink>
+                      ))}
+                    </SubNavLinkSection>
                   );
-                })}
-              </SubNavSection>
-              {section.customLink && (
-                <Box paddingLeft={7}>
-                  <TextButton
-                    onClick={section.customLink.onClick}
-                    startIcon={<Plus />}
-                    marginTop={2}
-                  >
-                    {formatMessage({
-                      id: section.customLink.id,
-                      defaultMessage: section.customLink.defaultMessage,
-                    })}
-                  </TextButton>
-                </Box>
-              )}
-            </React.Fragment>
-          );
-        })}
+                }
+
+                return (
+                  <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
+                    {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
+                  </SubNavLink>
+                );
+              })}
+            </SubNavSection>
+            {section.customLink && (
+              <Box paddingLeft={7}>
+                <TextButton onClick={section.customLink.onClick} startIcon={<Plus />} marginTop={2}>
+                  {formatMessage({
+                    id: section.customLink.id,
+                    defaultMessage: section.customLink.defaultMessage,
+                  })}
+                </TextButton>
+              </Box>
+            )}
+          </React.Fragment>
+        ))}
       </SubNavSections>
     </SubNav>
   );
