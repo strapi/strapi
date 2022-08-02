@@ -7,6 +7,8 @@ const domain = require('../domain');
 
 /**
  * Create a hook map used by the permission Engine
+ *
+ * @return {import('../..').PermissionEngineHooks}
  */
 const createEngineHooks = () => ({
   'before-format::validate.permission': hooks.createAsyncBailHook(),
