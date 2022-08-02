@@ -44,6 +44,14 @@ const resetPasswordSchema = yup
   })
   .noUnknown();
 
+const changePasswordSchema = yup
+  .object({
+    password: yup.string().required(),
+    passwordConfirmation: yup.string().required(),
+    currentPassword: yup.string().required(),
+  })
+  .noUnknown();
+
 module.exports = {
   validateCallbackBody: validateYupSchema(callbackSchema),
   validateRegisterBody: validateYupSchema(registerSchema),
@@ -51,4 +59,5 @@ module.exports = {
   validateEmailConfirmationBody: validateYupSchema(validateEmailConfirmationSchema),
   validateForgotPasswordBody: validateYupSchema(forgotPasswordSchema),
   validateResetPasswordBody: validateYupSchema(resetPasswordSchema),
+  validateChangePasswordBody: validateYupSchema(changePasswordSchema),
 };

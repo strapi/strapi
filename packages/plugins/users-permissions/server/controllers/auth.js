@@ -18,6 +18,7 @@ const {
   validateForgotPasswordBody,
   validateResetPasswordBody,
   validateEmailConfirmationBody,
+  validateChangePasswordBody,
 } = require('./validation/auth');
 
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
@@ -93,60 +94,39 @@ module.exports = {
   },
 
   async changePassword(ctx) {
-    const params = _.assign({}, ctx.request.body, ctx.params);
-
-    if (!_.get(ctx, 'state.user.id')) {
+    if (!ctx.state.user) {
       throw new ApplicationError('You must be authenticated to reset your password');
     }
 
-    if (
-      params.currentPassword &&
-      params.password &&
-      params.passwordConfirmation &&
-      params.passwordConfirmation === params.password
-    ) {
-      const user = await strapi.entityService.findOne(
-        'plugin::users-permissions.user',
-        ctx.state.user.id
-      );
+    const { currentPassword, password, passwordConfirmation } = await validateChangePasswordBody(
+      ctx.request.body
+    );
 
-      if (!user) {
-        throw new ValidationError('User not found');
-      }
+    const user = await strapi.entityService.findOne(
+      'plugin::users-permissions.user',
+      ctx.state.user.id
+    );
 
-      const validPassword = await getService('user').validatePassword(
-        params.currentPassword,
-        user.password
-      );
-
-      if (!validPassword) {
-        throw new ValidationError('Your current password is invalid');
-      }
-
-      if (params.currentPassword === params.password) {
-        throw new ValidationError('Your new password must be different than your current password');
-      }
-
-      await getService('user').edit(user.id, {
-        resetPasswordToken: null,
-        password: params.password,
-      });
-
-      ctx.send({
-        jwt: getService('jwt').issue({ id: user.id }),
-        user: await sanitizeUser(user, ctx),
-      });
-    } else if (!params.currentPassword) {
-      throw new ValidationError('You must provider your current password in order to change it');
-    } else if (
-      params.password &&
-      params.passwordConfirmation &&
-      params.password !== params.passwordConfirmation
-    ) {
+    if (password !== passwordConfirmation) {
       throw new ValidationError('Passwords do not match');
-    } else {
-      throw new ValidationError('Incorrect params provided');
     }
+
+    const validPassword = await getService('user').validatePassword(currentPassword, user.password);
+
+    if (!validPassword) {
+      throw new ValidationError('Your current password is invalid');
+    }
+
+    if (currentPassword === password) {
+      throw new ValidationError('Your new password must be different than your current password');
+    }
+
+    await getService('user').edit(user.id, { password });
+
+    ctx.send({
+      jwt: getService('jwt').issue({ id: user.id }),
+      user: await sanitizeUser(user, ctx),
+    });
   },
 
   async resetPassword(ctx) {

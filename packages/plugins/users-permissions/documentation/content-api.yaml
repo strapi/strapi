@@ -185,6 +185,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /auth/change-password:
+    put:
+      tags:
+        - Users-Permissions - Auth
+      summary: Update user's own password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  required: true
+                  type: string
+                currentPassword:
+                  required: true
+                  type: string
+                passwordConfirmation:
+                  required: true
+                  type: string
+      responses:
+        200:
+          description: Returns a jwt token and user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-UserRegistration'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /auth/email-confirmation:
     get:
       tags:
