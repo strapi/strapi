@@ -23,7 +23,7 @@ const parseFilesData = async files => {
       const getStream = () => fs.createReadStream(file.path);
 
       // Add formated data for the upload provider
-      formatedFilesData[inputName] = strapi
+      formatedFilesData[inputName] = await strapi
         .plugin('upload')
         .service('upload')
         .formatFileInfo({
