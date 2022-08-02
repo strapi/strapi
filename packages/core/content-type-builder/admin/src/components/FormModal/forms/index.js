@@ -1,5 +1,6 @@
 import get from 'lodash/get';
 import toLower from 'lodash/toLower';
+import has from 'lodash/has';
 import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
 import { categoryForm, createCategorySchema } from '../category';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';
@@ -52,12 +53,32 @@ const forms = {
 
         return { sections };
       },
-      advanced({ customField }) {
+      advanced({ customField, data, step, extensions, ...rest }) {
         // Default section with no fields
         const sections = [{ sectionTitle: null, items: [] }];
+        const injectedInputs = extensions.getAdvancedForm(['attribute', customField.type], {
+          data,
+          type: customField.type,
+          step,
+          ...rest,
+        });
 
         if (customField.options?.advanced) {
           addItemsToFormSection(customField.options.advanced, sections);
+        }
+
+        if (injectedInputs) {
+          const injectedInputsSection = injectedInputs.map(injectedInput => {
+            if (has(injectedInput, 'sectionTitle')) {
+              // When it has a sectionTitle (including null), use it
+              return injectedInput;
+            }
+
+            // Otherwise add an empty sectionTitle so it is added as a new section
+            return { sectionTitle: null, items: [injectedInput] };
+          });
+
+          addItemsToFormSection(injectedInputsSection, sections);
         }
 
         return { sections };
