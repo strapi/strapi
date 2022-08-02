@@ -39,7 +39,7 @@ const ListPage = () => {
   const queryName = ['users', search];
 
   const title = formatMessage({
-    id: 'Settings.permissions.users.listview.header.title',
+    id: 'global.users',
     defaultMessage: 'Users',
   });
 

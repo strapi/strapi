@@ -287,6 +287,14 @@ Array [
     "name": "Central Kurdish (ckb)",
   },
   Object {
+    "code": "kmr",
+    "name": "Northern Kurdish (kmr)",
+  },
+  Object {
+    "code": "sdh",
+    "name": "Southern Kurdish (sdh)",
+  },
+  Object {
     "code": "tzm",
     "name": "Central Morocco Tamazight (tzm)",
   },
@@ -1023,6 +1031,10 @@ Array [
     "name": "Kannada (India) (kn-IN)",
   },
   Object {
+    "code": "kaa",
+    "name": "Kara-Kalpak (kaa)",
+  },
+  Object {
     "code": "kk",
     "name": "Kazakh (kk)",
   },
@@ -1097,6 +1109,10 @@ Array [
   Object {
     "code": "nmg-CM",
     "name": "Kwasio (Cameroon) (nmg-CM)",
+  },
+  Object {
+    "code": "ky",
+    "name": "Kyrgyz (ky)",
   },
   Object {
     "code": "lag",
@@ -1523,6 +1539,10 @@ Array [
     "name": "Sangu (Tanzania) (sbp-TZ)",
   },
   Object {
+    "code": "sa",
+    "name": "Sanskrit (sa)",
+  },
+  Object {
     "code": "seh",
     "name": "Sena (seh)",
   },
@@ -1793,6 +1813,10 @@ Array [
   Object {
     "code": "dav-KE",
     "name": "Taita (Kenya) (dav-KE)",
+  },
+  Object {
+    "code": "tg",
+    "name": "Tajik (tg)",
   },
   Object {
     "code": "ta",

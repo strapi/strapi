@@ -12,12 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - name: Run lint
         run: yarn run -s lint
@@ -30,12 +31,13 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.codecov }}
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+          cache: yarn
       - uses: ./.github/actions/install-modules
         with:
           globalPackages: codecov
@@ -50,19 +52,20 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.codecov }}
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14, 16]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+          cache: yarn
       - uses: ./.github/actions/install-modules
         with:
           globalPackages: codecov
       - name: Build
         run: yarn build
       - name: Run test
-        run: yarn run -s test:front && codecov -C -F front
+        run: yarn run -s test:front --coverage && codecov -C -F front
 
   e2e_ce_pg:
     runs-on: ubuntu-latest
@@ -70,8 +73,7 @@ jobs:
     name: '[CE] E2E (postgres, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14, 16]
-      max-parallel: 3
+        node: [14, 16]
     services:
       postgres:
         # Docker Hub image
@@ -92,9 +94,10 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+          cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
         with:
@@ -106,8 +109,7 @@ jobs:
     name: '[CE] E2E (mysql, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14, 16]
-      max-parallel: 3
+        node: [14, 16]
     services:
       mysql:
         image: mysql
@@ -142,8 +144,7 @@ jobs:
     name: '[CE] E2E (mysql:5 , node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14, 16]
-      max-parallel: 3
+        node: [14, 16]
     services:
       mysql:
         image: mysql:5
@@ -175,11 +176,11 @@ jobs:
   e2e_ce_sqlite:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[CE] E2E (sqlite, node: ${{ matrix.node }})'
+    name: '[CE] E2E (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14, 16]
-      max-parallel: 3
+        node: [14, 16]
+        sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -188,9 +189,10 @@ jobs:
           cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
+        env:
+          SQLITE_PKG: ${{ matrix.sqlite_pkg }}
         with:
-          dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
-
+          dbOptions: '--dbclient=sqlite-legacy --dbfile=./tmp/data.db'
   # EE
   e2e_ee_pg:
     runs-on: ubuntu-latest
@@ -201,8 +203,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [12, 14, 16]
-      max-parallel: 3
+        node: [14, 16]
     services:
       postgres:
         # Docker Hub image
@@ -242,8 +243,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [12, 14, 16]
-      max-parallel: 3
+        node: [14, 16]
     services:
       mysql:
         image: mysql
@@ -276,14 +276,14 @@ jobs:
   e2e_ee_sqlite:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
-    name: '[EE] E2E (sqlite, node: ${{ matrix.node }})'
+    name: '[EE] E2E (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
     if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [12, 14, 16]
-      max-parallel: 3
+        node: [14, 16]
+        sqlite_pkg: ['better-sqlite3', 'sqlite3', '@vscode/sqlite3']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -292,6 +292,8 @@ jobs:
           cache: yarn
       - uses: ./.github/actions/install-modules
       - uses: ./.github/actions/run-e2e-tests
+        env:
+          SQLITE_PKG: ${{ matrix.sqlite_pkg }}
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           runEE: true

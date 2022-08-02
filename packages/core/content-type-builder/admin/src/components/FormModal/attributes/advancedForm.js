@@ -43,7 +43,7 @@ const advancedForm = {
         },
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.private],
@@ -61,7 +61,7 @@ const advancedForm = {
         sections: [
           {
             sectionTitle: {
-              id: getTrad('form.attribute.item.settings.name'),
+              id: 'global.settings',
               defaultMessage: 'Settings',
             },
             items: [options.required, options.private, options.max, options.min],
@@ -74,7 +74,7 @@ const advancedForm = {
       sections: [
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.private],
@@ -100,7 +100,7 @@ const advancedForm = {
         },
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.unique, options.private],
@@ -113,7 +113,7 @@ const advancedForm = {
       sections: [
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.max, options.min],
@@ -136,7 +136,7 @@ const advancedForm = {
 
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [
@@ -206,7 +206,7 @@ const advancedForm = {
 
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.private],
@@ -219,7 +219,7 @@ const advancedForm = {
       sections: [
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.private],
@@ -248,10 +248,10 @@ const advancedForm = {
         },
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.private, options.required],
+          items: [options.required, options.private],
         },
       ],
     };
@@ -279,7 +279,7 @@ const advancedForm = {
         },
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.unique, options.max, options.min, options.private],
@@ -294,7 +294,7 @@ const advancedForm = {
 
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.maxLength, options.minLength, options.private],
@@ -307,7 +307,7 @@ const advancedForm = {
       sections: [
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.private],
@@ -321,7 +321,7 @@ const advancedForm = {
         { sectionTitle: null, items: [options.default] },
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.maxLength, options.minLength, options.private],
@@ -336,7 +336,7 @@ const advancedForm = {
 
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [
@@ -360,7 +360,7 @@ const advancedForm = {
 
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.maxLength, options.minLength, options.private],

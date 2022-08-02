@@ -3,11 +3,22 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
+import { useHistory } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { Formik } from 'formik';
+import axios from 'axios';
+import {
+  Form,
+  useQuery,
+  useNotification,
+  useTracking,
+  getYupInnerErrors,
+  Link,
+} from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Main } from '@strapi/design-system/Main';
 import { Flex } from '@strapi/design-system/Flex';
-import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Checkbox } from '@strapi/design-system/Checkbox';
@@ -15,17 +26,6 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
-import {
-  Form,
-  useQuery,
-  useNotification,
-  useTracking,
-  getYupInnerErrors,
-} from '@strapi/helper-plugin';
-import { useHistory } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import { Formik } from 'formik';
-import axios from 'axios';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
@@ -143,7 +143,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                       <Typography as="h1" variant="alpha">
                         {formatMessage({
                           id: 'Auth.form.welcome.title',
-                          defaultMessage: 'Welcome!',
+                          defaultMessage: 'Welcome to Strapi!',
                         })}
                       </Typography>
                     </Box>
@@ -152,12 +152,12 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                         {formatMessage({
                           id: 'Auth.form.register.subtitle',
                           defaultMessage:
-                            'Your credentials are only used to authenticate yourself on the admin panel. All saved data will be stored in your own database.',
+                            'Credentials are only used to authenticate in Strapi. All saved data will be stored in your database.',
                         })}
                       </Typography>
                     </CenteredBox>
                   </Column>
-                  <Stack spacing={7}>
+                  <Stack spacing={6}>
                     <Grid gap={4}>
                       <GridItem col={6}>
                         <TextInput
@@ -227,11 +227,11 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                       hint={formatMessage({
                         id: 'Auth.form.password.hint',
                         defaultMessage:
-                          'Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number',
+                          'Must be at least 8 characters, 1 uppercase, 1 lowercase & 1 number',
                       })}
                       required
                       label={formatMessage({
-                        id: 'Auth.form.password.label',
+                        id: 'global.password',
                         defaultMessage: 'Password',
                       })}
                       type={passwordShown ? 'text' : 'password'}
@@ -284,7 +284,7 @@ const Register = ({ authType, fieldsToDisable, noSignin, onSubmit, schema }) => 
                         {
                           id: 'Auth.form.register.news.label',
                           defaultMessage:
-                            'Keep me updated about the new features and upcoming improvements (by doing this you accept the {terms} and the {policy}).',
+                            'Keep me updated about new features & upcoming improvements (by doing this you accept the {terms} and the {policy}).',
                         },
                         {
                           terms: (

@@ -42,7 +42,8 @@ module.exports = async function(cmdOptions = {}) {
 };
 
 async function changePassword({ email, password }) {
-  const app = await strapi().load();
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   await app.admin.services.user.resetPasswordByEmail(email, password);
 

@@ -26,7 +26,7 @@ const menu = [
     intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
     links: [
       {
-        intlLabel: { id: 'Settings.permissions.menu.link.roles.label', defaultMessage: 'Roles' },
+        intlLabel: { id: 'global.roles', defaultMessage: 'Roles' },
         to: '/settings/roles',
         id: 'roles',
         isDisplayed: true,
@@ -112,29 +112,34 @@ describe('SettingsPage || components || SettingsNav', () => {
         padding-bottom: 16px;
       }
 
-      .c11 {
+      .c13 {
         padding-top: 8px;
         padding-right: 16px;
         padding-bottom: 8px;
         padding-left: 24px;
       }
 
-      .c16 {
-        padding-right: 4px;
+      .c15 {
+        padding-right: 0px;
+        position: relative;
       }
 
       .c18 {
+        padding-right: 4px;
+      }
+
+      .c20 {
         background: #f6f6f9;
         padding-top: 8px;
         padding-bottom: 8px;
         padding-left: 32px;
       }
 
-      .c21 {
+      .c23 {
         padding-left: 8px;
       }
 
-      .c23 {
+      .c25 {
         padding-right: 16px;
       }
 
@@ -151,24 +156,10 @@ describe('SettingsPage || components || SettingsNav', () => {
       }
 
       .c2 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
         -webkit-align-items: flex-start;
         -webkit-box-align: flex-start;
         -ms-flex-align: flex-start;
         align-items: flex-start;
-      }
-
-      .c13 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -180,13 +171,27 @@ describe('SettingsPage || components || SettingsNav', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c10 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c16 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c14 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -194,10 +199,6 @@ describe('SettingsPage || components || SettingsNav', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c4 {
@@ -207,7 +208,7 @@ describe('SettingsPage || components || SettingsNav', () => {
         line-height: 1.22;
       }
 
-      .c17 {
+      .c19 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -215,7 +216,7 @@ describe('SettingsPage || components || SettingsNav', () => {
         text-transform: uppercase;
       }
 
-      .c22 {
+      .c24 {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -232,7 +233,7 @@ describe('SettingsPage || components || SettingsNav', () => {
         background-color: #dcdce4;
       }
 
-      .c19 {
+      .c21 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -250,81 +251,76 @@ describe('SettingsPage || components || SettingsNav', () => {
         color: #32324d;
       }
 
-      .c19 svg > * {
+      .c21 svg > * {
         fill: #666687;
       }
 
-      .c19.active {
+      .c21.active {
         background-color: #f0f0ff;
         border-right: 2px solid #4945ff;
       }
 
-      .c19.active svg > * {
+      .c21.active svg > * {
         fill: #271fe0;
       }
 
-      .c19.active .c3 {
+      .c21.active .c3 {
         color: #271fe0;
         font-weight: 500;
       }
 
-      .c19:focus-visible {
+      .c21:focus-visible {
         outline-offset: -2px;
       }
 
-      .c20 {
+      .c22 {
         width: 0.75rem;
         height: 0.25rem;
       }
 
-      .c20 * {
+      .c22 * {
         fill: #666687;
       }
 
-      .c24 {
+      .c26 {
         width: 0.75rem;
         height: 0.25rem;
       }
 
-      .c24 * {
+      .c26 * {
         fill: #4945ff;
       }
 
-      .c15 {
+      .c11 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c11 > * + * {
+        margin-top: 8px;
+      }
+
+      .c12 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c12 > * + * {
+        margin-top: 4px;
+      }
+
+      .c17 {
         border: none;
         padding: 0;
         background: transparent;
       }
 
-      .c12 {
-        max-height: 2rem;
-      }
-
-      .c12 svg {
+      .c14 svg {
         height: 0.25rem;
       }
 
-      .c12 svg path {
+      .c14 svg path {
         fill: #8e8ea9;
-      }
-
-      .c10 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c10 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c10 > * + * {
-        margin-top: 8px;
       }
 
       <nav
@@ -354,28 +350,29 @@ describe('SettingsPage || components || SettingsNav', () => {
         <div
           class="c9"
         >
-          <ul
-            class="c10"
+          <ol
+            class="c10 c11"
             spacing="2"
           >
             <li>
               <div
-                class=""
+                class="c10 c12"
+                spacing="1"
               >
                 <div
-                  class="c11 c12"
+                  class="c13 c14"
                 >
                   <div
-                    class="c13"
+                    class="c15"
                   >
                     <div
-                      class="c14 c15"
+                      class="c16 c17"
                     >
                       <div
-                        class="c16"
+                        class="c18"
                       >
                         <span
-                          class="c3 c17"
+                          class="c3 c19"
                         >
                           Global Settings
                         </span>
@@ -383,19 +380,19 @@ describe('SettingsPage || components || SettingsNav', () => {
                     </div>
                   </div>
                 </div>
-                <ul
+                <ol
                   id="subnav-list-2"
                 >
                   <li>
                     <a
-                      class="c18 c19"
+                      class="c20 c21"
                       href="/settings/application-infos"
                     >
                       <div
-                        class="c14"
+                        class="c16"
                       >
                         <svg
-                          class="c20"
+                          class="c22"
                           fill="none"
                           height="1em"
                           viewBox="0 0 4 4"
@@ -410,20 +407,20 @@ describe('SettingsPage || components || SettingsNav', () => {
                           />
                         </svg>
                         <div
-                          class="c21"
+                          class="c23"
                         >
                           <span
-                            class="c3 c22"
+                            class="c3 c24"
                           >
                             Overview
                           </span>
                         </div>
                       </div>
                       <div
-                        class="c14 sc-ehIJor c23"
+                        class="c16 sc-iuqRDJ c25"
                       >
                         <svg
-                          class="c24"
+                          class="c26"
                           fill="none"
                           height="1em"
                           viewBox="0 0 4 4"
@@ -440,27 +437,28 @@ describe('SettingsPage || components || SettingsNav', () => {
                       </div>
                     </a>
                   </li>
-                </ul>
+                </ol>
               </div>
             </li>
             <li>
               <div
-                class=""
+                class="c10 c12"
+                spacing="1"
               >
                 <div
-                  class="c11 c12"
+                  class="c13 c14"
                 >
                   <div
-                    class="c13"
+                    class="c15"
                   >
                     <div
-                      class="c14 c15"
+                      class="c16 c17"
                     >
                       <div
-                        class="c16"
+                        class="c18"
                       >
                         <span
-                          class="c3 c17"
+                          class="c3 c19"
                         >
                           Administration Panel
                         </span>
@@ -468,19 +466,19 @@ describe('SettingsPage || components || SettingsNav', () => {
                     </div>
                   </div>
                 </div>
-                <ul
+                <ol
                   id="subnav-list-3"
                 >
                   <li>
                     <a
-                      class="c18 c19"
+                      class="c20 c21"
                       href="/settings/roles"
                     >
                       <div
-                        class="c14"
+                        class="c16"
                       >
                         <svg
-                          class="c20"
+                          class="c22"
                           fill="none"
                           height="1em"
                           viewBox="0 0 4 4"
@@ -495,10 +493,10 @@ describe('SettingsPage || components || SettingsNav', () => {
                           />
                         </svg>
                         <div
-                          class="c21"
+                          class="c23"
                         >
                           <span
-                            class="c3 c22"
+                            class="c3 c24"
                           >
                             Roles
                           </span>
@@ -506,27 +504,28 @@ describe('SettingsPage || components || SettingsNav', () => {
                       </div>
                     </a>
                   </li>
-                </ul>
+                </ol>
               </div>
             </li>
             <li>
               <div
-                class=""
+                class="c10 c12"
+                spacing="1"
               >
                 <div
-                  class="c11 c12"
+                  class="c13 c14"
                 >
                   <div
-                    class="c13"
+                    class="c15"
                   >
                     <div
-                      class="c14 c15"
+                      class="c16 c17"
                     >
                       <div
-                        class="c16"
+                        class="c18"
                       >
                         <span
-                          class="c3 c17"
+                          class="c3 c19"
                         >
                           Email Plugin
                         </span>
@@ -534,19 +533,19 @@ describe('SettingsPage || components || SettingsNav', () => {
                     </div>
                   </div>
                 </div>
-                <ul
+                <ol
                   id="subnav-list-4"
                 >
                   <li>
                     <a
-                      class="c18 c19"
+                      class="c20 c21"
                       href="/settings/email"
                     >
                       <div
-                        class="c14"
+                        class="c16"
                       >
                         <svg
-                          class="c20"
+                          class="c22"
                           fill="none"
                           height="1em"
                           viewBox="0 0 4 4"
@@ -561,10 +560,10 @@ describe('SettingsPage || components || SettingsNav', () => {
                           />
                         </svg>
                         <div
-                          class="c21"
+                          class="c23"
                         >
                           <span
-                            class="c3 c22"
+                            class="c3 c24"
                           >
                             Settings
                           </span>
@@ -572,27 +571,28 @@ describe('SettingsPage || components || SettingsNav', () => {
                       </div>
                     </a>
                   </li>
-                </ul>
+                </ol>
               </div>
             </li>
             <li>
               <div
-                class=""
+                class="c10 c12"
+                spacing="1"
               >
                 <div
-                  class="c11 c12"
+                  class="c13 c14"
                 >
                   <div
-                    class="c13"
+                    class="c15"
                   >
                     <div
-                      class="c14 c15"
+                      class="c16 c17"
                     >
                       <div
-                        class="c16"
+                        class="c18"
                       >
                         <span
-                          class="c3 c17"
+                          class="c3 c19"
                         >
                           Users & Permissions plugin
                         </span>
@@ -600,19 +600,19 @@ describe('SettingsPage || components || SettingsNav', () => {
                     </div>
                   </div>
                 </div>
-                <ul
+                <ol
                   id="subnav-list-5"
                 >
                   <li>
                     <a
-                      class="c18 c19"
+                      class="c20 c21"
                       href="/settings/users-permissions/roles"
                     >
                       <div
-                        class="c14"
+                        class="c16"
                       >
                         <svg
-                          class="c20"
+                          class="c22"
                           fill="none"
                           height="1em"
                           viewBox="0 0 4 4"
@@ -627,10 +627,10 @@ describe('SettingsPage || components || SettingsNav', () => {
                           />
                         </svg>
                         <div
-                          class="c21"
+                          class="c23"
                         >
                           <span
-                            class="c3 c22"
+                            class="c3 c24"
                           >
                             Roles
                           </span>
@@ -638,10 +638,10 @@ describe('SettingsPage || components || SettingsNav', () => {
                       </div>
                     </a>
                   </li>
-                </ul>
+                </ol>
               </div>
             </li>
-          </ul>
+          </ol>
         </div>
       </nav>
     `);

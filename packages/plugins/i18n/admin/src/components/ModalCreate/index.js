@@ -85,7 +85,7 @@ const ModalCreate = ({ onClose }) => {
                   <Tab>
                     {formatMessage({
                       id: getTrad('Settings.locales.modal.base'),
-                      defaultMessage: 'Base settings',
+                      defaultMessage: 'Basic settings',
                     })}
                   </Tab>
                   <Tab>
@@ -119,7 +119,7 @@ const ModalCreate = ({ onClose }) => {
             }
             endActions={
               <Button type="submit" startIcon={<Check />} disabled={isAdding}>
-                {formatMessage({ id: 'app.components.Button.save', defaultMessage: 'Save' })}
+                {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>
             }
           />

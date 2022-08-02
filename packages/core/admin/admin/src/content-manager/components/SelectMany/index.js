@@ -2,7 +2,8 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import isEmpty from 'lodash/isEmpty';
-import Select, { createFilter } from 'react-select';
+import { createFilter } from 'react-select';
+import { ReactSelect as Select } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
@@ -24,7 +25,6 @@ function SelectMany({
   options,
   placeholder,
   searchToPersist,
-  styles,
   targetModel,
   value,
   description,
@@ -70,9 +70,8 @@ function SelectMany({
         onMenuOpen={onMenuOpen}
         onMenuScrollToBottom={onMenuScrollToBottom}
         placeholder={formatMessage(
-          placeholder || { id: 'components.Select.placeholder', defaultMessage: 'Select...' }
+          placeholder || { id: 'global.select', defaultMessage: 'Select...' }
         )}
-        styles={styles}
         value={[]}
       />
       <Box paddingTop={3} style={{ overflow: 'auto' }}>
@@ -138,7 +137,6 @@ SelectMany.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
   }),
   searchToPersist: PropTypes.string,
-  styles: PropTypes.object.isRequired,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.array,
   description: PropTypes.string,

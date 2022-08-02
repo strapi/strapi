@@ -56,12 +56,12 @@ function List({
           <Tr>
             <Th>
               <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
+                {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
+                {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
               </Typography>
             </Th>
           </Tr>
@@ -84,12 +84,12 @@ function List({
           <Tr>
             <Th>
               <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
+                {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
+                {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
               </Typography>
             </Th>
           </Tr>
@@ -134,12 +134,12 @@ function List({
                 <tr>
                   <th>
                     <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
+                      {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
                     </Typography>
                   </th>
                   <th colSpan="2">
                     <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
+                      {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
                     </Typography>
                   </th>
                 </tr>

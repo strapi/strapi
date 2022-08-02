@@ -1,5 +1,7 @@
 'use strict';
 
+const tsUtils = require('@strapi/typescript-utils');
+
 const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
 const validateInput = require('./utils/validate-input');
@@ -19,12 +21,14 @@ module.exports = plop => {
     ],
     actions(answers) {
       const filePath = getFilePath(answers.destination);
+      const currentDir = process.cwd();
+      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       return [
         {
           type: 'add',
-          path: `${filePath}/controllers/{{ id }}.js`,
-          templateFile: 'templates/controller.js.hbs',
+          path: `${filePath}/controllers/{{ id }}.${language}`,
+          templateFile: `templates/${language}/controller.${language}.hbs`,
         },
       ];
     },

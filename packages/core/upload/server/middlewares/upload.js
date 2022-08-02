@@ -19,13 +19,13 @@ module.exports = ({ strapi }) => {
     strapi.server.app.onerror(err);
   });
 
-  const localServerConfig = strapi.config.get('plugin.upload.providerOptions.localeServer', {});
+  const localServerConfig = strapi.config.get('plugin.upload.providerOptions.localServer', {});
 
   strapi.server.routes([
     {
       method: 'GET',
       path: '/uploads/(.*)',
-      handler: [range, koaStatic(strapi.dirs.public, { defer: true, ...localServerConfig })],
+      handler: [range, koaStatic(strapi.dirs.static.public, { defer: true, ...localServerConfig })],
       config: { auth: false },
     },
   ]);

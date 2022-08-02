@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
+import { TrackingContext, useRBAC } from '@strapi/helper-plugin';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
@@ -12,7 +12,6 @@ import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useNotification: jest.fn(),
   useRBAC: jest.fn(),
   CheckPermissions: jest.fn(({ children }) => children),
@@ -28,13 +27,15 @@ const client = new QueryClient({
 
 const makeApp = history => (
   <Router history={history}>
-    <ThemeProvider theme={lightTheme}>
-      <QueryClientProvider client={client}>
-        <IntlProvider locale="en" messages={{}} textComponent="span">
-          <RoleListPage />
-        </IntlProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+      <ThemeProvider theme={lightTheme}>
+        <QueryClientProvider client={client}>
+          <IntlProvider locale="en" messages={{}} textComponent="span">
+            <RoleListPage />
+          </IntlProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </TrackingContext.Provider>
   </Router>
 );
 
@@ -138,9 +139,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         align-items: center;
         padding: 10px 16px;
         background: #4945ff;
-        border: none;
         border: 1px solid #4945ff;
-        background: #4945ff;
       }
 
       .c9 .c10 {
@@ -243,6 +242,10 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
       }
 
       .c25 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -254,10 +257,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c23 {
@@ -418,6 +417,10 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
       }
 
       .c5 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -429,27 +432,13 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c6 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c18 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -457,17 +446,13 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
+      }
+
+      .c18 {
         -webkit-align-items: flex-start;
         -webkit-box-align: flex-start;
         -ms-flex-align: flex-start;
         align-items: flex-start;
-      }
-
-      .c19 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -475,10 +460,24 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c19 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
         -webkit-flex-wrap: wrap;
         -ms-flex-wrap: wrap;
         flex-wrap: wrap;

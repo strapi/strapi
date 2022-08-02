@@ -228,6 +228,10 @@ describe('<SearchURLQuery />', () => {
       }
 
       .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -235,13 +239,13 @@ describe('<SearchURLQuery />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c5 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c5 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -253,10 +257,6 @@ describe('<SearchURLQuery />', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c2 {
@@ -269,8 +269,10 @@ describe('<SearchURLQuery />', () => {
       .c10 {
         border: none;
         border-radius: 4px;
+        padding-bottom: 0.40625rem;
         padding-left: 0;
         padding-right: 16px;
+        padding-top: 0.40625rem;
         color: #32324d;
         font-weight: 400;
         font-size: 0.875rem;
@@ -312,7 +314,6 @@ describe('<SearchURLQuery />', () => {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
-        height: 2rem;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;

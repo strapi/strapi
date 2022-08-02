@@ -8,7 +8,7 @@ import Plugins from './Plugins';
 const InstalledPluginsPage = () => {
   const { formatMessage } = useIntl();
   const title = formatMessage({
-    id: 'app.components.ListPluginsPage.title',
+    id: 'global.plugins',
     defaultMessage: 'Plugins',
   });
 

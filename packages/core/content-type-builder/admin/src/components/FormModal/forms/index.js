@@ -1,6 +1,5 @@
 import get from 'lodash/get';
 import toLower from 'lodash/toLower';
-import getTrad from '../../../utils/getTrad';
 import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
 import { categoryForm, createCategorySchema } from '../category';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';
@@ -156,7 +155,7 @@ const forms = {
             ...baseForm,
             {
               sectionTitle: {
-                id: getTrad('form.attribute.item.settings.name'),
+                id: 'global.settings',
                 defaultMessage: 'Settings',
               },
               items: itemsToAdd,

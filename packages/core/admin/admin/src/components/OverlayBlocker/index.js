@@ -37,6 +37,10 @@ const Portal = ({ isOpen }) => {
   return null;
 };
 
+Portal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+};
+
 const OverlayBlockerProvider = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
 

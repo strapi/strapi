@@ -136,7 +136,7 @@ export const SettingsPage = () => {
               size="L"
             >
               {formatMessage({
-                id: 'app.components.Button.save',
+                id: 'global.save',
                 defaultMessage: 'Save',
               })}
             </Button>

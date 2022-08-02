@@ -1,22 +1,22 @@
 import React, { memo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import isEqualFastCompare from 'react-fast-compare';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
+import { Link } from '@strapi/helper-plugin';
 import { HeaderLayout } from '@strapi/design-system/Layout';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Dialog, DialogBody, DialogFooter } from '@strapi/design-system/Dialog';
-import { Link } from '@strapi/design-system/Link';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Check from '@strapi/icons/Check';
-import PropTypes from 'prop-types';
-import isEqualFastCompare from 'react-fast-compare';
 import { getTrad } from '../../../utils';
 import { connect, getDraftRelations, select } from './utils';
 
@@ -172,7 +172,7 @@ const Header = ({
             to="/"
           >
             {formatMessage({
-              id: 'app.components.HeaderLayout.link.go-back',
+              id: 'global.back',
               defaultMessage: 'Back',
             })}
           </Link>

@@ -54,7 +54,7 @@ const layout = [
   [
     {
       intlLabel: {
-        id: 'Auth.form.password.label',
+        id: 'global.password',
         defaultMessage: 'Password',
       },
       name: 'password',

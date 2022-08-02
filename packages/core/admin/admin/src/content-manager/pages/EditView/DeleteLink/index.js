@@ -71,7 +71,4 @@ DeleteLink.propTypes = {
 
 const Memoized = memo(DeleteLink, isEqual);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);

@@ -15,6 +15,7 @@ import {
   useNotification,
   useOverlayBlocker,
   LoadingIndicatorPage,
+  Link,
 } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 import { Formik } from 'formik';
@@ -22,7 +23,6 @@ import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Link } from '@strapi/design-system/Link';
 import { Typography } from '@strapi/design-system/Typography';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
@@ -142,14 +142,14 @@ const EditPage = ({ canUpdate }) => {
         <HeaderLayout
           primaryAction={
             <Button disabled startIcon={<Check />} type="button" size="L">
-              {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+              {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
             </Button>
           }
           title={title}
           navigationAction={
             <Link startIcon={<ArrowLeft />} to="/settings/users?pageSize=10&page=1&sort=firstname">
               {formatMessage({
-                id: 'app.components.go-back',
+                id: 'global.back',
                 defaultMessage: 'Back',
               })}
             </Link>
@@ -183,7 +183,7 @@ const EditPage = ({ canUpdate }) => {
                     type="submit"
                     size="L"
                   >
-                    {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+                    {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>
                 }
                 title={title}
@@ -193,7 +193,7 @@ const EditPage = ({ canUpdate }) => {
                     to="/settings/users?pageSize=10&page=1&sort=firstname"
                   >
                     {formatMessage({
-                      id: 'app.components.go-back',
+                      id: 'global.back',
                       defaultMessage: 'Back',
                     })}
                   </Link>
@@ -253,7 +253,7 @@ const EditPage = ({ canUpdate }) => {
                     <Stack spacing={4}>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
-                          id: 'app.components.Users.ModalCreateBody.block-title.login',
+                          id: 'global.roles',
                           defaultMessage: "User's role",
                         })}
                       </Typography>

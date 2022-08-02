@@ -7,15 +7,14 @@ const urlJoin = require('url-join');
 const { getService } = require('../utils');
 
 const DEFAULT_PERMISSIONS = [
-  { action: 'plugin::users-permissions.auth.admincallback', roleType: 'public' },
-  { action: 'plugin::users-permissions.auth.adminregister', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.callback', roleType: 'public' },
-  { action: 'plugin::users-permissions.auth.connect', roleType: null },
-  { action: 'plugin::users-permissions.auth.forgotpassword', roleType: 'public' },
-  { action: 'plugin::users-permissions.auth.resetpassword', roleType: 'public' },
+  { action: 'plugin::users-permissions.auth.connect', roleType: 'public' },
+  { action: 'plugin::users-permissions.auth.forgotPassword', roleType: 'public' },
+  { action: 'plugin::users-permissions.auth.resetPassword', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.register', roleType: 'public' },
-  { action: 'plugin::users-permissions.auth.emailconfirmation', roleType: 'public' },
-  { action: 'plugin::users-permissions.user.me', roleType: null },
+  { action: 'plugin::users-permissions.auth.emailConfirmation', roleType: 'public' },
+  { action: 'plugin::users-permissions.auth.sendEmailConfirmation', roleType: 'public' },
+  { action: 'plugin::users-permissions.user.me', roleType: 'authenticated' },
 ];
 
 const transformRoutePrefixFor = pluginName => route => {

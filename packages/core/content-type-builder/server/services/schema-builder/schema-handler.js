@@ -231,6 +231,7 @@ module.exports = function createSchemaHandler(infos) {
             options: state.schema.options,
             pluginOptions: state.schema.pluginOptions,
             attributes: state.schema.attributes,
+            config: state.schema.config,
           },
           { spaces: 2 }
         );

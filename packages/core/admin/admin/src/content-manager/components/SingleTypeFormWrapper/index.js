@@ -143,10 +143,8 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   const displayErrors = useCallback(
     err => {
-      const errorPayload = err.response.payload;
-      console.error(errorPayload);
-
-      let errorMessage = get(errorPayload, ['message'], 'Bad Request');
+      const errorPayload = err.response.data;
+      let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
 
       // TODO handle errors correctly when back-end ready
       if (Array.isArray(errorMessage)) {
@@ -178,10 +176,12 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       } catch (err) {
         trackUsageRef.current('didNotDeleteEntry', { error: err, ...trackerProperty });
 
+        displayErrors(err);
+
         return Promise.reject(err);
       }
     },
-    [slug, toggleNotification, searchToSend]
+    [slug, displayErrors, toggleNotification, searchToSend]
   );
 
   const onDeleteSucceeded = useCallback(() => {
@@ -211,12 +211,16 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         setIsCreatingEntry(false);
 
         dispatch(setStatus('resolved'));
+
+        return Promise.resolve(data);
       } catch (err) {
         trackUsageRef.current('didNotCreateEntry', { error: err, trackerProperty });
 
         displayErrors(err);
 
         dispatch(setStatus('resolved'));
+
+        return Promise.reject(err);
       }
     },
     [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification, setCurrentStep]
@@ -239,10 +243,14 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(submitSucceeded(cleanReceivedData(data)));
 
       dispatch(setStatus('resolved'));
+
+      return Promise.resolve(data);
     } catch (err) {
       displayErrors(err);
 
       dispatch(setStatus('resolved'));
+
+      return Promise.reject(err);
     }
   }, [cleanReceivedData, displayErrors, slug, searchToSend, dispatch, toggleNotification]);
 
@@ -267,12 +275,16 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
         dispatch(setStatus('resolved'));
+
+        return Promise.resolve(data);
       } catch (err) {
         displayErrors(err);
 
         trackUsageRef.current('didNotEditEntry', { error: err, trackerProperty });
 
         dispatch(setStatus('resolved'));
+
+        return Promise.reject(err);
       }
     },
     [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification]

@@ -7,6 +7,8 @@ import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 
+import isFieldTypeNumber from '../../../utils/isFieldTypeNumber';
+
 yup.addMethod(yup.mixed, 'defined', function() {
   return this.test('defined', errorsTrads.required, value => value !== undefined);
 });
@@ -240,12 +242,12 @@ const createYupSchemaAttribute = (type, validations, options) => {
       .typeError();
   }
 
-  if (['date', 'datetime'].includes(type)) {
-    schema = yup.date();
-  }
-
   if (type === 'biginteger') {
     schema = yup.string().matches(/^-?\d*$/);
+  }
+
+  if (['date', 'datetime'].includes(type)) {
+    schema = yup.date();
   }
 
   Object.keys(validations).forEach(validation => {
@@ -273,7 +275,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
                     return true;
                   }
 
-                  if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
+                  if (isFieldTypeNumber(type)) {
                     if (value === 0) {
                       return true;
                     }
@@ -344,12 +346,12 @@ const createYupSchemaAttribute = (type, validations, options) => {
           }
           break;
         case 'positive':
-          if (['number', 'integer', 'bigint', 'float', 'decimal'].includes(type)) {
+          if (isFieldTypeNumber(type)) {
             schema = schema.positive();
           }
           break;
         case 'negative':
-          if (['number', 'integer', 'bigint', 'float', 'decimal'].includes(type)) {
+          if (isFieldTypeNumber(type)) {
             schema = schema.negative();
           }
           break;

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.1.5",
+  "version": "4.3.2",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
     }
   ],
   "main": "build/index.js",
-  "module": "lib/src/index.js",
   "files": [
     "build"
   ],
@@ -35,6 +34,7 @@
     "prepublishOnly": "npm run build",
     "storybook": "start-storybook -p 6006",
     "test:front": "jest --config ./jest.config.front.js",
+    "test:front:cov": "jest --config ./jest.config.front.js --coverage --collectCoverageFrom='<rootDir>/packages/core/helper-plugin/lib/src/**/*.js' --coverageDirectory='<rootDir>/packages/core/helper-plugin/coverage'",
     "test:front:watch": "jest --config ./jest.config.front.js --watchAll",
     "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
   },
@@ -43,44 +43,42 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-brands-svg-icons": "^5.15.2",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
-    "@fortawesome/react-fontawesome": "^0.1.14",
+    "@fortawesome/react-fontawesome": "^0.2.0",
     "axios": "0.25.0",
-    "babel-plugin-styled-components": "2.0.2",
     "formik": "2.2.9",
     "invariant": "^2.2.1",
     "lodash": "4.17.21",
     "match-sorter": "^4.0.2",
-    "mini-css-extract-plugin": "2.4.4",
-    "moment": "^2.29.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
     "react-intl": "5.20.2",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "styled-components": "^5.2.3",
+    "react-select": "4.0.2",
+    "styled-components": "5.3.3",
     "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {
     "@babel/core": "7.16.7",
     "@babel/plugin-proposal-class-properties": "7.16.7",
-    "@babel/plugin-proposal-export-default-from": "7.16.7",
-    "@babel/plugin-proposal-function-bind": "7.16.7",
+    "@babel/plugin-proposal-export-default-from": "7.18.6",
+    "@babel/plugin-proposal-function-bind": "7.18.8",
     "@babel/plugin-transform-runtime": "7.16.7",
     "@babel/preset-env": "7.16.7",
-    "@babel/preset-react": "7.16.7",
+    "@babel/preset-react": "7.18.6",
     "@babel/runtime": "7.16.7",
     "@storybook/addon-actions": "6.4.10",
-    "@storybook/addon-essentials": "6.4.10",
-    "@storybook/addon-links": "6.4.10",
-    "@storybook/builder-webpack5": "6.4.10",
+    "@storybook/addon-essentials": "6.5.9",
+    "@storybook/addon-links": "6.5.9",
+    "@storybook/builder-webpack5": "6.5.9",
     "@storybook/manager-webpack5": "6.4.10",
     "@storybook/react": "^6.3.7",
-    "@strapi/design-system": "0.0.1-alpha.79",
-    "@strapi/icons": "0.0.1-alpha.79",
-    "babel-loader": "^8.2.2",
+    "@strapi/design-system": "1.2.1",
+    "@strapi/icons": "1.2.1",
+    "babel-loader": "^8.2.5",
     "cross-env": "^7.0.3",
-    "date-fns": "2.22.1",
+    "date-fns": "2.28.0",
     "rimraf": "3.0.2"
   },
   "peerDependencies": {
@@ -90,7 +88,16 @@
     "react-select": "^4.0.2"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "./build"
+        ]
+      }
+    }
   }
 }

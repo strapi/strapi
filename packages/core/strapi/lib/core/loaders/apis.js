@@ -5,9 +5,7 @@ const { existsSync } = require('fs-extra');
 const _ = require('lodash');
 const fse = require('fs-extra');
 const { isKebabCase } = require('@strapi/utils');
-
-// to handle names with numbers in it we first check if it is already in kebabCase
-const normalizeName = name => (isKebabCase(name) ? name : _.kebabCase(name));
+const { importDefault } = require('../../utils');
 
 const DEFAULT_CONTENT_TYPE = {
   schema: {},
@@ -15,22 +13,29 @@ const DEFAULT_CONTENT_TYPE = {
   lifecycles: {},
 };
 
+// to handle names with numbers in it we first check if it is already in kebabCase
+const normalizeName = name => (isKebabCase(name) ? name : _.kebabCase(name));
+
+const isDirectory = fd => fd.isDirectory();
+const isDotFile = fd => fd.name.startsWith('.');
+
 module.exports = async strapi => {
-  if (!existsSync(strapi.dirs.api)) {
-    throw new Error('Missing api folder. Please create one at `./src/api`');
+  if (!existsSync(strapi.dirs.dist.api)) {
+    return;
   }
 
-  const apisFDs = await fse.readdir(strapi.dirs.api, { withFileTypes: true });
+  const apisFDs = await (await fse.readdir(strapi.dirs.dist.api, { withFileTypes: true }))
+    .filter(isDirectory)
+    .filter(_.negate(isDotFile));
+
   const apis = {};
 
   // only load folders
   for (const apiFD of apisFDs) {
-    if (apiFD.isDirectory()) {
-      const apiName = normalizeName(apiFD.name);
-      const api = await loadAPI(join(strapi.dirs.api, apiFD.name));
+    const apiName = normalizeName(apiFD.name);
+    const api = await loadAPI(join(strapi.dirs.dist.api, apiFD.name));
 
-      apis[apiName] = api;
-    }
+    apis[apiName] = api;
   }
 
   validateContentTypesUnicity(apis);
@@ -150,7 +155,7 @@ const loadFile = file => {
 
   switch (ext) {
     case '.js':
-      return require(file);
+      return importDefault(file);
     case '.json':
       return fse.readJSON(file);
     default:

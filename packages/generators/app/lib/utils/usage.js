@@ -54,6 +54,10 @@ function captureStderr(name, error) {
 }
 
 function trackEvent(event, body) {
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
+
   try {
     return fetch('https://analytics.strapi.io/track', {
       method: 'POST',
@@ -82,6 +86,8 @@ function trackError({ scope, error }) {
     nodeVersion: process.version,
     docker: scope.docker,
     useYarn: scope.useYarn,
+    useTypescriptOnServer: scope.useTypescript,
+    useTypescriptOnAdmin: scope.useTypescript,
   };
 
   try {
@@ -108,6 +114,8 @@ function trackUsage({ event, scope, error }) {
     version: scope.strapiVersion,
     docker: scope.docker,
     useYarn: scope.useYarn.toString(),
+    useTypescriptOnServer: scope.useTypescript,
+    useTypescriptOnAdmin: scope.useTypescript,
     noRun: (scope.runQuickstartApp !== true).toString(),
   };
 

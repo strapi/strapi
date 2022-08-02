@@ -1,6 +1,7 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
+import { TrackingContext } from '@strapi/helper-plugin';
 import { FromComputerForm } from '../FromComputerForm';
 import en from '../../../../translations/en.json';
 
@@ -13,9 +14,11 @@ jest.mock('react-intl', () => ({
 describe('FromComputerForm', () => {
   it('snapshots the component', async () => {
     const { container } = renderTL(
-      <ThemeProvider theme={lightTheme}>
-        <FromComputerForm onClose={jest.fn()} onAddAssets={jest.fn()} />
-      </ThemeProvider>
+      <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+        <ThemeProvider theme={lightTheme}>
+          <FromComputerForm onClose={jest.fn()} onAddAssets={jest.fn()} />
+        </ThemeProvider>
+      </TrackingContext.Provider>
     );
 
     expect(container).toMatchInlineSnapshot(`
@@ -65,45 +68,6 @@ describe('FromComputerForm', () => {
 
       .c11 {
         position: relative;
-      }
-
-      .c3 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c4 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c8 {
-        color: #666687;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
       }
 
       .c15 {
@@ -178,12 +142,10 @@ describe('FromComputerForm', () => {
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
         border: 1px solid #4945ff;
-        background: #4945ff;
       }
 
-      .c13 .sc-hJhJFJ {
+      .c13 .sc-ezHhwS {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -248,12 +210,12 @@ describe('FromComputerForm', () => {
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
+        border: 1px solid #4945ff;
         border: 1px solid #dcdce4;
         background: #ffffff;
       }
 
-      .c21 .sc-hJhJFJ {
+      .c21 .sc-ezHhwS {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -313,6 +275,45 @@ describe('FromComputerForm', () => {
         fill: #32324d;
       }
 
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c4 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c8 {
+        color: #666687;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
       .c16 {
         background: #f6f6f9;
         padding-top: 16px;
@@ -322,6 +323,10 @@ describe('FromComputerForm', () => {
       }
 
       .c18 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -333,13 +338,13 @@ describe('FromComputerForm', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
+      }
+
+      .c19 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c19 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -347,10 +352,6 @@ describe('FromComputerForm', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c17 {

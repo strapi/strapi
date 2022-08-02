@@ -24,13 +24,19 @@ const LIMITED_EVENTS = [
 
 const createTelemetryInstance = strapi => {
   const uuid = strapi.config.get('uuid');
-  const isDisabled = !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED);
+  const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled');
+  const isDisabled =
+    !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED) || isTruthy(telemetryDisabled);
 
   const crons = [];
   const sender = createSender(strapi);
   const sendEvent = wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS });
 
   return {
+    get isDisabled() {
+      return isDisabled;
+    },
+
     register() {
       if (!isDisabled) {
         const pingCron = scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
@@ -90,7 +96,7 @@ const hashProject = strapi =>
 
 const hashDep = strapi => {
   const depStr = JSON.stringify(strapi.config.info.dependencies);
-  const readmePath = path.join(strapi.dirs.root, 'README.md');
+  const readmePath = path.join(strapi.dirs.app.root, 'README.md');
 
   try {
     if (fs.existsSync(readmePath)) {

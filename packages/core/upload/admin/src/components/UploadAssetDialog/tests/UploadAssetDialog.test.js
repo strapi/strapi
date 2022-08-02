@@ -2,6 +2,7 @@ import React from 'react';
 import { render as renderTL, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
+import { TrackingContext } from '@strapi/helper-plugin';
 import en from '../../../translations/en.json';
 import { UploadAssetDialog } from '../UploadAssetDialog';
 import { server } from './server';
@@ -23,11 +24,13 @@ const queryClient = new QueryClient({
 const render = (props = { onClose: () => {} }) =>
   renderTL(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
-        <UploadAssetDialog {...props} />
-      </ThemeProvider>
+      <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
+        <ThemeProvider theme={lightTheme}>
+          <UploadAssetDialog {...props} />
+        </ThemeProvider>
+      </TrackingContext.Provider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: document.getElementById('app') }
   );
 
 describe('UploadAssetDialog', () => {
@@ -45,9 +48,9 @@ describe('UploadAssetDialog', () => {
 
   describe('from computer', () => {
     it('snapshots the component', () => {
-      const { container } = render();
+      render();
 
-      expect(container).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
 
     it('closes the dialog when clicking on cancel on the add asset step', () => {
@@ -63,12 +66,12 @@ describe('UploadAssetDialog', () => {
       const file = new File(['Some stuff'], 'test.png', { type: 'image/png' });
       const onCloseSpy = jest.fn();
 
-      const { container } = render({ onClose: onCloseSpy, onSuccess: () => {} });
+      render({ onClose: onCloseSpy, onSuccess: () => {} });
 
       const fileList = [file];
       fileList.item = i => fileList[i];
 
-      fireEvent.change(container.querySelector('[type="file"]'), { target: { files: fileList } });
+      fireEvent.change(document.querySelector('[type="file"]'), { target: { files: fileList } });
       fireEvent.click(screen.getByText('app.components.Button.cancel'));
 
       expect(window.confirm).toBeCalled();
@@ -83,14 +86,19 @@ describe('UploadAssetDialog', () => {
       it(`shows ${number} valid ${mime} file`, () => {
         const onCloseSpy = jest.fn();
 
+        // see https://github.com/testing-library/react-testing-library/issues/470
+        Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
+          set: () => {},
+        });
+
         const file = new File(['Some stuff'], `test.${ext}`, { type: mime });
 
         const fileList = [file];
         fileList.item = i => fileList[i];
 
-        const { container } = render({ onClose: onCloseSpy, onSuccess: () => {} });
+        render({ onClose: onCloseSpy, onSuccess: () => {} });
 
-        fireEvent.change(container.querySelector('[type="file"]'), {
+        fireEvent.change(document.querySelector('[type="file"]'), {
           target: { files: fileList },
         });
 
@@ -112,11 +120,11 @@ describe('UploadAssetDialog', () => {
 
   describe('from url', () => {
     it('snapshots the component', () => {
-      const { container } = render();
+      render();
 
       fireEvent.click(screen.getByText('From url'));
 
-      expect(container).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
 
     it('shows an error message when the asset does not exist', async () => {

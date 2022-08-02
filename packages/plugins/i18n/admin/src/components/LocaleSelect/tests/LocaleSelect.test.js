@@ -54,25 +54,29 @@ describe('LocaleSelect', () => {
     const { container } = render();
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c8 {
+      .c9 {
         padding-left: 12px;
       }
 
-      .c3 {
+      .c1 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
-      .c5 {
+      .c4 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -80,32 +84,42 @@ describe('LocaleSelect', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c6 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
         -webkit-flex-wrap: wrap;
         -ms-flex-wrap: wrap;
         flex-wrap: wrap;
       }
 
-      .c9 {
+      .c10 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c9 svg {
+      .c10 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c9 svg path {
+      .c10 svg path {
         fill: #666687;
       }
 
-      .c10 {
+      .c11 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -114,11 +128,11 @@ describe('LocaleSelect', () => {
         border: none;
       }
 
-      .c10 svg {
+      .c11 svg {
         width: 0.375rem;
       }
 
-      .c2 {
+      .c3 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
@@ -137,7 +151,7 @@ describe('LocaleSelect', () => {
         width: 1px;
       }
 
-      .c4 {
+      .c5 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -152,12 +166,12 @@ describe('LocaleSelect', () => {
         transition-duration: 0.2s;
       }
 
-      .c4:focus-within {
+      .c5:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c6 {
+      .c7 {
         display: grid;
         -webkit-flex: 1 1 0%;
         -ms-flex: 1 1 0%;
@@ -165,7 +179,7 @@ describe('LocaleSelect', () => {
         position: relative;
       }
 
-      .c7 {
+      .c8 {
         display: inline-grid;
         grid-area: 1 / 1 / 2 / 3;
         grid-template-columns: 0px min-content;
@@ -180,34 +194,24 @@ describe('LocaleSelect', () => {
         outline: none;
       }
 
-      .c7:focus-visible {
+      .c8:focus-visible {
         outline: none;
         box-shadow: none;
         outline-offset: 0;
       }
 
-      .c7[aria-disabled='true'] {
+      .c8[aria-disabled='true'] {
         background: inherit;
         color: inherit;
         cursor: not-allowed;
       }
 
-      .c1 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c1 > * {
+      .c2 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c1 > * + * {
+      .c2 > * + * {
         margin-top: 4px;
       }
 
@@ -219,25 +223,25 @@ describe('LocaleSelect', () => {
           class="c0"
         />
         <div
-          class="c1"
+          class="c1 c2"
           spacing="1"
         >
           <label
-            class="c2"
+            class="c3"
             for="combobox-1"
             id="combobox-1-label"
           >
             <div
-              class="c3"
+              class="c4"
             >
               Locales
             </div>
           </label>
           <div
-            class="c3 c4"
+            class="c4 c5"
           >
             <div
-              class="c5 c6"
+              class="c6 c7"
               wrap="wrap"
             >
               
@@ -251,7 +255,7 @@ describe('LocaleSelect', () => {
                 aria-labelledby="combobox-1-label"
                 autocomplete="off"
                 autocorrect="off"
-                class="c7"
+                class="c8"
                 id="combobox-1"
                 placeholder="Select or enter a value"
                 role="combobox"
@@ -261,12 +265,12 @@ describe('LocaleSelect', () => {
               />
             </div>
             <div
-              class="c3"
+              class="c4"
             >
               
               <button
                 aria-hidden="true"
-                class="c8 c9 c10"
+                class="c9 c10 c11"
                 tabindex="-1"
                 type="button"
               >

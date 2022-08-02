@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+
 import { AssetDialog } from '../AssetDialog';
 import { AssetDefinition } from '../../constants';
 import { CarouselAssets } from './Carousel/CarouselAssets';
+import { EditFolderDialog } from '../EditFolderDialog';
 import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
 import getAllowedFiles from '../../utils/getAllowedFiles';
 
-const Steps = {
-  SelectAsset: 'SelectAsset',
-  UploadAsset: 'UploadAsset',
+const STEPS = {
+  AssetSelect: 'SelectAsset',
+  AssetUpload: 'UploadAsset',
+  FolderCreate: 'FolderCreate',
 };
 
 export const MediaLibraryInput = ({
@@ -29,6 +32,7 @@ export const MediaLibraryInput = ({
   const [step, setStep] = useState(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [droppedAssets, setDroppedAssets] = useState();
+  const [folderId, setFolderId] = useState(null);
   const { formatMessage } = useIntl();
 
   useEffect(() => {
@@ -96,7 +100,7 @@ export const MediaLibraryInput = ({
 
   const handleAssetDrop = assets => {
     setDroppedAssets(assets);
-    setStep(Steps.UploadAsset);
+    setStep(STEPS.AssetUpload);
   };
 
   let label = intlLabel.id ? formatMessage(intlLabel) : '';
@@ -117,7 +121,6 @@ export const MediaLibraryInput = ({
     setUploadedFiles(prev => [...prev, ...uploadedFiles]);
   };
 
-  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
     ? formatMessage(
         { id: description.id, defaultMessage: description.defaultMessage },
@@ -143,37 +146,48 @@ export const MediaLibraryInput = ({
         label={label}
         onDeleteAsset={handleDeleteAsset}
         onDeleteAssetFromMediaLibrary={handleDeleteAssetFromMediaLibrary}
-        onAddAsset={() => setStep(Steps.SelectAsset)}
+        onAddAsset={() => setStep(STEPS.AssetSelect)}
         onDropAsset={handleAssetDrop}
         onEditAsset={handleAssetEdit}
         onNext={handleNext}
         onPrevious={handlePrevious}
-        error={errorMessage}
+        error={error}
         hint={hint}
         required={required}
         selectedAssetIndex={selectedIndex}
         trackedLocation="content-manager"
       />
 
-      {step === Steps.SelectAsset && (
+      {step === STEPS.AssetSelect && (
         <AssetDialog
           allowedTypes={fieldAllowedTypes}
           initiallySelectedAssets={initiallySelectedAssets}
-          onClose={() => setStep(undefined)}
+          folderId={folderId}
+          onClose={() => {
+            setStep(undefined);
+            setFolderId(null);
+          }}
           onValidate={handleValidation}
           multiple={multiple}
-          onAddAsset={() => setStep(Steps.UploadAsset)}
+          onAddAsset={() => setStep(STEPS.AssetUpload)}
+          onAddFolder={() => setStep(STEPS.FolderCreate)}
+          onChangeFolder={folder => setFolderId(folder)}
           trackedLocation="content-manager"
         />
       )}
 
-      {step === Steps.UploadAsset && (
+      {step === STEPS.AssetUpload && (
         <UploadAssetDialog
-          onClose={() => setStep(Steps.SelectAsset)}
+          onClose={() => setStep(STEPS.AssetSelect)}
           initialAssetsToAdd={droppedAssets}
           addUploadedFiles={handleFilesUploadSucceeded}
           trackedLocation="content-manager"
+          folderId={folderId}
         />
+      )}
+
+      {step === STEPS.FolderCreate && (
+        <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} parentFolderId={folderId} />
       )}
     </>
   );
@@ -198,7 +212,7 @@ MediaLibraryInput.propTypes = {
     defaultMessage: PropTypes.string,
     values: PropTypes.shape({}),
   }),
-  error: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
+  error: PropTypes.string,
   intlLabel: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
   multiple: PropTypes.bool,
   onChange: PropTypes.func.isRequired,

@@ -175,7 +175,7 @@ export const ProvidersPage = () => {
                   </Th>
                   <Th>
                     <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: getTrad('Providers.name'), defaultMessage: 'Name' })}
+                      {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
                     </Typography>
                   </Th>
                   <Th>
@@ -187,7 +187,7 @@ export const ProvidersPage = () => {
                     <Typography variant="sigma">
                       <VisuallyHidden>
                         {formatMessage({
-                          id: getTrad('Providers.settings'),
+                          id: 'global.settings',
                           defaultMessage: 'Settings',
                         })}
                       </VisuallyHidden>
@@ -219,11 +219,11 @@ export const ProvidersPage = () => {
                       >
                         {provider.enabled
                           ? formatMessage({
-                              id: getTrad('Providers.enabled'),
+                              id: 'global.enabled',
                               defaultMessage: 'Enabled',
                             })
                           : formatMessage({
-                              id: getTrad('Providers.disabled'),
+                              id: 'global.disabled',
                               defaultMessage: 'Disabled',
                             })}
                       </Typography>

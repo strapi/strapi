@@ -284,6 +284,14 @@
     "name":"Central Kurdish (ckb)"
   },
   {
+    "code":"kmr",
+    "name":"Northern Kurdish (kmr)"
+  },
+  {
+    "code":"sdh",
+    "name":"Southern Kurdish (sdh)"
+  },
+  {
     "code":"tzm",
     "name":"Central Morocco Tamazight (tzm)"
   },
@@ -1020,6 +1028,10 @@
     "name":"Kannada (India) (kn-IN)"
   },
   {
+    "code":"kaa",
+    "name":"Kara-Kalpak (kaa)"
+  },
+  {
     "code":"kk",
     "name":"Kazakh (kk)"
   },
@@ -1094,6 +1106,10 @@
   {
     "code":"nmg-CM",
     "name":"Kwasio (Cameroon) (nmg-CM)"
+  },
+  {
+    "code":"ky",
+    "name":"Kyrgyz (ky)"
   },
   {
     "code":"lag",
@@ -1520,6 +1536,10 @@
     "name":"Sangu (Tanzania) (sbp-TZ)"
   },
   {
+    "code":"sa",
+    "name":"Sanskrit (sa)"
+  },
+  {
     "code":"seh",
     "name":"Sena (seh)"
   },
@@ -1790,6 +1810,10 @@
   {
     "code":"dav-KE",
     "name":"Taita (Kenya) (dav-KE)"
+  },
+  {
+    "code":"tg",
+    "name":"Tajik (tg)"
   },
   {
     "code":"ta",

@@ -140,7 +140,11 @@ const testData = {
       id: 1,
       name: 'name',
       subcomponotrepeatable: { id: 4, name: 'name' },
-      subrepeatable: [{ id: 1, name: 'name' }, { id: 2, name: 'name' }, { id: 3, name: 'name' }],
+      subrepeatable: [
+        { id: 1, name: 'name' },
+        { id: 2, name: 'name' },
+        { id: 3, name: 'name' },
+      ],
     },
     repeatable: [
       {

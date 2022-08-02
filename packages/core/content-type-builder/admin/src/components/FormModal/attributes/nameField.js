@@ -4,7 +4,7 @@ const nameField = {
   name: 'name',
   type: 'text',
   intlLabel: {
-    id: getTrad('modalForm.attribute.form.base.name'),
+    id: 'global.name',
     defaultMessage: 'Name',
   },
   description: {

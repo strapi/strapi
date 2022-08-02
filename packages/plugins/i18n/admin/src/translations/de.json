@@ -3,7 +3,6 @@
   "CMEditViewCopyLocale.copy-success": "Übersetzung kopiert",
   "CMEditViewCopyLocale.copy-text": "Aus anderer Sprache übernehmen",
   "CMEditViewCopyLocale.submit-text": "Ja, ausfüllen",
-  "CMEditViewCopyLocale.ModalConfirm.content": "Die aktuellen Inhalte werden dadurch gelöscht und mit denen aus der ausgewählten Sprache ersetzt:",
   "CMListView.popover.display-locales.label": "Übersetzungen anzeigen",
   "CheckboxConfirmation.Modal.body": "Möchtest du die Lokalisierung deaktivieren?",
   "CheckboxConfirmation.Modal.button-confirm": "Ja, deaktivieren",

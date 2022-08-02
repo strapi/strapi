@@ -1,12 +1,10 @@
 'use strict';
 
-const _ = require('lodash');
+const { getService } = require('./utils');
 
 module.exports = async ({ strapi }) => {
   // set plugin store
   const configurator = strapi.store({ type: 'plugin', name: 'upload', key: 'settings' });
-
-  strapi.plugin('upload').provider = createProvider(strapi.config.get('plugin.upload', {}));
 
   // if provider config does not exist set one by default
   const config = await configurator.get();
@@ -22,54 +20,8 @@ module.exports = async ({ strapi }) => {
   }
 
   await registerPermissionActions();
-};
 
-const createProvider = config => {
-  const { providerOptions, actionOptions = {} } = config;
-
-  const providerName = _.toLower(config.provider);
-  let provider;
-
-  let modulePath;
-  try {
-    modulePath = require.resolve(`@strapi/provider-upload-${providerName}`);
-  } catch (error) {
-    if (error.code === 'MODULE_NOT_FOUND') {
-      modulePath = providerName;
-    } else {
-      throw error;
-    }
-  }
-
-  try {
-    provider = require(modulePath);
-  } catch (err) {
-    throw new Error(`Could not load upload provider "${providerName}".`);
-  }
-
-  const providerInstance = provider.init(providerOptions);
-
-  return Object.assign(Object.create(baseProvider), {
-    ...providerInstance,
-    upload(file, options = actionOptions.upload) {
-      return providerInstance.upload(file, options);
-    },
-    delete(file, options = actionOptions.delete) {
-      return providerInstance.delete(file, options);
-    },
-  });
-};
-
-const baseProvider = {
-  extend(obj) {
-    Object.assign(this, obj);
-  },
-  upload() {
-    throw new Error('Provider upload method is not implemented');
-  },
-  delete() {
-    throw new Error('Provider delete method is not implemented');
-  },
+  await getService('metrics').registerCron();
 };
 
 const registerPermissionActions = async () => {

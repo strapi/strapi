@@ -10,6 +10,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
     state = {
       data: [],
       isLoading: true,
+      components: [],
       contentType: {},
       initialDisplayedHeaders: [],
       displayedHeaders: [],

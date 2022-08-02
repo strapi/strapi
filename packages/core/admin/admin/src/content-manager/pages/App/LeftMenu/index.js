@@ -5,18 +5,19 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { useSelector, shallowEqual } from 'react-redux';
+import { useIntl } from 'react-intl';
+import matchSorter from 'match-sorter';
+import sortBy from 'lodash/sortBy';
+import toLower from 'lodash/toLower';
+import { NavLink } from 'react-router-dom';
 import {
   SubNav,
   SubNavHeader,
   SubNavSection,
   SubNavSections,
   SubNavLink,
-} from '@strapi/design-system/SubNav';
-import { useSelector, shallowEqual } from 'react-redux';
-import { useIntl } from 'react-intl';
-import matchSorter from 'match-sorter';
-import sortBy from 'lodash/sortBy';
-import toLower from 'lodash/toLower';
+} from '@strapi/design-system/v2/SubNav';
 import getTrad from '../../../utils/getTrad';
 import { makeSelectModelLinks } from '../selectors';
 
@@ -111,7 +112,7 @@ const LeftMenu = () => {
                 const search = link.search ? `?${link.search}` : '';
 
                 return (
-                  <SubNavLink key={link.uid} to={`${link.to}${search}`}>
+                  <SubNavLink as={NavLink} key={link.uid} to={`${link.to}${search}`}>
                     {link.title}
                   </SubNavLink>
                 );

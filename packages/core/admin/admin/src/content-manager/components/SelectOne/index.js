@@ -5,7 +5,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
 import get from 'lodash/get';
 import isNull from 'lodash/isNull';
-import Select from 'react-select';
+import { ReactSelect as Select } from '@strapi/helper-plugin';
 import SingleValue from './SingleValue';
 
 function SelectOne({
@@ -21,7 +21,6 @@ function SelectOne({
   onMenuScrollToBottom,
   options,
   placeholder,
-  styles,
   value,
   description,
 }) {
@@ -46,9 +45,8 @@ function SelectOne({
         onMenuOpen={onMenuOpen}
         onMenuScrollToBottom={onMenuScrollToBottom}
         placeholder={formatMessage(
-          placeholder || { id: 'components.Select.placeholder', defaultMessage: 'Select...' }
+          placeholder || { id: 'global.select', defaultMessage: 'Select...' }
         )}
-        styles={styles}
         value={isNull(value) ? null : { label: get(value, [mainField.name], ''), value }}
       />
 
@@ -89,7 +87,6 @@ SelectOne.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }),
-  styles: PropTypes.object.isRequired,
   value: PropTypes.object,
   description: PropTypes.string,
 };

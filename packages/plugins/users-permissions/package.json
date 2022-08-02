@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "4.1.5",
+  "version": "4.3.2",
   "description": "Protect your API with a full-authentication process based on JWT",
   "repository": {
     "type": "git",
@@ -27,31 +27,29 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
-    "@purest/providers": "^1.0.2",
-    "@strapi/helper-plugin": "4.1.5",
-    "@strapi/utils": "4.1.5",
+    "@strapi/helper-plugin": "4.3.2",
+    "@strapi/utils": "4.3.2",
     "bcryptjs": "2.4.3",
     "grant-koa": "5.4.8",
     "jsonwebtoken": "^8.1.0",
-    "koa2-ratelimit": "^0.9.0",
+    "koa2-ratelimit": "^1.1.1",
     "lodash": "4.17.21",
-    "purest": "3.1.0",
+    "purest": "4.0.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-intl": "5.20.2",
-    "react-redux": "7.2.3",
+    "react-redux": "7.2.8",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
     "redux-saga": "^0.16.0",
     "request": "^2.83.0",
-    "url-join": "4.0.1",
-    "uuid": "^3.1.0"
+    "url-join": "4.0.1"
   },
   "devDependencies": {
-    "koa": "^2.13.1"
+    "koa": "^2.13.4"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

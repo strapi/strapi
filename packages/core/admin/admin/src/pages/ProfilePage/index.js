@@ -9,12 +9,13 @@ import {
   useNotification,
   useOverlayBlocker,
   auth,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
+import upperFirst from 'lodash/upperFirst';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import pick from 'lodash/pick';
-import omit from 'lodash/omit';
 import { Helmet } from 'react-helmet';
 import { Main } from '@strapi/design-system/Main';
 import { Typography } from '@strapi/design-system/Typography';
@@ -31,9 +32,14 @@ import Eye from '@strapi/icons/Eye';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Check from '@strapi/icons/Check';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
+import { useThemeToggle } from '../../hooks';
 import { fetchUser, putUser } from './utils/api';
 import schema from './utils/schema';
 import { getFullName } from '../../utils';
+
+const DocumentationLink = styled.a`
+  color: ${({ theme }) => theme.colors.primary600};
+`;
 
 const PasswordInput = styled(TextInput)`
   ::-ms-reveal {
@@ -59,9 +65,11 @@ const ProfilePage = () => {
   const { setUserDisplayName } = useAppInfos();
   const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { notifyStatus } = useNotifyAT();
+  const { currentTheme, themes: allApplicationThemes, onChangeTheme } = useThemeToggle();
   useFocusWhenNavigate();
 
   const { status, data } = useQuery('user', () => fetchUser(), {
@@ -83,14 +91,18 @@ const ProfilePage = () => {
 
   const isLoading = status !== 'success';
 
-  const submitMutation = useMutation(body => putUser(omit(body, 'confirmPassword')), {
+  const submitMutation = useMutation(body => putUser(body), {
     onSuccess: async data => {
       await queryClient.invalidateQueries('user');
 
-      auth.setUserInfo(data);
+      auth.setUserInfo(
+        pick(data, ['email', 'firstname', 'lastname', 'username', 'preferedLanguage'])
+      );
       const userDisplayName = data.username || getFullName(data.firstname, data.lastname);
       setUserDisplayName(userDisplayName);
       changeLocale(data.preferedLanguage);
+      onChangeTheme(data.currentTheme);
+      trackUsage('didChangeMode', { newMode: data.currentTheme });
 
       toggleNotification({
         type: 'success',
@@ -128,9 +140,16 @@ const ProfilePage = () => {
     );
   };
 
-  const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'preferedLanguage'];
+  const fieldsToPick = [
+    'currentTheme',
+    'email',
+    'firstname',
+    'lastname',
+    'username',
+    'preferedLanguage',
+  ];
 
-  const initialData = pick(data, fieldsToPick);
+  const initialData = pick({ ...data, currentTheme }, fieldsToPick);
 
   if (isLoading) {
     return (
@@ -154,6 +173,10 @@ const ProfilePage = () => {
     );
   }
 
+  const themesToDisplay = Object.keys(allApplicationThemes).filter(
+    themeName => allApplicationThemes[themeName]
+  );
+
   return (
     <Main aria-busy={isSubmittingForm}>
       <Helmet
@@ -176,7 +199,7 @@ const ProfilePage = () => {
                 title={data.username || getFullName(data.firstname, data.lastname)}
                 primaryAction={
                   <Button startIcon={<Check />} loading={isSubmitting} type="submit">
-                    {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+                    {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>
                 }
               />
@@ -195,7 +218,7 @@ const ProfilePage = () => {
                       <Stack spacing={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
-                            id: 'Settings.profile.form.section.profile.title',
+                            id: 'global.profile',
                             defaultMessage: 'Profile',
                           })}
                         </Typography>
@@ -266,7 +289,7 @@ const ProfilePage = () => {
                       <Stack spacing={4}>
                         <Typography variant="delta" as="h2">
                           {formatMessage({
-                            id: 'Settings.profile.form.section.password.title',
+                            id: 'global.change-password',
                             defaultMessage: 'Change password',
                           })}
                         </Typography>
@@ -329,11 +352,12 @@ const ProfilePage = () => {
                               onChange={handleChange}
                               value={values.password || ''}
                               label={formatMessage({
-                                id: 'Auth.form.password.label',
+                                id: 'global.password',
                                 defaultMessage: 'Password',
                               })}
                               name="password"
                               type={passwordShown ? 'text' : 'password'}
+                              autoComplete="new-password"
                               endAction={
                                 <FieldActionWrapper
                                   onClick={e => {
@@ -375,6 +399,7 @@ const ProfilePage = () => {
                               })}
                               name="confirmPassword"
                               type={passwordConfirmShown ? 'text' : 'password'}
+                              autoComplete="new-password"
                               endAction={
                                 <FieldActionWrapper
                                   onClick={e => {
@@ -424,20 +449,20 @@ const ProfilePage = () => {
                                 id:
                                   'Settings.profile.form.section.experience.interfaceLanguageHelp',
                                 defaultMessage:
-                                  'Selection will change the interface language only for you. Please refer to this {documentation} to make other languages available for your team.',
+                                  'Preference changes will apply only to you. More information is available {here}.',
                               },
                               {
-                                documentation: (
-                                  <a
+                                here: (
+                                  <DocumentationLink
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     href="https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#locales"
                                   >
                                     {formatMessage({
                                       id: 'Settings.profile.form.section.experience.documentation',
-                                      defaultMessage: 'documentation',
+                                      defaultMessage: 'here',
                                     })}
-                                  </a>
+                                  </DocumentationLink>
                                 ),
                               }
                             )}
@@ -451,7 +476,7 @@ const ProfilePage = () => {
                                 defaultMessage: 'Interface language',
                               })}
                               placeholder={formatMessage({
-                                id: 'components.Select.placeholder',
+                                id: 'global.select',
                                 defaultMessage: 'Select',
                               })}
                               hint={formatMessage({
@@ -485,6 +510,46 @@ const ProfilePage = () => {
                                   </Option>
                                 );
                               })}
+                            </Select>
+                          </GridItem>
+                          <GridItem s={12} col={6}>
+                            <Select
+                              label={formatMessage({
+                                id: 'Settings.profile.form.section.experience.mode.label',
+                                defaultMessage: 'Interface mode',
+                              })}
+                              placeholder={formatMessage({
+                                id: 'components.Select.placeholder',
+                                defaultMessage: 'Select',
+                              })}
+                              hint={formatMessage({
+                                id: 'Settings.profile.form.section.experience.mode.hint',
+                                defaultMessage: 'Displays your interface in the chosen mode.',
+                              })}
+                              value={values.currentTheme}
+                              onChange={e => {
+                                handleChange({
+                                  target: { name: 'currentTheme', value: e },
+                                });
+                              }}
+                            >
+                              {themesToDisplay.map(theme => (
+                                <Option value={theme} key={theme}>
+                                  {formatMessage(
+                                    {
+                                      id:
+                                        'Settings.profile.form.section.experience.mode.option-label',
+                                      defaultMessage: '{name} mode',
+                                    },
+                                    {
+                                      name: formatMessage({
+                                        id: theme,
+                                        defaultMessage: upperFirst(theme),
+                                      }),
+                                    }
+                                  )}
+                                </Option>
+                              ))}
                             </Select>
                           </GridItem>
                         </Grid>

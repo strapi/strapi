@@ -7,6 +7,7 @@ const {
   getCommonBeginning,
   getCommonPath,
   toRegressedEnumValue,
+  joinBy,
 } = require('../string-formatting');
 
 describe('string-formatting', () => {
@@ -119,6 +120,27 @@ describe('string-formatting', () => {
       ['test_test', 'test_test'],
     ])('%s => %s', (string, expectedResult) => {
       expect(toRegressedEnumValue(string)).toBe(expectedResult);
+    });
+  });
+
+  describe('joinBy', () => {
+    test.each([
+      [['/', ''], ''],
+      [['/', '/a/'], '/a/'],
+      [['/', 'a', 'b'], 'a/b'],
+      [['/', 'a', '/b'], 'a/b'],
+      [['/', 'a/', '/b'], 'a/b'],
+      [['/', 'a/', 'b'], 'a/b'],
+      [['/', 'a//', 'b'], 'a/b'],
+      [['/', 'a//', '//b'], 'a/b'],
+      [['/', 'a', '//b'], 'a/b'],
+      [['/', '/a//', '//b/'], '/a/b/'],
+      [['/', 'a', 'b', 'c'], 'a/b/c'],
+      [['/', 'a/', '/b/', '/c'], 'a/b/c'],
+      [['/', 'a//', '//b//', '//c'], 'a/b/c'],
+      [['/', '///a///', '///b///', '///c///'], '///a/b/c///'],
+    ])('%s => %s', (args, expectedResult) => {
+      expect(joinBy(...args)).toBe(expectedResult);
     });
   });
 });

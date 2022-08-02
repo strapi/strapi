@@ -44,7 +44,7 @@ const FieldButtonContent = ({ attribute, onEditField, onDeleteField, children })
           <CustomIconButton
             label={formatMessage(
               {
-                id: getTrad('app.component.table.delete'),
+                id: 'global.delete-target',
                 defaultMessage: `Delete {target}`,
               },
               {

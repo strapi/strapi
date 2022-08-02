@@ -1,10 +1,12 @@
 'use strict';
 
 const os = require('os');
+const path = require('path');
 const _ = require('lodash');
 const isDocker = require('is-docker');
 const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
+const { isUsingTypeScriptSync } = require('@strapi/typescript-utils');
 const ee = require('../../utils/ee');
 const machineID = require('../../utils/machine-id');
 const stringifyDeep = require('./stringify-deep');
@@ -36,6 +38,9 @@ module.exports = strapi => {
   const deviceId = machineID();
   const isEE = strapi.EE === true && ee.isEE === true;
 
+  const serverRootPath = strapi.dirs.app.root;
+  const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
+
   const anonymous_metadata = {
     environment: strapi.config.environment,
     os: os.type(),
@@ -47,6 +52,8 @@ module.exports = strapi => {
     version: strapi.config.get('info.strapi'),
     strapiVersion: strapi.config.get('info.strapi'),
     projectType: isEE ? 'Enterprise' : 'Community',
+    useTypescriptOnServer: isUsingTypeScriptSync(serverRootPath),
+    useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
   };
 
   addPackageJsonStrapiMetadata(anonymous_metadata, strapi);

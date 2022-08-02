@@ -14,7 +14,7 @@ const stopProcess = require('./utils/stop-process');
 const { trackUsage, captureStderr } = require('./utils/usage');
 const mergeTemplate = require('./utils/merge-template.js');
 
-const packageJSON = require('./resources/json/package.json');
+const packageJSON = require('./resources/json/common/package.json');
 const createDatabaseConfig = require('./resources/templates/database.js');
 const createAdminConfig = require('./resources/templates/admin-config.js');
 const createEnvFile = require('./resources/templates/env.js');
@@ -23,21 +23,40 @@ module.exports = async function createProject(scope, { client, connection, depen
   console.log(`Creating a new Strapi application at ${chalk.green(scope.rootPath)}.`);
   console.log('Creating files.');
 
-  const { rootPath } = scope;
+  const { rootPath, useTypescript } = scope;
   const resources = join(__dirname, 'resources');
+
+  const language = useTypescript ? 'ts' : 'js';
 
   try {
     // copy files
-    await fse.copy(join(resources, 'files'), rootPath);
+    await fse.copy(join(resources, 'files', language), rootPath);
 
     // copy dot files
     await fse.writeFile(join(rootPath, '.env'), createEnvFile());
-    const dotFiles = await fse.readdir(join(resources, 'dot-files'));
-    await Promise.all(
-      dotFiles.map(name => {
-        return fse.copy(join(resources, 'dot-files', name), join(rootPath, `.${name}`));
-      })
-    );
+
+    const copyDotFilesFromSubDirectory = subDirectory => {
+      const files = fse.readdirSync(join(resources, 'dot-files', subDirectory));
+
+      return Promise.all(
+        files.map(file => {
+          const src = join(resources, 'dot-files', subDirectory, file);
+          const dest = join(rootPath, `.${file}`);
+          return fse.copy(src, dest);
+        })
+      );
+    };
+
+    // Copy common dot files
+    copyDotFilesFromSubDirectory('common');
+
+    // Copy JS dot files
+    // For now we only support javascript and typescript, so if we're not using
+    // typescript, then we can assume we're using javascript. We'll need to change
+    // this behavior when we'll abstract the supported languages even more.
+    if (!useTypescript) {
+      copyDotFilesFromSubDirectory('js');
+    }
 
     await trackUsage({ event: 'didCopyProjectFiles', scope });
 
@@ -59,20 +78,41 @@ module.exports = async function createProject(scope, { client, connection, depen
 
     await trackUsage({ event: 'didWritePackageJSON', scope });
 
+    if (useTypescript) {
+      const tsJSONDir = join(__dirname, 'resources', 'json', 'ts');
+      const filesMap = {
+        'tsconfig-admin.json.js': 'src/admin',
+        'tsconfig-server.json.js': '.',
+      };
+
+      for (const [fileName, path] of Object.entries(filesMap)) {
+        const srcPath = join(tsJSONDir, fileName);
+        const destPath = join(rootPath, path, 'tsconfig.json');
+
+        const json = require(srcPath)();
+
+        await fse.writeJSON(destPath, json, { spaces: 2 });
+      }
+    }
+
     // ensure node_modules is created
     await fse.ensureDir(join(rootPath, 'node_modules'));
 
-    // create config/database.js
+    // create config/database
     await fse.writeFile(
-      join(rootPath, `config/database.js`),
+      join(rootPath, `config/database.${language}`),
       createDatabaseConfig({
         client,
         connection,
+        useTypescript,
       })
     );
 
     // create config/server.js
-    await fse.writeFile(join(rootPath, `config/admin.js`), createAdminConfig());
+    await fse.writeFile(
+      join(rootPath, `config/admin.${language}`),
+      createAdminConfig({ useTypescript })
+    );
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
 
     // merge template files if a template is specified
@@ -181,6 +221,9 @@ module.exports = async function createProject(scope, { client, connection, depen
 const installArguments = ['install', '--production', '--no-optional'];
 function runInstall({ rootPath, useYarn }) {
   if (useYarn) {
+    // Increase timeout for slow internet connections.
+    installArguments.push('--network-timeout 1000000');
+
     return execa('yarnpkg', installArguments, {
       cwd: rootPath,
       stdin: 'ignore',

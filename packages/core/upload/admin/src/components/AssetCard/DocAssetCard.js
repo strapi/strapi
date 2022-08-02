@@ -42,7 +42,7 @@ export const DocAssetCard = ({ name, extension, selected, onSelect, onEdit, onRe
   const { formatMessage } = useIntl();
 
   return (
-    <Card>
+    <Card height="100%">
       <CardHeader>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
         {(onRemove || onEdit) && (

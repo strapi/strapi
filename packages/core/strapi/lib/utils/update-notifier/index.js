@@ -20,7 +20,7 @@ const boxenOptions = {
   borderStyle: 'round',
 };
 
-const geUpdatetMessage = (newVersion, currentVersion) => {
+const getUpdateMessage = (newVersion, currentVersion) => {
   const currentVersionLog = chalk.dim(currentVersion);
   const newVersionLog = chalk.green(newVersion);
   const releaseLink = chalk.bold('https://github.com/strapi/strapi/releases');
@@ -38,7 +38,7 @@ const createUpdateNotifier = strapi => {
     config = new Configstore(
       pkg.name,
       {},
-      { configPath: path.join(strapi.dirs.root, '.strapi-updater.json') }
+      { configPath: path.join(strapi.dirs.app.root, '.strapi-updater.json') }
     );
   } catch {
     // we don't have write access to the file system
@@ -78,7 +78,7 @@ const createUpdateNotifier = strapi => {
       return;
     }
 
-    const message = boxen(geUpdatetMessage(latestVersion, pkg.version), boxenOptions);
+    const message = boxen(getUpdateMessage(latestVersion, pkg.version), boxenOptions);
     config.set('lastNotification', now);
     console.log(message);
   };

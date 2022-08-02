@@ -142,7 +142,7 @@ function ListRow({
                     onClick={handleClick}
                     label={`${formatMessage({
                       id: 'app.utils.edit',
-                      formatMessage: 'Edit',
+                      defaultMessage: 'Edit',
                     })} ${name}`}
                     noBorder
                     icon={<Pencil />}
@@ -158,7 +158,7 @@ function ListRow({
                     );
                   }}
                   label={`${formatMessage({
-                    id: 'app.utils.delete',
+                    id: 'global.delete',
                     defaultMessage: 'Delete',
                   })} ${name}`}
                   noBorder

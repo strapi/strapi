@@ -146,7 +146,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                   <Box>
                     <Typography variant="beta" as="h2">
                       {formatMessage({
-                        id: 'app.components.Users.ModalCreateBody.block-title.login',
+                        id: 'global.roles',
                         defaultMessage: "User's role",
                       })}
                     </Typography>

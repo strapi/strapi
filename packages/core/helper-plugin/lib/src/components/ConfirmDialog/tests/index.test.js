@@ -69,7 +69,7 @@ describe('ConfirmDialog', () => {
             onConfirm={jest.fn()}
             onToggleDialog={jest.fn()}
             title={{ id: 'app.components.ConfirmDialog.title', defaultMessage: 'Confirmation' }}
-            rightButtonText={{ id: 'app.components.Button.save', defaultMessage: 'Save' }}
+            rightButtonText={{ id: 'global.save', defaultMessage: 'Save' }}
           />
         </IntlProvider>
       </ThemeProvider>

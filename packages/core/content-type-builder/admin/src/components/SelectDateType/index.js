@@ -38,7 +38,10 @@ const SelectDateType = ({ intlLabel, error, modifiedData, name, onChange, option
       {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
         return (
           <Option key={key} value={value} disabled={disabled} hidden={hidden}>
-            {formatMessage(intlLabel)}
+            {formatMessage(
+              { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
+              intlLabel.values
+            )}
           </Option>
         );
       })}

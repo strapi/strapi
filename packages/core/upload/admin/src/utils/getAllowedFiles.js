@@ -12,7 +12,7 @@ const getAllowedFiles = (pluralTypes, files) => {
   const allowedFiles = files.filter(file => {
     const fileType = file.mime.split('/')[0];
 
-    if (singularTypes.includes('file') && !['video', 'image'].includes(fileType)) {
+    if (singularTypes.includes('file') && !['video', 'image', 'audio'].includes(fileType)) {
       return true;
     }
 

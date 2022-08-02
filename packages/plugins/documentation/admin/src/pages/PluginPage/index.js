@@ -167,7 +167,7 @@ const PluginPage = () => {
                                 icon={<Trash />}
                                 label={formatMessage(
                                   {
-                                    id: getTrad('pages.PluginPage.table.icon.delete'),
+                                    id: 'global.delete-target',
                                     defaultMessage: 'Delete {target}',
                                   },
                                   { target: `${doc.version}` }

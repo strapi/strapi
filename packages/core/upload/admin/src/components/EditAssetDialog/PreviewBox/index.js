@@ -41,6 +41,8 @@ export const PreviewBox = ({
 }) => {
   const { trackUsage } = useTracking();
   const previewRef = useRef(null);
+  const [isCropImageReady, setIsCropImageReady] = useState(false);
+  const [hasCropIntent, setHasCropIntent] = useState(null);
   const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset, false));
   const [thumbnailUrl, setThumbnailUrl] = useState(createAssetUrl(asset, true));
   const { formatMessage } = useIntl();
@@ -73,10 +75,25 @@ export const PreviewBox = ({
       if (asset.isLocal) {
         asset.url = fileLocalUrl;
       }
+
       setAssetUrl(fileLocalUrl);
       setThumbnailUrl(fileLocalUrl);
     }
   }, [replacementFile, asset]);
+
+  useEffect(() => {
+    if (hasCropIntent === false) {
+      stopCropping();
+      onCropCancel();
+    }
+  }, [hasCropIntent, stopCropping, onCropCancel, onCropFinish]);
+
+  useEffect(() => {
+    if (hasCropIntent && isCropImageReady) {
+      crop(previewRef.current);
+      onCropStart();
+    }
+  }, [isCropImageReady, hasCropIntent, onCropStart, crop]);
 
   const handleCropping = async () => {
     const nextAsset = { ...asset, width, height };
@@ -102,10 +119,9 @@ export const PreviewBox = ({
       trackUsage('didCropFile', { duplicatedFile: false, location: trackedLocation });
     }
 
-    stopCropping();
-    onCropCancel();
     setAssetUrl(optimizedCachingImage);
     setThumbnailUrl(optimizedCachingThumbnailImage);
+    setHasCropIntent(false);
   };
 
   const isInCroppingMode = isCropping && !isLoading;
@@ -118,18 +134,16 @@ export const PreviewBox = ({
 
     trackUsage('didCropFile', { duplicatedFile: true, location: trackedLocation });
 
-    stopCropping();
+    setHasCropIntent(false);
     onCropFinish();
   };
 
   const handleCropCancel = () => {
-    stopCropping();
-    onCropCancel();
+    setHasCropIntent(false);
   };
 
   const handleCropStart = () => {
-    crop(previewRef.current);
-    onCropStart();
+    setHasCropIntent(true);
   };
 
   return (
@@ -148,7 +162,7 @@ export const PreviewBox = ({
             {canUpdate && !asset.isLocal && (
               <IconButton
                 label={formatMessage({
-                  id: getTrad('app.utils.delete'),
+                  id: 'global.delete',
                   defaultMessage: 'Delete',
                 })}
                 icon={<Trash />}
@@ -198,7 +212,17 @@ export const PreviewBox = ({
             </UploadProgressWrapper>
           )}
 
-          <AssetPreview ref={previewRef} mime={asset.mime} name={asset.name} url={thumbnailUrl} />
+          <AssetPreview
+            ref={previewRef}
+            mime={asset.mime}
+            name={asset.name}
+            url={hasCropIntent ? assetUrl : thumbnailUrl}
+            onLoad={() => {
+              if (asset.isLocal || hasCropIntent) {
+                setIsCropImageReady(true);
+              }
+            }}
+          />
         </Wrapper>
 
         <ActionRow

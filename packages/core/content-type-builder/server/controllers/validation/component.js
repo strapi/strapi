@@ -22,8 +22,7 @@ const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
     icon: yup
       .string()
       .nullable()
-      .test(isValidIcon)
-      .required('icon.required'),
+      .test(isValidIcon),
     category: yup
       .string()
       .nullable()

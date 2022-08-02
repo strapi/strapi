@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { MultiSelectNested } from '@strapi/design-system/Select';
 import upperFirst from 'lodash/upperFirst';
-import getTrad from '../../utils/getTrad';
 
 const options = [
   {
@@ -23,7 +22,7 @@ const AllowedTypesSelect = ({ intlLabel, name, onChange, value }) => {
   /* eslint-disable indent */
   const displayedValue =
     value === null || value.length === 0
-      ? formatMessage({ id: getTrad('form.attribute.media.allowed-types.none') })
+      ? formatMessage({ id: 'global.none', defaultMessage: 'None' })
       : [...value]
           .sort()
           .map(v => upperFirst(v))

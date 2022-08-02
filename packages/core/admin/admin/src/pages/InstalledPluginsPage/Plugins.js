@@ -6,7 +6,7 @@ import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layou
 import { Main } from '@strapi/design-system/Main';
 import { Typography } from '@strapi/design-system/Typography';
 import { Table, Thead, Tbody, Tr, Td, Th } from '@strapi/design-system/Table';
-import useFetchInstalledPlugins from '../../hooks/useFetchInstalledPlugins';
+import useFetchEnabledPlugins from '../../hooks/useFetchEnabledPlugins';
 
 const Plugins = () => {
   const { formatMessage } = useIntl();
@@ -14,7 +14,7 @@ const Plugins = () => {
   useFocusWhenNavigate();
 
   const title = formatMessage({
-    id: 'app.components.ListPluginsPage.title',
+    id: 'global.plugins',
     defaultMessage: 'Plugins',
   });
 
@@ -30,7 +30,7 @@ const Plugins = () => {
     );
   };
 
-  const { status, data } = useFetchInstalledPlugins(notifyPluginPageLoad);
+  const { status, data } = useFetchEnabledPlugins(notifyPluginPageLoad);
 
   const isLoading = status !== 'success' && status !== 'error';
 
@@ -61,7 +61,7 @@ const Plugins = () => {
                 <Th>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
-                      id: 'Settings.roles.list.header.name',
+                      id: 'global.name',
                       defaultMessage: 'Name',
                     })}
                   </Typography>
@@ -69,7 +69,7 @@ const Plugins = () => {
                 <Th>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage({
-                      id: 'Settings.roles.list.header.description',
+                      id: 'global.description',
                       defaultMessage: 'description',
                     })}
                   </Typography>
@@ -82,11 +82,19 @@ const Plugins = () => {
                   <Tr key={name}>
                     <Td>
                       <Typography textColor="neutral800" variant="omega" fontWeight="bold">
-                        {displayName}
+                        {formatMessage({
+                          id: `global.plugins.${name}`,
+                          defaultMessage: displayName,
+                        })}
                       </Typography>
                     </Td>
                     <Td>
-                      <Typography textColor="neutral800">{description}</Typography>
+                      <Typography textColor="neutral800">
+                        {formatMessage({
+                          id: `global.plugins.${name}.description`,
+                          defaultMessage: description,
+                        })}
+                      </Typography>
                     </Td>
                   </Tr>
                 );

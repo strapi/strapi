@@ -9,7 +9,6 @@
   "HeaderNav.link.advancedSettings": "إعدادات متقدمة",
   "HeaderNav.link.emailTemplates": "قوالب الإيميل",
   "HeaderNav.link.providers": "مزودين",
-  "HeaderNav.link.roles": "الأدوار والأذونات",
   "Plugin.permissions.plugins.description": "حدد جميع الإجراءات المسموح بها للإضافة {name}.",
   "Plugins.header.description": "يتم سرد الإجراءات المحددة المرتبطة بالمسار أدناه.",
   "Plugins.header.title": "الصلاحيات",
