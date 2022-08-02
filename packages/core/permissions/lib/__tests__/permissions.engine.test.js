@@ -377,7 +377,7 @@ describe('Permissions Engine', () => {
       });
     });
 
-    describe('post-format::validate.permission', () => {
+    describe('after-format::validate.permission', () => {
       it('can prevent action register', async () => {
         const permissions = [
           { action: 'read', subject: 'article' },
@@ -390,7 +390,7 @@ describe('Permissions Engine', () => {
             permissions,
             engineHooks: [
               {
-                name: 'post-format::validate.permission',
+                name: 'after-format::validate.permission',
                 fn: generateInvalidateActionHook('read'),
               },
             ],
@@ -450,7 +450,7 @@ describe('Permissions Engine', () => {
               fn: generateInvalidateActionHook('view'),
             },
             {
-              name: 'post-format::validate.permission',
+              name: 'after-format::validate.permission',
               fn: generateInvalidateActionHook('update'),
             },
           ],
