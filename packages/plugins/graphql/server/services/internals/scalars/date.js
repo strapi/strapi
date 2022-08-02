@@ -1,6 +1,6 @@
 'use strict';
 
-const { GraphQLDate } = require('graphql-iso-date/dist');
+const { GraphQLDate } = require('graphql-scalars');
 
 const parseAndCast = parseFn => (...args) => {
   const parsedValue = parseFn(...args);
