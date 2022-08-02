@@ -204,7 +204,7 @@ describe('ADMIN | pages | SettingsPage', () => {
           <div
             class="c9"
           >
-            <ul
+            <ol
               class="c10 c11"
               spacing="2"
             />

@@ -30,29 +30,29 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c12 {
+      .c11 {
         color: #666687;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
       }
 
-      .c7 {
+      .c6 {
         background: #ffffff;
         padding: 64px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c9 {
+      .c8 {
         padding-bottom: 24px;
       }
 
-      .c11 {
+      .c10 {
         padding-bottom: 16px;
       }
 
-      .c8 {
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -67,22 +67,22 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         text-align: center;
       }
 
-      .c10 svg {
+      .c9 svg {
         height: 5.5rem;
       }
 
-      .c18 {
+      .c17 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c16 {
+      .c15 {
         padding-right: 8px;
       }
 
-      .c13 {
+      .c12 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -96,21 +96,21 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         outline: none;
       }
 
-      .c13 svg {
+      .c12 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c13 svg > g,
-      .c13 svg path {
+      .c12 svg > g,
+      .c12 svg path {
         fill: #ffffff;
       }
 
-      .c13[aria-disabled='true'] {
+      .c12[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c13:after {
+      .c12:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -125,11 +125,11 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         border: 2px solid transparent;
       }
 
-      .c13:focus-visible {
+      .c12:focus-visible {
         outline: none;
       }
 
-      .c13:focus-visible:after {
+      .c12:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -140,7 +140,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         border: 2px solid #4945ff;
       }
 
-      .c14 {
+      .c13 {
         padding: 8px 16px;
         background: #4945ff;
         border: 1px solid #4945ff;
@@ -155,7 +155,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         text-decoration: none;
       }
 
-      .c14 .c15 {
+      .c13 .c14 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -166,62 +166,62 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         align-items: center;
       }
 
-      .c14 .c17 {
+      .c13 .c16 {
         color: #ffffff;
       }
 
-      .c14[aria-disabled='true'] {
+      .c13[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true'] .c17 {
+      .c13[aria-disabled='true'] .c16 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true'] svg > g,
-      .c14[aria-disabled='true'] svg path {
+      .c13[aria-disabled='true'] svg > g,
+      .c13[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c14[aria-disabled='true']:active {
+      .c13[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true']:active .c17 {
+      .c13[aria-disabled='true']:active .c16 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true']:active svg > g,
-      .c14[aria-disabled='true']:active svg path {
+      .c13[aria-disabled='true']:active svg > g,
+      .c13[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c14:hover {
+      .c13:hover {
         background-color: #ffffff;
       }
 
-      .c14:active {
+      .c13:active {
         background-color: #ffffff;
         border: 1px solid #4945ff;
       }
 
-      .c14:active .c17 {
+      .c13:active .c16 {
         color: #4945ff;
       }
 
-      .c14:active svg > g,
-      .c14:active svg path {
+      .c13:active svg > g,
+      .c13:active svg path {
         fill: #4945ff;
       }
 
-      .c14 .c17 {
+      .c13 .c16 {
         color: #271fe0;
       }
 
-      .c14 svg > g,
-      .c14 svg path {
+      .c13 svg > g,
+      .c13 svg path {
         fill: #271fe0;
       }
 
@@ -237,7 +237,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         padding-left: 56px;
       }
 
-      .c6 {
+      .c5 {
         padding-right: 56px;
         padding-left: 56px;
       }
@@ -281,12 +281,6 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         line-height: 1.25;
       }
 
-      .c5 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
       <main
         aria-labelledby="main-content-title"
         class="c0"
@@ -313,20 +307,17 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
                 </h1>
               </div>
             </div>
-            <p
-              class="c5"
-            />
           </div>
         </div>
         <div
-          class="c6"
+          class="c5"
         >
           <div
-            class="c7 c8"
+            class="c6 c7"
           >
             <div
               aria-hidden="true"
-              class="c9 c10"
+              class="c8 c9"
             >
               <svg
                 fill="none"
@@ -392,23 +383,23 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
               </svg>
             </div>
             <div
-              class="c11"
+              class="c10"
             >
               <p
-                class="c12"
+                class="c11"
               >
                 You don't have any content yet, we recommend you to create your first Content-Type.
               </p>
             </div>
             <a
               aria-disabled="false"
-              class="c13 c14"
+              class="c12 c13"
               href="/plugins/content-type-builder/content-types/create-content-type"
               variant="secondary"
             >
               <div
                 aria-hidden="true"
-                class="c15 c16"
+                class="c14 c15"
               >
                 <svg
                   fill="none"
@@ -424,7 +415,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
                 </svg>
               </div>
               <span
-                class="c17 c18"
+                class="c16 c17"
               >
                 Create your first Content-type
               </span>
