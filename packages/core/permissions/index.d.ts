@@ -21,10 +21,24 @@ interface BaseCondition {
 interface ActionProvider<T extends Action = Action> extends Provider {}
 interface ConditionProvider<T extends Condition = Condition> extends Provider {}
 
+interface PermissionEngineHooks {
+  'before-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
+  'format.permission': ReturnType<typeof hooks.createAsyncSeriesWaterfallHook>;
+  'post-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
+  'before-evaluate.permission': ReturnType<typeof hooks.createAsyncSeriesHook>;
+  'before-register.permission': ReturnType<typeof hooks.createAsyncSeriesHook>;
+}
+
+type PermissionEngineHookCreator = () => PermissionEngineHooks;
+
+type PermissionEngineHookName = keyof PermissionEngineHooks;
+
 interface PermissionEngine {
   hooks: object;
 
+  on(hook: PermissionEngineHookName, handler: Function): PermissionEngine;
   generateAbility(permissions: Permission[], options?: object): Ability;
+  createRegisterFunction(can: Function, options: object): Function;
 }
 
 interface BaseAbility {
