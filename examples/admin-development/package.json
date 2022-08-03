@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
-    "@babel/core": "^7.16.7",
+    "@babel/core": "7.18.10",
     "@babel/plugin-proposal-class-properties": "7.16.7",
     "@babel/plugin-proposal-decorators": "7.16.7",
     "@babel/plugin-proposal-export-default-from": "7.16.7",
@@ -22,7 +22,7 @@
     "@babel/plugin-transform-parameters": "7.16.7",
     "@babel/plugin-transform-shorthand-properties": "7.16.7",
     "@babel/plugin-transform-spread": "7.16.7",
-    "@babel/preset-env": "7.16.11",
+    "@babel/preset-env": "7.18.10",
     "@babel/preset-typescript": "7.16.7",
     "@storybook/addon-actions": "6.4.10",
     "@storybook/addon-essentials": "6.4.10",
