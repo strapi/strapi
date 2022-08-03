@@ -1,13 +1,21 @@
 version: 2
 updates:
-  - package-ecosystem: 'npm'
-    directory: '/'
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: 'daily'
+      interval: daily
     versioning-strategy: increase
     ignore:
+      # Only allow patch as minor babel versions need to be upgraded all together
+      - dependency-name: '@babel/*'
+        update-types:
+          - 'version-update:semver-major'
+          - 'version-update:semver-minor'
+
       - dependency-name: '*'
-        update-types: ['version-update:semver-major']
+        update-types:
+          - 'version-update:semver-major'
+
     labels:
       - 'source: dependencies'
       - 'pr: chore'
