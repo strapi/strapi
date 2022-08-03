@@ -40,12 +40,12 @@
   dependencies:
     "@jridgewell/trace-mapping" "^0.3.0"
 
-"@apollo/federation@^0.28.0":
-  version "0.28.0"
-  resolved "https://registry.yarnpkg.com/@apollo/federation/-/federation-0.28.0.tgz#bbfcde3f327b3ec65dcfd98c6f52d6623a38b251"
-  integrity sha512-M5Dp0XJhuxEOzYjPWWK5VtIqEI1IFRioh1+XHrls90UC8R+b6VXa0UxMO/zfKv00APr4gBODMcfRe5w97NSruw==
+"@apollo/federation@^0.36.1":
+  version "0.36.1"
+  resolved "https://registry.yarnpkg.com/@apollo/federation/-/federation-0.36.1.tgz#25afa0598c701763928de13f6fbbe49dfabdb24e"
+  integrity sha512-SAvW7ZRUEtmAdK+UWRXZxo/wRNVbDDyYbeYJooKAtvc8B4Mly+2PusqBQ+4RuHhg5dSqrv5d6RXJeY9MBiraVA==
   dependencies:
-    apollo-graphql "^0.9.3"
+    "@apollo/subgraph" "^0.4.1"
     apollo-server-types "^3.0.2"
     lodash.xorby "^4.7.0"
 
@@ -86,6 +86,11 @@
     "@types/long" "^4.0.0"
     "@types/node" "^10.1.0"
     long "^4.0.0"
+
+"@apollo/subgraph@^0.4.1":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@apollo/subgraph/-/subgraph-0.4.2.tgz#f8516f1d5e5fbd57189727497ed9f805fa5017c8"
+  integrity sha512-sIGzqfUryW6tS5RPWp1awtO+5CehjPV6xbDrWS4I2Hsj8rug8Y9oiMpcnNk8GaQ1TF3UEf99ZL16mNa4J++IIQ==
 
 "@apollo/utils.dropunuseddefinitions@^1.1.0":
   version "1.1.0"
@@ -8089,7 +8094,7 @@ apollo-datasource@^3.3.2:
     "@apollo/utils.keyvaluecache" "^1.0.1"
     apollo-server-env "^4.2.1"
 
-apollo-graphql@^0.9.0, apollo-graphql@^0.9.3:
+apollo-graphql@^0.9.0:
   version "0.9.6"
   resolved "https://registry.yarnpkg.com/apollo-graphql/-/apollo-graphql-0.9.6.tgz#756312a92685b0547f82cceb04f5b2d6e9f0df5c"
   integrity sha512-CrqJxZwfu/U5x0bYYPPluwu1G+oC3jjKFK/EVn9CDcpi4+yD9rAYko/h1iUB5A6VRQhA4Boluc7QexMYQ2tCng==
