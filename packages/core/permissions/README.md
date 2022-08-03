@@ -105,5 +105,5 @@ ability.can('update'); // false
 ability.can('modify'); // true, because create was changed to 'modify'
 
 ability.can('delete'); // false, doesn't exist because it was changed by format.permission
-ability.can('remove'); // true, pre-format::validate.permission validates before format.permission changed it
+ability.can('remove'); // true, before-format::validate.permission validates before format.permission changed it
 ```
