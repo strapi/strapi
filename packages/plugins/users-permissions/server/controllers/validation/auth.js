@@ -47,7 +47,10 @@ const resetPasswordSchema = yup
 const changePasswordSchema = yup
   .object({
     password: yup.string().required(),
-    passwordConfirmation: yup.string().required(),
+    passwordConfirmation: yup
+      .string()
+      .required()
+      .oneOf([yup.ref('password')], 'Passwords do not match'),
     currentPassword: yup.string().required(),
   })
   .noUnknown();

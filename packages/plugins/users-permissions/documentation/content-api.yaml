@@ -186,7 +186,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /auth/change-password:
-    put:
+    post:
       tags:
         - Users-Permissions - Auth
       summary: Update user's own password

@@ -71,7 +71,7 @@ module.exports = [
     },
   },
   {
-    method: 'PUT',
+    method: 'POST',
     path: '/auth/change-password',
     handler: 'auth.changePassword',
     config: {

@@ -98,23 +98,17 @@ module.exports = {
       throw new ApplicationError('You must be authenticated to reset your password');
     }
 
-    const { currentPassword, password, passwordConfirmation } = await validateChangePasswordBody(
-      ctx.request.body
-    );
+    const { currentPassword, password } = await validateChangePasswordBody(ctx.request.body);
 
     const user = await strapi.entityService.findOne(
       'plugin::users-permissions.user',
       ctx.state.user.id
     );
 
-    if (password !== passwordConfirmation) {
-      throw new ValidationError('Passwords do not match');
-    }
-
     const validPassword = await getService('user').validatePassword(currentPassword, user.password);
 
     if (!validPassword) {
-      throw new ValidationError('Your current password is invalid');
+      throw new ValidationError('The provided current password is invalid');
     }
 
     if (currentPassword === password) {
