@@ -78,7 +78,7 @@ const engine = permissions.engine
       return false;
     }
   })
-  .on('post-format::validate.permission', ({ permission }) => {
+  .on('after-format::validate.permission', ({ permission }) => {
     if (permission.action === 'update') {
       return false;
     }

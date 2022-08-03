@@ -24,6 +24,11 @@ export interface Strapi {
   readonly auth: any;
 
   /**
+   * Getter for the Strapi content API container
+   */
+  readonly contentAPI: any;
+
+  /**
    * Getter for the Strapi sanitizers container
    */
   readonly sanitizers: any;

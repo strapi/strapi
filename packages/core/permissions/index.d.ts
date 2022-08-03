@@ -24,7 +24,7 @@ interface ConditionProvider<T extends Condition = Condition> extends Provider {}
 interface PermissionEngineHooks {
   'before-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
   'format.permission': ReturnType<typeof hooks.createAsyncSeriesWaterfallHook>;
-  'post-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
+  'after-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;
   'before-evaluate.permission': ReturnType<typeof hooks.createAsyncSeriesHook>;
   'before-register.permission': ReturnType<typeof hooks.createAsyncSeriesHook>;
 }

@@ -1,6 +1,6 @@
 'use strict';
 
-const { castArray, map } = require('lodash/fp');
+const { castArray, map, every, pipe } = require('lodash/fp');
 const { ForbiddenError, UnauthorizedError } = require('@strapi/utils').errors;
 
 const { getService } = require('../utils');
@@ -16,48 +16,61 @@ const authenticate = async ctx => {
     if (token) {
       const { id } = token;
 
+      // Invalid token
       if (id === undefined) {
         return { authenticated: false };
       }
 
-      // fetch authenticated user
       const user = await getService('user').fetchAuthenticatedUser(id);
 
+      // No user associated to the token
       if (!user) {
         return { error: 'Invalid credentials' };
       }
 
       const advancedSettings = await getAdvancedSettings();
 
+      // User not confirmed
       if (advancedSettings.email_confirmation && !user.confirmed) {
         return { error: 'Invalid credentials' };
       }
 
+      // User blocked
       if (user.blocked) {
         return { error: 'Invalid credentials' };
       }
+
+      // Fetch user's permissions
+      const permissions = await Promise.resolve(user.role.id)
+        .then(getService('permission').findRolePermissions)
+        .then(map(getService('permission').toContentAPIPermission));
+
+      // Generate an ability (content API engine) based on the given permissions
+      const ability = await strapi.contentAPI.permissions.engine.generateAbility(permissions);
 
       ctx.state.user = user;
 
       return {
         authenticated: true,
         credentials: user,
+        ability,
       };
     }
 
-    const publicPermissions = await strapi.query('plugin::users-permissions.permission').findMany({
-      where: {
-        role: { type: 'public' },
-      },
-    });
+    const publicPermissions = await getService('permission')
+      .findPublicPermissions()
+      .then(map(getService('permission').toContentAPIPermission));
 
     if (publicPermissions.length === 0) {
       return { authenticated: false };
     }
 
+    const ability = await strapi.contentAPI.permissions.engine.generateAbility(publicPermissions);
+
     return {
       authenticated: true,
       credentials: null,
+      ability,
     };
   } catch (err) {
     return { authenticated: false };
@@ -65,7 +78,7 @@ const authenticate = async ctx => {
 };
 
 const verify = async (auth, config) => {
-  const { credentials: user } = auth;
+  const { credentials: user, ability } = auth;
 
   if (!config.scope) {
     if (!user) {
@@ -77,18 +90,17 @@ const verify = async (auth, config) => {
     }
   }
 
-  let allowedActions = auth.allowedActions;
-
-  if (!allowedActions) {
-    const permissions = await strapi.query('plugin::users-permissions.permission').findMany({
-      where: { role: user ? user.role.id : { type: 'public' } },
-    });
-
-    allowedActions = map('action', permissions);
-    auth.allowedActions = allowedActions;
+  // If no ability have been generated, then consider auth is missing
+  if (!ability) {
+    throw new UnauthorizedError();
   }
 
-  const isAllowed = castArray(config.scope).every(scope => allowedActions.includes(scope));
+  const isAllowed = pipe(
+    // Make sure we're dealing with an array
+    castArray,
+    // Transform the scope array into an action array
+    every(scope => ability.can(scope))
+  )(config.scope);
 
   if (!isAllowed) {
     throw new ForbiddenError();

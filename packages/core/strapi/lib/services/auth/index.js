@@ -32,6 +32,7 @@ const createAuthentication = () => {
 
       return this;
     },
+
     async authenticate(ctx, next) {
       const { route } = ctx.state;
 
@@ -47,7 +48,7 @@ const createAuthentication = () => {
       for (const strategy of strategiesToUse) {
         const result = await strategy.authenticate(ctx);
 
-        const { authenticated = false, error = null, credentials } = result || {};
+        const { authenticated = false, credentials, ability = null, error = null } = result || {};
 
         if (error !== null) {
           return ctx.unauthorized(error);
@@ -58,6 +59,7 @@ const createAuthentication = () => {
           ctx.state.auth = {
             strategy,
             credentials,
+            ability,
           };
 
           return next();
@@ -66,6 +68,7 @@ const createAuthentication = () => {
 
       return ctx.unauthorized('Missing or invalid credentials');
     },
+
     async verify(auth, config = {}) {
       if (config === false) {
         return;
