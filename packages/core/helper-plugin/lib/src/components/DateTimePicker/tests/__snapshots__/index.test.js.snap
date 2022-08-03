@@ -447,7 +447,6 @@ exports[`DateTimePicker snapshots the component 1`] = `
                   data-testid="datetimepicker-date"
                   id="datepicker-1"
                   name="datetimepicker"
-                  placeholder="1/1/1970"
                   value="10/13/2021"
                 />
               </div>
