@@ -258,8 +258,8 @@ const createQueryBuilder = (uid, db) => {
       this.processSelect();
     },
 
-    shouldUseDistinct() {
-      return state.joins.length > 0 && _.isEmpty(state.groupBy);
+    shouldUseDistinct(numberOfJoins = 0) {
+      return state.joins.length > numberOfJoins && _.isEmpty(state.groupBy);
     },
 
     processSelect() {
@@ -306,7 +306,11 @@ const createQueryBuilder = (uid, db) => {
               ? this.aliasColumn(helpers.toColumnName(meta, 'id'))
               : this.aliasColumn(helpers.toColumnName(meta, state.count));
 
-          qb.countDistinct({ count: dbColumnName });
+          if (this.shouldUseDistinct(2)) {
+            qb.countDistinct({ count: dbColumnName });
+          } else {
+            qb.count({ count: dbColumnName });
+          }
           break;
         }
         case 'max': {
