@@ -159,50 +159,74 @@ module.exports = ({ strapi }) => ({
     return uploadedFiles;
   },
 
-  async uploadFileAndPersist(fileData, { user } = {}) {
-    const config = strapi.config.get('plugin.upload');
-
+  /**
+   * When uploading an image, an additional thubmnail is generated.
+   * Also, if there are responsive formats defined, another set of images will be generated too.
+   *
+   * @param {*} fileData
+   */
+  async uploadImage(fileData) {
     const {
       getDimensions,
       generateThumbnail,
       generateResponsiveFormats,
-      isImage,
       isOptimizableImage,
     } = getService('image-manipulation');
+
+    // Store width and height of the original image
+    const { width, height } = await getDimensions(fileData);
+
+    // Make sure this is assigned before calling upload
+    // That way it can mutate the width and height
+    _.assign(fileData, {
+      width,
+      height,
+    });
+
+    // Upload image
     await getService('provider').upload(fileData);
 
-    if (await isImage(fileData)) {
-      if (await isOptimizableImage(fileData)) {
-        const thumbnailFile = await generateThumbnail(fileData);
-        if (thumbnailFile) {
-          await getService('provider').upload(thumbnailFile);
-          _.set(fileData, 'formats.thumbnail', thumbnailFile);
-        }
-
-        const formats = await generateResponsiveFormats(fileData);
-        if (Array.isArray(formats) && formats.length > 0) {
-          for (const format of formats) {
-            if (!format) continue;
-
-            const { key, file } = format;
-
-            await getService('provider').upload(file);
-
-            _.set(fileData, ['formats', key], file);
-          }
-        }
+    // Generate thumbnail and responsive formats
+    if (await isOptimizableImage(fileData)) {
+      const thumbnailFile = await generateThumbnail(fileData);
+      if (thumbnailFile) {
+        await getService('provider').upload(thumbnailFile);
+        _.set(fileData, 'formats.thumbnail', thumbnailFile);
       }
 
-      const { width, height } = await getDimensions(fileData);
+      const formats = await generateResponsiveFormats(fileData);
+      if (Array.isArray(formats) && formats.length > 0) {
+        for (const format of formats) {
+          if (!format) continue;
 
-      _.assign(fileData, {
-        width,
-        height,
-      });
+          const { key, file } = format;
+
+          await getService('provider').upload(file);
+
+          _.set(fileData, ['formats', key], file);
+        }
+      }
+    }
+  },
+
+  /**
+   * Upload a file. If it is an image it will generate a thumbnail
+   * and responsive formats (if enabled).
+   */
+  async uploadFileAndPersist(fileData, { user } = {}) {
+    const config = strapi.config.get('plugin.upload');
+
+    const { isImage } = getService('image-manipulation');
+
+    if (await isImage(fileData)) {
+      await this.uploadImage(fileData);
+    } else {
+      await getService('provider').upload(fileData);
     }
 
     _.set(fileData, 'provider', config.provider);
 
+    // Persist file(s)
     return this.add(fileData, { user });
   },
 
@@ -230,9 +254,7 @@ module.exports = ({ strapi }) => ({
   async replace(id, { data, file }, { user } = {}) {
     const config = strapi.config.get('plugin.upload');
 
-    const { getDimensions, generateThumbnail, generateResponsiveFormats } = getService(
-      'image-manipulation'
-    );
+    const { isImage } = getService('image-manipulation');
 
     const dbFile = await this.findOne(id);
     if (!dbFile) {
@@ -267,42 +289,15 @@ module.exports = ({ strapi }) => ({
         }
       }
 
-      await getService('provider').upload(fileData);
-
       // clear old formats
       _.set(fileData, 'formats', {});
 
-      const { isImage, isOptimizableImage } = getService('image-manipulation');
-
       if (await isImage(fileData)) {
-        if (await isOptimizableImage(fileData)) {
-          const thumbnailFile = await generateThumbnail(fileData);
-          if (thumbnailFile) {
-            await getService('provider').upload(thumbnailFile);
-            _.set(fileData, 'formats.thumbnail', thumbnailFile);
-          }
-
-          const formats = await generateResponsiveFormats(fileData);
-          if (Array.isArray(formats) && formats.length > 0) {
-            for (const format of formats) {
-              if (!format) continue;
-
-              const { key, file } = format;
-
-              await getService('provider').upload(file);
-
-              _.set(fileData, ['formats', key], file);
-            }
-          }
-        }
-
-        const { width, height } = await getDimensions(fileData);
-
-        _.assign(fileData, {
-          width,
-          height,
-        });
+        await this.uploadImage(fileData);
+      } else {
+        await getService('provider').upload(fileData);
       }
+
       _.set(fileData, 'provider', config.provider);
     } finally {
       // delete temporary folder
