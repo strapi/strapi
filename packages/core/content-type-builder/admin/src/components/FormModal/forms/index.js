@@ -1,6 +1,5 @@
 import get from 'lodash/get';
 import toLower from 'lodash/toLower';
-import has from 'lodash/has';
 import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
 import { categoryForm, createCategorySchema } from '../category';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';
@@ -8,6 +7,7 @@ import { createComponentSchema, componentForm } from '../component';
 import { dynamiczoneForm } from '../dynamicZone';
 import { nameField } from '../attributes/nameField';
 import addItemsToFormSection from './utils/addItemsToFormSection';
+import getTrad from '../../../utils/getTrad';
 
 const getUsedAttributeNames = (attributes, schemaData) => {
   return attributes
@@ -68,17 +68,16 @@ const forms = {
         }
 
         if (injectedInputs) {
-          const injectedInputsSection = injectedInputs.map(injectedInput => {
-            if (has(injectedInput, 'sectionTitle')) {
-              // When it has a sectionTitle (including null), use it
-              return injectedInput;
-            }
+          // TODO: Discuss how to handle settings from other plugins
+          const extendedSettings = {
+            sectionTitle: {
+              id: getTrad('modalForm.custom-fields.advanced.settings.extended'),
+              defaultMessage: 'Extended settings',
+            },
+            items: injectedInputs,
+          };
 
-            // Otherwise add an empty sectionTitle so it is added as a new section
-            return { sectionTitle: null, items: [injectedInput] };
-          });
-
-          addItemsToFormSection(injectedInputsSection, sections);
+          sections.push(extendedSettings);
         }
 
         return { sections };
