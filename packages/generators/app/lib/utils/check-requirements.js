@@ -1,13 +1,15 @@
 'use strict';
 
-module.exports = function checkBeforeInstall() {
-  var currentNodeVersion = process.versions.node;
-  var semver = currentNodeVersion.split('.');
-  var major = semver[0];
+const { red, green, bold } = require('chalk');
 
-  if (major < 12) {
-    console.error(`You are running Node ${currentNodeVersion}`);
-    console.error('Strapi requires Node 12 and higher.');
+module.exports = function checkBeforeInstall() {
+  const currentNodeVersion = process.versions.node;
+  const semver = currentNodeVersion.split('.');
+  const major = semver[0];
+
+  if (major < 14 || major > 16) {
+    console.error(red(`You are running ${bold(`Node ${currentNodeVersion}`)}`));
+    console.error(`Strapi requires ${bold(green('Node 14 or 16'))}`);
     console.error('Please make sure to use the right version of Node.');
     process.exit(1);
   }
