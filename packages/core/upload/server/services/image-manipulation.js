@@ -6,6 +6,7 @@ const fs = require('fs');
 const { join } = require('path');
 const sharp = require('sharp');
 
+const { ForbiddenError } = require('@strapi/utils/lib/errors');
 const { getService } = require('../utils');
 const { bytesToKbytes } = require('../utils/file');
 
@@ -15,6 +16,8 @@ const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff'];
 const writeStreamToFile = (stream, path) =>
   new Promise((resolve, reject) => {
     const writeStream = fs.createWriteStream(path);
+    // Reject promise if there is an error with the provided stream
+    stream.on('error', reject);
     stream.pipe(writeStream);
     writeStream.on('close', resolve);
     writeStream.on('error', reject);
@@ -75,6 +78,12 @@ const generateThumbnail = async file => {
   return null;
 };
 
+/**
+ * Optimize image by:
+ *    - auto orienting image based on EXIF data
+ *    - reduce image quality
+ *
+ */
 const optimize = async file => {
   const { sizeOptimization = false, autoOrientation = false } = await getService(
     'upload'
@@ -82,32 +91,37 @@ const optimize = async file => {
 
   const newFile = { ...file };
 
-  const { width, height, size, format } = await getMetadata(newFile);
+  try {
+    const { width, height, size, format } = await getMetadata(newFile);
 
-  if (sizeOptimization || autoOrientation) {
-    const transformer = sharp();
-    transformer[format]({ quality: sizeOptimization ? 80 : 100 });
-    if (autoOrientation) {
-      transformer.rotate();
+    if (sizeOptimization || autoOrientation) {
+      const transformer = sharp();
+      // reduce image quality
+      transformer[format]({ quality: sizeOptimization ? 80 : 100 });
+      // rotate image based on EXIF data
+      if (autoOrientation) {
+        transformer.rotate();
+      }
+      const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
+      await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+      newFile.getStream = () => fs.createReadStream(filePath);
     }
 
-    const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
-    await writeStreamToFile(file.getStream().pipe(transformer), filePath);
-    newFile.getStream = () => fs.createReadStream(filePath);
+    const { width: newWidth, height: newHeight, size: newSize } = await getMetadata(newFile);
+
+    if (newSize > size) {
+      // Ignore optimization if output is bigger than original
+      return Object.assign({}, file, { width, height, size: bytesToKbytes(size) });
+    }
+
+    return Object.assign(newFile, {
+      width: newWidth,
+      height: newHeight,
+      size: bytesToKbytes(newSize),
+    });
+  } catch {
+    throw new ForbiddenError('File is not a supported image');
   }
-
-  const { width: newWidth, height: newHeight, size: newSize } = await getMetadata(newFile);
-
-  if (newSize > size) {
-    // Ignore optimization if output is bigger than original
-    return Object.assign({}, file, { width, height, size: bytesToKbytes(size) });
-  }
-
-  return Object.assign(newFile, {
-    width: newWidth,
-    height: newHeight,
-    size: bytesToKbytes(newSize),
-  });
 };
 
 const DEFAULT_BREAKPOINTS = {
@@ -117,7 +131,7 @@ const DEFAULT_BREAKPOINTS = {
 };
 
 const getBreakpoints = () => strapi.config.get('plugin.upload.breakpoints', DEFAULT_BREAKPOINTS);
-
+//
 const generateResponsiveFormats = async file => {
   const { responsiveDimensions = false } = await getService('upload').getSettings();
 
