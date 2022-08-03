@@ -18,7 +18,7 @@ const {
   contentTypes: contentTypesUtils,
   webhook: webhookUtils,
 } = require('@strapi/utils');
-const { NotFoundError, ForbiddenError } = require('@strapi/utils').errors;
+const { NotFoundError } = require('@strapi/utils').errors;
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
@@ -126,7 +126,6 @@ module.exports = ({ strapi }) => ({
     if (!(await isOptimizableImage(currentFile))) {
       return currentFile;
     }
-
     return optimize(currentFile);
   },
 
@@ -144,7 +143,6 @@ module.exports = ({ strapi }) => ({
 
       const doUpload = async (file, fileInfo) => {
         const fileData = await this.enhanceFile(file, fileInfo, metas);
-
         return this.uploadFileAndPersist(fileData, { user });
       };
 
@@ -173,43 +171,39 @@ module.exports = ({ strapi }) => ({
       isOptimizableImage,
     } = getService('image-manipulation');
 
-    try {
-      // Store width and height of the original image
-      const { width, height } = await getDimensions(fileData);
+    // Store width and height of the original image
+    const { width, height } = await getDimensions(fileData);
 
-      // Make sure this is assigned before calling upload
-      // That way it can mutate the width and height
-      _.assign(fileData, {
-        width,
-        height,
-      });
+    // Make sure this is assigned before calling upload
+    // That way it can mutate the width and height
+    _.assign(fileData, {
+      width,
+      height,
+    });
 
-      // Upload image
-      await getService('provider').upload(fileData);
+    // Upload image
+    await getService('provider').upload(fileData);
 
-      // Generate thumbnail and responsive formats
-      if (await isOptimizableImage(fileData)) {
-        const thumbnailFile = await generateThumbnail(fileData);
-        if (thumbnailFile) {
-          await getService('provider').upload(thumbnailFile);
-          _.set(fileData, 'formats.thumbnail', thumbnailFile);
-        }
+    // Generate thumbnail and responsive formats
+    if (await isOptimizableImage(fileData)) {
+      const thumbnailFile = await generateThumbnail(fileData);
+      if (thumbnailFile) {
+        await getService('provider').upload(thumbnailFile);
+        _.set(fileData, 'formats.thumbnail', thumbnailFile);
+      }
 
-        const formats = await generateResponsiveFormats(fileData);
-        if (Array.isArray(formats) && formats.length > 0) {
-          for (const format of formats) {
-            if (!format) continue;
+      const formats = await generateResponsiveFormats(fileData);
+      if (Array.isArray(formats) && formats.length > 0) {
+        for (const format of formats) {
+          if (!format) continue;
 
-            const { key, file } = format;
+          const { key, file } = format;
 
-            await getService('provider').upload(file);
+          await getService('provider').upload(file);
 
-            _.set(fileData, ['formats', key], file);
-          }
+          _.set(fileData, ['formats', key], file);
         }
       }
-    } catch (err) {
-      throw new ForbiddenError('File is not a valid image');
     }
   },
 

@@ -4,6 +4,7 @@
  */
 const fs = require('fs');
 const { join } = require('path');
+const { ApplicationError } = require('@strapi/utils').errors;
 const sharp = require('sharp');
 
 const { getService } = require('../utils');
@@ -45,7 +46,12 @@ const THUMBNAIL_RESIZE_OPTIONS = {
 
 const resizeFileTo = async (file, options, { name, hash }) => {
   const filePath = join(file.tmpWorkingDirectory, hash);
-  await writeStreamToFile(file.getStream().pipe(sharp().resize(options)), filePath);
+
+  try {
+    await writeStreamToFile(file.getStream().pipe(sharp().resize(options)), filePath);
+  } catch (err) {
+    throw new ApplicationError('File is not a valid image');
+  }
 
   const newFile = {
     name,
@@ -101,7 +107,13 @@ const optimize = async file => {
       transformer.rotate();
     }
     const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
-    await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+
+    try {
+      await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+    } catch {
+      throw new ApplicationError('File is not a valid image');
+    }
+
     newFile.getStream = () => fs.createReadStream(filePath);
   }
 
