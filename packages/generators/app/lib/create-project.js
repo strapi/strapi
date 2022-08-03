@@ -16,7 +16,6 @@ const mergeTemplate = require('./utils/merge-template.js');
 
 const packageJSON = require('./resources/json/common/package.json');
 const createDatabaseConfig = require('./resources/templates/database.js');
-const createAdminConfig = require('./resources/templates/admin-config.js');
 const createEnvFile = require('./resources/templates/env.js');
 
 module.exports = async function createProject(scope, { client, connection, dependencies }) {
@@ -108,11 +107,6 @@ module.exports = async function createProject(scope, { client, connection, depen
       })
     );
 
-    // create config/server.js
-    await fse.writeFile(
-      join(rootPath, `config/admin.${language}`),
-      createAdminConfig({ useTypescript })
-    );
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
 
     // merge template files if a template is specified
