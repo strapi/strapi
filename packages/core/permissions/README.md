@@ -73,7 +73,7 @@ const permissions = require('@strapi/permissions');
 
 const engine = permissions.engine
   .new({ providers })
-  .on('pre-format::validate.permission', ({ permission }) => {
+  .on('before-format::validate.permission', ({ permission }) => {
     if (permission.action === 'modify') {
       return false;
     }
