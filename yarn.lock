@@ -18302,17 +18302,16 @@ mailcomposer@3.12.0:
     buildmail "3.10.0"
     libmime "2.1.0"
 
-mailgun.js@5.0.2:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/mailgun.js/-/mailgun.js-5.0.2.tgz#df443ce875c1ab7f4c8436079c688cd6a5d549e8"
-  integrity sha512-vwzuFe+ly1q+UjWE7DfQIe9HJ8Vv0iupyOL4l8kfs+OCnsxnz4uDAhtjK4kvnLYjeC6CEv921t9xUTU+0kFD9A==
+mailgun.js@5.2.2:
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/mailgun.js/-/mailgun.js-5.2.2.tgz#3ac4fca01a1d14efc428ca85f9eedd527aa2041e"
+  integrity sha512-stnq7qJSwxpbHZFHoxw+IBRMm1A+pEwxCGdRZlyujdjIy7wENX+6XHbA8syfuSaWg/gklSGUBa3IMtfzxQ8ZwQ==
   dependencies:
     base-64 "^1.0.0"
     bluebird "^3.7.2"
     ky "^0.25.1"
     ky-universal "^0.8.2"
-    url "^0.11.0"
-    url-join "0.0.1"
+    url-join "^4.0.1"
     web-streams-polyfill "^3.0.1"
     webpack-merge "^5.4.0"
 
@@ -25597,12 +25596,7 @@ urix@^0.1.0:
   resolved "https://registry.yarnpkg.com/urix/-/urix-0.1.0.tgz#da937f7a62e21fec1fd18d49b35c2935067a6c72"
   integrity sha1-2pN/emLiH+wf0Y1Js1wpNQZ6bHI=
 
-url-join@0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/url-join/-/url-join-0.0.1.tgz#1db48ad422d3402469a87f7d97bdebfe4fb1e3c8"
-  integrity sha512-H6dnQ/yPAAVzMQRvEvyz01hhfQL5qRWSEt7BX8t9DqnPw9BjMb64fjIRq76Uvf1hkHp+mTZvEVJ5guXOT0Xqaw==
-
-url-join@4.0.1, url-join@^4.0.0:
+url-join@4.0.1, url-join@^4.0.0, url-join@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/url-join/-/url-join-4.0.1.tgz#b642e21a2646808ffa178c4c5fda39844e12cde7"
   integrity sha512-jk1+QP6ZJqyOiuEI9AEWQfju/nB2Pw466kbA0LEZljHwKeMgd9WrAEgEGxjPDD2+TNbbb37rTyhEfrCXfuKXnA==
