@@ -12,33 +12,45 @@ const statuses = {
 // NOTE:We could move the schema to use maps of tables & columns instead of arrays to make it easier to diff
 // => this will make the creation a bit more complicated (ordering, Object.values(tables | columns)) -> not a big pbl
 
+// https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
+// The system uses no more than NAMEDATALEN-1 bytes of an identifier; longer names can be written in commands, but they will be truncated. By default, NAMEDATALEN is 64 so the maximum identifier length is 63 bytes.
+const MAX_IDENTIFIER_LEN = 63
+
 const helpers = {
   hasTable(schema, tableName) {
-    return schema.tables.findIndex(table => table.name === tableName) !== -1;
+    const truncated = tableName.slice(0, MAX_IDENTIFIER_LEN)
+    return schema.tables.findIndex(table => table.name === truncated) !== -1;
   },
   findTable(schema, tableName) {
-    return schema.tables.find(table => table.name === tableName);
+    const truncated = tableName.slice(0, MAX_IDENTIFIER_LEN)
+    return schema.tables.find(table => table.name === truncated);
   },
 
   hasColumn(table, columnName) {
-    return table.columns.findIndex(column => column.name === columnName) !== -1;
+    const truncated = columnName.slice(0, MAX_IDENTIFIER_LEN)
+    return table.columns.findIndex(column => column.name === truncated) !== -1;
   },
   findColumn(table, columnName) {
-    return table.columns.find(column => column.name === columnName);
+    const truncated = columnName.slice(0, MAX_IDENTIFIER_LEN)
+    return table.columns.find(column => column.name === truncated);
   },
 
   hasIndex(table, columnName) {
-    return table.indexes.findIndex(column => column.name === columnName) !== -1;
+    const truncated = columnName.slice(0, MAX_IDENTIFIER_LEN)
+    return table.indexes.findIndex(column => column.name === truncated) !== -1;
   },
   findIndex(table, columnName) {
-    return table.indexes.find(column => column.name === columnName);
+    const truncated = columnName.slice(0, MAX_IDENTIFIER_LEN)
+    return table.indexes.find(column => column.name === truncated);
   },
 
   hasForeignKey(table, columnName) {
-    return table.foreignKeys.findIndex(column => column.name === columnName) !== -1;
+    const truncated = columnName.slice(0, MAX_IDENTIFIER_LEN)
+    return table.foreignKeys.findIndex(column => column.name === truncated) !== -1;
   },
   findForeignKey(table, columnName) {
-    return table.foreignKeys.find(column => column.name === columnName);
+    const truncated = columnName.slice(0, MAX_IDENTIFIER_LEN)
+    return table.foreignKeys.find(column => column.name === truncated);
   },
 };
 
