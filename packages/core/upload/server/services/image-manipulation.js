@@ -6,7 +6,6 @@ const fs = require('fs');
 const { join } = require('path');
 const sharp = require('sharp');
 
-const { ForbiddenError } = require('@strapi/utils/lib/errors');
 const { getService } = require('../utils');
 const { bytesToKbytes } = require('../utils/file');
 
@@ -91,37 +90,33 @@ const optimize = async file => {
 
   const newFile = { ...file };
 
-  try {
-    const { width, height, size, format } = await getMetadata(newFile);
+  const { width, height, size, format } = await getMetadata(newFile);
 
-    if (sizeOptimization || autoOrientation) {
-      const transformer = sharp();
-      // reduce image quality
-      transformer[format]({ quality: sizeOptimization ? 80 : 100 });
-      // rotate image based on EXIF data
-      if (autoOrientation) {
-        transformer.rotate();
-      }
-      const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
-      await writeStreamToFile(file.getStream().pipe(transformer), filePath);
-      newFile.getStream = () => fs.createReadStream(filePath);
+  if (sizeOptimization || autoOrientation) {
+    const transformer = sharp();
+    // reduce image quality
+    transformer[format]({ quality: sizeOptimization ? 80 : 100 });
+    // rotate image based on EXIF data
+    if (autoOrientation) {
+      transformer.rotate();
     }
-
-    const { width: newWidth, height: newHeight, size: newSize } = await getMetadata(newFile);
-
-    if (newSize > size) {
-      // Ignore optimization if output is bigger than original
-      return Object.assign({}, file, { width, height, size: bytesToKbytes(size) });
-    }
-
-    return Object.assign(newFile, {
-      width: newWidth,
-      height: newHeight,
-      size: bytesToKbytes(newSize),
-    });
-  } catch {
-    throw new ForbiddenError('File is not a supported image');
+    const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
+    await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+    newFile.getStream = () => fs.createReadStream(filePath);
   }
+
+  const { width: newWidth, height: newHeight, size: newSize } = await getMetadata(newFile);
+
+  if (newSize > size) {
+    // Ignore optimization if output is bigger than original
+    return Object.assign({}, file, { width, height, size: bytesToKbytes(size) });
+  }
+
+  return Object.assign(newFile, {
+    width: newWidth,
+    height: newHeight,
+    size: bytesToKbytes(newSize),
+  });
 };
 
 const DEFAULT_BREAKPOINTS = {
