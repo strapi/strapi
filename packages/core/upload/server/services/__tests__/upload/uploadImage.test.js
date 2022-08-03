@@ -67,6 +67,7 @@ describe('Upload image', () => {
     // Remove tmp directory
     await fse.remove(tmpWorkingDirectory);
   });
+
   test('Upload with thubmnail', async () => {
     let fileData = getFileData();
     const upload = jest.fn();
@@ -82,7 +83,7 @@ describe('Upload image', () => {
     mockUploadProvider(upload, { responsiveDimensions: true });
 
     await uploadService.uploadImage(fileData);
-    // 1 for the original image, 1 for thubnhail, 2 for the responsive formats
+    // 1 for the original image, 1 for thumbnail, 2 for the responsive formats
     expect(upload).toHaveBeenCalledTimes(4);
   });
 });
