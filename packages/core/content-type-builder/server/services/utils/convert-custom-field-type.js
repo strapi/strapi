@@ -1,8 +1,4 @@
 'use strict';
-const { DEFAULT_TYPES } = require('../constants');
-
-const notAllowedTypes = ['component', 'relation', 'dynamiczone', 'media'];
-const allowedTypes = DEFAULT_TYPES.filter(type => !notAllowedTypes.includes(type));
 
 /**
  * @description
@@ -12,10 +8,6 @@ const allowedTypes = DEFAULT_TYPES.filter(type => !notAllowedTypes.includes(type
 const convertCustomFieldType = attributes => {
   Object.values(attributes).forEach(attribute => {
     if (attribute.customField) {
-      if (!allowedTypes.includes(attribute.type)) {
-        // When the custom field was registered with an invalid strapi type
-        throw new Error(`Type: "${attribute.type}" is not a valid Custom Field type`);
-      }
       // Use the custom field uid sent from the admin to get its equivalent on the server
       // The getter will throw an error if the custom field is not found
       const customField = strapi.container.get('custom-fields').get(attribute.customField);

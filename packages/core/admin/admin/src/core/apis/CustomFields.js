@@ -1,5 +1,25 @@
 import invariant from 'invariant';
 
+const ALLOWED_TYPES = [
+  'string',
+  'text',
+  'richtext',
+  'password',
+  'email',
+  'enumeration',
+  'boolean',
+  'uid',
+  'json',
+  'integer',
+  'biginteger',
+  'float',
+  'decimal',
+  'date',
+  'time',
+  'datetime',
+  'timestamp',
+];
+
 class CustomFields {
   constructor() {
     this.customFields = {};
@@ -22,6 +42,12 @@ class CustomFields {
       invariant(intlDescription, 'An intlDescription must be provided');
       invariant(components, 'A components object must be provided');
       invariant(components.Input, 'An Input component must be provided');
+
+      // Ensure the type is valid
+      invariant(
+        ALLOWED_TYPES.includes(type),
+        `Custom field type: '${type}' is not a valid Strapi type or it can't be used with a Custom Field`
+      );
 
       // Ensure name has no special characters
       const isValidObjectKey = /^(?![0-9])[a-zA-Z0-9$_-]+$/g;
