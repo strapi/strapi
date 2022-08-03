@@ -10,6 +10,7 @@ jest.mock('../../../hooks/useFolderStructure');
 
 const setup = props => {
   const withDefaults = {
+    canRead: true,
     currentFolder: null,
     onChangeFolder: jest.fn(),
     ...props,
@@ -79,5 +80,17 @@ describe('Upload || components || DialogHeader', () => {
 
     expect(queryByText('Cats')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Go back')).not.toBeInTheDocument();
+  });
+
+  it('should not attempt to fetch the folder structure, if the user does not have permissions', () => {
+    const spy = jest.fn().mockReturnValueOnce({
+      isLoading: false,
+      error: null,
+    });
+    useFolderStructure.mockImplementation(spy);
+
+    setup({ canRead: false });
+
+    expect(spy).toHaveBeenCalledWith({ enabled: false });
   });
 });
