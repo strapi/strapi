@@ -5,6 +5,16 @@ const ts = require('typescript');
 
 const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
 
+/**
+ * Get the path of the typescript config file for a given directory
+ *
+ * @param {string} dir
+ * @param {object} [options]
+ * @param {string} [options.filename]
+ * @param {boolean} [options.ancestorsLookup]
+ *
+ * @return {string}
+ */
 module.exports = (dir, { filename = DEFAULT_TS_CONFIG_FILENAME, ancestorsLookup = false } = {}) => {
   const dirAbsolutePath = path.resolve(dir);
   const configFilePath = ts.findConfigFile(dirAbsolutePath, ts.sys.fileExists, filename);
@@ -13,5 +23,5 @@ module.exports = (dir, { filename = DEFAULT_TS_CONFIG_FILENAME, ancestorsLookup 
     return configFilePath;
   }
 
-  return configFilePath.startsWith(dirAbsolutePath);
+  return configFilePath.startsWith(dirAbsolutePath) ? configFilePath : undefined;
 };
