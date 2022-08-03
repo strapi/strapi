@@ -14,6 +14,7 @@ const getCustomWebpackConfig = (dir, config) => {
 
   if (fs.existsSync(adminConfigPath)) {
     const webpackAdminConfig = require(path.resolve(adminConfigPath));
+
     if (_.isFunction(webpackAdminConfig)) {
       // Expose the devServer configuration
       if (config.devServer) {
