@@ -10,7 +10,10 @@ describe('getBreadcrumbDataCM', () => {
     expect(getBreadcrumbDataCM(null)).toStrictEqual([
       {
         id: null,
-        label: 'Media Library',
+        label: {
+          id: 'upload.plugin.name',
+          defaultMessage: 'Media Library',
+        },
       },
     ]);
   });
@@ -19,7 +22,10 @@ describe('getBreadcrumbDataCM', () => {
     expect(getBreadcrumbDataCM(FIXTURE_FOLDER)).toStrictEqual([
       {
         id: null,
-        label: 'Media Library',
+        label: {
+          id: 'upload.plugin.name',
+          defaultMessage: 'Media Library',
+        },
       },
       {
         id: 1,
@@ -34,7 +40,10 @@ describe('getBreadcrumbDataCM', () => {
     ).toStrictEqual([
       {
         id: null,
-        label: 'Media Library',
+        label: {
+          id: 'upload.plugin.name',
+          defaultMessage: 'Media Library',
+        },
       },
 
       {
@@ -58,7 +67,10 @@ describe('getBreadcrumbDataCM', () => {
     ).toStrictEqual([
       {
         id: null,
-        label: 'Media Library',
+        label: {
+          id: 'upload.plugin.name',
+          defaultMessage: 'Media Library',
+        },
       },
       [],
       {

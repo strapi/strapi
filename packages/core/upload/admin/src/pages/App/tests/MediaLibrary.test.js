@@ -9,6 +9,7 @@ import { IntlProvider } from 'react-intl';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { useFolders } from '../../../hooks/useFolders';
 import { useAssets } from '../../../hooks/useAssets';
+import { useFolder } from '../../../hooks/useFolder';
 import { MediaLibrary } from '../MediaLibrary';
 
 const FIXTURE_ASSET_PAGINATION = {
@@ -199,6 +200,23 @@ describe('Media library homepage', () => {
         expect(screen.getByLabelText('Select all folders & assets')).toBeInTheDocument();
       });
 
+      it('hides the select all if there are not folders and assets', () => {
+        useAssets.mockReturnValueOnce({
+          isLoading: false,
+          error: null,
+          data: {},
+        });
+        useFolders.mockReturnValueOnce({
+          data: [],
+          isLoading: false,
+          error: null,
+        });
+
+        renderML();
+
+        expect(screen.queryByLabelText('Select all assets')).not.toBeInTheDocument();
+      });
+
       it('hides the select all button when the user is not allowed to update', () => {
         useMediaLibraryPermissions.mockReturnValue({
           isLoading: false,
@@ -251,6 +269,19 @@ describe('Media library homepage', () => {
   });
 
   describe('content', () => {
+    it('should show breadcrumbs navigation', () => {
+      renderML();
+
+      expect(screen.queryByLabelText('Folders navigation')).toBeInTheDocument();
+    });
+
+    it('should hide breadcrumbs navigation if in root folder', () => {
+      useFolder.mockReturnValueOnce({ isLoading: false, data: undefined });
+      renderML();
+
+      expect(screen.queryByLabelText('Folders navigation')).not.toBeInTheDocument();
+    });
+
     it('does display empty state upload first assets if no folder or assets', () => {
       useFolders.mockReturnValueOnce({
         data: [],

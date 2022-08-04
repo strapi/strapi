@@ -429,7 +429,7 @@ exports[`Header renders 1`] = `
           <h1
             class="c8"
           >
-            Media Library - Folder 1
+            Media Library
           </h1>
         </div>
         <div

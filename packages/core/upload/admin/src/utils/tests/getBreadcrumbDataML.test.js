@@ -18,7 +18,10 @@ describe('getBreadcrumbDataML', () => {
       {
         href: undefined,
         id: null,
-        label: 'Media Library',
+        label: {
+          id: 'upload.plugin.name',
+          defaultMessage: 'Media Library',
+        },
       },
     ]);
   });
@@ -30,7 +33,10 @@ describe('getBreadcrumbDataML', () => {
       {
         href: '/media-library?some=thing',
         id: null,
-        label: 'Media Library',
+        label: {
+          id: 'upload.plugin.name',
+          defaultMessage: 'Media Library',
+        },
       },
 
       {
@@ -49,7 +55,10 @@ describe('getBreadcrumbDataML', () => {
     ).toStrictEqual([
       {
         id: null,
-        label: 'Media Library',
+        label: {
+          id: 'upload.plugin.name',
+          defaultMessage: 'Media Library',
+        },
         href: '/media-library?some=thing',
       },
 
@@ -78,7 +87,10 @@ describe('getBreadcrumbDataML', () => {
     ).toStrictEqual([
       {
         id: null,
-        label: 'Media Library',
+        label: {
+          id: 'upload.plugin.name',
+          defaultMessage: 'Media Library',
+        },
         href: '/media-library?some=thing',
       },
 

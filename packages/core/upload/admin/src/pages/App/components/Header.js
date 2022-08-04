@@ -28,16 +28,16 @@ export const Header = ({
     ...query,
     folder: folder?.parent?.id ?? undefined,
   };
-  const name = folder?.name?.length > 30 ? `${folder.name.slice(0, 30)}...` : folder?.name;
 
   return (
     <HeaderLayout
-      title={`${formatMessage({
+      title={formatMessage({
         id: getTrad('plugin.name'),
         defaultMessage: `Media Library`,
-      })}${name ? ` - ${name}` : ''}`}
+      })}
       subtitle={
-        breadcrumbs && (
+        breadcrumbs &&
+        folder && (
           <Breadcrumbs
             as="nav"
             label={formatMessage({

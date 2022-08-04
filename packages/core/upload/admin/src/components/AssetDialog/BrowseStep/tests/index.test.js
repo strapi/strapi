@@ -133,6 +133,19 @@ describe('BrowseStep', () => {
     expect(spy).toHaveBeenCalledWith(1, { enabled: false });
   });
 
+  it('should show breadcrumbs navigation', () => {
+    setup();
+
+    expect(screen.queryByLabelText('Folders navigation')).toBeInTheDocument();
+  });
+
+  it('should hide breadcrumbs navigation if in root folder', () => {
+    useFolder.mockReturnValueOnce({ isLoading: false, data: undefined });
+    setup();
+
+    expect(screen.queryByLabelText('Folders navigation')).not.toBeInTheDocument();
+  });
+
   it('calls onAddAsset callback', () => {
     const spy = jest.fn();
     const { getByText } = setup({ onAddAsset: spy, folders: [] });

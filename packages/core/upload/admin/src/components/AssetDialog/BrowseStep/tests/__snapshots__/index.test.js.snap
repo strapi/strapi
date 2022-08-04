@@ -1208,7 +1208,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       class="c22"
     >
       <nav
-        aria-label="hello"
+        aria-label="Folders navigation"
         class=""
       >
         <ol

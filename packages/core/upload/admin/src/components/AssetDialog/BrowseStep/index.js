@@ -142,7 +142,7 @@ export const BrowseStep = ({
         </Box>
       )}
 
-      {canRead && breadcrumbs?.length > 0 && (
+      {canRead && breadcrumbs?.length > 0 && currentFolder && (
         <Box paddingTop={3}>
           <Breadcrumbs
             onChangeFolder={onChangeFolder}

@@ -5,7 +5,7 @@ const getBreadcrumbDataML = (folder, { pathname, query }) => {
   let data = [
     {
       id: null,
-      label: { id: getTrad('plugin.name'), defaultMessage: 'MediaLibrary' },
+      label: { id: getTrad('plugin.name'), defaultMessage: 'Media Library' },
       href: folder ? getFolderURL(pathname, query) : undefined,
     },
   ];
