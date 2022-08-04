@@ -4,11 +4,9 @@ const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
 const _ = require('lodash');
-const { isFaultyImage } = require('../../image-manipulation')();
 const uploadService = require('../../upload')({});
 
 const imageFilePath = path.join(__dirname, './image.png');
-const corruptImageFilePath = path.join(__dirname, './faulty_image.png');
 
 const tmpWorkingDirectory = path.join(__dirname, './tmp');
 
@@ -88,10 +86,5 @@ describe('Upload image', () => {
     await uploadService.uploadImage(fileData);
     // 1 for the original image, 1 for thumbnail, 2 for the responsive formats
     expect(upload).toHaveBeenCalledTimes(4);
-  });
-
-  test('Upload corrupt image', async () => {
-    let fileData = getFileData(corruptImageFilePath);
-    expect(await isFaultyImage(fileData)).toBe(true);
   });
 });
