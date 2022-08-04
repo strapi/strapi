@@ -12,7 +12,7 @@ import { getTrad } from '../../../utils';
 const getContentIntlMessage = ({ isFiltering, canCreate, canRead }) => {
   if (isFiltering) {
     return {
-      id: getTrad('list.assets-empty.title-withSearch'),
+      id: 'list.assets-empty.title-withSearch',
       defaultMessage: 'There are no elements with the applied filters',
     };
   }
@@ -20,19 +20,19 @@ const getContentIntlMessage = ({ isFiltering, canCreate, canRead }) => {
   if (canRead) {
     if (canCreate) {
       return {
-        id: getTrad('list.assets.empty-upload'),
+        id: 'list.assets.empty-upload',
         defaultMessage: 'Upload your first assets...',
       };
     }
 
     return {
-      id: getTrad('list.assets.empty'),
+      id: 'list.assets.empty',
       defaultMessage: 'Media Library is empty',
     };
   }
 
   return {
-    id: getTrad('header.actions.no-permissions'),
+    id: 'header.actions.no-permissions',
     defaultMessage: 'No permissions to view',
   };
 };
@@ -55,7 +55,10 @@ export const EmptyOrNoPermissions = ({ canCreate, isFiltering, canRead, onAction
           </Button>
         )
       }
-      content={content && formatMessage(content)}
+      content={formatMessage({
+        ...content,
+        id: getTrad(content.id),
+      })}
     />
   );
 };
