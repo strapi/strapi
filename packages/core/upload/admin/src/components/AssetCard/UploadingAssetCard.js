@@ -108,10 +108,21 @@ export const UploadingAssetCard = ({
       </Card>
       {error ? (
         <Typography variant="pi" fontWeight="bold" textColor="danger600">
-          {formatMessage({
-            id: getTrad(`apiError.${error.response.data.error.message}`),
-            defaultMessage: error.response.data.error.message,
-          })}
+          {formatMessage(
+            error?.response?.data?.error?.message
+              ? {
+                  id: getTrad(`apiError.${error.response.data.error.message}`),
+                  defaultMessage: error.response.data.error.message,
+                  /* See issue: https://github.com/strapi/strapi/issues/13867
+             A proxy might return an error, before the request reaches Strapi
+             and therefore we need to handle errors gracefully.
+          */
+                }
+              : {
+                  id: getTrad('upload.generic-error'),
+                  defaultMessage: 'An error occured while uploading the file.',
+                }
+          )}
         </Typography>
       ) : (
         undefined
