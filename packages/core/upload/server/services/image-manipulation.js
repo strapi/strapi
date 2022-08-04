@@ -7,7 +7,7 @@ const { join } = require('path');
 const sharp = require('sharp');
 
 const { getService } = require('../utils');
-const { bytesToKbytes, writableStreamDiscard } = require('../utils/file');
+const { bytesToKbytes, writableDiscardStream } = require('../utils/file');
 
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif'];
 const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff'];
@@ -189,7 +189,7 @@ const isFaultyImage = file =>
       .getStream()
       .pipe(sharp().rotate())
       .on('error', () => resolve(true))
-      .pipe(writableStreamDiscard())
+      .pipe(writableDiscardStream())
       .on('error', () => resolve(true))
       .on('close', () => resolve(false));
   });

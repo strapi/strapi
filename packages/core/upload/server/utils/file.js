@@ -31,7 +31,7 @@ const getStreamSize = stream =>
  * Create a writeable Node.js stream that discards received data.
  * Useful for testing, draining a stream of data, etc.
  */
-function writableStreamDiscard(options) {
+function writableDiscardStream(options) {
   return new Writable({
     ...options,
     write(chunk, encding, callback) {
@@ -44,5 +44,5 @@ module.exports = {
   streamToBuffer,
   bytesToKbytes,
   getStreamSize,
-  writableStreamDiscardData: writableStreamDiscard,
+  writableStreamDiscardData: writableDiscardStream,
 };
