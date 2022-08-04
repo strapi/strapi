@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
 const _ = require('lodash');
-const { ApplicationError } = require('@strapi/utils').errors;
+const { isFaultyImage } = require('../../image-manipulation')();
 const uploadService = require('../../upload')({});
 
 const imageFilePath = path.join(__dirname, './image.png');
@@ -90,14 +90,8 @@ describe('Upload image', () => {
     expect(upload).toHaveBeenCalledTimes(4);
   });
 
-  test('Upload corrupt image', () => {
+  test('Upload corrupt image', async () => {
     let fileData = getFileData(corruptImageFilePath);
-    mockUploadProvider(jest.fn(), {
-      responsiveDimensions: true,
-    });
-
-    expect(async () => {
-      await uploadService.uploadImage(fileData);
-    }).rejects.toThrow(ApplicationError);
+    expect(await isFaultyImage(fileData)).toBe(true);
   });
 });
