@@ -1,8 +1,10 @@
+import getTrad from './getTrad';
+
 const getBreadcrumbDataML = folder => {
   let data = [
     {
       id: null,
-      label: 'Media Library',
+      label: { id: getTrad('plugin.name'), defaultMessage: 'MediaLibrary' },
     },
   ];
 

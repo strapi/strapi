@@ -1,10 +1,11 @@
+import getTrad from './getTrad';
 import getFolderURL from './getFolderURL';
 
 const getBreadcrumbDataML = (folder, { pathname, query }) => {
   let data = [
     {
       id: null,
-      label: 'Media Library',
+      label: { id: getTrad('plugin.name'), defaultMessage: 'MediaLibrary' },
       href: folder ? getFolderURL(pathname, query) : undefined,
     },
   ];

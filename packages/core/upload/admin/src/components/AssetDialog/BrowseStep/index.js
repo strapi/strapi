@@ -147,7 +147,10 @@ export const BrowseStep = ({
           <Breadcrumbs
             onChangeFolder={onChangeFolder}
             as="nav"
-            label="hello"
+            label={formatMessage({
+              id: getTrad('header.breadcrumbs.nav.label'),
+              defaultMessage: 'Folders navigation',
+            })}
             breadcrumbs={breadcrumbs}
             currentFolderId={queryObject?.folder}
           />
