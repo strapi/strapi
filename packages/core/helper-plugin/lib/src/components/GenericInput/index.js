@@ -127,16 +127,17 @@ const GenericInput = ({
 
   switch (type) {
     case 'bool': {
+      const isClearable = isNullable && !disabled;
       const clearProps = {
         clearLabel:
-          isNullable &&
+          isClearable &&
           formatMessage({
             id: 'app.components.ToggleCheckbox.clear-label',
             defaultMessage: 'Clear',
           }),
 
         onClear:
-          isNullable &&
+          isClearable &&
           (() => {
             onChange({ target: { name, value: null } });
           }),
