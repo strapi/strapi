@@ -31,7 +31,7 @@ module.exports = ({ strapi }) => ({
 
     const possibleColisions = await query
       .findMany({
-        where: { [field]: { $contains: value } },
+        where: { [field]: { $eqi: value } },
       })
       .then(results => results.map(result => result[field]));
 
