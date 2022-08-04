@@ -130,11 +130,11 @@ module.exports = ({ strapi }) => ({
       if (await isFaultyImage(currentFile)) {
         throw new ApplicationError('File is not a valid image');
       }
-      if (!(await isOptimizableImage(currentFile))) {
-        return currentFile;
+      if (await isOptimizableImage(currentFile)) {
+        return optimize(currentFile);
       }
     }
-    return optimize(currentFile);
+    return currentFile;
   },
 
   // TODO V5: remove enhanceFile
