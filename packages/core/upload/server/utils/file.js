@@ -44,5 +44,5 @@ module.exports = {
   streamToBuffer,
   bytesToKbytes,
   getStreamSize,
-  writableStreamDiscardData: writableDiscardStream,
+  writableDiscardStream,
 };
