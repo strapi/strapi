@@ -71,7 +71,11 @@ export const AssetDialog = ({
     isLoading: isLoadingAssets,
     error: errorAssets,
   } = useAssets({ skipWhen: !canRead, query: queryObject });
-  const { data: folders, isLoading: isLoadingFolders, error: errorFolders } = useFolders({
+  const {
+    data: folders,
+    isLoading: isLoadingFolders,
+    error: errorFolders,
+  } = useFolders({
     enabled: canRead && !containsAssetFilter(queryObject) && pagination?.page === 1,
     query: queryObject,
   });
@@ -86,7 +90,7 @@ export const AssetDialog = ({
   );
   const handleSelectAllAssets = () => {
     const hasAllAssets = assets.every(
-      asset => selectedAssets.findIndex(curr => curr.id === asset.id) !== -1
+      (asset) => selectedAssets.findIndex((curr) => curr.id === asset.id) !== -1
     );
 
     if (hasAllAssets) {
@@ -97,7 +101,7 @@ export const AssetDialog = ({
 
     return multiple ? selectAll(allowedAssets) : undefined;
   };
-  const handleSelectAsset = asset => {
+  const handleSelectAsset = (asset) => {
     return multiple ? selectOne(asset) : selectOnly(asset);
   };
 
@@ -107,7 +111,7 @@ export const AssetDialog = ({
   if (isLoading) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
-        <DialogHeader />
+        <DialogHeader canRead={canRead} />
         <LoadingBody justifyContent="center" paddingTop={4} paddingBottom={4}>
           <Loader>
             {formatMessage({
@@ -124,7 +128,7 @@ export const AssetDialog = ({
   if (hasError) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogHeader />
+        <DialogHeader canRead={canRead} />
         <AnErrorOccurred />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
@@ -134,7 +138,7 @@ export const AssetDialog = ({
   if (!canRead) {
     return (
       <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <DialogHeader />
+        <DialogHeader canRead={canRead} />
         <NoPermissions />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
@@ -172,14 +176,18 @@ export const AssetDialog = ({
     setSelections(nextAssets);
   };
 
-  const handleFolderChange = folder => {
+  const handleFolderChange = (folder) => {
     onChangeFolder(folder);
     onChangeFolderParam(folder);
   };
 
   return (
     <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={isLoading}>
-      <DialogHeader currentFolder={queryObject?.folder} onChangeFolder={handleFolderChange} />
+      <DialogHeader
+        currentFolder={queryObject?.folder}
+        onChangeFolder={handleFolderChange}
+        canRead={canRead}
+      />
 
       <TabGroup
         label={formatMessage({

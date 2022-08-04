@@ -1,6 +1,6 @@
 'use strict';
 
-const uploadService = require('../upload')({});
+const uploadService = require('../../upload')({});
 
 describe('Upload service', () => {
   beforeAll(() => {

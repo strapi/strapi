@@ -188,22 +188,33 @@ describe('Content manager | App | main', () => {
         padding-bottom: 16px;
       }
 
-      .c15 {
+      .c16 {
         padding-top: 8px;
         padding-right: 16px;
         padding-bottom: 8px;
         padding-left: 24px;
       }
 
-      .c20 {
+      .c18 {
+        padding-right: 24px;
+        position: relative;
+      }
+
+      .c21 {
         padding-right: 4px;
       }
 
-      .c22 {
+      .c23 {
         background: #eaeaef;
         padding: 4px;
         border-radius: 4px;
+        position: absolute;
+        right: 0px;
+        top: 50%;
         min-width: 20px;
+        -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        transform: translateY(-50%);
       }
 
       .c25 {
@@ -261,25 +272,7 @@ describe('Content manager | App | main', () => {
         flex-direction: column;
       }
 
-      .c17 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c18 {
+      .c19 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -293,7 +286,7 @@ describe('Content manager | App | main', () => {
         flex-direction: row;
       }
 
-      .c23 {
+      .c24 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -318,7 +311,7 @@ describe('Content manager | App | main', () => {
         line-height: 1.22;
       }
 
-      .c21 {
+      .c22 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -490,35 +483,6 @@ describe('Content manager | App | main', () => {
         fill: #666687;
       }
 
-      .c19 {
-        border: none;
-        padding: 0;
-        background: transparent;
-      }
-
-      .c16 {
-        max-height: 2rem;
-      }
-
-      .c16 svg {
-        height: 0.25rem;
-      }
-
-      .c16 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
       .c14 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -526,6 +490,29 @@ describe('Content manager | App | main', () => {
 
       .c14 > * + * {
         margin-top: 8px;
+      }
+
+      .c15 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c15 > * + * {
+        margin-top: 4px;
+      }
+
+      .c20 {
+        border: none;
+        padding: 0;
+        background: transparent;
+      }
+
+      .c17 svg {
+        height: 0.25rem;
+      }
+
+      .c17 svg path {
+        fill: #8e8ea9;
       }
 
       <div
@@ -582,45 +569,47 @@ describe('Content manager | App | main', () => {
           <div
             class="c12"
           >
-            <ul
+            <ol
               class="c13 c14"
               spacing="2"
             >
               <li>
                 <div
-                  class=""
+                  class="c13 c15"
+                  spacing="1"
                 >
                   <div
-                    class="c15 c16"
+                    class="c16 c17"
                   >
                     <div
-                      class="c17"
+                      class="c18"
                     >
                       <div
-                        class="c18 c19"
+                        class="c19 c20"
                       >
                         <div
-                          class="c20"
+                          class="c21"
                         >
                           <span
-                            class="c4 c21"
+                            class="c4 c22"
                           >
                             Collection Types
                           </span>
                         </div>
                       </div>
                       <div
-                        class="c22 c23 c24"
+                        class="c23 c24"
+                        transform="translateY(-50%)"
                       >
                         <span
-                          class="c4 c21"
+                          class="c4 c22"
                         >
                           1
                         </span>
                       </div>
                     </div>
                   </div>
-                  <ul
+                  <ol
                     id="subnav-list-4"
                   >
                     <li>
@@ -630,7 +619,7 @@ describe('Content manager | App | main', () => {
                         href="/content-manager/collectionType/category"
                       >
                         <div
-                          class="c18"
+                          class="c19"
                         >
                           <svg
                             class="c27"
@@ -659,44 +648,46 @@ describe('Content manager | App | main', () => {
                         </div>
                       </a>
                     </li>
-                  </ul>
+                  </ol>
                 </div>
               </li>
               <li>
                 <div
-                  class=""
+                  class="c13 c15"
+                  spacing="1"
                 >
                   <div
-                    class="c15 c16"
+                    class="c16 c17"
                   >
                     <div
-                      class="c17"
+                      class="c18"
                     >
                       <div
-                        class="c18 c19"
+                        class="c19 c20"
                       >
                         <div
-                          class="c20"
+                          class="c21"
                         >
                           <span
-                            class="c4 c21"
+                            class="c4 c22"
                           >
                             Single Types
                           </span>
                         </div>
                       </div>
                       <div
-                        class="c22 c23 c24"
+                        class="c23 c24"
+                        transform="translateY(-50%)"
                       >
                         <span
-                          class="c4 c21"
+                          class="c4 c22"
                         >
                           1
                         </span>
                       </div>
                     </div>
                   </div>
-                  <ul
+                  <ol
                     id="subnav-list-5"
                   >
                     <li>
@@ -705,7 +696,7 @@ describe('Content manager | App | main', () => {
                         href="/homepage"
                       >
                         <div
-                          class="c18"
+                          class="c19"
                         >
                           <svg
                             class="c27"
@@ -734,10 +725,10 @@ describe('Content manager | App | main', () => {
                         </div>
                       </a>
                     </li>
-                  </ul>
+                  </ol>
                 </div>
               </li>
-            </ul>
+            </ol>
           </div>
         </nav>
         <div

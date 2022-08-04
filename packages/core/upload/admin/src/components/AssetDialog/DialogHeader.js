@@ -26,12 +26,15 @@ const BackIcon = styled(Icon)`
   }
 `;
 
-export const DialogHeader = ({ currentFolder, onChangeFolder }) => {
+export const DialogHeader = ({ currentFolder, onChangeFolder, canRead }) => {
   const { formatMessage } = useIntl();
 
-  const { data, isLoading } = useFolderStructure();
+  const { data, isLoading } = useFolderStructure({
+    enabled: canRead,
+  });
 
-  const folderMetadatas = !isLoading && findRecursiveFolderMetadatas(data[0], currentFolder);
+  const folderMetadatas =
+    !isLoading && Array.isArray(data) && findRecursiveFolderMetadatas(data[0], currentFolder);
   const folderLabel =
     folderMetadatas?.currentFolderLabel &&
     (folderMetadatas.currentFolderLabel.length > 60
@@ -82,6 +85,7 @@ DialogHeader.defaultProps = {
 };
 
 DialogHeader.propTypes = {
+  canRead: PropTypes.bool.isRequired,
   currentFolder: PropTypes.number,
   onChangeFolder: PropTypes.func,
 };
