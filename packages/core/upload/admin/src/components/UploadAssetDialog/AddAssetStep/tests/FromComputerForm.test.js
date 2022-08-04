@@ -1,6 +1,7 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
+import { TrackingContext } from '@strapi/helper-plugin';
 import { FromComputerForm } from '../FromComputerForm';
 import en from '../../../../translations/en.json';
 
@@ -13,9 +14,11 @@ jest.mock('react-intl', () => ({
 describe('FromComputerForm', () => {
   it('snapshots the component', async () => {
     const { container } = renderTL(
-      <ThemeProvider theme={lightTheme}>
-        <FromComputerForm onClose={jest.fn()} onAddAssets={jest.fn()} />
-      </ThemeProvider>
+      <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+        <ThemeProvider theme={lightTheme}>
+          <FromComputerForm onClose={jest.fn()} onAddAssets={jest.fn()} />
+        </ThemeProvider>
+      </TrackingContext.Provider>
     );
 
     expect(container).toMatchInlineSnapshot(`
@@ -65,45 +68,6 @@ describe('FromComputerForm', () => {
 
       .c11 {
         position: relative;
-      }
-
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
-      .c4 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c8 {
-        color: #666687;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
       }
 
       .c15 {
@@ -181,7 +145,7 @@ describe('FromComputerForm', () => {
         border: 1px solid #4945ff;
       }
 
-      .c13 .sc-gJbFto {
+      .c13 .sc-ezHhwS {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -251,7 +215,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c21 .sc-gJbFto {
+      .c21 .sc-ezHhwS {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -309,6 +273,45 @@ describe('FromComputerForm', () => {
       .c21 svg > g,
       .c21 svg path {
         fill: #32324d;
+      }
+
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c4 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c8 {
+        color: #666687;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
       }
 
       .c16 {

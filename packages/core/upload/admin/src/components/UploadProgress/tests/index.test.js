@@ -26,8 +26,11 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderCompo = props =>
-  render(
+const renderCompo = props => {
+  const target = document.createElement('div');
+  document.body.appendChild(target);
+
+  return render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
@@ -35,8 +38,9 @@ const renderCompo = props =>
         </IntlProvider>
       </ThemeProvider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: target }
   );
+};
 
 describe('<UploadProgress />', () => {
   it('renders with no error', () => {

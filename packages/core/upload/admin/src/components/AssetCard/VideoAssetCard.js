@@ -52,7 +52,7 @@ export const VideoAssetCard = ({
   const formattedDuration = duration && formatDuration(duration);
 
   return (
-    <Card>
+    <Card height="100%">
       <CardHeader>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
         {(onRemove || onEdit) && (

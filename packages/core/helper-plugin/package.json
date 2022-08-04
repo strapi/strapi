@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.2.3",
+  "version": "4.3.2",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
     }
   ],
   "main": "build/index.js",
-  "module": "lib/src/index.js",
   "files": [
     "build"
   ],
@@ -35,6 +34,7 @@
     "prepublishOnly": "npm run build",
     "storybook": "start-storybook -p 6006",
     "test:front": "jest --config ./jest.config.front.js",
+    "test:front:cov": "jest --config ./jest.config.front.js --coverage --collectCoverageFrom='<rootDir>/packages/core/helper-plugin/lib/src/**/*.js' --coverageDirectory='<rootDir>/packages/core/helper-plugin/coverage'",
     "test:front:watch": "jest --config ./jest.config.front.js --watchAll",
     "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
   },
@@ -52,29 +52,30 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
-    "react-intl": "6.0.5",
+    "react-intl": "5.20.2",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
+    "react-select": "4.0.2",
     "styled-components": "5.3.3",
     "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {
-    "@babel/core": "7.16.7",
+    "@babel/core": "7.18.10",
     "@babel/plugin-proposal-class-properties": "7.16.7",
     "@babel/plugin-proposal-export-default-from": "7.18.6",
     "@babel/plugin-proposal-function-bind": "7.18.8",
-    "@babel/plugin-transform-runtime": "7.16.7",
-    "@babel/preset-env": "7.16.7",
+    "@babel/plugin-transform-runtime": "7.18.10",
+    "@babel/preset-env": "7.18.10",
     "@babel/preset-react": "7.18.6",
-    "@babel/runtime": "7.16.7",
+    "@babel/runtime": "7.18.9",
     "@storybook/addon-actions": "6.4.10",
     "@storybook/addon-essentials": "6.5.9",
     "@storybook/addon-links": "6.5.9",
     "@storybook/builder-webpack5": "6.5.9",
     "@storybook/manager-webpack5": "6.4.10",
     "@storybook/react": "^6.3.7",
-    "@strapi/design-system": "1.2.0",
-    "@strapi/icons": "1.2.0",
+    "@strapi/design-system": "1.2.1",
+    "@strapi/icons": "1.2.1",
     "babel-loader": "^8.2.5",
     "cross-env": "^7.0.3",
     "date-fns": "2.28.0",

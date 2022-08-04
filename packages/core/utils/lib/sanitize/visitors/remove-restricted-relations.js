@@ -2,8 +2,9 @@
 
 const ACTIONS_TO_VERIFY = ['find'];
 
-// FIXME: Support populating creator fields
-module.exports = auth => async ({ data, key, attribute }, { remove, set }) => {
+const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = require('../../content-types').constants;
+
+module.exports = auth => async ({ data, key, attribute, schema }, { remove, set }) => {
   const isRelation = attribute.type === 'relation';
 
   if (!isRelation) {
@@ -42,16 +43,22 @@ module.exports = auth => async ({ data, key, attribute }, { remove, set }) => {
   };
 
   const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
+  const isCreatorRelation = [CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE].includes(key);
 
   // Polymorphic relations
   if (isMorphRelation) {
     await handleMorphRelation();
+    return;
+  }
+
+  // Creator relations
+  if (isCreatorRelation && schema.options.populateCreatorFields) {
+    // do nothing
+    return;
   }
 
   // Regular relations
-  else {
-    await handleRegularRelation();
-  }
+  await handleRegularRelation();
 };
 
 const hasAccessToSomeScopes = async (scopes, auth) => {

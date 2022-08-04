@@ -10,10 +10,12 @@ import { pxToRem } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 
 const StyledBullet = styled.div`
+  flex-shrink: 0;
   width: ${pxToRem(6)};
   height: ${pxToRem(6)};
   margin-right: ${({ theme }) => theme.spaces[2]};
-  background: ${({ theme, isDraft }) => theme.colors[isDraft ? 'secondary600' : 'success600']};
+  background-color: ${({ theme, isDraft }) =>
+    theme.colors[isDraft ? 'secondary600' : 'success600']};
   border-radius: 50%;
   cursor: pointer;
 `;
@@ -22,29 +24,27 @@ const Option = props => {
   const { formatMessage } = useIntl();
   const Component = components.Option;
   const hasDraftAndPublish = has(get(props, 'data.value'), 'publishedAt');
-  const isDraft = isEmpty(get(props, 'data.value.publishedAt'));
 
   if (hasDraftAndPublish) {
-    if (hasDraftAndPublish) {
-      const draftMessage = {
-        id: getTrad('components.Select.draft-info-title'),
-        defaultMessage: 'State: Draft',
-      };
-      const publishedMessage = {
-        id: getTrad('components.Select.publish-info-title'),
-        defaultMessage: 'State: Published',
-      };
-      const title = isDraft ? formatMessage(draftMessage) : formatMessage(publishedMessage);
+    const isDraft = isEmpty(get(props, 'data.value.publishedAt'));
+    const draftMessage = {
+      id: getTrad('components.Select.draft-info-title'),
+      defaultMessage: 'State: Draft',
+    };
+    const publishedMessage = {
+      id: getTrad('components.Select.publish-info-title'),
+      defaultMessage: 'State: Published',
+    };
+    const title = isDraft ? formatMessage(draftMessage) : formatMessage(publishedMessage);
 
-      return (
-        <Component {...props}>
-          <Flex>
-            <StyledBullet title={title} isDraft={isDraft} />
-            <Typography ellipsis>{props.label || '-'}</Typography>
-          </Flex>
-        </Component>
-      );
-    }
+    return (
+      <Component {...props}>
+        <Flex>
+          <StyledBullet title={title} isDraft={isDraft} />
+          <Typography ellipsis>{props.label || '-'}</Typography>
+        </Flex>
+      </Component>
+    );
   }
 
   return <Component {...props}>{props.label || '-'}</Component>;
