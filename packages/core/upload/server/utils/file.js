@@ -2,6 +2,7 @@
 /**
  * Utils file containing file treatment utils
  */
+const { Writable } = require('stream');
 
 const bytesToKbytes = bytes => Math.round((bytes / 1000) * 100) / 100;
 
@@ -26,8 +27,22 @@ const getStreamSize = stream =>
     stream.resume();
   });
 
+/**
+ * Create a writeable Node.js stream that discards received data.
+ * Useful for testing, draining a stream of data, etc.
+ */
+function writableStreamDiscard(options) {
+  return new Writable({
+    ...options,
+    write(chunk, encding, callback) {
+      setImmediate(callback);
+    },
+  });
+}
+
 module.exports = {
   streamToBuffer,
   bytesToKbytes,
   getStreamSize,
+  writableStreamDiscardData: writableStreamDiscard,
 };

@@ -4,11 +4,10 @@
  */
 const fs = require('fs');
 const { join } = require('path');
-const { ApplicationError } = require('@strapi/utils').errors;
 const sharp = require('sharp');
 
 const { getService } = require('../utils');
-const { bytesToKbytes } = require('../utils/file');
+const { bytesToKbytes, writableStreamDiscard } = require('../utils/file');
 
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif'];
 const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff'];
@@ -47,12 +46,7 @@ const THUMBNAIL_RESIZE_OPTIONS = {
 const resizeFileTo = async (file, options, { name, hash }) => {
   const filePath = join(file.tmpWorkingDirectory, hash);
 
-  try {
-    await writeStreamToFile(file.getStream().pipe(sharp().resize(options)), filePath);
-  } catch (err) {
-    throw new ApplicationError('File is not a valid image');
-  }
-
+  await writeStreamToFile(file.getStream().pipe(sharp().resize(options)), filePath);
   const newFile = {
     name,
     hash,
@@ -108,11 +102,7 @@ const optimize = async file => {
     }
     const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
 
-    try {
-      await writeStreamToFile(file.getStream().pipe(transformer), filePath);
-    } catch {
-      throw new ApplicationError('File is not a valid image');
-    }
+    await writeStreamToFile(file.getStream().pipe(transformer), filePath);
 
     newFile.getStream = () => fs.createReadStream(filePath);
   }
@@ -190,6 +180,20 @@ const isSupportedImage = (...args) => {
   return isOptimizableImage(...args);
 };
 
+/**
+ *  Applies a simple image transformation to see if the image is faulty/corrupted.
+ */
+const isFaultyImage = file =>
+  new Promise(resolve => {
+    file
+      .getStream()
+      .pipe(sharp().rotate())
+      .on('error', () => resolve(true))
+      .pipe(writableStreamDiscard())
+      .on('error', () => resolve(true))
+      .on('close', () => resolve(false));
+  });
+
 const isOptimizableImage = async file => {
   let format;
   try {
@@ -216,6 +220,7 @@ const isImage = async file => {
 
 module.exports = () => ({
   isSupportedImage,
+  isFaultyImage,
   isOptimizableImage,
   isImage,
   getDimensions,
