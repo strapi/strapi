@@ -294,6 +294,12 @@ describe('Test Graphql API End to End', () => {
       ],
       [
         {
+          category: { eqi: 'Blog' },
+        },
+        [postsPayload[0]],
+      ],
+      [
+        {
           name: { contains: 'post' },
         },
         postsPayload,

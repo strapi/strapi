@@ -3,7 +3,7 @@
 const { Kind, valueFromASTUntyped } = require('graphql');
 const { omit } = require('lodash/fp');
 const { unionType, scalarType } = require('nexus');
-const { ApplicationError } = require('@strapi/utils');
+const { ApplicationError } = require('@strapi/utils').errors;
 
 module.exports = ({ strapi }) => {
   const buildTypeDefinition = (name, components) => {

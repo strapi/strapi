@@ -63,6 +63,7 @@ export { default as PaginationURLQuery } from './components/PaginationURLQuery';
 export { default as PageSizeURLQuery } from './components/PageSizeURLQuery';
 export { default as RelativeTime } from './components/RelativeTime';
 export { default as DateTimePicker } from './components/DateTimePicker';
+export { default as ReactSelect } from './components/ReactSelect';
 export { default as Link } from './components/Link';
 export { default as LinkButton } from './components/LinkButton';
 
@@ -93,4 +94,5 @@ export * from './utils/stopPropagation';
 export { default as difference } from './utils/difference';
 
 export { default as request } from './utils/request';
+export { default as getAPIInnerErrors } from './utils/getAPIInnerErrors';
 export { default as getYupInnerErrors } from './utils/getYupInnerErrors';

@@ -5,7 +5,7 @@ import useAppInfos from '../useAppInfos';
 
 const useTracking = () => {
   const trackRef = useRef();
-  const uuid = useContext(TrackingContext);
+  const { uuid, telemetryProperties } = useContext(TrackingContext);
   const appInfo = useAppInfos();
 
   trackRef.current = (event, properties) => {
@@ -14,6 +14,7 @@ const useTracking = () => {
         axios.post('https://analytics.strapi.io/track', {
           event,
           properties: {
+            ...telemetryProperties,
             ...properties,
             projectType: strapi.projectType,
             environment: appInfo.currentEnvironment,

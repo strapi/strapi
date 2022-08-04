@@ -9,12 +9,13 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { NotificationsProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider, TrackingContext } from '@strapi/helper-plugin';
 import { EditAssetDialog } from '../index';
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
 
 jest.mock('../../../utils/downloadFile');
+jest.mock('../../../hooks/useFolderStructure');
 
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
   acc[curr] = `upload.${en[curr]}`;
@@ -98,15 +99,23 @@ const queryClient = new QueryClient({
 const renderCompo = (toggleNotification = jest.fn()) =>
   render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
-        <NotificationsProvider toggleNotification={toggleNotification}>
-          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-            <EditAssetDialog asset={asset} onClose={jest.fn()} canUpdate canCopyLink canDownload />
-          </IntlProvider>
-        </NotificationsProvider>
-      </ThemeProvider>
+      <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
+        <ThemeProvider theme={lightTheme}>
+          <NotificationsProvider toggleNotification={toggleNotification}>
+            <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+              <EditAssetDialog
+                asset={asset}
+                onClose={jest.fn()}
+                canUpdate
+                canCopyLink
+                canDownload
+              />
+            </IntlProvider>
+          </NotificationsProvider>
+        </ThemeProvider>
+      </TrackingContext.Provider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: document.getElementById('app') }
   );
 
 describe('<EditAssetDialog />', () => {
@@ -121,9 +130,9 @@ describe('<EditAssetDialog />', () => {
   });
 
   it('renders and matches the snapshot', () => {
-    const { container } = renderCompo();
+    renderCompo();
 
-    expect(container).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   describe('PreviewBox', () => {
