@@ -46,7 +46,7 @@ const TableHead = ({
           const isUp = sortOrder === 'ASC';
 
           const intlLabel = formatMessage({
-            id: `global.table.header.${name}`,
+            id: name || `global.table.header.${name}`,
             defaultMessage: label,
           });
 
