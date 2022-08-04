@@ -8,8 +8,6 @@ const formatLayoutToApi = ({ layouts, metadatas, ...rest }) => {
 
     return obj;
   });
-  const editRelations = layouts.editRelations.map(({ name }) => name);
-
   const formattedMetadatas = Object.keys(metadatas).reduce((acc, current) => {
     const currentMetadatas = get(metadatas, [current], {});
     let editMetadatas = currentMetadatas.edit;
@@ -36,7 +34,7 @@ const formatLayoutToApi = ({ layouts, metadatas, ...rest }) => {
 
   return {
     ...rest,
-    layouts: { edit, editRelations, list },
+    layouts: { edit, list },
     metadatas: formattedMetadatas,
   };
 };

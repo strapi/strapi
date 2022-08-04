@@ -1,5 +1,4 @@
 import formatLayouts, {
-  formatEditRelationsLayoutWithMetas,
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
   generateRelationQueryInfos,
@@ -41,37 +40,6 @@ const simpleModels = [
 ];
 
 describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
-  describe('formatEditRelationsLayoutWithMetas', () => {
-    it('should format editRelations layout correctly', () => {
-      const expectedLayout = [
-        {
-          name: 'categories',
-          size: 6,
-          fieldSchema: {
-            targetModel: 'api::category.category',
-          },
-          metadatas: {
-            mainField: {
-              name: 'name',
-              type: 'string',
-            },
-          },
-          queryInfos: {
-            endPoint: '/content-manager/relations/api::address.address/categories',
-            containsKey: 'name',
-            defaultParams: {},
-            shouldDisplayRelationLink: true,
-          },
-          targetModelPluginOptions: {},
-        },
-      ];
-
-      expect(formatEditRelationsLayoutWithMetas(addressSchema, simpleModels)).toEqual(
-        expectedLayout
-      );
-    });
-  });
-
   describe('formatLayouts', () => {
     it('should format the content type and components layouts', () => {
       const models = [
