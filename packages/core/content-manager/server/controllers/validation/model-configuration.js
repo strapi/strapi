@@ -3,7 +3,6 @@
 const { yup } = require('@strapi/utils');
 const {
   isListable,
-  hasRelationAttribute,
   hasEditableAttribute,
 } = require('../../services/utils/configuration/attributes');
 /**
@@ -106,10 +105,6 @@ const createLayoutsSchema = (schema, opts = {}) => {
     hasEditableAttribute(schema, key)
   );
 
-  const relationAttributes = Object.keys(schema.attributes).filter(key =>
-    hasRelationAttribute(schema, key)
-  );
-
   return yup.object().shape({
     edit: yup
       .array()
@@ -135,10 +130,6 @@ const createLayoutsSchema = (schema, opts = {}) => {
     list: yup
       .array()
       .of(yup.string().oneOf(validAttributes))
-      .test(createArrayTest(opts)),
-    editRelations: yup
-      .array()
-      .of(yup.string().oneOf(relationAttributes))
       .test(createArrayTest(opts)),
   });
 };

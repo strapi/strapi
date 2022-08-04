@@ -87,7 +87,6 @@ describe('Content Manager - Update Layout', () => {
       body: {
         layouts: {
           edit: payload,
-          editRelations: [],
           list: [],
         },
       },
@@ -132,7 +131,6 @@ describe('Content Manager - Update Layout', () => {
       body: {
         layouts: {
           edit: payload,
-          editRelations: [],
           list: [],
         },
       },
@@ -198,7 +196,6 @@ describe('Content Manager - Update Layout', () => {
       body: {
         layouts: {
           edit: payload,
-          editRelations: [],
           list: [],
         },
       },
