@@ -6,7 +6,6 @@ import { stringify } from 'qs';
 import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
-  NoPermissions,
   AnErrorOccurred,
   SearchURLQuery,
   useSelectionState,
@@ -225,7 +224,7 @@ export const MediaLibrary = () => {
             />
           )}
 
-          {canRead ? (
+          {canRead && (
             <>
               {folderCount > 0 && (
                 <FolderList
@@ -349,8 +348,6 @@ export const MediaLibrary = () => {
                 </>
               )}
             </>
-          ) : (
-            <NoPermissions />
           )}
         </ContentLayout>
       </Main>
