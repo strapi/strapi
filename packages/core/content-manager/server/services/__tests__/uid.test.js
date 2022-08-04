@@ -354,7 +354,7 @@ describe('Test uid service', () => {
       });
 
       expect(findMany).toHaveBeenCalledWith({
-        where: { slug: { $contains: 'my-test-model' } },
+        where: { slug: { $eqi: 'my-test-model' } },
       });
     });
   });
