@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
 const _ = require('lodash');
-const { ForbiddenError } = require('@strapi/utils').errors;
+const { ApplicationError } = require('@strapi/utils').errors;
 const uploadService = require('../../upload')({});
 
 const imageFilePath = path.join(__dirname, './image.png');
@@ -98,6 +98,6 @@ describe('Upload image', () => {
 
     expect(async () => {
       await uploadService.uploadImage(fileData);
-    }).rejects.toThrow(ForbiddenError);
+    }).rejects.toThrow(ApplicationError);
   });
 });
