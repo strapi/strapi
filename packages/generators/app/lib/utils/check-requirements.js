@@ -17,6 +17,10 @@ module.exports = function checkBeforeInstall() {
       `Strapi requires ${bold(green(`node >=${minNodeVersion} and <${maxNodeVersion}`))}`
     );
     console.error('Please make sure to use the right version of Node.');
+  }
+
+  // only exit on lower version; higher version is allowed to proceed with only the warning
+  if (!semver.gte(currentNodeVersion, minNodeVersion)) {
     process.exit(1);
   }
 };
