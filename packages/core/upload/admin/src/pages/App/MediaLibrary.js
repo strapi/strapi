@@ -15,8 +15,6 @@ import {
 } from '@strapi/helper-plugin';
 import { Layout, ContentLayout, ActionLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import Plus from '@strapi/icons/Plus';
 import { Box } from '@strapi/design-system/Box';
 import { Divider } from '@strapi/design-system/Divider';
 import { BaseCheckbox } from '@strapi/design-system/BaseCheckbox';
@@ -38,7 +36,6 @@ import { getTrad, containsAssetFilter } from '../../utils';
 import { PaginationFooter } from '../../components/PaginationFooter';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useFolder } from '../../hooks/useFolder';
-import { EmptyAssets } from '../../components/EmptyAssets';
 import { BulkActions } from './components/BulkActions';
 import {
   FolderCard,
@@ -48,6 +45,7 @@ import {
 } from '../../components/FolderCard';
 import { Filters } from './components/Filters';
 import { Header } from './components/Header';
+import { EmptyOrNoPermissions } from './components/EmptyOrNoPermissions';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -219,39 +217,11 @@ export const MediaLibrary = () => {
           {(assetsError || foldersError) && <AnErrorOccurred />}
 
           {folderCount === 0 && assetCount === 0 && (
-            <EmptyAssets
-              action={
-                canCreate &&
-                !isFiltering && (
-                  <Button
-                    variant="secondary"
-                    startIcon={<Plus />}
-                    onClick={toggleUploadAssetDialog}
-                  >
-                    {formatMessage({
-                      id: getTrad('header.actions.add-assets'),
-                      defaultMessage: 'Add new assets',
-                    })}
-                  </Button>
-                )
-              }
-              content={
-                // eslint-disable-next-line no-nested-ternary
-                isFiltering
-                  ? formatMessage({
-                      id: getTrad('list.assets-empty.title-withSearch'),
-                      defaultMessage: 'There are no elements with the applied filters',
-                    })
-                  : canCreate
-                  ? formatMessage({
-                      id: getTrad('list.assets.empty'),
-                      defaultMessage: 'Upload your first assets...',
-                    })
-                  : formatMessage({
-                      id: getTrad('list.assets.empty.no-permissions'),
-                      defaultMessage: 'The asset list is empty',
-                    })
-              }
+            <EmptyOrNoPermissions
+              canCreate={canCreate}
+              canRead={canRead}
+              isFiltering={isFiltering}
+              onActionClick={toggleUploadAssetDialog}
             />
           )}
 

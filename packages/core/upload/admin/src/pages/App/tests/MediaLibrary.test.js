@@ -500,26 +500,6 @@ describe('Media library homepage', () => {
       expect(screen.queryByText('Upload your first assets...')).toBeInTheDocument();
     });
 
-    it('does not display empty assets action, if there are no assets and the user does not have create permissions', () => {
-      useMediaLibraryPermissions.mockReturnValueOnce({
-        isLoading: false,
-        canCreate: false,
-        canRead: false,
-      });
-      useAssets.mockReturnValueOnce({
-        isLoading: false,
-        error: null,
-        data: {
-          pagination: FIXTURE_ASSET_PAGINATION,
-          results: FIXTURE_ASSETS,
-        },
-      });
-
-      renderML();
-
-      expect(screen.queryByText('header.actions.add-assets')).not.toBeInTheDocument();
-    });
-
     it('does not display empty assets action, if there are no assets, no folders and the user is currently filtering', () => {
       useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { filters: 'true' } }, jest.fn()]);
       useAssets.mockReturnValueOnce({
