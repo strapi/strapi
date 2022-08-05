@@ -6,10 +6,15 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { TextInput } from '@strapi/design-system/TextInput';
 import { Select, Option } from '@strapi/design-system/Select';
 import { getTrad } from '../../utils';
+import useDefaultLocales from '../../hooks/useDefaultLocales';
 
 const BaseForm = ({ locale }) => {
   const { formatMessage } = useIntl();
   const { values, handleChange, errors } = useFormikContext();
+  const { defaultLocales, isLoading } = useDefaultLocales();
+
+  const localeDetails =
+    !isLoading && defaultLocales.find(defaultLocale => defaultLocale.code === locale.code);
 
   return (
     <Grid gap={4}>
@@ -19,10 +24,10 @@ const BaseForm = ({ locale }) => {
             id: getTrad('Settings.locales.modal.locales.label'),
             defaultMessage: 'Locales',
           })}
-          value={locale.code}
+          value={localeDetails.code}
           disabled
         >
-          <Option value={locale.code}>{locale.name}</Option>
+          <Option value={localeDetails.code}>{localeDetails.name}</Option>
         </Select>
       </GridItem>
 
