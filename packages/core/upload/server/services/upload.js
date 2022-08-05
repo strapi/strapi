@@ -12,6 +12,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const fse = require('fs-extra');
 const _ = require('lodash');
+const { extension } = require('mime-types');
 const {
   sanitize,
   nameToSlug,
@@ -67,7 +68,7 @@ module.exports = ({ strapi }) => ({
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const fileService = getService('file');
 
-    const ext = path.extname(filename);
+    const ext = extension(type) || path.extname(filename);
     const basename = path.basename(fileInfo.name || filename, ext);
     const usedName = fileInfo.name || filename;
 
