@@ -30,8 +30,10 @@ module.exports = {
             if (err) {
               if (err.message.includes('File size too large')) {
                 reject(new PayloadTooLargeError());
+              } else {
+                reject(new Error(`Error uploading to cloudinary: ${err.message}`));
               }
-              reject(new Error(`Error uploading to cloudinary: ${err.message}`));
+              return;
             }
 
             if (image.resource_type === 'video') {
