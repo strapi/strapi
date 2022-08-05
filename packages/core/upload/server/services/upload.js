@@ -68,7 +68,8 @@ module.exports = ({ strapi }) => ({
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const fileService = getService('file');
 
-    const ext = extension(type) || path.extname(filename);
+    let ext = extension(type) || path.extname(filename);
+    ext = ext.startsWith('.') ? ext : `.${ext}`;
     const basename = path.basename(fileInfo.name || filename, ext);
     const usedName = fileInfo.name || filename;
 
