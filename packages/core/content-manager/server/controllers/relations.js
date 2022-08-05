@@ -1,64 +1,85 @@
 'use strict';
 
-const { prop, pick } = require('lodash/fp');
+const { prop, isEmpty } = require('lodash/fp');
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
 
 const { getService } = require('../utils');
+const { validateFindNew } = require('./validation/relations');
 
 module.exports = {
-  async find(ctx) {
+  async findNew(ctx) {
     const { model, targetField } = ctx.params;
-    const { _component, ...query } = ctx.request.query;
-    const { idsToOmit } = ctx.request.body;
 
-    if (!targetField) {
-      return ctx.badRequest();
-    }
+    await validateFindNew(ctx.request.query);
 
-    const modelDef = _component ? strapi.getModel(_component) : strapi.getModel(model);
+    const { component, entityId, idsToOmit, page = 1, pageSize = 10, q } = ctx.request.query;
 
+    const sourceModel = component || model;
+
+    const modelDef = strapi.getModel(sourceModel);
     if (!modelDef) {
-      return ctx.notFound('model.notFound');
+      return ctx.badRequest("The model doesn't exist");
     }
 
     const attribute = modelDef.attributes[targetField];
     if (!attribute || attribute.type !== 'relation') {
-      return ctx.badRequest('targetField.invalid');
+      return ctx.badRequest("This relational field doesn't exist");
     }
 
-    const target = strapi.getModel(attribute.target);
+    const targetedModel = strapi.getModel(attribute.target);
 
-    if (!target) {
-      return ctx.notFound('target.notFound');
-    }
+    const offset = Math.max(page - 1, 0) * pageSize;
+    const limit = Number(pageSize);
 
-    if (idsToOmit && Array.isArray(idsToOmit)) {
-      query.filters = {
-        $and: [
-          {
-            id: {
-              $notIn: idsToOmit,
-            },
-          },
-        ].concat(query.filters || []),
-      };
-    }
-
-    const entityManager = getService('entity-manager');
-
-    const entities = await entityManager.find(query, target.uid, []);
-
-    if (!entities) {
-      return ctx.notFound();
-    }
-
-    const modelConfig = _component
+    const modelConfig = component
       ? await getService('components').findConfiguration(modelDef)
       : await getService('content-types').findConfiguration(modelDef);
+    const mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
 
-    const field = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
-    const pickFields = [field, 'id', target.primaryKey, PUBLISHED_AT_ATTRIBUTE];
+    const query = strapi.db.queryBuilder(targetedModel.uid);
 
-    ctx.body = entities.map(pick(pickFields));
+    if (q) {
+      query.search(q);
+    }
+
+    if (!isEmpty(idsToOmit)) {
+      query.where({ id: { $notIn: idsToOmit } });
+    }
+
+    if (entityId) {
+      const joinTable = strapi.db.metadata.get(sourceModel).attributes[targetField].joinTable;
+      const sourceColumn = component ? joinTable.joinColumn.name : joinTable.inverseJoinColumn.name;
+      const targetColumn = component ? joinTable.inverseJoinColumn.name : joinTable.joinColumn.name;
+
+      // Select ids of targeted entities already having a relation with _entityId
+      const knexSubQuery = strapi.db
+        .queryBuilder(joinTable.name)
+        .select([targetColumn])
+        .where({ [sourceColumn]: entityId })
+        .getKnexQuery();
+
+      query.where({ id: { $notIn: knexSubQuery } });
+    }
+
+    const { count } = await query
+      .clone()
+      .count()
+      .first()
+      .execute();
+    const entities = await query
+      .select([mainField, 'id', PUBLISHED_AT_ATTRIBUTE])
+      .orderBy(mainField)
+      .offset(offset)
+      .limit(limit)
+      .execute();
+
+    ctx.body = {
+      results: entities,
+      pagination: {
+        page: Number(page),
+        pageSize: Number(pageSize),
+        total: count,
+      },
+    };
   },
 };

@@ -4,35 +4,42 @@ const _ = require('lodash/fp');
 
 const helpers = require('./helpers');
 
-const createQueryBuilder = (uid, db) => {
+const createQueryBuilder = (uid, db, initialState = {}) => {
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
 
-  const state = {
-    type: 'select',
-    select: [],
-    count: null,
-    max: null,
-    first: false,
-    data: null,
-    where: [],
-    joins: [],
-    populate: null,
-    limit: null,
-    offset: null,
-    transaction: null,
-    forUpdate: false,
-    orderBy: [],
-    groupBy: [],
-  };
+  const state = _.defaults(
+    {
+      type: 'select',
+      select: [],
+      count: null,
+      max: null,
+      first: false,
+      data: null,
+      where: [],
+      joins: [],
+      populate: null,
+      limit: null,
+      offset: null,
+      transaction: null,
+      forUpdate: false,
+      orderBy: [],
+      groupBy: [],
+      aliasCounter: 0,
+    },
+    initialState
+  );
 
-  let counter = 0;
-  const getAlias = () => `t${counter++}`;
+  const getAlias = () => `t${state.aliasCounter++}`;
 
   return {
     alias: getAlias(),
     getAlias,
     state,
+
+    clone() {
+      return createQueryBuilder(uid, db, state);
+    },
 
     select(args) {
       state.type = 'select';
