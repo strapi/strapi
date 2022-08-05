@@ -27,7 +27,6 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
-    "@apollo/federation": "^0.28.0",
     "@graphql-tools/schema": "8.1.2",
     "@graphql-tools/utils": "^8.9.0",
     "@strapi/utils": "4.3.2",
