@@ -68,7 +68,6 @@ const forms = {
         }
 
         if (injectedInputs) {
-          // TODO: Discuss how to handle settings from other plugins
           const extendedSettings = {
             sectionTitle: {
               id: getTrad('modalForm.custom-fields.advanced.settings.extended'),
