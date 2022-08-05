@@ -14,7 +14,7 @@ module.exports = {
     cloudinary.config(config);
 
     const upload = (file, customConfig = {}) =>
-      new Promise((resolve) => {
+      new Promise((resolve, reject) => {
         const config = {
           resource_type: 'auto',
           public_id: file.hash,
@@ -29,9 +29,9 @@ module.exports = {
           (err, image) => {
             if (err) {
               if (err.message.includes('File size too large')) {
-                throw new PayloadTooLargeError();
+                reject(new PayloadTooLargeError());
               }
-              throw new Error(`Error uploading to cloudinary: ${err.message}`);
+              reject(new Error(`Error uploading to cloudinary: ${err.message}`));
             }
 
             if (image.resource_type === 'video') {
