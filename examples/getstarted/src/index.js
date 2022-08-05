@@ -16,7 +16,20 @@ module.exports = {
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
    */
-  bootstrap({ strapi }) {},
+  async bootstrap({ strapi }) {
+    const payload = { type: 'custom', permissions: ['read', 'delete'], name: 'My custom token v2' };
+
+    const token = await strapi.admin.services['api-token'].create(payload);
+
+    console.log(JSON.stringify(token, null, 2));
+
+    const updatedToken = await strapi.admin.services['api-token'].update(token.id, {
+      description: 'foobar',
+      permissions: ['read', 'update'],
+    });
+
+    console.log(JSON.stringify(updatedToken, null, 2));
+  },
 
   /**
    * An asynchronous destroy function that runs before

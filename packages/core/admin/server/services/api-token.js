@@ -1,7 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const { omit } = require('lodash/fp');
+const { map, omit, differenceBy } = require('lodash/fp');
 
 /**
  * @typedef {'read-only'|'full-access'|'custom'} TokenType
@@ -88,6 +88,7 @@ const create = async attributes => {
   // Create the token
   const apiToken = await strapi.query('admin::api-token').create({
     select: SELECT_FIELDS,
+    populate: POPULATE_FIELDS,
     data: {
       ...omit('permissions', attributes),
       accessKey: hash(accessKey),
@@ -99,8 +100,8 @@ const create = async attributes => {
   // If this is a custom type token, create and link the associated permissions
   if (attributes.type === 'custom') {
     const permissions = await strapi
-      .query('admin::token-permissions')
-      .createMany({ data: permissions.map(action => ({ action, token: apiToken.id })) });
+      .query('admin::token-permission')
+      .createMany({ data: attributes.permissions.map(action => ({ action, token: apiToken.id })) });
 
     Object.assign(result, { permissions });
   }
@@ -178,14 +179,37 @@ const getByName = async name => {
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const update = async (id, attributes) => {
-  assertCustomTokenPermissionsValidity(attributes);
+  const oldToken = await strapi.query('admin::api-token').findOne({ where: { id } });
 
-  return strapi.query('admin::api-token').update({
+  if (!oldToken) {
+    throw new Error('Token not found');
+  }
+
+  assertCustomTokenPermissionsValidity({ ...attributes, type: attributes.type || oldToken.type });
+
+  const token = await strapi.query('admin::api-token').update({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     where: { id },
     data: omit('permissions', attributes),
   });
+
+  if (token.type === 'custom') {
+    const permissionsToDelete = differenceBy('action', token.permissions, attributes.permissions);
+    const permissionsToCreate = differenceBy('action', attributes.permissions, token.permissions);
+
+    await strapi
+      .query('admin::token-permission')
+      .deleteMany({ where: { action: map('action', permissionsToDelete) } });
+
+    await strapi
+      .query('admin::token-permission')
+      .createMany({ data: permissionsToCreate.map(({ action }) => ({ action, token: id })) });
+  }
+
+  const permissions = await strapi.entityService.load('admin::api-token', token, 'permissions');
+
+  return { ...token, permissions };
 };
 
 /**
