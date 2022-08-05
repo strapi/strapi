@@ -87,13 +87,6 @@ module.exports = ({ strapi }) => ({
   async remove(params) {
     return strapi.query('plugin::users-permissions.user').delete({ where: params });
   },
-  isHashed(password) {
-    if (typeof password !== 'string' || !password) {
-      return false;
-    }
-
-    return password.split('$').length === 4;
-  },
 
   validatePassword(password, hash) {
     return bcrypt.compare(password, hash);

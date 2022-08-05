@@ -15,6 +15,7 @@ const DEFAULT_PERMISSIONS = [
   { action: 'plugin::users-permissions.auth.emailConfirmation', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.sendEmailConfirmation', roleType: 'public' },
   { action: 'plugin::users-permissions.user.me', roleType: 'authenticated' },
+  { action: 'plugin::users-permissions.auth.changePassword', roleType: 'authenticated' },
 ];
 
 const transformRoutePrefixFor = pluginName => route => {
