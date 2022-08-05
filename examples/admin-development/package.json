@@ -24,7 +24,7 @@
     "@babel/plugin-transform-spread": "7.16.7",
     "@babel/preset-env": "7.18.10",
     "@babel/preset-typescript": "7.16.7",
-    "@storybook/addon-actions": "6.4.10",
+    "@storybook/addon-actions": "6.5.10",
     "@storybook/addon-essentials": "6.4.10",
     "@storybook/addon-interactions": "6.4.10",
     "@storybook/addon-links": "6.4.10",
