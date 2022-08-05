@@ -41,6 +41,12 @@ const FIXTURE_DEFAULT_LAYOUT = [
       size: 12,
     },
   ],
+  [
+    {
+      name: 'author',
+      size: 6,
+    },
+  ],
 ];
 
 describe('Content Manager - Update Layout', () => {
@@ -162,6 +168,12 @@ describe('Content Manager - Update Layout', () => {
           size: 12,
         },
       ],
+      [
+        {
+          name: 'author',
+          size: 6,
+        },
+      ],
 
       [
         {
@@ -229,6 +241,10 @@ describe('Content Manager - Update Layout', () => {
       ],
 
       [
+        {
+          name: 'author',
+          size: 6,
+        },
         {
           name: 'date',
           size: 4,
