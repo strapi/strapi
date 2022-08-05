@@ -176,37 +176,47 @@ module.exports = ({ strapi }) => ({
     // Store width and height of the original image
     const { width, height } = await getDimensions(fileData);
 
-    // Make sure this is assigned before calling upload
+    // Make sure this is assigned before calling any upload
     // That way it can mutate the width and height
     _.assign(fileData, {
       width,
       height,
     });
 
-    // Upload image
-    await getService('provider').upload(fileData);
+    // For performance reasons, all uploads are wrapped in a single Promise.all
+    const uploadThumbnail = async thumbnailFile => {
+      await getService('provider').upload(thumbnailFile);
+      _.set(fileData, 'formats.thumbnail', thumbnailFile);
+    };
 
-    // Generate thumbnail and responsive formats
+    const uploadResponsiveFormat = async format => {
+      const { key, file } = format;
+      await getService('provider').upload(file);
+      _.set(fileData, ['formats', key], file);
+    };
+
+    let uploadPromises = [];
+
+    // Upload image
+    uploadPromises.push(getService('provider').upload(fileData));
+
+    // Generate & Upload thumbnail and responsive formats
     if (await isOptimizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
-        await getService('provider').upload(thumbnailFile);
-        _.set(fileData, 'formats.thumbnail', thumbnailFile);
+        uploadPromises.push(uploadThumbnail(thumbnailFile));
       }
 
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
           if (!format) continue;
-
-          const { key, file } = format;
-
-          await getService('provider').upload(file);
-
-          _.set(fileData, ['formats', key], file);
+          uploadPromises.push(uploadResponsiveFormat(format));
         }
       }
     }
+    // Wait for all uploads to finish
+    await Promise.all(uploadPromises);
   },
 
   /**
