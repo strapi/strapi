@@ -47,5 +47,12 @@ module.exports = {
       configurable: false,
       required: true,
     },
+    permissions: {
+      type: 'relation',
+      target: 'admin::token-permission',
+      relation: 'oneToMany',
+      mappedBy: 'token',
+      configurable: false,
+    },
   },
 };

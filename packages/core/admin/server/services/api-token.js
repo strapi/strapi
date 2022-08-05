@@ -1,9 +1,10 @@
 'use strict';
 
 const crypto = require('crypto');
+const { omit } = require('lodash/fp');
 
 /**
- * @typedef {'read-only'|'full-access'} TokenType
+ * @typedef {'read-only'|'full-access'|'custom'} TokenType
  */
 
 /**
@@ -14,10 +15,34 @@ const crypto = require('crypto');
  * @property {string} [description]
  * @property {string} accessKey
  * @property {TokenType} type
+ * @property {(number|ApiTokenPermission)[]} [permissions]
+ */
+
+/**
+ * @typedef ApiTokenPermission
+ *
+ * @property {number|string} id
+ * @property {string} action
+ * @property {ApiToken|number} [token]
  */
 
 /** @constant {Array<string>} */
 const SELECT_FIELDS = ['id', 'name', 'description', 'type', 'createdAt'];
+
+/** @constant {Array<string>} */
+const POPULATE_FIELDS = ['permissions'];
+
+const assertCustomTokenPermissionsValidity = attributes => {
+  // Ensure non-custom tokens doesn't have permissions
+  if (attributes.type !== 'custom' && attributes.permissions) {
+    throw new Error('Non-custom tokens should not references permissions');
+  }
+
+  // Custom type tokens should always have permissions attached to them
+  if (attributes.type === 'custom' && !attributes.permissions) {
+    throw new Error('Missing permissions attributes for custom token');
+  }
+};
 
 /**
  * @param {Object} whereParams
@@ -50,6 +75,7 @@ const hash = accessKey => {
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
+ * @param {string[]} [attributes.permissions]
  * @param {string} [attributes.description]
  *
  * @returns {Promise<ApiToken>}
@@ -57,18 +83,29 @@ const hash = accessKey => {
 const create = async attributes => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
+  assertCustomTokenPermissionsValidity(attributes);
+
+  // Create the token
   const apiToken = await strapi.query('admin::api-token').create({
     select: SELECT_FIELDS,
     data: {
-      ...attributes,
+      ...omit('permissions', attributes),
       accessKey: hash(accessKey),
     },
   });
 
-  return {
-    ...apiToken,
-    accessKey,
-  };
+  const result = { ...apiToken, accessKey };
+
+  // If this is a custom type token, create and link the associated permissions
+  if (attributes.type === 'custom') {
+    const permissions = await strapi
+      .query('admin::token-permissions')
+      .createMany({ data: permissions.map(action => ({ action, token: apiToken.id })) });
+
+    Object.assign(result, { permissions });
+  }
+
+  return result;
 };
 
 /**
@@ -97,6 +134,7 @@ For security reasons, prefer storing the secret in an environment variable and r
 const list = async () => {
   return strapi.query('admin::api-token').findMany({
     select: SELECT_FIELDS,
+    populate: POPULATE_FIELDS,
     orderBy: { name: 'ASC' },
   });
 };
@@ -107,7 +145,9 @@ const list = async () => {
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const revoke = async id => {
-  return strapi.query('admin::api-token').delete({ select: SELECT_FIELDS, where: { id } });
+  return strapi
+    .query('admin::api-token')
+    .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
 };
 
 /**
@@ -138,9 +178,14 @@ const getByName = async name => {
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const update = async (id, attributes) => {
-  return strapi
-    .query('admin::api-token')
-    .update({ where: { id }, data: attributes, select: SELECT_FIELDS });
+  assertCustomTokenPermissionsValidity(attributes);
+
+  return strapi.query('admin::api-token').update({
+    select: SELECT_FIELDS,
+    populate: POPULATE_FIELDS,
+    where: { id },
+    data: omit('permissions', attributes),
+  });
 };
 
 /**
@@ -157,7 +202,9 @@ const getBy = async (whereParams = {}) => {
     return null;
   }
 
-  return strapi.query('admin::api-token').findOne({ select: SELECT_FIELDS, where: whereParams });
+  return strapi
+    .query('admin::api-token')
+    .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
 };
 
 module.exports = {
