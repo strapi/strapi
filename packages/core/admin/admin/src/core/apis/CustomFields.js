@@ -1,23 +1,23 @@
 import invariant from 'invariant';
 
 const ALLOWED_TYPES = [
-  'string',
-  'text',
-  'richtext',
-  'password',
+  'biginteger',
+  'boolean',
+  'date',
+  'datetime',
+  'decimal',
   'email',
   'enumeration',
-  'boolean',
-  'uid',
-  'json',
-  'integer',
-  'biginteger',
   'float',
-  'decimal',
-  'date',
+  'integer',
+  'json',
+  'password',
+  'richtext',
+  'string',
+  'text',
   'time',
-  'datetime',
   'timestamp',
+  'uid',
 ];
 
 class CustomFields {
