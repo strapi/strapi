@@ -3,47 +3,14 @@ import { getRequestUrl, mergeMetasWithSchema } from '../../../utils';
 
 const getRelationModel = (targetModel, models) => models.find(model => model.uid === targetModel);
 
-// editRelations is an array of strings...
-const formatEditRelationsLayoutWithMetas = (contentTypeConfiguration, models) => {
-  const formatted = contentTypeConfiguration.layouts.editRelations.reduce((acc, current) => {
-    const fieldSchema = get(contentTypeConfiguration, ['attributes', current], {});
-    const targetModelUID = get(
-      contentTypeConfiguration,
-      ['attributes', current, 'targetModel'],
-      null
-    );
-    const targetModelSchema = getRelationModel(targetModelUID, models);
-    const targetModelPluginOptions = targetModelSchema.pluginOptions || {};
-    const metadatas = get(contentTypeConfiguration, ['metadatas', current, 'edit'], {});
-    const size = 6;
-
-    const queryInfos = generateRelationQueryInfos(contentTypeConfiguration, current, models);
-
-    acc.push({
-      name: current,
-      size,
-      fieldSchema,
-      metadatas,
-      queryInfos,
-      targetModelPluginOptions,
-    });
-
-    return acc;
-  }, []);
-
-  return formatted;
-};
-
 const formatLayouts = (initialData, models) => {
   const data = createMetasSchema(initialData, models);
 
   const formattedCTEditLayout = formatLayoutWithMetas(data.contentType, null, models);
   const ctUid = data.contentType.uid;
-  const formattedEditRelationsLayout = formatEditRelationsLayoutWithMetas(data.contentType, models);
   const formattedListLayout = formatListLayoutWithMetas(data.contentType, data.components);
 
   set(data, ['contentType', 'layouts', 'edit'], formattedCTEditLayout);
-  set(data, ['contentType', 'layouts', 'editRelations'], formattedEditRelationsLayout);
   set(data, ['contentType', 'layouts', 'list'], formattedListLayout);
 
   Object.keys(data.components).forEach(compoUID => {
@@ -246,7 +213,6 @@ const getDisplayedModels = models =>
 
 export default formatLayouts;
 export {
-  formatEditRelationsLayoutWithMetas,
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
   generateRelationQueryInfos,
