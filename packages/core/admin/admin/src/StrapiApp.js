@@ -226,8 +226,12 @@ class StrapiApp {
       this.configurations.head.favicon = this.customConfigurations.head.favicon;
     }
 
-    if (this.customConfigurations?.theme) {
-      merge(this.configurations.themes.light, this.customConfigurations.theme);
+    if (this.customConfigurations?.theme?.light) {
+      merge(this.configurations.themes.light, this.customConfigurations.theme.light);
+    }
+
+    if (this.customConfigurations?.theme?.dark) {
+      merge(this.configurations.themes.dark, this.customConfigurations.theme.dark);
     }
 
     if (this.customConfigurations?.notifications?.releases !== undefined) {
