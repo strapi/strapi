@@ -72,7 +72,10 @@ module.exports = [
     path: '/webhooks/:id/trigger',
     handler: 'webhooks.triggerWebhook',
     config: {
-      policies: [],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.trigger'] } },
+      ],
     },
   },
 ];
