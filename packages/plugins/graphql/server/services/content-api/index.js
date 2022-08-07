@@ -105,10 +105,11 @@ module.exports = ({ strapi }) => {
     });
 
     // Nexus schema built with user-defined & shadow CRUD auto generated Nexus types
-    // Apply user-defined plugins to make them available in user-defined type extensions.
+    // WIP: apply "globally" flagged plugins in order to allow nexus plugins providing extensions
+    // to the Nexus builder function to be available in user-defined Strapi GraphQL extensions
     const nexusSchema = makeSchema({
       types: [registry.definitions, types],
-      plugins,
+      plugins: plugins.filter(plugin => plugin.__STRAPI_GLOBAL_NEXUS_PLUGIN__ === true),
     });
 
     // Merge type definitions with the Nexus schema
