@@ -141,12 +141,12 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test('Creates a custom api token (successfully)', async () => {
+  test.skip('Fails to create a read-only api token with permissions', async () => {
     const body = {
-      name: 'api-token_tests-custom',
+      name: 'api-token_tests-readonly',
       description: 'api-token_tests-description',
-      type: 'custom',
-      permissions: ['admin::subject.action', 'plugin::foo.bar.action'],
+      type: 'read-only',
+      permissions: ['admin::thing.action'],
     };
 
     const res = await rq({
@@ -155,11 +155,11 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       body,
     });
 
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(400); // TODO: should be a 400
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
-      permissions: body.permissions,
+      permissions: [],
       description: body.description,
       type: body.type,
       id: expect.any(Number),
@@ -191,6 +191,40 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       id: expect.any(Number),
       createdAt: expect.any(String),
     });
+  });
+
+  test.skip('Fails to create a custom api token without permissions', async () => {
+    const body = {
+      name: 'api-token_tests-custom',
+      description: 'api-token_tests-description',
+      type: 'custom',
+      permissions: [],
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(400);
+    // expect(res.body).toMatchObject({
+    //   data: null,
+    //   error: {
+    //     status: 400,
+    //     name: 'ValidationError',
+    //     message: 'type must be one of the following values: read-only, full-access, custom',
+    //     details: {
+    //       errors: [
+    //         {
+    //           path: ['type'],
+    //           name: 'ValidationError',
+    //           message: 'type must be one of the following values: read-only, full-access, custom',
+    //         },
+    //       ],
+    //     },
+    //   },
+    // });
   });
 
   test('Creates an api token without a description (successfully)', async () => {
