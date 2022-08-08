@@ -20,7 +20,7 @@ const AttributeFilter = ({ contentType, slug, metadatas }) => {
 
     return {
       name,
-      metadatas: { label: formatMessage({ id: label }) },
+      metadatas: { label: formatMessage({ id: label, defaultMessage: label }) },
       fieldSchema: { type, options, mainField },
       trackedEvent,
     };
