@@ -173,17 +173,19 @@ const DataManagerProvider = ({
     });
   };
 
-  const addCustomFieldAttribute = (
-    attributeToSet,
-    forTarget,
-    targetUid,
-    isEditing = false,
-    initialAttribute
-  ) => {
-    const actionType = isEditing ? EDIT_CUSTOM_FIELD_ATTRIBUTE : ADD_CUSTOM_FIELD_ATTRIBUTE;
-
+  const addCustomFieldAttribute = ({ attributeToSet, forTarget, targetUid, initialAttribute }) => {
     dispatch({
-      type: actionType,
+      type: ADD_CUSTOM_FIELD_ATTRIBUTE,
+      attributeToSet,
+      forTarget,
+      targetUid,
+      initialAttribute,
+    });
+  };
+
+  const editCustomFieldAttribute = ({ attributeToSet, forTarget, targetUid, initialAttribute }) => {
+    dispatch({
+      type: EDIT_CUSTOM_FIELD_ATTRIBUTE,
       attributeToSet,
       forTarget,
       targetUid,
@@ -561,6 +563,7 @@ const DataManagerProvider = ({
       value={{
         addAttribute,
         addCustomFieldAttribute,
+        editCustomFieldAttribute,
         addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(components, ['category']),
         allIcons,
