@@ -266,7 +266,7 @@ describe('<EditAssetDialog />', () => {
       const file = new File(['Replacement media'], 'test.png', { type: 'image/png' });
 
       const fileList = [file];
-      fileList.item = i => fileList[i];
+      fileList.item = (i) => fileList[i];
 
       renderCompo({
         canUpdate: true,

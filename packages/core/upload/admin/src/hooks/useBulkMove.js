@@ -27,7 +27,7 @@ export const useBulkMove = () => {
   };
 
   const mutation = useMutation(bulkMoveQuery, {
-    onSuccess: res => {
+    onSuccess(res) {
       const {
         data: { data },
       } = res;

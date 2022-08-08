@@ -5,7 +5,7 @@
  * with basic info, dependencies, etc.
  */
 
-module.exports = opts => {
+module.exports = (opts) => {
   const {
     strapiDependencies,
     additionalsDependencies,

@@ -2,7 +2,7 @@
 
 const { createJwtToken, getTokenOptions, decodeJwtToken, createToken } = require('../token');
 
-const delay = time => new Promise(resolve => setTimeout(resolve, time));
+const delay = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
 describe('Token', () => {
   describe('token options', () => {

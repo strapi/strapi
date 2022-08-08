@@ -119,7 +119,7 @@ const getGlobalId = (model, modelName, prefix) => {
   return model.globalId || _.upperFirst(_.camelCase(globalId));
 };
 
-const pickSchema = model => {
+const pickSchema = (model) => {
   const schema = _.cloneDeep(
     _.pick(model, [
       'connection',

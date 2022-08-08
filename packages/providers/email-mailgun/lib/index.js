@@ -5,15 +5,15 @@ const Mailgun = require('mailgun.js');
 const { removeUndefined } = require('@strapi/utils');
 
 const optionsMap = {
-  apiKey: { field: 'key', fn: value => value },
-  host: { field: 'url', fn: value => `https://${value || 'api.mailgun.net'}` },
+  apiKey: { field: 'key', fn: (value) => value },
+  host: { field: 'url', fn: (value) => `https://${value || 'api.mailgun.net'}` },
 };
 
 module.exports = {
   convertProviderOptions(providerOptions = {}) {
     const newOptions = {};
     if (typeof providerOptions === 'object') {
-      Object.keys(providerOptions).forEach(key => {
+      Object.keys(providerOptions).forEach((key) => {
         if (Object.keys(optionsMap).includes(key)) {
           newOptions[optionsMap[key].field] = optionsMap[key].fn(providerOptions[key]);
         } else {

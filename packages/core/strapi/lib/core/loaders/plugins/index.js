@@ -25,7 +25,7 @@ const defaultPlugin = {
   contentTypes: {},
 };
 
-const applyUserExtension = async plugins => {
+const applyUserExtension = async (plugins) => {
   const extensionsDir = strapi.dirs.dist.extensions;
   if (!(await fse.pathExists(extensionsDir))) {
     return;
@@ -54,7 +54,7 @@ const applyUserExtension = async plugins => {
   }
 };
 
-const applyUserConfig = async plugins => {
+const applyUserConfig = async (plugins) => {
   const userPluginsConfig = await getUserPluginsConfig();
 
   for (const pluginName in plugins) {
@@ -75,7 +75,7 @@ const applyUserConfig = async plugins => {
   }
 };
 
-const loadPlugins = async strapi => {
+const loadPlugins = async (strapi) => {
   const plugins = {};
 
   const enabledPlugins = await getEnabledPlugins(strapi);

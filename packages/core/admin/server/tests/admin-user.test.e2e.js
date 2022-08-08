@@ -136,7 +136,7 @@ describe('Admin User CRUD (e2e)', () => {
   });
 
   test('3. Creates users with superAdmin role (success)', async () => {
-    const getBody = index => {
+    const getBody = (index) => {
       return {
         email: `user-tests${index}@strapi-e2e.com`,
         firstname: 'user_tests-firstname',
@@ -283,7 +283,7 @@ describe('Admin User CRUD (e2e)', () => {
       url: `/admin/users/batch-delete`,
       method: 'POST',
       body: {
-        ids: users.map(u => u.id),
+        ids: users.map((u) => u.id),
       },
     });
 

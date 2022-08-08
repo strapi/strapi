@@ -23,7 +23,7 @@ const {
  * @param {Strapi} strapi
  * @returns {object}
  */
-const getAllStrapiSchemas = strapi => ({ ...strapi.contentTypes, ...strapi.components });
+const getAllStrapiSchemas = (strapi) => ({ ...strapi.contentTypes, ...strapi.components });
 
 /**
  * Extract a valid interface name from a schema uid
@@ -33,19 +33,7 @@ const getAllStrapiSchemas = strapi => ({ ...strapi.contentTypes, ...strapi.compo
  */
 const getSchemaInterfaceName = pipe(replace(/(:.)/, ' '), camelCase, upperFirst);
 
-/**
- * Get the parent type name to extend based on the schema's nature
- *
- * @param {object} schema
- * @returns {string}
- */
-const getSchemaExtendsTypeName = schema => {
-  const base = getSchemaModelType(schema);
-
-  return `${upperFirst(base)}Schema`;
-};
-
-const getSchemaModelType = schema => {
+const getSchemaModelType = (schema) => {
   const { modelType, kind } = schema;
 
   // Components
@@ -59,6 +47,18 @@ const getSchemaModelType = schema => {
   }
 
   return null;
+};
+
+/**
+ * Get the parent type name to extend based on the schema's nature
+ *
+ * @param {object} schema
+ * @returns {string}
+ */
+const getSchemaExtendsTypeName = (schema) => {
+  const base = getSchemaModelType(schema);
+
+  return `${upperFirst(base)}Schema`;
 };
 
 /**
@@ -77,7 +77,7 @@ const getTypeNode = (typeName, params = []) => {
  * @param data
  * @returns {ts.TypeNode}
  */
-const toTypeLiteral = data => {
+const toTypeLiteral = (data) => {
   if (isUndefined(data)) {
     return factory.createLiteralTypeNode(ts.SyntaxKind.UndefinedKeyword);
   }
@@ -99,7 +99,7 @@ const toTypeLiteral = data => {
   }
 
   if (isArray(data)) {
-    return factory.createTupleTypeNode(data.map(item => toTypeLiteral(item)));
+    return factory.createTupleTypeNode(data.map((item) => toTypeLiteral(item)));
   }
 
   if (isDate(data)) {
@@ -139,7 +139,7 @@ const toTypeLiteral = data => {
  * @param {ts.TypeNode} definition
  * @returns {number | null}
  */
-const getDefinitionAttributesCount = definition => {
+const getDefinitionAttributesCount = (definition) => {
   const attributesNode = definition.members.find(propEq('name.escapedText', 'attributes'));
 
   if (!attributesNode) {

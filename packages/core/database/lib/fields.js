@@ -97,11 +97,11 @@ class BigIntegerField extends NumberField {
   }
 }
 
-const timeRegex = new RegExp('^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$');
+const timeRegex = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$/;
 const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
 const partialDateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])/g;
 
-const parseTime = value => {
+const parseTime = (value) => {
   if (dateFns.isDate(value)) return dateFns.format(value, 'HH:mm:ss.SSS');
 
   if (typeof value !== 'string') {
@@ -119,7 +119,7 @@ const parseTime = value => {
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };
 
-const parseDate = value => {
+const parseDate = (value) => {
   const found = _.isString(value) ? value.match(partialDateRegex) || [] : [];
   const extractedValue = found[0];
 
@@ -139,7 +139,7 @@ const parseDate = value => {
   return extractedValue;
 };
 
-const parseDateTimeOrTimestamp = value => {
+const parseDateTimeOrTimestamp = (value) => {
   if (dateFns.isDate(value)) return value;
   try {
     const date = dateFns.parseISO(value);
@@ -216,7 +216,7 @@ const typeToFieldMap = {
   boolean: BooleanField,
 };
 
-const createField = attribute => {
+const createField = (attribute) => {
   const { type } = attribute;
 
   if (_.has(type, typeToFieldMap)) {

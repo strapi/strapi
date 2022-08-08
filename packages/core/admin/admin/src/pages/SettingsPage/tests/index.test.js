@@ -24,7 +24,13 @@ jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
 }));
-jest.mock('../pages/ApplicationInfosPage', () => () => <h1>App infos</h1>);
+jest.mock(
+  '../pages/ApplicationInfosPage',
+  () =>
+    function () {
+      return <h1>App infos</h1>;
+    }
+);
 
 const makeApp = (history, settings) => (
   <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>

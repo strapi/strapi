@@ -75,7 +75,7 @@ const client = new QueryClient({
   },
 });
 
-const ComponentFixture = props => {
+const ComponentFixture = (props) => {
   return (
     <QueryClientProvider client={client}>
       <ThemeProvider theme={lightTheme}>
@@ -110,7 +110,7 @@ const ComponentFixture = props => {
   );
 };
 
-const setup = props => render(<ComponentFixture {...props} />);
+const setup = (props) => render(<ComponentFixture {...props} />);
 describe('BrowseStep', () => {
   afterEach(() => {
     jest.clearAllMocks();

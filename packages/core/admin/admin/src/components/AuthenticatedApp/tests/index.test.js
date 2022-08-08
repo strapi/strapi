@@ -35,9 +35,21 @@ jest.mock('../utils/api', () => ({
   fetchUserRoles: jest.fn(),
 }));
 
-jest.mock('../../PluginsInitializer', () => () => <div>PluginsInitializer</div>);
+jest.mock(
+  '../../PluginsInitializer',
+  () =>
+    function () {
+      return <div>PluginsInitializer</div>;
+    }
+);
 // eslint-disable-next-line react/prop-types
-jest.mock('../../RBACProvider', () => ({ children }) => <div>{children}</div>);
+jest.mock(
+  '../../RBACProvider',
+  () =>
+    function ({ children }) {
+      return <div>{children}</div>;
+    }
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {

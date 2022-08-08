@@ -50,8 +50,5 @@ module.exports = async ({ strapi }) => {
     pluginStore.set({ key: 'config', value: { restrictedAccess: false } });
   }
 
-  await strapi
-    .plugin('documentation')
-    .service('documentation')
-    .generateFullDoc();
+  await strapi.plugin('documentation').service('documentation').generateFullDoc();
 };

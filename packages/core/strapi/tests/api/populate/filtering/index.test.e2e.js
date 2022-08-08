@@ -126,14 +126,14 @@ const fixtures = {
       ],
     },
   ],
-  c: fixtures => [
+  c: (fixtures) => [
     {
       first: 'hello',
       second: {
         number: 16,
         field: 'a simple string',
       },
-      third: fixtures.a.map(entity => entity.id).slice(0, 1),
+      third: fixtures.a.map((entity) => entity.id).slice(0, 1),
     },
     {
       first: 'world',
@@ -141,7 +141,7 @@ const fixtures = {
         number: 14,
         field: 'a simple string',
       },
-      third: fixtures.a.map(entity => entity.id).slice(0, 2),
+      third: fixtures.a.map((entity) => entity.id).slice(0, 2),
     },
   ],
 };
@@ -174,7 +174,7 @@ describe('Populate filters', () => {
       expect(status).toBe(200);
       expect(body.data).toHaveLength(fixtures.a.length);
 
-      body.data.forEach(entity => {
+      body.data.forEach((entity) => {
         expect(entity).not.toHaveProperty('fooRef');
         expect(entity).not.toHaveProperty('barRefs');
       });
@@ -190,7 +190,7 @@ describe('Populate filters', () => {
       expect(status).toBe(200);
       expect(body.data).toHaveLength(fixtures.a.length);
 
-      body.data.forEach(entity => {
+      body.data.forEach((entity) => {
         expect(entity.attributes).toHaveProperty('fooRef');
         expect(entity.attributes).not.toHaveProperty('barRefs');
       });
@@ -206,7 +206,7 @@ describe('Populate filters', () => {
       expect(status).toBe(200);
       expect(body.data).toHaveLength(fixtures.a.length);
 
-      body.data.forEach(entity => {
+      body.data.forEach((entity) => {
         expect(entity.attributes).toHaveProperty('fooRef');
         expect(entity.attributes).toHaveProperty('barRefs');
       });
@@ -221,13 +221,13 @@ describe('Populate filters', () => {
       expect(status).toBe(200);
       expect(body.data).toHaveLength(2);
 
-      body.data.forEach(entity => {
+      body.data.forEach((entity) => {
         expect(entity.attributes).toHaveProperty('second');
         expect(entity.attributes).toHaveProperty('third');
 
         expect(Array.isArray(entity.attributes.third.data)).toBe(true);
 
-        entity.attributes.third.data.forEach(thirdItem => {
+        entity.attributes.third.data.forEach((thirdItem) => {
           const expected = data.a.find(propEq('id', thirdItem.id));
 
           expect(thirdItem.attributes).toMatchObject(omit('id', expected));

@@ -33,7 +33,7 @@ module.exports = ({ strapi }) => {
 
       const targetContentType = strapi.getModel(targetUID);
 
-      return async (parent, args = {}, context) => {
+      return async (parent, args = {}, context = {}) => {
         const { auth } = context.state;
 
         const transformedArgs = transformArgs(args, {
@@ -58,8 +58,8 @@ module.exports = ({ strapi }) => {
         // so that the sanitize util can work properly.
         if (isMorphAttribute) {
           // Helpers used for the data cleanup
-          const wrapData = dataToWrap => ({ [attributeName]: dataToWrap });
-          const sanitizeData = dataToSanitize => {
+          const wrapData = (dataToWrap) => ({ [attributeName]: dataToWrap });
+          const sanitizeData = (dataToSanitize) => {
             return sanitize.contentAPI.output(dataToSanitize, contentType, { auth });
           };
           const unwrapData = get(attributeName);

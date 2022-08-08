@@ -53,7 +53,7 @@ describe('Roles API', () => {
       expect.arrayContaining([expect.objectContaining(internals.role)])
     );
 
-    data.role = res.body.roles.find(r => r.name === internals.role.name);
+    data.role = res.body.roles.find((r) => r.name === internals.role.name);
   });
 
   test('Delete Role', async () => {

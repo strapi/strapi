@@ -8,7 +8,7 @@ const modelsUtils = require('../../../../test/helpers/models');
 
 const form = require('../../../../test/helpers/generators');
 
-const cleanDate = entry => {
+const cleanDate = (entry) => {
   delete entry.updatedAt;
   delete entry.createdAt;
 };
@@ -173,7 +173,7 @@ describe('Create Strapi API End to End', () => {
     test('Update article1 add tag1 and tag3', async () => {
       const { id, attributes } = data.articles[0];
       const entry = { ...attributes };
-      entry.tags = data.tags.map(t => t.id);
+      entry.tags = data.tags.map((t) => t.id);
 
       cleanDate(entry);
 
@@ -201,7 +201,7 @@ describe('Create Strapi API End to End', () => {
       const { id, attributes } = data.articles[0];
 
       const entry = { ...attributes };
-      entry.tags = entry.tags.data.slice(1).map(t => t.id);
+      entry.tags = entry.tags.data.slice(1).map((t) => t.id);
 
       cleanDate(entry);
 
@@ -413,7 +413,7 @@ describe('Create Strapi API End to End', () => {
 
       const entry = { ...attributes };
       entry.articles = data.categories[0].attributes.articles.data
-        .map(a => a.id)
+        .map((a) => a.id)
         .concat(data.articles[0].id);
 
       cleanDate(entry);

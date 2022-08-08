@@ -175,7 +175,7 @@ describe('Permission Domain', () => {
 
       const newPermissions = domain.toPermission(permissions);
 
-      newPermissions.forEach(p => expect(p).not.toHaveProperty('foo'));
+      newPermissions.forEach((p) => expect(p).not.toHaveProperty('foo'));
     });
   });
 
@@ -209,7 +209,7 @@ describe('Permission Domain', () => {
 
       const getFooProperty = domain.getProperty('foo');
 
-      permissions.forEach(permission => {
+      permissions.forEach((permission) => {
         const fooProperty = getFooProperty(permission);
 
         expect(fooProperty).toBe(permission.properties.foo);
@@ -227,7 +227,7 @@ describe('Permission Domain', () => {
 
   describe('sanitizeConditions', () => {
     const conditions = ['foo', 'bar'];
-    const conditionProvider = { has: condition => conditions.includes(condition) };
+    const conditionProvider = { has: (condition) => conditions.includes(condition) };
 
     test(`No conditions should be removed if they're valid`, () => {
       const permission = { conditions: ['foo', 'bar'] };

@@ -26,7 +26,7 @@ function printSimpleValue(val, quoteStrings = false) {
   if (typeOf === 'symbol') return symbolToString.call(val).replace(SYMBOL_REGEXP, 'Symbol($1)');
 
   const tag = toString.call(val).slice(8, -1);
-  if (tag === 'Date') return isNaN(val.getTime()) ? `${val}` : val.toISOString(val);
+  if (tag === 'Date') return Number.isNaN(val.getTime()) ? `${val}` : val.toISOString(val);
   if (tag === 'Error' || val instanceof Error) return `[${errorToString.call(val)}]`;
   if (tag === 'RegExp') return regExpToString.call(val);
 
@@ -39,7 +39,7 @@ function printValue(value, quoteStrings) {
 
   return JSON.stringify(
     value,
-    function(key, value) {
+    function replacer(key, value) {
       const result = printSimpleValue(this[key], quoteStrings);
       if (result !== null) return result;
       return value;

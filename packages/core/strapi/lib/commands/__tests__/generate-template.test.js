@@ -31,7 +31,7 @@ describe('generate:template command', () => {
     expect(fse.ensureDir).toHaveBeenCalledWith(templatePath);
   });
 
-  it.each(['src', 'data'])('copies folder %s', async item => {
+  it.each(['src', 'data'])('copies folder %s', async (item) => {
     // Mock the empty directory arg
     fse.pathExists.mockReturnValueOnce(false);
     // Mock the folder exists
@@ -102,7 +102,7 @@ describe('generate:template command', () => {
       const rootPath = resolve(directory);
       const templatePath = join(rootPath, 'template');
 
-      await exportTemplate(directory).catch(err => {
+      await exportTemplate(directory).catch((err) => {
         expect(err).toEqual(new Error('exit'));
       });
 

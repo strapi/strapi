@@ -29,7 +29,7 @@ describe('Condition Provider', () => {
 
     expect(conditionProvider).toHaveProperty('hooks', expect.any(Object));
 
-    providerMethods.forEach(methodName =>
+    providerMethods.forEach((methodName) =>
       expect(conditionProvider).toHaveProperty(methodName, expect.any(Function))
     );
   });

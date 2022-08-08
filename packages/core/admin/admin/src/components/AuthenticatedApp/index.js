@@ -56,9 +56,10 @@ const AuthenticatedApp = () => {
     },
   ]);
 
-  const shouldUpdateStrapi = useMemo(() => checkLatestStrapiVersion(strapiVersion, tag_name), [
-    tag_name,
-  ]);
+  const shouldUpdateStrapi = useMemo(
+    () => checkLatestStrapiVersion(strapiVersion, tag_name),
+    [tag_name]
+  );
 
   useEffect(() => {
     if (userRoles) {

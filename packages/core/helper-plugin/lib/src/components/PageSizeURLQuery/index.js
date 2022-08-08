@@ -19,7 +19,7 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
   const [{ query }, setQuery] = useQueryParams();
   const { trackUsage } = useTracking();
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     if (trackedEvent) {
       trackUsage(trackedEvent);
     }

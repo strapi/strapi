@@ -64,7 +64,7 @@ const bedFixtures = [
     sku: 'sleepybed_0152',
     savEmail: 'sav@bed.fr',
     type: 'foam',
-    serialNumber: 9999999999999999,
+    serialNumber: '9999999999999999',
     peopleNumber: 6,
     fabricThickness: 1.14157,
   },
@@ -120,10 +120,7 @@ const bedFixtures = [
 
 describe('Search query', () => {
   beforeAll(async () => {
-    await builder
-      .addContentType(bedModel)
-      .addFixtures(bedModel.singularName, bedFixtures)
-      .build();
+    await builder.addContentType(bedModel).addFixtures(bedModel.singularName, bedFixtures).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -151,7 +148,7 @@ describe('Search query', () => {
       expect(res.body.results[0]).toMatchObject(data.beds[2]);
     });
 
-    test.each(Object.keys(bedFixtures[0]))('search that target column %p', async columnName => {
+    test.each(Object.keys(bedFixtures[0]))('search that target column %p', async (columnName) => {
       const res = await rq({
         method: 'GET',
         url: '/content-manager/collection-types/api::bed.bed',

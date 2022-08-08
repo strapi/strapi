@@ -11,7 +11,7 @@ const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 const getLocalesProperty = getOr([], 'properties.locales');
 const getFieldsProperty = prop('properties.fields');
 
-const getFirstLevelPath = map(path => path.split('.')[0]);
+const getFirstLevelPath = map((path) => path.split('.')[0]);
 
 module.exports = {
   async getNonLocalizedAttributes(ctx) {
@@ -55,7 +55,7 @@ module.exports = {
     });
 
     const localePermissions = permissions
-      .filter(perm => getLocalesProperty(perm).includes(locale))
+      .filter((perm) => getLocalesProperty(perm).includes(locale))
       .map(getFieldsProperty);
 
     const permittedFields = pipe(flatten, getFirstLevelPath, uniq)(localePermissions);

@@ -13,7 +13,7 @@ const tmpWorkingDirectory = path.join(__dirname, './tmp');
 function mockUploadProvider(uploadFunc, props) {
   const { responsiveDimensions = false } = props || {};
 
-  const default_config = {
+  const defaultConfig = {
     plugin: {
       upload: {
         breakpoints: {
@@ -26,7 +26,7 @@ function mockUploadProvider(uploadFunc, props) {
 
   global.strapi = {
     config: {
-      get: (path, defaultValue) => _.get(default_config, path, defaultValue),
+      get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
     },
     plugins: {
       upload: {
@@ -44,7 +44,7 @@ function mockUploadProvider(uploadFunc, props) {
   };
 }
 
-const getFileData = filePath => ({
+const getFileData = (filePath) => ({
   alternativeText: 'image.png',
   caption: 'image.png',
   ext: '.png',

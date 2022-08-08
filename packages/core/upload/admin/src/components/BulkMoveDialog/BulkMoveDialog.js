@@ -106,7 +106,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
 
                     <SelectTree
                       options={folderStructure}
-                      onChange={value => {
+                      onChange={(value) => {
                         setFieldValue('destination', value);
                       }}
                       defaultValue={values.destination}

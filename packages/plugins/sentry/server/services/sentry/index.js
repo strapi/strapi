@@ -4,7 +4,7 @@
 /* eslint-disable import/extensions */
 const Sentry = require('@sentry/node');
 
-const createSentryService = strapi => {
+const createSentryService = (strapi) => {
   let isReady = false;
   let instance = null;
   let settings = {};
@@ -70,7 +70,7 @@ const createSentryService = strapi => {
         return;
       }
 
-      instance.withScope(scope => {
+      instance.withScope((scope) => {
         // Configure the Sentry scope using the provided callback
         if (configureScope && settings.sendMetadata) {
           configureScope(scope, instance);

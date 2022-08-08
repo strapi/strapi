@@ -1,12 +1,12 @@
 const getSelectStyles = (theme, error) => {
   return {
-    clearIndicator: base => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
-    container: base => ({
+    clearIndicator: (base) => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
+    container: (base) => ({
       ...base,
       background: theme.colors.neutral0,
       lineHeight: 'normal',
     }),
-    control: (base, state) => {
+    control(base, state) {
       let border = `1px solid ${theme.colors.neutral200} !important`;
       let boxShadow = 0;
       let backgroundColor;
@@ -38,9 +38,9 @@ const getSelectStyles = (theme, error) => {
         boxShadow,
       };
     },
-    indicatorContainer: base => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
-    input: base => ({ ...base, margin: 0, padding: 0, color: theme.colors.neutral800 }),
-    menu: base => {
+    indicatorContainer: (base) => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
+    input: (base) => ({ ...base, margin: 0, padding: 0, color: theme.colors.neutral800 }),
+    menu(base) {
       return {
         ...base,
         width: '100%',
@@ -56,18 +56,18 @@ const getSelectStyles = (theme, error) => {
         zIndex: 2,
       };
     },
-    menuList: base => ({
+    menuList: (base) => ({
       ...base,
       paddingLeft: theme.spaces[1],
       paddingTop: theme.spaces[1],
       paddingRight: theme.spaces[1],
       paddingBottom: theme.spaces[1],
     }),
-    menuPortal: base => ({
+    menuPortal: (base) => ({
       ...base,
       zIndex: 100,
     }),
-    option: (base, state) => {
+    option(base, state) {
       let backgroundColor = base.backgroundColor;
 
       if (state.isFocused || state.isSelected) {
@@ -84,8 +84,8 @@ const getSelectStyles = (theme, error) => {
         },
       };
     },
-    placeholder: base => ({ ...base, marginLeft: 0 }),
-    singleValue: (base, state) => {
+    placeholder: (base) => ({ ...base, marginLeft: 0 }),
+    singleValue(base, state) {
       let color = theme.colors.neutral800;
 
       if (state.isDisabled) {
@@ -94,7 +94,7 @@ const getSelectStyles = (theme, error) => {
 
       return { ...base, marginLeft: 0, color };
     },
-    valueContainer: base => ({
+    valueContainer: (base) => ({
       ...base,
       padding: 0,
       paddingLeft: theme.spaces[4],

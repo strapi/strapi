@@ -4,7 +4,7 @@ const tsUtils = require('@strapi/typescript-utils');
 
 const strapi = require('../../index');
 
-module.exports = async function({ outDir, file, verbose, silent }) {
+module.exports = async function ({ outDir, file, verbose, silent }) {
   if (verbose && silent) {
     console.error('You cannot enable verbose and silent flags at the same time, exiting...');
     process.exit(1);

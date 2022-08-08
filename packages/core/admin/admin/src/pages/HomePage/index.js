@@ -39,14 +39,14 @@ const HomePage = () => {
     !isGuidedTourCompleted(guidedTourState) && isGuidedTourVisible && !isSkipped;
 
   const { push } = useHistory();
-  const handleClick = e => {
+  const handleClick = (e) => {
     e.preventDefault();
 
     push('/plugins/content-type-builder/content-types/create-content-type');
   };
 
   const hasAlreadyCreatedContentTypes = useMemo(() => {
-    const filterContentTypes = contentTypes => contentTypes.filter(c => c.isDisplayed);
+    const filterContentTypes = (contentTypes) => contentTypes.filter((c) => c.isDisplayed);
 
     return (
       filterContentTypes(collectionTypes).length > 1 || filterContentTypes(singleTypes).length > 0
@@ -60,7 +60,7 @@ const HomePage = () => {
   return (
     <Layout>
       <FormattedMessage id="HomePage.helmet.title" defaultMessage="Homepage">
-        {title => <Helmet title={title[0]} />}
+        {(title) => <Helmet title={title[0]} />}
       </FormattedMessage>
       <Main>
         <LogoContainer>

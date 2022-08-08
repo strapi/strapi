@@ -6,15 +6,15 @@ const { getService } = require('../utils');
 
 const { getCoreStore } = require('../utils');
 
-const find = params => strapi.query('plugin::i18n.locale').findMany({ where: params });
+const find = (params) => strapi.query('plugin::i18n.locale').findMany({ where: params });
 
-const findById = id => strapi.query('plugin::i18n.locale').findOne({ where: { id } });
+const findById = (id) => strapi.query('plugin::i18n.locale').findOne({ where: { id } });
 
-const findByCode = code => strapi.query('plugin::i18n.locale').findOne({ where: { code } });
+const findByCode = (code) => strapi.query('plugin::i18n.locale').findOne({ where: { code } });
 
-const count = params => strapi.query('plugin::i18n.locale').count({ where: params });
+const count = (params) => strapi.query('plugin::i18n.locale').count({ where: params });
 
-const create = async locale => {
+const create = async (locale) => {
   const result = await strapi.query('plugin::i18n.locale').create({ data: locale });
 
   getService('metrics').sendDidUpdateI18nLocalesEvent();
@@ -49,7 +49,7 @@ const setDefaultLocale = ({ code }) => getCoreStore().set({ key: 'default_locale
 
 const getDefaultLocale = () => getCoreStore().get({ key: 'default_locale' });
 
-const setIsDefault = async locales => {
+const setIsDefault = async (locales) => {
   if (isNil(locales)) {
     return locales;
   }
@@ -57,7 +57,7 @@ const setIsDefault = async locales => {
   const actualDefault = await getDefaultLocale();
 
   if (Array.isArray(locales)) {
-    return locales.map(locale => ({ ...locale, isDefault: actualDefault === locale.code }));
+    return locales.map((locale) => ({ ...locale, isDefault: actualDefault === locale.code }));
   }
   // single locale
   return { ...locales, isDefault: actualDefault === locales.code };

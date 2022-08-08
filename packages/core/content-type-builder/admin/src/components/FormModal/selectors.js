@@ -5,7 +5,7 @@ import { initialState } from './reducer';
 /**
  * Direct selector to the formModal state domain
  */
-const formModalDomain = () => state => state[`${pluginId}_formModal`] || initialState;
+const formModalDomain = () => (state) => state[`${pluginId}_formModal`] || initialState;
 
 /**
  * Other specific selectors
@@ -16,7 +16,7 @@ const formModalDomain = () => state => state[`${pluginId}_formModal`] || initial
  */
 
 const makeSelectFormModal = () =>
-  createSelector(formModalDomain(), substate => {
+  createSelector(formModalDomain(), (substate) => {
     return substate;
   });
 

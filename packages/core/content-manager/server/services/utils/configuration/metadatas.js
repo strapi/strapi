@@ -132,7 +132,7 @@ async function syncMetadatas(configuration, schema) {
   return _.assign(metasWithDefaults, updatedMetas);
 }
 
-const getTargetSchema = targetModel => {
+const getTargetSchema = (targetModel) => {
   return getService('content-types').findContentType(targetModel);
 };
 

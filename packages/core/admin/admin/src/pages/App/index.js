@@ -124,7 +124,7 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggleNotification, updateProjectSettings]);
 
-  const setHasAdmin = hasAdmin => setState(prev => ({ ...prev, hasAdmin }));
+  const setHasAdmin = (hasAdmin) => setState((prev) => ({ ...prev, hasAdmin }));
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -138,7 +138,7 @@ function App() {
           {authRoutes}
           <Route
             path="/auth/:authType"
-            render={routerProps => (
+            render={(routerProps) => (
               <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
             )}
             exact

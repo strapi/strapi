@@ -13,10 +13,10 @@ const checkFoldersExist = ({ appPath }) => {
   }
 
   if (missingPaths.length > 0) {
-    throw new Error(`Missing required folders:\n${missingPaths.map(p => `- ./${p}`).join('\n')}`);
+    throw new Error(`Missing required folders:\n${missingPaths.map((p) => `- ./${p}`).join('\n')}`);
   }
 };
 
-module.exports = config => {
+module.exports = (config) => {
   checkFoldersExist(config);
 };

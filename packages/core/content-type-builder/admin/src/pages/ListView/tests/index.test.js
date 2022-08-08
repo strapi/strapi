@@ -9,10 +9,10 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { lightTheme, darkTheme } from '@strapi/design-system';
-import LanguageProvider from '../../../../../../admin/admin/src/components/LanguageProvider';
-import Theme from '../../../../../../admin/admin/src/components/Theme';
-import ThemeToggleProvider from '../../../../../../admin/admin/src/components/ThemeToggleProvider';
-import en from '../../../../../../admin/admin/src/translations/en.json';
+import LanguageProvider from '@strapi/admin/admin/src/components/LanguageProvider/LanguageProvider';
+import Theme from '@strapi/admin/admin/src/components/Theme/Theme';
+import ThemeToggleProvider from '@strapi/admin/admin/src/components/ThemeToggleProvider/ThemeToggleProvider';
+import en from '@strapi/admin/admin/src/translations/en.json';
 import FormModalNavigationProvider from '../../../components/FormModalNavigationProvider';
 import pluginEn from '../../../translations/en.json';
 import getTrad from '../../../utils/getTrad';
@@ -26,8 +26,8 @@ jest.mock('../../../hooks/useDataManager', () => {
     modifiedData: mockData,
     isInDevelopmentMode: true,
     isInContentTypeView: true,
-    submitData: () => {},
-    toggleModalCancel: () => {},
+    submitData() {},
+    toggleModalCancel() {},
   }));
 });
 

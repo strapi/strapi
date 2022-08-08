@@ -26,110 +26,117 @@ const addMinMax = (validator, { attr, updatedAttribute }) => {
   return validator;
 };
 
-const addRequiredValidation = createOrUpdate => (validator, { attr: { required } }) => {
-  if (required) {
-    if (createOrUpdate === 'creation') {
-      validator = validator.notNil();
-    } else if (createOrUpdate === 'update') {
-      validator = validator.notNull();
-    }
-  } else {
-    validator = validator.nullable();
-  }
-  return validator;
-};
-
-const addDefault = createOrUpdate => (validator, { attr }) => {
-  if (createOrUpdate === 'creation') {
-    if (
-      ((attr.type === 'component' && attr.repeatable) || attr.type === 'dynamiczone') &&
-      !attr.required
-    ) {
-      validator = validator.default([]);
+const addRequiredValidation =
+  (createOrUpdate) =>
+  (validator, { attr: { required } }) => {
+    if (required) {
+      if (createOrUpdate === 'creation') {
+        validator = validator.notNil();
+      } else if (createOrUpdate === 'update') {
+        validator = validator.notNull();
+      }
     } else {
-      validator = validator.default(attr.default);
+      validator = validator.nullable();
     }
-  } else {
-    validator = validator.default(undefined);
-  }
+    return validator;
+  };
 
-  return validator;
-};
+const addDefault =
+  (createOrUpdate) =>
+  (validator, { attr }) => {
+    if (createOrUpdate === 'creation') {
+      if (
+        ((attr.type === 'component' && attr.repeatable) || attr.type === 'dynamiczone') &&
+        !attr.required
+      ) {
+        validator = validator.default([]);
+      } else {
+        validator = validator.default(attr.default);
+      }
+    } else {
+      validator = validator.default(undefined);
+    }
 
-const preventCast = validator => validator.transform((val, originalVal) => originalVal);
+    return validator;
+  };
 
-const createComponentValidator = createOrUpdate => ({ attr, updatedAttribute }, { isDraft }) => {
-  let validator;
+const preventCast = (validator) => validator.transform((val, originalVal) => originalVal);
 
-  const model = strapi.getModel(attr.component);
-  if (!model) {
-    throw new Error('Validation failed: Model not found');
-  }
+const createComponentValidator =
+  (createOrUpdate) =>
+  ({ attr, updatedAttribute }, { isDraft }) => {
+    let validator;
 
-  if (prop('repeatable', attr) === true) {
-    validator = yup
-      .array()
-      .of(
-        yup.lazy(item =>
-          createModelValidator(createOrUpdate)({ model, data: item }, { isDraft }).notNull()
-        )
-      );
+    const model = strapi.getModel(attr.component);
+    if (!model) {
+      throw new Error('Validation failed: Model not found');
+    }
+
+    if (prop('repeatable', attr) === true) {
+      validator = yup
+        .array()
+        .of(
+          yup.lazy((item) =>
+            createModelValidator(createOrUpdate)({ model, data: item }, { isDraft }).notNull()
+          )
+        );
+      validator = addRequiredValidation(createOrUpdate)(validator, { attr: { required: true } });
+      validator = addMinMax(validator, { attr, updatedAttribute });
+    } else {
+      validator = createModelValidator(createOrUpdate)({ model, updatedAttribute }, { isDraft });
+      validator = addRequiredValidation(createOrUpdate)(validator, {
+        attr: { required: !isDraft && attr.required },
+      });
+    }
+
+    return validator;
+  };
+
+const createDzValidator =
+  (createOrUpdate) =>
+  ({ attr, updatedAttribute }, { isDraft }) => {
+    let validator;
+
+    validator = yup.array().of(
+      yup.lazy((item) => {
+        const model = strapi.getModel(prop('__component', item));
+        const schema = yup
+          .object()
+          .shape({
+            __component: yup.string().required().oneOf(Object.keys(strapi.components)),
+          })
+          .notNull();
+
+        return model
+          ? schema.concat(createModelValidator(createOrUpdate)({ model, data: item }, { isDraft }))
+          : schema;
+      })
+    );
     validator = addRequiredValidation(createOrUpdate)(validator, { attr: { required: true } });
     validator = addMinMax(validator, { attr, updatedAttribute });
-  } else {
-    validator = createModelValidator(createOrUpdate)({ model, updatedAttribute }, { isDraft });
+
+    return validator;
+  };
+
+const createRelationValidator =
+  (createOrUpdate) =>
+  ({ attr, updatedAttribute }, { isDraft }) => {
+    let validator;
+
+    if (Array.isArray(updatedAttribute.value)) {
+      validator = yup.array().of(yup.mixed());
+    } else {
+      validator = yup.mixed();
+    }
+
     validator = addRequiredValidation(createOrUpdate)(validator, {
       attr: { required: !isDraft && attr.required },
     });
-  }
 
-  return validator;
-};
+    return validator;
+  };
 
-const createDzValidator = createOrUpdate => ({ attr, updatedAttribute }, { isDraft }) => {
-  let validator;
-
-  validator = yup.array().of(
-    yup.lazy(item => {
-      const model = strapi.getModel(prop('__component', item));
-      const schema = yup
-        .object()
-        .shape({
-          __component: yup
-            .string()
-            .required()
-            .oneOf(Object.keys(strapi.components)),
-        })
-        .notNull();
-
-      return model
-        ? schema.concat(createModelValidator(createOrUpdate)({ model, data: item }, { isDraft }))
-        : schema;
-    })
-  );
-  validator = addRequiredValidation(createOrUpdate)(validator, { attr: { required: true } });
-  validator = addMinMax(validator, { attr, updatedAttribute });
-
-  return validator;
-};
-
-const createRelationValidator = createOrUpdate => ({ attr, updatedAttribute }, { isDraft }) => {
-  let validator;
-
-  if (Array.isArray(updatedAttribute.value)) {
-    validator = yup.array().of(yup.mixed());
-  } else {
-    validator = yup.mixed();
-  }
-
-  validator = addRequiredValidation(createOrUpdate)(validator, {
-    attr: { required: !isDraft && attr.required },
-  });
-
-  return validator;
-};
-
-const createScalarAttributeValidator = createOrUpdate => (metas, options) => {
+const createScalarAttributeValidator = (createOrUpdate) => (metas, options) => {
   let validator;
 
   if (has(metas.attr.type, validators)) {
@@ -146,7 +153,7 @@ const createScalarAttributeValidator = createOrUpdate => (metas, options) => {
   return validator;
 };
 
-const createAttributeValidator = createOrUpdate => (metas, options) => {
+const createAttributeValidator = (createOrUpdate) => (metas, options) => {
   let validator;
 
   if (isMediaAttribute(metas.attr)) {
@@ -170,50 +177,49 @@ const createAttributeValidator = createOrUpdate => (metas, options) => {
   return validator;
 };
 
-const createModelValidator = createOrUpdate => ({ model, data, entity }, options) => {
-  const writableAttributes = model ? getWritableAttributes(model) : [];
+const createModelValidator =
+  (createOrUpdate) =>
+  ({ model, data, entity }, options) => {
+    const writableAttributes = model ? getWritableAttributes(model) : [];
 
-  const schema = writableAttributes.reduce((validators, attributeName) => {
-    const validator = createAttributeValidator(createOrUpdate)(
+    const schema = writableAttributes.reduce((validators, attributeName) => {
+      const validator = createAttributeValidator(createOrUpdate)(
+        {
+          attr: model.attributes[attributeName],
+          updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
+          model,
+          entity,
+        },
+        options
+      );
+
+      return assoc(attributeName, validator)(validators);
+    }, {});
+
+    return yup.object().shape(schema);
+  };
+
+const createValidateEntity =
+  (createOrUpdate) =>
+  async (model, data, { isDraft = false } = {}, entity = null) => {
+    if (!isObject(data)) {
+      const { displayName } = model.info;
+
+      throw new ValidationError(
+        `Invalid payload submitted for the ${createOrUpdate} of an entity of type ${displayName}. Expected an object, but got ${typeof data}`
+      );
+    }
+
+    const validator = createModelValidator(createOrUpdate)(
       {
-        attr: model.attributes[attributeName],
-        updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
         model,
+        data,
         entity,
       },
-      options
-    );
-
-    return assoc(attributeName, validator)(validators);
-  }, {});
-
-  return yup.object().shape(schema);
-};
-
-const createValidateEntity = createOrUpdate => async (
-  model,
-  data,
-  { isDraft = false } = {},
-  entity = null
-) => {
-  if (!isObject(data)) {
-    const { displayName } = model.info;
-
-    throw new ValidationError(
-      `Invalid payload submitted for the ${createOrUpdate} of an entity of type ${displayName}. Expected an object, but got ${typeof data}`
-    );
-  }
-
-  const validator = createModelValidator(createOrUpdate)(
-    {
-      model,
-      data,
-      entity,
-    },
-    { isDraft }
-  ).required();
-  return validateYupSchema(validator, { strict: false, abortEarly: false })(data);
-};
+      { isDraft }
+    ).required();
+    return validateYupSchema(validator, { strict: false, abortEarly: false })(data);
+  };
 
 module.exports = {
   validateEntityCreation: createValidateEntity('creation'),

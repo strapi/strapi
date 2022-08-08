@@ -158,7 +158,7 @@ module.exports = ({ strapi }) => {
               const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
 
               const files = await Promise.all(
-                uploads.map(upload =>
+                uploads.map((upload) =>
                   formatFile(
                     upload,
                     { folder: apiUploadFolder.id },
@@ -170,10 +170,10 @@ module.exports = ({ strapi }) => {
               const uploadService = getUploadService('upload');
 
               const uploadedFiles = await Promise.all(
-                files.map(file => uploadService.uploadFileAndPersist(file, {}))
+                files.map((file) => uploadService.uploadFileAndPersist(file, {}))
               );
 
-              sanitizedEntities = uploadedFiles.map(file =>
+              sanitizedEntities = uploadedFiles.map((file) =>
                 toEntityResponse(file, { args, resourceUID: fileTypeName })
               );
             } finally {

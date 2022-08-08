@@ -13,7 +13,7 @@ const applySearch = (knex, query, ctx) => {
 
   const searchColumns = ['id'];
 
-  const stringColumns = Object.keys(attributes).filter(attributeName => {
+  const stringColumns = Object.keys(attributes).filter((attributeName) => {
     const attribute = attributes[attributeName];
     return types.isString(attribute.type) && attribute.searchable !== false;
   });
@@ -21,7 +21,7 @@ const applySearch = (knex, query, ctx) => {
   searchColumns.push(...stringColumns);
 
   if (!_.isNaN(_.toNumber(query))) {
-    const numberColumns = Object.keys(attributes).filter(attributeName => {
+    const numberColumns = Object.keys(attributes).filter((attributeName) => {
       const attribute = attributes[attributeName];
       return types.isNumber(attribute.type) && attribute.searchable !== false;
     });
@@ -31,7 +31,7 @@ const applySearch = (knex, query, ctx) => {
 
   switch (db.dialect.client) {
     case 'postgres': {
-      searchColumns.forEach(attr => {
+      searchColumns.forEach((attr) => {
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`??::text ILIKE ?`, [
           qb.aliasColumn(columnName),
@@ -42,7 +42,7 @@ const applySearch = (knex, query, ctx) => {
       break;
     }
     case 'sqlite': {
-      searchColumns.forEach(attr => {
+      searchColumns.forEach((attr) => {
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`?? LIKE ? ESCAPE '\\'`, [
           qb.aliasColumn(columnName),
@@ -52,7 +52,7 @@ const applySearch = (knex, query, ctx) => {
       break;
     }
     case 'mysql': {
-      searchColumns.forEach(attr => {
+      searchColumns.forEach((attr) => {
         const columnName = toColumnName(meta, attr);
         return knex.orWhereRaw(`?? LIKE ?`, [
           qb.aliasColumn(columnName),

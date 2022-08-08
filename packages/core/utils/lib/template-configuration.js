@@ -19,7 +19,7 @@ const templateConfiguration = (obj, configPath = '') => {
       !excludeConfigPaths.includes(configPath.substr(1)) &&
       obj[key].match(regex) !== null
     ) {
-      // eslint-disable-next-line prefer-template
+      // eslint-disable-next-line prefer-template, no-eval
       acc[key] = eval('`' + obj[key] + '`');
     } else {
       acc[key] = obj[key];

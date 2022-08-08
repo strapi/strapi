@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = path => {
+module.exports = (path) => {
   if (typeof path !== 'string') throw new Error('admin.url must be a string');
   if (path === '' || path === '/') return '/';
 

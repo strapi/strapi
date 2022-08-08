@@ -52,10 +52,7 @@ const productWithCompoAndDP = {
 
 describe('CM API - Basic + dz + draftAndPublish', () => {
   beforeAll(async () => {
-    await builder
-      .addComponent(compo)
-      .addContentType(productWithCompoAndDP)
-      .build();
+    await builder.addComponent(compo).addContentType(productWithCompoAndDP).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -140,7 +137,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
   });
 
   describe('validation', () => {
-    describe.each(['create', 'update'])('%p', method => {
+    describe.each(['create', 'update'])('%p', (method) => {
       test(`Can ${method} product with compo - compo required - []`, async () => {
         const product = {
           name: 'Product 1',

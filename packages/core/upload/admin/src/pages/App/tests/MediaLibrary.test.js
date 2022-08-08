@@ -68,7 +68,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
-  getTrad: x => x,
+  getTrad: (x) => x,
 }));
 
 const queryClient = new QueryClient({
@@ -80,11 +80,13 @@ const queryClient = new QueryClient({
   },
 });
 
+const trackingValue = { uuid: false, telemetryProperties: undefined };
+
 const renderML = () =>
   renderTL(
     <QueryClientProvider client={queryClient}>
       <IntlProvider locale="en" messages={{}}>
-        <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
+        <TrackingContext.Provider value={trackingValue}>
           <ThemeProvider theme={lightTheme}>
             <MemoryRouter>
               <MediaLibrary />
@@ -176,7 +178,7 @@ describe('Media library homepage', () => {
         'name:DESC',
         'updatedAt:DESC',
         'updatedAt:ASC',
-      ].forEach(sortKey => {
+      ].forEach((sortKey) => {
         it(`modifies the URL with the according params: ${sortKey}`, async () => {
           const setQueryMock = jest.fn();
           useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: {} }, setQueryMock]);

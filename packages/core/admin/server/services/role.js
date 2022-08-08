@@ -27,7 +27,7 @@ const sanitizeRole = omit(['users', 'permissions']);
 const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action'];
 const pickComparableFields = pick(COMPARABLE_FIELDS);
 
-const jsonClean = data => JSON.parse(JSON.stringify(data));
+const jsonClean = (data) => JSON.parse(JSON.stringify(data));
 
 /**
  * Compare two permissions
@@ -48,7 +48,7 @@ const arePermissionsEqual = (p1, p2) => {
  * @param attributes A partial role object
  * @returns {Promise<role>}
  */
-const create = async attributes => {
+const create = async (attributes) => {
   const alreadyExists = await exists({ name: attributes.name });
 
   if (alreadyExists) {
@@ -107,7 +107,7 @@ const find = (params = {}, populate) => {
  * Find all roles in database
  * @returns {Promise<array>}
  */
-const findAllWithUsersCount = async populate => {
+const findAllWithUsersCount = async (populate) => {
   const roles = await strapi.query('admin::role').findMany({ populate });
   for (const role of roles) {
     role.usersCount = await getUsersCount(role.id);
@@ -205,7 +205,7 @@ const deleteByIds = async (ids = []) => {
  * @returns {Promise<number>}
  * @param roleId
  */
-const getUsersCount = async roleId => {
+const getUsersCount = async (roleId) => {
   return strapi.query('admin::user').count({ where: { roles: { id: roleId } } });
 };
 
@@ -231,7 +231,7 @@ const createRolesIfNoneExist = async () => {
   const { actionProvider } = getService('permission');
 
   const allActions = actionProvider.values();
-  const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
+  const contentTypesActions = allActions.filter((a) => a.section === 'contentTypes');
 
   // create 3 roles
   const superAdminRole = await create({
@@ -264,7 +264,7 @@ const createRolesIfNoneExist = async () => {
 
   const authorPermissions = editorPermissions
     .filter(({ action }) => action !== ACTIONS.publish)
-    .map(permission =>
+    .map((permission) =>
       permissionDomain.create({ ...permission, conditions: ['admin::is-creator'] })
     );
 
@@ -368,7 +368,7 @@ const addPermissions = async (roleId, permissions) => {
   return createMany(permissionsWithRole);
 };
 
-const isContentTypeAction = action => action.section === CONTENT_TYPE_SECTION;
+const isContentTypeAction = (action) => action.section === CONTENT_TYPE_SECTION;
 
 /**
  * Reset super admin permissions (giving it all permissions)
@@ -385,8 +385,8 @@ const resetSuperAdminPermissions = async () => {
 
   const allActions = permissionService.actionProvider.values();
 
-  const contentTypesActions = allActions.filter(action => isContentTypeAction(action));
-  const otherActions = allActions.filter(action => !isContentTypeAction(action));
+  const contentTypesActions = allActions.filter((action) => isContentTypeAction(action));
+  const otherActions = allActions.filter((action) => !isContentTypeAction(action));
 
   // First, get the content-types permissions
   const permissions = contentTypeService.getPermissionsWithNestedFields(contentTypesActions);
@@ -396,7 +396,9 @@ const resetSuperAdminPermissions = async () => {
     const { actionId, subjects } = action;
 
     if (isArray(subjects)) {
-      acc.push(...subjects.map(subject => permissionDomain.create({ action: actionId, subject })));
+      acc.push(
+        ...subjects.map((subject) => permissionDomain.create({ action: actionId, subject }))
+      );
     } else {
       acc.push(permissionDomain.create({ action: actionId }));
     }
@@ -416,7 +418,7 @@ const resetSuperAdminPermissions = async () => {
  * @param {object} user
  * @return {boolean}
  */
-const hasSuperAdminRole = user => {
+const hasSuperAdminRole = (user) => {
   const roles = _.get(user, 'roles', []);
 
   return roles.map(prop('code')).includes(SUPER_ADMIN_CODE);

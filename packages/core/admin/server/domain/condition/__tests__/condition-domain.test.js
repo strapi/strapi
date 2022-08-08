@@ -91,7 +91,7 @@ describe('Condition Domain', () => {
   });
 
   describe('sanitizeConditionAttributes', () => {
-    const getSortedAttributes = object => Object.keys(object).sort();
+    const getSortedAttributes = (object) => Object.keys(object).sort();
 
     test(`It shouldn't remove attributes contained in domain.conditionAttributes`, () => {
       const condition = domain.conditionFields.reduce(
@@ -114,7 +114,7 @@ describe('Condition Domain', () => {
       const sanitizedCondition = domain.sanitizeConditionAttributes(condition);
 
       expect(getSortedAttributes(sanitizedCondition)).not.toEqual(getSortedAttributes(condition));
-      invalidAttributes.forEach(attribute =>
+      invalidAttributes.forEach((attribute) =>
         expect(sanitizedCondition).not.toHaveProperty(attribute)
       );
     });

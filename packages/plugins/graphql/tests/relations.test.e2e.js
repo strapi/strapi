@@ -119,7 +119,7 @@ describe('Test Graphql Relations API End to End', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    graphqlQuery = body => {
+    graphqlQuery = (body) => {
       return rq({
         url: '/graphql',
         method: 'POST',
@@ -147,7 +147,7 @@ describe('Test Graphql Relations API End to End', () => {
     ];
     const documentsPayload = [{ name: 'document 1' }, { name: 'document 2' }];
 
-    test.each(labelsPayload)('Create label %o', async label => {
+    test.each(labelsPayload)('Create label %o', async (label) => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           mutation createLabel($data: LabelInput!) {
@@ -211,7 +211,7 @@ describe('Test Graphql Relations API End to End', () => {
       expect(body).toMatchObject({
         data: {
           labels: {
-            data: labelsPayload.map(label => ({ id: expect.any(String), attributes: label })),
+            data: labelsPayload.map((label) => ({ id: expect.any(String), attributes: label })),
           },
         },
       });
@@ -220,7 +220,7 @@ describe('Test Graphql Relations API End to End', () => {
       data.labels = data.labels.concat(res.body.data.labels.data);
     });
 
-    test.each(documentsPayload)('Create document linked to every labels %o', async document => {
+    test.each(documentsPayload)('Create document linked to every labels %o', async (document) => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           mutation createDocument($data: DocumentInput!) {
@@ -251,7 +251,7 @@ describe('Test Graphql Relations API End to End', () => {
         variables: {
           data: {
             ...document,
-            labels: data.labels.map(t => t.id),
+            labels: data.labels.map((t) => t.id),
           },
         },
       });
@@ -361,13 +361,13 @@ describe('Test Graphql Relations API End to End', () => {
         data: {
           labels: {
             data: expect.arrayContaining(
-              data.labels.map(label => ({
+              data.labels.map((label) => ({
                 id: label.id,
                 attributes: {
                   ...label.attributes,
                   documents: {
                     data: expect.arrayContaining(
-                      data.documents.map(document => ({
+                      data.documents.map((document) => ({
                         id: document.id,
                         attributes: selectFields(document.attributes),
                       }))
@@ -459,7 +459,7 @@ describe('Test Graphql Relations API End to End', () => {
         variables: {
           id: document.id,
           data: {
-            labels: labels.map(label => label.id),
+            labels: labels.map((label) => label.id),
           },
         },
       });
@@ -472,7 +472,7 @@ describe('Test Graphql Relations API End to End', () => {
               attributes: {
                 ...selectFields(document.attributes),
                 labels: {
-                  data: labels.map(label => ({
+                  data: labels.map((label) => ({
                     id: label.id,
                     attributes: {
                       ...selectFields(label.attributes),
@@ -565,7 +565,7 @@ describe('Test Graphql Relations API End to End', () => {
         data: {
           documents: {
             data: expect.arrayContaining(
-              data.documents.map(document => ({
+              data.documents.map((document) => ({
                 id: document.id,
                 attributes: {
                   ...selectFields(document.attributes),
@@ -799,7 +799,7 @@ describe('Test Graphql Relations API End to End', () => {
 
       const queryRes = await graphqlQuery({
         query: /* GraphQL */ `
-          query($id: ID!) {
+          query ($id: ID!) {
             car(id: $id) {
               data {
                 attributes {

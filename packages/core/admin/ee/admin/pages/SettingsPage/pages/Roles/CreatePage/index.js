@@ -56,7 +56,7 @@ const CreatePage = () => {
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
   const { permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
 
-  const handleCreateRoleSubmit = data => {
+  const handleCreateRoleSubmit = (data) => {
     lockApp();
     setIsSubmiting(true);
 
@@ -72,7 +72,7 @@ const CreatePage = () => {
         body: data,
       })
     )
-      .then(async res => {
+      .then(async (res) => {
         const { permissionsToSend } = permissionsRef.current.getPermissions();
 
         if (id) {
@@ -90,7 +90,7 @@ const CreatePage = () => {
 
         return res;
       })
-      .then(res => {
+      .then((res) => {
         setIsSubmiting(false);
         toggleNotification({
           type: 'success',
@@ -98,7 +98,7 @@ const CreatePage = () => {
         });
         replace(`/settings/roles/${res.data.id}`);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         setIsSubmiting(false);
         toggleNotification({
@@ -256,10 +256,12 @@ const CreatePage = () => {
   );
 };
 
-export default () => (
-  <CheckPagePermissions permissions={adminPermissions.settings.roles.create}>
-    <CreatePage />
-  </CheckPagePermissions>
-);
+export default function () {
+  return (
+    <CheckPagePermissions permissions={adminPermissions.settings.roles.create}>
+      <CreatePage />
+    </CheckPagePermissions>
+  );
+}
 
 export { CreatePage };

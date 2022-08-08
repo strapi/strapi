@@ -2,7 +2,7 @@
 
 const { join, resolve, relative } = require('path');
 const { promisify } = require('util');
-// eslint-disable-next-line node/no-extraneous-require
+// eslint-disable-next-line import/no-extraneous-dependencies
 const glob = promisify(require('glob').glob);
 const fs = require('fs-extra');
 const { getCorePluginsPath, createPluginsFile } = require('./create-plugins-file');
@@ -16,14 +16,11 @@ const getPluginsPackages = async () => {
   const pluginsPackageDirs = await glob(pathToPackages);
 
   return pluginsPackageDirs
-    .filter(pluginDir => {
+    .filter((pluginDir) => {
       return fs.existsSync(join(pluginDir, 'admin', 'src', 'index.js'));
     })
     .reduce((acc, current) => {
-      const depName = current
-        .replace(/\\/g, '/')
-        .split('/')
-        .slice(-1)[0];
+      const depName = current.replace(/\\/g, '/').split('/').slice(-1)[0];
 
       const adminEntryPoint = join(__dirname, '..', 'admin', 'src');
 
@@ -63,7 +60,7 @@ createFile()
     console.log('plugins.js file created');
     process.exit();
   })
-  .catch(err => {
+  .catch((err) => {
     console.error(err);
     process.exit(1);
   });

@@ -49,10 +49,7 @@ const productWithDz = {
 
 describe('CM API - Basic + dz', () => {
   beforeAll(async () => {
-    await builder
-      .addComponent(compo)
-      .addContentType(productWithDz)
-      .build();
+    await builder.addComponent(compo).addContentType(productWithDz).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });

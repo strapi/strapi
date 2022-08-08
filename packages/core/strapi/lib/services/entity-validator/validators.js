@@ -13,17 +13,20 @@ const { yup } = require('@strapi/utils');
 /**
  * Utility function to compose validators
  */
-const composeValidators = (...fns) => (...args) => {
-  let validator = yup.mixed();
+const composeValidators =
+  (...fns) =>
+  (...args) => {
+    let nextArgs = args;
+    let validator = yup.mixed();
 
-  // if we receive a schema then use it as base schema for nested composition
-  if (yup.isSchema(args[0])) {
-    validator = args[0];
-    args = args.slice(1);
-  }
+    // if we receive a schema then use it as base schema for nested composition
+    if (yup.isSchema(args[0])) {
+      validator = args[0];
+      nextArgs = args.slice(1);
+    }
 
-  return fns.reduce((validator, fn) => fn(validator, ...args), validator);
-};
+    return fns.reduce((validator, fn) => fn(validator, ...nextArgs), validator);
+  };
 
 /* Validator utils */
 
@@ -124,7 +127,7 @@ const addUniqueValidator = (validator, { attr, model, updatedAttribute, entity }
     return validator;
   }
 
-  return validator.test('unique', 'This attribute must be unique', async value => {
+  return validator.test('unique', 'This attribute must be unique', async (value) => {
     /**
      * If the attribute value is `null` we want to skip the unique validation.
      * Otherwise it'll only accept a single `null` entry in the database.
@@ -166,12 +169,12 @@ const stringValidator = composeValidators(
   addUniqueValidator
 );
 
-const emailValidator = composeValidators(stringValidator, validator =>
+const emailValidator = composeValidators(stringValidator, (validator) =>
   validator.email().min(1, '${path} cannot be empty')
 );
 
-const uidValidator = composeValidators(stringValidator, validator =>
-  validator.matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
+const uidValidator = composeValidators(stringValidator, (validator) =>
+  validator.matches(/^[A-Za-z0-9-_.~]*$/)
 );
 
 const enumerationValidator = ({ attr }) => {

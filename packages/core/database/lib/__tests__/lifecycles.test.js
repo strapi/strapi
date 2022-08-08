@@ -6,7 +6,7 @@ describe('LifecycleProvider', () => {
   describe('run', () => {
     /** @type {import("../lifecycles").LifecycleProvider} */
     let provider;
-    const dbMetadataGetStub = jest.fn(uid => ({ uid, name: 'TestModel' }));
+    const dbMetadataGetStub = jest.fn((uid) => ({ uid, name: 'TestModel' }));
 
     beforeEach(() => {
       const db = {

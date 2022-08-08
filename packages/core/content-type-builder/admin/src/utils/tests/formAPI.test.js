@@ -50,7 +50,7 @@ describe('formsAPI', () => {
 
   describe('mutateContentTypeSchema', () => {
     it('should call the mutation with the correct arguments', () => {
-      const mutation = jest.fn(data => data);
+      const mutation = jest.fn((data) => data);
       formsAPI.addContentTypeSchemaMutation(mutation);
 
       expect(formsAPI.contentTypeSchemaMutations).toHaveLength(1);

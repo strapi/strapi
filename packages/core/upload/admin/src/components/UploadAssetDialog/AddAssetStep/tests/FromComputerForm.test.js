@@ -5,16 +5,18 @@ import { TrackingContext } from '@strapi/helper-plugin';
 import { FromComputerForm } from '../FromComputerForm';
 import en from '../../../../translations/en.json';
 
-jest.mock('../../../../utils/getTrad', () => x => x);
+jest.mock('../../../../utils/getTrad', () => (x) => x);
 
 jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || 'App level translation') }),
 }));
 
+const trackingCtx = { uuid: false, telemetryProperties: undefined };
+
 describe('FromComputerForm', () => {
   it('snapshots the component', async () => {
     const { container } = renderTL(
-      <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+      <TrackingContext.Provider value={trackingCtx}>
         <ThemeProvider theme={lightTheme}>
           <FromComputerForm onClose={jest.fn()} onAddAssets={jest.fn()} />
         </ThemeProvider>

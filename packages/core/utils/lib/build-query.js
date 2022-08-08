@@ -25,7 +25,7 @@ const getAssociationFromFieldKey = ({ model, field }) => {
     const part = fieldParts[i];
     attribute = part;
 
-    const assoc = tmpModel.associations.find(ast => ast.alias === part);
+    const assoc = tmpModel.associations.find((ast) => ast.alias === part);
 
     if (assoc) {
       association = assoc;
@@ -59,7 +59,7 @@ const getAssociationFromFieldKey = ({ model, field }) => {
  */
 const castInput = ({ type, value, operator }) => {
   return Array.isArray(value)
-    ? value.map(val => castValue({ type, operator, value: val }))
+    ? value.map((val) => castValue({ type, operator, value: val }))
     : castValue({ type, operator, value });
 };
 
@@ -84,9 +84,7 @@ const castValue = ({ type, value, operator }) => {
 const normalizeFieldName = ({ model, field }) => {
   const fieldPath = field.split('.');
   return _.last(fieldPath) === 'id'
-    ? _.initial(fieldPath)
-        .concat(model.primaryKey)
-        .join('.')
+    ? _.initial(fieldPath).concat(model.primaryKey).join('.')
     : fieldPath.join('.');
 };
 
@@ -100,7 +98,7 @@ const hasDeepFilters = ({ where = [], sort = [] }, { minDepth = 1 } = {}) => {
 
   const hasDeepWhereClauses = where.some(({ field, operator, value }) => {
     if (BOOLEAN_OPERATORS.includes(operator)) {
-      return value.some(clauses => hasDeepFilters({ where: clauses }));
+      return value.some((clauses) => hasDeepFilters({ where: clauses }));
     }
 
     return field.split('.').length > minDepth;
@@ -126,7 +124,7 @@ const normalizeWhereClauses = (whereClauses, { model }) => {
         return {
           field,
           operator,
-          value: value.map(clauses => normalizeWhereClauses(clauses, { model })),
+          value: value.map((clauses) => normalizeWhereClauses(clauses, { model })),
         };
       }
 

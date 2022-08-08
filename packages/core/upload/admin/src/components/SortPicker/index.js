@@ -24,7 +24,7 @@ const SortPicker = ({ onChangeSort }) => {
         defaultMessage: 'Sort by',
       })}
     >
-      {filters.map(filter => (
+      {filters.map((filter) => (
         <MenuItem key={filter.key} onClick={() => onChangeSort(filter.value)}>
           {formatMessage({ id: getTrad(filter.key), defaultMessage: `${filter.value}` })}
         </MenuItem>

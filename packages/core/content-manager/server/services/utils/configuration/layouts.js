@@ -27,7 +27,7 @@ const isAllowedFieldSize = (type, size) => {
   return size <= MAX_ROW_SIZE;
 };
 
-const getDefaultFieldSize = type => {
+const getDefaultFieldSize = (type) => {
   if (FIELD_TYPES_FULL_SIZE.includes(type)) {
     return MAX_ROW_SIZE;
   }
@@ -50,20 +50,20 @@ async function createDefaultLayouts(schema) {
 
 function createDefaultListLayout(schema) {
   return Object.keys(schema.attributes)
-    .filter(name => isListable(schema, name))
+    .filter((name) => isListable(schema, name))
     .slice(0, DEFAULT_LIST_LENGTH);
 }
 
 function createDefaultEditRelationsLayout(schema) {
   if (schema.modelType === 'component') return [];
 
-  return Object.keys(schema.attributes).filter(name => hasRelationAttribute(schema, name));
+  return Object.keys(schema.attributes).filter((name) => hasRelationAttribute(schema, name));
 }
 
-const rowSize = els => els.reduce((sum, el) => sum + el.size, 0);
+const rowSize = (els) => els.reduce((sum, el) => sum + el.size, 0);
 
 function createDefaultEditLayout(schema) {
-  const keys = Object.keys(schema.attributes).filter(name => hasEditableAttribute(schema, name));
+  const keys = Object.keys(schema.attributes).filter((name) => hasEditableAttribute(schema, name));
 
   return appendToEditLayout([], keys, schema);
 }
@@ -75,9 +75,9 @@ function syncLayouts(configuration, schema) {
 
   const { list = [], editRelations = [], edit = [] } = configuration.layouts || {};
 
-  let cleanList = list.filter(attr => isListable(schema, attr));
+  let cleanList = list.filter((attr) => isListable(schema, attr));
 
-  let cleanEditRelations = editRelations.filter(attr => hasRelationAttribute(schema, attr));
+  let cleanEditRelations = editRelations.filter((attr) => hasRelationAttribute(schema, attr));
 
   const elementsToReAppend = [];
   let cleanEdit = [];
@@ -117,20 +117,20 @@ function syncLayouts(configuration, schema) {
     // only add valid listable attributes
     cleanList = _.uniq(
       cleanList
-        .concat(newAttributes.filter(key => isListable(schema, key)))
+        .concat(newAttributes.filter((key) => isListable(schema, key)))
         .slice(0, DEFAULT_LIST_LENGTH)
     );
   }
 
   // add new relations to layout
   if (schema.modelType !== 'component') {
-    const newRelations = newAttributes.filter(key => hasRelationAttribute(schema, key));
+    const newRelations = newAttributes.filter((key) => hasRelationAttribute(schema, key));
 
     cleanEditRelations = _.uniq(cleanEditRelations.concat(newRelations));
   }
 
   // add new attributes to edit view
-  const newEditAttributes = newAttributes.filter(key => hasEditableAttribute(schema, key));
+  const newEditAttributes = newAttributes.filter((key) => hasEditableAttribute(schema, key));
 
   cleanEdit = appendToEditLayout(cleanEdit, newEditAttributes, schema);
 

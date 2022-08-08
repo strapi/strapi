@@ -6,7 +6,7 @@ const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const form = require('../../../../../test/helpers/generators');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
-const cleanDate = entry => {
+const cleanDate = (entry) => {
   delete entry.updatedAt;
   delete entry.createdAt;
 };
@@ -262,7 +262,7 @@ describe('Content Manager End to End', () => {
 
     test('Update article1 add tag1 and tag3', async () => {
       const entry = { ...data.articles[0] };
-      entry.tags = entry.tags.map(tag => tag.id);
+      entry.tags = entry.tags.map((tag) => tag.id);
 
       entry.tags.push(data.tags[0].id);
       entry.tags.push(data.tags[2].id);
@@ -299,7 +299,7 @@ describe('Content Manager End to End', () => {
 
     test('Update article1 remove one tag', async () => {
       const entry = { ...data.articles[0] };
-      entry.tags = entry.tags.slice(1).map(tag => tag.id);
+      entry.tags = entry.tags.slice(1).map((tag) => tag.id);
 
       cleanDate(entry);
 
@@ -417,7 +417,7 @@ describe('Content Manager End to End', () => {
         url: '/content-manager/collection-types/api::article.article/actions/bulkDelete',
         method: 'POST',
         body: {
-          ids: articles.map(article => article.id),
+          ids: articles.map((article) => article.id),
         },
       });
 
@@ -687,7 +687,7 @@ describe('Content Manager End to End', () => {
 
     test('Update cat1 with article1', async () => {
       const entry = { ...data.categories[0] };
-      entry.articles = entry.articles.map(article => article.id);
+      entry.articles = entry.articles.map((article) => article.id);
       entry.articles.push(data.articles[0].id);
 
       cleanDate(entry);

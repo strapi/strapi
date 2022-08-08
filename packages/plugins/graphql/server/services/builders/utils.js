@@ -85,7 +85,7 @@ module.exports = ({ strapi }) => {
      * @param {object} attributes - The attributes object to transform
      * @return {Object<string, string>}
      */
-    scalarAttributesToFiltersMap: mapValues(attribute => {
+    scalarAttributesToFiltersMap: mapValues((attribute) => {
       const { mappers, naming } = getService('utils');
 
       const gqlScalar = mappers.strapiScalarToGraphQLScalar(attribute.type);

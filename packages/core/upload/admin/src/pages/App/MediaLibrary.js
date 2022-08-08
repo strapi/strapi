@@ -72,12 +72,20 @@ export const MediaLibrary = () => {
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
 
-  const { data: assetsData, isLoading: assetsLoading, errors: assetsError } = useAssets({
+  const {
+    data: assetsData,
+    isLoading: assetsLoading,
+    errors: assetsError,
+  } = useAssets({
     skipWhen: !canRead,
     query,
   });
 
-  const { data: folders, isLoading: foldersLoading, errors: foldersError } = useFolders({
+  const {
+    data: folders,
+    isLoading: foldersLoading,
+    errors: foldersError,
+  } = useFolders({
     enabled: canRead && assetsData?.pagination?.page === 1 && !containsAssetFilter(query),
     query,
   });
@@ -104,7 +112,7 @@ export const MediaLibrary = () => {
   const [assetToEdit, setAssetToEdit] = useState(undefined);
   const [folderToEdit, setFolderToEdit] = useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState(['type', 'id'], []);
-  const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
+  const toggleUploadAssetDialog = () => setShowUploadAssetDialog((prev) => !prev);
   const toggleEditFolderDialog = ({ created = false } = {}) => {
     // folders are only displayed on the first page, therefore
     // we have to navigate the user to that page, in case a folder
@@ -116,10 +124,10 @@ export const MediaLibrary = () => {
       });
     }
 
-    setShowEditFolderDialog(prev => !prev);
+    setShowEditFolderDialog((prev) => !prev);
   };
 
-  const handleChangeSort = value => {
+  const handleChangeSort = (value) => {
     trackUsage('didSortMediaLibraryElements', {
       location: 'upload',
       sort: value,
@@ -127,12 +135,12 @@ export const MediaLibrary = () => {
     setQuery({ sort: value });
   };
 
-  const handleEditFolder = folder => {
+  const handleEditFolder = (folder) => {
     setFolderToEdit(folder);
     setShowEditFolderDialog(true);
   };
 
-  const handleEditFolderClose = payload => {
+  const handleEditFolderClose = (payload) => {
     setFolderToEdit(null);
     toggleEditFolderDialog(payload);
 
@@ -178,13 +186,13 @@ export const MediaLibrary = () => {
                       (assetCount > 0 || folderCount > 0) &&
                       selected.length === assetCount + folderCount
                     }
-                    onChange={e => {
+                    onChange={(e) => {
                       if (e.target.checked) {
                         trackUsage('didSelectAllMediaLibraryElements');
                       }
                       selectAll([
-                        ...assets.map(asset => ({ ...asset, type: 'asset' })),
-                        ...folders.map(folder => ({ ...folder, type: 'folder' })),
+                        ...assets.map((asset) => ({ ...asset, type: 'asset' })),
+                        ...folders.map((folder) => ({ ...folder, type: 'folder' })),
                       ]);
                     }}
                   />
@@ -240,10 +248,10 @@ export const MediaLibrary = () => {
                     ''
                   }
                 >
-                  {folders.map(folder => {
+                  {folders.map((folder) => {
                     const selectedFolders = selected.filter(({ type }) => type === 'folder');
                     const isSelected = !!selectedFolders.find(
-                      currentFolder => currentFolder.id === folder.id
+                      (currentFolder) => currentFolder.id === folder.id
                     );
 
                     const url = getFolderURL(pathname, query, folder);

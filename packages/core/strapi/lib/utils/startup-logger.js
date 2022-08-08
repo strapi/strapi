@@ -6,7 +6,7 @@ const _ = require('lodash/fp');
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
 const ee = require('./ee');
 
-module.exports = app => {
+module.exports = (app) => {
   return {
     logStats() {
       const columns = Math.min(process.stderr.columns, 80) - 2;

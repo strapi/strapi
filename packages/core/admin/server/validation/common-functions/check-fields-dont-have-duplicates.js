@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const checkFieldsDontHaveDuplicates = fields => {
+const checkFieldsDontHaveDuplicates = (fields) => {
   if (_.isNil(fields)) {
     // Only check if the fields exist
     return true;

@@ -8,7 +8,7 @@ const { UnauthorizedError } = require('@strapi/utils').errors;
 const INVALID_STRATEGY_MSG =
   'Invalid auth strategy. Expecting an object with properties {name: string, authenticate: function, verify: function}';
 
-const validStrategy = strategy => {
+const validStrategy = (strategy) => {
   assert(has('authenticate', strategy), INVALID_STRATEGY_MSG);
   assert(typeof strategy.authenticate === 'function', INVALID_STRATEGY_MSG);
 

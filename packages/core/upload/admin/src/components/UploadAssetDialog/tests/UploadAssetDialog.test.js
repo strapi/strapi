@@ -7,7 +7,7 @@ import en from '../../../translations/en.json';
 import { UploadAssetDialog } from '../UploadAssetDialog';
 import { server } from './server';
 
-jest.mock('../../../utils/getTrad', () => x => x);
+jest.mock('../../../utils/getTrad', () => (x) => x);
 
 jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || id) }),
@@ -21,10 +21,12 @@ const queryClient = new QueryClient({
   },
 });
 
-const render = (props = { onClose: () => {} }) =>
+const trackingCtx = { uuid: false, telemetryProperties: undefined };
+
+const render = (props = { onClose() {} }) =>
   renderTL(
     <QueryClientProvider client={queryClient}>
-      <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
+      <TrackingContext.Provider value={trackingCtx}>
         <ThemeProvider theme={lightTheme}>
           <UploadAssetDialog {...props} />
         </ThemeProvider>
@@ -55,7 +57,7 @@ describe('UploadAssetDialog', () => {
 
     it('closes the dialog when clicking on cancel on the add asset step', () => {
       const onCloseSpy = jest.fn();
-      render({ onClose: onCloseSpy, onSuccess: () => {} });
+      render({ onClose: onCloseSpy, onSuccess() {} });
 
       fireEvent.click(screen.getByText('app.components.Button.cancel'));
 
@@ -66,10 +68,10 @@ describe('UploadAssetDialog', () => {
       const file = new File(['Some stuff'], 'test.png', { type: 'image/png' });
       const onCloseSpy = jest.fn();
 
-      render({ onClose: onCloseSpy, onSuccess: () => {} });
+      render({ onClose: onCloseSpy, onSuccess() {} });
 
       const fileList = [file];
-      fileList.item = i => fileList[i];
+      fileList.item = (i) => fileList[i];
 
       fireEvent.change(document.querySelector('[type="file"]'), { target: { files: fileList } });
       fireEvent.click(screen.getByText('app.components.Button.cancel'));
@@ -88,15 +90,15 @@ describe('UploadAssetDialog', () => {
 
         // see https://github.com/testing-library/react-testing-library/issues/470
         Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
-          set: () => {},
+          set() {},
         });
 
         const file = new File(['Some stuff'], `test.${ext}`, { type: mime });
 
         const fileList = [file];
-        fileList.item = i => fileList[i];
+        fileList.item = (i) => fileList[i];
 
-        render({ onClose: onCloseSpy, onSuccess: () => {} });
+        render({ onClose: onCloseSpy, onSuccess() {} });
 
         fireEvent.change(document.querySelector('[type="file"]'), {
           target: { files: fileList },
@@ -210,7 +212,7 @@ describe('UploadAssetDialog', () => {
         screen.getByText('Manage the assets before adding them to the Media Library')
       ).toBeInTheDocument();
 
-      assets.forEach(asset => {
+      assets.forEach((asset) => {
         const dialog = within(screen.getByRole('dialog'));
         const card = within(dialog.getAllByLabelText(asset.name)[0]);
 

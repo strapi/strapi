@@ -23,17 +23,14 @@ const writeStreamToFile = (stream, path) =>
     writeStream.on('error', reject);
   });
 
-const getMetadata = file =>
+const getMetadata = (file) =>
   new Promise((resolve, reject) => {
     const pipeline = sharp();
-    pipeline
-      .metadata()
-      .then(resolve)
-      .catch(reject);
+    pipeline.metadata().then(resolve).catch(reject);
     file.getStream().pipe(pipeline);
   });
 
-const getDimensions = async file => {
+const getDimensions = async (file) => {
   const { width = null, height = null } = await getMetadata(file);
   return { width, height };
 };
@@ -63,7 +60,7 @@ const resizeFileTo = async (file, options, { name, hash }) => {
   return newFile;
 };
 
-const generateThumbnail = async file => {
+const generateThumbnail = async (file) => {
   if (
     file.width > THUMBNAIL_RESIZE_OPTIONS.width ||
     file.height > THUMBNAIL_RESIZE_OPTIONS.height
@@ -84,7 +81,7 @@ const generateThumbnail = async file => {
  *    - reduce image quality
  *
  */
-const optimize = async file => {
+const optimize = async (file) => {
   const { sizeOptimization = false, autoOrientation = false } = await getService(
     'upload'
   ).getSettings();
@@ -130,7 +127,7 @@ const DEFAULT_BREAKPOINTS = {
 
 const getBreakpoints = () => strapi.config.get('plugin.upload.breakpoints', DEFAULT_BREAKPOINTS);
 
-const generateResponsiveFormats = async file => {
+const generateResponsiveFormats = async (file) => {
   const { responsiveDimensions = false } = await getService('upload').getSettings();
 
   if (!responsiveDimensions) return [];
@@ -139,12 +136,14 @@ const generateResponsiveFormats = async file => {
 
   const breakpoints = getBreakpoints();
   return Promise.all(
-    Object.keys(breakpoints).map(key => {
+    Object.keys(breakpoints).map((key) => {
       const breakpoint = breakpoints[key];
 
       if (breakpointSmallerThan(breakpoint, originalDimensions)) {
         return generateBreakpoint(key, { file, breakpoint, originalDimensions });
       }
+
+      return undefined;
     })
   );
 };
@@ -184,8 +183,8 @@ const isSupportedImage = (...args) => {
 /**
  *  Applies a simple image transformation to see if the image is faulty/corrupted.
  */
-const isFaultyImage = file =>
-  new Promise(resolve => {
+const isFaultyImage = (file) =>
+  new Promise((resolve) => {
     file
       .getStream()
       .pipe(sharp().rotate())
@@ -195,7 +194,7 @@ const isFaultyImage = file =>
       .on('close', () => resolve(false));
   });
 
-const isOptimizableImage = async file => {
+const isOptimizableImage = async (file) => {
   let format;
   try {
     const metadata = await getMetadata(file);
@@ -207,7 +206,7 @@ const isOptimizableImage = async file => {
   return format && FORMATS_TO_OPTIMIZE.includes(format);
 };
 
-const isImage = async file => {
+const isImage = async (file) => {
   let format;
   try {
     const metadata = await getMetadata(file);

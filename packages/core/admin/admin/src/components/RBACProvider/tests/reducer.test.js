@@ -1,4 +1,4 @@
-import { permissions } from '../../../../../../../admin-test-utils/lib/fixtures';
+import { permissions } from '@strapi/admin-test-utils/lib/fixtures/fixtures';
 
 import { setPermissions, resetStore } from '../actions';
 import rbacProviderReducer, { initialState } from '../reducer';

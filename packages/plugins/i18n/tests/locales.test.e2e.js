@@ -197,8 +197,8 @@ describe('CRUD locales', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      const enLocale = res.body.find(locale => locale.code === 'bas');
-      const enUsLocale = res.body.find(locale => locale.code === 'en-US');
+      const enLocale = res.body.find((locale) => locale.code === 'bas');
+      const enUsLocale = res.body.find((locale) => locale.code === 'en-US');
       expect(enLocale.isDefault).toBe(false);
       expect(enUsLocale.isDefault).toBe(true);
 
@@ -330,8 +330,8 @@ describe('CRUD locales', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.find(locale => locale.code === data.locales[0].code).isDefault).toBe(false);
-      expect(res.body.find(locale => locale.code === data.locales[1].code).isDefault).toBe(true);
+      expect(res.body.find((locale) => locale.code === data.locales[0].code).isDefault).toBe(false);
+      expect(res.body.find((locale) => locale.code === data.locales[1].code).isDefault).toBe(true);
     });
 
     test('Cannot unselect isDefault', async () => {

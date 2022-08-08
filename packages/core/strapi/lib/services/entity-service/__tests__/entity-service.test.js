@@ -19,7 +19,7 @@ describe('Entity service', () => {
   describe('Decorator', () => {
     test.each(['create', 'update', 'findMany', 'findOne', 'delete', 'count', 'findPage'])(
       'Can decorate',
-      async method => {
+      async (method) => {
         const instance = createEntityService({
           strapi: {},
           db: {},

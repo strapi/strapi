@@ -30,7 +30,7 @@ describe('Role CRUD End to End', () => {
 
     // Data is sorted to avoid error with snapshot when the data is not in the same order
     const sortedData = _.cloneDeep(res.body.data);
-    Object.keys(sortedData.sections).forEach(sectionName => {
+    Object.keys(sortedData.sections).forEach((sectionName) => {
       sortedData.sections[sectionName] = _.sortBy(sortedData.sections[sectionName], ['action']);
     });
     sortedData.conditions = sortedData.conditions.sort();

@@ -24,6 +24,9 @@
     "@testing-library/jest-dom": "5.16.5",
     "jest-styled-components": "7.0.2"
   },
+  "peerDependencies": {
+    "redux": "^4.0.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

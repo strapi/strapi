@@ -24,7 +24,7 @@ module.exports = {
             ...rest,
           };
 
-          sendgrid.send(removeUndefined(msg), function(err) {
+          sendgrid.send(removeUndefined(msg), (err) => {
             if (err) {
               reject(err);
             } else {

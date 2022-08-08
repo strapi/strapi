@@ -3,9 +3,9 @@
 const _ = require('lodash');
 const dates = require('date-fns');
 
-const timeRegex = new RegExp('^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$');
+const timeRegex = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$/;
 
-const parseTime = value => {
+const parseTime = (value) => {
   if (dates.isDate(value)) return dates.format(value, 'HH:mm:ss.SSS');
 
   if (typeof value !== 'string') {
@@ -23,7 +23,7 @@ const parseTime = value => {
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };
 
-const parseDate = value => {
+const parseDate = (value) => {
   if (dates.isDate(value)) return dates.format(value, 'yyyy-MM-dd');
   try {
     const date = dates.parseISO(value);
@@ -36,7 +36,7 @@ const parseDate = value => {
   }
 };
 
-const parseDateTimeOrTimestamp = value => {
+const parseDateTimeOrTimestamp = (value) => {
   if (dates.isDate(value)) return value;
   try {
     const date = dates.parseISO(value);

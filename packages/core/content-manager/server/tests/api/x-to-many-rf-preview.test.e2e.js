@@ -5,7 +5,7 @@ const { createAuthRequest } = require('../../../../../../test/helpers/request');
 const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 
-const toIds = arr => uniq(map(prop('id'))(arr));
+const toIds = (arr) => uniq(map(prop('id'))(arr));
 
 let strapi;
 let rq;
@@ -107,8 +107,8 @@ const fixtures = {
   ],
 };
 
-const getUID = modelName => `api::${modelName}.${modelName}`;
-const getCMPrefixUrl = modelName => `/content-manager/collection-types/${getUID(modelName)}`;
+const getUID = (modelName) => `api::${modelName}.${modelName}`;
+const getCMPrefixUrl = (modelName) => `/content-manager/collection-types/${getUID(modelName)}`;
 
 describe('x-to-many RF Preview', () => {
   const cmProductUrl = getCMPrefixUrl(productModel.singularName);
@@ -133,7 +133,7 @@ describe('x-to-many RF Preview', () => {
   });
 
   describe('Entity Misc', () => {
-    test.each(['foobar', 'name'])(`Throws if the targeted field is invalid (%s)`, async field => {
+    test.each(['foobar', 'name'])(`Throws if the targeted field is invalid (%s)`, async (field) => {
       const product = data.product[0];
       const { body, statusCode } = await rq.get(`${cmProductUrl}/${product.id}/${field}`);
 

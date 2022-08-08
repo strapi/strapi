@@ -24,11 +24,11 @@ const tableHeaders = [
     name: 'roles',
     metadatas: { label: 'Roles', sortable: false },
     /* eslint-disable react/prop-types */
-    cellFormatter: ({ roles }, { formatMessage }) => {
+    cellFormatter({ roles }, { formatMessage }) {
       return (
         <Typography textColor="neutral800">
           {roles
-            .map(role =>
+            .map((role) =>
               formatMessage({
                 id: `global.${role.code}`,
                 defaultMessage: role.name,
@@ -50,7 +50,7 @@ const tableHeaders = [
     name: 'isActive',
     metadatas: { label: 'User status', sortable: false },
     // eslint-disable-next-line react/prop-types
-    cellFormatter: ({ isActive }, { formatMessage }) => {
+    cellFormatter({ isActive }, { formatMessage }) {
       return (
         <Flex>
           <Status isActive={isActive} variant={isActive ? 'success' : 'danger'} />

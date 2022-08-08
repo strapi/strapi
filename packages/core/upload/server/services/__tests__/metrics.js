@@ -4,7 +4,7 @@ const metricsService = require('../metrics');
 
 // TODO: the matcher exists in jest@28
 const closeTo = (expected, precision = 2) => ({
-  asymmetricMatch: actual => Math.abs(expected - actual) < 10 ** -precision / 2,
+  asymmetricMatch: (actual) => Math.abs(expected - actual) < 10 ** -precision / 2,
 });
 
 describe('metrics', () => {
@@ -50,7 +50,8 @@ describe('metrics', () => {
             return {
               select() {
                 return {
-                  groupBy: () => folderLevels.map(info => ({ depth: info[0], occurence: info[1] })),
+                  groupBy: () =>
+                    folderLevels.map((info) => ({ depth: info[0], occurence: info[1] })),
                 };
               },
             };
@@ -62,17 +63,10 @@ describe('metrics', () => {
       const { computeMetrics } = metricsService({ strapi });
 
       const results = await computeMetrics();
-      const [
-        assetNumber,
-        maxDepth,
-        averageDepth,
-        folderNumber,
-        averageDeviationDepth,
-      ] = expectedResults;
+      const [assetNumber, maxDepth, averageDepth, folderNumber, averageDeviationDepth] =
+        expectedResults;
 
-      expect(
-        raw
-      ).toHaveBeenCalledWith(
+      expect(raw).toHaveBeenCalledWith(
         'LENGTH(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(??, ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?), ?, ?)) AS depth, COUNT(*) AS occurence',
         [
           'path',

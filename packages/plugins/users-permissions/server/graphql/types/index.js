@@ -18,4 +18,4 @@ const typesFactories = [
  * @param {object} context.strapi
  * @return {any[]}
  */
-module.exports = context => typesFactories.map(factory => factory(context));
+module.exports = (context) => typesFactories.map((factory) => factory(context));

@@ -29,9 +29,13 @@ class Dialect {
     return false;
   }
 
-  async startSchemaUpdate() {}
+  async startSchemaUpdate() {
+    // noop
+  }
 
-  async endSchemaUpdate() {}
+  async endSchemaUpdate() {
+    // noop
+  }
 
   transformErrors(error) {
     if (error instanceof Error) {

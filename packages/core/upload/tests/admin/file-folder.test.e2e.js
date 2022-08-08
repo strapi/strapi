@@ -37,7 +37,7 @@ describe('File', () => {
       method: 'POST',
       url: '/upload/actions/bulk-delete',
       body: {
-        folderIds: data.folders.map(f => f.id),
+        folderIds: data.folders.map((f) => f.id),
       },
     });
 

@@ -29,7 +29,7 @@ const DEFAULT_TYPES = [
  * @param {import('inquirer').Inquirer} inquirer
  * @returns {Promise<Record<string, string>[]>}
  */
-module.exports = async inquirer => {
+module.exports = async (inquirer) => {
   const { addAttributes } = await inquirer.prompt([
     {
       type: 'confirm',
@@ -44,31 +44,31 @@ module.exports = async inquirer => {
    * @param {import('inquirer').Inquirer} inquirer
    * @returns {Promise<void>}
    */
-  const createNewAttributes = async inquirer => {
+  const createNewAttributes = async (inquirer) => {
     const answers = await inquirer.prompt([
       {
         type: 'input',
         name: 'attributeName',
         message: 'Name of attribute',
-        validate: input => validateAttributeInput(input),
+        validate: (input) => validateAttributeInput(input),
       },
       {
         type: 'list',
         name: 'attributeType',
         message: 'What type of attribute',
         pageSize: DEFAULT_TYPES.length,
-        choices: DEFAULT_TYPES.map(type => {
+        choices: DEFAULT_TYPES.map((type) => {
           return { name: type, value: type };
         }),
       },
       {
-        when: answers => answers.attributeType === 'enumeration',
+        when: (answers) => answers.attributeType === 'enumeration',
         type: 'input',
         name: 'enum',
         message: 'Add values separated by a comma',
       },
       {
-        when: answers => answers.attributeType === 'media',
+        when: (answers) => answers.attributeType === 'media',
         type: 'list',
         name: 'multiple',
         message: 'Choose media type',

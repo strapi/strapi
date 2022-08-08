@@ -50,10 +50,7 @@ const productWithCompo = {
 
 describe('CM API - Basic + compo', () => {
   beforeAll(async () => {
-    await builder
-      .addComponent(compo)
-      .addContentType(productWithCompo)
-      .build();
+    await builder.addComponent(compo).addContentType(productWithCompo).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });

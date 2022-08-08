@@ -7,16 +7,16 @@ const delegate = require('delegates');
 const statuses = require('statuses');
 const { formatHttpError } = require('../errors');
 
-const addCustomMethods = app => {
+const addCustomMethods = (app) => {
   const delegator = delegate(app.context, 'response');
 
   /* errors */
   statuses.codes
-    .filter(code => code >= 400 && code < 600)
-    .forEach(code => {
+    .filter((code) => code >= 400 && code < 600)
+    .forEach((code) => {
       const name = statuses(code);
       const camelCasedName = camelCase(name);
-      app.response[camelCasedName] = function(message, details = {}) {
+      app.response[camelCasedName] = function responseCode(message, details = {}) {
         const httpError = createError(code, message, { details });
         const { status, body } = formatHttpError(httpError);
         this.status = status;
@@ -26,17 +26,17 @@ const addCustomMethods = app => {
     });
 
   /* send, created, deleted */
-  app.response.send = function(data, status = 200) {
+  app.response.send = function send(data, status = 200) {
     this.status = status;
     this.body = data;
   };
 
-  app.response.created = function(data) {
+  app.response.created = function created(data) {
     this.status = 201;
     this.body = data;
   };
 
-  app.response.deleted = function(data) {
+  app.response.deleted = function deleted(data) {
     if (isNil(data)) {
       this.status = 204;
     } else {
@@ -45,10 +45,7 @@ const addCustomMethods = app => {
     }
   };
 
-  delegator
-    .method('send')
-    .method('created')
-    .method('deleted');
+  delegator.method('send').method('created').method('deleted');
 
   return app;
 };

@@ -2,7 +2,7 @@
 
 const { has } = require('lodash/fp');
 
-const pluginsRegistry = strapi => {
+const pluginsRegistry = (strapi) => {
   const plugins = {};
 
   return {

@@ -20,7 +20,7 @@ const StyledBullet = styled.div`
   cursor: pointer;
 `;
 
-const Option = props => {
+const Option = (props) => {
   const { formatMessage } = useIntl();
   const Component = components.Option;
   const hasDraftAndPublish = has(get(props, 'data.value'), 'publishedAt');

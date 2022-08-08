@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Form, useFormikContext } from 'formik';
 
-const FormWithFocus = props => {
+const FormWithFocus = (props) => {
   const formRef = useRef(null);
   const { isSubmitting, isValidating, errors, touched } = useFormikContext();
 

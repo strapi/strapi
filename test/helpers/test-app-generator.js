@@ -11,9 +11,9 @@ const generateNew = require('../../packages/generators/app/lib/generate-new');
  * Delete the testApp folder
  * @param {string} appName - name of the app / folder where the app is located
  */
-const cleanTestApp = appName => {
+const cleanTestApp = (appName) => {
   return new Promise((resolve, reject) => {
-    rimraf(path.resolve(appName), err => {
+    rimraf(path.resolve(appName), (err) => {
       if (err) reject(err);
       resolve();
     });

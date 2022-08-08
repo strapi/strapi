@@ -39,7 +39,7 @@ module.exports = {
 
     const roles = await roleService.deleteByIds([id]);
 
-    const sanitizedRole = roles.map(role => roleService.sanitizeRole(role))[0] || null;
+    const sanitizedRole = roles.map((role) => roleService.sanitizeRole(role))[0] || null;
 
     return ctx.deleted({
       data: sanitizedRole,
@@ -96,8 +96,8 @@ module.exports = {
 
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 
-    ctx.body = {
+    return ctx.send({
       data: sanitizedPermissions,
-    };
+    });
   },
 };

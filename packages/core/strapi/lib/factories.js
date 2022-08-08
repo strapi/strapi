@@ -58,15 +58,15 @@ const createCoreRouter = (uid, cfg = {}) => {
 
         const defaultRoutes = createRoutes({ contentType });
 
-        Object.keys(defaultRoutes).forEach(routeName => {
+        Object.keys(defaultRoutes).forEach((routeName) => {
           const defaultRoute = defaultRoutes[routeName];
 
           Object.assign(defaultRoute.config, config[routeName] || {});
         });
 
         const selectedRoutes = pipe(
-          routes => (except ? omit(except, routes) : routes),
-          routes => (only ? pick(only, routes) : routes)
+          (routes) => (except ? omit(except, routes) : routes),
+          (routes) => (only ? pick(only, routes) : routes)
         )(defaultRoutes);
 
         routes = Object.values(selectedRoutes);

@@ -57,7 +57,7 @@ export default {
       id: 'internationalization',
       to: '/settings/internationalization',
 
-      Component: async () => {
+      async Component() {
         const component = await import(
           /* webpackChunkName: "i18n-settings-page" */ './pages/SettingsPage'
         );
@@ -116,7 +116,7 @@ export default {
       });
 
       ctbFormsAPI.extendFields(LOCALIZED_FIELDS, {
-        validator: args => ({
+        validator: (args) => ({
           i18n: yup.object().shape({
             localized: yup.bool().test({
               name: 'ensure-unique-localization',
@@ -179,7 +179,7 @@ export default {
   },
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map(locale => {
+      locales.map((locale) => {
         return import(
           /* webpackChunkName: "i18n-translation-[request]" */ `./translations/${locale}.json`
         )

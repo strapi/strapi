@@ -64,7 +64,7 @@ export const EditAssetDialog = ({
     enabled: true,
   });
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     const nextAsset = { ...asset, ...values, folder: values.parent.value };
 
     if (asset.isLocal) {
@@ -131,7 +131,7 @@ export const EditAssetDialog = ({
     },
   };
 
-  const handleClose = values => {
+  const handleClose = (values) => {
     if (!isEqual(initialFormData, values)) {
       handleConfirmClose();
     } else {
@@ -280,7 +280,7 @@ export const EditAssetDialog = ({
                         name="parent"
                         defaultValue={values.parent}
                         options={folderStructure}
-                        onChange={value => {
+                        onChange={(value) => {
                           setFieldValue('parent', value);
                         }}
                         menuPortalTarget={document.querySelector('body')}

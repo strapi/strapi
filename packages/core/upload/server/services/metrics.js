@@ -11,7 +11,7 @@ const getMetricsStoreValue = async () => {
   const value = await strapi.store.get({ type: 'plugin', name: 'upload', key: 'metrics' });
   return defaultTo({}, value);
 };
-const setMetricsStoreValue = value =>
+const setMetricsStoreValue = (value) =>
   strapi.store.set({ type: 'plugin', name: 'upload', key: 'metrics', value });
 
 module.exports = ({ strapi }) => ({
@@ -57,7 +57,7 @@ module.exports = ({ strapi }) => ({
           )
         )
         .groupBy('depth')
-    ).map(map => ({ depth: Number(map.depth), occurence: Number(map.occurence) })); // values can be strings depending on the database
+    ).map((map) => ({ depth: Number(map.depth), occurence: Number(map.occurence) })); // values can be strings depending on the database
 
     let product = 0;
     let folderNumber = 0;

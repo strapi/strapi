@@ -36,7 +36,7 @@ describe('Folder structure', () => {
       method: 'POST',
       url: '/upload/actions/bulk-delete',
       body: {
-        folderIds: res.body.data.map(f => f.id),
+        folderIds: res.body.data.map((f) => f.id),
       },
     });
 
@@ -53,7 +53,7 @@ describe('Folder structure', () => {
       method: 'POST',
       url: '/upload/actions/bulk-delete',
       body: {
-        folderIds: data.folders.map(f => f.id),
+        folderIds: data.folders.map((f) => f.id),
       },
     });
 

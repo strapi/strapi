@@ -21,7 +21,7 @@ module.exports = async (plugins, { deleteFiles }) => {
   const loader = ora();
   const dir = process.cwd();
 
-  const pluginArgs = plugins.map(name => `@strapi/plugin-${name}`);
+  const pluginArgs = plugins.map((name) => `@strapi/plugin-${name}`);
 
   try {
     // verify should rebuild before removing the pacakge

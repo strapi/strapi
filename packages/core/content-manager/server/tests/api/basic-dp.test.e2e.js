@@ -50,10 +50,7 @@ const compo = {
 
 describe('CM API - Basic + draftAndPublish', () => {
   beforeAll(async () => {
-    await builder
-      .addComponent(compo)
-      .addContentType(productWithDP)
-      .build();
+    await builder.addComponent(compo).addContentType(productWithDP).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -116,7 +113,7 @@ describe('CM API - Basic + draftAndPublish', () => {
         }),
       ])
     );
-    res.body.results.forEach(p => {
+    res.body.results.forEach((p) => {
       expect(p.publishedAt).toBeNull();
     });
   });

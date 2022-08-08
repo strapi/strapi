@@ -5,7 +5,7 @@ import { IntlProvider } from 'react-intl';
 
 import { EmptyOrNoPermissions } from '../EmptyOrNoPermissions';
 
-const setup = props =>
+const setup = (props) =>
   render(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}}>

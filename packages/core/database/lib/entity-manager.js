@@ -7,14 +7,14 @@ const { createQueryBuilder } = require('./query');
 const { createRepository } = require('./entity-repository');
 const { isBidirectional, isOneToAny } = require('./metadata/relations');
 
-const toId = value => value.id || value;
-const toIds = value => _.castArray(value || []).map(toId);
+const toId = (value) => value.id || value;
+const toIds = (value) => _.castArray(value || []).map(toId);
 
-const isValidId = value => _.isString(value) || _.isInteger(value);
-const toAssocs = data => {
+const isValidId = (value) => _.isString(value) || _.isInteger(value);
+const toAssocs = (data) => {
   return _.castArray(data)
-    .filter(datum => !_.isNil(datum))
-    .map(datum => {
+    .filter((datum) => !_.isNil(datum))
+    .map((datum) => {
       // if it is a string or an integer return an obj with id = to datum
       if (isValidId(datum)) {
         return { id: datum, __pivot: {} };
@@ -108,17 +108,14 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
   return obj;
 };
 
-const createEntityManager = db => {
+const createEntityManager = (db) => {
   const repoMap = {};
 
   return {
     async findOne(uid, params) {
       const states = await db.lifecycles.run('beforeFindOne', uid, { params });
 
-      const result = await this.createQueryBuilder(uid)
-        .init(params)
-        .first()
-        .execute();
+      const result = await this.createQueryBuilder(uid).init(params).first().execute();
 
       await db.lifecycles.run('afterFindOne', uid, { params, result }, states);
 
@@ -129,9 +126,7 @@ const createEntityManager = db => {
     async findMany(uid, params) {
       const states = await db.lifecycles.run('beforeFindMany', uid, { params });
 
-      const result = await this.createQueryBuilder(uid)
-        .init(params)
-        .execute();
+      const result = await this.createQueryBuilder(uid).init(params).execute();
 
       await db.lifecycles.run('afterFindMany', uid, { params, result }, states);
 
@@ -166,9 +161,7 @@ const createEntityManager = db => {
 
       const dataToInsert = processData(metadata, data, { withDefaults: true });
 
-      const res = await this.createQueryBuilder(uid)
-        .insert(dataToInsert)
-        .execute();
+      const res = await this.createQueryBuilder(uid).insert(dataToInsert).execute();
 
       const id = res[0].id || res[0];
 
@@ -198,15 +191,15 @@ const createEntityManager = db => {
         throw new Error('CreateMany expects data to be an array');
       }
 
-      const dataToInsert = data.map(datum => processData(metadata, datum, { withDefaults: true }));
+      const dataToInsert = data.map((datum) =>
+        processData(metadata, datum, { withDefaults: true })
+      );
 
       if (_.isEmpty(dataToInsert)) {
         throw new Error('Nothing to insert');
       }
 
-      await this.createQueryBuilder(uid)
-        .insert(dataToInsert)
-        .execute();
+      await this.createQueryBuilder(uid).insert(dataToInsert).execute();
 
       const result = { count: data.length };
 
@@ -229,11 +222,7 @@ const createEntityManager = db => {
         throw new Error('Update requires a where parameter');
       }
 
-      const entity = await this.createQueryBuilder(uid)
-        .select('id')
-        .where(where)
-        .first()
-        .execute();
+      const entity = await this.createQueryBuilder(uid).select('id').where(where).first().execute();
 
       if (!entity) {
         return null;
@@ -244,10 +233,7 @@ const createEntityManager = db => {
       const dataToUpdate = processData(metadata, data);
 
       if (!_.isEmpty(dataToUpdate)) {
-        await this.createQueryBuilder(uid)
-          .where({ id })
-          .update(dataToUpdate)
-          .execute();
+        await this.createQueryBuilder(uid).where({ id }).update(dataToUpdate).execute();
       }
 
       await this.updateRelations(uid, id, data);
@@ -311,10 +297,7 @@ const createEntityManager = db => {
 
       const { id } = entity;
 
-      await this.createQueryBuilder(uid)
-        .where({ id })
-        .delete()
-        .execute();
+      await this.createQueryBuilder(uid).where({ id }).delete().execute();
 
       await this.deleteRelations(uid, id);
 
@@ -329,10 +312,7 @@ const createEntityManager = db => {
 
       const { where } = params;
 
-      const deletedRows = await this.createQueryBuilder(uid)
-        .where(where)
-        .delete()
-        .execute();
+      const deletedRows = await this.createQueryBuilder(uid).where(where).delete().execute();
 
       const result = { count: deletedRows };
 
@@ -397,9 +377,7 @@ const createEntityManager = db => {
               continue;
             }
 
-            await this.createQueryBuilder(joinTable.name)
-              .insert(rows)
-              .execute();
+            await this.createQueryBuilder(joinTable.name).insert(rows).execute();
           }
 
           continue;
@@ -412,7 +390,7 @@ const createEntityManager = db => {
 
           const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
-          const rows = toAssocs(data[attributeName]).map(data => ({
+          const rows = toAssocs(data[attributeName]).map((data) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
@@ -424,9 +402,7 @@ const createEntityManager = db => {
             continue;
           }
 
-          await this.createQueryBuilder(joinTable.name)
-            .insert(rows)
-            .execute();
+          await this.createQueryBuilder(joinTable.name).insert(rows).execute();
 
           continue;
         }
@@ -479,7 +455,7 @@ const createEntityManager = db => {
               .execute();
           }
 
-          const insert = toAssocs(data[attributeName]).map(data => {
+          const insert = toAssocs(data[attributeName]).map((data) => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
@@ -493,9 +469,7 @@ const createEntityManager = db => {
             continue;
           }
 
-          await this.createQueryBuilder(joinTable.name)
-            .insert(insert)
-            .execute();
+          await this.createQueryBuilder(joinTable.name).insert(insert).execute();
         }
       }
     },
@@ -570,9 +544,7 @@ const createEntityManager = db => {
               continue;
             }
 
-            await this.createQueryBuilder(joinTable.name)
-              .insert(rows)
-              .execute();
+            await this.createQueryBuilder(joinTable.name).insert(rows).execute();
           }
 
           continue;
@@ -597,7 +569,7 @@ const createEntityManager = db => {
             })
             .execute();
 
-          const rows = toAssocs(data[attributeName]).map(data => ({
+          const rows = toAssocs(data[attributeName]).map((data) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
@@ -609,9 +581,7 @@ const createEntityManager = db => {
             continue;
           }
 
-          await this.createQueryBuilder(joinTable.name)
-            .insert(rows)
-            .execute();
+          await this.createQueryBuilder(joinTable.name).insert(rows).execute();
 
           continue;
         }
@@ -664,7 +634,7 @@ const createEntityManager = db => {
           }
 
           if (!_.isNull(data[attributeName])) {
-            const insert = toAssocs(data[attributeName]).map(data => {
+            const insert = toAssocs(data[attributeName]).map((data) => {
               return {
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: data.id,
@@ -678,9 +648,7 @@ const createEntityManager = db => {
               continue;
             }
 
-            await this.createQueryBuilder(joinTable.name)
-              .insert(insert)
-              .execute();
+            await this.createQueryBuilder(joinTable.name).insert(insert).execute();
           }
         }
       }

@@ -13,7 +13,7 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
   const lockAppWithAutoreload = (config = undefined) => {
     setIsOpen(true);
     setConfig(config);
-    setState(prev => ({ ...prev, start: Date.now() }));
+    setState((prev) => ({ ...prev, start: Date.now() }));
   };
 
   const unlockAppWithAutoreload = () => {
@@ -36,7 +36,7 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
           return null;
         }
 
-        setState(prev => ({ ...prev, elapsed: Math.round(Date.now() - prev.start) / 1000 }));
+        setState((prev) => ({ ...prev, elapsed: Math.round(Date.now() - prev.start) / 1000 }));
 
         return null;
       }, 1000);

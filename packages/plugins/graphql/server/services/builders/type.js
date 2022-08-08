@@ -16,7 +16,7 @@ const { contentTypes } = require('@strapi/utils');
  * @property {object} context.strapi
  * @property {object} context.registry
  */
-module.exports = context => {
+module.exports = (context) => {
   const { strapi } = context;
 
   const getGraphQLService = strapi.plugin('graphql').service;
@@ -48,6 +48,8 @@ module.exports = context => {
    * @param {TypeBuildersOptions} options
    */
   const addComponentAttribute = ({ builder, attributeName, contentType, attribute }) => {
+    let localBuilder = builder;
+
     const { naming } = getGraphQLService('utils');
     const { getContentTypeArgs } = getGraphQLService('builders').utils;
     const { buildComponentResolver } = getGraphQLService('builders').get('content-api');
@@ -55,7 +57,7 @@ module.exports = context => {
     const type = naming.getComponentNameFromAttribute(attribute);
 
     if (attribute.repeatable) {
-      builder = builder.list;
+      localBuilder = localBuilder.list;
     }
 
     const targetComponent = strapi.getModel(attribute.component);
@@ -68,7 +70,7 @@ module.exports = context => {
 
     const args = getContentTypeArgs(targetComponent, { multiple: !!attribute.repeatable });
 
-    builder.field(attributeName, { type, resolve, args });
+    localBuilder.field(attributeName, { type, resolve, args });
   };
 
   /**
@@ -124,7 +126,7 @@ module.exports = context => {
    * Add a media attribute to the type definition
    * @param {TypeBuildersOptions} options
    */
-  const addMediaAttribute = options => {
+  const addMediaAttribute = (options) => {
     const { naming } = getGraphQLService('utils');
     const { getContentTypeArgs } = getGraphQLService('builders').utils;
     const { buildAssociationResolver } = getGraphQLService('builders').get('content-api');
@@ -158,7 +160,7 @@ module.exports = context => {
    * Add a polymorphic relational attribute to the type definition
    * @param {TypeBuildersOptions} options
    */
-  const addPolymorphicRelationalAttribute = options => {
+  const addPolymorphicRelationalAttribute = (options) => {
     const { GENERIC_MORPH_TYPENAME } = getGraphQLService('constants');
     const { naming } = getGraphQLService('utils');
     const { buildAssociationResolver } = getGraphQLService('builders').get('content-api');
@@ -201,7 +203,7 @@ module.exports = context => {
    * Add a regular relational attribute to the type definition
    * @param {TypeBuildersOptions} options
    */
-  const addRegularRelationalAttribute = options => {
+  const addRegularRelationalAttribute = (options) => {
     const { naming } = getGraphQLService('utils');
     const { getContentTypeArgs } = getGraphQLService('builders').utils;
     const { buildAssociationResolver } = getGraphQLService('builders').get('content-api');
@@ -238,15 +240,12 @@ module.exports = context => {
     builder.field(attributeName, { type, resolve, args });
   };
 
-  const isNotPrivate = contentType => attributeName => {
+  const isNotPrivate = (contentType) => (attributeName) => {
     return !contentTypes.isPrivateAttribute(contentType, attributeName);
   };
 
-  const isNotDisabled = contentType => attributeName => {
-    return extension
-      .shadowCRUD(contentType.uid)
-      .field(attributeName)
-      .hasOutputEnabled();
+  const isNotDisabled = (contentType) => (attributeName) => {
+    return extension.shadowCRUD(contentType.uid).field(attributeName).hasOutputEnabled();
   };
 
   return {
@@ -306,7 +305,7 @@ module.exports = context => {
             // Ignore disabled fields (from extension service)
             .filter(isNotDisabled(contentType))
             // Add each attribute to the type definition
-            .forEach(attributeName => {
+            .forEach((attributeName) => {
               const attribute = attributes[attributeName];
 
               // We create a copy of the builder (t) to apply custom

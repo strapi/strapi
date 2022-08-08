@@ -49,7 +49,7 @@ describe('SSO', () => {
   describe('Get Strategy Callback URL', () => {
     const BASE_URL = '/admin/connect/{{provider}}';
 
-    test.each(['foo', 'bar', 'foobar'])('Get a correct callback url for %s', providerName => {
+    test.each(['foo', 'bar', 'foobar'])('Get a correct callback url for %s', (providerName) => {
       expect(getStrategyCallbackURL(providerName)).toBe(
         BASE_URL.replace('{{provider}}', providerName)
       );

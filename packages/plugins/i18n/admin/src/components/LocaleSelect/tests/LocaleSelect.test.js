@@ -10,7 +10,7 @@ import reducers from '../../../hooks/reducers';
 import LocaleSelect from '..';
 
 jest.mock('../../../utils', () => ({
-  getTrad: x => x,
+  getTrad: (x) => x,
 }));
 
 jest.mock('react-intl', () => ({
@@ -33,7 +33,7 @@ const queryClient = new QueryClient({
 
 const store = createStore(combineReducers(reducers));
 
-const render = props =>
+const render = (props) =>
   renderTL(
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>

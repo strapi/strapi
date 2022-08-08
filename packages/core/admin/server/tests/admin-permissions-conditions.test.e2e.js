@@ -103,7 +103,7 @@ if (edition === 'EE') {
       Object.assign(localTestData, { role, permissions, users });
     };
 
-    const getUserRequest = idx => requests[localTestData.users[idx].id];
+    const getUserRequest = (idx) => requests[localTestData.users[idx].id];
     const getModelName = () => localTestData.models.article.singularName;
 
     const deleteFixtures = async () => {

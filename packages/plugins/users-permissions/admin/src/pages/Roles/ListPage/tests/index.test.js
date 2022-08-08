@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-no-constructed-context-values */
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -25,7 +27,7 @@ const client = new QueryClient({
   },
 });
 
-const makeApp = history => (
+const makeApp = (history) => (
   <Router history={history}>
     <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
       <ThemeProvider theme={lightTheme}>

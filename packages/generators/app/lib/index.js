@@ -58,7 +58,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
     useTypescript: Boolean(cliArguments.typescript),
   };
 
-  sentry.configureScope(function(sentryScope) {
+  sentry.configureScope(function scope(sentryScope) {
     const tags = {
       os_type: os.type(),
       os_platform: os.platform(),
@@ -68,7 +68,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
       docker: scope.docker,
     };
 
-    Object.keys(tags).forEach(tag => {
+    Object.keys(tags).forEach((tag) => {
       sentryScope.setTag(tag, tags[tag]);
     });
   });
@@ -76,7 +76,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
   parseDatabaseArguments({ scope, args: cliArguments });
   initCancelCatcher(scope);
 
-  return generateNew(scope).catch(error => {
+  return generateNew(scope).catch((error) => {
     console.error(error);
     return captureException(error).then(() => {
       return trackError({ scope, error }).then(() => {
@@ -94,7 +94,7 @@ function initCancelCatcher() {
       output: process.stdout,
     });
 
-    rl.on('SIGINT', function() {
+    rl.on('SIGINT', function sigint() {
       process.emit('SIGINT');
     });
   }

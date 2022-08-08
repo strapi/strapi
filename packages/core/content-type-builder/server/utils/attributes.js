@@ -4,17 +4,17 @@ const _ = require('lodash');
 const utils = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 
-const hasComponent = model => {
-  const compoKeys = Object.keys(model.attributes || {}).filter(key => {
+const hasComponent = (model) => {
+  const compoKeys = Object.keys(model.attributes || {}).filter((key) => {
     return model.attributes[key].type === 'component';
   });
 
   return compoKeys.length > 0;
 };
 
-const isConfigurable = attribute => _.get(attribute, 'configurable', true);
+const isConfigurable = (attribute) => _.get(attribute, 'configurable', true);
 
-const isRelation = attribute => attribute.type === 'relation';
+const isRelation = (attribute) => attribute.type === 'relation';
 
 /**
  * Formats a component's attributes
@@ -22,7 +22,7 @@ const isRelation = attribute => attribute.type === 'relation';
  * @param {Object} context - function context
  * @param {Object} context.component - the associated component
  */
-const formatAttributes = model => {
+const formatAttributes = (model) => {
   const { getVisibleAttributes } = utils.contentTypes;
 
   // only get attributes that can be seen in the CTB
@@ -71,7 +71,7 @@ const formatAttribute = (key, attribute) => {
 };
 
 // TODO: move to schema builder
-const replaceTemporaryUIDs = uidMap => schema => {
+const replaceTemporaryUIDs = (uidMap) => (schema) => {
   return {
     ...schema,
     attributes: Object.keys(schema.attributes).reduce((acc, key) => {
@@ -97,7 +97,7 @@ const replaceTemporaryUIDs = uidMap => schema => {
       ) {
         acc[key] = {
           ...attr,
-          components: attr.components.map(value => {
+          components: attr.components.map((value) => {
             if (_.has(uidMap, value)) return uidMap[value];
 
             if (!_.has(strapi.components, value)) {

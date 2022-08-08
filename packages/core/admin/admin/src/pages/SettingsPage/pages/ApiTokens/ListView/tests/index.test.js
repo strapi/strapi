@@ -47,7 +47,7 @@ const client = new QueryClient({
   },
 });
 
-const makeApp = history => {
+const makeApp = (history) => {
   return (
     <QueryClientProvider client={client}>
       <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>

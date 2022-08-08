@@ -30,7 +30,7 @@ describe('Permission Controller', () => {
       services: {
         permission: {
           engine: {
-            checkMany: jest.fn(ability => permissions => {
+            checkMany: jest.fn((ability) => (permissions) => {
               return permissions.map(({ action, subject, field }) =>
                 ability.can(action, subject, field)
               );

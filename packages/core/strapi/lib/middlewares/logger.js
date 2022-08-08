@@ -1,8 +1,10 @@
 'use strict';
 
+/* eslint-disable no-nested-ternary */
+
 const chalk = require('chalk');
 
-const codeToColor = code => {
+const codeToColor = (code) => {
   return code >= 500
     ? chalk.red(code)
     : code >= 400

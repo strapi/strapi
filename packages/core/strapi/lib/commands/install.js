@@ -6,13 +6,13 @@ const ora = require('ora');
 const execa = require('execa');
 const findPackagePath = require('../load/package-path');
 
-module.exports = async plugins => {
+module.exports = async (plugins) => {
   const loader = ora();
   const dir = process.cwd();
 
   const version = require(join(dir, 'package.json')).dependencies['@strapi/strapi'];
 
-  const pluginArgs = plugins.map(name => `@strapi/plugin-${name}@${version}`);
+  const pluginArgs = plugins.map((name) => `@strapi/plugin-${name}@${version}`);
 
   try {
     loader.start(`Installing dependencies`);

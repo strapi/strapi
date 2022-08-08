@@ -31,7 +31,7 @@ jest.mock('../../../../../../hooks', () => ({
   useRolesList: jest.fn(),
 }));
 
-const makeApp = history => (
+const makeApp = (history) => (
   <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
     <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
       <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>

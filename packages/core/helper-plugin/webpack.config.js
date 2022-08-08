@@ -7,7 +7,7 @@ const nodeModules = [];
   ...Object.keys(packageJson.dependencies),
   ...Object.keys(packageJson.peerDependencies),
   ...Object.keys(packageJson.devDependencies),
-].forEach(module => {
+].forEach((module) => {
   nodeModules.push(new RegExp(`^${module}(/.+)?$`));
 });
 

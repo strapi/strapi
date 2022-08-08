@@ -45,10 +45,7 @@ const restart = async () => {
 
 describe('Migration - required attribute', () => {
   beforeAll(async () => {
-    await builder
-      .addContentType(dogModel)
-      .addFixtures(dogModel.singularName, dogs)
-      .build();
+    await builder.addContentType(dogModel).addFixtures(dogModel.singularName, dogs).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -68,7 +65,7 @@ describe('Migration - required attribute', () => {
         url: '/content-manager/collection-types/api::dog.dog',
       });
       expect(body.results.length).toBe(2);
-      const dogWithNameNull = body.results.find(dog => dog.name === null);
+      const dogWithNameNull = body.results.find((dog) => dog.name === null);
       expect(dogWithNameNull).toBeTruthy();
     });
 

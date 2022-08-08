@@ -126,10 +126,7 @@ const bedFixtures = [
 
 describe('Search query', () => {
   beforeAll(async () => {
-    await builder
-      .addContentType(bedModel)
-      .addFixtures(bedModel.singularName, bedFixtures)
-      .build();
+    await builder.addContentType(bedModel).addFixtures(bedModel.singularName, bedFixtures).build();
 
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
@@ -157,7 +154,7 @@ describe('Search query', () => {
       expect(res.body.data[0]).toMatchObject(transformToRESTResource(data.bed[2]));
     });
 
-    test.each(Object.keys(bedFixtures[0]))('search that target column %p', async columnName => {
+    test.each(Object.keys(bedFixtures[0]))('search that target column %p', async (columnName) => {
       const res = await rq({
         method: 'GET',
         url: '/beds',
@@ -182,7 +179,7 @@ describe('Search query', () => {
 
       expect(res.body.data.length).toBe(5);
       expect(res.body.data).toEqual(
-        expect.arrayContaining(data.bed.map(bed => transformToRESTResource(bed)))
+        expect.arrayContaining(data.bed.map((bed) => transformToRESTResource(bed)))
       );
       expect(res.body.meta).toMatchObject({
         pagination: {
@@ -224,7 +221,7 @@ describe('Search query', () => {
 
       expect(res.body.data.length).toBe(3);
 
-      const expected = [data.bed[0], data.bed[1], data.bed[4]].map(bed =>
+      const expected = [data.bed[0], data.bed[1], data.bed[4]].map((bed) =>
         transformToRESTResource(bed)
       );
 
@@ -254,7 +251,7 @@ describe('Search query', () => {
 
       expect(res.body.data.length).toBe(2);
 
-      const expected = [data.bed[0], data.bed[4]].map(bed => transformToRESTResource(bed));
+      const expected = [data.bed[0], data.bed[4]].map((bed) => transformToRESTResource(bed));
       expect(res.body.data).toEqual(expect.arrayContaining(expected));
     });
 
@@ -272,7 +269,7 @@ describe('Search query', () => {
 
       expect(res.body.data.length).toBe(2);
 
-      const expected = data.bed.slice(0, 2).map(bed => transformToRESTResource(bed));
+      const expected = data.bed.slice(0, 2).map((bed) => transformToRESTResource(bed));
       expect(res.body.data).toEqual(expect.arrayContaining(expected));
     });
 

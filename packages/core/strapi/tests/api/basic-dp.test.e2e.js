@@ -50,10 +50,7 @@ const productWithDP = {
 
 describe('Core API - Basic + draftAndPublish', () => {
   beforeAll(async () => {
-    await builder
-      .addComponent(compo)
-      .addContentType(productWithDP)
-      .build();
+    await builder.addComponent(compo).addContentType(productWithDP).build();
 
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
@@ -136,7 +133,7 @@ describe('Core API - Basic + draftAndPublish', () => {
       ])
     );
 
-    body.data.forEach(p => {
+    body.data.forEach((p) => {
       expect(p.attributes.publishedAt).toBeISODate();
     });
   });

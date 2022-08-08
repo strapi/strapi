@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import CustomRadioGroup from '../CustomRadioGroup';
 
 const BooleanRadioGroup = ({ onChange, name, ...rest }) => {
-  const handleChange = e => {
+  const handleChange = (e) => {
     const checked = e.target.value !== 'false';
 
     onChange({ target: { name, value: checked, type: 'boolean-radio-group' } });

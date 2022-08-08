@@ -112,8 +112,8 @@ module.exports = {
 
       const fileTable = strapi.getModel(FILE_MODEL_UID).collectionName;
       const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
-      const folderPathColName = strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath
-        .columnName;
+      const folderPathColName =
+        strapi.db.metadata.get(FILE_MODEL_UID).attributes.folderPath.columnName;
       const pathColName = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.path.columnName;
 
       if (existingFolders.length > 0) {
@@ -131,7 +131,7 @@ module.exports = {
             .queryBuilder(joinTable.name)
             .transacting(trx)
             .insert(
-              existingFolders.map(folder => ({
+              existingFolders.map((folder) => ({
                 [joinTable.inverseJoinColumn.name]: destinationFolderId,
                 [joinTable.joinColumn.name]: folder.id,
               }))
@@ -199,7 +199,7 @@ module.exports = {
             .queryBuilder(fileJoinTable.name)
             .transacting(trx)
             .insert(
-              existingFiles.map(file => ({
+              existingFiles.map((file) => ({
                 [fileJoinTable.inverseJoinColumn.name]: destinationFolderId,
                 [fileJoinTable.joinColumn.name]: file.id,
               }))

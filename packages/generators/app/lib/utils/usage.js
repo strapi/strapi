@@ -41,7 +41,7 @@ function captureStderr(name, error) {
     error.stderr
       .trim()
       .split('\n')
-      .forEach(line => {
+      .forEach((line) => {
         sentry.addBreadcrumb({
           category: 'stderr',
           message: line,

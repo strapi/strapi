@@ -26,7 +26,7 @@ module.exports = {
             ...rest,
           };
 
-          sendmail(removeUndefined(msg), err => {
+          sendmail(removeUndefined(msg), (err) => {
             if (err) {
               reject(err);
             } else {
