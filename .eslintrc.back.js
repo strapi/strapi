@@ -2,11 +2,7 @@
 
 module.exports = {
   extends: [
-    'eslint:recommended',
-    'prettier',
-    'plugin:import/errors',
-    'plugin:import/warnings',
-    'plugin:node/recommended',
+    '@strapi/eslint-config/back',
     // 'plugin:jsdoc/recommended',
   ],
   plugins: ['jsdoc'],
