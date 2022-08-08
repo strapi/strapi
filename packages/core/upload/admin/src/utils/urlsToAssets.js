@@ -4,9 +4,9 @@ import { typeFromMime } from './typeFromMime';
 
 /**
  * The URL might have query parameters.
- * Remove them to have a clean URL instead.
+ * Remove them to have a clean URL instead to use as a filename.
  */
-function cleanURL(url) {
+function cleanUrl(url) {
   // Break URL at ? and take first part (file name, extension)
   url = url.split('?')[0];
 
@@ -25,7 +25,7 @@ export const urlsToAssets = async urls => {
         timeout: 60000,
       })
       .then(res => {
-        const loadedFile = new File([res.data], cleanURL(res.config.url), {
+        const loadedFile = new File([res.data], cleanUrl(res.config.url), {
           type: res.headers['content-type'],
         });
 
