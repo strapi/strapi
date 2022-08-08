@@ -5,28 +5,6 @@ import StrikedWorld from '@strapi/icons/EarthStriked';
 import LabelAction from '../components/LabelAction';
 import { getTrad } from '../utils';
 
-const enhanceRelationLayout = (layout, locale) =>
-  layout.map(current => {
-    const labelActionProps = {
-      title: {
-        id: getTrad('Field.localized'),
-        defaultMessage: 'This value is unique for the selected locale',
-      },
-      icon: <I18N aria-hidden />,
-    };
-    let queryInfos = current.queryInfos;
-
-    if (get(current, ['targetModelPluginOptions', 'i18n', 'localized'], false)) {
-      queryInfos = {
-        ...queryInfos,
-        defaultParams: { ...queryInfos.defaultParams, locale },
-        paramsToKeep: ['plugins.i18n.locale'],
-      };
-    }
-
-    return { ...current, labelAction: <LabelAction {...labelActionProps} />, queryInfos };
-  });
-
 const enhanceEditLayout = layout =>
   layout.map(row => {
     const enhancedRow = row.reduce((acc, field) => {
@@ -120,15 +98,11 @@ const mutateEditViewLayoutHook = ({ layout, query }) => {
   }
 
   const editLayoutPath = getPathToContentType(['layouts', 'edit']);
-  const editRelationsPath = getPathToContentType(['layouts', 'editRelations']);
   const editLayout = get(layout, editLayoutPath);
-  const editRelationsLayout = get(layout, editRelationsPath);
-  const nextEditRelationLayout = enhanceRelationLayout(editRelationsLayout, currentLocale);
   const nextEditLayout = enhanceEditLayout(editLayout);
 
   const enhancedLayouts = {
     ...layout.contentType.layouts,
-    editRelations: nextEditRelationLayout,
     edit: nextEditLayout,
   };
 
@@ -150,9 +124,4 @@ const mutateEditViewLayoutHook = ({ layout, query }) => {
 };
 
 export default mutateEditViewLayoutHook;
-export {
-  enhanceComponentLayoutForRelations,
-  enhanceComponentsLayout,
-  enhanceEditLayout,
-  enhanceRelationLayout,
-};
+export { enhanceComponentLayoutForRelations, enhanceComponentsLayout, enhanceEditLayout };

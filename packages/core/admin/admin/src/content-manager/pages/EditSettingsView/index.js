@@ -369,7 +369,6 @@ EditSettingsView.propTypes = {
     info: PropTypes.object.isRequired,
     layouts: PropTypes.shape({
       list: PropTypes.array.isRequired,
-      editRelations: PropTypes.array.isRequired,
       edit: PropTypes.array.isRequired,
     }).isRequired,
     metadatas: PropTypes.object.isRequired,

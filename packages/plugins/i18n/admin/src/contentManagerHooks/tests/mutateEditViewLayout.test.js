@@ -6,7 +6,6 @@ import { getTrad } from '../../utils';
 import mutateEditViewLayout, {
   enhanceComponentsLayout,
   enhanceEditLayout,
-  enhanceRelationLayout,
 } from '../mutateEditViewLayout';
 
 const localizedTrad = getTrad('Field.localized');
@@ -42,16 +41,6 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
         pluginOptions: { i18n: { localized: true } },
         layouts: {
           edit: [],
-          editRelations: [
-            {
-              fieldSchema: {},
-              metadatas: {},
-              name: 'addresses',
-              queryInfos: {},
-              size: 6,
-              targetModelPluginOptions: {},
-            },
-          ],
         },
       },
     };
@@ -63,72 +52,6 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
     const results = mutateEditViewLayout(data);
 
     expect(results).toEqual(data);
-  });
-
-  it('should modify the editRelations layout when i18n is enabled and the query.locale is defined', () => {
-    const layout = {
-      contentType: {
-        uid: 'test',
-        pluginOptions: { i18n: { localized: true } },
-        layouts: {
-          edit: [],
-          editRelations: [
-            {
-              fieldSchema: {},
-              metadatas: {},
-              name: 'addresses',
-              queryInfos: {
-                test: true,
-                defaultParams: {},
-                paramsToKeep: ['plugins.i18n.locale'],
-              },
-              size: 6,
-              targetModelPluginOptions: {},
-            },
-          ],
-        },
-      },
-      components: {},
-    };
-
-    const data = {
-      layout,
-      query: { plugins: { i18n: { locale: 'en' } } },
-    };
-    const results = mutateEditViewLayout(data);
-
-    expect(results).toEqual({
-      ...data,
-      layout: {
-        ...layout,
-        contentType: {
-          ...layout.contentType,
-          layouts: {
-            edit: [],
-            editRelations: [
-              {
-                fieldSchema: {},
-                metadatas: {},
-                name: 'addresses',
-                queryInfos: {
-                  test: true,
-                  defaultParams: {},
-                  paramsToKeep: ['plugins.i18n.locale'],
-                },
-                size: 6,
-                targetModelPluginOptions: {},
-                labelAction: (
-                  <LabelAction
-                    title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
-                    icon={<I18N aria-hidden />}
-                  />
-                ),
-              },
-            ],
-          },
-        },
-      },
-    });
   });
 
   describe('enhanceComponentsLayout', () => {
@@ -457,84 +380,6 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
       ];
 
       expect(enhanceEditLayout(edit)).toEqual(expected);
-    });
-  });
-
-  describe('enhanceRelationLayout', () => {
-    it('should add the labelIcon key to all relations fields', () => {
-      const editRelations = [
-        {
-          fieldSchema: {},
-          metadatas: {},
-          name: 'addresses',
-          queryInfos: {},
-          size: 6,
-          targetModelPluginOptions: {},
-        },
-      ];
-      const expected = [
-        {
-          fieldSchema: {},
-          metadatas: {},
-          name: 'addresses',
-          queryInfos: {},
-          size: 6,
-          targetModelPluginOptions: {},
-          labelAction: (
-            <LabelAction
-              title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
-              icon={<I18N aria-hidden />}
-            />
-          ),
-        },
-      ];
-
-      expect(enhanceRelationLayout(editRelations, 'en')).toEqual(expected);
-    });
-
-    it('should add the locale to the queryInfos.defaultParams when the targetModelPluginOptions.i18n.localized is enabled', () => {
-      const editRelations = [
-        {
-          fieldSchema: {},
-          metadatas: {},
-          name: 'addresses',
-          queryInfos: {
-            defaultParams: {
-              test: true,
-            },
-          },
-          size: 6,
-          targetModelPluginOptions: {
-            i18n: { localized: true },
-          },
-        },
-      ];
-      const expected = [
-        {
-          fieldSchema: {},
-          metadatas: {},
-          name: 'addresses',
-          queryInfos: {
-            defaultParams: {
-              test: true,
-              locale: 'en',
-            },
-            paramsToKeep: ['plugins.i18n.locale'],
-          },
-          size: 6,
-          targetModelPluginOptions: {
-            i18n: { localized: true },
-          },
-          labelAction: (
-            <LabelAction
-              title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
-              icon={<I18N aria-hidden />}
-            />
-          ),
-        },
-      ];
-
-      expect(enhanceRelationLayout(editRelations, 'en')).toEqual(expected);
     });
   });
 });

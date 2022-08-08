@@ -666,10 +666,6 @@ components:
               type: array
               items:
                 type: string
-            editRelations:
-              type: array
-              items:
-                type: string
             edit:
               type: array
               items:
