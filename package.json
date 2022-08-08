@@ -71,7 +71,7 @@
     "@babel/polyfill": "7.12.1"
   },
   "devDependencies": {
-    "@swc/core": "1.2.218",
+    "@swc/core": "1.2.224",
     "@swc/jest": "0.2.22",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
