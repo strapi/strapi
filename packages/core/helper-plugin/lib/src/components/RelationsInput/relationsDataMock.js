@@ -1,42 +1,42 @@
 export const relations = [
   {
-    title: 'This is my first article relation',
+    label: 'This is my first article relation',
     status: 'published',
-    id: 1,
+    value: 1,
   },
   {
-    title: 'This is my second article relation',
+    label: 'This is my second article relation',
     status: 'draft',
-    id: 2,
+    value: 2,
   },
   {
-    title: 'This is my third article relation',
+    label: 'This is my third article relation',
     status: 'published',
-    id: 3,
+    value: 3,
   },
   {
-    title: 'This is my fourth article relation',
+    label: 'This is my fourth article relation',
     status: 'published',
-    id: 4,
+    value: 4,
   },
   {
-    title: 'This is my fifth article relation',
+    label: 'This is my fifth article relation',
     status: 'published',
-    id: 5,
+    value: 5,
   },
   {
-    title: 'This is my sixth article relation',
+    label: 'This is my sixth article relation',
     status: 'draft',
-    id: 6,
+    value: 6,
   },
   {
-    title: 'This is my seventh article relation',
+    label: 'This is my seventh article relation',
     status: 'published',
-    id: 7,
+    value: 7,
   },
   {
-    title: 'This is my eighth article relation',
+    label: 'This is my eighth article relation',
     status: 'published',
-    id: 8,
+    value: 8,
   },
 ];

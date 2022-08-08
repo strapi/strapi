@@ -1,13 +1,20 @@
 <!--- RelationsInput.stories.mdx --->
 
+import { useState } from 'react';
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
-import { BaseLink } from '@strapi/design-system/BaseLink';
+import { Box } from '@strapi/design-system/Box';
+import { Icon } from '@strapi/design-system/Icon';
 import { Typography } from '@strapi/design-system/Typography';
 import { Badge } from '@strapi/design-system/Badge';
-import { Icon } from '@strapi/design-system/Icon';
+import { BaseLink } from '@strapi/design-system/BaseLink';
+import { TextButton } from '@strapi/design-system/TextButton';
+import { FieldLabel } from '@strapi/design-system/Field';
 import Cross from '@strapi/icons/Cross';
-import { ShadowList, RelationItem } from './index';
-import { relations } from './relationsDataMock';
+import Refresh from '@strapi/icons/Refresh';
+
+import { Relation, ShadowList, RelationItem } from './index';
+import { relations as defaultEntries } from './relationsDataMock';
+import ReactSelect from './../ReactSelect';
 
 <Meta title="components/RelationsInput" />
 
@@ -20,30 +27,63 @@ WIP
 <Canvas>
   <Story name="base">
     {() => {
+      const [entries, setEntries] = useState(defaultEntries);
+      const [relations, setRelations] = useState([]);
+      const handleAddRelation = e => {
+        setRelations(prev => [...prev, e]);
+        const filteredEntries = entries.filter(entry => entry.value !== e.value);
+        setEntries(filteredEntries);
+      };
+      const handleRemoveRelation = relationToRemove => {
+        const filteredRelations = relations.filter(relation => relation.value !== relationToRemove.value)
+        setRelations(filteredRelations);
+        setEntries(prev => [...prev, relationToRemove])
+      };
       return (
-        <Main>
-          <ShadowList overflowing="both">
-            {relations.map(relation => {
-              const { title, status } = relation;
-              const variant = status === 'published' ? 'success' : 'secondary';
-              return (
-                <RelationItem endAction={<button type="button"><Icon width="12px" as={Cross} /></button>}>
-                  <BaseLink href="/">
-                    <Typography textColor="primary600">{title}</Typography>
-                  </BaseLink>
-                  <Badge
-                    borderSize={1}
-                    borderColor={`${variant}200`}
-                    backgroundColor={`${variant}100`}
-                    textColor={`${variant}700`}
+        <Box maxWidth="60%">
+          <Relation
+            rightAction={
+              <TextButton onClick={() => {}} startIcon={<Refresh />}>
+                Load more
+              </TextButton>
+            }
+            leftAction={
+              <>
+                <FieldLabel htmlFor="articles-relation">{`Articles (${relations.length})`}</FieldLabel>
+                <ReactSelect inputId="articles-relation" onChange={handleAddRelation} options={entries} />
+              </>
+            }
+          >           
+            <ShadowList overflowing="both">
+              {relations && relations.map(relation => {
+                const { label, status, value } = relation;
+                const variant = status === 'published' ? 'success' : 'secondary';
+                return (
+                  <RelationItem
+                    key={value}
+                    endAction={
+                      <button type="button" onClick={() => handleRemoveRelation(relation)}>
+                        <Icon width="12px" as={Cross} />
+                      </button>
+                    }
                   >
-                    {status}
-                  </Badge>
-                </RelationItem>
-              );
-            })}
-          </ShadowList>
-        </Main>
+                    <BaseLink href="/">
+                      <Typography textColor="primary600">{label}</Typography>
+                    </BaseLink>
+                    <Badge
+                      borderSize={1}
+                      borderColor={`${variant}200`}
+                      backgroundColor={`${variant}100`}
+                      textColor={`${variant}700`}
+                    >
+                      {status}
+                    </Badge>
+                  </RelationItem>
+                );
+              })}
+            </ShadowList>
+          </Relation>
+        </Box>
       );
     }}
   </Story>
