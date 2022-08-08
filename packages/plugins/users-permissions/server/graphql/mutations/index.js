@@ -25,6 +25,7 @@ module.exports = context => {
     register: require('./auth/register'),
     forgotPassword: require('./auth/forgot-password'),
     resetPassword: require('./auth/reset-password'),
+    changePassword: require('./auth/change-password'),
     emailConfirmation: require('./auth/email-confirmation'),
   };
 
