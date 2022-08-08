@@ -89,7 +89,7 @@ module.exports = {
       request: { body, files: { files } = {} },
     } = ctx;
 
-    const data = await validateUploadBody(body);
+    const data = await validateUploadBody(body, Array.isArray(files));
 
     const apiUploadFolderService = getService('api-upload-folder');
 
