@@ -70,7 +70,9 @@ module.exports = ({ strapi }) => ({
 
     let ext = '.' + extension(type);
     // If it is a file , get the extension from the filename.
-    ext = ext === '.bin' ? path.extname(filename) : '.bin';
+    if (ext === '.bin') {
+      ext = path.extname(filename);
+    }
     const basename = path.basename(fileInfo.name || filename, ext);
     const usedName = fileInfo.name || filename;
 
