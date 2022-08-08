@@ -2,6 +2,21 @@ import axios from 'axios';
 import { AssetSource } from '../constants';
 import { typeFromMime } from './typeFromMime';
 
+/**
+ * The URL might have query parameters.
+ * Remove them to have a clean URL instead.
+ */
+function cleanURL(url) {
+  // Break URL at ? and take first part (file name, extension)
+  url = url.split('?')[0];
+
+  // Sometimes URL doesn't have ? but #
+  url = url.split('#')[0];
+
+  // Cleaned URL
+  return url;
+}
+
 export const urlsToAssets = async urls => {
   const assetPromises = urls.map(url =>
     axios
@@ -10,7 +25,7 @@ export const urlsToAssets = async urls => {
         timeout: 60000,
       })
       .then(res => {
-        const loadedFile = new File([res.data], res.config.url, {
+        const loadedFile = new File([res.data], cleanURL(res.config.url), {
           type: res.headers['content-type'],
         });
 

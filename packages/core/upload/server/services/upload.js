@@ -70,7 +70,7 @@ module.exports = ({ strapi }) => ({
 
     let ext = path.extname(filename);
     if (!ext) {
-      ext = extension(type);
+      ext = '.' + extension(type);
     }
     const basename = path.basename(fileInfo.name || filename, ext);
     const usedName = fileInfo.name || filename;
