@@ -167,12 +167,12 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test('Fails to create a custom api token without permissions', async () => {
+  test('Creates a custom api token (successfully)', async () => {
     const body = {
       name: 'api-token_tests-custom',
       description: 'api-token_tests-description',
       type: 'custom',
-      permissions: [],
+      permissions: ['admin::subject.action', 'plugin::foo.bar.action'],
     };
 
     const res = await rq({
@@ -181,7 +181,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       body,
     });
 
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
