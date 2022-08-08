@@ -94,13 +94,13 @@ describe('Admin API Token CRUD (e2e)', () => {
       error: {
         status: 400,
         name: 'ValidationError',
-        message: 'type must be one of the following values: read-only, full-access',
+        message: 'type must be one of the following values: read-only, full-access, custom',
         details: {
           errors: [
             {
               path: ['type'],
               name: 'ValidationError',
-              message: 'type must be one of the following values: read-only, full-access',
+              message: 'type must be one of the following values: read-only, full-access, custom',
             },
           ],
         },
@@ -125,6 +125,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
+      permissions: [],
       description: body.description,
       type: body.type,
       id: expect.any(Number),
@@ -150,6 +151,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
+      permissions: [],
       description: '',
       type: body.type,
       id: expect.any(Number),
@@ -176,6 +178,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: 'api-token_tests-spaces-at-the-end',
+      permissions: [],
       description: 'api-token_tests-description-with-spaces-at-the-end',
       type: body.type,
       id: expect.any(Number),
@@ -197,6 +200,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       {
         id: expect.any(Number),
         name: 'api-token_tests-name',
+        permissions: [],
         description: 'api-token_tests-description',
         type: 'read-only',
         createdAt: expect.any(String),
@@ -204,6 +208,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       {
         id: expect.any(Number),
         name: 'api-token_tests-spaces-at-the-end',
+        permissions: [],
         description: 'api-token_tests-description-with-spaces-at-the-end',
         type: 'read-only',
         createdAt: expect.any(String),
@@ -211,6 +216,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       {
         id: expect.any(Number),
         name: 'api-token_tests-without-description',
+        permissions: [],
         description: '',
         type: 'full-access',
         createdAt: expect.any(String),
@@ -227,6 +233,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toStrictEqual({
       name: apiTokens[2].name,
+      permissions: apiTokens[2].permissions,
       description: apiTokens[2].description,
       type: apiTokens[2].type,
       id: apiTokens[2].id,
@@ -253,6 +260,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toStrictEqual({
       name: apiTokens[0].name,
+      permissions: apiTokens[0].permissions,
       description: apiTokens[0].description,
       type: apiTokens[0].type,
       id: apiTokens[0].id,
@@ -294,6 +302,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toStrictEqual({
       name: body.name,
+      permissions: body.permissions,
       description: body.description,
       type: body.type,
       id: apiTokens[0].id,
@@ -342,6 +351,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toMatchObject({
       name: apiTokens[0].name,
+      permissions: apiTokens[0].permissions,
       description: body.description,
       type: apiTokens[0].type,
       id: apiTokens[0].id,
@@ -371,13 +381,13 @@ describe('Admin API Token CRUD (e2e)', () => {
         details: {
           errors: [
             {
-              message: 'type must be one of the following values: read-only, full-access',
+              message: 'type must be one of the following values: read-only, full-access, custom',
               name: 'ValidationError',
               path: ['type'],
             },
           ],
         },
-        message: 'type must be one of the following values: read-only, full-access',
+        message: 'type must be one of the following values: read-only, full-access, custom',
         name: 'ValidationError',
         status: 400,
       },
@@ -398,6 +408,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toMatchObject({
       name: apiTokens[0].name,
+      permissions: apiTokens[0].permissions,
       description: '',
       type: apiTokens[0].type,
       id: apiTokens[0].id,
@@ -422,6 +433,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.body.data).toMatchObject({
       name: body.name,
       description: apiTokens[0].description,
+      permissions: apiTokens[0].permissions,
       type: apiTokens[0].type,
       id: apiTokens[0].id,
       createdAt: apiTokens[0].createdAt,
