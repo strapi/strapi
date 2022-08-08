@@ -28,7 +28,7 @@
     "@storybook/addon-essentials": "6.4.10",
     "@storybook/addon-interactions": "6.4.10",
     "@storybook/addon-links": "6.4.10",
-    "@storybook/react": "^6.3.7",
+    "@storybook/react": "^6.5.10",
     "@storybook/testing-library": "^0.0.9",
     "babel-loader": "^8.2.4",
     "babel-plugin-macros": "3.1.0",
