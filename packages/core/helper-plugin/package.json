@@ -73,7 +73,7 @@
     "@storybook/addon-links": "6.5.9",
     "@storybook/builder-webpack5": "6.5.9",
     "@storybook/manager-webpack5": "6.4.10",
-    "@storybook/react": "^6.3.7",
+    "@storybook/react": "^6.5.10",
     "@strapi/design-system": "1.2.1",
     "@strapi/icons": "1.2.1",
     "babel-loader": "^8.2.5",
