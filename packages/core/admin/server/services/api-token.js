@@ -2,6 +2,7 @@
 
 const crypto = require('crypto');
 const { map, omit, differenceBy } = require('lodash/fp');
+const constants = require('../services/constants');
 
 /**
  * @typedef {'read-only'|'full-access'|'custom'} TokenType
@@ -98,7 +99,7 @@ const create = async attributes => {
   const result = { ...apiToken, accessKey };
 
   // If this is a custom type token, create and link the associated permissions
-  if (attributes.type === 'custom') {
+  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM) {
     const permissions = await strapi
       .query('admin::token-permission')
       .createMany({ data: attributes.permissions.map(action => ({ action, token: apiToken.id })) });
