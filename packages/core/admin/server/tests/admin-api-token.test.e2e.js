@@ -47,6 +47,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       ),
     });
 
+    expect(req.status).toEqual(201);
     return req.body.data;
   };
 
