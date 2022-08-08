@@ -4,10 +4,6 @@ const { omit, map, orderBy } = require('lodash');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
-// TODO: fails when permissions are sent with full-access
-// TODO: fails when permissions are sent with read-only
-// TODO: fails when permissions are NOT sent with custom
-
 describe('Admin API Token v2 CRUD (e2e)', () => {
   let rq;
   let strapi;
@@ -154,6 +150,32 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
+    expect(res.body.data).toStrictEqual({
+      accessKey: expect.any(String),
+      name: body.name,
+      permissions: body.permissions,
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+      createdAt: expect.any(String),
+    });
+  });
+
+  test('Fails to create a custom api token without permissions', async () => {
+    const body = {
+      name: 'api-token_tests-custom',
+      description: 'api-token_tests-description',
+      type: 'custom',
+      permissions: [],
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(400);
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
