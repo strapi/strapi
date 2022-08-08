@@ -413,4 +413,224 @@ describe('Uploads folder', () => {
       uploadFolder = file.folder;
     });
   });
+
+  describe('Upload with multiple files', () => {
+    test('Uploaded files go into a specific folder', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: [
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fs.createReadStream(path.join(__dirname, '../utils/strapi.jpg')),
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const {
+        body: { results: files },
+      } = await rqAdmin({
+        method: 'GET',
+        url: '/upload/files',
+        qs: {
+          filters: {
+            id: {
+              $in: res.body.map(({ id }) => id),
+            },
+          },
+          populate: '*',
+        },
+      });
+
+      files.forEach(file =>
+        expect(file).toMatchObject({
+          folder: {
+            name: 'API Uploads (3)',
+            pathId: expect.any(Number),
+          },
+          folderPath: `/${file.folder.pathId}`,
+        })
+      );
+
+      expect(files.every(file => file.folder.id === files[0].folder.id)).toBe(true);
+
+      uploadFolder = files[0].folder;
+    });
+
+    test('Uploaded files with fileInfo', async () => {
+      const fileInfo = [
+        {
+          name: 'file1',
+          alternativeText: 'file1',
+          caption: 'file1',
+        },
+        {
+          name: 'file2',
+          alternativeText: 'file2',
+          caption: 'file2',
+        },
+      ];
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: [
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fs.createReadStream(path.join(__dirname, '../utils/strapi.jpg')),
+          ],
+          fileInfo: fileInfo.map(JSON.stringify),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const {
+        body: { results: files },
+      } = await rqAdmin({
+        method: 'GET',
+        url: '/upload/files',
+        qs: {
+          filters: {
+            id: {
+              $in: res.body.map(({ id }) => id),
+            },
+          },
+          populate: '*',
+        },
+      });
+
+      files.forEach((file, index) =>
+        expect(file).toMatchObject({
+          ...fileInfo[index],
+          folder: {
+            name: 'API Uploads (3)',
+            pathId: expect.any(Number),
+          },
+          folderPath: `/${file.folder.pathId}`,
+        })
+      );
+
+      expect(files.every(file => file.folder.id === files[0].folder.id)).toBe(true);
+
+      uploadFolder = files[0].folder;
+    });
+
+    test('Uploads folder is recreated if deleted', async () => {
+      await rqAdmin({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: {
+          folderIds: [uploadFolder.id],
+        },
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: [
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fs.createReadStream(path.join(__dirname, '../utils/strapi.jpg')),
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const {
+        body: { results: files },
+      } = await rqAdmin({
+        method: 'GET',
+        url: '/upload/files',
+        qs: {
+          filters: {
+            id: {
+              $in: res.body.map(({ id }) => id),
+            },
+          },
+          populate: '*',
+        },
+      });
+
+      files.forEach(file => {
+        expect(file).toMatchObject({
+          folder: {
+            name: 'API Uploads (3)',
+            pathId: expect.any(Number),
+          },
+          folderPath: `/${file.folder.pathId}`,
+        });
+        expect(file.folder.id).not.toBe(uploadFolder.id);
+      });
+
+      expect(files.every(file => file.folder.id === files[0].folder.id)).toBe(true);
+
+      uploadFolder = files[0].folder;
+    });
+
+    test('Uploads folder is recreated if deleted (handle duplicates)', async () => {
+      await rqAdmin({
+        method: 'POST',
+        url: '/upload/actions/bulk-delete',
+        body: {
+          folderIds: [uploadFolder.id],
+        },
+      });
+
+      await rqAdmin({
+        method: 'POST',
+        url: '/upload/folders',
+        body: {
+          name: 'API Uploads (3)',
+          parent: null,
+        },
+      });
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: [
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fs.createReadStream(path.join(__dirname, '../utils/strapi.jpg')),
+          ],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const {
+        body: { results: files },
+      } = await rqAdmin({
+        method: 'GET',
+        url: '/upload/files',
+        qs: {
+          filters: {
+            id: {
+              $in: res.body.map(({ id }) => id),
+            },
+          },
+          populate: '*',
+        },
+      });
+
+      files.forEach(file => {
+        expect(file).toMatchObject({
+          folder: {
+            name: 'API Uploads (4)',
+            pathId: expect.any(Number),
+          },
+          folderPath: `/${file.folder.pathId}`,
+        });
+        expect(file.folder.id).not.toBe(uploadFolder.id);
+      });
+
+      expect(files.every(file => file.folder.id === files[0].folder.id)).toBe(true);
+
+      uploadFolder = files[0].folder;
+    });
+  });
 });
