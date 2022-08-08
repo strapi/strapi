@@ -10,12 +10,14 @@ const addItemsToFormSection = (formTypeOptions, sections) => {
     if (!has(item, 'sectionTitle')) {
       // When there is no sectionTitle key,
       // add the item to the default section
-      return sections[0].items.push(item);
+      sections[0].items.push(item);
+
+      return;
     }
 
     // Otherwise, when no sectionTitle is present or sectionTitle has a value (including null),
     // add the item as a new section
-    return sections.push(item);
+    sections.push(item);
   });
 };
 

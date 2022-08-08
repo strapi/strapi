@@ -7,6 +7,7 @@ import { createComponentSchema, componentForm } from '../component';
 import { dynamiczoneForm } from '../dynamicZone';
 import { nameField } from '../attributes/nameField';
 import addItemsToFormSection from './utils/addItemsToFormSection';
+import getTrad from '../../../utils/getTrad';
 
 const getUsedAttributeNames = (attributes, schemaData) => {
   return attributes
@@ -52,12 +53,30 @@ const forms = {
 
         return { sections };
       },
-      advanced({ customField }) {
+      advanced({ customField, data, step, extensions, ...rest }) {
         // Default section with no fields
         const sections = [{ sectionTitle: null, items: [] }];
+        const injectedInputs = extensions.getAdvancedForm(['attribute', customField.type], {
+          data,
+          type: customField.type,
+          step,
+          ...rest,
+        });
 
         if (customField.options?.advanced) {
           addItemsToFormSection(customField.options.advanced, sections);
+        }
+
+        if (injectedInputs) {
+          const extendedSettings = {
+            sectionTitle: {
+              id: getTrad('modalForm.custom-fields.advanced.settings.extended'),
+              defaultMessage: 'Extended settings',
+            },
+            items: injectedInputs,
+          };
+
+          sections.push(extendedSettings);
         }
 
         return { sections };

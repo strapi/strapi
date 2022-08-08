@@ -14,7 +14,6 @@ const FormModalNavigationProvider = ({ children }) => {
       return {
         ...prevState,
         actionType: 'create',
-        // TODO: Create a new modalType on EXPANSION-245
         modalType: 'customField',
         attributeType,
         customFieldUid,
