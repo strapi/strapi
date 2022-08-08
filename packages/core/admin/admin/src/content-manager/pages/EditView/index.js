@@ -5,11 +5,9 @@ import { CheckPermissions, useTracking, LinkButton } from '@strapi/helper-plugin
 import { useIntl } from 'react-intl';
 import { ContentLayout } from '@strapi/design-system/Layout';
 import { Box } from '@strapi/design-system/Box';
-import { Divider } from '@strapi/design-system/Divider';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
-import { Typography } from '@strapi/design-system/Typography';
 import Layer from '@strapi/icons/Layer';
 import Pencil from '@strapi/icons/Pencil';
 import { InjectionZone } from '../../../shared/components';
@@ -17,7 +15,6 @@ import permissions from '../../../permissions';
 import DynamicZone from '../../components/DynamicZone';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
-import SelectWrapper from '../../components/SelectWrapper';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
@@ -86,9 +83,6 @@ const EditView = ({
       currentContentTypeLayoutData.attributes
     );
   }, [currentContentTypeLayoutData]);
-
-  const relationsLayout = currentContentTypeLayoutData.layouts.editRelations;
-  const displayedRelationsLength = relationsLayout.length;
 
   return (
     <DataManagementWrapper allLayoutData={layout} slug={slug} id={id} origin={origin}>
@@ -246,64 +240,6 @@ const EditView = ({
                         <Informations />
                         <InjectionZone area="contentManager.editView.informations" />
                       </Box>
-                      {displayedRelationsLength > 0 && (
-                        <Box
-                          as="aside"
-                          aria-labelledby="relations-title"
-                          background="neutral0"
-                          borderColor="neutral150"
-                          hasRadius
-                          paddingBottom={4}
-                          paddingLeft={4}
-                          paddingRight={4}
-                          paddingTop={6}
-                          shadow="tableShadow"
-                        >
-                          <Typography variant="sigma" textColor="neutral600" id="relations-title">
-                            {formatMessage(
-                              {
-                                id: getTrad('containers.Edit.relations'),
-                                defaultMessage:
-                                  '{number, plural, =0 {relations} one {relation} other {relations}}',
-                              },
-                              { number: displayedRelationsLength }
-                            )}
-                          </Typography>
-                          <Box paddingTop={2} paddingBottom={6}>
-                            <Divider />
-                          </Box>
-                          <Stack spacing={4}>
-                            {relationsLayout.map(
-                              ({ name, fieldSchema, labelAction, metadatas, queryInfos }) => {
-                                return (
-                                  <SelectWrapper
-                                    {...fieldSchema}
-                                    {...metadatas}
-                                    key={name}
-                                    description={metadatas.description}
-                                    intlLabel={{
-                                      id: metadatas.label,
-                                      defaultMessage: metadatas.label,
-                                    }}
-                                    labelAction={labelAction}
-                                    name={name}
-                                    relationsType={fieldSchema.relationType}
-                                    queryInfos={queryInfos}
-                                    placeholder={
-                                      metadatas.placeholder
-                                        ? {
-                                            id: metadatas.placeholder,
-                                            defaultMessage: metadatas.placeholder,
-                                          }
-                                        : null
-                                    }
-                                  />
-                                );
-                              }
-                            )}
-                          </Stack>
-                        </Box>
-                      )}
                       <Box as="aside" aria-labelledby="links">
                         <Stack spacing={2}>
                           <InjectionZone area="contentManager.editView.right-links" slug={slug} />

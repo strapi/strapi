@@ -13,9 +13,7 @@ const addressSchema = {
       targetModel: 'api::category.category',
     },
   },
-  layouts: {
-    editRelations: ['categories'],
-  },
+  layouts: {},
   metadatas: {
     categories: {
       edit: {
@@ -134,7 +132,6 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           uid: 'contentType',
           layouts: {
             list: [],
-            editRelations: [],
             edit: [
               [{ name: 'dz', size: 12 }],
               [
