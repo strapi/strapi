@@ -21,7 +21,7 @@
     "@babel/polyfill": "7.12.1"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "5.16.4",
+    "@testing-library/jest-dom": "5.16.5",
     "jest-styled-components": "7.0.2"
   },
   "scripts": {
