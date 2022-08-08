@@ -35,12 +35,12 @@ const POPULATE_FIELDS = ['permissions'];
 
 const assertCustomTokenPermissionsValidity = attributes => {
   // Ensure non-custom tokens doesn't have permissions
-  if (attributes.type !== 'custom' && attributes.permissions) {
+  if (attributes.type !== constants.API_TOKEN_TYPE.CUSTOM && attributes.permissions) {
     throw new Error('Non-custom tokens should not references permissions');
   }
 
   // Custom type tokens should always have permissions attached to them
-  if (attributes.type === 'custom' && !attributes.permissions) {
+  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM && !attributes.permissions) {
     throw new Error('Missing permissions attributes for custom token');
   }
 };
