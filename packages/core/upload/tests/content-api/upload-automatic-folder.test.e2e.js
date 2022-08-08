@@ -433,11 +433,78 @@ describe('Uploads folder', () => {
         body: { results: files },
       } = await rqAdmin({
         method: 'GET',
-        url: `/upload/files?filters[id][$in][0]=${res.body[0].id}&filters[id][$in][1]=${res.body[1].id}`,
+        url: '/upload/files',
+        qs: {
+          filters: {
+            id: {
+              $in: res.body.map(({ id }) => id),
+            },
+          },
+          populate: '*',
+        },
       });
 
       files.forEach(file =>
         expect(file).toMatchObject({
+          folder: {
+            name: 'API Uploads (3)',
+            pathId: expect.any(Number),
+          },
+          folderPath: `/${file.folder.pathId}`,
+        })
+      );
+
+      expect(files.every(file => file.folder.id === files[0].folder.id)).toBe(true);
+
+      uploadFolder = files[0].folder;
+    });
+
+    test('Uploaded files with fileInfo', async () => {
+      const fileInfo = [
+        {
+          name: 'file1',
+          alternativeText: 'file1',
+          caption: 'file1',
+        },
+        {
+          name: 'file2',
+          alternativeText: 'file2',
+          caption: 'file2',
+        },
+      ];
+
+      const res = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: [
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fs.createReadStream(path.join(__dirname, '../utils/strapi.jpg')),
+          ],
+          fileInfo: fileInfo.map(JSON.stringify),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+
+      const {
+        body: { results: files },
+      } = await rqAdmin({
+        method: 'GET',
+        url: '/upload/files',
+        qs: {
+          filters: {
+            id: {
+              $in: res.body.map(({ id }) => id),
+            },
+          },
+          populate: '*',
+        },
+      });
+
+      files.forEach((file, index) =>
+        expect(file).toMatchObject({
+          ...fileInfo[index],
           folder: {
             name: 'API Uploads (3)',
             pathId: expect.any(Number),
@@ -477,7 +544,15 @@ describe('Uploads folder', () => {
         body: { results: files },
       } = await rqAdmin({
         method: 'GET',
-        url: `/upload/files?filters[id][$in][0]=${res.body[0].id}&filters[id][$in][1]=${res.body[1].id}`,
+        url: '/upload/files',
+        qs: {
+          filters: {
+            id: {
+              $in: res.body.map(({ id }) => id),
+            },
+          },
+          populate: '*',
+        },
       });
 
       files.forEach(file => {
@@ -531,7 +606,15 @@ describe('Uploads folder', () => {
         body: { results: files },
       } = await rqAdmin({
         method: 'GET',
-        url: `/upload/files?filters[id][$in][0]=${res.body[0].id}&filters[id][$in][1]=${res.body[1].id}`,
+        url: '/upload/files',
+        qs: {
+          filters: {
+            id: {
+              $in: res.body.map(({ id }) => id),
+            },
+          },
+          populate: '*',
+        },
       });
 
       files.forEach(file => {
