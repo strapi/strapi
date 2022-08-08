@@ -17,7 +17,7 @@
     <img src="https://img.shields.io/npm/v/@strapi/strapi/latest.svg" alt="NPM Version" />
   </a>
   <a href="https://github.com/strapi/strapi/actions/workflows/tests.yml">
-    <img src="https://github.com/strapi/strapi/actions/workflows/tests.yml/badge.svg?branch=master" alt="Tests" />
+    <img src="https://github.com/strapi/strapi/actions/workflows/tests.yml/badge.svg?branch=main" alt="Tests" />
   </a>
   <a href="https://discord.strapi.io">
     <img src="https://img.shields.io/discord/811989166782021633?label=Discord" alt="Strapi on Discord" />
