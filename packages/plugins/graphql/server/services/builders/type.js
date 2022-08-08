@@ -130,7 +130,7 @@ module.exports = context => {
     const { buildAssociationResolver } = getGraphQLService('builders').get('content-api');
     const extension = getGraphQLService('extension');
 
-    let { builder } = options;
+    const { builder } = options;
     const { attributeName, attribute, contentType } = options;
     const fileUID = 'plugin::upload.file';
 
@@ -207,7 +207,7 @@ module.exports = context => {
     const { buildAssociationResolver } = getGraphQLService('builders').get('content-api');
     const extension = getGraphQLService('extension');
 
-    let { builder } = options;
+    const { builder } = options;
     const { attributeName, attribute, contentType } = options;
 
     if (extension.shadowCRUD(attribute.target).isDisabled()) {

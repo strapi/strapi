@@ -8,7 +8,7 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let uid = 'api::single-type-model.single-type-model';
+const uid = 'api::single-type-model.single-type-model';
 
 const ct = {
   kind: 'singleType',

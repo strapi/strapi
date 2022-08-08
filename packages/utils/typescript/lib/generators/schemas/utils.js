@@ -42,7 +42,7 @@ const getSchemaInterfaceName = pipe(replace(/(:.)/, ' '), camelCase, upperFirst)
 const getSchemaExtendsTypeName = schema => {
   const base = getSchemaModelType(schema);
 
-  return upperFirst(base) + 'Schema';
+  return `${upperFirst(base)}Schema`;
 };
 
 const getSchemaModelType = schema => {
@@ -54,7 +54,7 @@ const getSchemaModelType = schema => {
   }
 
   // Content-Types
-  else if (modelType === 'contentType') {
+  if (modelType === 'contentType') {
     return kind;
   }
 

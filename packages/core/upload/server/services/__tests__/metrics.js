@@ -4,7 +4,7 @@ const metricsService = require('../metrics');
 
 // TODO: the matcher exists in jest@28
 const closeTo = (expected, precision = 2) => ({
-  asymmetricMatch: actual => Math.abs(expected - actual) < Math.pow(10, -precision) / 2,
+  asymmetricMatch: actual => Math.abs(expected - actual) < 10 ** -precision / 2,
 });
 
 describe('metrics', () => {

@@ -1,4 +1,5 @@
 /* eslint-disable no-unreachable */
+
 'use strict';
 
 const { join } = require('path');
@@ -151,8 +152,8 @@ async function askDatabaseInfos(scope) {
 }
 
 async function installDatabaseTestingDep({ scope, configuration }) {
-  let packageManager = scope.useYarn ? 'yarnpkg' : 'npm';
-  let cmd = scope.useYarn
+  const packageManager = scope.useYarn ? 'yarnpkg' : 'npm';
+  const cmd = scope.useYarn
     ? ['--cwd', scope.tmpPath, 'add']
     : ['install', '--prefix', scope.tmpPath];
 

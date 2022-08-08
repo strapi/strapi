@@ -1,6 +1,6 @@
 'use strict';
 
-//TODO: move to dbal
+// TODO: move to dbal
 
 const _ = require('lodash');
 const parseType = require('./parse-type');
@@ -114,7 +114,8 @@ const normalizeWhereClauses = (whereClauses, { model }) => {
     .filter(({ field, value }) => {
       if (_.isNull(value)) {
         return false;
-      } else if (_.isUndefined(value)) {
+      }
+      if (_.isUndefined(value)) {
         strapi.log.warn(`The value of field: '${field}', in your where filter, is undefined.`);
         return false;
       }

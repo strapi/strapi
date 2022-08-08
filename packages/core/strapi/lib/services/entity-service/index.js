@@ -47,7 +47,7 @@ module.exports = ctx => {
         throw new Error(`Decorator must be a function, received ${typeof decorator}`);
       }
 
-      this.implementation = Object.assign({}, this.implementation, decorator(this.implementation));
+      this.implementation = { ...this.implementation, ...decorator(this.implementation) };
       return this;
     },
   };

@@ -145,9 +145,7 @@ describe('Create Strapi API End to End', () => {
 
     test('Update article1 add tag2', async () => {
       const { id, attributes } = data.articles[0];
-      const entry = Object.assign({}, attributes, {
-        tags: [data.tags[1].id],
-      });
+      const entry = { ...attributes, tags: [data.tags[1].id] };
 
       cleanDate(entry);
 
@@ -174,7 +172,7 @@ describe('Create Strapi API End to End', () => {
 
     test('Update article1 add tag1 and tag3', async () => {
       const { id, attributes } = data.articles[0];
-      const entry = Object.assign({}, attributes);
+      const entry = { ...attributes };
       entry.tags = data.tags.map(t => t.id);
 
       cleanDate(entry);
@@ -202,7 +200,7 @@ describe('Create Strapi API End to End', () => {
     test('Update article1 remove one tag', async () => {
       const { id, attributes } = data.articles[0];
 
-      const entry = Object.assign({}, attributes);
+      const entry = { ...attributes };
       entry.tags = entry.tags.data.slice(1).map(t => t.id);
 
       cleanDate(entry);
@@ -229,9 +227,7 @@ describe('Create Strapi API End to End', () => {
 
     test('Update article1 remove all tag', async () => {
       const { id, attributes } = data.articles[0];
-      const entry = Object.assign({}, attributes, {
-        tags: [],
-      });
+      const entry = { ...attributes, tags: [] };
 
       cleanDate(entry);
 
@@ -338,9 +334,7 @@ describe('Create Strapi API End to End', () => {
 
     test('Update article1 with cat2', async () => {
       const { id, attributes } = data.articles[0];
-      const entry = Object.assign({}, attributes, {
-        category: data.categories[1].id,
-      });
+      const entry = { ...attributes, category: data.categories[1].id };
 
       cleanDate(entry);
 
@@ -389,9 +383,7 @@ describe('Create Strapi API End to End', () => {
     test('Update article2 with cat2', async () => {
       const { id, attributes } = data.articles[1];
 
-      const entry = Object.assign({}, attributes, {
-        category: data.categories[1].id,
-      });
+      const entry = { ...attributes, category: data.categories[1].id };
 
       cleanDate(entry);
 
@@ -419,7 +411,7 @@ describe('Create Strapi API End to End', () => {
     test('Update cat1 with article1', async () => {
       const { id, attributes } = data.categories[0];
 
-      const entry = Object.assign({}, attributes);
+      const entry = { ...attributes };
       entry.articles = data.categories[0].attributes.articles.data
         .map(a => a.id)
         .concat(data.articles[0].id);
@@ -590,9 +582,7 @@ describe('Create Strapi API End to End', () => {
 
     test('Update article1 with ref1', async () => {
       const { id, attributes } = data.articles[0];
-      const entry = Object.assign({}, attributes, {
-        reference: data.references[0].id,
-      });
+      const entry = { ...attributes, reference: data.references[0].id };
 
       cleanDate(entry);
 

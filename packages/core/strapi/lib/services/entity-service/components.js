@@ -307,9 +307,9 @@ const deleteComponents = async (uid, entityToDelete) => {
   }
 };
 
-/***************************
+/** *************************
     Component queries
-***************************/
+************************** */
 
 // components can have nested compos so this must be recursive
 const createComponent = async (uid, data) => {

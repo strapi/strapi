@@ -21,7 +21,7 @@ module.exports = ({ strapi }) => ({
     const folderTable = strapi.getModel(FOLDER_MODEL_UID).collectionName;
 
     let keepOnlySlashesSQLString = '??';
-    let queryParams = [pathColName];
+    const queryParams = [pathColName];
     for (let i = 0; i < 10; i += 1) {
       keepOnlySlashesSQLString = `REPLACE(${keepOnlySlashesSQLString}, ?, ?)`;
       queryParams.push(String(i), '');

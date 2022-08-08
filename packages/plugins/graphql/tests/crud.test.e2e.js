@@ -61,7 +61,7 @@ describe('Test Graphql API End to End', () => {
       { name: 'post 1', bigint: 1316130638171, nullable: 'value', category: 'BLOG' },
       { name: 'post 2', bigint: 1416130639261, nullable: null, category: 'PRODUCT' },
     ];
-    let data = {
+    const data = {
       posts: [],
     };
 
@@ -487,7 +487,7 @@ describe('Test Graphql API End to End', () => {
     });
 
     test('Delete Posts', async () => {
-      for (let post of data.posts) {
+      for (const post of data.posts) {
         const res = await graphqlQuery({
           query: /* GraphQL */ `
             mutation deletePost($id: ID!) {

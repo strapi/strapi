@@ -1,6 +1,6 @@
 'use strict';
 
-const domain = require('../');
+const domain = require('..');
 
 describe('Condition Domain', () => {
   describe('assignConditionId', () => {

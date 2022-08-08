@@ -8,7 +8,7 @@ let strapi;
 let rq;
 const builder = createTestBuilder();
 
-let data = {
+const data = {
   stamps: [],
   collectors: [],
 };

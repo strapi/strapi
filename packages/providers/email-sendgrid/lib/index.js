@@ -12,7 +12,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
-          let msg = {
+          const msg = {
             from: from || settings.defaultFrom,
             to,
             cc,

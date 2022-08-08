@@ -26,7 +26,7 @@ const parseTime = value => {
 const parseDate = value => {
   if (dates.isDate(value)) return dates.format(value, 'yyyy-MM-dd');
   try {
-    let date = dates.parseISO(value);
+    const date = dates.parseISO(value);
 
     if (dates.isValid(date)) return dates.format(date, 'yyyy-MM-dd');
 

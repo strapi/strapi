@@ -34,7 +34,7 @@ module.exports = {
       throw new ApplicationError('model.not.localized');
     }
 
-    let params = modelDef.kind === 'singleType' ? {} : { id };
+    const params = modelDef.kind === 'singleType' ? {} : { id };
 
     const entity = await strapi
       .query(model)

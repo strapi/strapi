@@ -7,7 +7,7 @@ const { createContentAPIRequest } = require('../../../../../test/helpers/request
 let builder;
 let strapi;
 let rq;
-let data = {
+const data = {
   productsWithCompo: [],
 };
 

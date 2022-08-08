@@ -64,13 +64,13 @@ const getConfigUrls = (config, forAdminBuild = false) => {
 
 const getAbsoluteUrl = adminOrServer => (config, forAdminBuild = false) => {
   const { serverUrl, adminUrl } = getConfigUrls(config, forAdminBuild);
-  let url = adminOrServer === 'server' ? serverUrl : adminUrl;
+  const url = adminOrServer === 'server' ? serverUrl : adminUrl;
 
   if (url.startsWith('http')) {
     return url;
   }
 
-  let hostname =
+  const hostname =
     config.get('environment') === 'development' &&
     ['127.0.0.1', '0.0.0.0'].includes(config.get('server.host'))
       ? 'localhost'

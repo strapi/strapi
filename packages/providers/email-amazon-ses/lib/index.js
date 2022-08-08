@@ -5,14 +5,14 @@ const { removeUndefined } = require('@strapi/utils');
 
 module.exports = {
   init(providerOptions = {}, settings = {}) {
-    var client = nodeSES.createClient({ ...providerOptions });
+    const client = nodeSES.createClient({ ...providerOptions });
 
     return {
       send(options) {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
-          let msg = {
+          const msg = {
             from: from || settings.defaultFrom,
             to,
             cc,

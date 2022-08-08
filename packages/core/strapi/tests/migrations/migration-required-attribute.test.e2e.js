@@ -8,7 +8,7 @@ const modelsUtils = require('../../../../../test/helpers/models');
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let data = {
+const data = {
   dogs: [],
 };
 
@@ -63,7 +63,7 @@ describe('Migration - required attribute', () => {
 
   describe('Required: false -> true', () => {
     test('Can be null before migration', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         method: 'GET',
         url: '/content-manager/collection-types/api::dog.dog',
       });

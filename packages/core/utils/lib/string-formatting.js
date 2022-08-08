@@ -1,4 +1,5 @@
 'use strict';
+
 const _ = require('lodash');
 const { trimChars, trimCharsEnd, trimCharsStart } = require('lodash/fp');
 const slugify = require('@sindresorhus/slugify');

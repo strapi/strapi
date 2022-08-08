@@ -72,7 +72,7 @@ module.exports = ({ strapi }) => {
 
         // If this is a to-many relation, it returns an object that
         // matches what the entity-response-collection's resolvers expect
-        else if (isToMany) {
+        if (isToMany) {
           return toEntityResponseCollection(data, info);
         }
 

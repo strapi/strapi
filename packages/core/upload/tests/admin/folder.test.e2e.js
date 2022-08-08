@@ -11,12 +11,12 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
 let rq;
-let data = {
+const data = {
   folders: [],
 };
 
 const rootPathRegex = /^\/[0-9]*$/i;
-const getFolderPathRegex = pathId => new RegExp('^/' + pathId + '/[0-9]*$', 'i');
+const getFolderPathRegex = pathId => new RegExp(`^/${pathId}/[0-9]*$`, 'i');
 
 const createFolder = async (name, parent = null) => {
   const res = await rq({

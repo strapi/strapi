@@ -1,6 +1,7 @@
 /**
  * Simple worker queue in memory
  */
+
 'use strict';
 
 const debug = require('debug')('strapi:worker-queue');

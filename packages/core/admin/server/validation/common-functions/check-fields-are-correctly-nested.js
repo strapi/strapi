@@ -6,7 +6,8 @@ const checkFieldsAreCorrectlyNested = fields => {
   if (_.isNil(fields)) {
     // Only check if the fields exist
     return true;
-  } else if (!Array.isArray(fields)) {
+  }
+  if (!Array.isArray(fields)) {
     return false;
   }
 

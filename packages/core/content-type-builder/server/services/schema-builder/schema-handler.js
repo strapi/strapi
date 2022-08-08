@@ -123,14 +123,14 @@ module.exports = function createSchemaHandler(infos) {
 
     setAttributes(newAttributes) {
       // delete old configurable attributes
-      for (let key in this.schema.attributes) {
+      for (const key in this.schema.attributes) {
         if (isConfigurable(this.schema.attributes[key])) {
           this.deleteAttribute(key);
         }
       }
 
       // set new Attributes
-      for (let key in newAttributes) {
+      for (const key in newAttributes) {
         this.setAttribute(key, newAttributes[key]);
       }
 

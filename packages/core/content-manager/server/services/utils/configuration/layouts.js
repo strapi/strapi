@@ -79,12 +79,12 @@ function syncLayouts(configuration, schema) {
 
   let cleanEditRelations = editRelations.filter(attr => hasRelationAttribute(schema, attr));
 
-  let elementsToReAppend = [];
+  const elementsToReAppend = [];
   let cleanEdit = [];
-  for (let row of edit) {
-    let newRow = [];
+  for (const row of edit) {
+    const newRow = [];
 
-    for (let el of row) {
+    for (const el of row) {
       if (!hasEditableAttribute(schema, el.name)) continue;
 
       /* if the type of a field was changed (ex: string -> json) or a new field was added in the schema
@@ -153,11 +153,11 @@ const appendToEditLayout = (layout = [], keysToAppend, schema) => {
     layout[currentRowIndex] = [];
   }
 
-  for (let key of keysToAppend) {
+  for (const key of keysToAppend) {
     const attribute = schema.attributes[key];
 
     const attributeSize = getDefaultFieldSize(attribute.type);
-    let currenRowSize = rowSize(layout[currentRowIndex]);
+    const currenRowSize = rowSize(layout[currentRowIndex]);
 
     if (currenRowSize + attributeSize > MAX_ROW_SIZE) {
       currentRowIndex += 1;

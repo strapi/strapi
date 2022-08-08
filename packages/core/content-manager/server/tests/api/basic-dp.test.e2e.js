@@ -9,7 +9,7 @@ const { createAuthRequest } = require('../../../../../../test/helpers/request');
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let data = {
+const data = {
   productsWithDP: [],
 };
 
@@ -161,7 +161,7 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Publish a product, expect publishedAt to be defined', async () => {
     const entry = data.productsWithDP[0];
 
-    let { body } = await rq({
+    const { body } = await rq({
       url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
       method: 'POST',
     });
@@ -174,7 +174,7 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Publish article1, expect article1 to be already published', async () => {
     const entry = data.productsWithDP[0];
 
-    let { body } = await rq({
+    const { body } = await rq({
       url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
       method: 'POST',
     });
@@ -193,7 +193,7 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Unpublish article1, expect article1 to be set to null', async () => {
     const entry = data.productsWithDP[0];
 
-    let { body } = await rq({
+    const { body } = await rq({
       url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
       method: 'POST',
     });
@@ -206,7 +206,7 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Unpublish article1, expect article1 to already be a draft', async () => {
     const entry = data.productsWithDP[0];
 
-    let { body } = await rq({
+    const { body } = await rq({
       url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
       method: 'POST',
     });

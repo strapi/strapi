@@ -40,16 +40,15 @@ const generateNewPackageJSON = packageObj => {
         telemetryDisabled: false,
       },
     };
-  } else {
-    return {
-      ...packageObj,
-      strapi: {
-        ...packageObj.strapi,
-        uuid: packageObj.strapi.uuid ? packageObj.strapi.uuid : uuidv4(),
-        telemetryDisabled: false,
-      },
-    };
   }
+  return {
+    ...packageObj,
+    strapi: {
+      ...packageObj.strapi,
+      uuid: packageObj.strapi.uuid ? packageObj.strapi.uuid : uuidv4(),
+      telemetryDisabled: false,
+    },
+  };
 };
 
 const sendEvent = async uuid => {
@@ -64,7 +63,7 @@ const sendEvent = async uuid => {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (e) {
-    //...
+    // ...
   }
 };
 

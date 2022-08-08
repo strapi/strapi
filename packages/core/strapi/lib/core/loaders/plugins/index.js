@@ -40,11 +40,10 @@ const applyUserExtension = async plugins => {
     for (const ctName in plugin.contentTypes) {
       const extendedSchema = get([pluginName, 'content-types', ctName, 'schema'], extendedSchemas);
       if (extendedSchema) {
-        plugin.contentTypes[ctName].schema = Object.assign(
-          {},
-          plugin.contentTypes[ctName].schema,
-          extendedSchema
-        );
+        plugin.contentTypes[ctName].schema = {
+          ...plugin.contentTypes[ctName].schema,
+          ...extendedSchema,
+        };
       }
     }
     // second: execute strapi-server extension

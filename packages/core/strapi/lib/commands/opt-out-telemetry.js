@@ -38,7 +38,7 @@ const sendEvent = async uuid => {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (e) {
-    //...
+    // ...
   }
 };
 

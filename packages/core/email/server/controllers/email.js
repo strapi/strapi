@@ -10,7 +10,7 @@ const { ApplicationError } = require('@strapi/utils').errors;
  */
 module.exports = {
   async send(ctx) {
-    let options = ctx.request.body;
+    const options = ctx.request.body;
 
     try {
       await strapi

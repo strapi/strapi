@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 'use strict';
 
 // FIXME
@@ -13,7 +14,7 @@ const program = new Command();
 const packageJSON = require('../package.json');
 
 const checkCwdIsStrapiApp = name => {
-  let logErrorAndExit = () => {
+  const logErrorAndExit = () => {
     console.log(
       `You need to run ${yellow(
         `strapi ${name}`
@@ -23,7 +24,7 @@ const checkCwdIsStrapiApp = name => {
   };
 
   try {
-    const pkgJSON = require(process.cwd() + '/package.json');
+    const pkgJSON = require(`${process.cwd()}/package.json`);
     if (!_.has(pkgJSON, 'dependencies.@strapi/strapi')) {
       logErrorAndExit(name);
     }
@@ -69,7 +70,7 @@ program
   .command('version')
   .description('Output the version of Strapi')
   .action(() => {
-    process.stdout.write(packageJSON.version + '\n');
+    process.stdout.write(`${packageJSON.version}\n`);
     process.exit(0);
   });
 

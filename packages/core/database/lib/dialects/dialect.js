@@ -6,6 +6,7 @@ class Dialect {
   }
 
   configure() {}
+
   initialize() {}
 
   getSqlType(type) {
@@ -29,6 +30,7 @@ class Dialect {
   }
 
   async startSchemaUpdate() {}
+
   async endSchemaUpdate() {}
 
   transformErrors(error) {

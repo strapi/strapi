@@ -99,7 +99,7 @@ module.exports = ({ strapi }) => ({
 
     const settings = await pluginStore
       .get({ key: 'email' })
-      .then(storeEmail => storeEmail['email_confirmation'].options);
+      .then(storeEmail => storeEmail.email_confirmation.options);
 
     // Sanitize the template's user information
     const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(userSchema, user);

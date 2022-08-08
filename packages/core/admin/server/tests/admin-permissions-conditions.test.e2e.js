@@ -13,7 +13,7 @@ if (edition === 'EE') {
     let strapi;
     let utils;
     const builder = createTestBuilder();
-    let requests = {
+    const requests = {
       public: null,
       admin: null,
     };

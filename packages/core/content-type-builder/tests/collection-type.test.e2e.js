@@ -1,6 +1,7 @@
 /**
  * Integration test for the content-type-builder content types management apis
  */
+
 'use strict';
 
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');

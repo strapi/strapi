@@ -63,11 +63,11 @@ class BooleanField extends Field {
 
     if (strVal === '1') {
       return true;
-    } else if (strVal === '0') {
-      return false;
-    } else {
-      return null;
     }
+    if (strVal === '0') {
+      return false;
+    }
+    return null;
   }
 }
 
@@ -131,7 +131,7 @@ const parseDate = value => {
     );
   }
 
-  let date = dateFns.parseISO(extractedValue);
+  const date = dateFns.parseISO(extractedValue);
   if (!dateFns.isValid(date)) {
     throw new InvalidDateError(`Invalid date`);
   }

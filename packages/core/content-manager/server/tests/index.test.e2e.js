@@ -69,7 +69,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Create tag1', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
@@ -98,7 +98,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Create tag2', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
@@ -127,7 +127,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Create tag3', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
@@ -162,7 +162,7 @@ describe('Content Manager End to End', () => {
         date: '2019-08-13T00:00:00.000Z',
       };
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,
@@ -197,7 +197,7 @@ describe('Content Manager End to End', () => {
         tags: [data.tags[0].id],
       };
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,
@@ -227,13 +227,11 @@ describe('Content Manager End to End', () => {
     });
 
     test('Update article1 add tag2', async () => {
-      const entry = Object.assign({}, data.articles[0], {
-        tags: [data.tags[1].id],
-      });
+      const entry = { ...data.articles[0], tags: [data.tags[1].id] };
 
       cleanDate(entry);
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
@@ -263,7 +261,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Update article1 add tag1 and tag3', async () => {
-      const entry = Object.assign({}, data.articles[0]);
+      const entry = { ...data.articles[0] };
       entry.tags = entry.tags.map(tag => tag.id);
 
       entry.tags.push(data.tags[0].id);
@@ -271,7 +269,7 @@ describe('Content Manager End to End', () => {
 
       cleanDate(entry);
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
@@ -300,12 +298,12 @@ describe('Content Manager End to End', () => {
     });
 
     test('Update article1 remove one tag', async () => {
-      const entry = Object.assign({}, data.articles[0]);
+      const entry = { ...data.articles[0] };
       entry.tags = entry.tags.slice(1).map(tag => tag.id);
 
       cleanDate(entry);
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
@@ -334,13 +332,11 @@ describe('Content Manager End to End', () => {
     });
 
     test('Update article1 remove all tag', async () => {
-      const entry = Object.assign({}, data.articles[0], {
-        tags: [],
-      });
+      const entry = { ...data.articles[0], tags: [] };
 
       cleanDate(entry);
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
@@ -409,7 +405,7 @@ describe('Content Manager End to End', () => {
       expect(Array.isArray(articles[1].tags)).toBeTruthy();
       expect(articles[1].tags.length).toBe(1);
 
-      let { body: foundTag } = await rq({
+      const { body: foundTag } = await rq({
         url: `/content-manager/collection-types/api::tag.tag/${createdTag.id}`,
         method: 'GET',
       });
@@ -425,7 +421,7 @@ describe('Content Manager End to End', () => {
         },
       });
 
-      let { body: foundTag2 } = await rq({
+      const { body: foundTag2 } = await rq({
         url: `/content-manager/collection-types/api::tag.tag/${createdTag.id}`,
         method: 'GET',
       });
@@ -462,7 +458,7 @@ describe('Content Manager End to End', () => {
         tags: [createdTag.id],
       };
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::articlewithtag.articlewithtag',
         method: 'POST',
         body: entry,
@@ -502,7 +498,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Create cat1', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::category.category',
         method: 'POST',
         body: {
@@ -531,7 +527,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Create cat2', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::category.category',
         method: 'POST',
         body: {
@@ -566,7 +562,7 @@ describe('Content Manager End to End', () => {
         category: data.categories[0].id,
       };
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,
@@ -594,13 +590,11 @@ describe('Content Manager End to End', () => {
     });
 
     test('Update article1 with cat2', async () => {
-      const entry = Object.assign({}, data.articles[0], {
-        category: data.categories[1].id,
-      });
+      const entry = { ...data.articles[0], category: data.categories[1].id };
 
       cleanDate(entry);
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
@@ -633,7 +627,7 @@ describe('Content Manager End to End', () => {
         content: 'Content 2',
       };
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,
@@ -660,13 +654,11 @@ describe('Content Manager End to End', () => {
     });
 
     test('Update article2 with cat2', async () => {
-      const entry = Object.assign({}, data.articles[1], {
-        category: data.categories[1].id,
-      });
+      const entry = { ...data.articles[1], category: data.categories[1].id };
 
       cleanDate(entry);
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
@@ -694,13 +686,13 @@ describe('Content Manager End to End', () => {
     });
 
     test('Update cat1 with article1', async () => {
-      const entry = Object.assign({}, data.categories[0]);
+      const entry = { ...data.categories[0] };
       entry.articles = entry.articles.map(article => article.id);
       entry.articles.push(data.articles[0].id);
 
       cleanDate(entry);
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::category.category/${entry.id}`,
         method: 'PUT',
         body: entry,
@@ -732,7 +724,7 @@ describe('Content Manager End to End', () => {
         articles: [data.articles[0].id],
       };
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::category.category',
         method: 'POST',
         body: entry,
@@ -759,7 +751,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Get article1 with cat3', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::article.article/${data.articles[0].id}`,
         method: 'GET',
       });
@@ -781,7 +773,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Get article2 with cat2', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::article.article/${data.articles[1].id}`,
         method: 'GET',
       });
@@ -803,7 +795,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Get cat1 without relations', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}`,
         method: 'GET',
       });
@@ -825,7 +817,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Get cat2 with article2', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::category.category/${data.categories[1].id}`,
         method: 'GET',
       });
@@ -848,7 +840,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Get cat3 with article1', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::category.category/${data.categories[2].id}`,
         method: 'GET',
       });
@@ -884,7 +876,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Create ref1', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::reference.reference',
         method: 'POST',
         body: {
@@ -916,7 +908,7 @@ describe('Content Manager End to End', () => {
         content: 'Content 1',
       };
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,
@@ -943,13 +935,11 @@ describe('Content Manager End to End', () => {
     });
 
     test('Update article1 with ref1', async () => {
-      const entry = Object.assign({}, data.articles[0], {
-        reference: data.references[0].id,
-      });
+      const entry = { ...data.articles[0], reference: data.references[0].id };
 
       cleanDate(entry);
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
@@ -982,7 +972,7 @@ describe('Content Manager End to End', () => {
         reference: data.references[0].id,
       };
 
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,

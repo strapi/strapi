@@ -78,8 +78,6 @@ const createAuthentication = () => {
       if (typeof auth.strategy.verify === 'function') {
         return auth.strategy.verify(auth, config);
       }
-
-      return;
     },
   };
 };

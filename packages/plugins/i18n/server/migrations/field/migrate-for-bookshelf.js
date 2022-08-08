@@ -16,7 +16,7 @@ const batchInsertInTmpTable = async ({ updatesInfo }, { transacting: trx }) => {
 };
 
 const updateFromTmpTable = async ({ model, attributesToMigrate }, { transacting: trx }) => {
-  const collectionName = model.collectionName;
+  const { collectionName } = model;
   if (model.client === 'pg') {
     const substitutes = attributesToMigrate.map(() => '?? = ??.??').join(',');
     const bindings = [collectionName];

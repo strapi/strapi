@@ -12,7 +12,7 @@ const createCoreController = (uid, cfg = {}) => {
       contentType: strapi.contentType(uid),
     });
 
-    let userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
+    const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
 
     for (const methodName of Object.keys(baseController)) {
       if (userCtrl[methodName] === undefined) {
@@ -31,7 +31,7 @@ const createCoreService = (uid, cfg = {}) => {
       contentType: strapi.contentType(uid),
     });
 
-    let userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
+    const userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
 
     for (const methodName of Object.keys(baseService)) {
       if (userService[methodName] === undefined) {

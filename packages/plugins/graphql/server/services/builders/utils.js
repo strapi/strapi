@@ -35,7 +35,7 @@ module.exports = ({ strapi }) => {
       }
 
       // Collection Types
-      else if (kind === 'collectionType') {
+      if (kind === 'collectionType') {
         if (!multiple) {
           return { id: 'ID' };
         }
@@ -54,7 +54,7 @@ module.exports = ({ strapi }) => {
       }
 
       // Single Types
-      else if (kind === 'singleType') {
+      if (kind === 'singleType') {
         const params = {};
 
         if (hasDraftAndPublish(contentType)) {

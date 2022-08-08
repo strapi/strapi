@@ -87,11 +87,12 @@ const validateYupSchemaSync = (schema, options = {}) => (body, errorMessage) => 
 yup.setLocale({
   mixed: {
     notType({ path, type, value, originalValue }) {
-      let isCast = originalValue != null && originalValue !== value;
-      let msg =
+      const isCast = originalValue != null && originalValue !== value;
+      const msg =
         `${path} must be a \`${type}\` type, ` +
-        `but the final value was: \`${printValue(value, true)}\`` +
-        (isCast ? ` (cast from the value \`${printValue(originalValue, true)}\`).` : '.');
+        `but the final value was: \`${printValue(value, true)}\`${
+          isCast ? ` (cast from the value \`${printValue(originalValue, true)}\`).` : '.'
+        }`;
 
       /* Remove comment that is not supposed to be seen by the enduser
       if (value === null) {

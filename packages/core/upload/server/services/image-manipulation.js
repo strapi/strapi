@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * Image manipulation functions
  */
@@ -111,7 +112,7 @@ const optimize = async file => {
 
   if (newSize > size) {
     // Ignore optimization if output is bigger than original
-    return Object.assign({}, file, { width, height, size: bytesToKbytes(size) });
+    return { ...file, width, height, size: bytesToKbytes(size) };
   }
 
   return Object.assign(newFile, {

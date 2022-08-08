@@ -1261,7 +1261,7 @@ describe('Filtering API', () => {
     });
 
     test('Combined filters', async () => {
-      let res = await rq({
+      const res = await rq({
         method: 'GET',
         url: '/products',
         qs: {

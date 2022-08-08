@@ -6,7 +6,7 @@ const {
   validateRoleDeleteInput,
   validateRolesDeleteInput,
 } = require('../validation/role');
-const { getService } = require('../../../server//utils');
+const { getService } = require('../../../server/utils');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
 const { SUPER_ADMIN_CODE } = require('../../../server/services/constants');
 

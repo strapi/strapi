@@ -21,7 +21,7 @@ describe('Role CRUD End to End', () => {
   });
 
   test('Can get the existing permissions', async () => {
-    let res = await rq({
+    const res = await rq({
       url: '/admin/permissions',
       method: 'GET',
     });

@@ -10,7 +10,7 @@ const modelsUtils = require('../../../../../test/helpers/models');
 let builder;
 let strapi;
 let rq;
-let data = {
+const data = {
   dogs: [],
 };
 const dogModel = {
@@ -76,7 +76,7 @@ describe('Migration - draft and publish', () => {
 
     describe('Enabling D&P on a content-type', () => {
       test('No publishedAt before enabling the feature', async () => {
-        let { body } = await rq({
+        const { body } = await rq({
           url: '/content-manager/collection-types/api::dog.dog',
           method: 'GET',
         });
@@ -105,7 +105,7 @@ describe('Migration - draft and publish', () => {
 
         await restart();
 
-        let { body } = await rq({
+        const { body } = await rq({
           method: 'GET',
           url: '/content-manager/collection-types/api::dog.dog',
         });
@@ -149,7 +149,7 @@ describe('Migration - draft and publish', () => {
         // drafts should have been deleted with the migration, so we remove them
         data.dogs = data.dogs.filter(dog => !_.isNil(dog.publishedAt));
 
-        let { body } = await rq({
+        const { body } = await rq({
           url: '/content-manager/collection-types/api::dog.dog',
           method: 'GET',
         });

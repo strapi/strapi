@@ -70,7 +70,7 @@ describe('Upload image', () => {
   });
 
   test('Upload with thubmnail', async () => {
-    let fileData = getFileData(imageFilePath);
+    const fileData = getFileData(imageFilePath);
     const upload = jest.fn();
     mockUploadProvider(upload);
 
@@ -79,7 +79,7 @@ describe('Upload image', () => {
   });
 
   test('Upload with responsive formats', async () => {
-    let fileData = getFileData(imageFilePath);
+    const fileData = getFileData(imageFilePath);
     const upload = jest.fn();
     mockUploadProvider(upload, { responsiveDimensions: true });
 

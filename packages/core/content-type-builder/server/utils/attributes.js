@@ -45,8 +45,8 @@ const formatAttribute = (key, attribute) => {
   if (attribute.type === 'media') {
     return {
       type: 'media',
-      multiple: attribute.multiple ? true : false,
-      required: required ? true : false,
+      multiple: !!attribute.multiple,
+      required: !!required,
       configurable: configurable === false ? false : undefined,
       allowedTypes: attribute.allowedTypes,
       pluginOptions,
@@ -60,7 +60,7 @@ const formatAttribute = (key, attribute) => {
       target: attribute.target,
       targetAttribute: attribute.inversedBy || attribute.mappedBy || null,
       configurable: configurable === false ? false : undefined,
-      private: attribute.private ? true : false,
+      private: !!attribute.private,
       pluginOptions,
       // TODO: remove
       autoPopulate,

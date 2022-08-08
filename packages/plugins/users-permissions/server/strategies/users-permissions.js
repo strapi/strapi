@@ -77,7 +77,7 @@ const verify = async (auth, config) => {
     }
   }
 
-  let allowedActions = auth.allowedActions;
+  let { allowedActions } = auth;
 
   if (!allowedActions) {
     const permissions = await strapi.query('plugin::users-permissions.permission').findMany({

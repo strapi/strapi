@@ -75,12 +75,8 @@ const createOneToMany = (attributeName, attribute, meta, metadata) => {
       attributeName,
       meta,
     });
-  } else {
-    if (isOwner(attribute)) {
-      throw new Error(
-        'one side of a oneToMany cannot be the owner side in a bidirectional relation'
-      );
-    }
+  } else if (isOwner(attribute)) {
+    throw new Error('one side of a oneToMany cannot be the owner side in a bidirectional relation');
   }
 };
 
@@ -169,7 +165,7 @@ const createManyToMany = (attributeName, attribute, meta, metadata) => {
  * @param {ModelMetadata} meta
  * @param {Metadata} metadata
  */
-const createMorphToOne = (attributeName, attribute /*meta, metadata*/) => {
+const createMorphToOne = (attributeName, attribute /* meta, metadata */) => {
   const idColumnName = 'target_id';
   const typeColumnName = 'target_type';
 
@@ -354,7 +350,7 @@ const createRelation = (attributeName, attribute, meta, metadata) => {
  * @param {string} param.attributeName name of the associated attribute
  * @param {Object} param.meta model metadata
  */
-const createJoinColum = (metadata, { attribute, attributeName /*meta */ }) => {
+const createJoinColum = (metadata, { attribute, attributeName /* meta */ }) => {
   const targetMeta = metadata.get(attribute.target);
 
   const joinColumnName = _.snakeCase(`${attributeName}_id`);
@@ -395,7 +391,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
 
   const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_links`);
 
-  let joinColumnName = _.snakeCase(`${meta.singularName}_id`);
+  const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
   let inverseJoinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
 
   // if relation is slef referencing

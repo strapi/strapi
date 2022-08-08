@@ -1,4 +1,5 @@
 'use strict';
+
 jest.mock('fs-extra', () => ({
   ensureDir: jest.fn(() => Promise.resolve()),
   copy: jest.fn(() => Promise.resolve()),

@@ -255,7 +255,7 @@ describe('Role CRUD End to End', () => {
       ];
 
       test.each(rolesToCreate)('can create %p', async role => {
-        let res = await rq({
+        const res = await rq({
           url: '/admin/roles',
           method: 'POST',
           body: role,
@@ -465,7 +465,7 @@ describe('Role CRUD End to End', () => {
             },
           });
 
-          for (let role of roles) {
+          for (const role of roles) {
             res = await rq({
               url: `/admin/roles/${role.id}`,
               method: 'GET',
@@ -506,7 +506,7 @@ describe('Role CRUD End to End', () => {
           expect(res.statusCode).toBe(200);
           expect(res.body.data).toMatchObject(roles);
 
-          for (let roleId of rolesIds) {
+          for (const roleId of rolesIds) {
             res = await rq({
               url: `/admin/roles/${roleId}`,
               method: 'GET',

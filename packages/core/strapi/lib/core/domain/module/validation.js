@@ -12,9 +12,8 @@ const strapiServerSchema = yup
     routes: yup.lazy(value => {
       if (Array.isArray(value)) {
         return yup.array();
-      } else {
-        return yup.object();
       }
+      return yup.object();
     }),
     controllers: yup.object(),
     services: yup.object(),

@@ -336,12 +336,10 @@ const convertAndSanitizeFilters = (filters, schema) => {
     }
 
     // Handle operators
-    else {
-      if (['$null', '$notNull'].includes(key)) {
-        filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
-      } else if (isObject(value)) {
-        filters[key] = convertAndSanitizeFilters(value, schema);
-      }
+    else if (['$null', '$notNull'].includes(key)) {
+      filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
+    } else if (isObject(value)) {
+      filters[key] = convertAndSanitizeFilters(value, schema);
     }
 
     // Remove empty objects & arrays

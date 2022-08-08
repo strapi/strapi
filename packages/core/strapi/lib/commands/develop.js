@@ -97,7 +97,6 @@ const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin,
       case 'stop':
         process.exit(1);
       default:
-        return;
     }
   });
 
@@ -108,7 +107,7 @@ const workerProcess = ({ appDir, distDir, watchAdmin, polling, isTSProject }) =>
   const strapiInstance = strapi({
     distDir,
     autoReload: true,
-    serveAdminPanel: watchAdmin ? false : true,
+    serveAdminPanel: !watchAdmin,
   });
 
   const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);

@@ -118,7 +118,7 @@ module.exports = {
 
       if (existingFolders.length > 0) {
         // update folders' parent relation
-        const joinTable = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent.joinTable;
+        const { joinTable } = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
         await strapi.db
           .queryBuilder(joinTable.name)
           .transacting(trx)

@@ -168,7 +168,7 @@ describe('x-to-many RF Preview', () => {
   describe('Relation Nature', () => {
     test(`Throws if the relation's nature is not a x-to-many`, async () => {
       const url = getCMPrefixUrl(categoryModel.singularName);
-      const id = data.category[0].id;
+      const { id } = data.category[0];
 
       const { body, statusCode } = await rq.get(`${url}/${id}/product`);
 

@@ -104,8 +104,6 @@ const checkRequiredMiddlewares = middlewares => {
       )}".`
     );
   }
-
-  return;
 };
 
 module.exports = registerApplicationMiddlewares;

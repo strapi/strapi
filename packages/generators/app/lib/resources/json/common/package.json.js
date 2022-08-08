@@ -28,14 +28,13 @@ module.exports = opts => {
       strapi: 'strapi',
     },
     devDependencies: {},
-    dependencies: Object.assign(
-      {},
-      strapiDependencies.reduce((acc, key) => {
+    dependencies: {
+      ...strapiDependencies.reduce((acc, key) => {
         acc[key] = strapiVersion;
         return acc;
       }, {}),
-      additionalsDependencies
-    ),
+      ...additionalsDependencies,
+    },
     author: {
       name: 'A Strapi developer',
     },

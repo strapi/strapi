@@ -14,17 +14,12 @@ module.exports = (config, { strapi }) => async (ctx, next) => {
     },
   ];
 
-  return ratelimit.middleware(
-    Object.assign(
-      {},
-      {
-        interval: 1 * 60 * 1000,
-        max: 5,
-        prefixKey: `${ctx.request.path}:${ctx.request.ip}`,
-        message,
-      },
-      strapi.config.get('plugin.users-permissions.ratelimit'),
-      config
-    )
-  )(ctx, next);
+  return ratelimit.middleware({
+    interval: 1 * 60 * 1000,
+    max: 5,
+    prefixKey: `${ctx.request.path}:${ctx.request.ip}`,
+    message,
+    ...strapi.config.get('plugin.users-permissions.ratelimit'),
+    ...config,
+  })(ctx, next);
 };

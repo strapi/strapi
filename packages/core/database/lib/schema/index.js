@@ -87,7 +87,6 @@ const createSchemaProvider = db => {
       }
 
       debug('Schema unchanged');
-      return;
     },
   };
 };

@@ -143,7 +143,7 @@ const addUniqueValidator = (validator, { attr, model, updatedAttribute, entity }
       return true;
     }
 
-    let whereParams = entity
+    const whereParams = entity
       ? { $and: [{ [updatedAttribute.name]: value }, { $not: { id: entity.id } }] }
       : { [updatedAttribute.name]: value };
 

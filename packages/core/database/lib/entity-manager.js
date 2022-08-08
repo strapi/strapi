@@ -817,7 +817,7 @@ const createEntityManager = db => {
         populate,
       });
 
-      return Object.assign({}, entity, entry);
+      return { ...entity, ...entry };
     },
 
     // TODO: support multiple relations at once with the populate syntax

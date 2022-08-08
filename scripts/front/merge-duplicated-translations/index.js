@@ -1,4 +1,5 @@
 /* eslint-disable node/no-extraneous-require */
+
 'use strict';
 
 const path = require('path');
@@ -122,7 +123,7 @@ const merge = async valuesToMerge => {
   let current = 1;
   let mergedCount = 0;
 
-  for (let valueGroup of valuesToMerge) {
+  for (const valueGroup of valuesToMerge) {
     // Display
     console.clear();
     console.log(`${current}/${valuesToMerge.length}`);

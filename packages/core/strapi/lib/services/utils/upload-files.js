@@ -23,7 +23,7 @@ module.exports = async (uid, entity, files) => {
       return uid;
     }
 
-    let currentPath = [];
+    const currentPath = [];
     let tmpModel = modelDef;
     let modelUID = uid;
 

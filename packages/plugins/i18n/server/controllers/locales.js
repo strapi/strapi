@@ -57,7 +57,7 @@ module.exports = {
     const { user } = ctx.state;
     const { id } = ctx.params;
     const { body } = ctx.request;
-    let { isDefault, ...updates } = body;
+    const { isDefault, ...updates } = body;
 
     await validateUpdateLocaleInput(body);
 

@@ -24,31 +24,31 @@ const UID_REGEX = new RegExp('^[A-Za-z0-9-_.~]*$');
 
 const isValidName = {
   name: 'isValidName',
-  message: '${path} must match the following regex: ' + NAME_REGEX,
+  message: `\${path} must match the following regex: ${NAME_REGEX}`,
   test: val => val === '' || NAME_REGEX.test(val),
 };
 
 const isValidUID = {
   name: 'isValidUID',
-  message: '${path} must match the following regex: ' + UID_REGEX,
+  message: `\${path} must match the following regex: ${UID_REGEX}`,
   test: val => val === '' || UID_REGEX.test(val),
 };
 
 const isValidCategoryName = {
   name: 'isValidCategoryName',
-  message: '${path} must match the following regex: ' + CATEGORY_NAME_REGEX,
+  message: `\${path} must match the following regex: ${CATEGORY_NAME_REGEX}`,
   test: val => val === '' || CATEGORY_NAME_REGEX.test(val),
 };
 
 const isValidCollectionName = {
   name: 'isValidCollectionName',
-  message: '${path} must match the following regex: ' + COLLECTION_NAME_REGEX,
+  message: `\${path} must match the following regex: ${COLLECTION_NAME_REGEX}`,
   test: val => val === '' || COLLECTION_NAME_REGEX.test(val),
 };
 
 const isValidIcon = {
   name: 'isValidIcon',
-  message: '${path} must match the following regex: ' + ICON_REGEX,
+  message: `\${path} must match the following regex: ${ICON_REGEX}`,
   test: val => val === '' || ICON_REGEX.test(val),
 };
 

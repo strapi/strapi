@@ -1,4 +1,5 @@
 'use strict';
+
 const _ = require('lodash');
 
 const cleanSchemaAttributes = require('./utils/clean-schema-attributes');

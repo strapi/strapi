@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { DuplicateReporterPlugin } = require('duplicate-dependencies-webpack-plugin');
 const getPluginsPath = require('./utils/get-plugins-path');
 const webpackConfig = require('./webpack.config');

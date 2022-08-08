@@ -35,7 +35,7 @@ module.exports = {
       send(options) {
         const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
-        let data = {
+        const data = {
           from: from || settings.defaultFrom,
           to,
           cc,

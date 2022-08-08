@@ -2,6 +2,7 @@
  * Entity validator
  * Module that will validate input data for entity creation or edition
  */
+
 'use strict';
 
 const { has, assoc, prop, isObject } = require('lodash/fp');

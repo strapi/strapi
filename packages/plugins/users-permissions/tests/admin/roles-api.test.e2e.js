@@ -7,17 +7,17 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
 let rq;
-let data = {};
-let internals = {
+const data = {};
+const internals = {
   role: {
     name: 'Test Role',
     description: 'Some random test role',
   },
 };
 
-/*****************************
+/** ***************************
  * TESTS
- *****************************/
+ **************************** */
 describe('Roles API', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();

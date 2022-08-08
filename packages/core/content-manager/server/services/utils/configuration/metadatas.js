@@ -91,7 +91,7 @@ async function syncMetadatas(configuration, schema) {
     const { edit, list } = metasWithDefaults[key];
     const attr = schema.attributes[key];
 
-    let updatedMeta = { edit, list };
+    const updatedMeta = { edit, list };
     // update sortable attr
     if (list.sortable && !isSortable(schema, key)) {
       _.set(updatedMeta, ['list', 'sortable'], false);

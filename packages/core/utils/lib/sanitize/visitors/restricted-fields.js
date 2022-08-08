@@ -26,6 +26,5 @@ module.exports = (restrictedFields = null) => ({ key, path }, { remove }) => {
   );
   if (isRestrictedNested) {
     remove(key);
-    return;
   }
 };

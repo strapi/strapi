@@ -12,7 +12,7 @@ const getInitialProviders = ({ purest }) => ({
       .request()
       .then(({ body }) => {
         // Combine username and discriminator because discord username is not unique
-        var username = `${body.username}#${body.discriminator}`;
+        const username = `${body.username}#${body.discriminator}`;
         return {
           username,
           email: body.email,
@@ -264,7 +264,7 @@ const getInitialProviders = ({ purest }) => ({
           : body.strapiemail || body.email;
         if (!username || !email) {
           strapi.log.warn(
-            'CAS Response Body did not contain required attributes: ' + JSON.stringify(body)
+            `CAS Response Body did not contain required attributes: ${JSON.stringify(body)}`
           );
         }
         return {

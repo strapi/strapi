@@ -1,4 +1,5 @@
 /* eslint-disable no-unreachable */
+
 'use strict';
 
 // Add permissions

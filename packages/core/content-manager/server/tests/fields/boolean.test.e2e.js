@@ -46,7 +46,7 @@ describe('Test type boolean', () => {
   });
 
   test('Throws on invalid boolean value', async () => {
-    let res = await rq.post('/content-manager/collection-types/api::withboolean.withboolean', {
+    const res = await rq.post('/content-manager/collection-types/api::withboolean.withboolean', {
       body: { field: 'random' },
     });
 

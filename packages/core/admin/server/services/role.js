@@ -109,7 +109,7 @@ const find = (params = {}, populate) => {
  */
 const findAllWithUsersCount = async populate => {
   const roles = await strapi.query('admin::role').findMany({ populate });
-  for (let role of roles) {
+  for (const role of roles) {
     role.usersCount = await getUsersCount(role.id);
   }
 
@@ -171,7 +171,7 @@ const checkRolesIdForDeletion = async (ids = []) => {
     throw new ApplicationError('You cannot delete the super admin role');
   }
 
-  for (let roleId of ids) {
+  for (const roleId of ids) {
     const usersCount = await getUsersCount(roleId);
     if (usersCount !== 0) {
       throw new ApplicationError('Some roles are still assigned to some users');

@@ -18,7 +18,7 @@ const readTranslationFile = filePath => ({
 });
 
 const writeTranslationFile = file => {
-  fs.writeFileSync(file.filePath, JSON.stringify(file.fileContent, null, 2) + '\n');
+  fs.writeFileSync(file.filePath, `${JSON.stringify(file.fileContent, null, 2)}\n`);
 };
 
 const readAllTranslationFiles = () => {

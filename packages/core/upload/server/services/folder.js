@@ -113,7 +113,7 @@ const update = async (id, { name, parent }, { user }) => {
         .execute();
 
       // update parent folder (delete + insert; upsert not possible)
-      const joinTable = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent.joinTable;
+      const { joinTable } = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
       await strapi.db
         .queryBuilder(joinTable.name)
         .transacting(trx)
@@ -207,7 +207,7 @@ const exists = async (params = {}) => {
  * @returns {Promise<array>}
  */
 const getStructure = async () => {
-  const joinTable = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent.joinTable;
+  const { joinTable } = strapi.db.metadata.get(FOLDER_MODEL_UID).attributes.parent;
   const qb = strapi.db.queryBuilder(FOLDER_MODEL_UID);
   const alias = qb.getAlias();
   const folders = await qb

@@ -134,7 +134,7 @@ describe('Test Graphql Relations API End to End', () => {
   });
 
   describe('Test relations features', () => {
-    let data = {
+    const data = {
       labels: [],
       documents: [],
       people: [],
@@ -488,7 +488,7 @@ describe('Test Graphql Relations API End to End', () => {
     });
 
     test('Delete Labels and test Documents relations', async () => {
-      for (let label of data.labels) {
+      for (const label of data.labels) {
         const res = await graphqlQuery({
           query: /* GraphQL */ `
             mutation deleteLabel($id: ID!) {
@@ -579,7 +579,7 @@ describe('Test Graphql Relations API End to End', () => {
     });
 
     test('Delete Documents', async () => {
-      for (let document of data.documents) {
+      for (const document of data.documents) {
         const res = await graphqlQuery({
           query: /* GraphQL */ `
             mutation deleteDocument($id: ID!) {

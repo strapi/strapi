@@ -20,7 +20,7 @@ const parsePathWithVariables = routePath => {
     .parse(routePath)
     .map(token => {
       if (_.isObject(token)) {
-        return token.prefix + '{' + token.name + '}';
+        return `${token.prefix}{${token.name}}`;
       }
 
       return token;

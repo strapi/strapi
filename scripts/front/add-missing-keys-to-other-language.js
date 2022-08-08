@@ -4,6 +4,7 @@
 //   node scripts/front/add-missing-keys-to-other-language.js [language]
 // Example:
 //   node scripts/front/add-missing-keys-to-other-language.js vi
+
 'use strict';
 
 const { join, dirname } = require('path');

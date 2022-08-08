@@ -326,7 +326,7 @@ module.exports = {
       }
     }
 
-    let newUser = {
+    const newUser = {
       ...params,
       role: role.id,
       email: email.toLowerCase(),

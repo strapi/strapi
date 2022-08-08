@@ -11,7 +11,7 @@ const CREATOR_FIELDS = ['updatedBy', 'createdBy'];
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let data = {
+const data = {
   beds: [],
 };
 

@@ -117,7 +117,7 @@ module.exports = db => {
 
   const diffDefault = (oldColumn, column) => {
     const oldDefaultTo = oldColumn.defaultTo;
-    const defaultTo = column.defaultTo;
+    const { defaultTo } = column;
 
     if (oldDefaultTo === null || _.toLower(oldDefaultTo) === 'null') {
       return _.isNil(defaultTo) || _.toLower(defaultTo) === 'null';

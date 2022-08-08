@@ -4,7 +4,7 @@ const { isNil, camelCase } = require('lodash/fp');
 const Koa = require('koa');
 const createError = require('http-errors');
 const delegate = require('delegates');
-var statuses = require('statuses');
+const statuses = require('statuses');
 const { formatHttpError } = require('../errors');
 
 const addCustomMethods = app => {

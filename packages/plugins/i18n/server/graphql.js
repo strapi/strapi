@@ -209,7 +209,7 @@ module.exports = ({ strapi }) => ({
           return;
         }
 
-        const contentType = registryType.config.contentType;
+        const { contentType } = registryType.config;
 
         // Ignore non-localized content types
         if (!isLocalizedContentType(contentType)) {

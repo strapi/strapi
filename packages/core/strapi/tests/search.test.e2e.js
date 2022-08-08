@@ -11,7 +11,7 @@ const {
 const builder = createTestBuilder();
 let rq;
 let strapi;
-let data = {
+const data = {
   bed: [],
 };
 

@@ -39,7 +39,7 @@ describe('Admin User CRUD (e2e)', () => {
   let strapi;
 
   // Local test data used across the test suite
-  let testData = {
+  const testData = {
     firstSuperAdminUser: undefined,
     otherSuperAdminUsers: [],
     user: undefined,

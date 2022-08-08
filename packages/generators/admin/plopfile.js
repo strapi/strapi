@@ -46,10 +46,9 @@ module.exports = function(
     if (arguments.length === 2) {
       const condition = arguments[0];
       return leftShift(condition ? fn(this) : inverse(this));
-    } else {
-      const [a, operator, b] = Array.from(arguments).slice(0, end);
-      return leftShift(evaluateExpression(a, operator, b) ? fn(this) : inverse(this));
     }
+    const [a, operator, b] = Array.from(arguments).slice(0, end);
+    return leftShift(evaluateExpression(a, operator, b) ? fn(this) : inverse(this));
   });
   plop.setHelper('unless', function(/* ...args, options */) {
     const end = arguments.length - 1;
@@ -57,10 +56,9 @@ module.exports = function(
     if (arguments.length === 2) {
       const condition = arguments[0];
       return leftShift(!condition ? fn(this) : inverse(this));
-    } else {
-      const [a, operator, b] = Array.from(arguments).slice(0, end);
-      return leftShift(!evaluateExpression(a, operator, b) ? fn(this) : inverse(this));
     }
+    const [a, operator, b] = Array.from(arguments).slice(0, end);
+    return leftShift(!evaluateExpression(a, operator, b) ? fn(this) : inverse(this));
   });
   plop.setHelper('else', function(_, { fn }) {
     return leftShift(fn(this));

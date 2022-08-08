@@ -1,6 +1,7 @@
 /**
  * Webhook store is the implementation of webhook storage over the core_store
  */
+
 'use strict';
 
 const webhookModel = {

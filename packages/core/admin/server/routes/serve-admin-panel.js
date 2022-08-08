@@ -23,7 +23,7 @@ const registerAdminPanelRoute = ({ strapi }) => {
     }
 
     ctx.type = 'html';
-    ctx.body = fse.createReadStream(join(buildDir + '/index.html'));
+    ctx.body = fse.createReadStream(join(`${buildDir}/index.html`));
   };
 
   strapi.server.routes([

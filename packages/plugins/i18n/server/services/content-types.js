@@ -203,7 +203,7 @@ const getNestedPopulateOfNonLocalizedAttributes = modelUID => {
   const currentAttributesToPopulate = difference(nonLocalizedAttributes, scalarAttributes);
   const attributesToPopulate = [...currentAttributesToPopulate];
 
-  for (let attrName of currentAttributesToPopulate) {
+  for (const attrName of currentAttributesToPopulate) {
     const attr = schema.attributes[attrName];
     if (attr.type === 'component') {
       const nestedPopulate = getNestedPopulateOfNonLocalizedAttributes(attr.component).map(

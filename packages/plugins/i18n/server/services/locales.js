@@ -58,10 +58,9 @@ const setIsDefault = async locales => {
 
   if (Array.isArray(locales)) {
     return locales.map(locale => ({ ...locale, isDefault: actualDefault === locale.code }));
-  } else {
-    // single locale
-    return { ...locales, isDefault: actualDefault === locales.code };
   }
+  // single locale
+  return { ...locales, isDefault: actualDefault === locales.code };
 };
 
 const initDefaultLocale = async () => {

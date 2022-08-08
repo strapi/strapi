@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * Utils file containing file treatment utils
  */

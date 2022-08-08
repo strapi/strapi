@@ -1,5 +1,6 @@
 /* eslint-disable node/no-missing-require */
 /* eslint-disable node/no-extraneous-require */
+
 'use strict';
 
 const knex = require('knex');

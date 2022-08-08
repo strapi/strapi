@@ -2,7 +2,7 @@
 
 const { omit } = require('lodash/fp');
 const createConditionProvider = require('../provider');
-const domain = require('../');
+const domain = require('..');
 
 const providerMethods = [
   'register',

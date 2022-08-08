@@ -1,4 +1,5 @@
 'use strict';
+
 // FIXME
 /* eslint-disable import/extensions */
 const Sentry = require('@sentry/node');
