@@ -2,6 +2,7 @@
 
 const crypto = require('crypto');
 const { map, omit, differenceBy } = require('lodash/fp');
+const { ValidationError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 
 /**
@@ -36,12 +37,12 @@ const POPULATE_FIELDS = ['permissions'];
 const assertCustomTokenPermissionsValidity = attributes => {
   // Ensure non-custom tokens doesn't have permissions
   if (attributes.type !== constants.API_TOKEN_TYPE.CUSTOM && attributes.permissions) {
-    throw new Error('Non-custom tokens should not references permissions');
+    throw new ValidationError('Non-custom tokens should not references permissions');
   }
 
   // Custom type tokens should always have permissions attached to them
   if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM && !attributes.permissions) {
-    throw new Error('Missing permissions attributes for custom token');
+    throw new ValidationError('Missing permissions attributes for custom token');
   }
 };
 
