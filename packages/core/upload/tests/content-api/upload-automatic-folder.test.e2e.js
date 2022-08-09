@@ -444,7 +444,7 @@ describe('Uploads folder', () => {
         },
       });
 
-      files.forEach(file =>
+      files.forEach((file) =>
         expect(file).toMatchObject({
           folder: {
             name: 'API Uploads (3)',
@@ -454,7 +454,7 @@ describe('Uploads folder', () => {
         })
       );
 
-      expect(files.every(file => file.folder.id === files[0].folder.id)).toBe(true);
+      expect(files.every((file) => file.folder.id === files[0].folder.id)).toBe(true);
 
       uploadFolder = files[0].folder;
     });
@@ -513,7 +513,7 @@ describe('Uploads folder', () => {
         })
       );
 
-      expect(files.every(file => file.folder.id === files[0].folder.id)).toBe(true);
+      expect(files.every((file) => file.folder.id === files[0].folder.id)).toBe(true);
 
       uploadFolder = files[0].folder;
     });
@@ -555,7 +555,7 @@ describe('Uploads folder', () => {
         },
       });
 
-      files.forEach(file => {
+      files.forEach((file) => {
         expect(file).toMatchObject({
           folder: {
             name: 'API Uploads (3)',
@@ -566,7 +566,7 @@ describe('Uploads folder', () => {
         expect(file.folder.id).not.toBe(uploadFolder.id);
       });
 
-      expect(files.every(file => file.folder.id === files[0].folder.id)).toBe(true);
+      expect(files.every((file) => file.folder.id === files[0].folder.id)).toBe(true);
 
       uploadFolder = files[0].folder;
     });
@@ -617,7 +617,7 @@ describe('Uploads folder', () => {
         },
       });
 
-      files.forEach(file => {
+      files.forEach((file) => {
         expect(file).toMatchObject({
           folder: {
             name: 'API Uploads (4)',
@@ -628,7 +628,7 @@ describe('Uploads folder', () => {
         expect(file.folder.id).not.toBe(uploadFolder.id);
       });
 
-      expect(files.every(file => file.folder.id === files[0].folder.id)).toBe(true);
+      expect(files.every((file) => file.folder.id === files[0].folder.id)).toBe(true);
 
       uploadFolder = files[0].folder;
     });
