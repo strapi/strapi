@@ -7,14 +7,7 @@ import { typeFromMime } from './typeFromMime';
  * Remove them to have a clean URL instead to use as a filename.
  */
 function cleanUrl(url) {
-  // Break URL at ? and take first part (file name, extension)
-  url = url.split('?')[0];
-
-  // Sometimes URL doesn't have ? but #
-  url = url.split('#')[0];
-
-  // Cleaned URL
-  return url;
+  return new URL(url).pathname.substring(1);
 }
 
 export const urlsToAssets = async urls => {
