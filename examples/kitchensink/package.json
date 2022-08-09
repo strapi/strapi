@@ -12,12 +12,10 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/admin": "4.3.2",
     "@strapi/provider-email-mailgun": "4.3.2",
     "@strapi/provider-upload-aws-s3": "4.3.2",
     "@strapi/provider-upload-cloudinary": "4.3.2",
     "@strapi/strapi": "4.3.2",
-    "@strapi/utils": "4.3.2",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
