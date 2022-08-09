@@ -261,8 +261,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       return null;
     }
 
-    await db.query(uid).delete({ where: { id: entityToDelete.id } });
     await deleteComponents(uid, entityToDelete);
+    await db.query(uid).delete({ where: { id: entityToDelete.id } });
 
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
