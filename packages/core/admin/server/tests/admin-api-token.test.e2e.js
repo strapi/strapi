@@ -141,12 +141,38 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test('Fails to create a read-only api token with permissions', async () => {
+  test('Fails to create a non-custom api token with permissions', async () => {
     const body = {
       name: 'api-token_tests-readonlyFailWithPermissions',
       description: 'api-token_tests-description',
       type: 'read-only',
       permissions: ['admin::thing.action'],
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'Non-custom tokens should not references permissions',
+        details: {},
+      },
+    });
+  });
+
+  test('Fails to create a non-custom api token with any permissions attribute', async () => {
+    const body = {
+      name: 'api-token_tests-fullAccessFailWithEmptyPermissions',
+      description: 'api-token_tests-description',
+      type: 'full-access',
+      permissions: [],
     };
 
     const res = await rq({
