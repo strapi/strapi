@@ -31,7 +31,8 @@
     "lodash": "4.17.21"
   },
   "devDependencies": {
-    "@strapi/helper-plugin": "4.3.2"
+    "@strapi/helper-plugin": "4.3.2",
+    "@testing-library/react": "12.1.4"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",

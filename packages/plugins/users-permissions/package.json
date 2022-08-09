@@ -46,6 +46,9 @@
     "url-join": "4.0.1"
   },
   "devDependencies": {
+    "@testing-library/react": "12.1.4",
+    "@testing-library/react-hooks": "8.0.1",
+    "@testing-library/user-event": "14.4.2",
     "koa": "^2.13.4"
   },
   "engines": {

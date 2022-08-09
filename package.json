@@ -73,9 +73,6 @@
   "devDependencies": {
     "@swc/core": "1.2.224",
     "@swc/jest": "0.2.22",
-    "@testing-library/react": "11.2.7",
-    "@testing-library/react-hooks": "3.7.0",
-    "@testing-library/user-event": "13.5.0",
     "axios-mock-adapter": "1.20.0",
     "babel-eslint": "10.1.0",
     "chalk": "4.1.2",
@@ -112,7 +109,6 @@
     "plop": "2.7.6",
     "prettier": "1.19.1",
     "qs": "6.11.0",
-    "react-test-renderer": "17.0.2",
     "request": "2.88.2",
     "request-promise-native": "1.0.9",
     "rimraf": "3.0.2",

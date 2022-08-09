@@ -44,6 +44,12 @@
     "react-router-dom": "5.2.0",
     "sharp": "0.30.7"
   },
+  "devDependencies": {
+    "@testing-library/react": "12.1.4",
+    "@testing-library/react-hooks": "8.0.1",
+    "@testing-library/user-event": "14.4.2",
+    "msw": "0.42.3"
+  },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"

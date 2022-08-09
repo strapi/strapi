@@ -27,6 +27,10 @@
     "@strapi/utils": "4.3.2",
     "lodash": "4.17.21"
   },
+  "devDependencies": {
+    "@testing-library/react": "12.1.4",
+    "msw": "0.42.3"
+  },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
