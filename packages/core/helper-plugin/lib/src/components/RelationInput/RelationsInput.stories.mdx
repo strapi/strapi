@@ -1,4 +1,4 @@
-<!--- RelationsInput.stories.mdx --->
+<!--- RelationInput.stories.mdx --->
 
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
 import { BaseLink } from '@strapi/design-system/BaseLink';
@@ -6,12 +6,12 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Badge } from '@strapi/design-system/Badge';
 import { Icon } from '@strapi/design-system/Icon';
 import Cross from '@strapi/icons/Cross';
-import { ShadowList, RelationItem } from './index';
+import { RelationList, RelationItem } from './index';
 import { relations } from './relationsDataMock';
 
-<Meta title="components/RelationsInput" />
+<Meta title="components/RelationInput" />
 
-# RelationsInput
+# RelationInput
 
 WIP
 
@@ -22,7 +22,7 @@ WIP
     {() => {
       return (
         <Main>
-          <ShadowList overflowing="both">
+          <RelationList overflow="top-bottom">
             {relations.map(relation => {
               const { title, status } = relation;
               const variant = status === 'published' ? 'success' : 'secondary';
@@ -42,7 +42,7 @@ WIP
                 </RelationItem>
               );
             })}
-          </ShadowList>
+          </RelationList>
         </Main>
       );
     }}

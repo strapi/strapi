@@ -1,2 +1,2 @@
 export * from './components/RelationItem';
-export * from './components/ShadowList';
+export * from './components/RelationList';
