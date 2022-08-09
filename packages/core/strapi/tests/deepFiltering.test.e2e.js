@@ -181,8 +181,12 @@ describe('Deep Filtering API', () => {
         });
         expect(Array.isArray(res.body.data)).toBe(true);
         expect(res.body.data.length).toBe(2);
-        expect(res.body.data[0]).toMatchObject(data.collector[0]);
-        expect(res.body.data[1]).toMatchObject(data.collector[1]);
+        expect(res.body.data).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining(data.collector[0]),
+            expect.objectContaining(data.collector[1]),
+          ])
+        );
       });
     });
 
