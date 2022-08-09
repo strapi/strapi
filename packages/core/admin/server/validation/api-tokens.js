@@ -15,6 +15,10 @@ const apiTokenCreationSchema = yup
       .string()
       .oneOf(Object.values(constants.API_TOKEN_TYPE))
       .required(),
+    permissions: yup
+      .array()
+      .of(yup.string())
+      .nullable(),
   })
   .noUnknown();
 
@@ -30,6 +34,10 @@ const apiTokenUpdateSchema = yup
       .string()
       .oneOf(Object.values(constants.API_TOKEN_TYPE))
       .notNull(),
+    permissions: yup
+      .array()
+      .of(yup.string())
+      .nullable(),
   })
   .noUnknown();
 
