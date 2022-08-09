@@ -16,7 +16,7 @@ const defaultQueryOpts = {
   headers: { 'Content-Type': 'application/json' },
 };
 
-const ANALYTICS_URI = 'https://analytics.strapi.io';
+const ANALYTICS_URI = 'http://localhost:4000';
 
 /**
  * Add properties from the package.json strapi key in the metadata
@@ -54,16 +54,17 @@ module.exports = strapi => {
     projectType: isEE ? 'Enterprise' : 'Community',
     useTypescriptOnServer: isUsingTypeScriptSync(serverRootPath),
     useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
+    projectId: uuid,
   };
 
   addPackageJsonStrapiMetadata(anonymous_metadata, strapi);
 
-  return async (event, payload = {}, opts = {}) => {
+  return async (adminUserId = '', event, payload = {}, opts = {}) => {
     const reqParams = {
       method: 'POST',
       body: JSON.stringify({
         event,
-        uuid,
+        adminUserId,
         deviceId,
         properties: stringifyDeep({
           ...payload,

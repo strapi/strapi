@@ -78,9 +78,9 @@ const createTelemetryInstance = strapi => {
       // clear open handles
       crons.forEach(cron => cron.cancel());
     },
-    async send(event, payload) {
+    async send(adminUserId, event, payload) {
       if (isDisabled) return true;
-      return sendEvent(event, payload);
+      return sendEvent(adminUserId, event, payload);
     },
   };
 };

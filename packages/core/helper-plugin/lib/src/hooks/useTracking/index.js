@@ -5,21 +5,26 @@ import useAppInfos from '../useAppInfos';
 
 const useTracking = () => {
   const trackRef = useRef();
-  const { uuid, telemetryProperties } = useContext(TrackingContext);
+  const { uuid, telemetryProperties, deviceId } = useContext(TrackingContext);
   const appInfo = useAppInfos();
+  const adminUserId = appInfo?.adminUserId;
+
+  console.log(appInfo);
 
   trackRef.current = (event, properties) => {
     if (uuid) {
       try {
-        axios.post('https://analytics.strapi.io/track', {
+        axios.post('http://localhost:4000/track', {
           event,
+          deviceId,
           properties: {
             ...telemetryProperties,
             ...properties,
             projectType: strapi.projectType,
             environment: appInfo.currentEnvironment,
+            uuid,
           },
-          uuid,
+          adminUserId,
         });
       } catch (err) {
         // Silent

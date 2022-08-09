@@ -35,7 +35,10 @@ function App() {
   const toggleNotification = useNotification();
   const { updateProjectSettings } = useConfigurations();
   const { formatMessage } = useIntl();
-  const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
+  const [{ isLoading, hasAdmin, uuid, deviceId }, setState] = useState({
+    isLoading: true,
+    hasAdmin: false,
+  });
   const appInfo = useAppInfos();
 
   const authRoutes = useMemo(() => {
@@ -80,6 +83,7 @@ function App() {
         } = await axios.get(`${strapi.backendURL}/admin/init`);
 
         updateProjectSettings({ menuLogo: prefixFileUrlWithBackendUrl(menuLogo) });
+        const deviceId = await getUID();
 
         if (uuid) {
           const {
@@ -89,8 +93,6 @@ function App() {
           setTelemetryProperties(properties);
 
           try {
-            const deviceId = await getUID();
-
             fetch('https://analytics.strapi.io/track', {
               method: 'POST',
               body: JSON.stringify({
@@ -111,7 +113,7 @@ function App() {
           }
         }
 
-        setState({ isLoading: false, hasAdmin, uuid });
+        setState({ isLoading: false, hasAdmin, uuid, deviceId });
       } catch (err) {
         toggleNotification({
           type: 'warning',
@@ -133,7 +135,7 @@ function App() {
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
       <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
-      <TrackingContext.Provider value={{ uuid, telemetryProperties }}>
+      <TrackingContext.Provider value={{ uuid, telemetryProperties, deviceId }}>
         <Switch>
           {authRoutes}
           <Route

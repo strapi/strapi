@@ -2,14 +2,14 @@
 
 const { getService } = require('../utils');
 
-const sendDidInviteUser = async () => {
+const sendDidInviteUser = async adminUserId => {
   const numberOfUsers = await getService('user').count();
   const numberOfRoles = await getService('role').count();
-  strapi.telemetry.send('didInviteUser', { numberOfRoles, numberOfUsers });
+  strapi.telemetry.send(adminUserId, 'didInviteUser', { numberOfRoles, numberOfUsers });
 };
 
-const sendDidUpdateRolePermissions = async () => {
-  strapi.telemetry.send('didUpdateRolePermissions');
+const sendDidUpdateRolePermissions = async adminUserId => {
+  strapi.telemetry.send(adminUserId, 'didUpdateRolePermissions');
 };
 
 const sendDidChangeInterfaceLanguage = async () => {

@@ -13,6 +13,7 @@ const { getService } = require('../utils');
 module.exports = {
   async create(ctx) {
     const { body } = ctx.request;
+    const adminUserId = await getService('user-hash').hashAdminUser(ctx.state.user);
 
     await validateUserCreationInput(body);
 
@@ -32,7 +33,7 @@ module.exports = {
       throw new ApplicationError('Email already taken');
     }
 
-    const createdUser = await getService('user').create(attributes);
+    const createdUser = await getService('user').create(attributes, adminUserId);
 
     const userInfo = getService('user').sanitizeUser(createdUser);
 

@@ -1,5 +1,6 @@
 'use strict';
 
+const { hashAdminUser } = require('@strapi/utils/lib');
 const { getService } = require('../utils');
 const { ACTIONS, FILE_MODEL_UID } = require('../constants');
 const validateSettings = require('./validation/admin/settings');
@@ -16,8 +17,9 @@ module.exports = {
     }
 
     const data = await validateSettings(body);
+    const adminUserId = hashAdminUser(ctx.state.user.email);
 
-    await getService('upload').setSettings(data);
+    await getService('upload').setSettings(data, adminUserId);
 
     ctx.body = { data };
   },

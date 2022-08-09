@@ -27,7 +27,7 @@ const sanitizeUser = user => {
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
-const create = async attributes => {
+const create = async (attributes, adminUserId) => {
   const userInfo = {
     registrationToken: getService('token').createToken(),
     ...attributes,
@@ -41,7 +41,7 @@ const create = async attributes => {
 
   const createdUser = await strapi.query('admin::user').create({ data: user, populate: ['roles'] });
 
-  getService('metrics').sendDidInviteUser();
+  getService('metrics').sendDidInviteUser(adminUserId);
 
   return createdUser;
 };

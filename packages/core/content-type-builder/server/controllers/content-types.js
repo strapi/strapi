@@ -3,6 +3,7 @@
 const _ = require('lodash');
 
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
+const { hashAdminUser } = require('@strapi/utils');
 const { getService } = require('../utils');
 const {
   validateContentTypeInput,
@@ -68,6 +69,9 @@ module.exports = {
         kind: contentType.kind,
         hasDraftAndPublish: hasDraftAndPublish(contentType.schema),
       };
+
+      const adminUserId = hashAdminUser(ctx);
+      console.log(adminUserId);
 
       if (_.isEmpty(strapi.api)) {
         await strapi.telemetry.send('didCreateFirstContentType', metricsProperties);

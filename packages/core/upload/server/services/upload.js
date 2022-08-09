@@ -36,13 +36,13 @@ const generateFileName = name => {
   return `${baseName}_${randomSuffix()}`;
 };
 
-const sendMediaMetrics = data => {
+const sendMediaMetrics = (data, adminUserId) => {
   if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
-    strapi.telemetry.send('didSaveMediaWithCaption');
+    strapi.telemetry.send(adminUserId, 'didSaveMediaWithCaption');
   }
 
   if (_.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText)) {
-    strapi.telemetry.send('didSaveMediaWithAlternativeText');
+    strapi.telemetry.send(adminUserId, 'didSaveMediaWithAlternativeText');
   }
 };
 
@@ -317,7 +317,9 @@ module.exports = ({ strapi }) => ({
     if (user) {
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
     }
-    sendMediaMetrics(fileValues);
+
+    const adminUserId = user.adminUserId ? user.adminUserId : '';
+    sendMediaMetrics(fileValues, adminUserId);
 
     const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
 
@@ -332,7 +334,9 @@ module.exports = ({ strapi }) => ({
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
       fileValues[CREATED_BY_ATTRIBUTE] = user.id;
     }
-    sendMediaMetrics(fileValues);
+
+    const adminUserId = user.adminUserId ? user.adminUserId : '';
+    sendMediaMetrics(fileValues, adminUserId);
 
     const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
 
@@ -416,11 +420,11 @@ module.exports = ({ strapi }) => ({
     return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).get();
   },
 
-  setSettings(value) {
+  setSettings(value, adminUserId) {
     if (value.responsiveDimensions === true) {
-      strapi.telemetry.send('didEnableResponsiveDimensions');
+      strapi.telemetry.send(adminUserId, 'didEnableResponsiveDimensions');
     } else {
-      strapi.telemetry.send('didDisableResponsiveDimensions');
+      strapi.telemetry.send(adminUserId, 'didDisableResponsiveDimensions');
     }
 
     return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });

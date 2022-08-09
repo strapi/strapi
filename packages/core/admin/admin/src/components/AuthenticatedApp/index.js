@@ -9,6 +9,7 @@ import {
 } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 import get from 'lodash/get';
+import { hashAdminUser } from '@strapi/utils';
 import packageJSON from '../../../../package.json';
 import { useConfigurations } from '../../hooks';
 import PluginsInitializer from '../PluginsInitializer';
@@ -30,6 +31,7 @@ const AuthenticatedApp = () => {
   const setGuidedTourVisibilityRef = useRef(setGuidedTourVisibility);
   const userInfo = auth.getUserInfo();
   const userName = get(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname);
+  const adminUserId = userInfo ? hashAdminUser(userInfo.email) : '';
   const [userDisplayName, setUserDisplayName] = useState(userName);
   const { showReleaseNotification } = useConfigurations();
   const [
@@ -90,6 +92,7 @@ const AuthenticatedApp = () => {
     <AppInfosContext.Provider
       value={{
         ...appInfos,
+        adminUserId,
         latestStrapiReleaseTag: tag_name,
         setUserDisplayName,
         shouldUpdateStrapi,
