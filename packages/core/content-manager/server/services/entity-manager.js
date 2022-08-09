@@ -61,7 +61,7 @@ const getDeepPopulate = (uid, populate) => {
     }
 
     if (attribute.type === 'media') {
-      populateAcc[attributeName] = true;
+      populateAcc[attributeName] = { populate: 'folder' };
     }
 
     if (attribute.type === 'dynamiczone') {
