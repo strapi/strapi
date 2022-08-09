@@ -141,9 +141,9 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test.skip('Fails to create a read-only api token with permissions', async () => {
+  test('Fails to create a read-only api token with permissions', async () => {
     const body = {
-      name: 'api-token_tests-readonly',
+      name: 'api-token_tests-readonlyFailWithPermissions',
       description: 'api-token_tests-description',
       type: 'read-only',
       permissions: ['admin::thing.action'],
@@ -155,15 +155,15 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       body,
     });
 
-    expect(res.statusCode).toBe(400); // TODO: should be a 400
-    expect(res.body.data).toStrictEqual({
-      accessKey: expect.any(String),
-      name: body.name,
-      permissions: [],
-      description: body.description,
-      type: body.type,
-      id: expect.any(Number),
-      createdAt: expect.any(String),
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'Non-custom tokens should not references permissions',
+        details: {},
+      },
     });
   });
 
@@ -208,23 +208,15 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(400);
-    // expect(res.body).toMatchObject({
-    //   data: null,
-    //   error: {
-    //     status: 400,
-    //     name: 'ValidationError',
-    //     message: 'type must be one of the following values: read-only, full-access, custom',
-    //     details: {
-    //       errors: [
-    //         {
-    //           path: ['type'],
-    //           name: 'ValidationError',
-    //           message: 'type must be one of the following values: read-only, full-access, custom',
-    //         },
-    //       ],
-    //     },
-    //   },
-    // });
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'Missing permissions attributes for custom token',
+        details: {},
+      },
+    });
   });
 
   test('Creates an api token without a description (successfully)', async () => {

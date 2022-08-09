@@ -1,7 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const { map, omit, differenceBy } = require('lodash/fp');
+const { map, omit, differenceBy, isEmpty } = require('lodash/fp');
 const { ValidationError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 
@@ -41,7 +41,7 @@ const assertCustomTokenPermissionsValidity = attributes => {
   }
 
   // Custom type tokens should always have permissions attached to them
-  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM && !attributes.permissions) {
+  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM && isEmpty(attributes.permissions)) {
     throw new ValidationError('Missing permissions attributes for custom token');
   }
 };
@@ -199,7 +199,7 @@ const update = async (id, attributes) => {
     data: omit('permissions', attributes),
   });
 
-  if (token.type === 'custom') {
+  if (token.type === constants.API_TOKEN_TYPE.CUSTOM) {
     const permissionsToDelete = differenceBy('action', token.permissions, attributes.permissions);
     const permissionsToCreate = differenceBy('action', attributes.permissions, token.permissions);
 
