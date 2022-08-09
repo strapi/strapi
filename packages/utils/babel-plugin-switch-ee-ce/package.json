@@ -21,7 +21,7 @@
   "devDependencies": {
     "@babel/cli": "7.18.10",
     "@babel/core": "7.18.10",
-    "@babel/generator": "7.18.7",
+    "@babel/generator": "7.18.12",
     "@babel/parser": "7.18.10",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
     "@babel/plugin-transform-modules-commonjs": "7.18.6",
