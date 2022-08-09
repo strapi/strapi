@@ -9,18 +9,11 @@ const { pipeline } = require('stream');
 const fs = require('fs');
 const path = require('path');
 const fse = require('fs-extra');
-const { PayloadTooLargeError } = require('@strapi/utils').errors;
 
 const UPLOADS_FOLDER_NAME = 'uploads';
 
 module.exports = {
-  init({ sizeLimit = 1000000 } = {}) {
-    const verifySize = (file) => {
-      if (file.size > sizeLimit) {
-        throw new PayloadTooLargeError();
-      }
-    };
-
+  init() {
     // Ensure uploads folder exists
     const uploadPath = path.resolve(strapi.dirs.static.public, UPLOADS_FOLDER_NAME);
     if (!fse.pathExistsSync(uploadPath)) {
@@ -31,8 +24,6 @@ module.exports = {
 
     return {
       uploadStream(file) {
-        verifySize(file);
-
         return new Promise((resolve, reject) => {
           pipeline(
             file.stream,
@@ -50,8 +41,6 @@ module.exports = {
         });
       },
       upload(file) {
-        verifySize(file);
-
         return new Promise((resolve, reject) => {
           // write file in public/assets folder
           fs.writeFile(path.join(uploadPath, `${file.hash}${file.ext}`), file.buffer, (err) => {

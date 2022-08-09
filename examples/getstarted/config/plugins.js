@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = () => ({
+module.exports = ({ env }) => ({
   graphql: {
     enabled: true,
     config: {
@@ -18,6 +18,25 @@ module.exports = () => ({
     config: {
       info: {
         version: '2.0.0',
+      },
+    },
+  },
+  upload: {
+    config: {
+      provider: 'aws-s3',
+      sizeLimit: 10,
+      providerOptions: {
+        accessKeyId: env('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: env('AWS_ACCESS_SECRET'),
+        region: env('AWS_REGION'),
+        params: {
+          Bucket: env('AWS_BUCKET'),
+        },
+      },
+      actionOptions: {
+        upload: {},
+        uploadStream: {},
+        delete: {},
       },
     },
   },
