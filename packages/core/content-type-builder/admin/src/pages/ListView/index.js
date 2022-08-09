@@ -131,7 +131,10 @@ const ListView = () => {
                 startIcon={<Check />}
                 onClick={() => submitData()}
                 type="submit"
-                disabled={isEqual(modifiedData, initialData)}
+                disabled={
+                  isEqual(modifiedData, initialData) ||
+                  modifiedData.contentType.schema.attributes.length === 0
+                }
               >
                 {formatMessage({
                   id: 'global.save',

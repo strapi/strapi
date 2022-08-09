@@ -66,6 +66,7 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
         .test(forbiddenContentTypeNameValidator())
         .isKebabCase()
         .required(),
+      attributes: yup.object().test(emptyAttributes()),
     })
     .test(
       'singularName-not-equal-pluralName',
@@ -142,6 +143,12 @@ const alreadyUsedContentTypeName = isEdition => {
     },
   };
 };
+
+const emptyAttributes = () => ({
+  name: 'emptyAttributes',
+  message: 'Content types cannot be empty.',
+  test: attributes => Object.keys(attributes).length >= 1,
+});
 
 /**
  * Validates type kind
