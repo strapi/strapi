@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const { omit } = require('lodash');
 const apiTokenService = require('../api-token');
 
 describe('API Token', () => {
@@ -46,6 +47,7 @@ describe('API Token', () => {
           ...attributes,
           accessKey: apiTokenService.hash(mockedApiToken.hexedString),
         },
+        populate: ['permissions'],
       });
       expect(res).toEqual({
         ...attributes,
@@ -138,6 +140,7 @@ describe('API Token', () => {
       expect(findMany).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type', 'createdAt'],
         orderBy: { name: 'ASC' },
+        populate: ['permissions'],
       });
       expect(res).toEqual(tokens);
     });
@@ -165,6 +168,7 @@ describe('API Token', () => {
       expect(mockedDelete).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { id: token.id },
+        populate: ['permissions'],
       });
       expect(res).toEqual(token);
     });
@@ -183,6 +187,7 @@ describe('API Token', () => {
       expect(mockedDelete).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { id: 42 },
+        populate: ['permissions'],
       });
       expect(res).toEqual(null);
     });
@@ -210,6 +215,7 @@ describe('API Token', () => {
       expect(findOne).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { id: token.id },
+        populate: ['permissions'],
       });
       expect(res).toEqual(token);
     });
@@ -228,21 +234,37 @@ describe('API Token', () => {
       expect(findOne).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { id: 42 },
+        populate: ['permissions'],
       });
       expect(res).toEqual(null);
     });
   });
 
   describe('update', () => {
-    test('Updates a token', async () => {
+    test('Updates a non-custom token', async () => {
+      const token = {
+        id: 1,
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+      };
+
       const update = jest.fn(({ data }) => Promise.resolve(data));
+      const findOne = jest.fn().mockResolvedValue(token);
+      const load = jest.fn();
 
       global.strapi = {
         query() {
-          return { update };
+          return {
+            update,
+            findOne,
+          };
         },
         config: {
           get: jest.fn(() => ''),
+        },
+        entityService: {
+          load,
         },
       };
 
@@ -254,15 +276,92 @@ describe('API Token', () => {
       };
 
       const res = await apiTokenService.update(id, attributes);
-
+      expect(load).not.toHaveBeenCalled();
       expect(update).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { id },
         data: attributes,
+        populate: ['permissions'],
       });
       expect(res).toEqual(attributes);
     });
   });
+
+  test('Updates a custom token', async () => {
+    const token = {
+      id: 1,
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'custom',
+      permissions: ['admin::subject.action'],
+    };
+
+    const update = jest.fn(({ data }) => Promise.resolve(data));
+    const findOne = jest.fn().mockResolvedValue(token);
+    const deleteMany = jest.fn();
+    const createMany = jest.fn();
+    const load = jest.fn();
+
+    global.strapi = {
+      query() {
+        return {
+          update,
+          findOne,
+          deleteMany,
+          createMany,
+        };
+      },
+      config: {
+        get: jest.fn(() => ''),
+      },
+      entityService: {
+        load,
+      },
+    };
+
+    const id = 1;
+    const attributes = {
+      name: 'api-token_tests-updated-name',
+      description: 'api-token_tests-description',
+      type: 'custom',
+      permissions: ['admin::subject.newAction'],
+    };
+
+    const res = await apiTokenService.update(id, attributes);
+
+    // TODO: test that deleteMany and createMany are called with the correct values
+
+    // expect(deleteMany).toHaveBeenCalledWith({
+    //   where: {
+    //     action: ['admin::subject.action'],
+    //   },
+    // });
+
+    // expect(createMany).toHaveBeenCalledWith({
+    //   where: {
+    //     action: ['admin::subject.Newaction'],
+    //   },
+    // });
+
+    expect(load).toHaveBeenCalledWith(
+      'admin::api-token',
+      {
+        description: 'api-token_tests-description',
+        name: 'api-token_tests-updated-name',
+        type: 'custom',
+      },
+      'permissions'
+    );
+
+    expect(update).toHaveBeenCalledWith({
+      select: ['id', 'name', 'description', 'type', 'createdAt'],
+      where: { id },
+      data: omit(attributes, ['permissions']),
+      populate: ['permissions'],
+    });
+    expect(res).toEqual(omit(attributes, ['permissions']));
+  });
+
   describe('getByName', () => {
     const token = {
       id: 1,
@@ -285,6 +384,7 @@ describe('API Token', () => {
       expect(findOne).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { name: token.name },
+        populate: ['permissions'],
       });
       expect(res).toEqual(token);
     });
@@ -303,6 +403,7 @@ describe('API Token', () => {
       expect(findOne).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { name: 'unexistant-name' },
+        populate: ['permissions'],
       });
       expect(res).toEqual(null);
     });
