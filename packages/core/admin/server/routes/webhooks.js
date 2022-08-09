@@ -74,7 +74,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.trigger'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::webhooks.update'] } },
       ],
     },
   },
