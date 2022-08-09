@@ -7,7 +7,7 @@ import { typeFromMime } from './typeFromMime';
  * Remove them to have a clean URL instead to use as a filename.
  */
 function cleanUrl(url) {
-  return new URL(url).pathname.substring(1);
+  return new URL(url).pathname.split('/').pop();
 }
 
 export const urlsToAssets = async urls => {
