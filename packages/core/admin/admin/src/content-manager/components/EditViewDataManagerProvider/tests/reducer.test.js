@@ -258,7 +258,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
   });
 
   describe('ADD_RELATION', () => {
-    it('should add a relation in the modifiedData when it is not defined', () => {
+    it('should add a relation in the modifiedData', () => {
       const state = {
         ...initialState,
 
@@ -278,29 +278,32 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         modifiedData: {
           name: 'name',
-          relation: [{ id: 1 }],
+          relation: {
+            add: [{ id: 1 }],
+          },
         },
       };
 
       const action = {
         type: 'ADD_RELATION',
         keys: ['relation'],
-        value: [{ label: 'ezrraez', value: { id: 1 } }],
+        value: { id: 1 },
       };
 
       expect(reducer(state, action)).toEqual(expected);
     });
+  });
 
-    it('should add a relation in the modifiedData when it is not an empty array', () => {
+  describe('REMOVE_RELATION', () => {
+    it('should remove a relation from modifiedData', () => {
       const state = {
         ...initialState,
+
         initialData: {
           name: 'name',
-          relation: [{ id: 1 }],
         },
         modifiedData: {
           name: 'name',
-          relation: [{ id: 1 }],
         },
       };
 
@@ -309,53 +312,19 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         componentsDataStructure: {},
         initialData: {
           name: 'name',
-          relation: [{ id: 1 }],
         },
         modifiedData: {
           name: 'name',
-          relation: [{ id: 1 }, { id: 3 }],
+          relation: {
+            remove: [{ id: 1 }],
+          },
         },
       };
 
       const action = {
-        type: 'ADD_RELATION',
+        type: 'REMOVE_RELATION',
         keys: ['relation'],
-        value: [{ value: { id: 3 } }],
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('should not add a relation in the modifiedData when the value is empty', () => {
-      const state = {
-        ...initialState,
-        initialData: {
-          name: 'name',
-          relation: [{ id: 1 }],
-        },
-        modifiedData: {
-          name: 'name',
-          relation: [{ id: 1 }],
-        },
-      };
-
-      const expected = {
-        ...initialState,
-        componentsDataStructure: {},
-        initialData: {
-          name: 'name',
-          relation: [{ id: 1 }],
-        },
-        modifiedData: {
-          name: 'name',
-          relation: [{ id: 1 }],
-        },
-      };
-
-      const action = {
-        type: 'ADD_RELATION',
-        keys: ['relation'],
-        value: [],
+        value: { id: 1 },
       };
 
       expect(reducer(state, action)).toEqual(expected);
@@ -816,31 +785,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
           },
         },
         shouldCheckErrors: true,
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('REMOVE_RELATION', () => {
-    it('should remove a relation correctly', () => {
-      const state = {
-        ...initialState,
-        modifiedData: {
-          relation: ['one', 'two', 'three'],
-        },
-      };
-
-      const action = {
-        type: 'REMOVE_RELATION',
-        keys: 'relation.1',
-      };
-
-      const expected = {
-        ...initialState,
-        modifiedData: {
-          relation: ['one', 'three'],
-        },
       };
 
       expect(reducer(state, action)).toEqual(expected);

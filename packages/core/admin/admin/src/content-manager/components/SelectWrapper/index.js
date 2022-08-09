@@ -69,7 +69,7 @@ function SelectWrapper({
     modifiedData,
     moveRelation,
     onChange,
-    onRemoveRelation,
+    removeRelation,
   } = useCMEditViewDataManager();
   const { pathname } = useLocation();
 
@@ -226,9 +226,11 @@ function SelectWrapper({
   };
 
   const handleAddRelation = value => {
-    if (!isEmpty(value)) {
-      addRelation({ target: { name, value } });
-    }
+    addRelation({ target: { name, value } });
+  };
+
+  const handleRemoveRelation = value => {
+    removeRelation({ target: { name, value } });
   };
 
   const handleMenuOpen = () => {
@@ -301,7 +303,7 @@ function SelectWrapper({
         onMenuClose={handleMenuClose}
         onMenuOpen={handleMenuOpen}
         onMenuScrollToBottom={handleMenuScrollToBottom}
-        onRemove={onRemoveRelation}
+        onRemove={handleRemoveRelation}
         placeholder={placeholder}
         searchToPersist={searchToPersist}
         targetModel={targetModel}

@@ -413,10 +413,11 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const onRemoveRelation = useCallback(keys => {
+  const removeRelation = useCallback(({ target: { name, value } }) => {
     dispatch({
       type: 'REMOVE_RELATION',
-      keys,
+      keys: name.split('.'),
+      value,
     });
   }, []);
 
@@ -491,7 +492,7 @@ const EditViewDataManagerProvider = ({
         onChange: handleChange,
         onPublish: handlePublish,
         onUnpublish,
-        onRemoveRelation,
+        removeRelation,
         readActionAllowedFields,
         redirectToPreviousPage,
         removeComponentFromDynamicZone,
