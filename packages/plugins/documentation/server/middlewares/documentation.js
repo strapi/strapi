@@ -22,4 +22,15 @@ module.exports = async ({ strapi }) => {
       },
     },
   ]);
+
+  const customPath = strapi.plugin('documentation').config('x-strapi-config.path');
+
+  if (customPath) {
+    strapi.plugins.documentation.routes.forEach((route, index) => {
+      const path = `/${customPath}${route.path}`.replace('//', '/').replace(/\/$/, '');
+
+      strapi.plugins.documentation.routes[index].config.prefix = '';
+      strapi.plugins.documentation.routes[index].path = path;
+    });
+  }
 };
