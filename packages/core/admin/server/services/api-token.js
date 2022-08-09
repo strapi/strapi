@@ -199,6 +199,7 @@ const update = async (id, attributes) => {
     data: omit('permissions', attributes),
   });
 
+  let permissions = {};
   if (token.type === constants.API_TOKEN_TYPE.CUSTOM) {
     const permissionsToDelete = differenceBy('action', token.permissions, attributes.permissions);
     const permissionsToCreate = differenceBy('action', attributes.permissions, token.permissions);
@@ -210,11 +211,13 @@ const update = async (id, attributes) => {
     await strapi
       .query('admin::token-permission')
       .createMany({ data: permissionsToCreate.map(({ action }) => ({ action, token: id })) });
+
+    permissions = {
+      permissions: await strapi.entityService.load('admin::api-token', token, 'permissions'),
+    };
   }
 
-  const permissions = await strapi.entityService.load('admin::api-token', token, 'permissions');
-
-  return { ...token, permissions };
+  return { ...token, ...permissions };
 };
 
 /**
