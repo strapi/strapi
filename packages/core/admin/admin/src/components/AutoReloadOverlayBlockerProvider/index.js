@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { AutoReloadOverlayBockerContext } from '@strapi/helper-plugin';
 import Blocker from './Blocker';
@@ -75,10 +75,12 @@ const AutoReloadOverlayBlockerProvider = ({ children }) => {
     };
   }
 
+  const autoReloadValue = useMemo(() => {
+    return { lockApp: lockApp.current, unlockApp: unlockApp.current };
+  }, [lockApp, unlockApp]);
+
   return (
-    <AutoReloadOverlayBockerContext.Provider
-      value={{ lockApp: lockApp.current, unlockApp: unlockApp.current }}
-    >
+    <AutoReloadOverlayBockerContext.Provider value={autoReloadValue}>
       <Blocker
         displayedIcon={displayedIcon}
         isOpen={isOpen}

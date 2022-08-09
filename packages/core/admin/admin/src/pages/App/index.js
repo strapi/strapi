@@ -11,7 +11,7 @@ import {
   auth,
   request,
   useNotification,
-  TrackingContext,
+  TrackingProvider,
   prefixFileUrlWithBackendUrl,
   useAppInfos,
 } from '@strapi/helper-plugin';
@@ -126,6 +126,14 @@ function App() {
 
   const setHasAdmin = (hasAdmin) => setState((prev) => ({ ...prev, hasAdmin }));
 
+  const trackingInfo = useMemo(
+    () => ({
+      uuid,
+      telemetryProperties,
+    }),
+    [uuid, telemetryProperties]
+  );
+
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
@@ -133,7 +141,7 @@ function App() {
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
       <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
-      <TrackingContext.Provider value={{ uuid, telemetryProperties }}>
+      <TrackingProvider value={trackingInfo}>
         <Switch>
           {authRoutes}
           <Route
@@ -147,7 +155,7 @@ function App() {
           <PrivateRoute path="/" component={AuthenticatedApp} />
           <Route path="" component={NotFoundPage} />
         </Switch>
-      </TrackingContext.Provider>
+      </TrackingProvider>
     </Suspense>
   );
 }

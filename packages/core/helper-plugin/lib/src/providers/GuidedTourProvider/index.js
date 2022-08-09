@@ -2,35 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import GuidedTourContext from '../../contexts/GuidedTourContext';
 
-const GuidedTourProvider = ({
-  children,
-  currentStep,
-  setCurrentStep,
-  guidedTourState,
-  setGuidedTourVisibility,
-  setSkipped,
-  setStepState,
-  startSection,
-  isGuidedTourVisible,
-  isSkipped,
-}) => {
-  return (
-    <GuidedTourContext.Provider
-      value={{
-        currentStep,
-        guidedTourState,
-        setCurrentStep,
-        setSkipped,
-        setStepState,
-        setGuidedTourVisibility,
-        startSection,
-        isGuidedTourVisible,
-        isSkipped,
-      }}
-    >
-      {children}
-    </GuidedTourContext.Provider>
-  );
+const GuidedTourProvider = ({ children, ...value }) => {
+  return <GuidedTourContext.Provider value={value}>{children}</GuidedTourContext.Provider>;
 };
 
 GuidedTourProvider.defaultProps = {

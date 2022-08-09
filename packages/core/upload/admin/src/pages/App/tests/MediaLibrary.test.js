@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { render as renderTL, screen, waitFor, fireEvent } from '@testing-library/react';
-import { useSelectionState, useQueryParams, TrackingContext } from '@strapi/helper-plugin';
+import { useSelectionState, useQueryParams, TrackingProvider } from '@strapi/helper-plugin';
 import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 
@@ -80,19 +80,17 @@ const queryClient = new QueryClient({
   },
 });
 
-const trackingValue = { uuid: false, telemetryProperties: undefined };
-
 const renderML = () =>
   renderTL(
     <QueryClientProvider client={queryClient}>
       <IntlProvider locale="en" messages={{}}>
-        <TrackingContext.Provider value={trackingValue}>
+        <TrackingProvider>
           <ThemeProvider theme={lightTheme}>
             <MemoryRouter>
               <MediaLibrary />
             </MemoryRouter>
           </ThemeProvider>
-        </TrackingContext.Provider>
+        </TrackingProvider>
       </IntlProvider>
     </QueryClientProvider>
   );

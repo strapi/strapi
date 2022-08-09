@@ -2,7 +2,7 @@ import React from 'react';
 import { render as renderTL, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
-import { TrackingContext } from '@strapi/helper-plugin';
+import { TrackingProvider } from '@strapi/helper-plugin';
 import en from '../../../translations/en.json';
 import { UploadAssetDialog } from '../UploadAssetDialog';
 import { server } from './server';
@@ -21,16 +21,14 @@ const queryClient = new QueryClient({
   },
 });
 
-const trackingCtx = { uuid: false, telemetryProperties: undefined };
-
 const render = (props = { onClose() {} }) =>
   renderTL(
     <QueryClientProvider client={queryClient}>
-      <TrackingContext.Provider value={trackingCtx}>
+      <TrackingProvider>
         <ThemeProvider theme={lightTheme}>
           <UploadAssetDialog {...props} />
         </ThemeProvider>
-      </TrackingContext.Provider>
+      </TrackingProvider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
   );

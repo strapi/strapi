@@ -1,4 +1,4 @@
-import { fixtures } from '@strapi/admin-test-utils/lib/lib';
+import { fixtures } from '@strapi/admin-test-utils/lib';
 import addLocaleToCollectionTypesLinksHook from '../addLocaleToCollectionTypesLinks';
 
 describe('i18n | contentManagerHooks | addLocaleToCollectionTypesLinksHook', () => {

@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
@@ -48,9 +48,10 @@ const Card = styled(Box)`
 export const FolderCard = forwardRef(
   ({ children, id, startAction, cardActions, ariaLabel, onClick, to, ...props }, ref) => {
     const generatedId = useId(id);
+    const fodlerCtxValue = useMemo(() => ({ id: generatedId }), [generatedId]);
 
     return (
-      <FolderCardContext.Provider value={{ id: generatedId }}>
+      <FolderCardContext.Provider value={fodlerCtxValue}>
         <Card position="relative" tabIndex={0} isCardActions={!!cardActions} ref={ref} {...props}>
           <FauxClickWrapper
             to={to || undefined}

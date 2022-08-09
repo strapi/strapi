@@ -5,7 +5,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { TrackingContext, useRBAC } from '@strapi/helper-plugin';
+import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
@@ -29,7 +29,7 @@ const client = new QueryClient({
 
 const makeApp = (history) => (
   <Router history={history}>
-    <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+    <TrackingProvider>
       <ThemeProvider theme={lightTheme}>
         <QueryClientProvider client={client}>
           <IntlProvider locale="en" messages={{}} textComponent="span">
@@ -37,7 +37,7 @@ const makeApp = (history) => (
           </IntlProvider>
         </QueryClientProvider>
       </ThemeProvider>
-    </TrackingContext.Provider>
+    </TrackingProvider>
   </Router>
 );
 

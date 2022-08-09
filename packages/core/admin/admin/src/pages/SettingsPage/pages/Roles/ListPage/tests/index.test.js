@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
-import { useRBAC, TrackingContext } from '@strapi/helper-plugin';
+import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import { useRolesList } from '../../../../../../hooks';
 
@@ -33,7 +33,7 @@ jest.mock('../../../../../../hooks', () => ({
 
 const makeApp = (history) => (
   <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-    <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+    <TrackingProvider>
       <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
         <Theme>
           <Router history={history}>
@@ -41,7 +41,7 @@ const makeApp = (history) => (
           </Router>
         </Theme>
       </ThemeToggleProvider>
-    </TrackingContext.Provider>
+    </TrackingProvider>
   </IntlProvider>
 );
 

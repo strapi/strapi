@@ -78,6 +78,16 @@ const AuthenticatedApp = () => {
 
   const shouldShowLoader = isLoading || shouldShowNotDependentQueriesLoader;
 
+  const appInfosValue = useMemo(() => {
+    return {
+      ...appInfos,
+      latestStrapiReleaseTag: tag_name,
+      setUserDisplayName,
+      shouldUpdateStrapi,
+      userDisplayName,
+    };
+  }, [appInfos, tag_name, shouldUpdateStrapi, userDisplayName]);
+
   if (shouldShowLoader) {
     return <LoadingIndicatorPage />;
   }
@@ -88,15 +98,7 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <AppInfosContext.Provider
-      value={{
-        ...appInfos,
-        latestStrapiReleaseTag: tag_name,
-        setUserDisplayName,
-        shouldUpdateStrapi,
-        userDisplayName,
-      }}
-    >
+    <AppInfosContext.Provider value={appInfosValue}>
       <RBACProvider permissions={permissions} refetchPermissions={refetch}>
         <PluginsInitializer />
       </RBACProvider>

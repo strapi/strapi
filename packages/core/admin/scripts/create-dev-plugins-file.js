@@ -2,6 +2,7 @@
 
 const { join, resolve, relative } = require('path');
 const { promisify } = require('util');
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 const glob = promisify(require('glob').glob);
 const fs = require('fs-extra');

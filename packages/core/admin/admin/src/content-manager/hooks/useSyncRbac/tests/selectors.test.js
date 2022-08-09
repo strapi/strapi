@@ -1,4 +1,4 @@
-import { fixtures } from '@strapi/admin-test-utils/lib/lib';
+import { fixtures } from '@strapi/admin-test-utils/lib';
 import { selectPermissions, selectCollectionTypePermissions } from '../selectors';
 
 describe('Admin | content manager | hooks | useSyncRbac | selectors', () => {
