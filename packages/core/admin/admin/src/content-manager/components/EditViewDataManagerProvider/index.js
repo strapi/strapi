@@ -404,15 +404,6 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const moveRelation = useCallback((dragIndex, overIndex, name) => {
-    dispatch({
-      type: 'MOVE_FIELD',
-      dragIndex,
-      overIndex,
-      keys: name.split('.'),
-    });
-  }, []);
-
   const onRemoveRelation = useCallback(keys => {
     dispatch({
       type: 'REMOVE_RELATION',
@@ -487,7 +478,6 @@ const EditViewDataManagerProvider = ({
         moveComponentDown,
         moveComponentField,
         moveComponentUp,
-        moveRelation,
         onChange: handleChange,
         onPublish: handlePublish,
         onUnpublish,
