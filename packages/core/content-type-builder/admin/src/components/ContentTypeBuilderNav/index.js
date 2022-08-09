@@ -80,7 +80,7 @@ const ContentTypeBuilderNav = () => {
                 })}
               </SubNavSection>
               {section.customLink && (
-                <Box paddingLeft={7}>
+                <Box paddingLeft={7} paddingTop={2} paddingBottom={2}>
                   <TextButton onClick={section.customLink.onClick} startIcon={<Plus />}>
                     {formatMessage({
                       id: section.customLink.id,
