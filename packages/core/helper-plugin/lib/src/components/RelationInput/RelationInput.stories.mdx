@@ -12,13 +12,13 @@ import { FieldLabel } from '@strapi/design-system/Field';
 import Cross from '@strapi/icons/Cross';
 import Refresh from '@strapi/icons/Refresh';
 
-import { Relation, ShadowList, RelationItem } from './index';
+import { Relation, RelationList, RelationItem } from './index';
 import { relations as defaultEntries } from './relationsDataMock';
 import ReactSelect from './../ReactSelect';
 
-<Meta title="components/RelationsInput" />
+<Meta title="components/RelationInput" />
 
-# RelationsInput
+# RelationInput
 
 WIP
 
@@ -54,7 +54,7 @@ WIP
               </>
             }
           >           
-            <ShadowList overflowing="both">
+            <RelationList overflow="top-bottom">
               {relations && relations.map(relation => {
                 const { label, status, value } = relation;
                 const variant = status === 'published' ? 'success' : 'secondary';
@@ -81,7 +81,7 @@ WIP
                   </RelationItem>
                 );
               })}
-            </ShadowList>
+            </RelationList>
           </Relation>
         </Box>
       );
