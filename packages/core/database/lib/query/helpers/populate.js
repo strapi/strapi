@@ -80,7 +80,7 @@ const processPopulate = (populate, ctx) => {
     }
 
     if (!types.isRelation(attribute.type)) {
-      throw new Error(`Invalid populate field. Expected a relation, got ${attribute.type}`);
+      continue;
     }
 
     // make sure id is present for future populate queries
