@@ -261,9 +261,11 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       return null;
     }
 
+    // Delete entity components first, and then the entity
     await deleteComponents(uid, entityToDelete);
     await db.query(uid).delete({ where: { id: entityToDelete.id } });
 
+    // Trigger webhook
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
     return entityToDelete;
@@ -284,11 +286,11 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       return null;
     }
 
-    // Delete all the entities components first and then the entities
+    // Delete all the entities components first, and then the entities
     await Promise.all(entitiesToDelete.map(entity => deleteComponents(uid, entity)));
     const result = await db.query(uid).deleteMany(query);
 
-    // Trigger the webhook events. One for each entity
+    // Trigger the webhooks. One for each entity
     await Promise.all(entitiesToDelete.map(entity => this.emitEvent(uid, ENTRY_DELETE, entity)));
 
     return result;
