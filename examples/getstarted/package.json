@@ -12,7 +12,6 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/admin": "4.3.2",
     "@strapi/plugin-documentation": "4.3.2",
     "@strapi/plugin-graphql": "4.3.2",
     "@strapi/plugin-i18n": "4.3.2",
