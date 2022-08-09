@@ -88,8 +88,12 @@ const formsAPI = {
     return sectionsToAdd;
   },
 
-  makeCustomFieldValidator(initShape, validator, ...validatorArgs) {
-    return initShape.shape({ options: yup.object().shape(validator(validatorArgs)) });
+  makeCustomFieldValidator(attributeShape, validator, ...validatorArgs) {
+    // When no validator, return the attribute shape
+    if (!validator) return attributeShape;
+
+    // Otherwise extend the shape with the provided validator
+    return attributeShape.shape({ options: yup.object().shape(validator(validatorArgs)) });
   },
 
   makeValidator(target, initShape, ...args) {
