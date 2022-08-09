@@ -99,7 +99,7 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "1.0.0",
     "match-sorter": "^4.0.2",
-    "mini-css-extract-plugin": "2.4.4",
+    "mini-css-extract-plugin": "2.6.1",
     "node-polyfill-webpack-plugin": "1.1.4",
     "p-map": "4.0.0",
     "passport-local": "1.0.0",
