@@ -14,6 +14,7 @@ export const RelationItem = ({ children, endAction, ...props }) => {
       borderSize={1}
       borderColor="neutral200"
       justifyContent="space-between"
+      as="li"
       {...props}
     >
       <Flex width="100%" justifyContent="space-between">

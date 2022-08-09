@@ -10,23 +10,24 @@ const ShadowBox = styled(Box)`
   &:before,
   &:after {
     position: absolute;
-    opacity: 0.8;
     width: 100%;
     height: 4px;
     z-index: 1;
   }
 
   &:before {
+    // TODO: as for DS Table component we would need this to be handled by the DS theme
     content: ${({ overflow }) =>
       overflow === 'top-bottom' || overflow === 'top' ? "''" : undefined};
-    background: linear-gradient(#dfdfe7 0%, rgba(0, 0, 0, 0) 100%);
+    background: linear-gradient(rgba(33, 33, 52, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
     top: 0;
   }
 
   &:after {
+    // TODO: as for DS Table component we would need this to be handled by the DS theme
     content: ${({ overflow }) =>
       overflow === 'top-bottom' || overflow === 'bottom' ? "''" : undefined};
-    background: linear-gradient(rgba(0, 0, 0, 0) 0%, #dfdfe7 100%);
+    background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(33, 33, 52, 0.1) 100%);
     bottom: 0;
   }
 `;
@@ -34,7 +35,9 @@ const ShadowBox = styled(Box)`
 export const RelationList = ({ children, ...props }) => {
   return (
     <ShadowBox {...props}>
-      <Stack spacing={1}>{children}</Stack>
+      <Stack spacing={1} as="ol">
+        {children}
+      </Stack>
     </ShadowBox>
   );
 };
