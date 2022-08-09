@@ -169,7 +169,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
 
   test('Creates a custom api token (successfully)', async () => {
     const body = {
-      name: 'api-token_tests-custom',
+      name: 'api-token_tests-customSuccess',
       description: 'api-token_tests-description',
       type: 'custom',
       permissions: ['admin::subject.action', 'plugin::foo.bar.action'],
@@ -193,9 +193,9 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test.skip('Fails to create a custom api token without permissions', async () => {
+  test('Fails to create a custom api token without permissions', async () => {
     const body = {
-      name: 'api-token_tests-custom',
+      name: 'api-token_tests-customFail',
       description: 'api-token_tests-description',
       type: 'custom',
       permissions: [],
