@@ -185,6 +185,7 @@ export const AssetDialog = ({
         folder={folderToEdit}
         onClose={() => setFolderToEdit(undefined)}
         location="content-manager"
+        parentFolderId={queryObject?.folder}
       />
     );
   }
