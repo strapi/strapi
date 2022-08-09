@@ -35,7 +35,7 @@ module.exports =
   (config, { strapi }) =>
   (ctx, next) => {
     let helmetConfig = defaultsDeep(defaults, config);
-    const specialPaths = ['/documentation'];
+    const specialPaths = [strapi.plugin('documentation').config('x-strapi-config.path')];
 
     if (strapi.plugin('graphql')) {
       const { config: gqlConfig } = strapi.plugin('graphql');
