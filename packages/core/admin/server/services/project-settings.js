@@ -23,11 +23,14 @@ const parseFilesData = async (files) => {
       const getStream = () => fs.createReadStream(file.path);
 
       // Add formated data for the upload provider
-      formatedFilesData[inputName] = strapi.plugin('upload').service('upload').formatFileInfo({
-        filename: file.name,
-        type: file.type,
-        size: file.size,
-      });
+      formatedFilesData[inputName] = await strapi
+        .plugin('upload')
+        .service('upload')
+        .formatFileInfo({
+          filename: file.name,
+          type: file.type,
+          size: file.size,
+        });
 
       // Add image dimensions
       Object.assign(
