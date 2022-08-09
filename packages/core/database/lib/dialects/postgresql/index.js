@@ -38,7 +38,7 @@ class PostgresDialect extends Dialect {
   transformErrors(error) {
     switch (error.code) {
       case '23502': {
-        throw new errors.NotNullConstraint({ column: error.column });
+        throw new errors.NotNullError({ column: error.column });
       }
       default: {
         super.transformErrors(error);
