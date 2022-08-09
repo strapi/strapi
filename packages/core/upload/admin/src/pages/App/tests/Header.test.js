@@ -85,15 +85,6 @@ describe('Header', () => {
     expect(container).toMatchSnapshot();
   });
 
-  test('truncates long folder lavels', () => {
-    useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { folder: 2 } }, jest.fn()]);
-
-    const { queryByText } = setup({
-      folder: { ...FIXTURE_FOLDER, name: 'The length of this label exceeds the maximum length' },
-    });
-    expect(queryByText('Media Library - The length of this label excee...')).toBeInTheDocument();
-  });
-
   test('does not render a back button at the root level of the media library', () => {
     const { queryByText } = setup({ folder: null });
 

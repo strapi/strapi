@@ -53,7 +53,7 @@ module.exports = db => {
   const diffIndexes = (oldIndex, index) => {
     const changes = [];
 
-    if (_.difference(oldIndex.columns, index.columns).length > 0) {
+    if (!_.isEqual(oldIndex.columns, index.columns)) {
       changes.push('columns');
     }
 

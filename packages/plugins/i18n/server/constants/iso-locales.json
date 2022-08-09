@@ -936,6 +936,14 @@
     "name":"Igbo (Nigeria) (ig-NG)"
   },
   {
+    "code":"smn",
+    "name":"Inari Sami"
+  },
+  {
+    "code":"smn-FI",
+    "name":"Inari Sami (Finland)"
+  },
+  {
     "code":"id",
     "name":"Indonesian (id)"
   },
@@ -1316,6 +1324,22 @@
     "name":"Nepali (Nepal) (ne-NP)"
   },
   {
+    "code": "se",
+    "name": "Northern Sami"
+  },
+  {
+    "code": "se-FI",
+    "name": "Northern Sami (Finland)"
+  },
+  {
+    "code": "se-NO",
+    "name": "Northern Sami (Norway)"
+  },
+  {
+    "code": "se-SE",
+    "name": "Northern Sami (Sweden)"
+  },
+  {
     "code":"nd",
     "name":"North Ndebele (nd)"
   },
@@ -1538,6 +1562,14 @@
   {
     "code":"sa",
     "name":"Sanskrit (sa)"
+  },
+  {
+    "code":"gd",
+    "name":"Scottish Gaelic (gd)"
+  },
+  {
+    "code":"gd-GB",
+    "name":"Scottish Gaelic (United Kingdom)"
   },
   {
     "code":"seh",
@@ -1926,6 +1958,14 @@
   {
     "code":"ur-PK",
     "name":"Urdu (Pakistan) (ur-PK)"
+  },
+  {
+    "code": "ug",
+    "name": "Uyghur"
+  },
+  {
+    "code": "ug-CN",
+    "name": "Uyghur (China)"
   },
   {
     "code":"uz",

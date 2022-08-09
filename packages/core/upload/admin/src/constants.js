@@ -21,6 +21,8 @@ const ParentFolderDefinition = PropTypes.shape({
   path: PropTypes.string.isRequired,
 });
 
+ParentFolderDefinition.parent = PropTypes.shape(ParentFolderDefinition);
+
 export const FolderDefinition = PropTypes.shape({
   id: PropTypes.number.isRequired,
   children: PropTypes.shape({
@@ -32,7 +34,7 @@ export const FolderDefinition = PropTypes.shape({
     count: PropTypes.number.isRequired,
   }),
   name: PropTypes.string.isRequired,
-  parent: PropTypes.oneOf([ParentFolderDefinition, PropTypes.number]),
+  parent: PropTypes.oneOfType([ParentFolderDefinition, PropTypes.number]),
   updatedAt: PropTypes.string.isRequired,
   updatedBy: PropTypes.shape(),
   pathId: PropTypes.number.isRequired,
@@ -72,3 +74,15 @@ export const AssetDefinition = PropTypes.shape({
     }),
   }),
 });
+
+export const CrumbDefinition = PropTypes.shape({
+  id: PropTypes.number,
+  label: PropTypes.string.isRequired,
+  href: PropTypes.string,
+});
+
+export const CrumbMenuDefinition = PropTypes.arrayOf(CrumbDefinition);
+
+export const BreadcrumbsDefinition = PropTypes.arrayOf(
+  PropTypes.oneOfType([CrumbDefinition, CrumbMenuDefinition])
+);
