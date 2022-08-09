@@ -8,7 +8,7 @@ const validateFindNewSchema = yup
     component: yup.string(),
     entityId: yup.strapiID(),
     q: yup.string(),
-    omitIds: yup.array().of(yup.strapiID()),
+    idsToOmit: yup.array().of(yup.strapiID()),
     page: yup
       .number()
       .integer()
