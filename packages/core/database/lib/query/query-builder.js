@@ -71,7 +71,7 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
-    count(count = '*') {
+    count(count = 'id') {
       state.type = 'count';
       state.count = count;
 
@@ -258,8 +258,8 @@ const createQueryBuilder = (uid, db) => {
       this.processSelect();
     },
 
-    shouldUseDistinct(numberOfJoins = 0) {
-      return state.joins.length > numberOfJoins && _.isEmpty(state.groupBy);
+    shouldUseDistinct() {
+      return state.joins.length > 0 && _.isEmpty(state.groupBy);
     },
 
     processSelect() {
@@ -301,12 +301,9 @@ const createQueryBuilder = (uid, db) => {
           break;
         }
         case 'count': {
-          const dbColumnName =
-            state.count === '*'
-              ? this.aliasColumn(helpers.toColumnName(meta, 'id'))
-              : this.aliasColumn(helpers.toColumnName(meta, state.count));
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.count));
 
-          if (this.shouldUseDistinct(2)) {
+          if (this.shouldUseDistinct()) {
             qb.countDistinct({ count: dbColumnName });
           } else {
             qb.count({ count: dbColumnName });
