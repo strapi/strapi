@@ -45,15 +45,15 @@ const createHTTPServer = (strapi, koaApp) => {
       return;
     }
 
-    return new Promise((resolve, reject) =>
+    return new Promise((resolve, reject) => {
       server.close((error) => {
         if (error) {
-          return reject(error);
+          reject(error);
+        } else {
+          resolve();
         }
-
-        resolve();
-      })
-    );
+      });
+    });
   };
 
   return server;

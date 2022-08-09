@@ -45,7 +45,7 @@ const ComponentFixture = (props) => (
 
 const setup = (props) => {
   return new Promise((resolve) => {
-    return act(() => {
+    act(() => {
       resolve(render(<ComponentFixture options={FIXTURE_OPTIONS} {...props} />));
     });
   });

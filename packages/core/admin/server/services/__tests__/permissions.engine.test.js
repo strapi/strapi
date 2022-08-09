@@ -84,7 +84,10 @@ describe('Permissions Engine', () => {
         plugin: 'test',
         name: 'isBob',
         category: 'default',
-        handler: async (user) => new Promise((resolve) => resolve(user.firstname === 'Bob')),
+        handler: async (user) =>
+          new Promise((resolve) => {
+            resolve(user.firstname === 'Bob');
+          }),
       },
       {
         plugin: 'test',

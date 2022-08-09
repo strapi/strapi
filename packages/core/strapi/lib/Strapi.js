@@ -282,11 +282,11 @@ class Strapi {
       const listenSocket = this.config.get('server.socket');
 
       if (listenSocket) {
-        return this.server.listen(listenSocket, onListen);
+        this.server.listen(listenSocket, onListen);
+      } else {
+        const { host, port } = this.config.get('server');
+        this.server.listen(port, host, onListen);
       }
-
-      const { host, port } = this.config.get('server');
-      return this.server.listen(port, host, onListen);
     });
   }
 
