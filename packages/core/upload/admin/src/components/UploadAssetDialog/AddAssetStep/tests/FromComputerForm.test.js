@@ -5,7 +5,7 @@ import { TrackingContext } from '@strapi/helper-plugin';
 import { FromComputerForm } from '../FromComputerForm';
 import en from '../../../../translations/en.json';
 
-jest.mock('../../../../utils/getTrad', () => x => x);
+jest.mock('../../../../utils/getTrad', () => (x) => x);
 
 jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || 'App level translation') }),
@@ -145,7 +145,7 @@ describe('FromComputerForm', () => {
         border: 1px solid #4945ff;
       }
 
-      .c13 .sc-iseIHH {
+      .c13 .sc-ezHhwS {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -215,7 +215,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c21 .sc-iseIHH {
+      .c21 .sc-ezHhwS {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

@@ -69,7 +69,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
-  getTrad: x => x,
+  getTrad: (x) => x,
 }));
 
 jest.mock('react-intl', () => ({
@@ -210,6 +210,24 @@ describe('Media library homepage', () => {
     });
 
     describe('select all', () => {
+      it('is not visible if there are not folders and assets', () => {
+        useAssets.mockReturnValueOnce({
+          isLoading: false,
+          error: null,
+          data: {},
+        });
+        useFolders.mockReturnValueOnce({
+          data: [],
+          isLoading: false,
+          error: null,
+        });
+        renderML();
+
+        expect(
+          screen.queryByText('There are no elements with the applied filters')
+        ).not.toBeInTheDocument();
+      });
+
       it('shows the select all button when the user is allowed to update', () => {
         renderML();
 
@@ -480,26 +498,6 @@ describe('Media library homepage', () => {
       renderML();
 
       expect(screen.queryByText('Upload your first assets...')).toBeInTheDocument();
-    });
-
-    it('does not display empty assets action, if there are no assets and the user does not have create permissions', () => {
-      useMediaLibraryPermissions.mockReturnValueOnce({
-        isLoading: false,
-        canCreate: false,
-        canRead: false,
-      });
-      useAssets.mockReturnValueOnce({
-        isLoading: false,
-        error: null,
-        data: {
-          pagination: FIXTURE_ASSET_PAGINATION,
-          results: FIXTURE_ASSETS,
-        },
-      });
-
-      renderML();
-
-      expect(screen.queryByText('header.actions.add-assets')).not.toBeInTheDocument();
     });
 
     it('does not display empty assets action, if there are no assets, no folders and the user is currently filtering', () => {

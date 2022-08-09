@@ -20,10 +20,7 @@ const merge = mergeWith((a, b) => {
 
 module.exports = async ({ strapi }) => {
   // Generate the GraphQL schema for the content API
-  const schema = strapi
-    .plugin('graphql')
-    .service('content-api')
-    .buildSchema();
+  const schema = strapi.plugin('graphql').service('content-api').buildSchema();
 
   if (isEmpty(schema)) {
     strapi.log.warn('The GraphQL schema has not been generated because it is empty');
@@ -61,6 +58,8 @@ module.exports = async ({ strapi }) => {
         ? ApolloServerPluginLandingPageDisabled()
         : ApolloServerPluginLandingPageGraphQLPlayground(),
     ],
+
+    cache: 'bounded',
   };
 
   const serverConfig = merge(defaultServerConfig, config('apolloServer'));
@@ -109,6 +108,9 @@ module.exports = async ({ strapi }) => {
               type: 'content-api',
             },
           };
+
+          // allow graphql playground to load without authentication
+          if (ctx.request.method === 'GET') return next();
 
           return strapi.auth.authenticate(ctx, next);
         },
