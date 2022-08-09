@@ -100,11 +100,14 @@ const create = async attributes => {
 
   // If this is a custom type token, create and link the associated permissions
   if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM) {
-    const permissions = await strapi
+    const permissionsCount = await strapi
       .query('admin::token-permission')
       .createMany({ data: attributes.permissions.map(action => ({ action, token: apiToken.id })) });
 
-    Object.assign(result, { permissions });
+    // TODO: should we select the permissions again to ensure it worked?
+    if (permissionsCount) {
+      Object.assign(result, { permissions: attributes.permissions });
+    }
   }
 
   return result;
