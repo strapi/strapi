@@ -563,7 +563,6 @@ const DataManagerProvider = ({
       value={{
         addAttribute,
         addCustomFieldAttribute,
-        editCustomFieldAttribute,
         addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(components, ['category']),
         allIcons,
@@ -576,6 +575,7 @@ const DataManagerProvider = ({
         deleteCategory,
         deleteData,
         editCategory,
+        editCustomFieldAttribute,
         isInDevelopmentMode,
         initialData,
         isInContentTypeView,

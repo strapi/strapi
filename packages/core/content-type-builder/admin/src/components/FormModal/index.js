@@ -107,7 +107,6 @@ const FormModal = () => {
   const {
     addAttribute,
     addCustomFieldAttribute,
-    editCustomFieldAttribute,
     addCreatedComponentToDynamicZone,
     allComponentsCategories,
     changeDynamicZoneComponents,
@@ -117,6 +116,7 @@ const FormModal = () => {
     deleteCategory,
     deleteData,
     editCategory,
+    editCustomFieldAttribute,
     submitData,
     modifiedData: allDataSchema,
     nestedComponents,
@@ -1055,10 +1055,10 @@ const FormModal = () => {
                   onSubmitCreateContentType={handleSubmit}
                   onSubmitCreateDz={handleSubmit}
                   onSubmitEditAttribute={handleSubmit}
-                  onSubmitEditCusomFieldAttribute={handleSubmit}
                   onSubmitEditCategory={handleSubmit}
                   onSubmitEditComponent={handleSubmit}
                   onSubmitEditContentType={handleSubmit}
+                  onSubmitEditCustomFieldAttribute={handleSubmit}
                   onSubmitEditDz={handleSubmit}
                 />
               }
