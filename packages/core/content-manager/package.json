@@ -23,7 +23,7 @@
     "test:unit": "jest --verbose"
   },
   "dependencies": {
-    "@sindresorhus/slugify": "1.1.0",
+    "@sindresorhus/slugify": "1.1.2",
     "@strapi/utils": "4.3.2",
     "lodash": "4.17.21"
   },
