@@ -1,6 +1,7 @@
 'use strict';
 
-const { prop, isEmpty } = require('lodash/fp');
+const { prop, isEmpty, isNil } = require('lodash/fp');
+const { convertFiltersQueryParams } = require('@strapi/utils/lib/convert-query-params');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
 
@@ -39,8 +40,12 @@ module.exports = {
 
     const query = strapi.db.queryBuilder(targetedModel.uid);
 
-    if (q) {
+    if (!isNil(q)) {
       query.search(q);
+    }
+
+    if (!isNil(ctx.request.query.filters)) {
+      query.where(convertFiltersQueryParams(ctx.request.query.filters, targetedModel));
     }
 
     if (!isEmpty(idsToOmit)) {
@@ -52,7 +57,7 @@ module.exports = {
       const sourceColumn = component ? joinTable.joinColumn.name : joinTable.inverseJoinColumn.name;
       const targetColumn = component ? joinTable.inverseJoinColumn.name : joinTable.joinColumn.name;
 
-      // Select ids of targeted entities already having a relation with _entityId
+      // Select ids of targeted entities already having a relation with entityId
       const knexSubQuery = strapi.db
         .queryBuilder(joinTable.name)
         .select([targetColumn])
