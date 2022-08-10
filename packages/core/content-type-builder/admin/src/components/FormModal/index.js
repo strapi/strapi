@@ -551,7 +551,7 @@ const FormModal = () => {
         // Add/edit a field to a created component (the end modal is not step 2)
       } else if (isCreatingCustomFieldAttribute) {
         const customFieldAttributeUpdate = {
-          attributeToSet: { ...modifiedData, customField: customFieldUid },
+          attributeToSet: { ...modifiedData, customField: customFieldUid, type: customField.type },
           forTarget,
           targetUid,
           initialAttribute: initialData,
