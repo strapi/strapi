@@ -26,6 +26,16 @@ describe('format attributes', () => {
           },
         },
       },
+      components: {
+        'default.test': {
+          attributes: {
+            color: {
+              type: 'customField',
+              customField: 'plugin::mycustomfields.color',
+            },
+          },
+        },
+      },
     };
 
     convertCustomFieldType(global.strapi);
@@ -34,6 +44,16 @@ describe('format attributes', () => {
       ...global.strapi,
       contentTypes: {
         test: {
+          attributes: {
+            color: {
+              type: 'text',
+              customField: 'plugin::mycustomfields.color',
+            },
+          },
+        },
+      },
+      components: {
+        'default.test': {
           attributes: {
             color: {
               type: 'text',
