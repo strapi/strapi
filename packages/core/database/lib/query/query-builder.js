@@ -71,7 +71,7 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
-    count(count = '*') {
+    count(count = 'id') {
       state.type = 'count';
       state.count = count;
 
@@ -301,10 +301,13 @@ const createQueryBuilder = (uid, db) => {
           break;
         }
         case 'count': {
-          const dbColumnName =
-            state.count === '*' ? '*' : this.aliasColumn(helpers.toColumnName(meta, state.count));
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.count));
 
-          qb.count({ count: dbColumnName });
+          if (this.shouldUseDistinct()) {
+            qb.countDistinct({ count: dbColumnName });
+          } else {
+            qb.count({ count: dbColumnName });
+          }
           break;
         }
         case 'max': {
