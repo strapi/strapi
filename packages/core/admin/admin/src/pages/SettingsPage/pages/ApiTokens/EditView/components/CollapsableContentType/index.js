@@ -17,7 +17,7 @@ const Border = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const CollapsableContentType = ({ actions, label, orderNumber, name }) => {
+const CollapsableContentType = ({ actions, label, orderNumber, name, disabled }) => {
   //   const { formatMessage } = useIntl();
   const {
     value: { onChange, onChangeSelectAll, modifiedData },
@@ -61,6 +61,7 @@ const CollapsableContentType = ({ actions, label, orderNumber, name }) => {
               onValueChange={value => {
                 onChangeSelectAll({ target: { name, value } });
               }}
+              disabled={disabled}
             >
               Select all
             </Checkbox>
@@ -78,6 +79,7 @@ const CollapsableContentType = ({ actions, label, orderNumber, name }) => {
                   onValueChange={value => {
                     onChange({ target: { name: currentName, value } });
                   }}
+                  disabled={disabled}
                 >
                   {action}
                 </Checkbox>
@@ -93,6 +95,7 @@ const CollapsableContentType = ({ actions, label, orderNumber, name }) => {
 CollapsableContentType.defaultProps = {
   actions: null,
   orderNumber: 0,
+  disabled: false,
 };
 
 CollapsableContentType.propTypes = {
@@ -100,6 +103,7 @@ CollapsableContentType.propTypes = {
   orderNumber: PropTypes.number,
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
 };
 
 export default CollapsableContentType;
