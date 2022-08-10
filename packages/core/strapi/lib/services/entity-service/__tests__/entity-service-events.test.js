@@ -1,7 +1,5 @@
 'use strict';
 
-jest.mock('bcryptjs', () => ({ hashSync: () => 'secret-password' }));
-
 const createEntityService = require('../');
 const entityValidator = require('../../entity-validator');
 
