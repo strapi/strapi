@@ -20,3 +20,8 @@ export interface CollectionTypeService extends BaseService {
 
 export type Service = SingleTypeService | CollectionTypeService;
 
+export type GenericService = Partial<Service> & {
+  [method: string | number | symbol]: (...args:unknown) => Promise<Entity> | Entity;
+};
+
+
