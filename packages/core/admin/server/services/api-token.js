@@ -1,7 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const { map, omit, differenceBy, isEmpty } = require('lodash/fp');
+const { omit, difference, isEmpty, map } = require('lodash/fp');
 const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 
@@ -99,15 +99,32 @@ const create = async attributes => {
 
   const result = { ...apiToken, accessKey };
 
-  // If this is a custom type token, create and link the associated permissions
+  // If this is a custom type token, create and the related permissions
   if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM) {
-    const permissionsCount = await strapi
-      .query('admin::token-permission')
-      .createMany({ data: attributes.permissions.map(action => ({ action, token: apiToken.id })) });
+    // TODO: createMany doesn't seem to create relation properly, figure this out?
+    // const permissionsCount = await strapi.query('admin::token-permission').createMany({
+    //   populate: POPULATE_FIELDS,
+    //   data: attributes.permissions.map(action => ({ action, token: apiToken })),
+    // });
 
-    // TODO: select the permissions to ensure it worked
-    if (permissionsCount) {
-      Object.assign(result, { permissions: attributes.permissions });
+    let promises = [];
+    attributes.permissions.forEach(action => {
+      promises.push(
+        strapi.query('admin::token-permission').create({
+          data: { action, token: apiToken },
+        })
+      );
+    });
+    await Promise.all(promises);
+
+    const currentPermissions = await strapi.entityService.load(
+      'admin::api-token',
+      apiToken,
+      'permissions'
+    );
+
+    if (currentPermissions) {
+      Object.assign(result, { permissions: map('action', currentPermissions) });
     }
   }
 
@@ -204,26 +221,56 @@ const update = async (id, attributes) => {
     data: omit('permissions', attributes),
   });
 
+  const currentPermissions = await strapi.entityService.load(
+    'admin::api-token',
+    token,
+    'permissions'
+  );
+
   let permissions = {};
   if (token.type === constants.API_TOKEN_TYPE.CUSTOM) {
-    const permissionsToDelete = differenceBy('action', token.permissions, attributes.permissions);
-    const permissionsToCreate = differenceBy('action', attributes.permissions, token.permissions);
+    const permissionsToDelete = difference(
+      map('action', currentPermissions),
+      attributes.permissions
+    );
+    const permissionsToCreate = difference(attributes.permissions, oldToken.permissions);
 
-    // TODO: this is deleting the permission, but not the link to this token
-    await strapi
-      .query('admin::token-permission')
-      .deleteMany({ where: { action: map('action', permissionsToDelete) } });
+    // TODO: make deleteMany work with relations
+    // await strapi
+    //   .query('admin::token-permission')
+    //   .deleteMany({ where: { action: map('action', permissionsToDelete), token: id } });
+    let promises = [];
+    permissionsToDelete.forEach(action => {
+      promises.push(
+        strapi.query('admin::token-permission').delete({
+          where: { action, token: id },
+        })
+      );
+    });
+    await Promise.all(promises);
 
-    // TODO: This is only creating the permission, not linking it to this token
-    await strapi
-      .query('admin::token-permission')
-      .createMany({ data: permissionsToCreate.map(action => ({ action, token: id })) });
+    // TODO: make createMany work with relations
+    // await strapi
+    //   .query('admin::token-permission')
+    //   .createMany({ data: permissionsToCreate.map(action => ({ action, token: id })) });
+    promises = [];
+    permissionsToCreate.forEach(action => {
+      promises.push(
+        strapi.query('admin::token-permission').create({
+          data: { action, token: id },
+        })
+      );
+    });
+    await Promise.all(promises);
 
+    // retrieve permissions
     permissions = {
       permissions: await strapi.entityService.load('admin::api-token', token, 'permissions'),
     };
-  } else {
-    // TODO: if type is changing from custom, make sure old permissions get removed
+  }
+  // TODO: if type is changing from custom, make sure old permissions get removed
+  else {
+    //TODO
   }
 
   return { ...token, ...permissions };
