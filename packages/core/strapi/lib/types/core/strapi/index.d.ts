@@ -2,7 +2,8 @@ import type Koa from 'koa';
 import { Database } from '@strapi/database';
 
 import type { StringMap } from './utils';
-import type { GenericController } from '../core-api/controller'
+import type { GenericController } from '../../../core-api/controller'
+import type { GenericService } from '../../../core-api/service'
 
 /**
  * The Strapi interface implemented by the main Strapi class.
@@ -33,12 +34,12 @@ export interface Strapi {
    *
    * It returns all the registered services
    */
-  readonly services: StringMap<Service>;
+  readonly services: StringMap<GenericService>;
 
   /**
    * Find a service using its unique identifier
    */
-  service<T extends Service = unknown>(uid: string): T | undefined;
+  service(uid: string): GenericService | undefined;
 
   /**
    * Getter for the Strapi controllers container
