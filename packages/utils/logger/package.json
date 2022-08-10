@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "lodash": "4.17.21",
-    "winston": "3.3.3"
+    "winston": "3.8.1"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",
