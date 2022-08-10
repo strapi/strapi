@@ -2,10 +2,6 @@ import axios from 'axios';
 import { AssetSource } from '../constants';
 import { typeFromMime } from './typeFromMime';
 
-/**
- * The URL might have query parameters.
- * Remove them to have a clean URL instead to use as a filename.
- */
 function getFilenameFromURL(url) {
   return new URL(url).pathname.split('/').pop();
 }
