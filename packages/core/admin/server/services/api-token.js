@@ -105,7 +105,7 @@ const create = async attributes => {
       .query('admin::token-permission')
       .createMany({ data: attributes.permissions.map(action => ({ action, token: apiToken.id })) });
 
-    // TODO: should we select the permissions again to ensure it worked?
+    // TODO: select the permissions to ensure it worked
     if (permissionsCount) {
       Object.assign(result, { permissions: attributes.permissions });
     }

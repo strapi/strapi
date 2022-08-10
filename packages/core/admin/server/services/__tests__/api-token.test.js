@@ -331,17 +331,17 @@ describe('API Token', () => {
 
     // TODO: test that deleteMany and createMany are called with the correct values
 
-    // expect(deleteMany).toHaveBeenCalledWith({
-    //   where: {
-    //     action: ['admin::subject.action'],
-    //   },
-    // });
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: {
+        action: ['admin::subject.action'],
+      },
+    });
 
-    // expect(createMany).toHaveBeenCalledWith({
-    //   where: {
-    //     action: ['admin::subject.Newaction'],
-    //   },
-    // });
+    expect(createMany).toHaveBeenCalledWith({
+      where: {
+        action: ['admin::subject.Newaction'],
+      },
+    });
 
     expect(load).toHaveBeenCalledWith(
       'admin::api-token',
