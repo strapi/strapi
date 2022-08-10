@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@graphql-tools/schema": "8.1.2",
-    "@graphql-tools/utils": "^8.9.0",
+    "@graphql-tools/utils": "^8.9.1",
     "@strapi/utils": "4.3.2",
     "apollo-server-core": "3.1.2",
     "apollo-server-koa": "3.10.0",
