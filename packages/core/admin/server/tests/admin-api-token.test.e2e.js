@@ -551,6 +551,4 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
     });
   });
-
-  test.todo("Updates a custom token's permissions");
 });
