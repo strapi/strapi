@@ -7,15 +7,8 @@ import { createComponentSchema, componentForm } from '../component';
 import { dynamiczoneForm } from '../dynamicZone';
 import { nameField } from '../attributes/nameField';
 import addItemsToFormSection from './utils/addItemsToFormSection';
+import getUsedAttributeNames from './utils/getUsedAttributeNames';
 import getTrad from '../../../utils/getTrad';
-
-const getUsedAttributeNames = (attributes, schemaData) => {
-  return attributes
-    .filter(({ name }) => {
-      return name !== schemaData.initialData.name;
-    })
-    .map(({ name }) => name);
-};
 
 const forms = {
   customField: {
