@@ -87,6 +87,12 @@ const fixtures = {
   ],
 };
 
+const pagination = {
+  page: 1,
+  pageSize: 25,
+  pageCount: 1,
+};
+
 describe('Deep Filtering API', () => {
   beforeAll(async () => {
     await builder
@@ -119,8 +125,11 @@ describe('Deep Filtering API', () => {
             filters: { cards: { name: data.card[0].attributes.name } },
           },
         });
-
         expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.meta.pagination).toMatchObject({
+          ...pagination,
+          total: 2,
+        });
         expect(res.body.data.length).toBe(2);
         expect(res.body.data[0]).toMatchObject(data.collector[0]);
         expect(res.body.data[1]).toMatchObject(data.collector[1]);
@@ -135,9 +144,49 @@ describe('Deep Filtering API', () => {
           },
         });
 
+        expect(res.body.meta.pagination).toMatchObject({
+          ...pagination,
+          total: 1,
+        });
         expect(Array.isArray(res.body.data)).toBe(true);
         expect(res.body.data.length).toBe(1);
         expect(res.body.data[0]).toMatchObject(data.collector[0]);
+      });
+
+      test('should return 2 results when deep filtering with $or', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/collectors',
+          qs: {
+            filters: {
+              $or: [
+                {
+                  cards: {
+                    name: data.card[0].attributes.name,
+                  },
+                },
+                {
+                  cards: {
+                    name: data.card[1].attributes.name,
+                  },
+                },
+              ],
+            },
+          },
+        });
+
+        expect(res.body.meta.pagination).toMatchObject({
+          ...pagination,
+          total: 2,
+        });
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBe(2);
+        expect(res.body.data).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining(data.collector[0]),
+            expect.objectContaining(data.collector[1]),
+          ])
+        );
       });
     });
 
@@ -150,7 +199,10 @@ describe('Deep Filtering API', () => {
             filters: { collector_friends: { name: data.collector[0].attributes.name } },
           },
         });
-
+        expect(res.body.meta.pagination).toMatchObject({
+          ...pagination,
+          total: 2,
+        });
         expect(Array.isArray(res.body.data)).toBe(true);
         expect(res.body.data.length).toBe(2);
         expect(res.body.data).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
@@ -173,7 +225,10 @@ describe('Deep Filtering API', () => {
             _q: '',
           },
         });
-
+        expect(res.body.meta.pagination).toMatchObject({
+          ...pagination,
+          total: 2,
+        });
         expect(Array.isArray(res.body.data)).toBe(true);
         expect(res.body.data.length).toBe(2);
         expect(res.body.data).toEqual(expect.arrayContaining(data.collector.slice(0, 2)));
@@ -193,6 +248,10 @@ describe('Deep Filtering API', () => {
           },
         });
 
+        expect(res.body.meta.pagination).toMatchObject({
+          ...pagination,
+          total: 1,
+        });
         expect(Array.isArray(res.body.data)).toBe(true);
         expect(res.body.data.length).toBe(1);
         expect(res.body.data[0]).toMatchObject(data.collector[0]);
@@ -214,6 +273,10 @@ describe('Deep Filtering API', () => {
           },
         });
 
+        expect(res.body.meta.pagination).toMatchObject({
+          ...pagination,
+          total: 2,
+        });
         expect(Array.isArray(res.body.data)).toBe(true);
         expect(res.body.data.length).toBe(2);
         expect(res.body.data).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
@@ -233,6 +296,10 @@ describe('Deep Filtering API', () => {
           },
         });
 
+        expect(res.body.meta.pagination).toMatchObject({
+          ...pagination,
+          total: 1,
+        });
         expect(Array.isArray(res.body.data)).toBe(true);
         expect(res.body.data.length).toBe(1);
         expect(res.body.data[0]).toMatchObject(data.collector[1]);

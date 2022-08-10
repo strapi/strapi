@@ -40,7 +40,7 @@ module.exports = config => {
 
       const requestOrigin = ctx.accept.headers.origin;
       if (whitelist.includes('*')) {
-        return '*';
+        return credentials ? requestOrigin : '*';
       }
 
       if (!whitelist.includes(requestOrigin)) {

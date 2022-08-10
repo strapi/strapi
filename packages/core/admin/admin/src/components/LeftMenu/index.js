@@ -125,13 +125,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               const Icon = link.icon;
 
               return (
-                <NavLink
-                  as={RouterNavLink}
-                  to={link.to}
-                  key={link.to}
-                  icon={<Icon />}
-                  badgeContent={link.badge}
-                >
+                <NavLink as={RouterNavLink} to={link.to} key={link.to} icon={<Icon />}>
                   {formatMessage(link.intlLabel)}
                 </NavLink>
               );
