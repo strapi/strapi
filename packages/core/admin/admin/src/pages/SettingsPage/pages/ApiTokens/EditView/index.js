@@ -10,6 +10,7 @@ import {
   useGuidedTour,
   Link,
   usePersistentState,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -33,6 +34,7 @@ import { getDateOfExpiration, schema, getActionsState } from './utils';
 import LoadingView from './components/LoadingView';
 import HeaderContentBox from './components/ContentBox';
 import Permissions from './components/Permissions';
+import adminPermissions from '../../../../../permissions';
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
 import { data as permissions } from './utils/tests/dataMock';
 import init from './init';
@@ -48,6 +50,9 @@ const ApiTokenCreateView = () => {
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
+  const {
+    allowedActions: { canCreate, canUpdate },
+  } = useRBAC(adminPermissions.settings['api-tokens']);
   const [state, dispatch] = useReducer(reducer, initialState, state => init(state, permissions));
   const [lang] = usePersistentState('strapi-admin-language', 'en');
 
@@ -226,6 +231,7 @@ const ApiTokenCreateView = () => {
     onChangeSelectAll: handleChangeSelectAllCheckbox,
   };
 
+  const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
   const isLoading = !isCreating && !apiToken && status !== 'success';
 
   if (isLoading) {
@@ -259,18 +265,20 @@ const ApiTokenCreateView = () => {
                     })
                   }
                   primaryAction={
-                    <Button
-                      disabled={isSubmitting}
-                      loading={isSubmitting}
-                      startIcon={<Check />}
-                      type="submit"
-                      size="L"
-                    >
-                      {formatMessage({
-                        id: 'global.save',
-                        defaultMessage: 'Save',
-                      })}
-                    </Button>
+                    canEditInputs && (
+                      <Button
+                        disabled={isSubmitting}
+                        loading={isSubmitting}
+                        startIcon={<Check />}
+                        type="submit"
+                        size="L"
+                      >
+                        {formatMessage({
+                          id: 'global.save',
+                          defaultMessage: 'Save',
+                        })}
+                      </Button>
+                    )
                   }
                   navigationAction={
                     <Link startIcon={<ArrowLeft />} to="/settings/api-tokens">
@@ -319,6 +327,7 @@ const ApiTokenCreateView = () => {
                               })}
                               onChange={handleChange}
                               value={values.name}
+                              disabled={!canEditInputs}
                               required
                             />
                           </GridItem>
@@ -342,6 +351,7 @@ const ApiTokenCreateView = () => {
                                   : null
                               }
                               onChange={handleChange}
+                              disabled={!canEditInputs}
                             >
                               {values.description}
                             </Textarea>
@@ -431,6 +441,7 @@ const ApiTokenCreateView = () => {
                               }}
                               placeholder="Select"
                               required
+                              disabled={!canEditInputs}
                             >
                               <Option value="read-only">
                                 {formatMessage({
@@ -455,7 +466,7 @@ const ApiTokenCreateView = () => {
                         </Grid>
                       </Stack>
                     </Box>
-                    <Permissions />
+                    <Permissions disabled={!canEditInputs} />
                   </Stack>
                 </ContentLayout>
               </Form>

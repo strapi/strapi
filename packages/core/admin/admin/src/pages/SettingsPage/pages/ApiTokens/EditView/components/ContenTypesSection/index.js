@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import CollapsableContentType from '../CollapsableContentType';
 
-const ContentTypesSection = ({ section, name }) => {
+const ContentTypesSection = ({ section, name, ...props }) => {
   return (
     <Box padding={4} background="neutral0">
       {section &&
@@ -14,6 +14,7 @@ const ContentTypesSection = ({ section, name }) => {
             actions={section[contentType]}
             orderNumber={index}
             name={`${name}.${contentType}`}
+            {...props}
           />
         ))}
     </Box>
