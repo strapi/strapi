@@ -76,7 +76,7 @@
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
     "@testing-library/user-event": "13.5.0",
-    "axios-mock-adapter": "1.20.0",
+    "axios-mock-adapter": "1.21.2",
     "babel-eslint": "10.1.0",
     "chalk": "4.1.2",
     "chokidar": "3.5.3",
