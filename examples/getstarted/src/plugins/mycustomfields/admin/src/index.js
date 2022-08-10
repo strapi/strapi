@@ -54,6 +54,17 @@ export default {
               value: 'hex',
               options: [
                 {
+                  key: '__null_reset_value__',
+                  value: '',
+                  metadatas: {
+                    intlLabel: {
+                      id: 'color-picker.color.format.placeholder',
+                      defaultMessage: 'Select a format',
+                    },
+                    hidden: true,
+                  },
+                },
+                {
                   key: 'hex',
                   value: 'hex',
                   metadatas: {
