@@ -15,17 +15,7 @@ describe('Entity service triggers webhooks', () => {
 
   let instance;
   let eventHub = { emit: jest.fn() };
-  let fakeDB = {
-    query: () => ({
-      count: () => 0,
-      create: ({ data }) => data,
-      update: ({ data }) => data,
-      findOne: () => ({ attr: 'value' }),
-      findMany: () => [{ attr: 'value' }, { attr: 'value2' }],
-      delete: () => ({}),
-      deleteMany: () => ({}),
-    }),
-  };
+  let entity = { attr: 'value' };
 
   beforeAll(() => {
     instance = createEntityService({
@@ -39,21 +29,29 @@ describe('Entity service triggers webhooks', () => {
           },
         }),
       },
-      db: fakeDB,
+      db: {
+        query: () => ({
+          count: () => 0,
+          create: ({ data }) => data,
+          update: ({ data }) => data,
+          findOne: () => entity,
+          findMany: () => [entity, entity],
+          delete: () => ({}),
+          deleteMany: () => ({}),
+        }),
+      },
       eventHub,
       entityValidator,
     });
   });
 
   test('Emit event: Create', async () => {
-    const data = { attr: 'value' };
-
     // Create entity
-    await instance.create('test-model', { data });
+    await instance.create('test-model', { data: entity });
 
     // Expect entry.create event to be emitted
     expect(eventHub.emit).toHaveBeenCalledWith('entry.create', {
-      entry: data,
+      entry: entity,
       model: 'test-model',
     });
 
@@ -61,14 +59,12 @@ describe('Entity service triggers webhooks', () => {
   });
 
   test('Emit event: Update', async () => {
-    const data = { attr: 'value' };
-
     // Update entity
-    await instance.update('test-model', 'entity-id', { data });
+    await instance.update('test-model', 'entity-id', { data: entity });
 
     // Expect entry.update event to be emitted
     expect(eventHub.emit).toHaveBeenCalledWith('entry.update', {
-      entry: data,
+      entry: entity,
       model: 'test-model',
     });
 
@@ -81,7 +77,7 @@ describe('Entity service triggers webhooks', () => {
 
     // Expect entry.create event to be emitted
     expect(eventHub.emit).toHaveBeenCalledWith('entry.delete', {
-      entry: { attr: 'value' },
+      entry: entity,
       model: 'test-model',
     });
 
@@ -94,7 +90,7 @@ describe('Entity service triggers webhooks', () => {
 
     // Expect entry.create event to be emitted
     expect(eventHub.emit).toHaveBeenCalledWith('entry.delete', {
-      entry: { attr: 'value' },
+      entry: entity,
       model: 'test-model',
     });
     // One event per each entity deleted
@@ -104,8 +100,8 @@ describe('Entity service triggers webhooks', () => {
   });
 
   test('Do not emit event when no deleted entity', async () => {
-    fakeDB.query = () => ({ findOne: () => null });
-    // Delete entity
+    entity = null;
+    // Delete non existent entity
     await instance.delete('test-model', 'entity-id', {});
 
     // Expect entry.create event to be emitted
