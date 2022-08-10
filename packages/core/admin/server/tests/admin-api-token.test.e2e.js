@@ -167,7 +167,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test('Fails to create a non-custom api token with any permissions attribute', async () => {
+  test('Creates a non-custom api token with empty permissions attribute', async () => {
     const body = {
       name: 'api-token_tests-fullAccessFailWithEmptyPermissions',
       description: 'api-token_tests-description',
@@ -294,6 +294,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
+  // TODO: test this with custom token that has permissions
   test('List all tokens (successfully)', async () => {
     await deleteAllTokens();
 
@@ -345,6 +346,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     expect(res.body.data).toBeNull();
   });
 
+  // TODO: test this with a custom token that has permissions
   test('Retrieves a token (successfully)', async () => {
     const token = await createValidToken();
 
@@ -549,4 +551,6 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
     });
   });
+
+  test.todo("Updates a custom token's permissions");
 });
