@@ -15,7 +15,7 @@ const addItemsToFormSection = (formTypeOptions, sections) => {
       return;
     }
 
-    // Otherwise, when no sectionTitle is present or sectionTitle has a value (including null),
+    // Otherwise, when sectionTitle has a value (including null),
     // add the item as a new section
     sections.push(item);
   });

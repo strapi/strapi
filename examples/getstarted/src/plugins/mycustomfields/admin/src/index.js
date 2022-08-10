@@ -49,10 +49,21 @@ export default {
                 id: 'color-picker.color.format.label',
                 defaultMessage: 'Color format',
               },
-              name: 'options.color-picker.format',
+              name: 'options.format',
               type: 'select',
               value: 'hex',
               options: [
+                {
+                  key: '__null_reset_value__',
+                  value: '',
+                  metadatas: {
+                    intlLabel: {
+                      id: 'color-picker.color.format.placeholder',
+                      defaultMessage: 'Select a format',
+                    },
+                    hidden: true,
+                  },
+                },
                 {
                   key: 'hex',
                   value: 'hex',
@@ -111,11 +122,9 @@ export default {
             },
           ],
           validator: args => ({
-            'color-picker': yup.object().shape({
-              format: yup.string().required({
-                id: 'options.color-picker.format.error',
-                defaultMessage: 'The color format is required',
-              }),
+            format: yup.string().required({
+              id: 'options.color-picker.format.error',
+              defaultMessage: 'The color format is required',
             }),
           }),
         },

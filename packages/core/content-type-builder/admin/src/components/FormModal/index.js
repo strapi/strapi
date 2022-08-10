@@ -116,6 +116,7 @@ const FormModal = () => {
     deleteCategory,
     deleteData,
     editCategory,
+    editCustomFieldAttribute,
     submitData,
     modifiedData: allDataSchema,
     nestedComponents,
@@ -347,7 +348,6 @@ const FormModal = () => {
         ctbFormsAPI,
         customFieldValidator: customField.options.validator,
       });
-
       // Check for validity for creating a component
       // This is happening when the user creates a component "on the fly"
       // Since we temporarily store the component info in another object
@@ -550,13 +550,18 @@ const FormModal = () => {
         // Add/edit a field to a content type
         // Add/edit a field to a created component (the end modal is not step 2)
       } else if (isCreatingCustomFieldAttribute) {
-        addCustomFieldAttribute(
-          { ...modifiedData, customField: customFieldUid },
+        const customFieldAttributeUpdate = {
+          attributeToSet: { ...modifiedData, customField: customFieldUid },
           forTarget,
           targetUid,
-          actionType === 'edit',
-          initialData
-        );
+          initialAttribute: initialData,
+        };
+
+        if (actionType === 'edit') {
+          editCustomFieldAttribute(customFieldAttributeUpdate);
+        } else {
+          addCustomFieldAttribute(customFieldAttributeUpdate);
+        }
 
         if (shouldContinue) {
           onNavigateToChooseAttributeModal({
@@ -1050,10 +1055,10 @@ const FormModal = () => {
                   onSubmitCreateContentType={handleSubmit}
                   onSubmitCreateDz={handleSubmit}
                   onSubmitEditAttribute={handleSubmit}
-                  onSubmitEditCusomFieldAttribute={handleSubmit}
                   onSubmitEditCategory={handleSubmit}
                   onSubmitEditComponent={handleSubmit}
                   onSubmitEditContentType={handleSubmit}
+                  onSubmitEditCustomFieldAttribute={handleSubmit}
                   onSubmitEditDz={handleSubmit}
                 />
               }

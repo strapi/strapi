@@ -38,10 +38,10 @@ const FormModalEndActions = ({
   onSubmitCreateComponent,
   onSubmitCreateDz,
   onSubmitEditAttribute,
-  onSubmitEditCusomFieldAttribute,
   onSubmitEditCategory,
   onSubmitEditComponent,
   onSubmitEditContentType,
+  onSubmitEditCustomFieldAttribute,
   onSubmitEditDz,
 }) => {
   const { formatMessage } = useIntl();
@@ -394,7 +394,7 @@ const FormModalEndActions = ({
           onClick={e => {
             e.preventDefault();
 
-            onSubmitEditCusomFieldAttribute(e, true);
+            onSubmitEditCustomFieldAttribute(e, true);
           }}
           startIcon={<Plus />}
         >
@@ -409,7 +409,7 @@ const FormModalEndActions = ({
           onClick={e => {
             e.preventDefault();
 
-            onSubmitEditCusomFieldAttribute(e, false);
+            onSubmitEditCustomFieldAttribute(e, false);
           }}
         >
           {formatMessage({
@@ -455,10 +455,10 @@ FormModalEndActions.propTypes = {
   onSubmitCreateComponent: PropTypes.func.isRequired,
   onSubmitCreateDz: PropTypes.func.isRequired,
   onSubmitEditAttribute: PropTypes.func.isRequired,
-  onSubmitEditCusomFieldAttribute: PropTypes.func.isRequired,
   onSubmitEditCategory: PropTypes.func.isRequired,
   onSubmitEditComponent: PropTypes.func.isRequired,
   onSubmitEditContentType: PropTypes.func.isRequired,
+  onSubmitEditCustomFieldAttribute: PropTypes.func.isRequired,
   onSubmitEditDz: PropTypes.func.isRequired,
 };
 
