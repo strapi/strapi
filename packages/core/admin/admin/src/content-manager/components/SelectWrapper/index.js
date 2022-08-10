@@ -64,13 +64,8 @@ function SelectWrapper({
   const [{ query }] = useQueryParams();
   // Disable the input in case of a polymorphic relation
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
-  const {
-    addRelation,
-    modifiedData,
-    moveRelation,
-    onChange,
-    removeRelation,
-  } = useCMEditViewDataManager();
+
+  const { addRelation, modifiedData, onChange, removeRelation } = useCMEditViewDataManager();
   const { pathname } = useLocation();
 
   const value = get(modifiedData, name, null);
@@ -295,7 +290,6 @@ function SelectWrapper({
         isLoading={isLoading}
         isClearable
         mainField={mainField}
-        move={moveRelation}
         name={name}
         options={filteredOptions}
         onChange={handleChange}
