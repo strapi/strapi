@@ -114,7 +114,7 @@
     "koa-compress": "5.1.0",
     "koa-favicon": "2.1.0",
     "koa-helmet": "6.1.0",
-    "koa-ip": "2.1.0",
+    "koa-ip": "2.1.2",
     "koa-session": "6.2.0",
     "koa-static": "5.0.0",
     "lodash": "4.17.21",
