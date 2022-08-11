@@ -81,11 +81,23 @@ describe('Role controller', () => {
   describe('updatePermissions', () => {
     test('Fails on missing permissions input', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
+      const hashAdminUser = jest.fn(() => 'testhash');
 
-      const ctx = createContext({
-        params: { id: 1 },
-        body: {},
-      });
+      const state = {
+        user: {
+          id: 1,
+        },
+      };
+
+      const ctx = createContext(
+        {
+          params: { id: 1 },
+          body: {},
+        },
+        {
+          state,
+        }
+      );
 
       global.strapi = {
         admin: {
@@ -95,6 +107,9 @@ describe('Role controller', () => {
             },
             role: {
               findOne,
+            },
+            'user-hash': {
+              hashAdminUser,
             },
           },
         },
@@ -112,13 +127,25 @@ describe('Role controller', () => {
 
     test('Fails on missing action permission', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
+      const hashAdminUser = jest.fn(() => 'testhash');
 
-      const ctx = createContext({
-        params: { id: 1 },
-        body: {
-          permissions: [{}],
+      const state = {
+        user: {
+          id: 1,
         },
-      });
+      };
+
+      const ctx = createContext(
+        {
+          params: { id: 1 },
+          body: {
+            permissions: [{}],
+          },
+        },
+        {
+          state,
+        }
+      );
       global.strapi = {
         admin: {
           services: {
@@ -127,6 +154,9 @@ describe('Role controller', () => {
               sanitizePermission: jest.fn(p => p),
               actionProvider: { get: jest.fn() },
               conditionProvider: { values: jest.fn(() => []) },
+            },
+            'user-hash': {
+              hashAdminUser,
             },
           },
         },
@@ -146,6 +176,7 @@ describe('Role controller', () => {
       const roleID = 1;
       const findOneRole = jest.fn(() => Promise.resolve({ id: roleID }));
       const assignPermissions = jest.fn((roleID, permissions) => Promise.resolve(permissions));
+      const hashAdminUser = jest.fn(() => 'testhash');
       const inputPermissions = [
         {
           action: 'test',
@@ -155,12 +186,23 @@ describe('Role controller', () => {
         },
       ];
 
-      const ctx = createContext({
-        params: { id: roleID },
-        body: {
-          permissions: inputPermissions,
+      const state = {
+        user: {
+          id: 1,
         },
-      });
+      };
+
+      const ctx = createContext(
+        {
+          params: { id: roleID },
+          body: {
+            permissions: inputPermissions,
+          },
+        },
+        {
+          state,
+        }
+      );
 
       global.strapi = {
         admin: {
@@ -184,14 +226,20 @@ describe('Role controller', () => {
                 })),
               },
             },
+            'user-hash': {
+              hashAdminUser,
+            },
           },
         },
       };
 
+      const adminUserId = hashAdminUser();
+
       await roleController.updatePermissions(ctx);
 
+      expect(hashAdminUser).toHaveBeenCalledWith(ctx.state.user);
       expect(findOneRole).toHaveBeenCalledWith({ id: roleID });
-      expect(assignPermissions).toHaveBeenCalledWith(roleID, inputPermissions);
+      expect(assignPermissions).toHaveBeenCalledWith(roleID, inputPermissions, adminUserId);
 
       expect(ctx.body).toEqual({
         data: inputPermissions,

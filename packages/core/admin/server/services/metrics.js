@@ -14,7 +14,7 @@ const sendDidUpdateRolePermissions = async adminUserId => {
 
 const sendDidChangeInterfaceLanguage = async () => {
   const languagesInUse = await getService('user').getLanguagesInUse();
-  strapi.telemetry.send('didChangeInterfaceLanguage', { languagesInUse });
+  strapi.telemetry.send('', 'didChangeInterfaceLanguage', { languagesInUse });
 };
 
 module.exports = {

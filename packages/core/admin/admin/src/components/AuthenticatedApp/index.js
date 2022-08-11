@@ -9,7 +9,6 @@ import {
 } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 import get from 'lodash/get';
-import { hashAdminUser } from '@strapi/utils';
 import packageJSON from '../../../../package.json';
 import { useConfigurations } from '../../hooks';
 import PluginsInitializer from '../PluginsInitializer';
@@ -21,7 +20,7 @@ import {
   fetchUserRoles,
 } from './utils/api';
 import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
-import { getFullName } from '../../utils';
+import { getFullName, hashAdminUser } from '../../utils';
 
 const strapiVersion = packageJSON.version;
 

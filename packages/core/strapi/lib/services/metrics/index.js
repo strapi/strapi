@@ -39,7 +39,7 @@ const createTelemetryInstance = strapi => {
 
     register() {
       if (!isDisabled) {
-        const pingCron = scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
+        const pingCron = scheduleJob('0 0 12 * * *', () => sendEvent('', 'ping'));
         crons.push(pingCron);
 
         strapi.server.use(createMiddleware({ sendEvent }));
@@ -52,6 +52,7 @@ const createTelemetryInstance = strapi => {
 
         const sendLicenseCheck = () => {
           return sendEvent(
+            '',
             'didCheckLicense',
             {
               licenseInfo: {

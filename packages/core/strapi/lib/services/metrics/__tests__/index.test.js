@@ -91,16 +91,19 @@ describe('metrics', () => {
       },
     });
 
-    send('someEvent');
+    const adminUserId = 'testhash';
+
+    send(adminUserId, 'someEvent');
 
     expect(fetch).toHaveBeenCalled();
     expect(fetch.mock.calls[0][0]).toBe('https://analytics.strapi.io/track');
     expect(fetch.mock.calls[0][1].method).toBe('POST');
     expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
       event: 'someEvent',
-      uuid: 'test',
+      adminUserId: 'testhash',
       properties: {
         projectType: 'Community',
+        projectId: 'test',
       },
     });
 

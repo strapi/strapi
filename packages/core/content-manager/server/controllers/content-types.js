@@ -75,6 +75,7 @@ module.exports = {
     const { userAbility } = ctx.state;
     const { uid } = ctx.params;
     const { body } = ctx.request;
+    const adminUserId = strapi.service('admin::user-hash').hashAdminUser(ctx.state.user);
 
     const contentTypeService = getService('content-types');
     const metricsService = getService('metrics');
@@ -105,7 +106,7 @@ module.exports = {
 
     const newConfiguration = await contentTypeService.updateConfiguration(contentType, input);
 
-    await metricsService.sendDidConfigureListView(contentType, newConfiguration);
+    await metricsService.sendDidConfigureListView(contentType, newConfiguration, adminUserId);
 
     const confWithUpdatedMetadata = {
       ...newConfiguration,

@@ -16,7 +16,7 @@ const defaultQueryOpts = {
   headers: { 'Content-Type': 'application/json' },
 };
 
-const ANALYTICS_URI = 'http://localhost:4000';
+const ANALYTICS_URI = 'https://analytics.strapi.io';
 
 /**
  * Add properties from the package.json strapi key in the metadata

@@ -92,7 +92,7 @@ module.exports = ({ strapi }) => ({
 
   async sendMetrics() {
     const metrics = await this.computeMetrics();
-    strapi.telemetry.send('didSendUploadPropertiesOnceAWeek', metrics);
+    strapi.telemetry.send('', 'didSendUploadPropertiesOnceAWeek', metrics);
 
     const metricsInfoStored = await getMetricsStoreValue();
     await setMetricsStoreValue({ ...metricsInfoStored, lastWeeklyUpdate: new Date().getTime() });

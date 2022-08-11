@@ -46,6 +46,7 @@ module.exports = {
     const { user, userAbility } = ctx.state;
     const { model } = ctx.params;
     const { body, query } = ctx.request;
+    const adminUserId = strapi.service('admin::user-hash').hashAdminUser(ctx.state.user);
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -73,7 +74,7 @@ module.exports = {
       const newEntity = await entityManager.create(sanitizedBody, model, { params: query });
       ctx.body = await permissionChecker.sanitizeOutput(newEntity);
 
-      await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      await strapi.telemetry.send(adminUserId, 'didCreateFirstContentTypeEntry', { model });
       return;
     }
 

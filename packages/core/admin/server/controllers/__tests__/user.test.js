@@ -15,13 +15,22 @@ describe('User Controller', () => {
 
     test('Fails if user already exist', async () => {
       const exists = jest.fn(() => Promise.resolve(true));
-      const ctx = createContext({ body });
+      const hashAdminUser = jest.fn(() => 'testhash');
+      const state = {
+        user: {
+          id: 1,
+        },
+      };
+      const ctx = createContext({ body }, { state });
 
       global.strapi = {
         admin: {
           services: {
             user: {
               exists,
+            },
+            'user-hash': {
+              hashAdminUser,
             },
           },
         },
@@ -44,8 +53,14 @@ describe('User Controller', () => {
       const exists = jest.fn(() => Promise.resolve(false));
       const sanitizeUser = jest.fn(user => Promise.resolve(user));
       const created = jest.fn();
-      const ctx = createContext({ body }, { created });
-
+      const hashAdminUser = jest.fn(() => 'testhash');
+      const state = {
+        user: {
+          id: 1,
+        },
+      };
+      const ctx = createContext({ body }, { state, created });
+      console.log(ctx);
       global.strapi = {
         admin: {
           services: {
@@ -54,14 +69,20 @@ describe('User Controller', () => {
               create,
               sanitizeUser,
             },
+            'user-hash': {
+              hashAdminUser,
+            },
           },
         },
       };
 
+      const adminUserId = hashAdminUser();
+
       await userController.create(ctx);
 
+      expect(hashAdminUser).toHaveBeenCalledWith(ctx.state.user);
       expect(exists).toHaveBeenCalledWith({ email: body.email });
-      expect(create).toHaveBeenCalledWith(body);
+      expect(create).toHaveBeenCalledWith(body, adminUserId);
       expect(sanitizeUser).toHaveBeenCalled();
       expect(created).toHaveBeenCalled();
     });

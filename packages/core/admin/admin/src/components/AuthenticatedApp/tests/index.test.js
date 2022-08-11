@@ -19,7 +19,9 @@ const strapiVersion = packageJSON.version;
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  auth: { getUserInfo: () => ({ firstname: 'kai', lastname: 'doe' }) },
+  auth: {
+    getUserInfo: () => ({ firstname: 'kai', lastname: 'doe', email: 'testemail@strapi.io' }),
+  },
   useGuidedTour: jest.fn(() => ({
     setGuidedTourVisibility: jest.fn(),
   })),

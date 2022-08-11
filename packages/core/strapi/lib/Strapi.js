@@ -244,9 +244,9 @@ class Strapi {
     if (shouldOpenAdmin && !isInitialized) {
       try {
         await utils.openBrowser(this.config);
-        this.telemetry.send('didOpenTab');
+        this.telemetry.send('', 'didOpenTab');
       } catch (e) {
-        this.telemetry.send('didNotOpenTab');
+        this.telemetry.send('', 'didNotOpenTab');
       }
     }
   }

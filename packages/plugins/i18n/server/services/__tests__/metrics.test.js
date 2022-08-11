@@ -43,7 +43,7 @@ describe('Metrics', () => {
 
     await sendDidInitializeEvent();
 
-    expect(strapi.telemetry.send).toHaveBeenCalledWith('didInitializeI18n', {
+    expect(strapi.telemetry.send).toHaveBeenCalledWith('', 'didInitializeI18n', {
       numberOfContentTypes: 1,
     });
   });
@@ -87,7 +87,7 @@ describe('Metrics', () => {
 
     await sendDidUpdateI18nLocalesEvent();
 
-    expect(strapi.telemetry.send).toHaveBeenCalledWith('didUpdateI18nLocales', {
+    expect(strapi.telemetry.send).toHaveBeenCalledWith('', 'didUpdateI18nLocales', {
       numberOfLocales: 3,
     });
   });

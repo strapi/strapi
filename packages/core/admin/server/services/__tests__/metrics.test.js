@@ -17,9 +17,14 @@ describe('Metrics', () => {
       },
     };
 
-    await metricsService.sendDidInviteUser();
+    const adminUserId = 'testhash';
 
-    expect(send).toHaveBeenCalledWith('didInviteUser', { numberOfRoles: 3, numberOfUsers: 2 });
+    await metricsService.sendDidInviteUser(adminUserId);
+
+    expect(send).toHaveBeenCalledWith(adminUserId, 'didInviteUser', {
+      numberOfRoles: 3,
+      numberOfUsers: 2,
+    });
     expect(countUsers).toHaveBeenCalledWith();
     expect(countRoles).toHaveBeenCalledWith();
   });
@@ -30,9 +35,11 @@ describe('Metrics', () => {
       telemetry: { send },
     };
 
-    await metricsService.sendDidUpdateRolePermissions();
+    const adminUserId = 'testhash';
 
-    expect(send).toHaveBeenCalledWith('didUpdateRolePermissions');
+    await metricsService.sendDidUpdateRolePermissions(adminUserId);
+
+    expect(send).toHaveBeenCalledWith(adminUserId, 'didUpdateRolePermissions');
   });
 
   test('didChangeInterfaceLanguage', async () => {
@@ -51,7 +58,7 @@ describe('Metrics', () => {
     await metricsService.sendDidChangeInterfaceLanguage();
 
     expect(getLanguagesInUse).toHaveBeenCalledWith();
-    expect(send).toHaveBeenCalledWith('didChangeInterfaceLanguage', {
+    expect(send).toHaveBeenCalledWith('', 'didChangeInterfaceLanguage', {
       languagesInUse: ['en', 'fr', 'en'],
     });
   });
