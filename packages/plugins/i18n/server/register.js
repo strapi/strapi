@@ -21,7 +21,7 @@ module.exports = ({ strapi }) => {
 const decorateRelations = () => {
   const { wrapParams } = getService('entity-service-decorator');
 
-  strapi.container.get('controllers').extend('plugin::content-manager.relations', controller => {
+  strapi.container.get('controllers').extend('plugin::content-manager.relations', (controller) => {
     const oldFindAvailable = controller.findAvailable;
     return Object.assign(controller, {
       async findAvailable(ctx, next) {

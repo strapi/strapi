@@ -91,11 +91,7 @@ module.exports = {
       query.where({ id: { $notIn: knexSubQuery } });
     }
 
-    const { count } = await query
-      .clone()
-      .count()
-      .first()
-      .execute();
+    const { count } = await query.clone().count().first().execute();
 
     const fieldsToSelect = ['id', mainField];
     if (hasDraftAndPublish(targetedModel)) {
