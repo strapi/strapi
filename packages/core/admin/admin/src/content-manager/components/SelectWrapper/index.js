@@ -5,12 +5,12 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { connect, select } from './utils';
 import { useRelation } from '../../hooks/useRelation';
 
-function SelectWrapper() {
+function SelectWrapper({ name }) {
   const { addRelation, removeRelation, modifiedData } = useCMEditViewDataManager();
   const { relations, searchResults, search } = useRelation({ relationsToShow: 2 });
 
   const relationWillBeDeleted = relation =>
-    !modifiedData?.something?.remove?.find(curr => curr.title === relation.title);
+    !modifiedData?.[name]?.remove?.find(curr => curr.title === relation.title);
 
   return (
     <>
@@ -29,7 +29,7 @@ function SelectWrapper() {
               Existing: {relation.title}{' '}
               <button
                 type="button"
-                onClick={() => removeRelation({ target: { name: 'something', value: relation } })}
+                onClick={() => removeRelation({ target: { name, value: relation } })}
               >
                 Remove
               </button>
@@ -42,7 +42,7 @@ function SelectWrapper() {
               <button
                 type="button"
                 onClick={() =>
-                  removeRelation({ target: { name: 'something', value: relationToAdd } })}
+                  removeRelation({ target: { name, value: relationToAdd } })}
               >
                 Remove
               </button>
