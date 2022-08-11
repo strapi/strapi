@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useIntl } from 'react-intl';
 import useLocalesProvider from '../../LocalesProvider/useLocalesProvider';
@@ -29,7 +29,7 @@ describe('LanguageProvider', () => {
     `);
   });
 
-  it('should change the locale and set the strapi-admin-language item in the localStorage', () => {
+  it('should change the locale and set the strapi-admin-language item in the localStorage', async () => {
     const Test = () => {
       const { locale } = useIntl();
       const { changeLocale } = useLocalesProvider();
@@ -56,7 +56,7 @@ describe('LanguageProvider', () => {
 
     userEvent.click(screen.getByText('CHANGE'));
 
-    expect(screen.getByText('Français')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Français')).toBeInTheDocument());
     expect(localStorage.getItem('strapi-admin-language')).toEqual('fr');
   });
 });
