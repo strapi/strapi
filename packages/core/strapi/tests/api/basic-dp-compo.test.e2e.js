@@ -163,9 +163,7 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
 
   describe('database state', () => {
     test('components have been removed from the database', async () => {
-      const dbComponents = await strapi.db
-        .query('default.compo')
-        .findMany({ name: 'compo name updated' });
+      const dbComponents = await strapi.db.query('default.compo').findMany({});
       expect(dbComponents).toHaveLength(0);
     });
   });
