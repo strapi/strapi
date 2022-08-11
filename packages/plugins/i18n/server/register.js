@@ -22,9 +22,9 @@ const decorateRelations = () => {
   const { wrapParams } = getService('entity-service-decorator');
 
   strapi.container.get('controllers').extend('plugin::content-manager.relations', controller => {
-    const oldFindNew = controller.findNew;
+    const oldFindAvailable = controller.findAvailable;
     return Object.assign(controller, {
-      async findNew(ctx, next) {
+      async findAvailable(ctx, next) {
         const { model, targetField } = ctx.params;
         const { component } = ctx.request.query;
 
@@ -48,7 +48,7 @@ const decorateRelations = () => {
           ctx.request.query = await wrapParams(ctx.request.query);
         }
 
-        return oldFindNew(ctx, next);
+        return oldFindAvailable(ctx, next);
       },
     });
   });

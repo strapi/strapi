@@ -6,21 +6,45 @@ const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
 
 const { getService } = require('../utils');
-const { validateFindNew } = require('./validation/relations');
+const { validateFindAvailable } = require('./validation/relations');
 
 module.exports = {
-  async findNew(ctx) {
+  async findAvailable(ctx) {
+    const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;
 
-    await validateFindNew(ctx.request.query);
+    await validateFindAvailable(ctx.request.query);
 
-    const { component, entityId, idsToOmit, page = 1, pageSize = 10, q } = ctx.request.query;
+    const { component, entityId, idsToOmit, page = 1, pageSize = 10, _q } = ctx.request.query;
 
     const sourceModelUid = component || model;
 
     const sourceModel = strapi.getModel(sourceModelUid);
     if (!sourceModel) {
       return ctx.badRequest("The model doesn't exist");
+    }
+
+    // permission check
+    if (entityId) {
+      const entityManager = getService('entity-manager');
+      const permissionChecker = getService('permission-checker').create({
+        userAbility,
+        model: sourceModel,
+      });
+
+      if (permissionChecker.cannot.read()) {
+        return ctx.forbidden();
+      }
+
+      const entity = await entityManager.findOneWithCreatorRoles(entityId, model);
+
+      if (!entity) {
+        return ctx.notFound();
+      }
+
+      if (permissionChecker.cannot.read(entity)) {
+        return ctx.forbidden();
+      }
     }
 
     const attribute = sourceModel.attributes[targetField];
@@ -40,8 +64,8 @@ module.exports = {
 
     const query = strapi.db.queryBuilder(targetedModel.uid);
 
-    if (!isNil(q)) {
-      query.search(q);
+    if (!isNil(_q)) {
+      query.search(_q);
     }
 
     if (!isNil(ctx.request.query.filters)) {

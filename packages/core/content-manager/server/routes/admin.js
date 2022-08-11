@@ -82,7 +82,7 @@ module.exports = {
     {
       method: 'GET',
       path: '/relations/:model/:targetField',
-      handler: 'relations.findNew',
+      handler: 'relations.findAvailable',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',

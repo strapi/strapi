@@ -2,12 +2,12 @@
 
 const { yup, validateYupSchema } = require('@strapi/utils');
 
-const validateFindNewSchema = yup
+const validateFindAvailableSchema = yup
   .object()
   .shape({
     component: yup.string(),
     entityId: yup.strapiID(),
-    q: yup.string(),
+    _q: yup.string(),
     idsToOmit: yup.array().of(yup.strapiID()),
     page: yup
       .number()
@@ -23,5 +23,5 @@ const validateFindNewSchema = yup
   .required();
 
 module.exports = {
-  validateFindNew: validateYupSchema(validateFindNewSchema, { strict: false }),
+  validateFindAvailable: validateYupSchema(validateFindAvailableSchema, { strict: false }),
 };

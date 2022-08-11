@@ -112,7 +112,7 @@ describe('Relations with Draft & Publish', () => {
     await builder.cleanup();
   });
 
-  describe('findNew', () => {
+  describe('findAvailable', () => {
     test('relation not in a component && no entity', async () => {
       let res = await rq({
         method: 'GET',
