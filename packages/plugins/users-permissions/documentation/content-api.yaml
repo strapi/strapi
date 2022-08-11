@@ -44,7 +44,7 @@ paths:
                 password:
                   type: string
             example:
-              identier: foobar
+              identifier: foobar
               password: Test1234
         required: true
       responses:
