@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery, useInfiniteQuery } from 'react-query';
 
 const FIXTURE_RELATIONS = [
   {
@@ -59,17 +59,25 @@ const FIXTURE_SEARCH = [
 
 export const useRelation = ({ relationsToShow = 10 }) => {
   const [searchTerm, setSearchTerm] = useState(null);
-  const [relationsRange, setRelationsLoadRange] = useState([0, relationsToShow]);
 
-  const fetchRelations = () => {
-    return Promise.resolve(FIXTURE_RELATIONS.slice(-1 * relationsRange[1]));
+  const fetchRelations = ({ pageParam = 1 }) => {
+    const startIndex = (pageParam - 1) * relationsToShow;
+    return Promise.resolve(FIXTURE_RELATIONS.slice(startIndex, startIndex + relationsToShow));
   };
 
   const fetchSearch = () => {
     return Promise.resolve(FIXTURE_SEARCH.filter(curr => curr.title.includes(searchTerm)));
   };
 
-  const relationsRes = useQuery(['relations', ...relationsRange], fetchRelations);
+  const relationsRes = useInfiniteQuery(['relations'], fetchRelations, {
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < relationsToShow) {
+        return undefined;
+      }
+
+      return (pages?.length || 0) + 1;
+    },
+  });
 
   const searchRes = useQuery(['relation', 'search', searchTerm], fetchSearch, {
     enabled: !!searchTerm,
@@ -79,9 +87,5 @@ export const useRelation = ({ relationsToShow = 10 }) => {
     setSearchTerm(term);
   };
 
-  const load = (startIndex, count) => {
-    setRelationsLoadRange([startIndex, startIndex + count]);
-  };
-
-  return { relations: relationsRes, searchResults: searchRes, search, load };
+  return { relations: relationsRes, searchResults: searchRes, search };
 };

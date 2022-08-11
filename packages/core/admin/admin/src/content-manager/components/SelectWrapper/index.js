@@ -7,24 +7,26 @@ import { useRelation } from '../../hooks/useRelation';
 
 function SelectWrapper() {
   const { addRelation, removeRelation, modifiedData } = useCMEditViewDataManager();
-  const { relations, searchResults, search, load } = useRelation({ relationsToShow: 2 });
+  const { relations, searchResults, search } = useRelation({ relationsToShow: 2 });
 
   const relationWillBeDeleted = relation =>
     !modifiedData?.something?.remove?.find(curr => curr.title === relation.title);
 
   return (
     <>
-      <button type="button" onClick={() => load(relations?.data?.length ?? 0, 2)}>
-        Load 2 more
-      </button>
+      {relations.hasNextPage ? (
+        <button type="button" onClick={() => relations.fetchNextPage()}>
+          Load 2 more
+        </button>
+      ) : 'No more pages'}
 
       <hr />
 
       {!relations.isLoading && (
         <ol>
-          {relations?.data?.filter(relationWillBeDeleted).map(relation => (
+          {relations?.data?.pages?.flat().reverse().filter(relationWillBeDeleted).map(relation => (
             <li key={`relation-${relation.title}`}>
-              Existing Relation: {relation.title}{' '}
+              Existing: {relation.title}{' '}
               <button
                 type="button"
                 onClick={() => removeRelation({ target: { name: 'something', value: relation } })}
@@ -36,7 +38,7 @@ function SelectWrapper() {
 
           {modifiedData?.something?.add?.filter(relationWillBeDeleted).map(relationToAdd => (
             <li key={`relation-add-${relationToAdd.title}`}>
-              Relation to add : {relationToAdd.title}{' '}
+              Add: {relationToAdd.title}{' '}
               <button
                 type="button"
                 onClick={() =>
@@ -59,7 +61,7 @@ function SelectWrapper() {
         <ol>
           {searchResults?.data?.map(search => (
             <li key={`search-result-${search.title}`}>
-              Search Result:{' '}
+              Search:{' '}
               <button
                 type="button"
                 onClick={() => addRelation({ target: { name: 'something', value: search } })}
