@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`RelationInput should render and match snapshot 1`] = `
-.c6 {
+.c9 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -23,7 +23,7 @@ exports[`RelationInput should render and match snapshot 1`] = `
   border: 1px solid #dcdce4;
 }
 
-.c5 {
+.c7 {
   width: 100%;
 }
 
@@ -43,6 +43,22 @@ exports[`RelationInput should render and match snapshot 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
+}
+
+.c5 {
+  color: #4945ff;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c6 {
+  width: 100%;
+}
+
+.c8 > a {
+  color: currentColor;
+  -webkit-text-decoration: none;
+  text-decoration: none;
 }
 
 .c1 {
@@ -102,36 +118,48 @@ exports[`RelationInput should render and match snapshot 1`] = `
         class="c3 c4"
       >
         <div
-          class="c5 c4"
-          width="100%"
+          class="c5 c6"
         >
-          First relation
+          <div
+            class="c7 c4 c8"
+            width="100%"
+          >
+            First relation
+          </div>
         </div>
       </li>
       <li
         class="c3 c4"
       >
         <div
-          class="c5 c4"
-          width="100%"
+          class="c5 c6"
         >
-          Second relation
+          <div
+            class="c7 c4 c8"
+            width="100%"
+          >
+            Second relation
+          </div>
         </div>
       </li>
       <li
         class="c3 c4"
       >
         <div
-          class="c5 c4"
-          width="100%"
+          class="c5 c6"
         >
-          Third relation
+          <div
+            class="c7 c4 c8"
+            width="100%"
+          >
+            Third relation
+          </div>
         </div>
       </li>
     </ol>
   </div>
   <div
-    class="c6"
+    class="c9"
   >
     <p
       aria-live="polite"
@@ -156,7 +184,7 @@ exports[`RelationInput should render and match snapshot 1`] = `
 `;
 
 exports[`RelationInput should render endAction and match snapshot 1`] = `
-.c7 {
+.c10 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -168,7 +196,7 @@ exports[`RelationInput should render endAction and match snapshot 1`] = `
   width: 1px;
 }
 
-.c6 {
+.c9 {
   padding-left: 16px;
 }
 
@@ -182,7 +210,7 @@ exports[`RelationInput should render endAction and match snapshot 1`] = `
   border: 1px solid #dcdce4;
 }
 
-.c5 {
+.c7 {
   width: 100%;
 }
 
@@ -202,6 +230,22 @@ exports[`RelationInput should render endAction and match snapshot 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
+}
+
+.c5 {
+  color: #4945ff;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c6 {
+  width: 100%;
+}
+
+.c8 > a {
+  color: currentColor;
+  -webkit-text-decoration: none;
+  text-decoration: none;
 }
 
 .c1 {
@@ -261,13 +305,17 @@ exports[`RelationInput should render endAction and match snapshot 1`] = `
         class="c3 c4"
       >
         <div
-          class="c5 c4"
-          width="100%"
+          class="c5 c6"
         >
-          First relation
+          <div
+            class="c7 c4 c8"
+            width="100%"
+          >
+            First relation
+          </div>
         </div>
         <div
-          class="c6"
+          class="c9"
         >
           <div>
             end action here
@@ -278,26 +326,34 @@ exports[`RelationInput should render endAction and match snapshot 1`] = `
         class="c3 c4"
       >
         <div
-          class="c5 c4"
-          width="100%"
+          class="c5 c6"
         >
-          Second relation
+          <div
+            class="c7 c4 c8"
+            width="100%"
+          >
+            Second relation
+          </div>
         </div>
       </li>
       <li
         class="c3 c4"
       >
         <div
-          class="c5 c4"
-          width="100%"
+          class="c5 c6"
         >
-          Third relation
+          <div
+            class="c7 c4 c8"
+            width="100%"
+          >
+            Third relation
+          </div>
         </div>
       </li>
     </ol>
   </div>
   <div
-    class="c7"
+    class="c10"
   >
     <p
       aria-live="polite"

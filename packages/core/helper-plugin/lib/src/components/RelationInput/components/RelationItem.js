@@ -1,7 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+
+const TypographyWrapper = styled(Typography)`
+  width: 100%;
+`;
+
+const ChildrenWrapper = styled(Flex)`
+  > a {
+    color: currentColor;
+    text-decoration: none;
+  }
+`;
 
 export const RelationItem = ({ children, endAction, ...props }) => {
   return (
@@ -17,9 +30,11 @@ export const RelationItem = ({ children, endAction, ...props }) => {
       as="li"
       {...props}
     >
-      <Flex width="100%" justifyContent="space-between">
-        {children}
-      </Flex>
+      <TypographyWrapper textColor="primary600" as="div">
+        <ChildrenWrapper width="100%" justifyContent="space-between" color="currentColor">
+          {children}
+        </ChildrenWrapper>
+      </TypographyWrapper>
       {endAction && <Box paddingLeft={4}>{endAction}</Box>}
     </Flex>
   );
