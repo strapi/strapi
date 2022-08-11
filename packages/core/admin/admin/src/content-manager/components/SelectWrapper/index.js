@@ -64,7 +64,8 @@ function SelectWrapper({
   const [{ query }] = useQueryParams();
   // Disable the input in case of a polymorphic relation
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
-  const { addRelation, modifiedData, onChange, onRemoveRelation } = useCMEditViewDataManager();
+
+  const { addRelation, modifiedData, onChange, removeRelation } = useCMEditViewDataManager();
   const { pathname } = useLocation();
 
   const value = get(modifiedData, name, null);
@@ -220,9 +221,11 @@ function SelectWrapper({
   };
 
   const handleAddRelation = value => {
-    if (!isEmpty(value)) {
-      addRelation({ target: { name, value } });
-    }
+    addRelation({ target: { name, value } });
+  };
+
+  const handleRemoveRelation = value => {
+    removeRelation({ target: { name, value } });
   };
 
   const handleMenuOpen = () => {
@@ -294,7 +297,7 @@ function SelectWrapper({
         onMenuClose={handleMenuClose}
         onMenuOpen={handleMenuOpen}
         onMenuScrollToBottom={handleMenuScrollToBottom}
-        onRemove={onRemoveRelation}
+        onRemove={handleRemoveRelation}
         placeholder={placeholder}
         searchToPersist={searchToPersist}
         targetModel={targetModel}

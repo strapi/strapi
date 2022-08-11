@@ -73,21 +73,15 @@ const reducer = (state, action) =>
         break;
       }
       case 'ADD_RELATION': {
-        if (!Array.isArray(action.value) || !action.value.length) {
-          break;
+        const path = ['modifiedData', ...action.keys, 'add'];
+        const currentValue = get(state, path);
+        const { value } = action;
+
+        if (Array.isArray(currentValue)) {
+          set(draftState, path, [...currentValue, value]);
+        } else {
+          set(draftState, path, [value]);
         }
-
-        const el = action.value[0].value;
-
-        const currentValue = get(state, ['modifiedData', ...action.keys], null);
-
-        if (!currentValue) {
-          set(draftState, ['modifiedData', ...action.keys], [el]);
-
-          break;
-        }
-
-        set(draftState, ['modifiedData', ...action.keys], [...currentValue, el]);
 
         break;
       }
@@ -214,15 +208,15 @@ const reducer = (state, action) =>
         break;
       }
       case 'REMOVE_RELATION': {
-        const pathArray = action.keys.split('.');
-        const pathArrayLength = pathArray.length - 1;
-        const pathToData = ['modifiedData', ...take(pathArray, pathArrayLength)];
-        const currentValue = get(state, pathToData).slice();
-        const indexToRemove = parseInt(pathArray[pathArrayLength], 10);
+        const path = ['modifiedData', ...action.keys, 'remove'];
+        const currentValue = get(state, path);
+        const { value } = action;
 
-        currentValue.splice(indexToRemove, 1);
-
-        set(draftState, pathToData, currentValue);
+        if (Array.isArray(currentValue)) {
+          set(draftState, path, [...currentValue, value]);
+        } else {
+          set(draftState, path, [value]);
+        }
 
         break;
       }
