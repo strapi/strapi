@@ -11,7 +11,7 @@ const RelativeTime = ({ timestamp }) => {
     end: Date.now(),
   });
 
-  const unit = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'].find(intervalUnit => {
+  const unit = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'].find((intervalUnit) => {
     return interval[intervalUnit] > 0 && Object.keys(interval).includes(intervalUnit);
   });
 

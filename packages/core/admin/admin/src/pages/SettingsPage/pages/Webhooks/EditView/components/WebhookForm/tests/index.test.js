@@ -10,7 +10,7 @@ import ThemeToggleProvider from '../../../../../../../../components/ThemeToggleP
 import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
 
-const makeApp = component => {
+const makeApp = (component) => {
   const history = createMemoryHistory();
   const messages = { en };
   const localeNames = { en: 'English' };

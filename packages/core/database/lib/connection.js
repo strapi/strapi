@@ -1,12 +1,12 @@
-/* eslint-disable node/no-missing-require */
-/* eslint-disable node/no-extraneous-require */
+/* eslint-disable import/no-extraneous-dependencies */
+
 'use strict';
 
 const knex = require('knex');
 
 const SqliteClient = require('knex/lib/dialects/sqlite3/index');
 
-const trySqlitePackage = packageName => {
+const trySqlitePackage = (packageName) => {
   try {
     require.resolve(packageName);
     return packageName;
@@ -44,7 +44,7 @@ const getSqlitePackageName = () => {
   );
 };
 
-const createConnection = config => {
+const createConnection = (config) => {
   const knexConfig = { ...config };
   if (knexConfig.client === 'sqlite') {
     const sqlitePackageName = getSqlitePackageName();

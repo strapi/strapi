@@ -5,8 +5,8 @@ import StrikedWorld from '@strapi/icons/EarthStriked';
 import LabelAction from '../components/LabelAction';
 import { getTrad } from '../utils';
 
-const enhanceEditLayout = layout =>
-  layout.map(row => {
+const enhanceEditLayout = (layout) =>
+  layout.map((row) => {
     const enhancedRow = row.reduce((acc, field) => {
       const type = get(field, ['fieldSchema', 'type'], null);
       const hasI18nEnabled = get(
@@ -52,7 +52,7 @@ const enhanceComponentsLayout = (components, locale) => {
 };
 
 const enhanceComponentLayoutForRelations = (layout, locale) =>
-  layout.map(row => {
+  layout.map((row) => {
     const enhancedRow = row.reduce((acc, field) => {
       if (
         get(field, ['fieldSchema', 'type']) === 'relation' &&
@@ -77,7 +77,7 @@ const enhanceComponentLayoutForRelations = (layout, locale) =>
     return enhancedRow;
   });
 
-const getPathToContentType = pathArray => ['contentType', ...pathArray];
+const getPathToContentType = (pathArray) => ['contentType', ...pathArray];
 
 const mutateEditViewLayoutHook = ({ layout, query }) => {
   const hasI18nEnabled = get(

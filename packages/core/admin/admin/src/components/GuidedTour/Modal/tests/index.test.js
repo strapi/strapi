@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { useGuidedTour, TrackingContext } from '@strapi/helper-plugin';
+import { useGuidedTour, TrackingProvider } from '@strapi/helper-plugin';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../Theme';
 import ThemeToggleProvider from '../../../ThemeToggleProvider';
@@ -30,7 +30,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 }));
 
 const App = (
-  <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+  <TrackingProvider>
     <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
       <Theme>
         <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
@@ -38,7 +38,7 @@ const App = (
         </IntlProvider>
       </Theme>
     </ThemeToggleProvider>
-  </TrackingContext.Provider>
+  </TrackingProvider>
 );
 
 describe('<GuidedTourModal />', () => {

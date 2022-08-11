@@ -16,7 +16,7 @@ const createContentTypeSchema = (
       .test({
         name: 'nameAlreadyUsed',
         message: errorsTrads.unique,
-        test: value => {
+        test(value) {
           if (!value) {
             return false;
           }
@@ -29,7 +29,7 @@ const createContentTypeSchema = (
       .test({
         name: 'nameNotAllowed',
         message: getTrad('error.contentTypeName.reserved-name'),
-        test: value => {
+        test(value) {
           if (!value) {
             return false;
           }
@@ -43,7 +43,7 @@ const createContentTypeSchema = (
       .test({
         name: 'pluralNameAlreadyUsed',
         message: errorsTrads.unique,
-        test: value => {
+        test(value) {
           if (!value) {
             return false;
           }
@@ -54,7 +54,7 @@ const createContentTypeSchema = (
       .test({
         name: 'pluralAndSingularAreUnique',
         message: getTrad('error.contentType.pluralName-used'),
-        test: (value, context) => {
+        test(value, context) {
           if (!value) {
             return false;
           }
@@ -68,7 +68,7 @@ const createContentTypeSchema = (
       .test({
         name: 'singularNameAlreadyUsed',
         message: errorsTrads.unique,
-        test: value => {
+        test(value) {
           if (!value) {
             return false;
           }
@@ -79,7 +79,7 @@ const createContentTypeSchema = (
       .test({
         name: 'pluralAndSingularAreUnique',
         message: getTrad('error.contentType.singularName-used'),
-        test: (value, context) => {
+        test(value, context) {
           if (!value) {
             return false;
           }

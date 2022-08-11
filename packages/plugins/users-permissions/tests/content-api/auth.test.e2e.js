@@ -28,9 +28,7 @@ describe('Auth API', () => {
 
     data.user = user;
 
-    rq = createRequest({ strapi })
-      .setURLPrefix('/api/auth')
-      .setToken(jwt);
+    rq = createRequest({ strapi }).setURLPrefix('/api/auth').setToken(jwt);
   });
 
   afterAll(async () => {

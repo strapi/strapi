@@ -10,14 +10,11 @@ const {
   checkFieldsDontHaveDuplicates,
 } = require('./common-functions');
 
-const getActionFromProvider = actionId => {
+const getActionFromProvider = (actionId) => {
   return getService('permission').actionProvider.get(actionId);
 };
 
-const email = yup
-  .string()
-  .email()
-  .lowercase();
+const email = yup.string().email().lowercase();
 
 const firstname = yup.string().min(1);
 
@@ -36,7 +33,7 @@ const roles = yup.array(yup.strapiID()).min(1);
 
 const isAPluginName = yup
   .string()
-  .test('is-a-plugin-name', 'is not a plugin name', function(value) {
+  .test('is-a-plugin-name', 'is not a plugin name', function (value) {
     return [undefined, 'admin', ...Object.keys(strapi.plugins)].includes(value)
       ? true
       : this.createError({ path: this.path, message: `${this.path} is not an existing plugin` });
@@ -45,7 +42,7 @@ const isAPluginName = yup
 const arrayOfConditionNames = yup
   .array()
   .of(yup.string())
-  .test('is-an-array-of-conditions', 'is not a plugin name', function(value) {
+  .test('is-an-array-of-conditions', 'is not a plugin name', function (value) {
     const ids = strapi.admin.services.permission.conditionProvider.keys();
     return _.isUndefined(value) || _.difference(value, ids).length === 0
       ? true
@@ -55,14 +52,14 @@ const arrayOfConditionNames = yup
 const permissionsAreEquals = (a, b) =>
   a.action === b.action && (a.subject === b.subject || (_.isNil(a.subject) && _.isNil(b.subject)));
 
-const checkNoDuplicatedPermissions = permissions =>
+const checkNoDuplicatedPermissions = (permissions) =>
   !Array.isArray(permissions) ||
   permissions.every((permA, i) =>
-    permissions.slice(i + 1).every(permB => !permissionsAreEquals(permA, permB))
+    permissions.slice(i + 1).every((permB) => !permissionsAreEquals(permA, permB))
   );
 
-const checkNilFields = action =>
-  function(fields) {
+const checkNilFields = (action) =>
+  function (fields) {
     // If the parent has no action field, then we ignore this test
     if (isNil(action)) {
       return true;
@@ -71,7 +68,7 @@ const checkNilFields = action =>
     return actionDomain.appliesToProperty('fields', action) || isNil(fields);
   };
 
-const fieldsPropertyValidation = action =>
+const fieldsPropertyValidation = (action) =>
   yup
     .array()
     .of(yup.string())
@@ -105,20 +102,22 @@ const updatePermissions = yup
             action: yup
               .string()
               .required()
-              .test('action-validity', 'action is not an existing permission action', function(
-                actionId
-              ) {
-                // If the action field is Nil, ignore the test and let the required check handle the error
-                if (isNil(actionId)) {
-                  return true;
-                }
+              .test(
+                'action-validity',
+                'action is not an existing permission action',
+                function (actionId) {
+                  // If the action field is Nil, ignore the test and let the required check handle the error
+                  if (isNil(actionId)) {
+                    return true;
+                  }
 
-                return !!getActionFromProvider(actionId);
-              }),
+                  return !!getActionFromProvider(actionId);
+                }
+              ),
             subject: yup
               .string()
               .nullable()
-              .test('subject-validity', 'Invalid subject submitted', function(subject) {
+              .test('subject-validity', 'Invalid subject submitted', function (subject) {
                 const action = getActionFromProvider(this.options.parent.action);
 
                 if (!action) {
@@ -137,57 +136,61 @@ const updatePermissions = yup
               }),
             properties: yup
               .object()
-              .test('properties-structure', 'Invalid property set at ${path}', function(
-                properties
-              ) {
-                const action = getActionFromProvider(this.options.parent.action);
-                const hasNoProperties = isEmpty(properties) || isNil(properties);
+              .test(
+                'properties-structure',
+                'Invalid property set at ${path}',
+                function (properties) {
+                  const action = getActionFromProvider(this.options.parent.action);
+                  const hasNoProperties = isEmpty(properties) || isNil(properties);
 
-                if (!has('options.applyToProperties', action)) {
-                  return hasNoProperties;
+                  if (!has('options.applyToProperties', action)) {
+                    return hasNoProperties;
+                  }
+
+                  if (hasNoProperties) {
+                    return true;
+                  }
+
+                  const { applyToProperties } = action.options;
+
+                  if (!isArray(applyToProperties)) {
+                    return false;
+                  }
+
+                  return Object.keys(properties).every((property) =>
+                    applyToProperties.includes(property)
+                  );
                 }
+              )
+              .test(
+                'fields-property',
+                'Invalid fields property at ${path}',
+                async function (properties = {}) {
+                  const action = getActionFromProvider(this.options.parent.action);
 
-                if (hasNoProperties) {
-                  return true;
+                  if (!action || !properties) {
+                    return true;
+                  }
+
+                  if (!actionDomain.appliesToProperty('fields', action)) {
+                    return true;
+                  }
+
+                  try {
+                    await fieldsPropertyValidation(action).validate(properties.fields, {
+                      strict: true,
+                      abortEarly: false,
+                    });
+                    return true;
+                  } catch (e) {
+                    // Propagate fieldsPropertyValidation error with updated path
+                    throw this.createError({
+                      message: e.message,
+                      path: `${this.path}.fields`,
+                    });
+                  }
                 }
-
-                const { applyToProperties } = action.options;
-
-                if (!isArray(applyToProperties)) {
-                  return false;
-                }
-
-                return Object.keys(properties).every(property =>
-                  applyToProperties.includes(property)
-                );
-              })
-              .test('fields-property', 'Invalid fields property at ${path}', async function(
-                properties = {}
-              ) {
-                const action = getActionFromProvider(this.options.parent.action);
-
-                if (!action || !properties) {
-                  return true;
-                }
-
-                if (!actionDomain.appliesToProperty('fields', action)) {
-                  return true;
-                }
-
-                try {
-                  await fieldsPropertyValidation(action).validate(properties.fields, {
-                    strict: true,
-                    abortEarly: false,
-                  });
-                  return true;
-                } catch (e) {
-                  // Propagate fieldsPropertyValidation error with updated path
-                  throw this.createError({
-                    message: e.message,
-                    path: `${this.path}.fields`,
-                  });
-                }
-              }),
+              ),
             conditions: yup.array().of(yup.string()),
           })
           .noUnknown()

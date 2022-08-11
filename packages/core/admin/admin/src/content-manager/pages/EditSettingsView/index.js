@@ -46,7 +46,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const modelName = get(mainLayout, ['info', 'displayName'], '');
   const attributes = get(modifiedData, ['attributes'], {});
 
-  const entryTitleOptions = Object.keys(attributes).filter(attr => {
+  const entryTitleOptions = Object.keys(attributes).filter((attr) => {
     const type = get(attributes, [attr, 'type'], '');
 
     return (
@@ -67,10 +67,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const editLayout = get(modifiedData, ['layouts', 'edit'], []);
   const displayedFields = flatMap(editLayout, 'rowContent');
   const editLayoutFields = Object.keys(modifiedData.attributes)
-    .filter(attr => get(modifiedData, ['metadatas', attr, 'edit', 'visible'], false) === true)
-    .filter(attr => {
-      return displayedFields.findIndex(el => el.name === attr) === -1;
-    })
+    .filter((attr) => get(modifiedData, ['metadatas', attr, 'edit', 'visible'], false) === true)
+    .filter((attr) => displayedFields.findIndex((el) => el.name === attr) === -1)
     .sort();
 
   const handleChange = ({ target: { name, value } }) => {
@@ -82,11 +80,11 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   };
 
   const handleToggleModal = () => {
-    setIsModalFormOpen(prev => !prev);
+    setIsModalFormOpen((prev) => !prev);
   };
 
   const toggleConfirmDialog = () => {
-    setIsConfirmDialogOpen(prev => !prev);
+    setIsConfirmDialogOpen((prev) => !prev);
   };
 
   const handleMetaChange = ({ target: { name, value } }) => {
@@ -105,7 +103,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
     });
   };
 
-  const handleMetaSubmit = e => {
+  const handleMetaSubmit = (e) => {
     e.preventDefault();
     dispatch({
       type: 'SUBMIT_META_FORM',
@@ -113,17 +111,17 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
     handleToggleModal();
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     toggleConfirmDialog();
   };
 
   const submitMutation = useMutation(
-    body => {
+    (body) => {
       return putCMSettingsEV(body, slug, isContentTypeView);
     },
     {
-      onSuccess: ({ data }) => {
+      onSuccess({ data }) {
         if (updateLayout) {
           updateLayout(data.data);
         }
@@ -133,7 +131,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
         toggleConfirmDialog();
         trackUsage('didEditEditSettings');
       },
-      onError: () => {
+      onError() {
         toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
       },
     }
@@ -203,7 +201,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
       onMoveField={handleMoveField}
       moveRow={moveRow}
       moveItem={moveItem}
-      setEditFieldToSelect={name => {
+      setEditFieldToSelect={(name) => {
         dispatch({
           type: 'SET_FIELD_TO_EDIT',
           name,
@@ -230,7 +228,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
             navigationAction={
               <Link
                 startIcon={<ArrowLeft />}
-                onClick={e => {
+                onClick={(e) => {
                   e.preventDefault();
                   goBack();
                 }}
@@ -280,7 +278,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                         id: getTrad('containers.SettingPage.editSettings.entry.title.description'),
                         defaultMessage: 'Set the display field of your entry',
                       })}
-                      onChange={value => {
+                      onChange={(value) => {
                         handleChange({
                           target: {
                             name: 'settings.mainField',
@@ -290,7 +288,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                       }}
                       value={modifiedData.settings.mainField}
                     >
-                      {entryTitleOptions.map(attribute => (
+                      {entryTitleOptions.map((attribute) => (
                         <Option key={attribute} value={attribute}>
                           {attribute}
                         </Option>
@@ -312,7 +310,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                   attributes={attributes}
                   editLayout={editLayout}
                   fields={editLayoutFields}
-                  onAddField={field => {
+                  onAddField={(field) => {
                     dispatch({
                       type: 'ON_ADD_FIELD',
                       name: field,

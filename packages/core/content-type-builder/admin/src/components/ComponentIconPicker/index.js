@@ -27,7 +27,7 @@ const ComponentIconPicker = ({ error, intlLabel, name, onChange, value }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState('');
   const [icons, setIcons] = useState(allIcons);
-  const toggleSearch = () => setShowSearch(prev => !prev);
+  const toggleSearch = () => setShowSearch((prev) => !prev);
 
   useEffect(() => {
     if (showSearch) {
@@ -37,7 +37,7 @@ const ComponentIconPicker = ({ error, intlLabel, name, onChange, value }) => {
 
   const handleChangeSearch = ({ target: { value } }) => {
     setSearch(value);
-    setIcons(() => allIcons.filter(icon => icon.includes(value)));
+    setIcons(() => allIcons.filter((icon) => icon.includes(value)));
   };
 
   // eslint-disable-next-line react/prop-types

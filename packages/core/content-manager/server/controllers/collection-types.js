@@ -28,7 +28,7 @@ module.exports = {
     );
 
     const sanitizedResults = await Promise.all(
-      results.map(result => permissionChecker.sanitizeOutput(result))
+      results.map((result) => permissionChecker.sanitizeOutput(result))
     );
 
     ctx.body = {

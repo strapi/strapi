@@ -34,6 +34,7 @@ export { default as GuidedTourProvider } from './providers/GuidedTourProvider';
 export { default as LibraryProvider } from './providers/LibraryProvider';
 export { default as NotificationsProvider } from './providers/NotificationsProvider';
 export { default as StrapiAppProvider } from './providers/StrapiAppProvider';
+export { default as TrackingProvider } from './providers/TrackingProvider';
 
 // Utils
 

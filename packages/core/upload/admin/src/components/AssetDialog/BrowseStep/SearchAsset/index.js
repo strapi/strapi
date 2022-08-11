@@ -23,7 +23,7 @@ const SearchAsset = ({ onChangeSearch, queryValue }) => {
   }, [isOpen]);
 
   const handleToggle = () => {
-    setIsOpen(prev => !prev);
+    setIsOpen((prev) => !prev);
   };
 
   const handleClear = () => {
@@ -31,7 +31,7 @@ const SearchAsset = ({ onChangeSearch, queryValue }) => {
     onChangeSearch(null);
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -46,7 +46,7 @@ const SearchAsset = ({ onChangeSearch, queryValue }) => {
           <Searchbar
             name="search"
             onClear={handleClear}
-            onChange={e => setValue(e.target.value)}
+            onChange={(e) => setValue(e.target.value)}
             clearLabel={formatMessage({
               id: getTrad('search.clear.label'),
               defaultMessage: 'Clear the search',

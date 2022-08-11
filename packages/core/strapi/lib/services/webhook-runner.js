@@ -1,6 +1,7 @@
 /**
  * The event hub is Strapi's event control center.
  */
+
 'use strict';
 
 const debug = require('debug')('strapi:webhook');
@@ -51,7 +52,7 @@ class WebhookRunner {
       );
     }
 
-    const listen = info => {
+    const listen = (info) => {
       this.queue.enqueue({ event, info });
     };
 
@@ -62,10 +63,10 @@ class WebhookRunner {
   async executeListener({ event, info }) {
     debug(`Executing webhook for event '${event}'`);
     const webhooks = this.webhooksMap.get(event) || [];
-    const activeWebhooks = webhooks.filter(webhook => webhook.isEnabled === true);
+    const activeWebhooks = webhooks.filter((webhook) => webhook.isEnabled === true);
 
     for (const webhook of activeWebhooks) {
-      await this.run(webhook, event, info).catch(error => {
+      await this.run(webhook, event, info).catch((error) => {
         this.logger.error('Error running webhook');
         this.logger.error(error);
       });
@@ -90,7 +91,7 @@ class WebhookRunner {
       },
       timeout: 10000,
     })
-      .then(async res => {
+      .then(async (res) => {
         if (res.ok) {
           return {
             statusCode: res.status,
@@ -102,7 +103,7 @@ class WebhookRunner {
           message: await res.text(),
         };
       })
-      .catch(err => {
+      .catch((err) => {
         return {
           statusCode: 500,
           message: err.message,
@@ -114,7 +115,7 @@ class WebhookRunner {
     debug(`Registering webhook '${webhook.id}'`);
     const { events } = webhook;
 
-    events.forEach(event => {
+    events.forEach((event) => {
       if (this.webhooksMap.has(event)) {
         this.webhooksMap.get(event).push(webhook);
       } else {
@@ -134,7 +135,7 @@ class WebhookRunner {
     debug(`Unregistering webhook '${webhook.id}'`);
 
     this.webhooksMap.forEach((webhooks, event) => {
-      const filteredWebhooks = webhooks.filter(value => value.id !== webhook.id);
+      const filteredWebhooks = webhooks.filter((value) => value.id !== webhook.id);
 
       // Cleanup hanging listeners
       if (filteredWebhooks.length === 0) {

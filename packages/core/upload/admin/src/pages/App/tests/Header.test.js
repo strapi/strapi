@@ -42,7 +42,7 @@ const FIXTURE_FOLDER = {
   },
 };
 
-const setup = props => {
+const setup = (props) => {
   const withDefaults = {
     ...props,
     assetCount: 2,

@@ -1,15 +1,15 @@
 'use strict';
 
-const koa = require('koa');
+const Koa = require('koa');
 const request = require('supertest');
 
 describe('Errors middleware', () => {
   test('_explicitStatus still exists', async () => {
     // Since we are using an internal variable of koa in our code,
     // we check that it doesn't change in newer updates
-    const app = new koa();
+    const app = new Koa();
 
-    app.use(async ctx => {
+    app.use(async (ctx) => {
       ctx.body = 'hello';
       expect(ctx.response._explicitStatus).toBe(true);
     });

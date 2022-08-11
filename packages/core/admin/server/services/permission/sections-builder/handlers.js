@@ -78,21 +78,23 @@ const contentTypesBase = ({ action, section }) => {
 /**
  * Initialize the subjects array of a section based on the action's subjects
  */
-const subjectsHandlerFor = kind => ({ action, section: contentTypesSection }) => {
-  const { subjects } = action;
+const subjectsHandlerFor =
+  (kind) =>
+  ({ action, section: contentTypesSection }) => {
+    const { subjects } = action;
 
-  const newSubjects = subjects
-    // Ignore already added subjects
-    .filter(isNotInSubjects(contentTypesSection.subjects))
-    // Transform UIDs into content-types
-    .map(resolveContentType)
-    // Only keep specific kind of content-types
-    .filter(isOfKind(kind))
-    // Transform the content-types into section's subjects
-    .map(toSubjectTemplate);
+    const newSubjects = subjects
+      // Ignore already added subjects
+      .filter(isNotInSubjects(contentTypesSection.subjects))
+      // Transform UIDs into content-types
+      .map(resolveContentType)
+      // Only keep specific kind of content-types
+      .filter(isOfKind(kind))
+      // Transform the content-types into section's subjects
+      .map(toSubjectTemplate);
 
-  contentTypesSection.subjects.push(...newSubjects);
-};
+    contentTypesSection.subjects.push(...newSubjects);
+  };
 
 const buildNode = (model, attributeName, attribute) => {
   if (!isVisibleAttribute(model, attributeName)) {
@@ -113,10 +115,10 @@ const buildNode = (model, attributeName, attribute) => {
   return node;
 };
 
-const buildDeepAttributesCollection = model => {
+const buildDeepAttributesCollection = (model) => {
   return Object.entries(model.attributes)
     .map(([attributeName, attribute]) => buildNode(model, attributeName, attribute))
-    .filter(node => node !== null);
+    .filter((node) => node !== null);
 };
 
 /**
@@ -129,8 +131,8 @@ const fieldsProperty = ({ action, section }) => {
   const { subjects } = action;
 
   section.subjects
-    .filter(subject => subjects.includes(subject.uid))
-    .forEach(subject => {
+    .filter((subject) => subjects.includes(subject.uid))
+    .forEach((subject) => {
       const { uid } = subject;
       const contentType = resolveContentType(uid);
 

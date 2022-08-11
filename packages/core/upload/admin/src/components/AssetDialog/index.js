@@ -73,7 +73,11 @@ export const AssetDialog = ({
     error: errorAssets,
   } = useAssets({ skipWhen: !canRead, query: queryObject });
 
-  const { data: folders, isLoading: isLoadingFolders, error: errorFolders } = useFolders({
+  const {
+    data: folders,
+    isLoading: isLoadingFolders,
+    error: errorFolders,
+  } = useFolders({
     enabled: canRead && !containsAssetFilter(queryObject) && pagination?.page === 1,
     query: queryObject,
   });
@@ -89,7 +93,7 @@ export const AssetDialog = ({
 
   const handleSelectAllAssets = () => {
     const hasAllAssets = assets.every(
-      asset => selectedAssets.findIndex(curr => curr.id === asset.id) !== -1
+      (asset) => selectedAssets.findIndex((curr) => curr.id === asset.id) !== -1
     );
 
     if (hasAllAssets) {
@@ -101,7 +105,7 @@ export const AssetDialog = ({
     return multiple ? selectAll(allowedAssets) : undefined;
   };
 
-  const handleSelectAsset = asset => {
+  const handleSelectAsset = (asset) => {
     return multiple ? selectOne(asset) : selectOnly(asset);
   };
 
@@ -185,6 +189,7 @@ export const AssetDialog = ({
         folder={folderToEdit}
         onClose={() => setFolderToEdit(undefined)}
         location="content-manager"
+        parentFolderId={queryObject?.folder}
       />
     );
   }
@@ -196,7 +201,7 @@ export const AssetDialog = ({
     setSelections(nextAssets);
   };
 
-  const handleFolderChange = folder => {
+  const handleFolderChange = (folder) => {
     onChangeFolder(folder);
     onChangeFolderParam(folder);
   };

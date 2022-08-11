@@ -105,7 +105,7 @@ const DataManagerProvider = ({
         },
         { data: reservedNames },
       ] = await Promise.all(
-        ['components', 'content-types', 'reserved-names'].map(endPoint => {
+        ['components', 'content-types', 'reserved-names'].map((endPoint) => {
           return axiosInstance.get(endPoint);
         })
       );
@@ -229,7 +229,7 @@ const DataManagerProvider = ({
     });
   };
 
-  const deleteCategory = async categoryUid => {
+  const deleteCategory = async (categoryUid) => {
     try {
       const requestURL = `/component-categories/${categoryUid}`;
       // eslint-disable-next-line no-alert
@@ -421,7 +421,7 @@ const DataManagerProvider = ({
 
   const redirectEndpoint = useMemo(() => {
     const allowedEndpoints = Object.keys(contentTypes)
-      .filter(uid => get(contentTypes, [uid, 'schema', 'visible'], true))
+      .filter((uid) => get(contentTypes, [uid, 'schema', 'visible'], true))
       .sort();
 
     return get(allowedEndpoints, '0', 'create-content-type');
@@ -431,7 +431,7 @@ const DataManagerProvider = ({
     return <Redirect to={`/plugins/${pluginId}/content-types/${redirectEndpoint}`} />;
   }
 
-  const submitData = async additionalContentTypeData => {
+  const submitData = async (additionalContentTypeData) => {
     try {
       const isCreating = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
       const body = {
@@ -558,7 +558,8 @@ const DataManagerProvider = ({
         changeDynamicZoneComponents,
         components,
         componentsGroupedByCategory: groupBy(components, 'category'),
-        componentsThatHaveOtherComponentInTheirAttributes: getAllComponentsThatHaveAComponentInTheirAttributes(),
+        componentsThatHaveOtherComponentInTheirAttributes:
+          getAllComponentsThatHaveAComponentInTheirAttributes(),
         contentTypes,
         createSchema,
         deleteCategory,
@@ -578,16 +579,14 @@ const DataManagerProvider = ({
         updateSchema,
       }}
     >
-      <>
-        {isLoadingForDataToBeSet ? (
-          <LoadingIndicatorPage />
-        ) : (
-          <>
-            {children}
-            {isInDevelopmentMode && <FormModal />}
-          </>
-        )}
-      </>
+      {isLoadingForDataToBeSet ? (
+        <LoadingIndicatorPage />
+      ) : (
+        <>
+          {children}
+          {isInDevelopmentMode && <FormModal />}
+        </>
+      )}
     </DataManagerContext.Provider>
   );
 };

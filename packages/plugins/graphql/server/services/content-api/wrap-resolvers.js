@@ -16,6 +16,37 @@ const introspectionQueries = [
 ];
 
 /**
+ * Get & parse middlewares definitions from the resolver's config
+ * @param {object} resolverConfig
+ * @param {object} strapi
+ * @return {function[]}
+ */
+const parseMiddlewares = (resolverConfig, strapi) => {
+  const resolverMiddlewares = getOr([], 'middlewares', resolverConfig);
+
+  // TODO: [v4] to factorize with compose endpoints (routes)
+  return resolverMiddlewares.map((middleware) => {
+    if (isFunction(middleware)) {
+      return middleware;
+    }
+
+    if (typeof middleware === 'string') {
+      return strapi.middleware(middleware);
+    }
+
+    if (typeof middleware === 'object') {
+      const { name, options = {} } = middleware;
+
+      return strapi.middleware(name)(options);
+    }
+
+    throw new Error(
+      `Invalid middleware type, expected (function,string,object), received ${typeof middleware}`
+    );
+  });
+};
+
+/**
  * Wrap the schema's resolvers if they've been
  * customized using the GraphQL extension service
  * @param {object} options
@@ -112,33 +143,6 @@ const wrapResolvers = ({ schema, strapi, extension = {} }) => {
   });
 
   return schema;
-};
-
-/**
- * Get & parse middlewares definitions from the resolver's config
- * @param {object} resolverConfig
- * @param {object} strapi
- * @return {function[]}
- */
-const parseMiddlewares = (resolverConfig, strapi) => {
-  const resolverMiddlewares = getOr([], 'middlewares', resolverConfig);
-
-  // TODO: [v4] to factorize with compose endpoints (routes)
-  return resolverMiddlewares.map(middleware => {
-    if (isFunction(middleware)) {
-      return middleware;
-    }
-
-    if (typeof middleware === 'string') {
-      return strapi.middleware(middleware);
-    }
-
-    if (typeof middleware === 'object') {
-      const { name, options = {} } = middleware;
-
-      return strapi.middleware(name)(options);
-    }
-  });
 };
 
 module.exports = { wrapResolvers };

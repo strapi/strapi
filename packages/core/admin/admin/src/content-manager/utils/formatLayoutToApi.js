@@ -1,7 +1,7 @@
 import { omit, get } from 'lodash';
 
 const formatLayoutToApi = ({ layouts, metadatas, ...rest }) => {
-  const list = layouts.list.map(obj => {
+  const list = layouts.list.map((obj) => {
     if (obj.name) {
       return obj.name;
     }
@@ -25,7 +25,7 @@ const formatLayoutToApi = ({ layouts, metadatas, ...rest }) => {
     };
   }, {});
 
-  const edit = layouts.edit.map(row =>
+  const edit = layouts.edit.map((row) =>
     row.map(({ name, size }) => ({
       name,
       size,

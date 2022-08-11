@@ -23,7 +23,7 @@ function getFiles(ctx) {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = config => {
+module.exports = (config) => {
   const bodyConfig = defaultsDeep(defaults, config);
 
   return async (ctx, next) => {
@@ -64,7 +64,7 @@ module.exports = config => {
     if (files) {
       if (Array.isArray(files)) {
         // not awaiting to not slow the request
-        Promise.all(files.map(file => fse.remove(file.path)));
+        Promise.all(files.map((file) => fse.remove(file.path)));
       } else if (files && files.path) {
         // not awaiting to not slow the request
         fse.remove(files.path);

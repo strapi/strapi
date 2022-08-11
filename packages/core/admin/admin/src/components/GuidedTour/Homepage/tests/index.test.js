@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { useGuidedTour, TrackingContext } from '@strapi/helper-plugin';
+import { useGuidedTour, TrackingProvider } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import GuidedTourHomepage from '../index';
 
@@ -31,7 +31,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 const history = createMemoryHistory();
 
 const App = (
-  <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+  <TrackingProvider>
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} textComponent="span">
         <Router history={history}>
@@ -39,7 +39,7 @@ const App = (
         </Router>
       </IntlProvider>
     </ThemeProvider>
-  </TrackingContext.Provider>
+  </TrackingProvider>
 );
 
 describe('GuidedTour Homepage', () => {

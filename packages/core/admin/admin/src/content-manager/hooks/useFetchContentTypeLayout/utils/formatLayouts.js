@@ -1,7 +1,7 @@
 import { cloneDeep, get, set } from 'lodash';
 import { getRequestUrl, mergeMetasWithSchema } from '../../../utils';
 
-const getRelationModel = (targetModel, models) => models.find(model => model.uid === targetModel);
+const getRelationModel = (targetModel, models) => models.find((model) => model.uid === targetModel);
 
 const formatLayouts = (initialData, models) => {
   const data = createMetasSchema(initialData, models);
@@ -13,7 +13,7 @@ const formatLayouts = (initialData, models) => {
   set(data, ['contentType', 'layouts', 'edit'], formattedCTEditLayout);
   set(data, ['contentType', 'layouts', 'list'], formattedListLayout);
 
-  Object.keys(data.components).forEach(compoUID => {
+  Object.keys(data.components).forEach((compoUID) => {
     const formattedCompoEditLayout = formatLayoutWithMetas(
       data.components[compoUID],
       ctUid,
@@ -30,7 +30,7 @@ const createMetasSchema = (initialData, models) => {
   const data = mergeMetasWithSchema(cloneDeep(initialData), models, 'contentType');
   const { components, contentType } = data;
 
-  const formatMetadatas = targetSchema => {
+  const formatMetadatas = (targetSchema) => {
     return Object.keys(targetSchema.metadatas).reduce((acc, current) => {
       const schema = get(targetSchema, ['attributes', current], {});
       let metadatas = targetSchema.metadatas[current];
@@ -63,7 +63,7 @@ const createMetasSchema = (initialData, models) => {
 
   set(data, ['contentType', 'metadatas'], formatMetadatas(contentType));
 
-  Object.keys(components).forEach(compoUID => {
+  Object.keys(components).forEach((compoUID) => {
     const currentCompo = components[compoUID];
     const updatedMetas = formatMetadatas(currentCompo);
 
@@ -75,7 +75,7 @@ const createMetasSchema = (initialData, models) => {
 
 const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
   const formatted = contentTypeConfiguration.layouts.edit.reduce((acc, current) => {
-    const row = current.map(attribute => {
+    const row = current.map((attribute) => {
       const fieldSchema = get(contentTypeConfiguration, ['attributes', attribute.name], {});
 
       const data = {
@@ -208,8 +208,8 @@ const generateRelationQueryInfosForComponents = (
   return queryInfos;
 };
 
-const getDisplayedModels = models =>
-  models.filter(model => model.isDisplayed).map(({ uid }) => uid);
+const getDisplayedModels = (models) =>
+  models.filter((model) => model.isDisplayed).map(({ uid }) => uid);
 
 export default formatLayouts;
 export {

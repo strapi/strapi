@@ -19,7 +19,7 @@ export const useFolderStructure = ({ enabled = true } = {}) => {
       data: { data },
     } = await axiosInstance.get(dataRequestURL);
 
-    const children = data.map(f => recursiveRenameKeys(f, key => FIELD_MAPPING?.[key] ?? key));
+    const children = data.map((f) => recursiveRenameKeys(f, (key) => FIELD_MAPPING?.[key] ?? key));
 
     return [
       {

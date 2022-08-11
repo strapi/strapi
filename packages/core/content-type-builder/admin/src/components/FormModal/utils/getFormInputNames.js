@@ -1,4 +1,4 @@
-const getFormInputNames = form =>
+const getFormInputNames = (form) =>
   form.reduce((acc, current) => {
     const names = current.items.reduce((acc, current) => {
       if (current.name) {

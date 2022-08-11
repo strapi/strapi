@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "4.3.2",
+  "version": "4.3.4",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -51,12 +51,12 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.7",
-    "@strapi/babel-plugin-switch-ee-ce": "4.3.2",
+    "@strapi/babel-plugin-switch-ee-ce": "4.3.4",
     "@strapi/design-system": "1.2.1",
-    "@strapi/helper-plugin": "4.3.2",
+    "@strapi/helper-plugin": "4.3.4",
     "@strapi/icons": "1.2.1",
-    "@strapi/typescript-utils": "4.3.2",
-    "@strapi/utils": "4.3.2",
+    "@strapi/typescript-utils": "4.3.4",
+    "@strapi/utils": "4.3.4",
     "axios": "0.24.0",
     "babel-loader": "8.2.5",
     "babel-plugin-styled-components": "2.0.2",
@@ -121,7 +121,6 @@
     "react-router-dom": "5.2.0",
     "react-window": "1.8.7",
     "redux": "^4.0.1",
-    "redux-saga": "^0.16.0",
     "reselect": "^4.0.0",
     "rimraf": "3.0.2",
     "sanitize-html": "2.7.0",
@@ -140,6 +139,9 @@
     "glob": "8.0.3",
     "speed-measure-webpack-plugin": "1.5.0",
     "webpack-bundle-analyzer": "^4.5.0"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "4.3.2"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",

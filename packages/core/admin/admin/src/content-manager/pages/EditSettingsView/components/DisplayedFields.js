@@ -57,7 +57,7 @@ const DisplayedFields = ({ editLayout, fields, onRemoveField, onAddField }) => {
             variant="secondary"
             disabled={fields.length === 0}
           >
-            {fields.map(field => (
+            {fields.map((field) => (
               <MenuItem key={field} onClick={() => onAddField(field)}>
                 {field}
               </MenuItem>

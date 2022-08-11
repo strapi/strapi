@@ -18,7 +18,7 @@ const initialState = {
 
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD': {
         set(
