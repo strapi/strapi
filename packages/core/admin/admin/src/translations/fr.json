@@ -484,7 +484,7 @@
   "content-manager.containers.List.published": "Publié",
   "content-manager.containers.ListPage.displayedFields": "Champs affichés",
   "content-manager.containers.ListPage.items": "{number, plural, =0 {élements} one {élement} other {élements}}",
-  "content-manager.containers.ListPage.table-headers.published_at": "Statut",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "Statut",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Editer le label",
   "content-manager.containers.SettingPage.add.field": "Insérer un autre champ",
   "content-manager.containers.SettingPage.add.relational-field": "Insérer un autre champ relationnel",

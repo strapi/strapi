@@ -462,7 +462,7 @@
     "content-manager.containers.List.published": "પ્રકાશિત",
     "content-manager.containers.ListPage.displayedFields": "પ્રદર્શિત ક્ષેત્રો",
     "content-manager.containers.ListPage.items": "{સંખ્યા, બહુવચન, =0 {items} એક {item} અન્ય {items}}",
-    "content-manager.containers.ListPage.table-headers.published_at": "રાજ્ય",
+    "content-manager.containers.ListPage.table-headers.publishedAt": "રાજ્ય",
     "content-manager.containers.ListSettingsView.modal-form.edit-label": "{fieldName} સંપાદિત કરો",
     "content-manager.containers.SettingPage.add.field": "બીજું ક્ષેત્ર દાખલ કરો",
     "content-manager.containers.SettingPage.add.relational-field": "બીજું રિલેશનલ ફીલ્ડ દાખલ કરો",

@@ -36,16 +36,34 @@ const DynamicTable = ({
     });
 
     const formattedHeaders = headers.displayedHeaders.map(header => {
+      const { metadatas } = header;
+
       if (header.fieldSchema.type === 'relation') {
         const sortFieldValue = `${header.name}.${header.metadatas.mainField.name}`;
 
         return {
           ...header,
+          metadatas: {
+            ...metadatas,
+            label: formatMessage({
+              id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+              defaultMessage: header.name,
+            }),
+          },
           name: sortFieldValue,
         };
       }
 
-      return header;
+      return {
+        ...header,
+        metadatas: {
+          ...metadatas,
+          label: formatMessage({
+            id: getTrad(`containers.ListPage.table-headers.${header.name}`),
+            defaultMessage: header.name,
+          }),
+        },
+      };
     });
 
     if (!hasDraftAndPublish) {
@@ -61,7 +79,10 @@ const DynamicTable = ({
           type: 'custom',
         },
         metadatas: {
-          label: formatMessage({ id: getTrad('containers.ListPage.table-headers.published_at') }),
+          label: formatMessage({
+            id: getTrad(`containers.ListPage.table-headers.publishedAt`),
+            defaultMessage: 'publishedAt default',
+          }),
           searchable: false,
           sortable: true,
         },

@@ -543,7 +543,7 @@
     "content-manager.containers.List.published": "प्रकाशित",
     "content-manager.containers.ListPage.displayedFields": "प्रदर्शित फ़ील्ड",
     "content-manager.containers.ListPage.items": "{संख्या, बहुवचन, =0 {आइटम} एक {आइटम} अन्य {आइटम}}",
-    "content-manager.containers.ListPage.table-headers.published_at": "राज्य",
+    "content-manager.containers.ListPage.table-headers.publishedAt": "राज्य",
     "content-manager.containers.ListSettingsView.modal-form.edit-label": "संपादित करें {फ़ील्डनाम}",
     "content-manager.containers.SettingPage.add.field": "एक और फ़ील्ड डालें",
     "content-manager.containers.SettingPage.add.relational-field": "एक और रिलेशनल फील्ड डालें",

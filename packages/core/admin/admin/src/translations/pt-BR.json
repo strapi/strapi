@@ -488,7 +488,7 @@
   "content-manager.containers.List.published": "Publicado",
   "content-manager.containers.ListPage.displayedFields": "Campos exibidos",
   "content-manager.containers.ListPage.items": "{number, plural, =0 {itens} one {item} other {itens}}",
-  "content-manager.containers.ListPage.table-headers.published_at": "Estado",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "Estado",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Editar {fieldName}",
   "content-manager.containers.SettingPage.add.field": "Criar outro campo",
   "content-manager.containers.SettingPage.add.relational-field": "Criar outro campo relacional",

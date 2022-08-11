@@ -543,7 +543,7 @@
     "content-manager.containers.List.published": "പ്രസിദ്ധീകരിച്ചു",
     "content-manager.containers.ListPage.displayedFields": "പ്രദർശിപ്പിച്ച ഫീൽഡുകൾ",
     "content-manager.containers.ListPage.items": "{സംഖ്യ, ബഹുവചനം, =0 {ഇനങ്ങൾ} ഒന്ന് {ഇനം} മറ്റൊന്ന് {ഇനങ്ങൾ}}",
-    "content-manager.containers.ListPage.table-headers.published_at": "സ്റ്റേറ്റ്",
+    "content-manager.containers.ListPage.table-headers.publishedAt": "സ്റ്റേറ്റ്",
     "content-manager.containers.ListSettingsView.modal-form.edit-label": "എഡിറ്റ് {fieldName}",
     "content-manager.containers.SettingPage.add.field": "മറ്റൊരു ഫീൽഡ് ചേർക്കുക",
     "content-manager.containers.SettingPage.add.relational-field": "മറ്റൊരു റിലേഷണൽ ഫീൽഡ് ചേർക്കുക",

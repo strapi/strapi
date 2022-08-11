@@ -488,7 +488,7 @@
   "content-manager.containers.List.published": "Gepubliceerd",
   "content-manager.containers.ListPage.displayedFields": "Weergegeven velden",
   "content-manager.containers.ListPage.items": "{number, plural, =0 {items} één {item} ander {items}}",
-  "content-manager.containers.ListPage.table-headers.published_at": "Status",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "Status",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Pas {fieldName} aan",
   "content-manager.containers.SettingPage.add.field": "Voeg nog een veld toe",
   "content-manager.containers.SettingPage.add.relational-field": "Voeg nog een gerelateerd veld toe",

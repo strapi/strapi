@@ -543,7 +543,7 @@
     "content-manager.containers.List.published": "प्रकाशित", 
     "content-manager.containers.ListPage.displayedFields": "प्रदर्शितक्षेत्राणि",
     "content-manager.containers.ListPage.items": "{संख्या, बहुवचन, =0 {आइटम} एक {आइटम} अन्य {आइटम}}",
-    "content-manager.containers.ListPage.table-headers.published_at": "राज्यम्",
+    "content-manager.containers.ListPage.table-headers.publishedAt": "राज्यम्",
     "content-manager.containers.ListSettingsView.modal-form.edit-label": "{क्षेत्रनाम} सम्पादित करें",
     "content-manager.containers.SettingPage.add.field": "अन्यं क्षेत्रं सम्मिलितं कुर्वन्तु",
     "content-manager.containers.SettingPage.add.relational-field": "अन्यं सम्बन्धक्षेत्रं सम्मिलितं कुर्वन्तु",

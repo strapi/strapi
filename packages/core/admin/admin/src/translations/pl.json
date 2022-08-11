@@ -543,7 +543,7 @@
   "content-manager.containers.List.published": "Opublikowany",
   "content-manager.containers.ListPage.displayedFields": "Wyświetlone atrybuty",
   "content-manager.containers.ListPage.items": "{number, plural, =0 {items} one {item} other {items}}",
-  "content-manager.containers.ListPage.table-headers.published_at": "Stan",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "Stan",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Edytuj etykietę",
   "content-manager.containers.SettingPage.add.field": "Wstaw inne pole",
   "content-manager.containers.SettingPage.add.relational-field": "Wstaw inne pole relacyjne",

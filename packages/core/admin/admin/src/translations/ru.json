@@ -378,7 +378,7 @@
   "content-manager.containers.List.errorFetchRecords": "Ошибка",
   "content-manager.containers.List.published": "Опубликованный",
   "content-manager.containers.ListPage.displayedFields": "Отображаемые поля",
-  "content-manager.containers.ListPage.table-headers.published_at": "Состояние",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "Состояние",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Отредактируйте ярлык",
   "content-manager.containers.SettingPage.add.field": "Добавить еще одно поле",
   "content-manager.containers.SettingPage.add.relational-field": "Добавить еще одно связанное поле",

@@ -334,7 +334,7 @@
   "content-manager.containers.List.errorFetchRecords": "Eror",
   "content-manager.containers.List.published": "Dipublikasi",
   "content-manager.containers.ListPage.displayedFields": "Bidang Ditampilkan",
-  "content-manager.containers.ListPage.table-headers.published_at": "Status",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "Status",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Edit label",
   "content-manager.containers.SettingPage.add.field": "Tambah bidang lain",
   "content-manager.containers.SettingPage.add.relational-field": "Tambah bidang relasional",

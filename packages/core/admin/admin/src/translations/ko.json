@@ -483,7 +483,7 @@
   "content-manager.containers.List.published": "발행됨",
   "content-manager.containers.ListPage.displayedFields": "표시 필드",
   "content-manager.containers.ListPage.items": "{number, plural, =0 {items} one {item} other {items}}",
-  "content-manager.containers.ListPage.table-headers.published_at": "상태",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "상태",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "{fieldName} 수정",
   "content-manager.containers.SettingPage.add.field": "다른 필드 추가",
   "content-manager.containers.SettingPage.add.relational-field": "다른 릴레이션 필드 추가",

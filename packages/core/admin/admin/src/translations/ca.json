@@ -545,7 +545,7 @@
   "content-manager.containers.List.published": "Publicat",
   "content-manager.containers.ListPage.displayedFields": "Camps mostrats",
   "content-manager.containers.ListPage.items": "{number, plural, =0 {elements} one {element} other {elements}}",
-  "content-manager.containers.ListPage.table-headers.published_at": "Estat",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "Estat",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Edita l'etiqueta",
   "content-manager.containers.SettingPage.add.field": "Inserir un altre camp",
   "content-manager.containers.SettingPage.add.relational-field": "Inserir un altre camp relacional",

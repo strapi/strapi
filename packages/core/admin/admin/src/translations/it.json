@@ -343,7 +343,7 @@
   "content-manager.containers.List.errorFetchRecords": "Errore",
   "content-manager.containers.List.published": "Pubblicato",
   "content-manager.containers.ListPage.displayedFields": "Campi visualizzati",
-  "content-manager.containers.ListPage.table-headers.published_at": "Stato",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "Stato",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Modifica etichetta",
   "content-manager.containers.SettingPage.add.field": "Inserisci nuovo campo",
   "content-manager.containers.SettingPage.add.relational-field": "Inserisci nuovo campo relazione",

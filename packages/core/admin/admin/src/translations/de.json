@@ -539,7 +539,7 @@
   "content-manager.containers.List.published": "Veröffentlicht",
   "content-manager.containers.ListPage.displayedFields": "Dargestellte Felder",
   "content-manager.containers.ListPage.items": "{number, plural, one {Eintrag} other {Einträge}}",
-  "content-manager.containers.ListPage.table-headers.published_at": "Status",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "Status",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Beschriftung ändern",
   "content-manager.containers.SettingPage.add.field": "Ein weiteres Feld hinzufügen",
   "content-manager.containers.SettingPage.add.relational-field": "Ein weiteres Beziehungs-Feld hinzufügen",

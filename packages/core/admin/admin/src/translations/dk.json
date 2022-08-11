@@ -485,7 +485,7 @@
   "content-manager.containers.List.published": "Offentliggjort",
   "content-manager.containers.ListPage.displayedFields": "Viste felter",
   "content-manager.containers.ListPage.items": "{number, plural, =0 {elementer} one {element} other {elementer}}",
-  "content-manager.containers.ListPage.table-headers.published_at": "Tilstand",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "Tilstand",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Redigér label",
   "content-manager.containers.SettingPage.add.field": "Indsæt endnu et felt",
   "content-manager.containers.SettingPage.add.relational-field": "Indsæt endnu et relationsfelt",

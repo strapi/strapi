@@ -333,7 +333,7 @@
   "content-manager.containers.List.errorFetchRecords": "Chyba",
   "content-manager.containers.List.published": "Publikované",
   "content-manager.containers.ListPage.displayedFields": "Zobrazené políčka",
-  "content-manager.containers.ListPage.table-headers.published_at": "Stav",
+  "content-manager.containers.ListPage.table-headers.publishedAt": "Stav",
   "content-manager.containers.ListSettingsView.modal-form.edit-label": "Upraviť popis",
   "content-manager.containers.SettingPage.add.field": "Vložiť ďalšie políčko",
   "content-manager.containers.SettingPage.add.relational-field": "Vložiť ďalšie políčko prepojenia",
