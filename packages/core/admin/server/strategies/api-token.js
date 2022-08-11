@@ -76,7 +76,12 @@ const verify = (auth, config) => {
   }
 
   // Custom
-  else if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM && ability) {
+  else if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
+    if (!ability) {
+      console.log('missing ability');
+      throw new ForbiddenError();
+    }
+
     const scopes = castArray(config.scope);
 
     const isAllowed = scopes.every(scope => ability.can(scope));
