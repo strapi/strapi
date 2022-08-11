@@ -91,6 +91,18 @@ module.exports = {
         user: await sanitizeUser(user, ctx),
       });
     }
+
+    // Connect the user with the third-party provider.
+    try {
+      const user = await getService('providers').connect(provider, ctx.query);
+
+      return ctx.send({
+        jwt: getService('jwt').issue({ id: user.id }),
+        user: await sanitizeUser(user, ctx),
+      });
+    } catch (error) {
+      throw new ApplicationError(error.message);
+    }
   },
 
   async changePassword(ctx) {
