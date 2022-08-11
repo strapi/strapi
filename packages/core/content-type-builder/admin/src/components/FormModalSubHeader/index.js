@@ -17,6 +17,10 @@ const FormModalSubHeader = ({
   customField,
 }) => {
   const { formatMessage } = useIntl();
+  const intlLabel =
+    modalType === 'customField'
+      ? customField.intlLabel
+      : { id: getTrad(`attribute.${attributeType}`) };
 
   return (
     <Typography as="h2" variant="beta">
@@ -32,9 +36,7 @@ const FormModalSubHeader = ({
           defaultMessage: 'Add new field',
         },
         {
-          type: upperFirst(
-            formatMessage(customField?.intlLabel ?? { id: getTrad(`attribute.${attributeType}`) })
-          ),
+          type: upperFirst(formatMessage(intlLabel)),
           name: upperFirst(attributeName),
           step,
         }
