@@ -346,7 +346,7 @@ const FormModal = () => {
         reservedNames,
         schemaData: { modifiedData, initialData },
         ctbFormsAPI,
-        customFieldValidator: customField.options.validator,
+        customFieldValidator: customField.options?.validator,
       });
       // Check for validity for creating a component
       // This is happening when the user creates a component "on the fly"
