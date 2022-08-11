@@ -232,10 +232,8 @@ const update = async (id, attributes) => {
     );
     const actionsToAdd = difference(attributes.permissions, originalToken.permissions);
 
-    // TODO: make deleteMany work with relations
-    // await strapi
-    //   .query('admin::token-permission')
-    //   .deleteMany({ where: { action: map('action', permissionsToDelete), token: id } });
+    // TODO: improve efficiency here
+    // method using a loop -- works but very inefficient
     let promises = [];
     actionsToDelete.forEach(action => {
       promises.push(
@@ -246,10 +244,13 @@ const update = async (id, attributes) => {
     });
     await Promise.all(promises);
 
-    // TODO: make createMany work with relations
+    // method using deleteMany -- leaves relations in _links table!
     // await strapi
     //   .query('admin::token-permission')
-    //   .createMany({ data: permissionsToCreate.map(action => ({ action, token: id })) });
+    //   .deleteMany({ where: { action: map('action', permissionsToDelete), token: id } });
+
+    // TODO: improve efficiency here
+    // using a loop -- works but very inefficient
     promises = [];
     actionsToAdd.forEach(action => {
       promises.push(
@@ -259,6 +260,25 @@ const update = async (id, attributes) => {
       );
     });
     await Promise.all(promises);
+
+    // method using createMany -- doesn't create relations in _links table!
+    // await strapi
+    //   .query('admin::token-permission')
+    //   .createMany({ data: actionsToAdd.map(action => ({ action, token: id })) });
+
+    // method attempting to use entityService -- can't create new items in entityservice, permissions need to already exist
+    // await strapi.entityService.update('admin::api-token', originalToken.id, {
+    //   data: {
+    //     permissions: [
+    //       actionsToAdd.map(action => {
+    //         return { action };
+    //       }),
+    //     ],
+    //   },
+    //   populate: POPULATE_FIELDS,
+    // });
+
+    // method attempting to createMany permissions, then update token with those permissions -- createMany doesn't return the ids, and we can't query for them
   }
   // if type is not custom, make sure any old permissions get removed
   else {
