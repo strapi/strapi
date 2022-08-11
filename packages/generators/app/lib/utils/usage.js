@@ -88,11 +88,11 @@ function trackError({ scope, error }) {
     useYarn: scope.useYarn,
     useTypescriptOnServer: scope.useTypescript,
     useTypescriptOnAdmin: scope.useTypescript,
+    projectId: uuid,
   };
 
   try {
     return trackEvent('didNotCreateProject', {
-      uuid,
       deviceId: scope.deviceId,
       properties: addPackageJsonStrapiMetadata(properties, scope),
     });
@@ -117,11 +117,11 @@ function trackUsage({ event, scope, error }) {
     useTypescriptOnServer: scope.useTypescript,
     useTypescriptOnAdmin: scope.useTypescript,
     noRun: (scope.runQuickstartApp !== true).toString(),
+    projectId: uuid,
   };
 
   try {
     return trackEvent(event, {
-      uuid,
       deviceId: scope.deviceId,
       properties: addPackageJsonStrapiMetadata(properties, scope),
     });
