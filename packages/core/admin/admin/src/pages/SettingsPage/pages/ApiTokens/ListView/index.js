@@ -21,7 +21,7 @@ import { useHistory } from 'react-router-dom';
 import qs from 'qs';
 import { axiosInstance } from '../../../../../core/utils';
 import adminPermissions from '../../../../../permissions';
-import tableHeaders from './utils/tableHeaders';
+import getTableHeaders from './utils/getTableHeaders';
 import TableRows from './DynamicTable';
 
 const ApiTokenListView = () => {
@@ -132,7 +132,7 @@ const ApiTokenListView = () => {
         {!canRead && <NoPermissions />}
         {shouldDisplayDynamicTable && (
           <DynamicTable
-            headers={tableHeaders}
+            headers={getTableHeaders(formatMessage)}
             contentType="api-tokens"
             rows={apiTokens}
             withBulkActions={canDelete || canUpdate}
