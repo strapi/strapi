@@ -277,9 +277,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // select / populate
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    const entitiesToDelete = await db.query(uid).findMany({
-      ...query,
-    });
+    const entitiesToDelete = await db.query(uid).findMany(query);
 
     if (!entitiesToDelete.length) {
       return null;
