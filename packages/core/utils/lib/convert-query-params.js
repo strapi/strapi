@@ -87,7 +87,7 @@ const convertSingleSortQueryParam = (sortQuery, schema) => {
     throw new Error('Field cannot be empty');
   }
 
-  if (!_.get(schema, `attributes.${field}`)) {
+  if (!_.get(schema, `attributes.${field}` && field !== 'id')) {
     return {};
   }
 
@@ -336,7 +336,7 @@ const convertAndSanitizeFilters = (filters, schema) => {
 
   // Here, `key` can either be an operator or an attribute name
   for (const [key, value] of Object.entries(filters)) {
-    const attribute = get(key, schema.attributes);
+    const attribute = key === 'id' ? { type: 'integer' } : get(key, schema.attributes);
 
     // Handle attributes
     if (attribute) {
