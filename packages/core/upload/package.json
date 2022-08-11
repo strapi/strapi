@@ -49,7 +49,8 @@
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
     "@testing-library/user-event": "13.5.0",
-    "msw": "0.42.3"
+    "msw": "0.42.3",
+    "react-test-renderer": "^17.0.2"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",
