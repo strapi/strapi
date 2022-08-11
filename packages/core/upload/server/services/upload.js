@@ -198,18 +198,18 @@ module.exports = ({ strapi }) => ({
     });
 
     // For performance reasons, all uploads are wrapped in a single Promise.all
-    const uploadThumbnail = async thumbnailFile => {
+    const uploadThumbnail = async (thumbnailFile) => {
       await getService('provider').upload(thumbnailFile);
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
     };
 
-    const uploadResponsiveFormat = async format => {
+    const uploadResponsiveFormat = async (format) => {
       const { key, file } = format;
       await getService('provider').upload(file);
       _.set(fileData, ['formats', key], file);
     };
 
-    let uploadPromises = [];
+    const uploadPromises = [];
 
     // Upload image
     uploadPromises.push(getService('provider').upload(fileData));

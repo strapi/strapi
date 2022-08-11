@@ -1,6 +1,6 @@
 'use strict';
 
-const createEntityService = require('../');
+const createEntityService = require('..');
 const entityValidator = require('../../entity-validator');
 
 describe('Entity service triggers webhooks', () => {
@@ -12,7 +12,7 @@ describe('Entity service triggers webhooks', () => {
   };
 
   let instance;
-  let eventHub = { emit: jest.fn() };
+  const eventHub = { emit: jest.fn() };
   let entity = { attr: 'value' };
 
   beforeAll(() => {
