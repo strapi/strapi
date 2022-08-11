@@ -32,7 +32,7 @@ const createJoin = (ctx, { alias, attributeName, attribute }) => {
 
   const tragetMeta = db.metadata.get(attribute.target);
 
-  const joinColumn = attribute.joinColumn;
+  const { joinColumn } = attribute;
 
   if (joinColumn) {
     const subAlias = qb.getAlias();
@@ -46,7 +46,7 @@ const createJoin = (ctx, { alias, attributeName, attribute }) => {
     return subAlias;
   }
 
-  const joinTable = attribute.joinTable;
+  const { joinTable } = attribute;
   if (joinTable) {
     return createPivotJoin(qb, joinTable, alias, tragetMeta);
   }
@@ -67,7 +67,7 @@ const applyJoin = (qb, join) => {
     orderBy,
   } = join;
 
-  qb[method](`${referencedTable} as ${alias}`, inner => {
+  qb[method](`${referencedTable} as ${alias}`, (inner) => {
     inner.on(`${rootTable}.${rootColumn}`, `${alias}.${referencedColumn}`);
 
     if (on) {
@@ -78,14 +78,14 @@ const applyJoin = (qb, join) => {
   });
 
   if (orderBy) {
-    Object.keys(orderBy).forEach(column => {
+    Object.keys(orderBy).forEach((column) => {
       const direction = orderBy[column];
       qb.orderBy(`${alias}.${column}`, direction);
     });
   }
 };
 
-const applyJoins = (qb, joins) => joins.forEach(join => applyJoin(qb, join));
+const applyJoins = (qb, joins) => joins.forEach((join) => applyJoin(qb, join));
 
 module.exports = {
   createJoin,

@@ -21,7 +21,7 @@ const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
 /**
  * Validates a plugin name format
  */
-const isValidPluginName = plugin => {
+const isValidPluginName = (plugin) => {
   return _.isString(plugin) && !_.isEmpty(plugin) && PLUGIN_NAME_REGEX.test(plugin);
 };
 

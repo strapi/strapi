@@ -18,7 +18,7 @@ const initialState = {
 };
 
 const reducer = (state = initialState, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'SET_CUSTOM_MENU_LOGO': {
         draftState.menuLogo.display = action.value;

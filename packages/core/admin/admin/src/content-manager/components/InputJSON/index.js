@@ -87,11 +87,10 @@ class InputJSON extends React.Component {
 
   setSize = () => this.codeMirror.setSize('100%', 'auto');
 
-  getContentAtLine = line => this.codeMirror.getLine(line);
+  getContentAtLine = (line) => this.codeMirror.getLine(line);
 
-  getEditorOption = opt => this.codeMirror.getOption(opt);
-
-  getValue = () => this.codeMirror.getValue();
+  // getEditorOption = (opt) => this.codeMirror.getOption(opt);
+  // getValue = () => this.codeMirror.getValue();
 
   markSelection = ({ message }) => {
     let line = parseInt(message.split(':')[0].split('line ')[1], 10) - 1;
@@ -142,7 +141,7 @@ class InputJSON extends React.Component {
     this.timer = setTimeout(() => this.testJSON(doc.getValue()), WAIT);
   };
 
-  testJSON = value => {
+  testJSON = (value) => {
     try {
       jsonlint.parse(value);
     } catch (err) {
@@ -189,7 +188,7 @@ InputJSON.defaultProps = {
   error: undefined,
   intlLabel: undefined,
   labelAction: undefined,
-  onChange: () => {},
+  onChange() {},
   value: null,
   required: false,
 };

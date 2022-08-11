@@ -62,18 +62,18 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
 
   const initials = userDisplayName
     .split(' ')
-    .map(name => name.substring(0, 1))
+    .map((name) => name.substring(0, 1))
     .join('')
     .substring(0, 2);
 
-  const handleToggleUserLinks = () => setUserLinksVisible(prev => !prev);
+  const handleToggleUserLinks = () => setUserLinksVisible((prev) => !prev);
 
   const handleLogout = () => {
     auth.clearAppStorage();
     handleToggleUserLinks();
   };
 
-  const handleBlur = e => {
+  const handleBlur = (e) => {
     if (
       !e.currentTarget.contains(e.relatedTarget) &&
       e.relatedTarget?.parentElement?.id !== 'main-nav-user-button'
@@ -121,7 +121,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               defaultMessage: 'Plugins',
             })}
           >
-            {pluginsSectionLinks.map(link => {
+            {pluginsSectionLinks.map((link) => {
               const Icon = link.icon;
 
               return (
@@ -140,7 +140,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
               defaultMessage: 'General',
             })}
           >
-            {generalSectionLinks.map(link => {
+            {generalSectionLinks.map((link) => {
               const LinkIcon = link.icon;
 
               return (
@@ -201,7 +201,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         </LinkUserWrapper>
       )}
 
-      <NavCondense onClick={() => setCondensed(s => !s)}>
+      <NavCondense onClick={() => setCondensed((s) => !s)}>
         {condensed
           ? formatMessage({
               id: 'app.components.LeftMenu.expand',

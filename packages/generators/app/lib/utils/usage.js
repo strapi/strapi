@@ -21,7 +21,7 @@ async function captureException(error) {
     sentry.captureException(error);
     await sentry.flush();
   } catch (err) {
-    /** ignore errors*/
+    /** ignore errors */
     return Promise.resolve();
   }
 }
@@ -31,7 +31,7 @@ async function captureError(message) {
     sentry.captureMessage(message, 'error');
     await sentry.flush();
   } catch (err) {
-    /** ignore errors*/
+    /** ignore errors */
     return Promise.resolve();
   }
 }
@@ -41,7 +41,7 @@ function captureStderr(name, error) {
     error.stderr
       .trim()
       .split('\n')
-      .forEach(line => {
+      .forEach((line) => {
         sentry.addBreadcrumb({
           category: 'stderr',
           message: line,
@@ -69,7 +69,7 @@ function trackEvent(event, body) {
       headers: { 'Content-Type': 'application/json' },
     }).catch(() => {});
   } catch (err) {
-    /** ignore errors*/
+    /** ignore errors */
     return Promise.resolve();
   }
 }
@@ -78,7 +78,7 @@ function trackError({ scope, error }) {
   const { uuid } = scope;
 
   const properties = {
-    error: typeof error == 'string' ? error : error && error.message,
+    error: typeof error === 'string' ? error : error && error.message,
     os: os.type(),
     platform: os.platform(),
     release: os.release(),
@@ -97,7 +97,7 @@ function trackError({ scope, error }) {
       properties: addPackageJsonStrapiMetadata(properties, scope),
     });
   } catch (err) {
-    /** ignore errors*/
+    /** ignore errors */
     return Promise.resolve();
   }
 }
@@ -106,7 +106,7 @@ function trackUsage({ event, scope, error }) {
   const { uuid } = scope;
 
   const properties = {
-    error: typeof error == 'string' ? error : error && error.message,
+    error: typeof error === 'string' ? error : error && error.message,
     os: os.type(),
     os_platform: os.platform(),
     os_release: os.release(),
@@ -126,7 +126,7 @@ function trackUsage({ event, scope, error }) {
       properties: addPackageJsonStrapiMetadata(properties, scope),
     });
   } catch (err) {
-    /** ignore errors*/
+    /** ignore errors */
     return Promise.resolve();
   }
 }

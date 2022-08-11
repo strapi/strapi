@@ -34,7 +34,7 @@ const editAssetRequest = (asset, file, cancelToken, onProgress) => {
     onUploadProgress({ total, loaded }) {
       onProgress((loaded / total) * 100);
     },
-  }).then(res => res.data);
+  }).then((res) => res.data);
 };
 
 export const useEditAsset = () => {
@@ -47,12 +47,12 @@ export const useEditAsset = () => {
   const mutation = useMutation(
     ({ asset, file }) => editAssetRequest(asset, file, tokenRef.current, setProgress),
     {
-      onSuccess: () => {
+      onSuccess() {
         queryClient.refetchQueries([pluginId, 'assets'], { active: true });
         queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
         queryClient.refetchQueries([pluginId, 'folders'], { active: true });
       },
-      onError: reason => {
+      onError(reason) {
         if (reason.response.status === 403) {
           toggleNotification({
             type: 'info',

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { render, waitFor } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { useGuidedTour } from '@strapi/helper-plugin';
@@ -37,9 +38,19 @@ jest.mock('../utils/api', () => ({
   fetchUserRoles: jest.fn(),
 }));
 
-jest.mock('../../PluginsInitializer', () => () => <div>PluginsInitializer</div>);
+jest.mock('../../PluginsInitializer', () => () => {
+  return <div>PluginsInitializer</div>;
+});
 // eslint-disable-next-line react/prop-types
-jest.mock('../../RBACProvider', () => ({ children }) => <div>{children}</div>);
+jest.mock('../../RBACProvider', () => {
+  const Compo = ({ children }) => <div>{children}</div>;
+
+  Compo.propTypes = {
+    children: PropTypes.node.isRequired,
+  };
+
+  return Compo;
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,11 +60,13 @@ const queryClient = new QueryClient({
   },
 });
 
-const app = (
+const configurationContextValue = { showReleaseNotification: false };
+
+const App = () => (
   <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
     <Theme>
       <QueryClientProvider client={queryClient}>
-        <ConfigurationsContext.Provider value={{ showReleaseNotification: false }}>
+        <ConfigurationsContext.Provider value={configurationContextValue}>
           <AuthenticatedApp />
         </ConfigurationsContext.Provider>
       </QueryClientProvider>
@@ -83,7 +96,7 @@ describe('Admin | components | AuthenticatedApp', () => {
     );
     fetchCurrentUserPermissions.mockImplementation(() => Promise.resolve([]));
 
-    const { container } = render(app);
+    const { container } = render(<App />);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c0 {
@@ -149,7 +162,7 @@ describe('Admin | components | AuthenticatedApp', () => {
   });
 
   it('should not fetch the latest release', () => {
-    render(app);
+    render(<App />);
 
     expect(fetchStrapiLatestRelease).not.toHaveBeenCalled();
   });
@@ -159,7 +172,7 @@ describe('Admin | components | AuthenticatedApp', () => {
     const setGuidedTourVisibility = jest.fn();
     useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
 
-    render(app);
+    render(<App />);
 
     await waitFor(() => expect(setGuidedTourVisibility).not.toHaveBeenCalled());
   });
@@ -168,7 +181,7 @@ describe('Admin | components | AuthenticatedApp', () => {
     fetchUserRoles.mockImplementationOnce(() => [{ code: 'strapi-super-admin' }]);
     const setGuidedTourVisibility = jest.fn();
     useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
-    render(app);
+    render(<App />);
 
     await waitFor(() => expect(setGuidedTourVisibility).toHaveBeenCalledWith(true));
   });

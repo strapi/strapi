@@ -17,7 +17,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
-const makeApp = queryValue => (
+const makeApp = (queryValue) => (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en">
       <SearchAsset onChangeSearch={handleChange} queryValue={queryValue} />

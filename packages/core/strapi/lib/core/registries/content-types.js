@@ -4,7 +4,7 @@ const { pickBy, has } = require('lodash/fp');
 const { createContentType } = require('../domain/content-type');
 const { addNamespace, hasNamespace } = require('../utils');
 
-const validateKeySameToSingularName = contentTypes => {
+const validateKeySameToSingularName = (contentTypes) => {
   for (const ctName in contentTypes) {
     const contentType = contentTypes[ctName];
 

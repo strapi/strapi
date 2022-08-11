@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import get from 'lodash/get';
 
-const selectContentManagerListViewPluginOptions = state =>
+const selectContentManagerListViewPluginOptions = (state) =>
   state['content-manager_listView'].contentType.pluginOptions;
 
 const useHasI18n = () => {

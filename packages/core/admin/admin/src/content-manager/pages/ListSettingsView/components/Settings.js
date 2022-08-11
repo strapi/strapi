@@ -34,7 +34,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
             id: getTrad('form.Input.search'),
             defaultMessage: 'Enable search',
           })}
-          onChange={e => {
+          onChange={(e) => {
             onChange({ target: { name: 'settings.searchable', value: e.target.checked } });
           }}
           onLabel={formatMessage({
@@ -53,7 +53,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
             id: getTrad('form.Input.filters'),
             defaultMessage: 'Enable filters',
           })}
-          onChange={e => {
+          onChange={(e) => {
             onChange({ target: { name: 'settings.filterable', value: e.target.checked } });
           }}
           onLabel={formatMessage({
@@ -72,7 +72,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
             id: getTrad('form.Input.bulkActions'),
             defaultMessage: 'Enable bulk actions',
           })}
-          onChange={e => {
+          onChange={(e) => {
             onChange({ target: { name: 'settings.bulkable', value: e.target.checked } });
           }}
           onLabel={formatMessage({
@@ -99,11 +99,11 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
               defaultMessage:
                 'Note: You can override this value in the Collection Type settings page.',
             })}
-            onChange={value => onChange({ target: { name: 'settings.pageSize', value } })}
+            onChange={(value) => onChange({ target: { name: 'settings.pageSize', value } })}
             name="settings.pageSize"
             value={modifiedData.settings.pageSize || ''}
           >
-            {[10, 20, 50, 100].map(pageSize => (
+            {[10, 20, 50, 100].map((pageSize) => (
               <Option key={pageSize} value={pageSize}>
                 {pageSize}
               </Option>
@@ -116,11 +116,11 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
               id: getTrad('form.Input.defaultSort'),
               defaultMessage: 'Default sort attribute',
             })}
-            onChange={value => onChange({ target: { name: 'settings.defaultSortBy', value } })}
+            onChange={(value) => onChange({ target: { name: 'settings.defaultSortBy', value } })}
             name="settings.defaultSortBy"
             value={modifiedData.settings.defaultSortBy || ''}
           >
-            {sortOptions.map(sortBy => (
+            {sortOptions.map((sortBy) => (
               <Option key={sortBy} value={sortBy}>
                 {sortBy}
               </Option>
@@ -133,11 +133,11 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
               id: getTrad('form.Input.sort.order'),
               defaultMessage: 'Default sort order',
             })}
-            onChange={value => onChange({ target: { name: 'settings.defaultSortOrder', value } })}
+            onChange={(value) => onChange({ target: { name: 'settings.defaultSortOrder', value } })}
             name="settings.defaultSortOrder"
             value={modifiedData.settings.defaultSortOrder || ''}
           >
-            {['ASC', 'DESC'].map(order => (
+            {['ASC', 'DESC'].map((order) => (
               <Option key={order} value={order}>
                 {order}
               </Option>

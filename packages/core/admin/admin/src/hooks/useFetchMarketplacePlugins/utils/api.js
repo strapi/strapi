@@ -8,7 +8,7 @@ const fetchMarketplacePlugins = async () => {
   // Only keep v4 plugins
   const filteredResponse = {
     ...response,
-    data: response.data.filter(plugin => plugin.attributes.strapiCompatibility === 'v4'),
+    data: response.data.filter((plugin) => plugin.attributes.strapiCompatibility === 'v4'),
   };
 
   return filteredResponse;

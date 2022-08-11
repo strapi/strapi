@@ -1,38 +1,11 @@
 'use strict';
 
-const ts = require('typescript');
 const { factory } = require('typescript');
 const _ = require('lodash/fp');
 
 const { addImport } = require('./imports');
 const { getTypeNode, toTypeLiteral } = require('./utils');
-
-/**
- * Generate a property signature node for a given attribute
- *
- * @param {object} schema
- * @param {string} attributeName
- * @param {object} attribute
- * @returns {object}
- */
-const attributeToPropertySignature = (schema, attributeName, attribute) => {
-  const baseType = getAttributeType(attributeName, attribute, schema.uid);
-
-  if (baseType === null) {
-    return null;
-  }
-
-  const modifiers = getAttributeModifiers(attribute);
-
-  const nodes = [baseType, ...modifiers];
-
-  return factory.createPropertySignature(
-    undefined,
-    factory.createIdentifier(attributeName),
-    undefined,
-    factory.createIntersectionTypeNode(nodes)
-  );
-};
+const mappers = require('./mappers');
 
 /**
  * Create the base type node for a given attribute
@@ -64,7 +37,7 @@ const getAttributeType = (attributeName, attribute, uid) => {
  * @param {object} attribute
  * @returns {object[]}
  */
-const getAttributeModifiers = attribute => {
+const getAttributeModifiers = (attribute) => {
   const modifiers = [];
 
   // Required
@@ -151,127 +124,31 @@ const getAttributeModifiers = attribute => {
   return modifiers;
 };
 
-const mappers = {
-  string() {
-    return ['StringAttribute'];
-  },
-  text() {
-    return ['TextAttribute'];
-  },
-  richtext() {
-    return ['RichTextAttribute'];
-  },
-  password() {
-    return ['PasswordAttribute'];
-  },
-  email() {
-    return ['EmailAttribute'];
-  },
-  date() {
-    return ['DateAttribute'];
-  },
-  time() {
-    return ['TimeAttribute'];
-  },
-  datetime() {
-    return ['DateTimeAttribute'];
-  },
-  timestamp() {
-    return ['TimestampAttribute'];
-  },
-  integer() {
-    return ['IntegerAttribute'];
-  },
-  biginteger() {
-    return ['BigIntegerAttribute'];
-  },
-  float() {
-    return ['FloatAttribute'];
-  },
-  decimal() {
-    return ['DecimalAttribute'];
-  },
-  uid({ attribute, uid }) {
-    const { targetField, options } = attribute;
+/**
+ * Generate a property signature node for a given attribute
+ *
+ * @param {object} schema
+ * @param {string} attributeName
+ * @param {object} attribute
+ * @returns {object}
+ */
+const attributeToPropertySignature = (schema, attributeName, attribute) => {
+  const baseType = getAttributeType(attributeName, attribute, schema.uid);
 
-    // If there are no params to compute, then return the attribute type alone
-    if (targetField === undefined && options === undefined) {
-      return ['UIDAttribute'];
-    }
+  if (baseType === null) {
+    return null;
+  }
 
-    const params = [];
+  const modifiers = getAttributeModifiers(attribute);
 
-    // If the targetField property is defined, then reference it,
-    // otherwise, put `undefined` keyword type nodes as placeholders
-    const targetFieldParams = _.isUndefined(targetField)
-      ? [
-          factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
-          factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
-        ]
-      : [factory.createStringLiteral(uid), factory.createStringLiteral(targetField)];
+  const nodes = [baseType, ...modifiers];
 
-    params.push(...targetFieldParams);
-
-    // If the options property is defined, transform it to
-    // a type literral node and add it to the params list
-    if (_.isObject(options)) {
-      params.push(toTypeLiteral(options));
-    }
-
-    return ['UIDAttribute', params];
-  },
-  enumeration({ attribute }) {
-    const { enum: enumValues } = attribute;
-
-    return ['EnumerationAttribute', [toTypeLiteral(enumValues)]];
-  },
-  boolean() {
-    return ['BooleanAttribute'];
-  },
-  json() {
-    return ['JSONAttribute'];
-  },
-  media() {
-    return ['MediaAttribute'];
-  },
-  relation({ uid, attribute }) {
-    const { relation, target } = attribute;
-
-    const isMorphRelation = relation.toLowerCase().includes('morph');
-
-    if (isMorphRelation) {
-      return [
-        'RelationAttribute',
-        [factory.createStringLiteral(uid, true), factory.createStringLiteral(relation, true)],
-      ];
-    }
-
-    return [
-      'RelationAttribute',
-      [
-        factory.createStringLiteral(uid, true),
-        factory.createStringLiteral(relation, true),
-        factory.createStringLiteral(target, true),
-      ],
-    ];
-  },
-  component({ attribute }) {
-    const target = attribute.component;
-    const params = [factory.createStringLiteral(target, true)];
-
-    if (attribute.repeatable) {
-      params.push(factory.createTrue());
-    }
-
-    return ['ComponentAttribute', params];
-  },
-  dynamiczone({ attribute }) {
-    const componentsParam = factory.createTupleTypeNode(
-      attribute.components.map(component => factory.createStringLiteral(component))
-    );
-
-    return ['DynamicZoneAttribute', [componentsParam]];
-  },
+  return factory.createPropertySignature(
+    undefined,
+    factory.createIdentifier(attributeName),
+    undefined,
+    factory.createIntersectionTypeNode(nodes)
+  );
 };
 
 module.exports = attributeToPropertySignature;

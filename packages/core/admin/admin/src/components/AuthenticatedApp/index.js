@@ -57,9 +57,10 @@ const AuthenticatedApp = () => {
     },
   ]);
 
-  const shouldUpdateStrapi = useMemo(() => checkLatestStrapiVersion(strapiVersion, tag_name), [
-    tag_name,
-  ]);
+  const shouldUpdateStrapi = useMemo(
+    () => checkLatestStrapiVersion(strapiVersion, tag_name),
+    [tag_name]
+  );
 
   useEffect(() => {
     if (userRoles) {
@@ -78,6 +79,17 @@ const AuthenticatedApp = () => {
 
   const shouldShowLoader = isLoading || shouldShowNotDependentQueriesLoader;
 
+  const appInfosValue = useMemo(() => {
+    return {
+      ...appInfos,
+      adminUserId,
+      latestStrapiReleaseTag: tag_name,
+      setUserDisplayName,
+      shouldUpdateStrapi,
+      userDisplayName,
+    };
+  }, [appInfos, tag_name, shouldUpdateStrapi, userDisplayName, adminUserId]);
+
   if (shouldShowLoader) {
     return <LoadingIndicatorPage />;
   }
@@ -88,16 +100,7 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <AppInfosContext.Provider
-      value={{
-        ...appInfos,
-        adminUserId,
-        latestStrapiReleaseTag: tag_name,
-        setUserDisplayName,
-        shouldUpdateStrapi,
-        userDisplayName,
-      }}
-    >
+    <AppInfosContext.Provider value={appInfosValue}>
       <RBACProvider permissions={permissions} refetchPermissions={refetch}>
         <PluginsInitializer />
       </RBACProvider>

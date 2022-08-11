@@ -9,7 +9,7 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
 let rq;
-let data = {
+const data = {
   folders: [],
   files: [],
 };
@@ -48,7 +48,7 @@ describe('Bulk actions for folders & files', () => {
       method: 'POST',
       url: '/upload/actions/bulk-delete',
       body: {
-        folderIds: data.folders.map(f => f.id),
+        folderIds: data.folders.map((f) => f.id),
       },
     });
 
@@ -116,7 +116,7 @@ describe('Bulk actions for folders & files', () => {
         url: '/upload/folders',
       });
 
-      const existingfoldersIds = resFolder.body.data.map(f => f.id);
+      const existingfoldersIds = resFolder.body.data.map((f) => f.id);
       expect(existingfoldersIds).toEqual(expect.not.arrayContaining([folder1a.id, folder1a1.id]));
       expect(existingfoldersIds).toEqual(expect.arrayContaining([folder1.id, folder1b.id]));
 
@@ -128,7 +128,7 @@ describe('Bulk actions for folders & files', () => {
         },
       });
 
-      const existingfilesIds = resFiles.body.results.map(f => f.id);
+      const existingfilesIds = resFiles.body.results.map((f) => f.id);
       expect(existingfilesIds).toEqual(
         expect.not.arrayContaining([file1.id, file1a.id, file1a1.id])
       );
@@ -183,7 +183,7 @@ describe('Bulk actions for folders & files', () => {
         },
       });
 
-      const existingfilesIds = resFiles.body.results.map(f => f.id);
+      const existingfilesIds = resFiles.body.results.map((f) => f.id);
       expect(existingfilesIds).toEqual(expect.not.arrayContaining([file.id]));
     });
 
@@ -217,7 +217,7 @@ describe('Bulk actions for folders & files', () => {
         url: '/upload/folders',
       });
 
-      const existingfoldersIds = resFolder.body.data.map(f => f.id);
+      const existingfoldersIds = resFolder.body.data.map((f) => f.id);
       expect(existingfoldersIds).toEqual(expect.not.arrayContaining([folder.id]));
     });
   });

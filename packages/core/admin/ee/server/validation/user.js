@@ -12,7 +12,7 @@ const ssoUserCreationInputExtension = yup
   })
   .noUnknown();
 
-const validateUserCreationInput = data => {
+const validateUserCreationInput = (data) => {
   let schema = schemas.userCreationSchema;
 
   if (features.isEnabled('sso')) {

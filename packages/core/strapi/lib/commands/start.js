@@ -1,4 +1,5 @@
 'use strict';
+
 const fs = require('fs');
 const tsUtils = require('@strapi/typescript-utils');
 const strapi = require('../index');

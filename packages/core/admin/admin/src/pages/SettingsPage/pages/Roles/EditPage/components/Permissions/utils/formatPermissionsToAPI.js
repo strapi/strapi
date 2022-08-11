@@ -1,7 +1,7 @@
 import formatContentTypesPermissionToAPI from './formatContentTypesPermissionToAPI';
 import formatSettingsPermissionsToAPI from './formatSettingsPermissionsToAPI';
 
-const formatPermissionsToAPI = modifiedData => {
+const formatPermissionsToAPI = (modifiedData) => {
   const pluginsPermissions = formatSettingsPermissionsToAPI(modifiedData.plugins);
   const settingsPermissions = formatSettingsPermissionsToAPI(modifiedData.settings);
   const collectionTypesPermissions = formatContentTypesPermissionToAPI(

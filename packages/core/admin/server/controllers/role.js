@@ -118,7 +118,7 @@ module.exports = {
     let permissionsToAssign;
 
     if ([EDITOR_CODE, AUTHOR_CODE].includes(role.code)) {
-      permissionsToAssign = input.permissions.map(permission => {
+      permissionsToAssign = input.permissions.map((permission) => {
         const action = actionProvider.get(permission.action);
 
         if (action.section !== 'contentTypes') {

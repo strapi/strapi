@@ -1,11 +1,11 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
-import { TrackingContext } from '@strapi/helper-plugin';
+import { TrackingProvider } from '@strapi/helper-plugin';
 import { FromComputerForm } from '../FromComputerForm';
 import en from '../../../../translations/en.json';
 
-jest.mock('../../../../utils/getTrad', () => x => x);
+jest.mock('../../../../utils/getTrad', () => (x) => x);
 
 jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id] || 'App level translation') }),
@@ -14,11 +14,11 @@ jest.mock('react-intl', () => ({
 describe('FromComputerForm', () => {
   it('snapshots the component', async () => {
     const { container } = renderTL(
-      <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+      <TrackingProvider>
         <ThemeProvider theme={lightTheme}>
           <FromComputerForm onClose={jest.fn()} onAddAssets={jest.fn()} />
         </ThemeProvider>
-      </TrackingContext.Provider>
+      </TrackingProvider>
     );
 
     expect(container).toMatchInlineSnapshot(`
@@ -145,7 +145,7 @@ describe('FromComputerForm', () => {
         border: 1px solid #4945ff;
       }
 
-      .c13 .sc-iseIHH {
+      .c13 .sc-ezHhwS {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -215,7 +215,7 @@ describe('FromComputerForm', () => {
         background: #ffffff;
       }
 
-      .c21 .sc-iseIHH {
+      .c21 .sc-ezHhwS {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

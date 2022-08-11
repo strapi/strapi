@@ -18,22 +18,22 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
   const { formatMessage } = useIntl();
   const [dragOver, setDragOver] = useState(false);
 
-  const handleDragEnter = e => {
+  const handleDragEnter = (e) => {
     e.preventDefault();
     setDragOver(true);
   };
 
-  const handleDragLeave = e => {
+  const handleDragLeave = (e) => {
     if (!e.currentTarget.contains(e.relatedTarget)) {
       setDragOver(false);
     }
   };
 
-  const handleDragOver = e => {
+  const handleDragOver = (e) => {
     e.preventDefault();
   };
 
-  const handleDrop = e => {
+  const handleDrop = (e) => {
     e.preventDefault();
 
     if (e?.dataTransfer?.files) {

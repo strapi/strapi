@@ -7,7 +7,7 @@ import en from '../../../translations/en.json';
 
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
-  getTrad: x => x,
+  getTrad: (x) => x,
 }));
 
 jest.mock('react-intl', () => ({
@@ -132,7 +132,7 @@ describe('MediaLibrary / AssetList', () => {
   beforeAll(() => {
     // see https://github.com/testing-library/react-testing-library/issues/470
     Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
-      set: () => {},
+      set() {},
     });
   });
 

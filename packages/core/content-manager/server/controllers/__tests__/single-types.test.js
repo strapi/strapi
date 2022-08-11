@@ -22,7 +22,7 @@ describe('Single Types', () => {
         read: jest.fn(() => false),
         create: jest.fn(() => false),
       },
-      buildReadQuery: jest.fn(query => query),
+      buildReadQuery: jest.fn((query) => query),
     };
 
     global.strapi = {
@@ -97,9 +97,9 @@ describe('Single Types', () => {
         update: jest.fn(() => false),
         create: jest.fn(() => false),
       },
-      sanitizeCreateInput: obj => obj,
-      sanitizeOutput: obj => obj,
-      buildReadQuery: jest.fn(query => query),
+      sanitizeCreateInput: (obj) => obj,
+      sanitizeOutput: (obj) => obj,
+      buildReadQuery: jest.fn((query) => query),
     };
 
     const createFn = jest.fn(() => ({}));
@@ -218,8 +218,8 @@ describe('Single Types', () => {
       cannot: {
         delete: jest.fn(() => false),
       },
-      sanitizeOutput: jest.fn(obj => obj),
-      buildReadQuery: jest.fn(query => query),
+      sanitizeOutput: jest.fn((obj) => obj),
+      buildReadQuery: jest.fn((query) => query),
     };
 
     const deleteFn = jest.fn(() => ({}));
@@ -312,8 +312,8 @@ describe('Single Types', () => {
       cannot: {
         publish: jest.fn(() => false),
       },
-      sanitizeOutput: jest.fn(obj => obj),
-      buildReadQuery: jest.fn(query => query),
+      sanitizeOutput: jest.fn((obj) => obj),
+      buildReadQuery: jest.fn((query) => query),
     };
 
     const publishFn = jest.fn(() => ({}));
@@ -406,8 +406,8 @@ describe('Single Types', () => {
       cannot: {
         unpublish: jest.fn(() => false),
       },
-      sanitizeOutput: jest.fn(obj => obj),
-      buildReadQuery: jest.fn(query => query),
+      sanitizeOutput: jest.fn((obj) => obj),
+      buildReadQuery: jest.fn((query) => query),
     };
 
     const unpublishFn = jest.fn(() => ({}));

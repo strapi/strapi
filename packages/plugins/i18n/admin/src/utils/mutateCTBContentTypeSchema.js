@@ -3,7 +3,7 @@ import LOCALIZED_FIELDS from './localizedFields';
 
 const localizedPath = ['pluginOptions', 'i18n', 'localized'];
 
-const addLocalisationToFields = attributes =>
+const addLocalisationToFields = (attributes) =>
   Object.keys(attributes).reduce((acc, current) => {
     const currentAttribute = attributes[current];
 
@@ -24,7 +24,7 @@ const addLocalisationToFields = attributes =>
     return acc;
   }, {});
 
-const disableAttributesLocalisation = attributes =>
+const disableAttributesLocalisation = (attributes) =>
   Object.keys(attributes).reduce((acc, current) => {
     acc[current] = omit(attributes[current], 'pluginOptions.i18n');
 

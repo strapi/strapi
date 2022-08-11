@@ -3,7 +3,7 @@
 const { capitalize, isArray, getOr, prop } = require('lodash/fp');
 const { getService } = require('../../utils');
 
-const actions = ['create', 'read', 'update', 'delete'].map(uid => ({
+const actions = ['create', 'read', 'update', 'delete'].map((uid) => ({
   section: 'settings',
   category: 'Internationalization',
   subCategory: 'Locales',
@@ -44,7 +44,7 @@ const shouldApplyLocalesPropertyToSubject = ({ property, subject }) => {
   return true;
 };
 
-const addAllLocalesToPermissions = async permissions => {
+const addAllLocalesToPermissions = async (permissions) => {
   const { actionProvider } = strapi.admin.services.permission;
   const { find: findAllLocales } = getService('locales');
 
@@ -52,7 +52,7 @@ const addAllLocalesToPermissions = async permissions => {
   const allLocalesCode = allLocales.map(prop('code'));
 
   return Promise.all(
-    permissions.map(async permission => {
+    permissions.map(async (permission) => {
       const { action, subject } = permission;
 
       const appliesToLocalesProperty = await actionProvider.appliesToProperty(
@@ -116,7 +116,7 @@ const updateActionsProperties = () => {
   actionProvider.hooks.willRegister.register(addLocalesPropertyIfNeeded);
 
   // Handle already registered actions
-  actionProvider.values().forEach(action => addLocalesPropertyIfNeeded({ value: action }));
+  actionProvider.values().forEach((action) => addLocalesPropertyIfNeeded({ value: action }));
 };
 
 module.exports = {

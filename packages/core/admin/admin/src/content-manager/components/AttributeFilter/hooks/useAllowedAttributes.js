@@ -17,7 +17,7 @@ const useAllowedAttributes = (contentType, slug) => {
   const readPermissionForAttr = get(readPermissionsForSlug, ['0', 'properties', 'fields'], []);
   const attributesArray = Object.keys(get(contentType, ['attributes']), {});
   const allowedAttributes = attributesArray
-    .filter(attr => {
+    .filter((attr) => {
       const current = get(contentType, ['attributes', attr], {});
 
       if (!current.type) {

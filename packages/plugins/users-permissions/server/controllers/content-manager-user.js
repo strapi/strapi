@@ -2,12 +2,8 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
-const {
-  ApplicationError,
-  ValidationError,
-  NotFoundError,
-  ForbiddenError,
-} = require('@strapi/utils').errors;
+const { ApplicationError, ValidationError, NotFoundError, ForbiddenError } =
+  require('@strapi/utils').errors;
 const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
@@ -132,17 +128,13 @@ module.exports = {
 
     const { email, username, password } = body;
 
-    let pm;
-    let user;
-
-    const { pm: permissionManager, entity } = await findEntityAndCheckPermissions(
+    const { pm, entity } = await findEntityAndCheckPermissions(
       userAbility,
       ACTIONS.edit,
       userModel,
       id
     );
-    pm = permissionManager;
-    user = entity;
+    const user = entity;
 
     await validateUpdateUserBody(ctx.request.body);
 

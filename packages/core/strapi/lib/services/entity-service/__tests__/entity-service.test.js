@@ -3,7 +3,7 @@
 jest.mock('bcryptjs', () => ({ hashSync: () => 'secret-password' }));
 
 const { EventEmitter } = require('events');
-const createEntityService = require('../');
+const createEntityService = require('..');
 const entityValidator = require('../../entity-validator');
 
 describe('Entity service', () => {
@@ -19,7 +19,7 @@ describe('Entity service', () => {
   describe('Decorator', () => {
     test.each(['create', 'update', 'findMany', 'findOne', 'delete', 'count', 'findPage'])(
       'Can decorate',
-      async method => {
+      async (method) => {
         const instance = createEntityService({
           strapi: {},
           db: {},

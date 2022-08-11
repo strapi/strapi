@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { resetStore, setPermissions } from './actions';
 
 const RBACProvider = ({ children, permissions, refetchPermissions }) => {
-  const { allPermissions } = useSelector(state => state.rbacProvider);
+  const { allPermissions } = useSelector((state) => state.rbacProvider);
 
   const dispatch = useDispatch();
 
