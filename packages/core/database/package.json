@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "date-fns": "2.28.0",
-    "debug": "4.3.1",
+    "debug": "4.3.2",
     "fs-extra": "10.0.0",
     "knex": "1.0.7",
     "lodash": "4.17.21",

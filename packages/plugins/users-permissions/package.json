@@ -32,6 +32,7 @@
     "bcryptjs": "2.4.3",
     "grant-koa": "5.4.8",
     "jsonwebtoken": "^8.1.0",
+    "koa": "^2.13.4",
     "koa2-ratelimit": "^1.1.1",
     "lodash": "4.17.21",
     "purest": "4.0.2",
@@ -41,9 +42,7 @@
     "react-redux": "7.2.8",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "request": "^2.83.0",
-    "url-join": "4.0.1",
-    "koa": "^2.13.4"
+    "url-join": "4.0.1"
   },
   "devDependencies": {
     "@testing-library/dom": "8.17.1",
