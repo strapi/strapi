@@ -161,6 +161,13 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
     data.productsWithCompoAndDP.shift();
   });
 
+  describe('database state', () => {
+    test('components have been removed from the database', async () => {
+      const dbComponents = await strapi.db.query('default.compo').findMany({});
+      expect(dbComponents).toHaveLength(0);
+    });
+  });
+
   describe('validation', () => {
     test('Cannot create product with compo - compo required', async () => {
       const product = {
