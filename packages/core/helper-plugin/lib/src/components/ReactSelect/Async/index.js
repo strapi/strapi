@@ -1,1 +1,3 @@
-export default from './Async';
+import Async from './Async';
+
+export default Async;
