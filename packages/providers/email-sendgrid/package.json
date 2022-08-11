@@ -36,7 +36,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@sendgrid/mail": "7.4.7",
+    "@sendgrid/mail": "7.7.0",
     "@strapi/utils": "4.3.4"
   },
   "engines": {
