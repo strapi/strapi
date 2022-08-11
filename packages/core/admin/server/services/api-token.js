@@ -232,15 +232,25 @@ const update = async (id, attributes) => {
     );
     const actionsToAdd = difference(attributes.permissions, originalToken.permissions);
 
-    await strapi.query('admin::token-permission').delete({
-      where: { action: { $in: actionsToDelete }, token: id },
+    // TODO: make deleteMany work with relations
+    // await strapi
+    //   .query('admin::token-permission')
+    //   .deleteMany({ where: { action: map('action', permissionsToDelete), token: id } });
+    let promises = [];
+    actionsToDelete.forEach(action => {
+      promises.push(
+        strapi.query('admin::token-permission').delete({
+          where: { action, token: id },
+        })
+      );
     });
+    await Promise.all(promises);
 
     // TODO: make createMany work with relations
     // await strapi
     //   .query('admin::token-permission')
     //   .createMany({ data: permissionsToCreate.map(action => ({ action, token: id })) });
-    let promises = [];
+    promises = [];
     actionsToAdd.forEach(action => {
       promises.push(
         strapi.query('admin::token-permission').create({
