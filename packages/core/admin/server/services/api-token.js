@@ -208,8 +208,9 @@ const update = async (id, attributes) => {
     throw new NotFoundError('Token not found');
   }
 
+  // TODO: allow updating only the non-permissions attributes of a custom token
   assertCustomTokenPermissionsValidity({
-    ...originalToken,
+    ...omit(['permissions'], originalToken),
     ...attributes,
     type: attributes.type || originalToken.type,
   });
@@ -222,38 +223,25 @@ const update = async (id, attributes) => {
   });
 
   if (updatedToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
-    const currentPermissions = await strapi.entityService.load(
-      'admin::api-token',
-      updatedToken,
-      'permissions'
-    );
+    const currentPermissionsResult =
+      (await strapi.entityService.load('admin::api-token', updatedToken, 'permissions')) || [];
 
-    const permissionsToDelete = difference(
-      map('action', currentPermissions),
+    const actionsToDelete = difference(
+      map('action', currentPermissionsResult),
       attributes.permissions
     );
-    const permissionsToCreate = difference(attributes.permissions, originalToken.permissions);
+    const actionsToAdd = difference(attributes.permissions, originalToken.permissions);
 
-    // TODO: make deleteMany work with relations
-    // await strapi
-    //   .query('admin::token-permission')
-    //   .deleteMany({ where: { action: map('action', permissionsToDelete), token: id } });
-    let promises = [];
-    permissionsToDelete.forEach(action => {
-      promises.push(
-        strapi.query('admin::token-permission').delete({
-          where: { action, token: id },
-        })
-      );
+    await strapi.query('admin::token-permission').delete({
+      where: { action: { $in: actionsToDelete }, token: id },
     });
-    await Promise.all(promises);
 
     // TODO: make createMany work with relations
     // await strapi
     //   .query('admin::token-permission')
     //   .createMany({ data: permissionsToCreate.map(action => ({ action, token: id })) });
-    promises = [];
-    permissionsToCreate.forEach(action => {
+    let promises = [];
+    actionsToAdd.forEach(action => {
       promises.push(
         strapi.query('admin::token-permission').create({
           data: { action, token: id },
