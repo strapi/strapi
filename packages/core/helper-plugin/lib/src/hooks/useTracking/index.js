@@ -14,17 +14,17 @@ const useTracking = () => {
   trackRef.current = (event, properties) => {
     if (uuid) {
       try {
-        axios.post('http://localhost:4000/track', {
+        axios.post('https://analytics.strapi.io/track', {
           event,
+          adminUserId,
           deviceId,
           properties: {
             ...telemetryProperties,
             ...properties,
             projectType: strapi.projectType,
             environment: appInfo.currentEnvironment,
-            uuid,
+            projectId: uuid,
           },
-          adminUserId,
         });
       } catch (err) {
         // Silent
