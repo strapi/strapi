@@ -363,9 +363,15 @@ describe('API Token', () => {
     const res = await apiTokenService.update(id, updatedAttributes);
 
     expect(deleteFn).toHaveBeenCalledTimes(1);
+    // expect(deleteFn).toHaveBeenCalledWith({
+    //   where: {
+    //     action: { $in: ['admin::subject.oldAction'] },
+    //     token: id,
+    //   },
+    // });
     expect(deleteFn).toHaveBeenCalledWith({
       where: {
-        action: { $in: ['admin::subject.oldAction'] },
+        action: 'admin::subject.oldAction',
         token: id,
       },
     });
