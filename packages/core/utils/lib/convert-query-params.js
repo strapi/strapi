@@ -11,6 +11,30 @@ const contentTypesUtils = require('./content-types');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
+const FILTER_OPERATORS = [
+  '$and',
+  '$or',
+  '$not',
+  '$in',
+  '$notIn',
+  '$eq',
+  '$eqi',
+  '$ne',
+  '$gt',
+  '$gte',
+  '$lt',
+  '$lte',
+  '$null',
+  '$notNull',
+  '$between',
+  '$startsWith',
+  '$endsWith',
+  '$contains',
+  '$notContains',
+  '$containsi',
+  '$notContainsi',
+];
+
 class InvalidOrderError extends Error {
   constructor() {
     super();
@@ -39,23 +63,23 @@ const convertCountQueryParams = countQuery => {
  * Sort query parser
  * @param {string} sortQuery - ex: id:asc,price:desc
  */
-const convertSortQueryParams = sortQuery => {
+const convertSortQueryParams = (sortQuery, schema) => {
   if (typeof sortQuery === 'string') {
-    return sortQuery.split(',').map(value => convertSingleSortQueryParam(value));
+    return sortQuery.split(',').map(value => convertSingleSortQueryParam(value, schema));
   }
 
   if (Array.isArray(sortQuery)) {
-    return sortQuery.flatMap(sortValue => convertSortQueryParams(sortValue));
+    return sortQuery.flatMap(sortValue => convertSortQueryParams(sortValue, schema));
   }
 
   if (_.isPlainObject(sortQuery)) {
-    return convertNestedSortQueryParam(sortQuery);
+    return convertNestedSortQueryParam(sortQuery, schema);
   }
 
   throw new InvalidSortError();
 };
 
-const convertSingleSortQueryParam = sortQuery => {
+const convertSingleSortQueryParam = (sortQuery, schema) => {
   // split field and order param with default order to ascending
   const [field, order = 'asc'] = sortQuery.split(':');
 
@@ -63,14 +87,22 @@ const convertSingleSortQueryParam = sortQuery => {
     throw new Error('Field cannot be empty');
   }
 
+  if (!_.get(schema, `attributes.${field}`)) {
+    return {};
+  }
+
   validateOrder(order);
 
   return _.set({}, field, order);
 };
 
-const convertNestedSortQueryParam = sortQuery => {
+const convertNestedSortQueryParam = (sortQuery, schema) => {
   const transformedSort = {};
   for (const field in sortQuery) {
+    if (!_.get(schema, `attributes.${field}`) && field !== 'id') {
+      continue;
+    }
+
     const order = sortQuery[field];
 
     // this is a deep sort
@@ -227,7 +259,7 @@ const convertNestedPopulate = (subPopulate, schema) => {
   const query = {};
 
   if (sort) {
-    query.orderBy = convertSortQueryParams(sort);
+    query.orderBy = convertSortQueryParams(sort, schema);
   }
 
   if (filters) {
@@ -235,7 +267,7 @@ const convertNestedPopulate = (subPopulate, schema) => {
   }
 
   if (fields) {
-    query.select = convertFieldsQueryParams(fields);
+    query.select = convertFieldsQueryParams(fields, 0, schema);
   }
 
   if (populate) {
@@ -249,19 +281,23 @@ const convertNestedPopulate = (subPopulate, schema) => {
   return query;
 };
 
-const convertFieldsQueryParams = (fields, depth = 0) => {
+const convertFieldsQueryParams = (fields, depth = 0, schema) => {
   if (depth === 0 && fields === '*') {
     return undefined;
   }
 
   if (typeof fields === 'string') {
     const fieldsValues = fields.split(',').map(value => _.trim(value));
-    return _.uniq(['id', ...fieldsValues]);
+    return _.uniq(['id', ...fieldsValues]).filter(
+      field => Object.keys(schema.attributes).includes(field) || field === 'id'
+    );
   }
 
   if (Array.isArray(fields)) {
     // map convert
-    const fieldsValues = fields.flatMap(value => convertFieldsQueryParams(value, depth + 1));
+    const fieldsValues = fields.flatMap(value =>
+      convertFieldsQueryParams(value, depth + 1, schema)
+    );
     return _.uniq(['id', ...fieldsValues]);
   }
 
@@ -336,12 +372,14 @@ const convertAndSanitizeFilters = (filters, schema) => {
     }
 
     // Handle operators
-    else {
+    else if (FILTER_OPERATORS.includes(key)) {
       if (['$null', '$notNull'].includes(key)) {
         filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
       } else if (isObject(value)) {
         filters[key] = convertAndSanitizeFilters(value, schema);
       }
+    } else {
+      removeOperator(key);
     }
 
     // Remove empty objects & arrays

@@ -28,7 +28,7 @@ const transformParamsToQuery = (uid, params) => {
   }
 
   if (!isNil(sort)) {
-    query.orderBy = convertSortQueryParams(sort);
+    query.orderBy = convertSortQueryParams(sort, schema);
   }
 
   if (!isNil(filters)) {
@@ -36,7 +36,7 @@ const transformParamsToQuery = (uid, params) => {
   }
 
   if (!isNil(fields)) {
-    query.select = convertFieldsQueryParams(fields);
+    query.select = convertFieldsQueryParams(fields, 0, schema);
   }
 
   if (!isNil(populate)) {
