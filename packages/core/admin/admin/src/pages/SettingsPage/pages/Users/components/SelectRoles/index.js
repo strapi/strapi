@@ -60,7 +60,7 @@ const SelectRoles = ({ disabled, error, onChange, value }) => {
       hint={hint}
       label={label}
       name="roles"
-      onChange={v => {
+      onChange={(v) => {
         onChange({ target: { name: 'roles', value: v } });
       }}
       placeholder={placeholder}
@@ -70,7 +70,7 @@ const SelectRoles = ({ disabled, error, onChange, value }) => {
       withTags
       required
     >
-      {(data || []).map(role => {
+      {(data || []).map((role) => {
         return (
           <Option key={role.id} value={role.id}>
             {formatMessage({

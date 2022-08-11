@@ -41,7 +41,7 @@ const EditPage = () => {
     onSubmitSucceeded,
   } = useFetchRole(id);
 
-  const handleEditRoleSubmit = async data => {
+  const handleEditRoleSubmit = async (data) => {
     try {
       lockApp();
       setIsSubmiting(true);
@@ -106,68 +106,66 @@ const EditPage = () => {
       >
         {({ handleSubmit, values, errors, handleChange, handleBlur }) => (
           <form onSubmit={handleSubmit}>
-            <>
-              <HeaderLayout
-                primaryAction={
-                  <Stack horizontal spacing={2}>
-                    <Button
-                      disabled={role.code === 'strapi-super-admin'}
-                      onClick={handleSubmit}
-                      loading={isSubmitting}
-                      size="L"
-                    >
-                      {formatMessage({
-                        id: 'global.save',
-                        defaultMessage: 'Save',
-                      })}
-                    </Button>
-                  </Stack>
-                }
-                title={formatMessage({
-                  id: 'Settings.roles.edit.title',
-                  defaultMessage: 'Edit a role',
-                })}
-                subtitle={formatMessage({
-                  id: 'Settings.roles.create.description',
-                  defaultMessage: 'Define the rights given to the role',
-                })}
-                navigationAction={
-                  <Link startIcon={<ArrowLeft />} to="/settings/roles">
+            <HeaderLayout
+              primaryAction={
+                <Stack horizontal spacing={2}>
+                  <Button
+                    disabled={role.code === 'strapi-super-admin'}
+                    onClick={handleSubmit}
+                    loading={isSubmitting}
+                    size="L"
+                  >
                     {formatMessage({
-                      id: 'global.back',
-                      defaultMessage: 'Back',
+                      id: 'global.save',
+                      defaultMessage: 'Save',
                     })}
-                  </Link>
-                }
-              />
-              <ContentLayout>
-                <Stack spacing={6}>
-                  <RoleForm
-                    isLoading={isRoleLoading}
-                    disabled={isFormDisabled}
-                    errors={errors}
-                    values={values}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    role={role}
-                  />
-                  {!isLayoutLoading && !isRoleLoading ? (
-                    <Box shadow="filterShadow" hasRadius>
-                      <Permissions
-                        isFormDisabled={isFormDisabled}
-                        permissions={rolePermissions}
-                        ref={permissionsRef}
-                        layout={permissionsLayout}
-                      />
-                    </Box>
-                  ) : (
-                    <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                      <LoadingIndicatorPage />
-                    </Box>
-                  )}
+                  </Button>
                 </Stack>
-              </ContentLayout>
-            </>
+              }
+              title={formatMessage({
+                id: 'Settings.roles.edit.title',
+                defaultMessage: 'Edit a role',
+              })}
+              subtitle={formatMessage({
+                id: 'Settings.roles.create.description',
+                defaultMessage: 'Define the rights given to the role',
+              })}
+              navigationAction={
+                <Link startIcon={<ArrowLeft />} to="/settings/roles">
+                  {formatMessage({
+                    id: 'global.back',
+                    defaultMessage: 'Back',
+                  })}
+                </Link>
+              }
+            />
+            <ContentLayout>
+              <Stack spacing={6}>
+                <RoleForm
+                  isLoading={isRoleLoading}
+                  disabled={isFormDisabled}
+                  errors={errors}
+                  values={values}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  role={role}
+                />
+                {!isLayoutLoading && !isRoleLoading ? (
+                  <Box shadow="filterShadow" hasRadius>
+                    <Permissions
+                      isFormDisabled={isFormDisabled}
+                      permissions={rolePermissions}
+                      ref={permissionsRef}
+                      layout={permissionsLayout}
+                    />
+                  </Box>
+                ) : (
+                  <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+                    <LoadingIndicatorPage />
+                  </Box>
+                )}
+              </Stack>
+            </ContentLayout>
           </form>
         )}
       </Formik>

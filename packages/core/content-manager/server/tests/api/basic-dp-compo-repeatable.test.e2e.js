@@ -9,7 +9,7 @@ const { createAuthRequest } = require('../../../../../../test/helpers/request');
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let data = {
+const data = {
   productsWithCompoAndDP: [],
 };
 
@@ -53,10 +53,7 @@ const productWithCompoAndDP = {
 
 describe('CM API - Basic + compo + draftAndPublish', () => {
   beforeAll(async () => {
-    await builder
-      .addComponent(compo)
-      .addContentType(productWithCompoAndDP)
-      .build();
+    await builder.addComponent(compo).addContentType(productWithCompoAndDP).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -80,8 +77,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'POST',
-      url:
-        '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
+      url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
       body: product,
     });
 
@@ -148,8 +144,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url:
-          '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
+        url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
         body: product,
       });
 
@@ -171,8 +166,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url:
-          '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
+        url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
         body: product,
       });
 
@@ -194,8 +188,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url:
-          '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
+        url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
         body: product,
       });
 
@@ -231,8 +224,7 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url:
-          '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
+        url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
         body: product,
       });
 

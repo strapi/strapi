@@ -17,7 +17,7 @@ const initialState = {
 
 const reducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
     const layoutPathRelations = ['modifiedData', 'layouts', 'editRelations'];
 

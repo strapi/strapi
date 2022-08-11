@@ -17,7 +17,7 @@ module.exports = async ({ strapi }) => {
   }
 };
 
-const createProvider = config => {
+const createProvider = (config) => {
   const { providerOptions, actionOptions = {} } = config;
 
   const providerName = _.toLower(config.provider);
@@ -61,7 +61,7 @@ const createProvider = config => {
   }
 
   const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {
-    return async function(file, options = actionOptions[methodName]) {
+    return async function (file, options = actionOptions[methodName]) {
       return providerInstance[methodName](file, options);
     };
   });

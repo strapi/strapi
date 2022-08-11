@@ -39,25 +39,25 @@ const prompts = [
     type: 'input',
     name: 'htmlTag',
     message: 'Which HTML tag should be used as a base?',
-    when: answers => answers.styled,
-    validate: htmlTag => (!htmlTag ? 'The HTML tag cannot be empty.' : true),
+    when: (answers) => answers.styled,
+    validate: (htmlTag) => (!htmlTag ? 'The HTML tag cannot be empty.' : true),
     filter: lowerCase,
   },
   {
     type: 'confirm',
     name: 'useI18n',
     message: 'Will it use i18n?',
-    when: answers => !answers.styled,
+    when: (answers) => !answers.styled,
   },
   {
     type: 'confirm',
     name: 'useRedux',
     message: 'Will it use Redux?',
-    when: answers => !answers.styled,
+    when: (answers) => !answers.styled,
   },
 ];
 
-const actions = answers => {
+const actions = (answers) => {
   const { useRedux } = answers;
   const [pluginFolder, plugin] = answers.plugin.split('/');
   answers.plugin = plugin;

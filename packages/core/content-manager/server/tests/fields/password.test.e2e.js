@@ -61,7 +61,7 @@ describe('Test type password', () => {
 
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body.results)).toBe(true);
-    res.body.results.forEach(element => {
+    res.body.results.forEach((element) => {
       expect(element.field).toBeUndefined();
     });
   });

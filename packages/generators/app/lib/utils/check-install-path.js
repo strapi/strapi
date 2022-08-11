@@ -8,7 +8,7 @@ const stopProcess = require('./stop-process');
  * Checks if the an empty directory exists at rootPath
  * @param {string} rootPath
  */
-module.exports = async rootPath => {
+module.exports = async (rootPath) => {
   if (await fse.pathExists(rootPath)) {
     const stat = await fse.stat(rootPath);
 

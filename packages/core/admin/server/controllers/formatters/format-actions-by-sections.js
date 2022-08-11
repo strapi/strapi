@@ -5,7 +5,7 @@
  * @param {Array<Action>} actions - array of actions
  * @returns {Object} "{ contentTypes, plugins, settings }"
  */
-const formatActionsBySections = actions =>
+const formatActionsBySections = (actions) =>
   actions.reduce((result, p) => {
     const checkboxItem = {
       displayName: p.displayName,
@@ -13,18 +13,21 @@ const formatActionsBySections = actions =>
     };
 
     switch (p.section) {
-      case 'contentTypes':
+      case 'contentTypes': {
         checkboxItem.subjects = p.subjects;
         break;
-      case 'plugins':
+      }
+      case 'plugins': {
         checkboxItem.subCategory = p.subCategory;
         checkboxItem.plugin = `plugin::${p.pluginName}`;
         break;
-      case 'settings':
+      }
+      case 'settings': {
         checkboxItem.category = p.category;
         checkboxItem.subCategory = p.subCategory;
         break;
-      case 'default':
+      }
+      default:
         throw new Error(`Unknown section ${p.section}`);
     }
 

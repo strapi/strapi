@@ -9,7 +9,7 @@ const { createAuthRequest } = require('../../../../../../test/helpers/request');
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let data = {
+const data = {
   products: [],
 };
 
@@ -91,7 +91,7 @@ describe('CM API - Basic', () => {
         }),
       ])
     );
-    res.body.results.forEach(p => expect(p.publishedAt).toBeUndefined());
+    res.body.results.forEach((p) => expect(p.publishedAt).toBeUndefined());
   });
 
   test('Update product', async () => {

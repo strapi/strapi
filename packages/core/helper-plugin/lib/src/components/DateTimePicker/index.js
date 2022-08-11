@@ -50,7 +50,7 @@ const DateTimePicker = ({
       : null
   );
 
-  const handleDateChange = e => {
+  const handleDateChange = (e) => {
     setDateValue(e);
 
     if (timeValue) {
@@ -71,7 +71,7 @@ const DateTimePicker = ({
     }
   };
 
-  const handleTimeChange = e => {
+  const handleTimeChange = (e) => {
     setTimeValue(e);
 
     const dateToSet = new Date(dateValue);
@@ -148,7 +148,7 @@ const DateTimePicker = ({
             ariaLabel={label || ariaLabel}
             error={error}
             selectedDate={dateValue}
-            selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
+            selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
             onChange={handleDateChange}
             size={size}
             onClear={onClear && handleDateClear}

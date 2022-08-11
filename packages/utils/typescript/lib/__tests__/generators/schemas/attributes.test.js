@@ -23,11 +23,11 @@ describe('Attributes', () => {
     const schema = { uid: 'api::foo.foo' };
     const attributeName = 'foo';
 
-    const toPropertySignature = attribute => {
+    const toPropertySignature = (attribute) => {
       return attributeToPropertySignature(schema, attributeName, attribute);
     };
 
-    const defaultAssertion = node => {
+    const defaultAssertion = (node) => {
       expect(node.kind).toBe(ts.SyntaxKind.PropertySignature);
       expect(node.name.escapedText).toBe(attributeName);
       expect(node.type.kind).toBe(ts.SyntaxKind.IntersectionType);

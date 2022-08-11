@@ -71,7 +71,7 @@ describe('Upload', () => {
           total: expect.any(Number),
         },
       });
-      res.body.results.forEach(file => expect(file.folder).toBeDefined());
+      res.body.results.forEach((file) => expect(file.folder).toBeDefined());
     });
   });
 });

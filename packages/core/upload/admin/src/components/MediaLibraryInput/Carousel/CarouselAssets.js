@@ -59,9 +59,7 @@ export const CarouselAssets = ({
               onAddAsset={disabled ? undefined : onAddAsset}
               onEditAsset={onEditAsset ? () => setIsEditingAsset(true) : undefined}
             />
-          ) : (
-            undefined
-          )
+          ) : undefined
         }
       >
         {assets.length === 0 ? (
@@ -93,7 +91,7 @@ export const CarouselAssets = ({
 
       {isEditingAsset && (
         <EditAssetDialog
-          onClose={editedAsset => {
+          onClose={(editedAsset) => {
             setIsEditingAsset(false);
 
             // The asset has been deleted

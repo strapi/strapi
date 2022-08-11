@@ -4,7 +4,7 @@ import { get, isEmpty } from 'lodash';
 /* eslint-disable no-unused-vars */
 
 const createAttributesLayout = (currentLayout, attributes) => {
-  const getType = name => get(attributes, [name, 'type'], '');
+  const getType = (name) => get(attributes, [name, 'type'], '');
   let currentRowIndex = 0;
   const newLayout = [];
 
@@ -29,7 +29,7 @@ const createAttributesLayout = (currentLayout, attributes) => {
     }
   }
 
-  return newLayout.filter(arr => arr.length > 0);
+  return newLayout.filter((arr) => arr.length > 0);
 };
 
 export default createAttributesLayout;

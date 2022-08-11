@@ -25,7 +25,7 @@ const Svg = styled.svg`
   }
 `;
 
-const Curve = props => (
+const Curve = (props) => (
   <StyledBox>
     <Svg
       width="20"

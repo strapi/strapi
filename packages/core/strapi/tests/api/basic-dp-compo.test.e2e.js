@@ -7,7 +7,7 @@ const { createContentAPIRequest } = require('../../../../../test/helpers/request
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let data = {
+const data = {
   productsWithCompoAndDP: [],
 };
 
@@ -50,10 +50,7 @@ const productWithCompoAndDP = {
 
 describe('Core API - Basic + compo + draftAndPublish', () => {
   beforeAll(async () => {
-    await builder
-      .addComponent(compo)
-      .addContentType(productWithCompoAndDP)
-      .build();
+    await builder.addComponent(compo).addContentType(productWithCompoAndDP).build();
 
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
@@ -109,7 +106,7 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
 
     expect(body.data).toHaveLength(1);
     expect(body.data[0]).toMatchObject(data.productsWithCompoAndDP[0]);
-    body.data.forEach(p => {
+    body.data.forEach((p) => {
       expect(p.attributes.publishedAt).toBeISODate();
     });
   });

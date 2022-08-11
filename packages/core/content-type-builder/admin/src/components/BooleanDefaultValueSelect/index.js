@@ -18,7 +18,7 @@ const BooleanDefaultValueSelect = ({ intlLabel, name, options, onChange, value }
       )
     : name;
 
-  const handleChange = value => {
+  const handleChange = (value) => {
     let nextValue = '';
 
     if (value === 'true') {

@@ -7,7 +7,7 @@ const { createContentAPIRequest } = require('../../../../../test/helpers/request
 let builder;
 let strapi;
 let rq;
-let data = {
+const data = {
   productsWithCompo: [],
 };
 
@@ -70,7 +70,7 @@ describe('Lifecycle - beforeDelete', () => {
     expect.assertions(4);
 
     let entity;
-    const beforeDelete = jest.fn(async ctx => {
+    const beforeDelete = jest.fn(async (ctx) => {
       entity = await strapi.db.query('api::product-with-compo.product-with-compo').findOne({
         ...ctx.params,
         populate: {

@@ -124,9 +124,7 @@ export const UploadingAssetCard = ({
                 }
           )}
         </Typography>
-      ) : (
-        undefined
-      )}
+      ) : undefined}
     </Stack>
   );
 };
