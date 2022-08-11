@@ -124,7 +124,7 @@
     "redux-saga": "^0.16.0",
     "reselect": "^4.0.0",
     "rimraf": "3.0.2",
-    "sanitize-html": "2.7.0",
+    "sanitize-html": "2.7.1",
     "semver": "7.3.7",
     "sift": "13.5.4",
     "style-loader": "3.3.1",
