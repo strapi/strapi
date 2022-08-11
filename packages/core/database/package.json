@@ -31,7 +31,7 @@
     "test:unit": "jest --verbose"
   },
   "dependencies": {
-    "date-fns": "2.28.0",
+    "date-fns": "2.29.1",
     "debug": "4.3.1",
     "fs-extra": "10.0.0",
     "knex": "1.0.7",

@@ -28,7 +28,7 @@
     "@strapi/utils": "4.3.4",
     "byte-size": "7.0.1",
     "cropperjs": "1.5.12",
-    "date-fns": "2.28.0",
+    "date-fns": "2.29.1",
     "fs-extra": "10.0.0",
     "immer": "9.0.15",
     "koa-range": "0.3.0",
