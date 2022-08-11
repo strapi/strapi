@@ -365,13 +365,7 @@ describe('API Token', () => {
     expect(deleteFn).toHaveBeenCalledTimes(1);
     expect(deleteFn).toHaveBeenCalledWith({
       where: {
-        action: 'admin::subject.oldAction',
-        token: id,
-      },
-    });
-    expect(deleteFn).not.toHaveBeenCalledWith({
-      where: {
-        action: 'admin::subject.keepAction',
+        action: { $in: ['admin::subject.oldAction'] },
         token: id,
       },
     });
