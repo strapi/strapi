@@ -76,7 +76,7 @@ describe('Provider Login', () => {
   });
 
   describe('Get the provider list', () => {
-    test.each(Object.keys(requests))('It should be available for everyone (%s)', async type => {
+    test.each(Object.keys(requests))('It should be available for everyone (%s)', async (type) => {
       const rq = requests[type];
       const res = await rq.get('/admin/providers');
 

@@ -12,7 +12,7 @@ const createCoreController = (uid, cfg = {}) => {
       contentType: strapi.contentType(uid),
     });
 
-    let userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
+    const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
 
     for (const methodName of Object.keys(baseController)) {
       if (userCtrl[methodName] === undefined) {
@@ -31,7 +31,7 @@ const createCoreService = (uid, cfg = {}) => {
       contentType: strapi.contentType(uid),
     });
 
-    let userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
+    const userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg;
 
     for (const methodName of Object.keys(baseService)) {
       if (userService[methodName] === undefined) {
@@ -58,15 +58,15 @@ const createCoreRouter = (uid, cfg = {}) => {
 
         const defaultRoutes = createRoutes({ contentType });
 
-        Object.keys(defaultRoutes).forEach(routeName => {
+        Object.keys(defaultRoutes).forEach((routeName) => {
           const defaultRoute = defaultRoutes[routeName];
 
           Object.assign(defaultRoute.config, config[routeName] || {});
         });
 
         const selectedRoutes = pipe(
-          routes => (except ? omit(except, routes) : routes),
-          routes => (only ? pick(only, routes) : routes)
+          (routes) => (except ? omit(except, routes) : routes),
+          (routes) => (only ? pick(only, routes) : routes)
         )(defaultRoutes);
 
         routes = Object.values(selectedRoutes);

@@ -1,7 +1,7 @@
 function getOpenValues(options, defaultValue = {}) {
   let values = [];
   const { value } = defaultValue;
-  const option = options.find(option => option.value === value);
+  const option = options.find((option) => option.value === value);
 
   if (!option) {
     return values;

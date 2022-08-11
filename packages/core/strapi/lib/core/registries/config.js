@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 module.exports = (initialConfig = {}) => {
-  const _config = Object.assign({}, initialConfig); // not deep clone because it would break some config
+  const _config = { ...initialConfig }; // not deep clone because it would break some config
 
   return {
     ..._config, // TODO: to remove

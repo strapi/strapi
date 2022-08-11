@@ -33,10 +33,7 @@ module.exports = ({ nexus, strapi }) => {
       koaContext.params = { id: args.id };
       koaContext.request.body = toPlainObject(args.data);
 
-      await strapi
-        .plugin('users-permissions')
-        .controller('user')
-        .update(koaContext);
+      await strapi.plugin('users-permissions').controller('user').update(koaContext);
 
       checkBadRequest(koaContext.body);
 

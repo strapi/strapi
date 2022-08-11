@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import FilterTag from './FilterTag';
 
 const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }) => {
-  const handleClick = filter => {
-    const nextFilters = appliedFilters.filter(prevFilter => {
+  const handleClick = (filter) => {
+    const nextFilters = appliedFilters.filter((prevFilter) => {
       const name = Object.keys(filter)[0];
       const filterType = Object.keys(filter[name])[0];
       const value = filter[name][filterType];

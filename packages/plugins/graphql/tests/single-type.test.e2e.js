@@ -23,7 +23,7 @@ const homePageModel = {
   },
 };
 
-const updateContent = data => {
+const updateContent = (data) => {
   return graphqlQuery({
     query: /* GraphQL */ `
       mutation updateHomePage($data: HomePageInput!) {
@@ -45,7 +45,7 @@ describe('Single type Graphql support', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    graphqlQuery = body => {
+    graphqlQuery = (body) => {
       return rq({
         url: '/graphql',
         method: 'POST',

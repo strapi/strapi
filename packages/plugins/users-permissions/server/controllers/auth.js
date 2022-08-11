@@ -259,10 +259,7 @@ module.exports = {
     await getService('user').edit(user.id, { resetPasswordToken });
 
     // Send an email to the user.
-    await strapi
-      .plugin('email')
-      .service('email')
-      .send(emailToSend);
+    await strapi.plugin('email').service('email').send(emailToSend);
 
     ctx.send({ ok: true });
   },
@@ -326,7 +323,7 @@ module.exports = {
       }
     }
 
-    let newUser = {
+    const newUser = {
       ...params,
       role: role.id,
       email: email.toLowerCase(),

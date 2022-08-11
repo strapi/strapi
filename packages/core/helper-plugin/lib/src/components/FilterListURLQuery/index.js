@@ -12,8 +12,8 @@ import AttributeTag from './AttributeTag';
 const FilterListURLQuery = ({ filtersSchema }) => {
   const [{ query }, setQuery] = useQueryParams();
 
-  const handleClick = filter => {
-    const nextFilters = query.filters.$and.filter(prevFilter => {
+  const handleClick = (filter) => {
+    const nextFilters = query.filters.$and.filter((prevFilter) => {
       const name = Object.keys(filter)[0];
       const filterType = Object.keys(filter[name])[0];
       const value = filter[name][filterType];

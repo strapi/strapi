@@ -3,14 +3,14 @@ import { componentField, componentForm } from '../component';
 
 const form = {
   advanced: {
-    default: () => {
+    default() {
       return {
         sections: componentForm.advanced('componentToCreate.'),
       };
     },
   },
   base: {
-    createComponent: () => {
+    createComponent() {
       return {
         sections: [
           { sectionTitle: null, items: [componentField] },
@@ -18,7 +18,7 @@ const form = {
         ],
       };
     },
-    default: () => {
+    default() {
       return {
         sections: [
           { sectionTitle: null, items: [componentField] },

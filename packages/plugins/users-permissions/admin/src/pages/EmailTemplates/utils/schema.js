@@ -9,10 +9,7 @@ const schema = yup.object().shape({
         .object()
         .shape({
           name: yup.string().required(translatedErrors.required),
-          email: yup
-            .string()
-            .email(translatedErrors.email)
-            .required(translatedErrors.required),
+          email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
         })
         .required(),
       response_email: yup.string().email(translatedErrors.email),

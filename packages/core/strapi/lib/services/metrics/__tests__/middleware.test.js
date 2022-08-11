@@ -21,7 +21,7 @@ describe('Metrics middleware', () => {
     expect(sendEvent).not.toHaveBeenCalled();
   });
 
-  test.each(['OPTIONS', 'HEAD'])('Ignores %s method', async method => {
+  test.each(['OPTIONS', 'HEAD'])('Ignores %s method', async (method) => {
     const sendEvent = jest.fn();
 
     const middleware = createMiddleware({ sendEvent });

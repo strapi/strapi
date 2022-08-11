@@ -9,10 +9,10 @@ const _ = require('lodash/fp');
 const hasInversedBy = _.has('inversedBy');
 const hasMappedBy = _.has('mappedBy');
 
-const isOneToAny = attribute => ['oneToOne', 'oneToMany'].includes(attribute.relation);
-const isBidirectional = attribute => hasInversedBy(attribute) || hasMappedBy(attribute);
-const isOwner = attribute => !isBidirectional(attribute) || hasInversedBy(attribute);
-const shouldUseJoinTable = attribute => attribute.useJoinTable !== false;
+const isOneToAny = (attribute) => ['oneToOne', 'oneToMany'].includes(attribute.relation);
+const isBidirectional = (attribute) => hasInversedBy(attribute) || hasMappedBy(attribute);
+const isOwner = (attribute) => !isBidirectional(attribute) || hasInversedBy(attribute);
+const shouldUseJoinTable = (attribute) => attribute.useJoinTable !== false;
 
 /**
  * Creates a oneToOne relation metadata
@@ -75,12 +75,8 @@ const createOneToMany = (attributeName, attribute, meta, metadata) => {
       attributeName,
       meta,
     });
-  } else {
-    if (isOwner(attribute)) {
-      throw new Error(
-        'one side of a oneToMany cannot be the owner side in a bidirectional relation'
-      );
-    }
+  } else if (isOwner(attribute)) {
+    throw new Error('one side of a oneToMany cannot be the owner side in a bidirectional relation');
   }
 };
 
@@ -169,7 +165,7 @@ const createManyToMany = (attributeName, attribute, meta, metadata) => {
  * @param {ModelMetadata} meta
  * @param {Metadata} metadata
  */
-const createMorphToOne = (attributeName, attribute /*meta, metadata*/) => {
+const createMorphToOne = (attributeName, attribute /* meta, metadata */) => {
   const idColumnName = 'target_id';
   const typeColumnName = 'target_type';
 
@@ -341,9 +337,10 @@ const createRelation = (attributeName, attribute, meta, metadata) => {
       return createMorphOne(attributeName, attribute, meta, metadata);
     case 'morphMany':
       return createMorphMany(attributeName, attribute, meta, metadata);
+    default: {
+      throw new Error(`Unknown relation ${attribute.relation}`);
+    }
   }
-
-  throw new Error(`Unknown relation ${attribute.relation}`);
 };
 
 /**
@@ -354,7 +351,7 @@ const createRelation = (attributeName, attribute, meta, metadata) => {
  * @param {string} param.attributeName name of the associated attribute
  * @param {Object} param.meta model metadata
  */
-const createJoinColum = (metadata, { attribute, attributeName /*meta */ }) => {
+const createJoinColum = (metadata, { attribute, attributeName /* meta */ }) => {
   const targetMeta = metadata.get(attribute.target);
 
   const joinColumnName = _.snakeCase(`${attributeName}_id`);
@@ -395,7 +392,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
 
   const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_links`);
 
-  let joinColumnName = _.snakeCase(`${meta.singularName}_id`);
+  const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
   let inverseJoinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
 
   // if relation is slef referencing

@@ -39,7 +39,7 @@ const exists = async (whereParams = {}) => {
  *
  * @returns {string}
  */
-const hash = accessKey => {
+const hash = (accessKey) => {
   return crypto
     .createHmac('sha512', strapi.config.get('admin.apiToken.salt'))
     .update(accessKey)
@@ -54,7 +54,7 @@ const hash = accessKey => {
  *
  * @returns {Promise<ApiToken>}
  */
-const create = async attributes => {
+const create = async (attributes) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
   const apiToken = await strapi.query('admin::api-token').create({
@@ -106,7 +106,7 @@ const list = async () => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const revoke = async id => {
+const revoke = async (id) => {
   return strapi.query('admin::api-token').delete({ select: SELECT_FIELDS, where: { id } });
 };
 
@@ -115,7 +115,7 @@ const revoke = async id => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const getById = async id => {
+const getById = async (id) => {
   return getBy({ id });
 };
 
@@ -124,7 +124,7 @@ const getById = async id => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const getByName = async name => {
+const getByName = async (name) => {
   return getBy({ name });
 };
 

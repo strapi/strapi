@@ -19,7 +19,7 @@ describe('Sanitize visitors util', () => {
     test('keeps creator relations with populateCreatorFields true', async () => {
       const remove = jest.fn();
       const set = jest.fn();
-      const promises = creatorKeys.map(async key => {
+      const promises = creatorKeys.map(async (key) => {
         await rrrFunction(
           {
             data,
@@ -39,7 +39,7 @@ describe('Sanitize visitors util', () => {
     test('removes creator relations with populateCreatorFields false', async () => {
       const remove = jest.fn();
       const set = jest.fn();
-      const promises = creatorKeys.map(async key => {
+      const promises = creatorKeys.map(async (key) => {
         await rrrFunction(
           {
             data,
@@ -53,7 +53,7 @@ describe('Sanitize visitors util', () => {
       await Promise.all(promises);
 
       expect(remove).toHaveBeenCalledTimes(creatorKeys.length);
-      creatorKeys.forEach(key => expect(remove).toHaveBeenCalledWith(key));
+      creatorKeys.forEach((key) => expect(remove).toHaveBeenCalledWith(key));
       expect(set).toBeCalledTimes(0);
     });
   });

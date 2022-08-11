@@ -26,7 +26,7 @@ const crudInitialState = {
 };
 
 const crudReducer = (state = crudInitialState, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case GET_DATA: {
         draftState.isLoading = true;

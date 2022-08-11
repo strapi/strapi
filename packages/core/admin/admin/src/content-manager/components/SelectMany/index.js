@@ -46,7 +46,7 @@ function SelectMany({
         id={name}
         filterOption={(candidate, input) => {
           if (!isEmpty(value)) {
-            const isSelected = value.findIndex(item => item.id === candidate.value.id) !== -1;
+            const isSelected = value.findIndex((item) => item.id === candidate.value.id) !== -1;
 
             if (isSelected) {
               return false;

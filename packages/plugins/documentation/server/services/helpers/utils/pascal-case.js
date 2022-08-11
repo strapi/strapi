@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const pascalCase = string => {
+const pascalCase = (string) => {
   return _.upperFirst(_.camelCase(string));
 };
 

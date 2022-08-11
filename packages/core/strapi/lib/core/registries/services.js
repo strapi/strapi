@@ -8,7 +8,7 @@ const { addNamespace, hasNamespace } = require('../utils');
  * @typedef {import('./services').ServiceFactory} ServiceFactory
  */
 
-const servicesRegistry = strapi => {
+const servicesRegistry = (strapi) => {
   const services = {};
   const instantiatedServices = {};
 

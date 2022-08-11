@@ -4,7 +4,7 @@ const { setPathIdAndPath } = require('../folder');
 
 const folderUID = '1';
 const rootPathRegex = /^\/[0-9]*$/i;
-const folderPathRegex = new RegExp('^/' + folderUID + '/[0-9]*$', 'i');
+const folderPathRegex = new RegExp(`^/${folderUID}/[0-9]*$`, 'i');
 
 describe('folder', () => {
   describe('setPathIdAndPath', () => {

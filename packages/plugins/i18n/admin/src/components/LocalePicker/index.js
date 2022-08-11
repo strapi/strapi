@@ -33,7 +33,7 @@ const LocalePicker = () => {
     return null;
   }
 
-  const displayedLocales = locales.filter(locale => {
+  const displayedLocales = locales.filter((locale) => {
     const canCreate = createPermissions.find(({ properties }) => {
       return get(properties, 'locales', []).includes(locale.code);
     });
@@ -44,7 +44,7 @@ const LocalePicker = () => {
     return canCreate || canRead;
   });
 
-  const handleClick = code => {
+  const handleClick = (code) => {
     if (code === selected) {
       return;
     }
@@ -66,7 +66,7 @@ const LocalePicker = () => {
       value={selected}
       onChange={handleClick}
     >
-      {displayedLocales.map(locale => (
+      {displayedLocales.map((locale) => (
         <Option key={locale.id} id={`menu-item${locale.name || locale.code}`} value={locale.code}>
           {locale.name}
         </Option>

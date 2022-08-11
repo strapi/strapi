@@ -20,7 +20,7 @@ const promptQuestions = [
  * @param {string} cmdOptions.email - user's email
  * @param {string} cmdOptions.password - user's new password
  */
-module.exports = async function(cmdOptions = {}) {
+module.exports = async function (cmdOptions = {}) {
   const { email, password } = cmdOptions;
 
   if (_.isEmpty(email) && _.isEmpty(password) && process.stdin.isTTY) {

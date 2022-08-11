@@ -47,15 +47,8 @@ export const PreviewBox = ({
   const [thumbnailUrl, setThumbnailUrl] = useState(createAssetUrl(asset, true));
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const {
-    crop,
-    produceFile,
-    stopCropping,
-    isCropping,
-    isCropperReady,
-    width,
-    height,
-  } = useCropImg();
+  const { crop, produceFile, stopCropping, isCropping, isCropperReady, width, height } =
+    useCropImg();
   const { editAsset, error, isLoading, progress, cancel } = useEditAsset();
 
   const {

@@ -26,7 +26,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderCompo = props => {
+const renderCompo = (props) => {
   const target = document.createElement('div');
   document.body.appendChild(target);
 

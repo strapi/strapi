@@ -1,6 +1,6 @@
 'use strict';
 
-const strapi = require('../');
+const strapi = require('..');
 const { buildAdmin } = require('./builders');
 
 /**

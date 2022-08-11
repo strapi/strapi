@@ -3,7 +3,7 @@ const translations = require('../en.json');
 describe('translations', () => {
   describe('plural syntax', () => {
     it('should avoid .plural/.singular syntax', () => {
-      Object.keys(translations).forEach(translationKey => {
+      Object.keys(translations).forEach((translationKey) => {
         const keyParts = translationKey.split('.');
         const lastKeyPart = keyParts.pop();
 

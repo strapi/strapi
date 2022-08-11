@@ -1,9 +1,9 @@
 const to = (promise, errorExt) => {
   return promise
-    .then(function(data) {
+    .then(function (data) {
       return [null, data];
     })
-    .catch(function(err) {
+    .catch(function (err) {
       if (errorExt) {
         Object.assign(err, errorExt);
       }

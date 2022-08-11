@@ -7,7 +7,7 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import UseCasePage from '../index';
 
 jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale: () => {},
+  changeLocale() {},
   localeNames: ['en'],
   messages: ['test'],
 }));
