@@ -161,7 +161,7 @@ describe('UploadAssetDialog', () => {
 
       const assets = [
         {
-          name: 'http://localhost:5000/an-image.png',
+          name: 'an-image.png',
           ext: 'png',
           mime: 'image/png',
           source: 'url',
@@ -170,7 +170,7 @@ describe('UploadAssetDialog', () => {
           rawFile: new File([''], 'image/png'),
         },
         {
-          name: 'http://localhost:5000/a-pdf.pdf',
+          name: 'a-pdf.pdf',
           ext: 'pdf',
           mime: 'application/pdf',
           source: 'url',
@@ -179,7 +179,7 @@ describe('UploadAssetDialog', () => {
           rawFile: new File([''], 'application/pdf'),
         },
         {
-          name: 'http://localhost:5000/a-video.mp4',
+          name: 'a-video.mp4',
           ext: 'mp4',
           mime: 'video/mp4',
           source: 'url',
@@ -188,7 +188,7 @@ describe('UploadAssetDialog', () => {
           rawFile: new File([''], 'video/mp4'),
         },
         {
-          name: 'http://localhost:5000/not-working-like-cors.lutin',
+          name: 'not-working-like-cors.lutin',
           ext: 'lutin',
           mime: 'application/json',
           source: 'url',
