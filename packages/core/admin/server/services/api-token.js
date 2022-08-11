@@ -37,12 +37,12 @@ const POPULATE_FIELDS = ['permissions'];
 const assertCustomTokenPermissionsValidity = attributes => {
   // Ensure non-custom tokens doesn't have permissions
   if (attributes.type !== constants.API_TOKEN_TYPE.CUSTOM && !isEmpty(attributes.permissions)) {
-    throw new ValidationError('Non-custom tokens should not references permissions');
+    throw new ValidationError('Non-custom tokens should not reference permissions');
   }
 
   // Custom type tokens should always have permissions attached to them
   if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM && isEmpty(attributes.permissions)) {
-    throw new ValidationError('Missing permissions attributes for custom token');
+    throw new ValidationError('Missing permissions attribute for custom token');
   }
 };
 
@@ -101,7 +101,7 @@ const create = async attributes => {
 
   // If this is a custom type token, create and the related permissions
   if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM) {
-    // TODO: createMany doesn't seem to create relation properly, figure this out?
+    // TODO: createMany doesn't seem to create relation properly, implement a better way rather than a ton of queries
     // const permissionsCount = await strapi.query('admin::token-permission').createMany({
     //   populate: POPULATE_FIELDS,
     //   data: attributes.permissions.map(action => ({ action, token: apiToken })),
@@ -202,38 +202,37 @@ const getByName = async name => {
  */
 const update = async (id, attributes) => {
   // retrieve token without permissions
-  const oldToken = await strapi.query('admin::api-token').findOne({ where: { id } });
+  const originalToken = await strapi.query('admin::api-token').findOne({ where: { id } });
 
-  if (!oldToken) {
+  if (!originalToken) {
     throw new NotFoundError('Token not found');
   }
 
   assertCustomTokenPermissionsValidity({
-    ...oldToken,
+    ...originalToken,
     ...attributes,
-    type: attributes.type || oldToken.type,
+    type: attributes.type || originalToken.type,
   });
 
-  const token = await strapi.query('admin::api-token').update({
+  const updatedToken = await strapi.query('admin::api-token').update({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     where: { id },
     data: omit('permissions', attributes),
   });
 
-  const currentPermissions = await strapi.entityService.load(
-    'admin::api-token',
-    token,
-    'permissions'
-  );
+  if (updatedToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
+    const currentPermissions = await strapi.entityService.load(
+      'admin::api-token',
+      updatedToken,
+      'permissions'
+    );
 
-  let permissions = {};
-  if (token.type === constants.API_TOKEN_TYPE.CUSTOM) {
     const permissionsToDelete = difference(
       map('action', currentPermissions),
       attributes.permissions
     );
-    const permissionsToCreate = difference(attributes.permissions, oldToken.permissions);
+    const permissionsToCreate = difference(attributes.permissions, originalToken.permissions);
 
     // TODO: make deleteMany work with relations
     // await strapi
@@ -262,18 +261,25 @@ const update = async (id, attributes) => {
       );
     });
     await Promise.all(promises);
-
-    // retrieve permissions
-    permissions = {
-      permissions: await strapi.entityService.load('admin::api-token', token, 'permissions'),
-    };
   }
-  // TODO: if type is changing from custom, make sure old permissions get removed
+  // if type is not custom, make sure any old permissions get removed
   else {
-    //TODO
+    await strapi.query('admin::token-permission').delete({
+      where: { token: id },
+    });
   }
 
-  return { ...token, ...permissions };
+  // retrieve permissions
+  const permissionsFromDb = await strapi.entityService.load(
+    'admin::api-token',
+    updatedToken,
+    'permissions'
+  );
+
+  return {
+    ...updatedToken,
+    permissions: permissionsFromDb ? permissionsFromDb.map(p => p.action) : undefined,
+  };
 };
 
 /**

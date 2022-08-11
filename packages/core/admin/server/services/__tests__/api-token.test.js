@@ -1,7 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const { omit } = require('lodash');
+const { omit } = require('lodash/fp');
 const apiTokenService = require('../api-token');
 
 describe('API Token', () => {
@@ -250,6 +250,7 @@ describe('API Token', () => {
       };
 
       const update = jest.fn(({ data }) => Promise.resolve(data));
+      const deleteFn = jest.fn(({ data }) => Promise.resolve(data));
       const findOne = jest.fn().mockResolvedValue(token);
       const load = jest.fn();
 
@@ -258,6 +259,7 @@ describe('API Token', () => {
           return {
             update,
             findOne,
+            delete: deleteFn,
           };
         },
         config: {
@@ -276,7 +278,12 @@ describe('API Token', () => {
       };
 
       const res = await apiTokenService.update(id, attributes);
-      expect(load).not.toHaveBeenCalled();
+      // ensure any existing permissions have been deleted
+      expect(deleteFn).toHaveBeenCalledWith({
+        where: {
+          token: id,
+        },
+      });
       expect(update).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type', 'createdAt'],
         where: { id },
@@ -288,27 +295,61 @@ describe('API Token', () => {
   });
 
   test('Updates a custom token', async () => {
-    const token = {
-      id: 1,
+    const id = 1;
+
+    const originalToken = {
+      id,
       name: 'api-token_tests-name',
       description: 'api-token_tests-description',
       type: 'custom',
-      permissions: ['admin::subject.action'],
+      permissions: ['admin::subject.keepThisAction', 'admin::subject.oldAction'],
+    };
+
+    const updatedAttributes = {
+      name: 'api-token_tests-updated-name',
+      description: 'api-token_tests-description',
+      type: 'custom',
+      permissions: [
+        'admin::subject.keepThisAction',
+        'admin::subject.newAction',
+        'admin::subject.otherAction',
+      ],
     };
 
     const update = jest.fn(({ data }) => Promise.resolve(data));
-    const findOne = jest.fn().mockResolvedValue(token);
-    const deleteMany = jest.fn();
-    const createMany = jest.fn();
-    const load = jest.fn();
+    const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+    const deleteFn = jest.fn();
+    const create = jest.fn();
+    const load = jest
+      .fn()
+      // first call to load original permissions
+      .mockResolvedValueOnce(
+        Promise.resolve(
+          originalToken.permissions.map(p => {
+            return {
+              action: p,
+            };
+          })
+        )
+      )
+      // second call to check new permissions
+      .mockResolvedValueOnce(
+        Promise.resolve(
+          updatedAttributes.permissions.map(p => {
+            return {
+              action: p,
+            };
+          })
+        )
+      );
 
     global.strapi = {
       query() {
         return {
           update,
           findOne,
-          deleteMany,
-          createMany,
+          delete: deleteFn,
+          create,
         };
       },
       config: {
@@ -319,47 +360,50 @@ describe('API Token', () => {
       },
     };
 
-    const id = 1;
-    const attributes = {
-      name: 'api-token_tests-updated-name',
-      description: 'api-token_tests-description',
-      type: 'custom',
-      permissions: ['admin::subject.newAction'],
-    };
+    const res = await apiTokenService.update(id, updatedAttributes);
 
-    const res = await apiTokenService.update(id, attributes);
-
-    // TODO: test that deleteMany and createMany are called with the correct values
-
-    expect(deleteMany).toHaveBeenCalledWith({
+    expect(deleteFn).toHaveBeenCalledTimes(1);
+    expect(deleteFn).toHaveBeenCalledWith({
       where: {
-        action: ['admin::subject.action'],
+        action: 'admin::subject.oldAction',
+        token: id,
+      },
+    });
+    expect(deleteFn).not.toHaveBeenCalledWith({
+      where: {
+        action: 'admin::subject.keepAction',
+        token: id,
       },
     });
 
-    expect(createMany).toHaveBeenCalledWith({
-      where: {
-        action: ['admin::subject.Newaction'],
+    expect(create).toHaveBeenCalledTimes(3);
+    expect(create).not.toHaveBeenCalledWith({
+      data: {
+        action: 'admin::subject.keepAction',
+        token: id,
       },
     });
-
-    expect(load).toHaveBeenCalledWith(
-      'admin::api-token',
-      {
-        description: 'api-token_tests-description',
-        name: 'api-token_tests-updated-name',
-        type: 'custom',
+    expect(create).toHaveBeenCalledWith({
+      data: {
+        action: 'admin::subject.newAction',
+        token: id,
       },
-      'permissions'
-    );
+    });
+    expect(create).toHaveBeenCalledWith({
+      data: {
+        action: 'admin::subject.otherAction',
+        token: id,
+      },
+    });
 
     expect(update).toHaveBeenCalledWith({
       select: ['id', 'name', 'description', 'type', 'createdAt'],
       where: { id },
-      data: omit(attributes, ['permissions']),
-      populate: ['permissions'],
+      data: omit(['permissions'], updatedAttributes),
+      populate: expect.anything(), // it doesn't matter how this is used
     });
-    expect(res).toEqual(omit(attributes, ['permissions']));
+
+    expect(res).toEqual(updatedAttributes);
   });
 
   describe('getByName', () => {

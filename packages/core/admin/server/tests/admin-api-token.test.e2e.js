@@ -161,11 +161,16 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       error: {
         status: 400,
         name: 'ValidationError',
-        message: 'Non-custom tokens should not references permissions',
+        message: 'Non-custom tokens should not reference permissions',
         details: {},
       },
     });
   });
+
+  /**
+   * TODO: Discuss: Which behaviour do we want? Should an empty array be treated the same as omitted/undefined?
+   * Easy to change in assertCustomTokenPermissionsValidity by checking isEmpty (to allow empty) vs !attributes.permissions
+   */
 
   test('Creates a non-custom api token with empty permissions attribute', async () => {
     const body = {
@@ -181,15 +186,15 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       body,
     });
 
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toMatchObject({
-      data: null,
-      error: {
-        status: 400,
-        name: 'ValidationError',
-        message: 'Non-custom tokens should not references permissions',
-        details: {},
-      },
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toStrictEqual({
+      accessKey: expect.any(String),
+      name: body.name,
+      permissions: [],
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+      createdAt: expect.any(String),
     });
   });
 
@@ -239,7 +244,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       error: {
         status: 400,
         name: 'ValidationError',
-        message: 'Missing permissions attributes for custom token',
+        message: 'Missing permissions attribute for custom token',
         details: {},
       },
     });
