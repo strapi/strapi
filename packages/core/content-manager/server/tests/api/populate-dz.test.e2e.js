@@ -32,6 +32,10 @@ const compo2 = {
     name: {
       type: 'string',
     },
+    category: {
+      // same field name as in compo1 but different type
+      type: 'string',
+    },
     category_diff: {
       type: 'relation',
       relation: 'oneToOne',
@@ -136,7 +140,7 @@ describe('CM API - Populate dz', () => {
           },
           {
             __component: 'default.compo-b',
-            items: { id: 2, name: 'BBBB', category_diff: data.categories[0].id },
+            items: { id: 2, name: 'BBBB', category_diff: data.categories[0].id, category: 'smthg' },
           },
         ],
       },
@@ -162,6 +166,7 @@ describe('CM API - Populate dz', () => {
           __component: 'default.compo-b',
           items: {
             name: 'BBBB',
+            category: 'smthg',
             category_diff: {
               name: 'name',
             },
