@@ -94,7 +94,7 @@ export const useRelation = ({ name, relationsToShow = 10, relationsToSearch = 10
     },
   });
 
-  const searchRes = useInfiniteQuery(['relation', name, 'search'], fetchSearch, {
+  const searchRes = useInfiniteQuery(['relation', name, 'search', searchTerm], fetchSearch, {
     enabled: !!searchTerm,
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < relationsToSearch) {
