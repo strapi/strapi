@@ -9,8 +9,10 @@ module.exports = () => ({
   },
 
   include: [
-    // Include all files
-    './**/*',
+    // Include all ts files
+    './**/*.ts',
+    // Include all js files
+    './**/*.js',
     // Force the JSON files in the src folder to be included
     './src/**/*.json',
   ],
@@ -25,7 +27,7 @@ module.exports = () => ({
     // Do not include admin files in the server compilation
     'src/admin/',
     // Do not include test files
-    '**/*.test.ts',
+    '**/*.test.*',
     // Do not include plugins in the server compilation
     'src/plugins/**',
   ],
