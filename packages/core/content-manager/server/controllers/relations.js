@@ -29,7 +29,7 @@ module.exports = {
       const entityManager = getService('entity-manager');
       const permissionChecker = getService('permission-checker').create({
         userAbility,
-        model: sourceModel,
+        model,
       });
 
       if (permissionChecker.cannot.read()) {

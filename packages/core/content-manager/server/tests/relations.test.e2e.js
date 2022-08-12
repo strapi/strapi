@@ -61,6 +61,15 @@ const shopModel = {
   pluralName: 'shops',
 };
 
+const createEntry = async (uid, data) => {
+  const { body } = await rq({
+    method: 'POST',
+    url: `/content-manager/collection-types/${uid}`,
+    body: data,
+  });
+  return body;
+};
+
 describe('Relations', () => {
   const builder = createTestBuilder();
 
@@ -74,28 +83,16 @@ describe('Relations', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    const { body: createdProduct1 } = await rq({
-      method: 'POST',
-      url: '/content-manager/collection-types/api::product.product',
-      body: { name: 'Skate' },
-    });
-    const { body: createdProduct2 } = await rq({
-      method: 'POST',
-      url: '/content-manager/collection-types/api::product.product',
-      body: { name: 'Candle' },
-    });
+    const createdProduct1 = await createEntry('api::product.product', { name: 'Skate' });
+    const createdProduct2 = await createEntry('api::product.product', { name: 'Candle' });
 
     data.products.push(createdProduct1);
     data.products.push(createdProduct2);
 
-    const { body: createdShop } = await rq({
-      method: 'POST',
-      url: '/content-manager/collection-types/api::shop.shop',
-      body: {
-        name: 'Cazotte Shop',
-        products: [createdProduct1.id],
-        myCompo: { compoProducts: [createdProduct2.id] },
-      },
+    const createdShop = await createEntry('api::shop.shop', {
+      name: 'Cazotte Shop',
+      products: [createdProduct1.id],
+      myCompo: { compoProducts: [createdProduct2.id] },
     });
 
     data.shops.push(createdShop);
