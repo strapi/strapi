@@ -34,17 +34,17 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
   // create a random valid token that we can test with (delete, list, etc)
   let currentTokens = 0;
   const createValidToken = async (token = {}) => {
+    const body = {
+      type: 'read-only',
+      name: 'token_' + String(currentTokens++),
+      description: 'generic description',
+      ...token,
+    };
+
     const req = await rq({
       url: '/admin/api-tokens',
       method: 'POST',
-      body: Object.assign(
-        {
-          type: 'read-only',
-          name: 'token_' + String(currentTokens++),
-          description: 'generic description',
-        },
-        token
-      ),
+      body,
     });
 
     expect(req.status).toEqual(201);
