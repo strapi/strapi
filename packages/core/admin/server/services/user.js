@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { defaults } = require('lodash/fp');
+const crypto = require('crypto');
 const { stringIncludes } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
 const { createUser, hasSuperAdminRole } = require('../domain/user');
@@ -323,6 +324,14 @@ const getLanguagesInUse = async () => {
   return users.map((user) => user.preferedLanguage || 'en');
 };
 
+const hashAdminUser = (payload) => {
+  if (typeof payload === 'string') {
+    return crypto.createHash('sha256').update(payload).digest('hex');
+  }
+
+  return crypto.createHash('sha256').update(payload.email).digest('hex');
+};
+
 module.exports = {
   create,
   updateById,
@@ -341,4 +350,5 @@ module.exports = {
   displayWarningIfUsersDontHaveRole,
   resetPasswordByEmail,
   getLanguagesInUse,
+  hashAdminUser,
 };

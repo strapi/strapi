@@ -98,7 +98,7 @@ module.exports = {
   async updatePermissions(ctx) {
     const { id } = ctx.params;
     const { body: input } = ctx.request;
-    const adminUserId = await getService('user-hash').hashAdminUser(ctx.state.user);
+    const adminUserId = await getService('user').hashAdminUser(ctx.state.user);
 
     const { findOne, assignPermissions } = getService('role');
     const { sanitizePermission, actionProvider } = getService('permission');

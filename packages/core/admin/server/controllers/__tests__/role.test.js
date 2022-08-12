@@ -108,7 +108,7 @@ describe('Role controller', () => {
             role: {
               findOne,
             },
-            'user-hash': {
+            user: {
               hashAdminUser,
             },
           },
@@ -155,7 +155,7 @@ describe('Role controller', () => {
               actionProvider: { get: jest.fn() },
               conditionProvider: { values: jest.fn(() => []) },
             },
-            'user-hash': {
+            user: {
               hashAdminUser,
             },
           },
@@ -226,7 +226,7 @@ describe('Role controller', () => {
                 })),
               },
             },
-            'user-hash': {
+            user: {
               hashAdminUser,
             },
           },

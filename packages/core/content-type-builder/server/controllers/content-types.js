@@ -47,7 +47,7 @@ module.exports = {
 
   async createContentType(ctx) {
     const { body } = ctx.request;
-    const adminUserId = strapi.service('admin::user-hash').hashAdminUser(ctx.state.user);
+    const adminUserId = strapi.service('admin::user').hashAdminUser(ctx.state.user);
 
     try {
       await validateContentTypeInput(body);

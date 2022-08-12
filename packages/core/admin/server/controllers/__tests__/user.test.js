@@ -28,8 +28,6 @@ describe('User Controller', () => {
           services: {
             user: {
               exists,
-            },
-            'user-hash': {
               hashAdminUser,
             },
           },
@@ -68,8 +66,6 @@ describe('User Controller', () => {
               exists,
               create,
               sanitizeUser,
-            },
-            'user-hash': {
               hashAdminUser,
             },
           },

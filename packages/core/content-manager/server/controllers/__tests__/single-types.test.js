@@ -112,7 +112,7 @@ describe('Single Types', () => {
           permission: {
             createPermissionsManager,
           },
-          'user-hash': {
+          user: {
             hashAdminUser,
           },
         },
