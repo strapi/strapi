@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useInfiniteQuery } from 'react-query';
+import { useInfiniteQuery } from 'react-query';
 
 const FIXTURE_RELATIONS = [
   {
@@ -55,9 +55,21 @@ const FIXTURE_SEARCH = [
   {
     title: 'Marc',
   },
+
+  {
+    title: 'lowercase u'
+  },
+
+  {
+    title: 'more lowercase u'
+  },
+
+  {
+    title: 'a lot lowercase us'
+  }
 ];
 
-export const useRelation = ({ relationsToShow = 10 }) => {
+export const useRelation = ({ relationsToShow = 10, relationsToSearch = 10 }) => {
   const [searchTerm, setSearchTerm] = useState(null);
 
   const fetchRelations = ({ pageParam = 1 }) => {
@@ -65,8 +77,11 @@ export const useRelation = ({ relationsToShow = 10 }) => {
     return Promise.resolve(FIXTURE_RELATIONS.slice(startIndex, startIndex + relationsToShow));
   };
 
-  const fetchSearch = () => {
-    return Promise.resolve(FIXTURE_SEARCH.filter(curr => curr.title.includes(searchTerm)));
+  const fetchSearch = ({ pageParam = 1 }) => {
+    const results = FIXTURE_SEARCH.filter(curr => curr.title.includes(searchTerm));
+    const startIndex = (pageParam - 1) * relationsToSearch;
+
+    return Promise.resolve(results.slice(startIndex, startIndex + relationsToSearch));
   };
 
   const relationsRes = useInfiniteQuery(['relations'], fetchRelations, {
@@ -79,13 +94,21 @@ export const useRelation = ({ relationsToShow = 10 }) => {
     },
   });
 
-  const searchRes = useQuery(['relation', 'search', searchTerm], fetchSearch, {
+  const searchRes = useInfiniteQuery(['relations', 'search'], fetchSearch, {
     enabled: !!searchTerm,
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < relationsToSearch) {
+        return undefined;
+      }
+
+      return (pages?.length || 0) + 1;
+    },
   });
 
-  const search = term => {
+  const searchFor = (term) => {
+    searchRes.remove();
     setSearchTerm(term);
-  };
+  }
 
-  return { relations: relationsRes, searchResults: searchRes, search };
+  return { relations: relationsRes, search: searchRes, searchFor };
 };

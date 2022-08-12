@@ -7,7 +7,7 @@ import { useRelation } from '../../hooks/useRelation';
 
 function SelectWrapper({ name }) {
   const { addRelation, removeRelation, modifiedData } = useCMEditViewDataManager();
-  const { relations, searchResults, search } = useRelation({ relationsToShow: 2 });
+  const { relations, search, searchFor } = useRelation({ relationsToShow: 2, relationsToSearch: 2 });
 
   const relationWillBeDeleted = relation =>
     !modifiedData?.[name]?.remove?.find(curr => curr.title === relation.title);
@@ -53,13 +53,13 @@ function SelectWrapper({ name }) {
 
       <hr />
 
-      <input type="text" onKeyUp={event => search(event.target.value)} />
+      <input type="text" onKeyUp={event => searchFor(event.target.value)} />
 
       <hr />
 
-      {!searchResults.isLoading && (
+      {!search.isLoading && (
         <ol>
-          {searchResults?.data?.map(search => (
+          {search?.data?.pages?.flat().map(search => (
             <li key={`search-result-${search.title}`}>
               Search:{' '}
               <button
@@ -70,6 +70,10 @@ function SelectWrapper({ name }) {
               </button>
             </li>
           ))}
+
+          {search.hasNextPage && (
+            <button type="button" onClick={() => search.fetchNextPage()}>more results</button>
+          )}
         </ol>
       )}
     </>
