@@ -15,9 +15,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
   useFocusWhenNavigate: jest.fn(),
-  useRBAC: jest.fn(() => ({
-    allowedActions: { canCreate: true, canDelete: true, canRead: true, canUpdate: true },
-  })),
+  useRBAC: jest.fn(),
   useGuidedTour: jest.fn(() => ({
     startSection: jest.fn(),
   })),
@@ -73,6 +71,9 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   });
 
   it('should show a list of api tokens', async () => {
+    useRBAC.mockImplementation(() => ({
+      allowedActions: { canCreate: true, canDelete: true, canRead: true, canUpdate: true },
+    }));
     const history = createMemoryHistory();
     history.push('/settings/api-tokens');
     const app = makeApp(history);
@@ -989,7 +990,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   });
 
   it('should not show the create button when the user does not have the rights to create', async () => {
-    useRBAC.mockImplementationOnce(() => ({
+    useRBAC.mockImplementation(() => ({
       allowedActions: { canCreate: false, canDelete: true, canRead: true, canUpdate: true },
     }));
 
@@ -1002,6 +1003,9 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   });
 
   it('should show the delete button when the user have the rights to delete', async () => {
+    useRBAC.mockImplementation(() => ({
+      allowedActions: { canCreate: false, canDelete: true, canRead: true, canUpdate: false },
+    }));
     const history = createMemoryHistory();
     history.push('/settings/api-tokens');
     const app = makeApp(history);
@@ -1014,8 +1018,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   });
 
   it('should show the read button when the user have the rights to read and not to update', async () => {
-    useRBAC.mockImplementationOnce(() => ({
-      allowedActions: { canCreate: false, canDelete: false, canRead: true, canUpdate: false },
+    useRBAC.mockImplementation(() => ({
+      allowedActions: { canCreate: false, canDelete: true, canRead: true, canUpdate: false },
     }));
     const history = createMemoryHistory();
     history.push('/settings/api-tokens');
@@ -1024,7 +1028,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
     const { container } = render(app);
 
     await waitFor(() => {
-      expect(container.querySelector('a[title*="Edit"]')).toBeInTheDocument();
+      expect(container.querySelector('a[title*="Read"]')).toBeInTheDocument();
     });
   });
 });
