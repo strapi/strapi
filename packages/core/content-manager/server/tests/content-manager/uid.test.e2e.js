@@ -8,7 +8,7 @@ const { createAuthRequest } = require('../../../../../../test/helpers/request');
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let uid = 'api::uid-model.uid-model';
+const uid = 'api::uid-model.uid-model';
 
 const model = {
   kind: 'collectionType',

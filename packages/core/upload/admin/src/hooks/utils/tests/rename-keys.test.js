@@ -18,7 +18,7 @@ const FIXTURE = {
 describe('recursiveRenameKeys', () => {
   test('does rename keys', () => {
     expect(
-      recursiveRenameKeys(FIXTURE, key => {
+      recursiveRenameKeys(FIXTURE, (key) => {
         switch (key) {
           case 'foo':
             return 'bam';

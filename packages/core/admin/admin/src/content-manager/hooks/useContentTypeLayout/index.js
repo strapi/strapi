@@ -7,7 +7,7 @@ const useContentTypeLayout = () => {
   const currentLayout = useSelector(selectLayout);
 
   const getComponentLayout = useCallback(
-    componentUid => {
+    (componentUid) => {
       return get(currentLayout, ['components', componentUid], {});
     },
     [currentLayout]

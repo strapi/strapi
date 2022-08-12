@@ -2,6 +2,7 @@
 
 const { join, resolve } = require('path');
 const fs = require('fs-extra');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const glob = require('glob');
 
 // Only for dev environement
@@ -12,7 +13,7 @@ const getPluginsPath = () => {
   const corePackageDirs = glob.sync(corePath);
   const pluginsPackageDirs = glob.sync(pluginsPath);
 
-  const packageDirs = [...corePackageDirs, ...pluginsPackageDirs].filter(dir => {
+  const packageDirs = [...corePackageDirs, ...pluginsPackageDirs].filter((dir) => {
     const isCoreAdmin = dir.includes('packages/core/admin');
     const pathToEntryPoint = join(dir, 'admin', 'src', 'index.js');
     const doesAdminFolderExist = fs.pathExistsSync(pathToEntryPoint);
@@ -20,7 +21,7 @@ const getPluginsPath = () => {
     return !isCoreAdmin && doesAdminFolderExist;
   });
 
-  return packageDirs.map(dir => resolve(__dirname, '..', join(dir, 'admin', 'src')));
+  return packageDirs.map((dir) => resolve(__dirname, '..', join(dir, 'admin', 'src')));
 };
 
 module.exports = getPluginsPath;

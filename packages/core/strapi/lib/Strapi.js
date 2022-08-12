@@ -55,7 +55,7 @@ const draftAndPublishSync = require('./migrations/draft-publish');
  * - If `appDir` is `undefined`, it'll be set to `process.cwd()`
  * - If `distDir` is `undefined`, it'll be set to `appDir`
  */
-const resolveWorkingDirectories = opts => {
+const resolveWorkingDirectories = (opts) => {
   const cwd = process.cwd();
 
   const appDir = opts.appDir ? path.resolve(cwd, opts.appDir) : cwd;
@@ -265,7 +265,7 @@ class Strapi {
    */
   async listen() {
     return new Promise((resolve, reject) => {
-      const onListen = async error => {
+      const onListen = async (error) => {
         if (error) {
           return reject(error);
         }
@@ -282,11 +282,11 @@ class Strapi {
       const listenSocket = this.config.get('server.socket');
 
       if (listenSocket) {
-        return this.server.listen(listenSocket, onListen);
+        this.server.listen(listenSocket, onListen);
+      } else {
+        const { host, port } = this.config.get('server');
+        this.server.listen(port, host, onListen);
       }
-
-      const { host, port } = this.config.get('server');
-      return this.server.listen(port, host, onListen);
     });
   }
 
@@ -463,7 +463,7 @@ class Strapi {
 
   async startWebhooks() {
     const webhooks = await this.webhookStore.findWebhooks();
-    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
+    webhooks.forEach((webhook) => this.webhookRunner.add(webhook));
   }
 
   reload() {
@@ -471,7 +471,7 @@ class Strapi {
       shouldReload: 0,
     };
 
-    const reload = function() {
+    const reload = function () {
       if (state.shouldReload > 0) {
         // Reset the reloading state
         state.shouldReload -= 1;
@@ -535,7 +535,7 @@ class Strapi {
   }
 }
 
-module.exports = options => {
+module.exports = (options) => {
   const strapi = new Strapi(options);
   global.strapi = strapi;
   return strapi;

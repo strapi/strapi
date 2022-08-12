@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 const PageSize = ({ onChangePageSize, pageSize }) => {
   const { formatMessage } = useIntl();
 
-  const handleChange = value => {
+  const handleChange = (value) => {
     onChangePageSize(value);
   };
 

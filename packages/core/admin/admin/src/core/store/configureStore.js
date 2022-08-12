@@ -4,7 +4,7 @@ import createReducer from './createReducer';
 const configureStore = (appMiddlewares, appReducers) => {
   const middlewares = [];
 
-  appMiddlewares.forEach(middleware => {
+  appMiddlewares.forEach((middleware) => {
     middlewares.push(middleware());
   });
 

@@ -43,11 +43,11 @@ const allowedOperations = [
 ];
 const operations = pick(allowedOperations, sift);
 
-const conditionsMatcher = conditions => {
+const conditionsMatcher = (conditions) => {
   return sift.createQueryTester(conditions, { operations });
 };
 
-module.exports = conditionProvider => {
+module.exports = (conditionProvider) => {
   const state = {
     hooks: createEngineHooks(),
   };
@@ -112,7 +112,7 @@ module.exports = conditionProvider => {
       );
 
       const permissionWithSanitizedProperties = invalidProperties.reduce(
-        property => permissionDomain.deleteProperty(property, permission),
+        (property) => permissionDomain.deleteProperty(property, permission),
         permission
       );
 
@@ -174,13 +174,13 @@ module.exports = conditionProvider => {
       const resolveConditions = map(conditionProvider.get);
 
       // 2. Filter conditions, only keep those whose handler is a function
-      const filterValidConditions = filter(condition => isFunction(condition.handler));
+      const filterValidConditions = filter((condition) => isFunction(condition.handler));
 
       // 3. Evaluate the conditions handler and returns an object
       // containing both the original condition and its result
-      const evaluateConditions = conditions => {
+      const evaluateConditions = (conditions) => {
         return Promise.all(
-          conditions.map(async condition => ({
+          conditions.map(async (condition) => ({
             condition,
             result: await condition.handler(
               user,
@@ -237,7 +237,7 @@ module.exports = conditionProvider => {
      * @returns {function}
      */
     createRegisterFunction(can, permission, user) {
-      const registerToCasl = caslPermission => {
+      const registerToCasl = (caslPermission) => {
         const { action, subject, fields, condition } = caslPermission;
 
         can(
@@ -248,7 +248,7 @@ module.exports = conditionProvider => {
         );
       };
 
-      const runWillRegisterHook = async caslPermission => {
+      const runWillRegisterHook = async (caslPermission) => {
         const hookContext = createWillRegisterContext(caslPermission, {
           permission,
           user,
@@ -259,7 +259,7 @@ module.exports = conditionProvider => {
         return caslPermission;
       };
 
-      return async caslPermission => {
+      return async (caslPermission) => {
         await runWillRegisterHook(caslPermission);
         registerToCasl(caslPermission);
       };

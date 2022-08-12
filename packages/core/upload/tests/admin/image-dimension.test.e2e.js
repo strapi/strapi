@@ -24,7 +24,7 @@ describe('Dimensions are populated when uploading an image', () => {
 
   test.each([['.jpg'], ['.png'], ['.webp'], ['.tiff'], ['.svg'], ['.gif']])(
     'Dimensions are populated for %s',
-    async ext => {
+    async (ext) => {
       const res = await rq({
         method: 'POST',
         url: '/upload',

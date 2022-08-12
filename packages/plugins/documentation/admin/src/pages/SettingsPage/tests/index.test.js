@@ -23,7 +23,7 @@ const client = new QueryClient({
   },
 });
 
-const makeApp = history => (
+const makeApp = (history) => (
   <Router history={history}>
     <ThemeProvider theme={lightTheme}>
       <QueryClientProvider client={client}>

@@ -34,10 +34,7 @@ describe('Non repeatable and required component', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
-    await builder
-      .addComponent(component)
-      .addContentType(ct)
-      .build();
+    await builder.addComponent(component).addContentType(ct).build();
 
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
@@ -98,7 +95,7 @@ describe('Non repeatable and required component', () => {
 
     test.each([[], 'someString', 128219, false])(
       'Throws if the field is not an object %p',
-      async value => {
+      async (value) => {
         const res = await rq.post('/', {
           body: {
             data: {
@@ -154,7 +151,7 @@ describe('Non repeatable and required component', () => {
       expect(statusCode).toBe(200);
 
       expect(Array.isArray(body.data)).toBe(true);
-      body.data.forEach(entry => {
+      body.data.forEach((entry) => {
         if (entry.attributes.field === null) return;
 
         expect(entry.attributes.field).toMatchObject({
@@ -167,7 +164,7 @@ describe('Non repeatable and required component', () => {
   describe('PUT entry', () => {
     test.each([[], 'someString', 128219, false])(
       'Throws when sending invalid updated field %p',
-      async value => {
+      async (value) => {
         const res = await rq.post('/', {
           body: {
             data: {

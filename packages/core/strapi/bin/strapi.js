@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 'use strict';
 
 // FIXME
@@ -12,8 +13,8 @@ const program = new Command();
 
 const packageJSON = require('../package.json');
 
-const checkCwdIsStrapiApp = name => {
-  let logErrorAndExit = () => {
+const checkCwdIsStrapiApp = (name) => {
+  const logErrorAndExit = () => {
     console.log(
       `You need to run ${yellow(
         `strapi ${name}`
@@ -23,7 +24,7 @@ const checkCwdIsStrapiApp = name => {
   };
 
   try {
-    const pkgJSON = require(process.cwd() + '/package.json');
+    const pkgJSON = require(`${process.cwd()}/package.json`);
     if (!_.has(pkgJSON, 'dependencies.@strapi/strapi')) {
       logErrorAndExit(name);
     }
@@ -32,30 +33,32 @@ const checkCwdIsStrapiApp = name => {
   }
 };
 
-const getLocalScript = name => (...args) => {
-  checkCwdIsStrapiApp(name);
+const getLocalScript =
+  (name) =>
+  (...args) => {
+    checkCwdIsStrapiApp(name);
 
-  const cmdPath = resolveCwd.silent(`@strapi/strapi/lib/commands/${name}`);
-  if (!cmdPath) {
-    console.log(
-      `Error loading the local ${yellow(
-        name
-      )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
-    );
-    process.exit(1);
-  }
-
-  const script = require(cmdPath);
-
-  Promise.resolve()
-    .then(() => {
-      return script(...args);
-    })
-    .catch(error => {
-      console.error(error);
+    const cmdPath = resolveCwd.silent(`@strapi/strapi/lib/commands/${name}`);
+    if (!cmdPath) {
+      console.log(
+        `Error loading the local ${yellow(
+          name
+        )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
+      );
       process.exit(1);
-    });
-};
+    }
+
+    const script = require(cmdPath);
+
+    Promise.resolve()
+      .then(() => {
+        return script(...args);
+      })
+      .catch((error) => {
+        console.error(error);
+        process.exit(1);
+      });
+  };
 
 // Initial program setup
 program.storeOptionsAsProperties(false).allowUnknownOption(true);
@@ -69,7 +72,7 @@ program
   .command('version')
   .description('Output the version of Strapi')
   .action(() => {
-    process.stdout.write(packageJSON.version + '\n');
+    process.stdout.write(`${packageJSON.version}\n`);
     process.exit(0);
   });
 

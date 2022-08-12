@@ -53,7 +53,7 @@ const EditPage = ({ canUpdate }) => {
     retry: false,
     keepPreviousData: false,
     staleTime: 1000 * 20,
-    onError: err => {
+    onError(err) {
       const status = err.response.status;
 
       // Redirect the use to the homepage if is not allowed to read
@@ -223,8 +223,8 @@ const EditPage = ({ canUpdate }) => {
                         })}
                       </Typography>
                       <Grid gap={5}>
-                        {layout.map(row => {
-                          return row.map(input => {
+                        {layout.map((row) => {
+                          return row.map((input) => {
                             return (
                               <GridItem key={input.name} {...input.size}>
                                 <GenericInput

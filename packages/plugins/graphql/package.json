@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-graphql",
-  "version": "4.3.2",
+  "version": "4.3.4",
   "description": "Adds GraphQL endpoint with default API methods.",
   "repository": {
     "type": "git",
@@ -27,19 +27,16 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
-    "@apollo/federation": "^0.28.0",
     "@graphql-tools/schema": "8.1.2",
     "@graphql-tools/utils": "^8.9.0",
-    "@strapi/utils": "4.3.2",
+    "@strapi/utils": "4.3.4",
     "apollo-server-core": "3.1.2",
     "apollo-server-koa": "3.10.0",
     "glob": "^7.1.7",
     "graphql": "^15.5.1",
     "graphql-depth-limit": "^1.1.0",
-    "graphql-iso-date": "^3.6.1",
     "graphql-playground-middleware-koa": "^1.6.21",
-    "graphql-type-json": "^0.3.2",
-    "graphql-type-long": "^0.1.1",
+    "graphql-scalars": "1.17.0",
     "graphql-upload": "^13.0.0",
     "koa-compose": "^4.1.0",
     "lodash": "4.17.21",

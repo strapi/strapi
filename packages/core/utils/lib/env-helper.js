@@ -58,7 +58,7 @@ const utils = {
       value = value.substring(1, value.length - 1);
     }
 
-    return value.split(',').map(v => {
+    return value.split(',').map((v) => {
       return _.trim(_.trim(v, ' '), '"');
     });
   },

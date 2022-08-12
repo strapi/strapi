@@ -6,7 +6,7 @@ const { policy: policyUtils } = require('@strapi/utils');
 
 const getPoliciesConfig = propOr([], 'config.policies');
 
-const resolvePolicies = route => {
+const resolvePolicies = (route) => {
   const policiesConfig = getPoliciesConfig(route);
   const resolvedPolicies = policyUtils.resolve(policiesConfig, route.info);
 

@@ -49,10 +49,10 @@ const RepeatableComponent = ({
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
   const { getComponentLayout } = useContentTypeLayout();
-  const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
-    componentUid,
-    getComponentLayout,
-  ]);
+  const componentLayoutData = useMemo(
+    () => getComponentLayout(componentUid),
+    [componentUid, getComponentLayout]
+  );
 
   const nextTempKey = useMemo(() => {
     return getMaxTempKey(componentValue || []) + 1;
@@ -113,7 +113,7 @@ const RepeatableComponent = ({
   }
 
   const doesRepComponentHasChildError = componentErrorKeys.some(
-    error => error.split('.').length > 1
+    (error) => error.split('.').length > 1
   );
 
   if (doesRepComponentHasChildError && !hasMinError) {

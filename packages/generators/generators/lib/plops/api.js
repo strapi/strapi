@@ -6,7 +6,7 @@ const tsUtils = require('@strapi/typescript-utils');
 
 const validateInput = require('./utils/validate-input');
 
-module.exports = plop => {
+module.exports = (plop) => {
   // API generator
   plop.setGenerator('api', {
     description: 'Generate a basic API',
@@ -15,7 +15,7 @@ module.exports = plop => {
         type: 'input',
         name: 'id',
         message: 'API name',
-        validate: input => validateInput(input),
+        validate: (input) => validateInput(input),
       },
       {
         type: 'confirm',
@@ -23,7 +23,7 @@ module.exports = plop => {
         message: 'Is this API for a plugin?',
       },
       {
-        when: answers => answers.isPluginApi,
+        when: (answers) => answers.isPluginApi,
         type: 'list',
         name: 'plugin',
         message: 'Plugin name',
@@ -36,7 +36,7 @@ module.exports = plop => {
           }
 
           const pluginsDir = await fs.readdir(pluginsPath, { withFileTypes: true });
-          const pluginsDirContent = pluginsDir.filter(fd => fd.isDirectory());
+          const pluginsDirContent = pluginsDir.filter((fd) => fd.isDirectory());
 
           if (pluginsDirContent.length === 0) {
             throw Error('The "plugins" directory is empty');

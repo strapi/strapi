@@ -36,9 +36,9 @@ describe('ADMIN | core | utils | createHook', () => {
   });
 
   it('calls all of the mocks in a waterfall fashion', () => {
-    hooksContainer.register(n => n + 1);
-    hooksContainer.register(n => n + 2);
-    hooksContainer.register(n => n * 3);
+    hooksContainer.register((n) => n + 1);
+    hooksContainer.register((n) => n + 2);
+    hooksContainer.register((n) => n * 3);
 
     const res = hooksContainer.runWaterfall(1);
 
@@ -46,9 +46,9 @@ describe('ADMIN | core | utils | createHook', () => {
   });
 
   it('calls all of the mocks in a waterfall fashion when they resolve async code', async () => {
-    hooksContainer.register(n => Promise.resolve(n + 1));
-    hooksContainer.register(n => n + 2);
-    hooksContainer.register(n => Promise.resolve(n * 3));
+    hooksContainer.register((n) => Promise.resolve(n + 1));
+    hooksContainer.register((n) => n + 2);
+    hooksContainer.register((n) => Promise.resolve(n * 3));
 
     const res = await hooksContainer.runWaterfallAsync(1);
 

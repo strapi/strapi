@@ -11,7 +11,7 @@ const registerDynamicZonesDefinition = (contentType, { registry, strapi, builder
 
   const { attributes } = contentType;
 
-  const dynamicZoneAttributes = Object.keys(attributes).filter(attributeName =>
+  const dynamicZoneAttributes = Object.keys(attributes).filter((attributeName) =>
     isDynamicZone(attributes[attributeName])
   );
 

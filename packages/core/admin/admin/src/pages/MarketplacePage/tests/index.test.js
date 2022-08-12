@@ -223,14 +223,14 @@ describe('Marketplace page', () => {
     // Plugin that's already installed
     const alreadyInstalledCard = screen
       .getAllByTestId('npm-package-card')
-      .find(div => div.innerHTML.includes('Documentation'));
+      .find((div) => div.innerHTML.includes('Documentation'));
     const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
     expect(alreadyInstalledText).toBeVisible();
 
     // Plugin that's not installed
     const notInstalledCard = screen
       .getAllByTestId('npm-package-card')
-      .find(div => div.innerHTML.includes('Comments'));
+      .find((div) => div.innerHTML.includes('Comments'));
     const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
     expect(notInstalledText).toBeVisible();
   });
@@ -244,14 +244,14 @@ describe('Marketplace page', () => {
     // Provider that's already installed
     const alreadyInstalledCard = screen
       .getAllByTestId('npm-package-card')
-      .find(div => div.innerHTML.includes('Cloudinary'));
+      .find((div) => div.innerHTML.includes('Cloudinary'));
     const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
     expect(alreadyInstalledText).toBeVisible();
 
     // Provider that's not installed
     const notInstalledCard = screen
       .getAllByTestId('npm-package-card')
-      .find(div => div.innerHTML.includes('Rackspace'));
+      .find((div) => div.innerHTML.includes('Rackspace'));
     const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
     expect(notInstalledText).toBeVisible();
   });
