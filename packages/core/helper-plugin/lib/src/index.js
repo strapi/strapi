@@ -68,6 +68,7 @@ export { default as ReactSelect } from './components/ReactSelect';
 export { default as ReactSelectAsync } from './components/ReactSelect/Async';
 export { default as Link } from './components/Link';
 export { default as LinkButton } from './components/LinkButton';
+export { default as RelationInput } from './components/RelationInput';
 
 // New icons
 export { default as SortIcon } from './icons/SortIcon';

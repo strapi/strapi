@@ -1,2 +1,3 @@
-export * from './components/RelationItem';
-export * from './components/RelationList';
+import { RelationInput } from './RelationInput';
+
+export default RelationInput;
