@@ -39,7 +39,7 @@ export interface Strapi {
   /**
    * Find a service using its unique identifier
    */
-  service(uid: string): GenericService | undefined;
+  service<T extends GenericService = GenericService>(uid: string): T | undefined;
 
   /**
    * Getter for the Strapi controllers container
