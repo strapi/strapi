@@ -167,7 +167,14 @@ const EditView = ({
                                 return (
                                   <Grid gap={4} key={gridIndex}>
                                     {grid.map(
-                                      ({ fieldSchema, labelAction, metadatas, name, size }) => {
+                                      ({
+                                        fieldSchema,
+                                        labelAction,
+                                        metadatas,
+                                        name,
+                                        size,
+                                        queryInfos,
+                                      }) => {
                                         const isComponent = fieldSchema.type === 'component';
 
                                         if (isComponent) {
@@ -205,6 +212,7 @@ const EditView = ({
                                               keys={name}
                                               labelAction={labelAction}
                                               metadatas={metadatas}
+                                              queryInfos={queryInfos}
                                             />
                                           </GridItem>
                                         );
