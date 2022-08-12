@@ -69,7 +69,7 @@ const FIXTURE_SEARCH = [
   }
 ];
 
-export const useRelation = ({ relationsToShow = 10, relationsToSearch = 10 }) => {
+export const useRelation = ({ name, relationsToShow = 10, relationsToSearch = 10 }) => {
   const [searchTerm, setSearchTerm] = useState(null);
 
   const fetchRelations = ({ pageParam = 1 }) => {
@@ -84,7 +84,7 @@ export const useRelation = ({ relationsToShow = 10, relationsToSearch = 10 }) =>
     return Promise.resolve(results.slice(startIndex, startIndex + relationsToSearch));
   };
 
-  const relationsRes = useInfiniteQuery(['relations'], fetchRelations, {
+  const relationsRes = useInfiniteQuery(['relation', name], fetchRelations, {
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < relationsToShow) {
         return undefined;
@@ -94,7 +94,7 @@ export const useRelation = ({ relationsToShow = 10, relationsToSearch = 10 }) =>
     },
   });
 
-  const searchRes = useInfiniteQuery(['relations', 'search'], fetchSearch, {
+  const searchRes = useInfiniteQuery(['relation', name, 'search'], fetchSearch, {
     enabled: !!searchTerm,
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < relationsToSearch) {

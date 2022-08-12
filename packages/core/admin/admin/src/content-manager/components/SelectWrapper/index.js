@@ -7,7 +7,7 @@ import { useRelation } from '../../hooks/useRelation';
 
 function SelectWrapper({ name }) {
   const { addRelation, removeRelation, modifiedData } = useCMEditViewDataManager();
-  const { relations, search, searchFor } = useRelation({ relationsToShow: 2, relationsToSearch: 2 });
+  const { relations, search, searchFor } = useRelation({ name, relationsToShow: 2, relationsToSearch: 2 });
 
   const relationWillBeDeleted = relation =>
     !modifiedData?.[name]?.remove?.find(curr => curr.title === relation.title);
