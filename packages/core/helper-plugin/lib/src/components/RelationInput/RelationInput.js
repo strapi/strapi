@@ -82,6 +82,14 @@ const ReactQueryRelationResult = PropTypes.shape({
   isSuccess: PropTypes.bool.isRequired,
 });
 
+const ReactQuerySearchResult = PropTypes.shape({
+  data: PropTypes.shape({
+    pages: PropTypes.arrayOf(RelationTypeDef),
+  }),
+  isLoading: PropTypes.bool.isRequired,
+  isSuccess: PropTypes.bool.isRequired,
+});
+
 RelationInput.defaultProps = {
   relations: [],
   searchResults: [],
@@ -89,15 +97,21 @@ RelationInput.defaultProps = {
 };
 
 RelationInput.propTypes = {
+  // eslint-disable-next-line react/no-unused-prop-types
   description: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  // eslint-disable-next-line react/no-unused-prop-types
   onRelationAdd: PropTypes.func.isRequired,
   onRelationRemove: PropTypes.func.isRequired,
+  // eslint-disable-next-line react/no-unused-prop-types
   onRelationLoadMore: PropTypes.func.isRequired,
+  // eslint-disable-next-line react/no-unused-prop-types
   onSearchNextPage: PropTypes.func.isRequired,
-  searchResults: PropTypes.arrayOf(RelationTypeDef),
+  // eslint-disable-next-line react/no-unused-prop-types
+  searchResults: PropTypes.arrayOf(ReactQuerySearchResult),
   relations: ReactQueryRelationResult,
+  // eslint-disable-next-line react/no-unused-prop-types
   relationsToDisplay: PropTypes.number,
 };
