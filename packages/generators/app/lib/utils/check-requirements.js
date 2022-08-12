@@ -17,7 +17,7 @@ module.exports = function checkBeforeInstall() {
   }
 
   // warn if not using a LTS version
-  else if (!semver.satisfies(currentNodeVersion, '14.x.x || 16.x.x || 18.x.x || 20.x.x')) {
+  else if (semver.satisfies(currentNodeVersion, '15.x.x || 17.x.x || 19.x.x')) {
     console.warn(yellow(`You are running ${bold(`Node.js ${currentNodeVersion}`)}`));
     console.warn(
       `Strapi only supports ${bold(
