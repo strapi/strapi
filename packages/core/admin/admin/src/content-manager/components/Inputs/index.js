@@ -6,12 +6,14 @@ import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
 import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
-import { useContentTypeLayout } from '../../hooks';
-import { getFieldName } from '../../utils';
+
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
 import InputUID from '../InputUID';
-import SelectWrapper from '../SelectWrapper';
+import { RelationInputWrapper } from '../RelationInputWrapper';
+
+import { useContentTypeLayout } from '../../hooks';
+import { getFieldName } from '../../utils';
 
 import {
   connect,
@@ -183,7 +185,7 @@ function Inputs({
 
   if (type === 'relation') {
     return (
-      <SelectWrapper
+      <RelationInputWrapper
         {...metadatas}
         {...fieldSchema}
         description={
