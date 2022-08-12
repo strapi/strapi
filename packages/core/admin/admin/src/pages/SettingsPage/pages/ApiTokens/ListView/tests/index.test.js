@@ -956,6 +956,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                                 aria-disabled="false"
                                 aria-labelledby="tooltip-3"
                                 class="c25 c26"
+                                name="delete"
                                 tabindex="-1"
                                 type="button"
                               >
@@ -998,5 +999,32 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
     const { queryByTestId } = render(app);
 
     await waitFor(() => expect(queryByTestId('create-api-token-button')).not.toBeInTheDocument());
+  });
+
+  it('should show the delete button when the user have the rights to delete', async () => {
+    const history = createMemoryHistory();
+    history.push('/settings/api-tokens');
+    const app = makeApp(history);
+
+    const { container } = render(app);
+
+    await waitFor(() => {
+      expect(container.querySelector('button[name="delete"]')).toBeInTheDocument();
+    });
+  });
+
+  it('should show the read button when the user have the rights to read and not to update', async () => {
+    useRBAC.mockImplementationOnce(() => ({
+      allowedActions: { canCreate: false, canDelete: false, canRead: true, canUpdate: false },
+    }));
+    const history = createMemoryHistory();
+    history.push('/settings/api-tokens');
+    const app = makeApp(history);
+
+    const { container } = render(app);
+
+    await waitFor(() => {
+      expect(container.querySelector('a[title*="Edit"]')).toBeInTheDocument();
+    });
   });
 });

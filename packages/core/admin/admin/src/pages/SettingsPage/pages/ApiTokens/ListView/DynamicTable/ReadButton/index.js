@@ -5,7 +5,7 @@ import DefaultButton from '../DefaultButton';
 
 const ReadButton = ({ tokenName, tokenId }) => {
   return (
-    <DefaultButton tokenName={tokenName} tokenId={tokenId}>
+    <DefaultButton tokenName={tokenName} tokenId={tokenId} buttonType="read">
       <Eye />
     </DefaultButton>
   );
