@@ -22,6 +22,8 @@ module.exports = (dir, { filename = DEFAULT_TS_CONFIG_FILENAME, ancestorsLookup 
   if (!configFilePath || ancestorsLookup) {
     return configFilePath;
   }
+  
+  const configFileAbsolutePath = path.resolve(configFilePath);
 
-  return configFilePath.startsWith(dirAbsolutePath) ? configFilePath : undefined;
+  return configFileAbsolutePath.startsWith(dirAbsolutePath) ? configFileAbsolutePath : undefined;
 };
