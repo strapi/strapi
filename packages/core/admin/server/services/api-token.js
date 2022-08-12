@@ -1,7 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const { omit, difference, isEmpty, map } = require('lodash/fp');
+const { omit, difference, isEmpty, map, isArray } = require('lodash/fp');
 const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 
@@ -155,11 +155,14 @@ For security reasons, prefer storing the secret in an environment variable and r
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const list = async () => {
-  return strapi.query('admin::api-token').findMany({
+  const tokens = await strapi.query('admin::api-token').findMany({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     orderBy: { name: 'ASC' },
   });
+
+  if (!tokens) return tokens;
+  return tokens.map(token => mapTokenPermissions(token));
 };
 
 /**
@@ -314,9 +317,20 @@ const getBy = async (whereParams = {}) => {
     return null;
   }
 
-  return strapi
+  const token = await strapi
     .query('admin::api-token')
     .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
+
+  if (!token) return token;
+  return mapTokenPermissions(token);
+};
+
+const mapTokenPermissions = token => {
+  if (!token) return token;
+  return {
+    ...token,
+    permissions: isArray(token.permissions) ? map('action', token.permissions) : token.permissions,
+  };
 };
 
 module.exports = {

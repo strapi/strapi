@@ -299,15 +299,19 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  // TODO: test this with custom token that has permissions
   test('List all tokens (successfully)', async () => {
     await deleteAllTokens();
 
     // create 4 tokens
     let tokens = [];
-    tokens.push(await createValidToken());
-    tokens.push(await createValidToken());
-    tokens.push(await createValidToken());
+    tokens.push(
+      await createValidToken({
+        type: 'custom',
+        permissions: ['admin::model.model.read', 'admin::model.model.create'],
+      })
+    );
+    tokens.push(await createValidToken({ type: 'full-access' }));
+    tokens.push(await createValidToken({ type: 'read-only' }));
     tokens.push(await createValidToken());
 
     const res = await rq({
@@ -351,9 +355,32 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     expect(res.body.data).toBeNull();
   });
 
-  // TODO: test this with a custom token that has permissions
-  test('Retrieves a token (successfully)', async () => {
-    const token = await createValidToken();
+  test('Retrieves a non-custom token (successfully)', async () => {
+    const token = await createValidToken({
+      type: 'read-only',
+    });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}`,
+      method: 'GET',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toStrictEqual({
+      name: token.name,
+      permissions: token.permissions,
+      description: token.description,
+      type: token.type,
+      id: token.id,
+      createdAt: token.createdAt,
+    });
+  });
+
+  test('Retrieves a custom token (successfully)', async () => {
+    const token = await createValidToken({
+      type: 'custom',
+      permissions: ['admin::model.model.read'],
+    });
 
     const res = await rq({
       url: `/admin/api-tokens/${token.id}`,
