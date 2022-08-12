@@ -9,10 +9,10 @@ module.exports = () => ({
   },
 
   include: [
-    // Include the root directory
-    './',
+    // Include all files
+    './**/*',
     // Force the JSON files in the src folder to be included
-    'src/**/*.json',
+    './src/**/*.json',
   ],
 
   exclude: [
