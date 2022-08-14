@@ -11,10 +11,11 @@ import {
   auth,
   request,
   useNotification,
-  TrackingContext,
+  TrackingProvider,
   prefixFileUrlWithBackendUrl,
   useAppInfos,
 } from '@strapi/helper-plugin';
+import axios from 'axios';
 import { SkipToContent } from '@strapi/design-system/Main';
 import { useIntl } from 'react-intl';
 import PrivateRoute from '../../components/PrivateRoute';
@@ -42,6 +43,8 @@ function App() {
       routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
     );
   }, []);
+
+  const [telemetryProperties, setTelemetryProperties] = useState(null);
 
   useEffect(() => {
     const currentToken = auth.getToken();
@@ -71,12 +74,20 @@ function App() {
     const getData = async () => {
       try {
         const {
-          data: { hasAdmin, uuid, menuLogo },
-        } = await request('/admin/init', { method: 'GET' });
+          data: {
+            data: { hasAdmin, uuid, menuLogo },
+          },
+        } = await axios.get(`${strapi.backendURL}/admin/init`);
 
         updateProjectSettings({ menuLogo: prefixFileUrlWithBackendUrl(menuLogo) });
 
         if (uuid) {
+          const {
+            data: { data: properties },
+          } = await axios.get(`${strapi.backendURL}/admin/telemetry-properties`);
+
+          setTelemetryProperties(properties);
+
           try {
             const deviceId = await getUID();
 
@@ -87,6 +98,7 @@ function App() {
                 uuid,
                 deviceId,
                 properties: {
+                  ...properties,
                   environment: appInfo.currentEnvironment,
                 },
               }),
@@ -112,7 +124,15 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggleNotification, updateProjectSettings]);
 
-  const setHasAdmin = hasAdmin => setState(prev => ({ ...prev, hasAdmin }));
+  const setHasAdmin = (hasAdmin) => setState((prev) => ({ ...prev, hasAdmin }));
+
+  const trackingInfo = useMemo(
+    () => ({
+      uuid,
+      telemetryProperties,
+    }),
+    [uuid, telemetryProperties]
+  );
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -121,12 +141,12 @@ function App() {
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
       <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
-      <TrackingContext.Provider value={uuid}>
+      <TrackingProvider value={trackingInfo}>
         <Switch>
           {authRoutes}
           <Route
             path="/auth/:authType"
-            render={routerProps => (
+            render={(routerProps) => (
               <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
             )}
             exact
@@ -135,7 +155,7 @@ function App() {
           <PrivateRoute path="/" component={AuthenticatedApp} />
           <Route path="" component={NotFoundPage} />
         </Switch>
-      </TrackingContext.Provider>
+      </TrackingProvider>
     </Suspense>
   );
 }

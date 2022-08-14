@@ -17,7 +17,7 @@ module.exports = {
    */
   // '0 0 1 * * 1': async function({ strapi }) {
   //   // Add your own logic here (e.g. send a queue of email, create a database backup, etc.).
-  // }
+  // },
   // 'myJob': {
   //   task: ({ strapi }) => { /* Add your own logic here */ },
   //   options: {

@@ -33,6 +33,7 @@ const createMetadata = (models = []) => {
         ...model.attributes,
       },
       lifecycles: model.lifecycles || {},
+      indexes: model.indexes || [],
     });
   }
 
@@ -83,14 +84,14 @@ const createMetadata = (models = []) => {
   return metadata;
 };
 
-const hasComponentsOrDz = model => {
+const hasComponentsOrDz = (model) => {
   return Object.values(model.attributes).some(
     ({ type }) => types.isComponent(type) || types.isDynamicZone(type)
   );
 };
 
 // NOTE: we might just move the compo logic outside this layer too at some point
-const createCompoLinkModelMeta = baseModelMeta => {
+const createCompoLinkModelMeta = (baseModelMeta) => {
   return {
     // TODO: make sure there can't be any conflicts with a prefix
     // singularName: 'compo',

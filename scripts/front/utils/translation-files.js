@@ -7,18 +7,18 @@ const glob = require('glob');
 const PACKAGES_DIR_PATH = 'packages/';
 const TRANSLATION_FILE_PATH = '/admin/src/translations/en.json';
 
-const getPackageNameFromPath = filePath => {
+const getPackageNameFromPath = (filePath) => {
   return filePath.replace(PACKAGES_DIR_PATH, '').replace(TRANSLATION_FILE_PATH, '');
 };
 
-const readTranslationFile = filePath => ({
+const readTranslationFile = (filePath) => ({
   filePath,
   packageName: getPackageNameFromPath(filePath),
   fileContent: JSON.parse(fs.readFileSync(filePath).toString('utf-8')),
 });
 
-const writeTranslationFile = file => {
-  fs.writeFileSync(file.filePath, JSON.stringify(file.fileContent, null, 2) + '\n');
+const writeTranslationFile = (file) => {
+  fs.writeFileSync(file.filePath, `${JSON.stringify(file.fileContent, null, 2)}\n`);
 };
 
 const readAllTranslationFiles = () => {
@@ -30,7 +30,7 @@ const readAllTranslationFiles = () => {
   return translationFilesPaths.map(readTranslationFile);
 };
 
-const writeAllTranslationFiles = files => {
+const writeAllTranslationFiles = (files) => {
   files.forEach(writeTranslationFile);
 };
 

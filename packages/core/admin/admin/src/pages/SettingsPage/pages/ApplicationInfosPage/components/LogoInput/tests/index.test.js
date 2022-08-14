@@ -21,7 +21,7 @@ global.Image = class extends Image {
   }
 };
 
-const render = props =>
+const render = (props) =>
   renderTL(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} textComponent="span">

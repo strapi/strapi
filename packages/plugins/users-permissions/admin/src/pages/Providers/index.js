@@ -53,26 +53,26 @@ export const ProvidersPage = () => {
     allowedActions: { canUpdate },
   } = useRBAC(updatePermissions);
 
-  const { isLoading: isLoadingForData, data: modifiedData, isFetching } = useQuery(
-    'get-providers',
-    () => fetchData(toggleNotification),
-    {
-      onSuccess: () => {
-        notifyStatus(
-          formatMessage({
-            id: getTrad('Providers.data.loaded'),
-            defaultMessage: 'Providers have been loaded',
-          })
-        );
-      },
-      initialData: {},
-    }
-  );
+  const {
+    isLoading: isLoadingForData,
+    data: modifiedData,
+    isFetching,
+  } = useQuery('get-providers', () => fetchData(toggleNotification), {
+    onSuccess() {
+      notifyStatus(
+        formatMessage({
+          id: getTrad('Providers.data.loaded'),
+          defaultMessage: 'Providers have been loaded',
+        })
+      );
+    },
+    initialData: {},
+  });
 
   const isLoading = isLoadingForData || isFetching;
 
   const submitMutation = useMutation(putProvider, {
-    onSuccess: async () => {
+    async onSuccess() {
       await queryClient.invalidateQueries('get-providers');
       toggleNotification({
         type: 'info',
@@ -84,7 +84,7 @@ export const ProvidersPage = () => {
       handleToggleModal();
       unlockApp();
     },
-    onError: () => {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
@@ -104,7 +104,7 @@ export const ProvidersPage = () => {
       return false;
     }
 
-    const providerToEdit = providers.find(obj => obj.name === providerToEditName);
+    const providerToEdit = providers.find((obj) => obj.name === providerToEditName);
 
     return has(providerToEdit, 'subdomain');
   }, [providers, providerToEditName]);
@@ -127,17 +127,17 @@ export const ProvidersPage = () => {
   }, [providerToEditName, isProviderWithSubdomain]);
 
   const handleToggleModal = () => {
-    setIsOpen(prev => !prev);
+    setIsOpen((prev) => !prev);
   };
 
-  const handleClickEdit = provider => {
+  const handleClickEdit = (provider) => {
     if (canUpdate) {
       setProviderToEditName(provider.name);
       handleToggleModal();
     }
   };
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     setIsSubmiting(true);
 
     lockApp();
@@ -196,7 +196,7 @@ export const ProvidersPage = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {providers.map(provider => (
+                {providers.map((provider) => (
                   <Tr
                     key={provider.name}
                     {...onRowClick({

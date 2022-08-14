@@ -16,7 +16,7 @@ const Filters = ({ displayedFilters }) => {
     if (!isVisible) {
       trackUsage('willFilterEntries');
     }
-    setIsVisible(prev => !prev);
+    setIsVisible((prev) => !prev);
   };
 
   return (

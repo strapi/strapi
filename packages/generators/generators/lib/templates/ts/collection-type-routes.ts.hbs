@@ -1,0 +1,49 @@
+export default {
+  routes: [
+    {
+      method: 'GET',
+      path: '/{{pluralize id}}',
+      handler: '{{id}}.find',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/{{pluralize id}}/:id',
+      handler: '{{id}}.findOne',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'POST',
+      path: '/{{pluralize id}}',
+      handler: '{{id}}.create',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/{{pluralize id}}/:id',
+      handler: '{{id}}.update',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'DELETE',
+      path: '/{{pluralize id}}/:id',
+      handler: '{{id}}.delete',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+  ],
+};

@@ -1,9 +1,11 @@
+/* eslint-disable react/jsx-no-constructed-context-values */
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
+import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
@@ -12,7 +14,6 @@ import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useNotification: jest.fn(),
   useRBAC: jest.fn(),
   CheckPermissions: jest.fn(({ children }) => children),
@@ -26,15 +27,17 @@ const client = new QueryClient({
   },
 });
 
-const makeApp = history => (
+const makeApp = (history) => (
   <Router history={history}>
-    <ThemeProvider theme={lightTheme}>
-      <QueryClientProvider client={client}>
-        <IntlProvider locale="en" messages={{}} textComponent="span">
-          <RoleListPage />
-        </IntlProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <TrackingProvider>
+      <ThemeProvider theme={lightTheme}>
+        <QueryClientProvider client={client}>
+          <IntlProvider locale="en" messages={{}} textComponent="span">
+            <RoleListPage />
+          </IntlProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </TrackingProvider>
   </Router>
 );
 

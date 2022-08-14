@@ -61,7 +61,7 @@ class SqliteDialect extends Dialect {
   transformErrors(error) {
     switch (error.errno) {
       case 19: {
-        throw new errors.NotNullConstraint(); // TODO: extract column name
+        throw new errors.NotNullError(); // TODO: extract column name
       }
       default: {
         super.transformErrors(error);

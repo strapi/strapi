@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const _ = require('lodash');
 const { isFunction } = require('lodash/fp');
 const { createLogger } = require('@strapi/logger');
@@ -23,6 +24,7 @@ const createTelemetry = require('./services/metrics');
 const createAuth = require('./services/auth');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
+const { LIFECYCLES } = require('./utils/lifecycles');
 const ee = require('./utils/ee');
 const contentTypesRegistry = require('./core/registries/content-types');
 const servicesRegistry = require('./core/registries/services');
@@ -42,18 +44,40 @@ const sanitizersRegistry = require('./core/registries/sanitizers');
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
 
-const LIFECYCLES = {
-  REGISTER: 'register',
-  BOOTSTRAP: 'bootstrap',
-  DESTROY: 'destroy',
+/**
+ * Resolve the working directories based on the instance options.
+ *
+ * Behavior:
+ * - `appDir` is the directory where Strapi will write every file (schemas, generated APIs, controllers or services)
+ * - `distDir` is the directory where Strapi will read configurations, schemas and any compiled code
+ *
+ * Default values:
+ * - If `appDir` is `undefined`, it'll be set to `process.cwd()`
+ * - If `distDir` is `undefined`, it'll be set to `appDir`
+ */
+const resolveWorkingDirectories = (opts) => {
+  const cwd = process.cwd();
+
+  const appDir = opts.appDir ? path.resolve(cwd, opts.appDir) : cwd;
+  const distDir = opts.distDir ? path.resolve(cwd, opts.distDir) : appDir;
+
+  return { app: appDir, dist: distDir };
 };
 
+/** @implements {import('@strapi/strapi').Strapi} */
 class Strapi {
   constructor(opts = {}) {
     destroyOnSignal(this);
-    const rootDir = opts.dir || process.cwd();
-    const appConfig = loadConfiguration(rootDir, opts);
+
+    const rootDirs = resolveWorkingDirectories(opts);
+
+    // Load the app configuration from the dist directory
+    const appConfig = loadConfiguration({ appDir: rootDirs.app, distDir: rootDirs.dist }, opts);
+
+    // Instanciate the Strapi container
     this.container = createContainer(this);
+
+    // Register every Strapi registry in the container
     this.container.register('config', createConfigProvider(appConfig));
     this.container.register('content-types', contentTypesRegistry(this));
     this.container.register('services', servicesRegistry(this));
@@ -67,12 +91,17 @@ class Strapi {
     this.container.register('auth', createAuth(this));
     this.container.register('sanitizers', sanitizersRegistry(this));
 
-    this.dirs = utils.getDirs(rootDir, { strapi: this });
+    // Create a mapping of every useful directory (for the app, dist and static directories)
+    this.dirs = utils.getDirs(rootDirs, { strapi: this });
 
+    // Strapi state management variables
     this.isLoaded = false;
     this.reload = this.reload();
+
+    // Instanciate the Koa app & the HTTP server
     this.server = createServer(this);
 
+    // Strapi utils instanciation
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
@@ -88,7 +117,7 @@ class Strapi {
   }
 
   get EE() {
-    return ee({ dir: this.dirs.root, logger: this.log });
+    return ee({ dir: this.dirs.dist.root, logger: this.log });
   }
 
   get services() {
@@ -236,7 +265,7 @@ class Strapi {
    */
   async listen() {
     return new Promise((resolve, reject) => {
-      const onListen = async error => {
+      const onListen = async (error) => {
         if (error) {
           return reject(error);
         }
@@ -253,11 +282,11 @@ class Strapi {
       const listenSocket = this.config.get('server.socket');
 
       if (listenSocket) {
-        return this.server.listen(listenSocket, onListen);
+        this.server.listen(listenSocket, onListen);
+      } else {
+        const { host, port } = this.config.get('server');
+        this.server.listen(port, host, onListen);
       }
-
-      const { host, port } = this.config.get('server');
-      return this.server.listen(port, host, onListen);
     });
   }
 
@@ -376,8 +405,10 @@ class Strapi {
       entityValidator: this.entityValidator,
     });
 
-    const cronTasks = this.config.get('server.cron.tasks', {});
-    this.cron.add(cronTasks);
+    if (strapi.config.get('server.cron.enabled', true)) {
+      const cronTasks = this.config.get('server.cron.tasks', {});
+      this.cron.add(cronTasks);
+    }
 
     this.telemetry.bootstrap();
 
@@ -432,7 +463,7 @@ class Strapi {
 
   async startWebhooks() {
     const webhooks = await this.webhookStore.findWebhooks();
-    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
+    webhooks.forEach((webhook) => this.webhookRunner.add(webhook));
   }
 
   reload() {
@@ -440,7 +471,7 @@ class Strapi {
       shouldReload: 0,
     };
 
-    const reload = function() {
+    const reload = function () {
       if (state.shouldReload > 0) {
         // Reset the reloading state
         state.shouldReload -= 1;
@@ -504,7 +535,7 @@ class Strapi {
   }
 }
 
-module.exports = options => {
+module.exports = (options) => {
   const strapi = new Strapi(options);
   global.strapi = strapi;
   return strapi;

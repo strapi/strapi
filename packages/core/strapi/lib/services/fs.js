@@ -6,13 +6,13 @@ const fse = require('fs-extra');
 /**
  * create strapi fs layer
  */
-module.exports = strapi => {
+module.exports = (strapi) => {
   function normalizePath(optPath) {
     const filePath = Array.isArray(optPath) ? optPath.join('/') : optPath;
 
     const normalizedPath = path.normalize(filePath).replace(/^\/?(\.\/|\.\.\/)+/, '');
 
-    return path.resolve(strapi.dirs.root, normalizedPath);
+    return path.resolve(strapi.dirs.app.root, normalizedPath);
   }
 
   const strapiFS = {

@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const createRouteScopeGenerator = namespace => route => {
+const createRouteScopeGenerator = (namespace) => (route) => {
   const prefix = namespace.endsWith('::') ? namespace : `${namespace}.`;
 
   if (typeof route.handler === 'string') {
@@ -20,7 +20,7 @@ const createRouteScopeGenerator = namespace => route => {
  * Register all routes
  * @param {import('../../').Strapi} strapi
  */
-module.exports = strapi => {
+module.exports = (strapi) => {
   registerAdminRoutes(strapi);
   registerAPIRoutes(strapi);
   registerPluginRoutes(strapi);
@@ -30,10 +30,10 @@ module.exports = strapi => {
  * Register admin routes
  * @param {import('../../').Strapi} strapi
  */
-const registerAdminRoutes = strapi => {
+const registerAdminRoutes = (strapi) => {
   const generateRouteScope = createRouteScopeGenerator(`admin::`);
 
-  strapi.admin.routes.forEach(route => {
+  strapi.admin.routes.forEach((route) => {
     generateRouteScope(route);
     route.info = { pluginName: 'admin' };
   });
@@ -49,14 +49,14 @@ const registerAdminRoutes = strapi => {
  * Register plugin routes
  * @param {import('../../').Strapi} strapi
  */
-const registerPluginRoutes = strapi => {
+const registerPluginRoutes = (strapi) => {
   for (const pluginName in strapi.plugins) {
     const plugin = strapi.plugins[pluginName];
 
     const generateRouteScope = createRouteScopeGenerator(`plugin::${pluginName}`);
 
     if (Array.isArray(plugin.routes)) {
-      plugin.routes.forEach(route => {
+      plugin.routes.forEach((route) => {
         generateRouteScope(route);
         route.info = { pluginName };
       });
@@ -67,10 +67,10 @@ const registerPluginRoutes = strapi => {
         routes: plugin.routes,
       });
     } else {
-      _.forEach(plugin.routes, router => {
+      _.forEach(plugin.routes, (router) => {
         router.type = router.type || 'admin';
         router.prefix = `/${pluginName}`;
-        router.routes.forEach(route => {
+        router.routes.forEach((route) => {
           generateRouteScope(route);
           route.info = { pluginName };
         });
@@ -85,17 +85,17 @@ const registerPluginRoutes = strapi => {
  * Register api routes
  * @param {import('../../').Strapi} strapi
  */
-const registerAPIRoutes = strapi => {
+const registerAPIRoutes = (strapi) => {
   for (const apiName in strapi.api) {
     const api = strapi.api[apiName];
 
     const generateRouteScope = createRouteScopeGenerator(`api::${apiName}`);
 
-    _.forEach(api.routes, router => {
+    _.forEach(api.routes, (router) => {
       // TODO: remove once auth setup
       // pass meta down to compose endpoint
       router.type = 'content-api';
-      router.routes.forEach(route => {
+      router.routes.forEach((route) => {
         generateRouteScope(route);
         route.info = { apiName };
       });

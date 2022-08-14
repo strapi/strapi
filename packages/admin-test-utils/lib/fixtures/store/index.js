@@ -1,9 +1,9 @@
 'use strict';
 
-// eslint-disable-next-line node/no-extraneous-require
 const { combineReducers, createStore } = require('redux');
 
 const reducers = {
+  admin_app: jest.fn(() => ({ status: 'init' })),
   'content-manager_app': jest.fn(() => ({
     components: [],
     status: 'loading',

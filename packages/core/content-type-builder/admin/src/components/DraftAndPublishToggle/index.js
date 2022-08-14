@@ -46,7 +46,7 @@ const DraftAndPublishToggle = ({
       )
     : '';
 
-  const handleToggle = () => setShowWarning(prev => !prev);
+  const handleToggle = () => setShowWarning((prev) => !prev);
 
   const handleConfirm = () => {
     onChange({ target: { name, value: false } });

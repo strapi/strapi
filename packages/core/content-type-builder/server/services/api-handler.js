@@ -10,7 +10,7 @@ const fse = require('fs-extra');
 async function clear(uid) {
   const { apiName, modelName } = strapi.contentTypes[uid];
 
-  const apiFolder = path.join(strapi.dirs.api, apiName);
+  const apiFolder = path.join(strapi.dirs.app.api, apiName);
 
   await recursiveRemoveFiles(apiFolder, createDeleteApiFunction(modelName));
   await deleteBackup(uid);
@@ -23,8 +23,8 @@ async function clear(uid) {
 async function backup(uid) {
   const { apiName } = strapi.contentTypes[uid];
 
-  const apiFolder = path.join(strapi.dirs.api, apiName);
-  const backupFolder = path.join(strapi.dirs.api, '.backup', apiName);
+  const apiFolder = path.join(strapi.dirs.app.api, apiName);
+  const backupFolder = path.join(strapi.dirs.app.api, '.backup', apiName);
 
   // backup the api folder
   await fse.copy(apiFolder, backupFolder);
@@ -37,8 +37,8 @@ async function backup(uid) {
 async function deleteBackup(uid) {
   const { apiName } = strapi.contentTypes[uid];
 
-  const backupFolder = path.join(strapi.dirs.api, '.backup');
-  const apiBackupFolder = path.join(strapi.dirs.api, '.backup', apiName);
+  const backupFolder = path.join(strapi.dirs.app.api, '.backup');
+  const apiBackupFolder = path.join(strapi.dirs.app.api, '.backup', apiName);
 
   await fse.remove(apiBackupFolder);
 
@@ -55,8 +55,8 @@ async function deleteBackup(uid) {
 async function rollback(uid) {
   const { apiName } = strapi.contentTypes[uid];
 
-  const apiFolder = path.join(strapi.dirs.api, apiName);
-  const backupFolder = path.join(strapi.dirs.api, '.backup', apiName);
+  const apiFolder = path.join(strapi.dirs.app.api, apiName);
+  const backupFolder = path.join(strapi.dirs.app.api, '.backup', apiName);
 
   const exists = await fse.exists(backupFolder);
 
@@ -73,13 +73,13 @@ async function rollback(uid) {
  * Creates a delete function to clear an api folder
  * @param {string} baseName
  */
-const createDeleteApiFunction = baseName => {
+const createDeleteApiFunction = (baseName) => {
   /**
    * Delets a file in an api.
    * Will only update routes.json instead of deleting it if other routes are present
    * @param {string} filePath file path to delete
    */
-  return async filePath => {
+  return async (filePath) => {
     const fileName = path.basename(filePath, path.extname(filePath));
 
     const isSchemaFile = filePath.endsWith(`${baseName}/schema.json`);

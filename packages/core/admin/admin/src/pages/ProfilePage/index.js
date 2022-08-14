@@ -73,7 +73,7 @@ const ProfilePage = () => {
   useFocusWhenNavigate();
 
   const { status, data } = useQuery('user', () => fetchUser(), {
-    onSuccess: () => {
+    onSuccess() {
       notifyStatus(
         formatMessage({
           id: 'Settings.profile.form.notify.data.loaded',
@@ -81,7 +81,7 @@ const ProfilePage = () => {
         })
       );
     },
-    onError: () => {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error', defaultMessage: 'An error occured' },
@@ -91,8 +91,8 @@ const ProfilePage = () => {
 
   const isLoading = status !== 'success';
 
-  const submitMutation = useMutation(body => putUser(body), {
-    onSuccess: async data => {
+  const submitMutation = useMutation((body) => putUser(body), {
+    async onSuccess(data) {
       await queryClient.invalidateQueries('user');
 
       auth.setUserInfo(
@@ -109,7 +109,7 @@ const ProfilePage = () => {
         message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
       });
     },
-    onSettled: () => {
+    onSettled() {
       unlockApp();
     },
     refetchActive: true,
@@ -124,7 +124,7 @@ const ProfilePage = () => {
     submitMutation.mutate(
       { ...body, username },
       {
-        onError: error => {
+        onError(error) {
           const res = error?.response?.data;
 
           if (res?.data) {
@@ -174,7 +174,7 @@ const ProfilePage = () => {
   }
 
   const themesToDisplay = Object.keys(allApplicationThemes).filter(
-    themeName => allApplicationThemes[themeName]
+    (themeName) => allApplicationThemes[themeName]
   );
 
   return (
@@ -315,9 +315,9 @@ const ProfilePage = () => {
                               type={currentPasswordShown ? 'text' : 'password'}
                               endAction={
                                 <FieldActionWrapper
-                                  onClick={e => {
+                                  onClick={(e) => {
                                     e.stopPropagation();
-                                    setCurrentPasswordShown(prev => !prev);
+                                    setCurrentPasswordShown((prev) => !prev);
                                   }}
                                   label={formatMessage(
                                     currentPasswordShown
@@ -357,11 +357,12 @@ const ProfilePage = () => {
                               })}
                               name="password"
                               type={passwordShown ? 'text' : 'password'}
+                              autoComplete="new-password"
                               endAction={
                                 <FieldActionWrapper
-                                  onClick={e => {
+                                  onClick={(e) => {
                                     e.stopPropagation();
-                                    setPasswordShown(prev => !prev);
+                                    setPasswordShown((prev) => !prev);
                                   }}
                                   label={formatMessage(
                                     passwordShown
@@ -398,11 +399,12 @@ const ProfilePage = () => {
                               })}
                               name="confirmPassword"
                               type={passwordConfirmShown ? 'text' : 'password'}
+                              autoComplete="new-password"
                               endAction={
                                 <FieldActionWrapper
-                                  onClick={e => {
+                                  onClick={(e) => {
                                     e.stopPropagation();
-                                    setPasswordConfirmShown(prev => !prev);
+                                    setPasswordConfirmShown((prev) => !prev);
                                   }}
                                   label={formatMessage(
                                     passwordConfirmShown
@@ -444,8 +446,7 @@ const ProfilePage = () => {
                           <Typography>
                             {formatMessage(
                               {
-                                id:
-                                  'Settings.profile.form.section.experience.interfaceLanguageHelp',
+                                id: 'Settings.profile.form.section.experience.interfaceLanguageHelp',
                                 defaultMessage:
                                   'Preference changes will apply only to you. More information is available {here}.',
                               },
@@ -478,8 +479,7 @@ const ProfilePage = () => {
                                 defaultMessage: 'Select',
                               })}
                               hint={formatMessage({
-                                id:
-                                  'Settings.profile.form.section.experience.interfaceLanguage.hint',
+                                id: 'Settings.profile.form.section.experience.interfaceLanguage.hint',
                                 defaultMessage:
                                   'This will only display your own interface in the chosen language.',
                               })}
@@ -493,13 +493,13 @@ const ProfilePage = () => {
                                 defaultMessage: 'Clear the interface language selected',
                               })}
                               value={values.preferedLanguage}
-                              onChange={e => {
+                              onChange={(e) => {
                                 handleChange({
                                   target: { name: 'preferedLanguage', value: e },
                                 });
                               }}
                             >
-                              {Object.keys(localeNames).map(language => {
+                              {Object.keys(localeNames).map((language) => {
                                 const langName = localeNames[language];
 
                                 return (
@@ -525,18 +525,17 @@ const ProfilePage = () => {
                                 defaultMessage: 'Displays your interface in the chosen mode.',
                               })}
                               value={values.currentTheme}
-                              onChange={e => {
+                              onChange={(e) => {
                                 handleChange({
                                   target: { name: 'currentTheme', value: e },
                                 });
                               }}
                             >
-                              {themesToDisplay.map(theme => (
+                              {themesToDisplay.map((theme) => (
                                 <Option value={theme} key={theme}>
                                   {formatMessage(
                                     {
-                                      id:
-                                        'Settings.profile.form.section.experience.mode.option-label',
+                                      id: 'Settings.profile.form.section.experience.mode.option-label',
                                       defaultMessage: '{name} mode',
                                     },
                                     {

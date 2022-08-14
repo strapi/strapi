@@ -33,7 +33,7 @@ const Header = ({ headers, label }) => {
           {translatedLabel}
         </Typography>
       </PropertyLabelWrapper>
-      {headers.map(header => {
+      {headers.map((header) => {
         if (!header.isActionRelatedToCurrentProperty) {
           return <HeaderLabel key={header.label} />;
         }

@@ -1,6 +1,6 @@
 'use strict';
 
-const { getInitLocale } = require('../');
+const { getInitLocale } = require('..');
 
 describe('I18N default locale', () => {
   describe('getInitLocale', () => {

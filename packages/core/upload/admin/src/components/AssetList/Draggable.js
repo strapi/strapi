@@ -22,10 +22,10 @@ export const Draggable = ({ children, id, index, moveItem }) => {
 
   const [{ isDragging }, drag] = useDrag({
     type: 'draggable',
-    item: () => {
+    item() {
       return { index, id };
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });

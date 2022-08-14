@@ -73,7 +73,7 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
       <UpgradeWrapper onClick={onClose}>
         <FocusTrap onEscape={onClose}>
           <UpgradeContainer
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             aria-labelledby="upgrade-plan"
             background="neutral0"
             hasRadius

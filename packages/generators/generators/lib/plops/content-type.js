@@ -4,6 +4,7 @@ const { join } = require('path');
 const slugify = require('@sindresorhus/slugify');
 const fs = require('fs-extra');
 const { isKebabCase } = require('@strapi/utils');
+const tsUtils = require('@strapi/typescript-utils');
 
 const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
@@ -13,7 +14,7 @@ const draftAndPublishPrompts = require('./prompts/draft-and-publish-prompts');
 const getAttributesPrompts = require('./prompts/get-attributes-prompts');
 const bootstrapApiPrompts = require('./prompts/bootstrap-api-prompts');
 
-module.exports = plop => {
+module.exports = (plop) => {
   // Model generator
   plop.setGenerator('content-type', {
     description: 'Generate a content type for an API',
@@ -28,7 +29,7 @@ module.exports = plop => {
       const api = await inquirer.prompt([
         ...getDestinationPrompts('model', plop.getDestBasePath()),
         {
-          when: answers => answers.destination === 'new',
+          when: (answers) => answers.destination === 'new',
           type: 'input',
           name: 'id',
           default: config.singularName,
@@ -46,9 +47,9 @@ module.exports = plop => {
             }
 
             const apiDir = await fs.readdir(apiPath, { withFileTypes: true });
-            const apiDirContent = apiDir.filter(fd => fd.isDirectory());
+            const apiDirContent = apiDir.filter((fd) => fd.isDirectory());
 
-            if (apiDirContent.findIndex(api => api.name === input) !== -1) {
+            if (apiDirContent.findIndex((api) => api.name === input) !== -1) {
               throw new Error('This name is already taken.');
             }
 
@@ -69,7 +70,7 @@ module.exports = plop => {
         const val = { type: answer.attributeType };
 
         if (answer.attributeType === 'enumeration') {
-          val.enum = answer.enum.split(',').map(item => item.trim());
+          val.enum = answer.enum.split(',').map((item) => item.trim());
         }
 
         if (answer.attributeType === 'media') {
@@ -81,12 +82,14 @@ module.exports = plop => {
       }, {});
 
       const filePath = getFilePath(answers.destination);
+      const currentDir = process.cwd();
+      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions = [
         {
           type: 'add',
           path: `${filePath}/content-types/{{ singularName }}/schema.json`,
-          templateFile: 'templates/content-type.schema.json.hbs',
+          templateFile: `templates/${language}/content-type.schema.json.hbs`,
           data: {
             collectionName: slugify(answers.pluralName, { separator: '_' }),
           },
@@ -120,20 +123,20 @@ module.exports = plop => {
         baseActions.push(
           {
             type: 'add',
-            path: `${filePath}/controllers/{{singularName}}.js`,
-            templateFile: 'templates/core-controller.js.hbs',
+            path: `${filePath}/controllers/{{singularName}}.${language}`,
+            templateFile: `templates/${language}/core-controller.${language}.hbs`,
             data: { uid },
           },
           {
             type: 'add',
-            path: `${filePath}/services/{{singularName}}.js`,
-            templateFile: 'templates/core-service.js.hbs',
+            path: `${filePath}/services/{{singularName}}.${language}`,
+            templateFile: `templates/${language}/core-service.${language}.hbs`,
             data: { uid },
           },
           {
             type: 'add',
-            path: `${filePath}/routes/{{singularName}}.js`,
-            templateFile: `templates/core-router.js.hbs`,
+            path: `${filePath}/routes/{{singularName}}.${language}`,
+            templateFile: `templates/${language}/core-router.${language}.hbs`,
             data: { uid },
           }
         );

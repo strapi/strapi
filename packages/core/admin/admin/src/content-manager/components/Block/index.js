@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Wrapper, Sub } from './components';
 
-const renderMsg = msg => <p>{msg}</p>;
+const renderMsg = (msg) => <p>{msg}</p>;
 
 const Block = ({ children, description, style, title }) => (
   <div className="col-md-12">
