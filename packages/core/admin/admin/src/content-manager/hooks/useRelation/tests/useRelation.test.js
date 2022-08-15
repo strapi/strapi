@@ -25,10 +25,19 @@ const ComponentFixture = ({ children }) => (
   <QueryClientProvider client={client}>{children}</QueryClientProvider>
 );
 
-function setup(...args) {
+function setup(name = 'test', opts) {
+  const options = {
+    ...opts,
+    endpoints: {
+      relation: '/',
+      search: '/',
+      ...opts?.endpoints,
+    },
+  };
+
   return new Promise((resolve) => {
     act(() => {
-      resolve(renderHook(() => useRelation(...args), { wrapper: ComponentFixture }));
+      resolve(renderHook(() => useRelation(name, options), { wrapper: ComponentFixture }));
     });
   });
 }
@@ -39,7 +48,23 @@ describe('useRelation', () => {
   });
 
   test('fetch relations', async () => {
-    const { result, waitForNextUpdate } = await setup({ name: 'test' });
+    const { result, waitForNextUpdate } = await setup();
+
+    await waitForNextUpdate();
+
+    expect(result.current.relations.isSuccess).toBe(true);
+    expect(axiosInstance.get).toBeCalledTimes(1);
+    expect(axiosInstance.get).toBeCalledWith('?page=1');
+  });
+
+  test('doesn not fetch relations if a relation endpoint was not passed', async () => {
+    await setup(undefined, { endpoints: { relation: undefined } });
+
+    expect(axiosInstance.get).not.toBeCalled();
+  });
+
+  test('fetch relations', async () => {
+    const { result, waitForNextUpdate } = await setup();
 
     await waitForNextUpdate();
 
@@ -53,7 +78,7 @@ describe('useRelation', () => {
       data: [1, 2],
     });
 
-    const { result, waitForNextUpdate } = await setup({ name: 'test', relationsToShow: 1 });
+    const { result, waitForNextUpdate } = await setup(undefined, { relationsToShow: 1 });
 
     await waitForNextUpdate();
 
@@ -73,7 +98,7 @@ describe('useRelation', () => {
       data: [1, 2],
     });
 
-    const { result, waitForNextUpdate } = await setup({ name: 'test', relationsToShow: 3 });
+    const { result, waitForNextUpdate } = await setup(undefined, { relationsToShow: 3 });
 
     await waitForNextUpdate();
 
@@ -87,7 +112,7 @@ describe('useRelation', () => {
   });
 
   test('does not fetch search by default', async () => {
-    const { result, waitForNextUpdate } = await setup({ name: 'test' });
+    const { result, waitForNextUpdate } = await setup();
 
     await waitForNextUpdate();
 
@@ -95,7 +120,7 @@ describe('useRelation', () => {
   });
 
   test('does fetch search results once a term was provided', async () => {
-    const { result, waitForNextUpdate } = await setup({ name: 'test' });
+    const { result, waitForNextUpdate } = await setup();
 
     await waitForNextUpdate();
 
@@ -112,8 +137,25 @@ describe('useRelation', () => {
     expect(spy).toBeCalledWith('?page=1');
   });
 
+  test('does not fetch search results once a term was provided, but no endpoint was set', async () => {
+    const { result, waitForNextUpdate } = await setup(undefined, {
+      endpoints: { search: undefined },
+    });
+
+    const spy = jest.fn().mockResolvedValue({ data: [] });
+    axiosInstance.get = spy;
+
+    act(() => {
+      result.current.searchFor('something');
+    });
+
+    await waitForNextUpdate();
+
+    expect(spy).not.toBeCalled();
+  });
+
   test('fetch search next page, if a full page was returned', async () => {
-    const { result, waitForNextUpdate } = await setup({ name: 'test', searchResultsToShow: 1 });
+    const { result, waitForNextUpdate } = await setup(undefined, { searchResultsToShow: 1 });
 
     const spy = jest.fn().mockResolvedValue({ data: [1, 2] });
     axiosInstance.get = spy;
@@ -136,7 +178,7 @@ describe('useRelation', () => {
   });
 
   test('doesn not fetch search next page, if a full page was not returned', async () => {
-    const { result, waitForNextUpdate } = await setup({ name: 'test', searchResultsToShow: 3 });
+    const { result, waitForNextUpdate } = await setup(undefined, { searchResultsToShow: 3 });
 
     const spy = jest.fn().mockResolvedValue({ data: [1, 2] });
     axiosInstance.get = spy;
