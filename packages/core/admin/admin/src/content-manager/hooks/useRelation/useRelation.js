@@ -10,15 +10,17 @@ export const useRelation = (
   const [searchTerm, setSearchTerm] = useState(null);
 
   const fetchRelations = async ({ pageParam = 1 }) => {
-    // TODO: use relations endpoint
-    const { data } = await axiosInstance.get(`?page=${pageParam}`);
+    const { data } = await axiosInstance.get(endpoints?.relation, {
+      page: pageParam,
+    });
 
     return data;
   };
 
   const fetchSearch = async ({ pageParam = 1 }) => {
-    // TODO: use search endpoint
-    const { data } = await axiosInstance.get(`?page=${pageParam}`);
+    const { data } = await axiosInstance.get(endpoints?.search, {
+      page: pageParam,
+    });
 
     return data;
   };

@@ -54,7 +54,9 @@ describe('useRelation', () => {
 
     expect(result.current.relations.isSuccess).toBe(true);
     expect(axiosInstance.get).toBeCalledTimes(1);
-    expect(axiosInstance.get).toBeCalledWith('?page=1');
+    expect(axiosInstance.get).toBeCalledWith('/', {
+      page: 1,
+    });
   });
 
   test('doesn not fetch relations if a relation endpoint was not passed', async () => {
@@ -70,7 +72,9 @@ describe('useRelation', () => {
 
     expect(result.current.relations.isSuccess).toBe(true);
     expect(axiosInstance.get).toBeCalledTimes(1);
-    expect(axiosInstance.get).toBeCalledWith('?page=1');
+    expect(axiosInstance.get).toBeCalledWith('/', {
+      page: 1,
+    });
   });
 
   test('fetch relations next page, if a full page was returned', async () => {
@@ -89,8 +93,8 @@ describe('useRelation', () => {
     await waitForNextUpdate();
 
     expect(axiosInstance.get).toBeCalledTimes(2);
-    expect(axiosInstance.get).toHaveBeenNthCalledWith(1, '?page=1');
-    expect(axiosInstance.get).toHaveBeenNthCalledWith(2, '?page=2');
+    expect(axiosInstance.get).toHaveBeenNthCalledWith(1, '/', { page: 1 });
+    expect(axiosInstance.get).toHaveBeenNthCalledWith(2, '/', { page: 2 });
   });
 
   test('does not fetch relations next page, if a full page was not returned', async () => {
@@ -134,7 +138,7 @@ describe('useRelation', () => {
     await waitForNextUpdate();
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith('?page=1');
+    expect(spy).toBeCalledWith('/', { page: 1 });
   });
 
   test('does not fetch search results once a term was provided, but no endpoint was set', async () => {
@@ -173,8 +177,8 @@ describe('useRelation', () => {
     await waitForNextUpdate();
 
     expect(spy).toBeCalledTimes(2);
-    expect(spy).toHaveBeenNthCalledWith(1, '?page=1');
-    expect(spy).toHaveBeenNthCalledWith(2, '?page=2');
+    expect(spy).toHaveBeenNthCalledWith(1, '/', { page: 1 });
+    expect(spy).toHaveBeenNthCalledWith(2, '/', { page: 2 });
   });
 
   test('doesn not fetch search next page, if a full page was not returned', async () => {
