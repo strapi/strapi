@@ -115,16 +115,18 @@ const ReactQuerySearchResult = PropTypes.shape({
 });
 
 RelationInput.defaultProps = {
+  description: undefined,
   disabled: false,
+  error: undefined,
   relations: [],
   searchResults: [],
 };
 
 RelationInput.propTypes = {
   // eslint-disable-next-line react/no-unused-prop-types
-  error: PropTypes.string.isRequired,
+  error: PropTypes.string,
   // eslint-disable-next-line react/no-unused-prop-types
-  description: PropTypes.string.isRequired,
+  description: PropTypes.string,
   // eslint-disable-next-line react/no-unused-prop-types
   disabled: PropTypes.bool,
   id: PropTypes.string.isRequired,
@@ -140,6 +142,6 @@ RelationInput.propTypes = {
   onSearchNextPage: PropTypes.func.isRequired,
   placeholder: PropTypes.string.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
-  searchResults: PropTypes.arrayOf(ReactQuerySearchResult),
+  searchResults: ReactQuerySearchResult,
   relations: ReactQueryRelationResult,
 };
