@@ -11,6 +11,7 @@ export const useRelation = (
 
   const fetchRelations = async ({ pageParam = 1 }) => {
     const { data } = await axiosInstance.get(endpoints?.relation, {
+      limit: relationsToShow,
       page: pageParam,
     });
 
@@ -19,6 +20,7 @@ export const useRelation = (
 
   const fetchSearch = async ({ pageParam = 1 }) => {
     const { data } = await axiosInstance.get(endpoints?.search, {
+      limit: searchResultsToShow,
       page: pageParam,
     });
 

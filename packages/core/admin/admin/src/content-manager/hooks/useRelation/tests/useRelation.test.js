@@ -55,7 +55,19 @@ describe('useRelation', () => {
     expect(result.current.relations.isSuccess).toBe(true);
     expect(axiosInstance.get).toBeCalledTimes(1);
     expect(axiosInstance.get).toBeCalledWith('/', {
+      limit: 10,
       page: 1,
+    });
+  });
+
+  test('fetch relations with different limit', async () => {
+    const { waitForNextUpdate } = await setup(undefined, { relationsToShow: 5 });
+
+    await waitForNextUpdate();
+
+    expect(axiosInstance.get).toBeCalledWith(expect.any(String), {
+      limit: 5,
+      page: expect.any(Number),
     });
   });
 
@@ -73,6 +85,7 @@ describe('useRelation', () => {
     expect(result.current.relations.isSuccess).toBe(true);
     expect(axiosInstance.get).toBeCalledTimes(1);
     expect(axiosInstance.get).toBeCalledWith('/', {
+      limit: 10,
       page: 1,
     });
   });
@@ -93,8 +106,14 @@ describe('useRelation', () => {
     await waitForNextUpdate();
 
     expect(axiosInstance.get).toBeCalledTimes(2);
-    expect(axiosInstance.get).toHaveBeenNthCalledWith(1, '/', { page: 1 });
-    expect(axiosInstance.get).toHaveBeenNthCalledWith(2, '/', { page: 2 });
+    expect(axiosInstance.get).toHaveBeenNthCalledWith(1, '/', {
+      limit: expect.any(Number),
+      page: 1,
+    });
+    expect(axiosInstance.get).toHaveBeenNthCalledWith(2, '/', {
+      limit: expect.any(Number),
+      page: 2,
+    });
   });
 
   test('does not fetch relations next page, if a full page was not returned', async () => {
@@ -138,7 +157,25 @@ describe('useRelation', () => {
     await waitForNextUpdate();
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith('/', { page: 1 });
+    expect(spy).toBeCalledWith('/', { limit: 10, page: 1 });
+  });
+
+  test('does fetch search results with a different limit', async () => {
+    const { result, waitForNextUpdate } = await setup(undefined, { searchResultsToShow: 5 });
+
+    await waitForNextUpdate();
+
+    const spy = jest.fn().mockResolvedValue({ data: [] });
+    axiosInstance.get = spy;
+
+    act(() => {
+      result.current.searchFor('something');
+    });
+
+    await waitForNextUpdate();
+
+    expect(spy).toBeCalledTimes(1);
+    expect(spy).toBeCalledWith(expect.any(String), { limit: 5, page: expect.any(Number) });
   });
 
   test('does not fetch search results once a term was provided, but no endpoint was set', async () => {
@@ -177,8 +214,8 @@ describe('useRelation', () => {
     await waitForNextUpdate();
 
     expect(spy).toBeCalledTimes(2);
-    expect(spy).toHaveBeenNthCalledWith(1, '/', { page: 1 });
-    expect(spy).toHaveBeenNthCalledWith(2, '/', { page: 2 });
+    expect(spy).toHaveBeenNthCalledWith(1, '/', { limit: expect.any(Number), page: 1 });
+    expect(spy).toHaveBeenNthCalledWith(2, '/', { limit: expect.any(Number), page: 2 });
   });
 
   test('doesn not fetch search next page, if a full page was not returned', async () => {
