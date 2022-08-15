@@ -30,6 +30,7 @@ export const RelationInput = ({
   onRelationRemove,
   onSearchNextPage,
   onSearch,
+  placeholder,
 }) => {
   return (
     <Box>
@@ -40,11 +41,13 @@ export const RelationInput = ({
             <ReactSelect
               inputId={id}
               isSearchable
+              isClear
               onChange={onRelationAdd}
               onInputChange={onSearch}
               onMenuClose={onRelationOpen}
               onMenuOpen={onRelationClose}
               onMenuScrollToBottom={onSearchNextPage}
+              placeholder={placeholder}
             />
           </>
         }
@@ -135,6 +138,7 @@ RelationInput.propTypes = {
   onRelationLoadMore: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
   onSearchNextPage: PropTypes.func.isRequired,
+  placeholder: PropTypes.string.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
   searchResults: PropTypes.arrayOf(ReactQuerySearchResult),
   relations: ReactQueryRelationResult,
