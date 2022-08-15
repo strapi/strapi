@@ -18,11 +18,15 @@ import { RelationList } from './components/RelationList';
 import ReactSelect from '../ReactSelect';
 
 export const RelationInput = ({
+  id,
   name,
   label,
   labelLoadMore,
   relations,
+  onRelationClose,
+  onRelationOpen,
   onRelationRemove,
+  onRelationScrollEnd,
   onSearch,
 }) => {
   return (
@@ -30,8 +34,15 @@ export const RelationInput = ({
       <Relation
         search={
           <>
-            <FieldLabel htmlFor="articles-relation">{label}</FieldLabel>
-            <ReactSelect inputId="articles-relation" isSearchable onInputChange={onSearch} />
+            <FieldLabel htmlFor={id}>{label}</FieldLabel>
+            <ReactSelect
+              inputId={id}
+              isSearchable
+              onInputChange={onSearch}
+              onMenuClose={onRelationOpen}
+              onMenuOpen={onRelationClose}
+              onMenuScrollToBottom={onRelationScrollEnd}
+            />
           </>
         }
         loadMore={
@@ -98,6 +109,7 @@ const ReactQuerySearchResult = PropTypes.shape({
 });
 
 RelationInput.defaultProps = {
+  disabled: false,
   relations: [],
   searchResults: [],
   relationsToDisplay: 5,
@@ -106,12 +118,18 @@ RelationInput.defaultProps = {
 RelationInput.propTypes = {
   // eslint-disable-next-line react/no-unused-prop-types
   description: PropTypes.string.isRequired,
+  // eslint-disable-next-line react/no-unused-prop-types
+  disabled: PropTypes.bool,
+  id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
   onRelationAdd: PropTypes.func.isRequired,
+  onRelationOpen: PropTypes.func.isRequired,
+  onRelationClose: PropTypes.func.isRequired,
   onRelationRemove: PropTypes.func.isRequired,
+  onRelationScrollEnd: PropTypes.func.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
   onRelationLoadMore: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
