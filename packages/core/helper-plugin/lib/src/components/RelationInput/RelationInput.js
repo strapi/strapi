@@ -17,14 +17,21 @@ import { RelationList } from './components/RelationList';
 
 import ReactSelect from '../ReactSelect';
 
-export const RelationInput = ({ name, label, labelLoadMore, relations, onRelationRemove }) => {
+export const RelationInput = ({
+  name,
+  label,
+  labelLoadMore,
+  relations,
+  onRelationRemove,
+  onSearch,
+}) => {
   return (
     <Box>
       <Relation
         search={
           <>
             <FieldLabel htmlFor="articles-relation">{label}</FieldLabel>
-            <ReactSelect inputId="articles-relation" options={[]} />
+            <ReactSelect inputId="articles-relation" isSearchable onInputChange={onSearch} />
           </>
         }
         loadMore={
@@ -107,6 +114,7 @@ RelationInput.propTypes = {
   onRelationRemove: PropTypes.func.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
   onRelationLoadMore: PropTypes.func.isRequired,
+  onSearch: PropTypes.func.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
   onSearchNextPage: PropTypes.func.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
