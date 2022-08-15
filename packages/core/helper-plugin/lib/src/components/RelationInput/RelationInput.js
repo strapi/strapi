@@ -117,6 +117,8 @@ RelationInput.defaultProps = {
 
 RelationInput.propTypes = {
   // eslint-disable-next-line react/no-unused-prop-types
+  error: PropTypes.string.isRequired,
+  // eslint-disable-next-line react/no-unused-prop-types
   description: PropTypes.string.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
   disabled: PropTypes.bool,
