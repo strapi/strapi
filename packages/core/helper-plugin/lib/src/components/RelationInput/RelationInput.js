@@ -24,9 +24,11 @@ export const RelationInput = ({
   labelLoadMore,
   relations,
   onRelationClose,
+  onRelationAdd,
+  onRelationLoadMore,
   onRelationOpen,
   onRelationRemove,
-  onRelationScrollEnd,
+  onSearchNextPage,
   onSearch,
 }) => {
   return (
@@ -38,15 +40,16 @@ export const RelationInput = ({
             <ReactSelect
               inputId={id}
               isSearchable
+              onChange={onRelationAdd}
               onInputChange={onSearch}
               onMenuClose={onRelationOpen}
               onMenuOpen={onRelationClose}
-              onMenuScrollToBottom={onRelationScrollEnd}
+              onMenuScrollToBottom={onSearchNextPage}
             />
           </>
         }
         loadMore={
-          <TextButton onClick={() => {}} startIcon={<Refresh />}>
+          <TextButton onClick={() => onRelationLoadMore()} startIcon={<Refresh />}>
             {labelLoadMore}
           </TextButton>
         }
@@ -112,7 +115,6 @@ RelationInput.defaultProps = {
   disabled: false,
   relations: [],
   searchResults: [],
-  relationsToDisplay: 5,
 };
 
 RelationInput.propTypes = {
@@ -126,20 +128,14 @@ RelationInput.propTypes = {
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  // eslint-disable-next-line react/no-unused-prop-types
   onRelationAdd: PropTypes.func.isRequired,
   onRelationOpen: PropTypes.func.isRequired,
   onRelationClose: PropTypes.func.isRequired,
   onRelationRemove: PropTypes.func.isRequired,
-  onRelationScrollEnd: PropTypes.func.isRequired,
-  // eslint-disable-next-line react/no-unused-prop-types
   onRelationLoadMore: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
-  // eslint-disable-next-line react/no-unused-prop-types
   onSearchNextPage: PropTypes.func.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
   searchResults: PropTypes.arrayOf(ReactQuerySearchResult),
   relations: ReactQueryRelationResult,
-  // eslint-disable-next-line react/no-unused-prop-types
-  relationsToDisplay: PropTypes.number,
 };
