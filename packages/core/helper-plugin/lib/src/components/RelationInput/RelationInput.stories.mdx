@@ -5,7 +5,7 @@ import { BaseLink } from '@strapi/design-system/BaseLink';
 import { Badge } from '@strapi/design-system/Badge';
 import { Icon } from '@strapi/design-system/Icon';
 import Cross from '@strapi/icons/Cross';
-import { RelationList, RelationItem } from './index';
+import { RelationInput } from './RelationInput';
 import { relations } from './relationsDataMock';
 
 <Meta title="components/RelationInput" />
@@ -18,33 +18,26 @@ WIP
 
 <Canvas>
   <Story name="base">
-    {() => {
-      return (
-        <Main>
-          <RelationList overflow="top-bottom">
-            {relations.map(relation => {
-              const { title, status } = relation;
-              const variant = status === 'published' ? 'success' : 'secondary';
-              return (
-                <RelationItem endAction={<button type="button"><Icon width="12px" as={Cross} /></button>}>
-                  <BaseLink href="/">
-                    {title}
-                  </BaseLink>
-                  <Badge
-                    borderSize={1}
-                    borderColor={`${variant}200`}
-                    backgroundColor={`${variant}100`}
-                    textColor={`${variant}700`}
-                  >
-                    {status}
-                  </Badge>
-                </RelationItem>
-              );
-            })}
-          </RelationList>
-        </Main>
-      );
-    }}
+    <RelationInput label="Relations" labelLoadMore="Load More" name="options" relations={{
+      data: {
+        pages: [
+          {
+            id: 1,
+            href: '',
+            title: 'Relation 1',
+            isDraft: false
+          },
+          {
+            id: 2,
+            href: '',
+            title: 'Relation 2',
+            isDraft: false
+          }
+        ],
+      },
+      isLoading: false,
+      isSuccess: true
+    }} />
   </Story>
 </Canvas>
 
