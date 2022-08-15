@@ -106,11 +106,11 @@ describe('useRelation', () => {
     await waitForNextUpdate();
 
     expect(axiosInstance.get).toBeCalledTimes(2);
-    expect(axiosInstance.get).toHaveBeenNthCalledWith(1, '/', {
+    expect(axiosInstance.get).toHaveBeenNthCalledWith(1, expect.any(String), {
       limit: expect.any(Number),
       page: 1,
     });
-    expect(axiosInstance.get).toHaveBeenNthCalledWith(2, '/', {
+    expect(axiosInstance.get).toHaveBeenNthCalledWith(2, expect.any(String), {
       limit: expect.any(Number),
       page: 2,
     });
@@ -214,8 +214,14 @@ describe('useRelation', () => {
     await waitForNextUpdate();
 
     expect(spy).toBeCalledTimes(2);
-    expect(spy).toHaveBeenNthCalledWith(1, '/', { limit: expect.any(Number), page: 1 });
-    expect(spy).toHaveBeenNthCalledWith(2, '/', { limit: expect.any(Number), page: 2 });
+    expect(spy).toHaveBeenNthCalledWith(1, expect.any(String), {
+      limit: expect.any(Number),
+      page: 1,
+    });
+    expect(spy).toHaveBeenNthCalledWith(2, expect.any(String), {
+      limit: expect.any(Number),
+      page: 2,
+    });
   });
 
   test('doesn not fetch search next page, if a full page was not returned', async () => {
