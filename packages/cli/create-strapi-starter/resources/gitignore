@@ -112,3 +112,4 @@ exports
 *.cache
 build
 .strapi-updater.json
+config/database.ts
