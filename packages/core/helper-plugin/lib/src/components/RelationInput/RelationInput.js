@@ -55,7 +55,7 @@ export const RelationInput = ({
                     </button>
                   }
                 >
-                  {href ? <BaseLink href="/">{title}</BaseLink> : title}
+                  {href ? <BaseLink href={href}>{title}</BaseLink> : title}
 
                   <Badge
                     borderSize={1}
