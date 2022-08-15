@@ -6,24 +6,28 @@ import { RelationInput, useCMEditViewDataManager, NotAllowedInput } from '@strap
 
 import { useRelation } from '../../hooks/useRelation';
 import { connect, select, filterRemovedRelations } from './utils';
+import { getRequestUrl } from '../../utils';
 
 export const RelationInputWrapper = ({
   editable,
   description,
   intlLabel,
   isFieldAllowed,
-  isCreatingEntry,
   isFieldReadable,
   labelAction,
   name,
-  queryInfos: { endPoint },
+  queryInfos: { endpoints },
   relationType,
 }) => {
   const { formatMessage } = useIntl();
-  const { addRelation, removeRelation, modifiedData } = useCMEditViewDataManager();
+  const { addRelation, removeRelation, modifiedData, isCreatingEntry, slug, initialData } = useCMEditViewDataManager();
+
   const { relations, search, searchFor } = useRelation({
     name,
-    availableEndpoint: endPoint,
+    endpoints: {
+      ...endpoints,
+      ...(!isCreatingEntry && { fetch: getRequestUrl(`${slug}/${initialData.id}/${name}`) })
+    },
   });
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
@@ -117,7 +121,6 @@ RelationInputWrapper.propTypes = {
     values: PropTypes.object,
   }).isRequired,
   labelAction: PropTypes.element,
-  isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool,
   isFieldReadable: PropTypes.bool.isRequired,
   mainField: PropTypes.shape({
@@ -138,7 +141,9 @@ RelationInputWrapper.propTypes = {
   queryInfos: PropTypes.shape({
     containsKey: PropTypes.string.isRequired,
     defaultParams: PropTypes.object,
-    endPoint: PropTypes.string.isRequired,
+    endpoints: PropTypes.shape({
+      search: PropTypes.string.isRequired,
+    }).isRequired,
     shouldDisplayRelationLink: PropTypes.bool.isRequired,
     paramsToKeep: PropTypes.array,
   }).isRequired,
