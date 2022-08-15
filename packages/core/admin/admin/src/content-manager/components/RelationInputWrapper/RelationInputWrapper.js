@@ -1,13 +1,14 @@
 import PropTypes from 'prop-types';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 
 import { RelationInput, useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
 import { useRelation } from '../../hooks/useRelation';
-import { connect, select } from './utils';
+import { connect, select, filterRemovedRelations } from './utils';
 
 export const RelationInputWrapper = ({
+  editable,
   description,
   intlLabel,
   isFieldAllowed,
@@ -15,29 +16,55 @@ export const RelationInputWrapper = ({
   isFieldReadable,
   labelAction,
   name,
+  queryInfos: { endPoint },
+  relationType,
 }) => {
   const { formatMessage } = useIntl();
-  const { addRelation, removeRelation } = useCMEditViewDataManager();
+  const { addRelation, removeRelation, modifiedData } = useCMEditViewDataManager();
   const { relations, search, searchFor } = useRelation({
     name,
-    relationsToShow: 2,
-    relationsToSearch: 2,
+    availableEndpoint: endPoint,
   });
 
-  const handleRelationAdd = () => {
-    addRelation({ target: { name, value: null } });
+  const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
+  const isSingleRelation = [
+    'oneWay',
+    'oneToOne',
+    'manyToOne',
+    'oneToManyMorph',
+    'oneToOneMorph',
+  ].includes(relationType);
+
+  const isDisabled = useMemo(() => {
+    if (isMorph) {
+      return true;
+    }
+
+    if (!isCreatingEntry) {
+      return (!isFieldAllowed && isFieldReadable) || !editable;
+    }
+
+    return !editable;
+  }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
+
+  const handleRelationAdd = (relation) => {
+    if (isSingleRelation) {
+      // TODO remove all relations from relations before
+    }
+
+    addRelation({ target: { name, value: relation } });
   };
 
-  const handleRelationRemove = () => {
-    removeRelation({ target: { name, value: null } });
+  const handleRelationRemove = (relation) => {
+    removeRelation({ target: { name, value: relation } });
   };
 
   const handleRelationLoadMore = () => {
     relations.fetchNextPage();
   };
 
-  const handleSearch = () => {
-    searchFor('');
+  const handleSearch = (term) => {
+    searchFor(term);
   };
 
   const handleSearchMore = () => {
@@ -54,6 +81,8 @@ export const RelationInputWrapper = ({
   return (
     <RelationInput
       description={description}
+      disabled={isDisabled}
+      id={name}
       label={formatMessage(intlLabel)}
       labelLoadMore={formatMessage({
         id: 'tbd',
@@ -65,7 +94,7 @@ export const RelationInputWrapper = ({
       onRelationLoadMore={() => handleRelationLoadMore()}
       onSearch={() => handleSearch()}
       onSearchNextPage={() => handleSearchMore()}
-      relations={relations}
+      relations={filterRemovedRelations(relations, modifiedData)}
       searchResults={search}
     />
   );
@@ -104,6 +133,7 @@ RelationInputWrapper.propTypes = {
     values: PropTypes.object,
   }),
   relationType: PropTypes.string.isRequired,
+  // eslint-disable-next-line react/no-unused-prop-types
   targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.shape({
     containsKey: PropTypes.string.isRequired,
