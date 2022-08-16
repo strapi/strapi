@@ -17,7 +17,7 @@ const crypto = require('crypto');
  */
 
 /** @constant {Array<string>} */
-const SELECT_FIELDS = ['id', 'name', 'description', 'type', 'createdAt'];
+const SELECT_FIELDS = ['id', 'name', 'description', 'type', 'createdAt', 'updatedAt'];
 
 /**
  * @param {Object} whereParams
