@@ -69,6 +69,7 @@ describe('Admin Controller', () => {
                 'info.dependencies': {
                   dependency: '1.0.0',
                 },
+                uuid: 'testuuid',
                 environment: 'development',
               }[key] || value)
           ),
@@ -85,12 +86,14 @@ describe('Admin Controller', () => {
         ['autoReload', false],
         ['info.strapi', null],
         ['info.dependencies', {}],
+        ['uuid', null],
       ]);
       expect(result.data).toBeDefined();
       expect(result.data).toStrictEqual({
         currentEnvironment: 'development',
         autoReload: false,
         strapiVersion: '1.0.0',
+        projectId: 'testuuid',
         dependencies: {
           dependency: '1.0.0',
         },
