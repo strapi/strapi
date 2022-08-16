@@ -77,15 +77,14 @@ module.exports = {
     }
 
     if (entityId) {
-      const joinTable = strapi.db.metadata.get(sourceModelUid).attributes[targetField].joinTable;
-      const sourceColumn = component ? joinTable.joinColumn.name : joinTable.inverseJoinColumn.name;
-      const targetColumn = component ? joinTable.inverseJoinColumn.name : joinTable.joinColumn.name;
+      const subQuery = strapi.db.queryBuilder(sourceModel.uid);
 
-      // Select ids of targeted entities already having a relation with entityId
-      const knexSubQuery = strapi.db
-        .queryBuilder(joinTable.name)
-        .select([targetColumn])
-        .where({ [sourceColumn]: entityId })
+      const alias = subQuery.getAlias();
+
+      const knexSubQuery = subQuery
+        .where({ id: entityId })
+        .join({ alias, targetField })
+        .select(`${alias}.id`)
         .getKnexQuery();
 
       query.where({ id: { $notIn: knexSubQuery } });

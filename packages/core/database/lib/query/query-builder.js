@@ -196,7 +196,24 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
     },
 
     join(join) {
-      state.joins.push(join);
+      if (!join.targetField) {
+        state.joins.push(join);
+        return this;
+      }
+
+      const model = db.metadata.get(uid);
+      const attribute = model.attributes[join.targetField];
+
+      helpers.createJoin(
+        { db, qb: this },
+        {
+          alias: this.alias,
+          refAlias: join.alias,
+          attributeName: join.targetField,
+          attribute,
+        }
+      );
+
       return this;
     },
 
