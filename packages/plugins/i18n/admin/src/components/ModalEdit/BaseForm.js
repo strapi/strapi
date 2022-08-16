@@ -24,10 +24,12 @@ const BaseForm = ({ locale }) => {
             id: getTrad('Settings.locales.modal.locales.label'),
             defaultMessage: 'Locales',
           })}
-          value={localeDetails.code}
+          value={localeDetails?.code || locale.code}
           disabled
         >
-          <Option value={localeDetails.code}>{localeDetails.name}</Option>
+          <Option value={localeDetails?.code || locale.code}>
+            {localeDetails?.name || locale.code}
+          </Option>
         </Select>
       </GridItem>
 
