@@ -23,7 +23,8 @@ const LinkStyled = styled(Link)`
     }
   }
 
-  &:hover {
+  &:hover,
+  &:focus {
     svg {
       path {
         fill: ${({ theme }) => theme.colors.neutral800};
