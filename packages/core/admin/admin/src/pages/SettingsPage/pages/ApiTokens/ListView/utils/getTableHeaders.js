@@ -1,4 +1,4 @@
-const getTableHeaders = formatMessage => [
+const getTableHeaders = (formatMessage) => [
   {
     name: 'name',
     key: 'name',
