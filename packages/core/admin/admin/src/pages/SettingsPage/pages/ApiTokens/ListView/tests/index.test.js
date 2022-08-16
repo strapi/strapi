@@ -632,7 +632,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         fill: #8e8ea9;
       }
 
-      .c36:hover svg path {
+      .c36:hover svg path,
+      .c36:focus svg path {
         fill: #32324d;
       }
 
