@@ -1,12 +1,16 @@
 import { useMemo } from 'react';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
-function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name }) {
+import { getRequestUrl } from '../../../utils';
+
+function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, queryInfos }) {
   const {
     isCreatingEntry,
     createActionAllowedFields,
     readActionAllowedFields,
     updateActionAllowedFields,
+    slug,
+    initialData,
   } = useCMEditViewDataManager();
 
   const isFieldAllowed = useMemo(() => {
@@ -35,7 +39,22 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name })
     return allowedFields.includes(name);
   }, [isCreatingEntry, isUserAllowedToReadField, name, readActionAllowedFields]);
 
+  const relationFetchEndpoint = useMemo(() => {
+    if (isCreatingEntry) {
+      return false;
+    }
+
+    return getRequestUrl(`${slug}/${initialData.id}/${name}`);
+  }, [isCreatingEntry, slug, initialData, name]);
+
   return {
+    queryInfos: {
+      ...queryInfos,
+      endpoints: {
+        ...queryInfos.endpoints,
+        fetch: relationFetchEndpoint,
+      },
+    },
     isCreatingEntry,
     isFieldAllowed,
     isFieldReadable,

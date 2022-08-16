@@ -1,1 +1,1 @@
-export { RelationInputWrapper } from './RelationInputWrapper';
+export { default as RelationInputWrapper } from './RelationInputWrapper';
