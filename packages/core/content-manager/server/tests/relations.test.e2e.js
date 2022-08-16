@@ -239,5 +239,23 @@ describe('Relations', () => {
 
       expect(res.body.results).toHaveLength(0);
     });
+
+    test('can search', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/content-manager/relations/api::shop.shop/products',
+        qs: {
+          _q: 'Can',
+        },
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.results).toMatchObject([
+        {
+          id: expect.any(Number),
+          name: 'Candle',
+        },
+      ]);
+    });
   });
 });

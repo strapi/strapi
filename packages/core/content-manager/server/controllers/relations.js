@@ -54,26 +54,36 @@ module.exports = {
 
     const targetedModel = strapi.getModel(attribute.target);
 
-    const offset = Math.max(page - 1, 0) * pageSize;
-    const limit = Number(pageSize);
-
     const modelConfig = component
       ? await getService('components').findConfiguration(sourceModel)
       : await getService('content-types').findConfiguration(sourceModel);
     const mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
 
-    const query = strapi.db.queryBuilder(targetedModel.uid);
+    const fieldsToSelect = ['id', mainField];
+    if (hasDraftAndPublish(targetedModel)) {
+      fieldsToSelect.push(PUBLISHED_AT_ATTRIBUTE);
+    }
+
+    const queryParams = {
+      where: { $and: [] },
+      select: fieldsToSelect,
+      orderBy: mainField,
+      page,
+      pageSize,
+    };
 
     if (!isNil(_q)) {
-      query.search(_q);
+      queryParams._q = _q;
     }
 
     if (!isNil(ctx.request.query.filters)) {
-      query.where(convertFiltersQueryParams(ctx.request.query.filters, targetedModel));
+      queryParams.where.$and.push(
+        convertFiltersQueryParams(ctx.request.query.filters, targetedModel).filters
+      );
     }
 
     if (!isEmpty(idsToOmit)) {
-      query.where({ id: { $notIn: idsToOmit } });
+      queryParams.where.$and.push({ id: { $notIn: idsToOmit } });
     }
 
     if (entityId) {
@@ -87,28 +97,17 @@ module.exports = {
         .select(`${alias}.id`)
         .getKnexQuery();
 
-      query.where({ id: { $notIn: knexSubQuery } });
+      queryParams.where.$and.push({ id: { $notIn: knexSubQuery } });
     }
 
-    const { count } = await query.clone().count().first().execute();
-
-    const fieldsToSelect = ['id', mainField];
-    if (hasDraftAndPublish(targetedModel)) {
-      fieldsToSelect.push(PUBLISHED_AT_ATTRIBUTE);
-    }
-    const entities = await query
-      .select(fieldsToSelect)
-      .orderBy(mainField)
-      .offset(offset)
-      .limit(limit)
-      .execute();
+    const results = await strapi.query(targetedModel.uid).findPage(queryParams);
 
     ctx.body = {
-      results: entities,
+      results: results.results,
       pagination: {
-        page: Number(page),
-        pageSize: Number(pageSize),
-        total: count,
+        page: results.pagination.page,
+        pageSize: results.pagination.pageSize,
+        total: results.pagination.total,
       },
     };
   },
