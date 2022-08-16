@@ -42,7 +42,7 @@ const DefaultButton = ({ tokenName, tokenId, buttonType, children }) => {
   return (
     <LinkStyled
       to={`${pathname}/${tokenId}`}
-      title={formatMessage(MESSAGES_MAP[buttonType], { target: `${tokenName}` })}
+      title={formatMessage(MESSAGES_MAP[buttonType], { target: tokenName })}
     >
       {children}
     </LinkStyled>
