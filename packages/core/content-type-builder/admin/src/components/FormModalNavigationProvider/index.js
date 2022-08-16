@@ -10,7 +10,7 @@ const FormModalNavigationProvider = ({ children }) => {
 
   const onClickSelectCustomField = ({ attributeType, customFieldUid }) => {
     // TODO: Add tracking for custom fields
-    setFormModalNavigationState(prevState => {
+    setFormModalNavigationState((prevState) => {
       return {
         ...prevState,
         actionType: 'create',
@@ -26,7 +26,7 @@ const FormModalNavigationProvider = ({ children }) => {
       trackUsage('didSelectContentTypeFieldType', { type: attributeType });
     }
 
-    setFormModalNavigationState(prevState => {
+    setFormModalNavigationState((prevState) => {
       return {
         ...prevState,
         actionType: 'create',
@@ -38,7 +38,7 @@ const FormModalNavigationProvider = ({ children }) => {
   };
 
   const onOpenModalAddComponentsToDZ = ({ dynamicZoneTarget, targetUid }) => {
-    setFormModalNavigationState(prevState => {
+    setFormModalNavigationState((prevState) => {
       return {
         ...prevState,
         dynamicZoneTarget,
@@ -53,7 +53,7 @@ const FormModalNavigationProvider = ({ children }) => {
   };
 
   const onOpenModalAddField = ({ forTarget, targetUid }) => {
-    setFormModalNavigationState(prevState => {
+    setFormModalNavigationState((prevState) => {
       return {
         ...prevState,
         actionType: 'create',
@@ -65,14 +65,14 @@ const FormModalNavigationProvider = ({ children }) => {
     });
   };
 
-  const onOpenModalCreateSchema = nextState => {
-    setFormModalNavigationState(prevState => {
+  const onOpenModalCreateSchema = (nextState) => {
+    setFormModalNavigationState((prevState) => {
       return { ...prevState, ...nextState, isOpen: true };
     });
   };
 
-  const onOpenModalEditCategory = categoryName => {
-    setFormModalNavigationState(prevState => {
+  const onOpenModalEditCategory = (categoryName) => {
+    setFormModalNavigationState((prevState) => {
       return {
         ...prevState,
         categoryName,
@@ -90,7 +90,7 @@ const FormModalNavigationProvider = ({ children }) => {
     attributeType,
     customFieldUid,
   }) => {
-    setFormModalNavigationState(prevState => {
+    setFormModalNavigationState((prevState) => {
       return {
         ...prevState,
         modalType: 'customField',
@@ -106,7 +106,7 @@ const FormModalNavigationProvider = ({ children }) => {
   };
 
   const onOpenModalEditField = ({ forTarget, targetUid, attributeName, attributeType, step }) => {
-    setFormModalNavigationState(prevState => {
+    setFormModalNavigationState((prevState) => {
       return {
         ...prevState,
         modalType: 'attribute',
@@ -122,7 +122,7 @@ const FormModalNavigationProvider = ({ children }) => {
   };
 
   const onOpenModalEditSchema = ({ modalType, forTarget, targetUid, kind }) => {
-    setFormModalNavigationState(prevState => {
+    setFormModalNavigationState((prevState) => {
       return {
         ...prevState,
         modalType,
@@ -140,7 +140,7 @@ const FormModalNavigationProvider = ({ children }) => {
   };
 
   const onNavigateToChooseAttributeModal = ({ forTarget, targetUid }) => {
-    setFormModalNavigationState(prev => {
+    setFormModalNavigationState((prev) => {
       return {
         ...prev,
         forTarget,
@@ -151,7 +151,7 @@ const FormModalNavigationProvider = ({ children }) => {
   };
 
   const onNavigateToCreateComponentStep2 = () => {
-    setFormModalNavigationState(prev => {
+    setFormModalNavigationState((prev) => {
       return {
         ...prev,
         attributeType: 'component',
@@ -162,7 +162,7 @@ const FormModalNavigationProvider = ({ children }) => {
   };
 
   const onNavigateToAddCompoToDZModal = ({ dynamicZoneTarget }) => {
-    setFormModalNavigationState(prev => {
+    setFormModalNavigationState((prev) => {
       return {
         ...prev,
         dynamicZoneTarget,

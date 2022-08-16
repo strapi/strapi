@@ -1,0 +1,1558 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BrowseStep renders and match snapshot 1`] = `
+.c81 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c22 {
+  padding-top: 12px;
+}
+
+.c31 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.c35 {
+  position: relative;
+}
+
+.c40 {
+  background: #eaf5ff;
+  color: #66b7f1;
+  padding-top: 8px;
+  padding-right: 12px;
+  padding-bottom: 8px;
+  padding-left: 12px;
+  border-radius: 4px;
+}
+
+.c45 {
+  padding: 4px;
+  max-width: 100%;
+}
+
+.c72 {
+  padding-left: 8px;
+}
+
+.c16 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c13 {
+  padding-right: 8px;
+}
+
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c10 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c10 svg > g,
+.c10 svg path {
+  fill: #ffffff;
+}
+
+.c10[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c10:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c10:focus-visible {
+  outline: none;
+}
+
+.c10:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c14 {
+  height: 100%;
+}
+
+.c11 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c11 .c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c11 .c15 {
+  color: #ffffff;
+}
+
+.c11[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c11[aria-disabled='true'] .c15 {
+  color: #666687;
+}
+
+.c11[aria-disabled='true'] svg > g,
+.c11[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c11[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c11[aria-disabled='true']:active .c15 {
+  color: #666687;
+}
+
+.c11[aria-disabled='true']:active svg > g,
+.c11[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c11:hover {
+  background-color: #f6f6f9;
+}
+
+.c11:active {
+  background-color: #eaeaef;
+}
+
+.c11 .c15 {
+  color: #32324d;
+}
+
+.c11 svg > g,
+.c11 svg path {
+  fill: #32324d;
+}
+
+.c42 {
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.c47 {
+  max-width: 100%;
+}
+
+.c58 {
+  padding-top: 16px;
+}
+
+.c0 {
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c1 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c17 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c43 {
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c48 {
+  -webkit-align-items: start;
+  -webkit-box-align: start;
+  -ms-flex-align: start;
+  align-items: start;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c59 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c20 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c20 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c20 svg > g,
+.c20 svg path {
+  fill: #ffffff;
+}
+
+.c20[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c20:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c20:focus-visible {
+  outline: none;
+}
+
+.c20:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c21 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c21 svg > g,
+.c21 svg path {
+  fill: #8e8ea9;
+}
+
+.c21:hover svg > g,
+.c21:hover svg path {
+  fill: #666687;
+}
+
+.c21:active svg > g,
+.c21:active svg path {
+  fill: #a5a5ba;
+}
+
+.c21[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c21[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c64 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+}
+
+.c64:focus {
+  outline: none;
+}
+
+.c64[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c67 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c69 {
+  padding-left: 12px;
+}
+
+.c60 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c62 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c65 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c68 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c61 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c63 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c63:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c70 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c70 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c70 svg path {
+  fill: #666687;
+}
+
+.c71 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c71 svg {
+  width: 0.375rem;
+}
+
+.c66 {
+  width: 100%;
+}
+
+.c37 {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  cursor: pointer;
+  cursor: pointer;
+}
+
+.c38 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c39 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c39 > * + * {
+  margin-left: 8px;
+}
+
+.c32 {
+  font-weight: 500;
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c49 {
+  font-weight: 500;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c52 {
+  color: #666687;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c73 {
+  color: #666687;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c79 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c51 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c33 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
+}
+
+.c34 {
+  grid-column: span 3;
+  max-width: 100%;
+}
+
+.c54 {
+  right: 16px;
+}
+
+.c55 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c56 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c56 > * + * {
+  margin-left: 8px;
+}
+
+.c57 {
+  position: absolute;
+  top: 12px;
+}
+
+.c26 {
+  padding-top: 4px;
+  padding-right: 8px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+}
+
+.c28 {
+  padding-right: 4px;
+  padding-left: 4px;
+}
+
+.c27 {
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c29 {
+  color: #8e8ea9;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c23 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c25 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c24:first-child {
+  margin-left: calc(-1*8px);
+}
+
+.c30 {
+  border-radius: 4px;
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.43;
+  padding: 4px 8px;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.c30:hover,
+.c30:focus {
+  background-color: #dcdce4;
+  color: #4a4a6a;
+}
+
+.c6 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c8 {
+  padding-left: 8px;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c3 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c3 svg > g,
+.c3 svg path {
+  fill: #ffffff;
+}
+
+.c3[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c3:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c3:focus-visible {
+  outline: none;
+}
+
+.c3:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c4 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c4 .c7 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c4 .c5 {
+  color: #ffffff;
+}
+
+.c4[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c4[aria-disabled='true'] .c5 {
+  color: #666687;
+}
+
+.c4[aria-disabled='true'] svg > g,
+.c4[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c4[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c4[aria-disabled='true']:active .c5 {
+  color: #666687;
+}
+
+.c4[aria-disabled='true']:active svg > g,
+.c4[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c4:hover {
+  background-color: #f6f6f9;
+}
+
+.c4:active {
+  background-color: #eaeaef;
+}
+
+.c4 .c5 {
+  color: #32324d;
+}
+
+.c4 svg > g,
+.c4 svg path {
+  fill: #32324d;
+}
+
+.c9 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c9 svg {
+  height: 4px;
+  width: 6px;
+}
+
+.c36 {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  width: 100%;
+}
+
+.c36:hover,
+.c36:focus {
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.c41 path {
+  fill: currentColor;
+}
+
+.c53 {
+  display: none;
+}
+
+.c44 {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c46:focus {
+  outline: 2px solid #4945ff;
+  outline-offset: -2px;
+}
+
+.c74 > * + * {
+  margin-left: 4px;
+}
+
+.c80 {
+  line-height: revert;
+}
+
+.c75 {
+  padding: 12px;
+  border-radius: 4px;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c75:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c75:focus-visible {
+  outline: none;
+}
+
+.c75:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c77 {
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  outline: none;
+}
+
+.c77:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c77:focus-visible {
+  outline: none;
+}
+
+.c77:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c78 {
+  color: #271fe0;
+  background: #ffffff;
+}
+
+.c78:hover {
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c76 {
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+
+.c76 svg path {
+  fill: #c0c0cf;
+}
+
+.c76:focus svg path,
+.c76:hover svg path {
+  fill: #c0c0cf;
+}
+
+.c2 > * + * {
+  margin-left: 8px;
+}
+
+.c18 {
+  margin-left: auto;
+}
+
+.c18 > * + * {
+  margin-left: 8px;
+}
+
+.c19 {
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.c50 {
+  max-width: 100%;
+}
+
+@media (max-width:68.75rem) {
+  .c34 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c34 {
+    grid-column: span;
+  }
+}
+
+<div>
+  <div
+    class=""
+  >
+    <div
+      class=""
+    >
+      <div
+        class="c0"
+      >
+        <div
+          class="c1 c2"
+          wrap="wrap"
+        >
+          <div>
+            <button
+              aria-controls="simplemenu-1"
+              aria-disabled="false"
+              aria-expanded="false"
+              aria-haspopup="true"
+              class="c3 c4"
+              label="Sort by"
+              type="button"
+            >
+              <span
+                class="c5 c6"
+              >
+                Sort by
+              </span>
+              <div
+                aria-hidden="true"
+                class="c7 c8"
+              >
+                <span
+                  class="c9"
+                >
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 14 8"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      clip-rule="evenodd"
+                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                      fill="#32324D"
+                      fill-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </div>
+            </button>
+          </div>
+          <button
+            aria-disabled="false"
+            class="c10 c11"
+            type="button"
+          >
+            <div
+              aria-hidden="true"
+              class="c12 c13 c14"
+            >
+              <svg
+                fill="none"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M0 4a2 2 0 012-2h20a2 2 0 110 4H2a2 2 0 01-2-2zm4 8a2 2 0 012-2h12a2 2 0 110 4H6a2 2 0 01-2-2zm6 6a2 2 0 100 4h4a2 2 0 100-4h-4z"
+                  fill="#32324D"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </div>
+            <span
+              class="c15 c16"
+            >
+              Filters
+            </span>
+          </button>
+        </div>
+        <div
+          class="c17 c18 c19"
+        >
+          <span>
+            <button
+              aria-disabled="false"
+              aria-labelledby="tooltip-1"
+              class="c20 c21"
+              tabindex="0"
+              type="button"
+            >
+              <svg
+                fill="none"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M23.813 20.163l-5.3-5.367a9.792 9.792 0 001.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 005.007-1.4l5.275 5.35a.634.634 0 00.913 0l2.706-2.737a.641.641 0 000-.907zM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062z"
+                  fill="#32324D"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </button>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div
+      class="c22"
+    >
+      <nav
+        aria-label="Folders navigation"
+        class=""
+      >
+        <ol
+          class="c23 c24"
+        >
+          <li
+            class="c25"
+          >
+            <div
+              class="c26"
+            >
+              <span
+                aria-current="false"
+                class="c27"
+              >
+                Media Library
+              </span>
+            </div>
+            <div
+              aria-hidden="true"
+              class="c28"
+            >
+              <span
+                class="c29"
+              >
+                /
+              </span>
+            </div>
+          </li>
+          <li
+            class="c25"
+          >
+            <button
+              class="c30"
+              type="button"
+            >
+              Folder 2
+            </button>
+            <div
+              aria-hidden="true"
+              class="c28"
+            >
+              <span
+                class="c29"
+              >
+                /
+              </span>
+            </div>
+          </li>
+          <li
+            class="c25"
+          >
+            <button
+              class="c30"
+              type="button"
+            >
+              Folder 1
+            </button>
+          </li>
+        </ol>
+      </nav>
+    </div>
+    <div
+      class=""
+    >
+      <div
+        class="c31"
+      >
+        <h2
+          class="c32"
+        >
+          Folders (1)
+        </h2>
+      </div>
+      <div
+        class="c33"
+      >
+        <div
+          class="c34"
+        >
+          <div
+            class=""
+          >
+            <div
+              class="c35 "
+              tabindex="0"
+            >
+              <button
+                aria-hidden="true"
+                aria-label="Folder 1"
+                class="c36"
+                tabindex="-1"
+                type="button"
+              />
+              <div
+                class="c37 c38 c39"
+                cursor="pointer"
+                spacing="2"
+              >
+                <div
+                  class="c40"
+                >
+                  <svg
+                    class="c41"
+                    fill="none"
+                    height="1.5rem"
+                    viewBox="0 0 24 24"
+                    width="1.5rem"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </div>
+                <div
+                  class="c42 c43 c44"
+                  id="folder-1-1-title"
+                  overflow="hidden"
+                >
+                  <button
+                    class="c45 c46"
+                    type="button"
+                  >
+                    <h2
+                      class="c47 c48"
+                    >
+                      <span
+                        class="c49 c50"
+                      >
+                        Folder 1
+                        <div
+                          class="c51"
+                        >
+                          :
+                        </div>
+                      </span>
+                      <span
+                        class="c52 c50"
+                      >
+                        1 folder, 1 asset
+                      </span>
+                    </h2>
+                  </button>
+                </div>
+                <div
+                  class="c53"
+                >
+                  <div
+                    class="c54 c55 c56 c57"
+                    spacing="2"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="c58 c59"
+    >
+      <div
+        class="c17"
+      >
+        <div>
+          <div
+            class="c60 c61"
+          >
+            <div
+              class="c62 c63"
+            >
+              <button
+                aria-disabled="false"
+                aria-expanded="false"
+                aria-haspopup="listbox"
+                aria-label="Entries per page"
+                aria-labelledby="select-1-label select-1-content"
+                class="c64"
+                id="select-1"
+                type="button"
+              />
+              <div
+                class="c65 c66"
+              >
+                <div
+                  class="c62"
+                >
+                  <div
+                    class="c67"
+                  >
+                    <span
+                      class="c68"
+                      id="select-1-content"
+                    >
+                      10
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="c62"
+                >
+                  <button
+                    aria-hidden="true"
+                    class="c69 c70 c71"
+                    tabindex="-1"
+                    type="button"
+                  >
+                    <svg
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 14 8"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        clip-rule="evenodd"
+                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                        fill="#32324D"
+                        fill-rule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="c72"
+        >
+          <label
+            class="c73"
+            for="page-size"
+          >
+            Entries per page
+          </label>
+        </div>
+      </div>
+      <nav
+        aria-label="pagination"
+        class="sc-fMfAsl"
+      >
+        <ul
+          class="c17 c74"
+        >
+          <li>
+            <button
+              aria-disabled="true"
+              class="c75 c76"
+              tabindex="-1"
+              type="button"
+            >
+              <div
+                class="c51"
+              >
+                Go to previous page
+              </div>
+              <svg
+                aria-hidden="true"
+                fill="none"
+                height="1em"
+                viewBox="0 0 10 16"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9.88 14.12L3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88z"
+                  fill="#32324D"
+                />
+              </svg>
+            </button>
+          </li>
+          <li>
+            <button
+              class="c77 c78"
+              type="button"
+            >
+              <div
+                class="c51"
+              >
+                Go to page 1
+              </div>
+              <span
+                aria-hidden="true"
+                class="c79 c80"
+              >
+                1
+              </span>
+            </button>
+          </li>
+          <li>
+            <button
+              aria-disabled="true"
+              class="c75 c76"
+              tabindex="-1"
+              type="button"
+            >
+              <div
+                class="c51"
+              >
+                Go to next page
+              </div>
+              <svg
+                aria-hidden="true"
+                fill="none"
+                height="1em"
+                viewBox="0 0 10 16"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
+                  fill="#32324D"
+                />
+              </svg>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+  <div
+    class="c81"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;

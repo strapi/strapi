@@ -689,7 +689,7 @@ describe('Admin | containers | RoleEditPage', () => {
         padding-left: 32px;
       }
 
-      .c68 {
+      .c69 {
         background: #eaeaef;
         padding-top: 24px;
         padding-right: 32px;
@@ -719,25 +719,29 @@ describe('Admin | containers | RoleEditPage', () => {
         max-width: 100%;
       }
 
-      .c67 {
+      .c68 {
         grid-column: span 5;
         max-width: 100%;
       }
 
-      .c59 {
+      .c61 {
         color: #4945ff;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c60 {
+      .c62 {
         color: #4a4a6a;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
       }
 
-      .c61 {
+      .c63 {
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -749,26 +753,39 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c51 {
         background: #f6f6f9;
+        padding-top: 24px;
         padding-right: 24px;
+        padding-bottom: 24px;
         padding-left: 24px;
       }
 
       .c54 {
+        max-width: 100%;
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
       }
 
-      .c63 {
+      .c57 {
+        min-width: 0px;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c64 {
         background: #dcdce4;
         border-radius: 50%;
         cursor: pointer;
         width: 2rem;
         height: 2rem;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
         cursor: pointer;
       }
 
-      .c65 {
+      .c66 {
         color: #666687;
         width: 0.6875rem;
       }
@@ -805,7 +822,7 @@ describe('Admin | containers | RoleEditPage', () => {
         flex-direction: row;
       }
 
-      .c64 {
+      .c65 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -817,6 +834,9 @@ describe('Admin | containers | RoleEditPage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
         -webkit-box-pack: center;
         -webkit-justify-content: center;
         -ms-flex-pack: center;
@@ -831,11 +851,11 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c49:hover:not([aria-disabled='true']) .sc-cWPeQZ {
+      .c49:hover:not([aria-disabled='true']) .sc-OVzLa {
         color: #271fe0;
       }
 
-      .c49:hover:not([aria-disabled='true']) .c58 {
+      .c49:hover:not([aria-disabled='true']) .c60 {
         color: #4945ff;
       }
 
@@ -847,22 +867,22 @@ describe('Admin | containers | RoleEditPage', () => {
         background: #d9d8ff;
       }
 
-      .c56 {
+      .c58 {
         background: transparent;
         border: none;
         position: relative;
         outline: none;
       }
 
-      .c56[aria-disabled='true'] {
+      .c58[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c56[aria-disabled='true'] svg path {
+      .c58[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c56 svg {
+      .c58 svg {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -870,11 +890,11 @@ describe('Admin | containers | RoleEditPage', () => {
         font-size: 0.625rem;
       }
 
-      .c56 svg path {
+      .c58 svg path {
         fill: #4945ff;
       }
 
-      .c56:after {
+      .c58:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -889,11 +909,11 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 2px solid transparent;
       }
 
-      .c56:focus-visible {
+      .c58:focus-visible {
         outline: none;
       }
 
-      .c56:focus-visible:after {
+      .c58:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -904,34 +924,38 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c62 > * {
+      .c56 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c62 > * + * {
+      .c56 > * + * {
         margin-left: 12px;
       }
 
-      .c66 path {
+      .c67 path {
         fill: #666687;
       }
 
-      .c57 {
+      .c59 {
         text-align: left;
       }
 
-      .c57 svg {
+      .c59 > span {
+        max-width: 100%;
+      }
+
+      .c59 svg {
         width: 0.875rem;
         height: 0.875rem;
       }
 
-      .c57 svg path {
+      .c59 svg path {
         fill: #8e8ea9;
       }
 
       .c53 {
-        height: 5.5rem;
+        min-height: 5.5rem;
         border-radius: 4px;
       }
 
@@ -964,13 +988,13 @@ describe('Admin | containers | RoleEditPage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c67 {
+        .c68 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c67 {
+        .c68 {
           grid-column: span;
         }
       }
@@ -1222,60 +1246,65 @@ describe('Admin | containers | RoleEditPage', () => {
                             class="c50 c51 c52 c53"
                             cursor=""
                           >
-                            <button
-                              aria-controls="accordion-content-accordion-1"
-                              aria-disabled="false"
-                              aria-expanded="false"
-                              aria-labelledby="accordion-label-accordion-1"
-                              class="c50 c54 c55 c56 c57"
-                              data-strapi-accordion-toggle="true"
-                              type="button"
-                            >
-                              <span
-                                class="c58 c59"
-                              >
-                                <span
-                                  class="c58 c60"
-                                  id="accordion-label-accordion-1"
-                                >
-                                  Address
-                                </span>
-                                <p
-                                  class="c58 c61"
-                                  id="accordion-desc-accordion-1"
-                                >
-                                  Define all allowed actions for the api::address plugin.
-                                </p>
-                              </span>
-                            </button>
                             <div
-                              class="c50 c55 c62"
+                              class="c50 c54 c55 c56"
                               spacing="3"
                             >
-                              <span
-                                aria-hidden="true"
-                                class="c50 c63 c64"
-                                cursor="pointer"
-                                data-strapi-dropdown="true"
-                                height="2rem"
-                                width="2rem"
+                              <button
+                                aria-controls="accordion-content-accordion-1"
+                                aria-disabled="false"
+                                aria-expanded="false"
+                                aria-labelledby="accordion-label-accordion-1"
+                                class="c50 c57 c55 c58 c59"
+                                data-strapi-accordion-toggle="true"
+                                type="button"
                               >
-                                <svg
-                                  class="c65 c66"
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 14 8"
-                                  width="0.6875rem"
-                                  xmlns="http://www.w3.org/2000/svg"
+                                <span
+                                  class="c60 c61"
                                 >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
+                                  <span
+                                    class="c60 sc-OVzLa c62"
+                                    id="accordion-label-accordion-1"
+                                  >
+                                    Address
+                                  </span>
+                                  <p
+                                    class="c60 c63"
+                                    id="accordion-desc-accordion-1"
+                                  >
+                                    Define all allowed actions for the api::address plugin.
+                                  </p>
+                                </span>
+                              </button>
+                              <div
+                                class="c50 c55 c56"
+                                spacing="3"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="c50 c64 c65"
+                                  cursor="pointer"
+                                  data-strapi-dropdown="true"
+                                  height="2rem"
+                                  width="2rem"
+                                >
+                                  <svg
+                                    class="c66 c67"
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 14 8"
+                                    width="0.6875rem"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1284,10 +1313,10 @@ describe('Admin | containers | RoleEditPage', () => {
                   </div>
                 </div>
                 <div
-                  class="c67"
+                  class="c68"
                 >
                   <div
-                    class="c68"
+                    class="c69"
                     style="min-height: 100%;"
                   >
                     <div
@@ -1341,18 +1370,13 @@ describe('Admin | containers | RoleEditPage', () => {
     await userEvent.click(saveButton);
     await waitFor(() => expect(saveButton).not.toBeDisabled());
     const errorMessages = await getAllByText(/invalid value/i);
-    errorMessages.forEach(errorMessage => expect(errorMessage).toBeInTheDocument());
+    errorMessages.forEach((errorMessage) => expect(errorMessage).toBeInTheDocument());
   });
 
   it('can toggle the permissions accordions and actions', async () => {
     // Create app and wait for loading
-    const {
-      getByLabelText,
-      queryByText,
-      getByTestId,
-      getByText,
-      getAllByRole,
-    } = makeAndRenderApp();
+    const { getByLabelText, queryByText, getByTestId, getByText, getAllByRole } =
+      makeAndRenderApp();
     const loader = getByTestId('loader');
     await waitForElementToBeRemoved(loader);
 
@@ -1372,7 +1396,7 @@ describe('Admin | containers | RoleEditPage', () => {
     const [selectAllCheckbox, ...actionCheckboxes] = getAllByRole('checkbox');
     expect(selectAllCheckbox.checked).toBe(false);
     await userEvent.click(selectAllCheckbox);
-    actionCheckboxes.forEach(actionCheckbox => {
+    actionCheckboxes.forEach((actionCheckbox) => {
       expect(actionCheckbox.checked).toBe(true);
     });
 

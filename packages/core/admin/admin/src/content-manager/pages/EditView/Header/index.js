@@ -134,8 +134,8 @@ const Header = ({
     );
   }
 
-  const toggleWarningUnpublish = () => setWarningUnpublish(prevState => !prevState);
-  const toggleWarningDraftRelation = () => setShowWarningDraftRelation(prevState => !prevState);
+  const toggleWarningUnpublish = () => setWarningUnpublish((prevState) => !prevState);
+  const toggleWarningDraftRelation = () => setShowWarningDraftRelation((prevState) => !prevState);
 
   const handlePublish = () => {
     toggleWarningDraftRelation();
@@ -165,7 +165,7 @@ const Header = ({
             // Needed in order to redirect the user with the correct search params
             // Since parts is using a link from react-router-dom the best way to do it is to disable the
             // event
-            onClick={e => {
+            onClick={(e) => {
               e.preventDefault();
               goBack();
             }}
@@ -254,7 +254,7 @@ const Header = ({
                     },
                     {
                       br: () => <br />,
-                      b: chunks => <Typography fontWeight="bold">{chunks}</Typography>,
+                      b: (chunks) => <Typography fontWeight="bold">{chunks}</Typography>,
                       count: draftRelationsCountRef.current,
                     }
                   )}

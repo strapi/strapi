@@ -133,7 +133,7 @@ function ListRow({
                   />
                 )}
                 <IconButton
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
                     removeAttribute(
                       editTarget,
@@ -171,7 +171,7 @@ ListRow.defaultProps = {
   customField: null,
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
-  onClick: () => {},
+  onClick() {},
   relation: '',
   repeatable: false,
   secondLoopComponentUid: null,

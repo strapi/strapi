@@ -86,7 +86,7 @@ const Table = ({
 
   const handleSelectAll = () => {
     if (!areAllEntriesSelected) {
-      setEntriesToDelete(rows.map(row => row.id));
+      setEntriesToDelete(rows.map((row) => row.id));
     } else {
       setEntriesToDelete([]);
     }
@@ -97,29 +97,29 @@ const Table = ({
       trackUsage(onOpenDeleteAllModalTrackedEvent);
     }
 
-    setShowConfirmDeleteAll(prev => !prev);
+    setShowConfirmDeleteAll((prev) => !prev);
   };
 
   const handleToggleConfirmDelete = () => {
     if (showConfirmDelete) {
       setEntriesToDelete([]);
     }
-    setShowConfirmDelete(prev => !prev);
+    setShowConfirmDelete((prev) => !prev);
   };
 
-  const handleClickDelete = id => {
+  const handleClickDelete = (id) => {
     setEntriesToDelete([id]);
 
     handleToggleConfirmDelete();
   };
 
   const handleSelectRow = ({ name, value }) => {
-    setEntriesToDelete(prev => {
+    setEntriesToDelete((prev) => {
       if (value) {
         return prev.concat(name);
       }
 
-      return prev.filter(id => id !== name);
+      return prev.filter((id) => id !== name);
     });
   };
 
@@ -177,7 +177,7 @@ const Table = ({
             action={action}
           />
         ) : (
-          Children.toArray(children).map(child =>
+          Children.toArray(children).map((child) =>
             cloneElement(child, {
               entriesToDelete,
               onClickDelete: handleClickDelete,
@@ -217,8 +217,8 @@ Table.defaultProps = {
   footer: undefined,
   headers: [],
   isLoading: false,
-  onConfirmDeleteAll: () => {},
-  onConfirmDelete: () => {},
+  onConfirmDeleteAll() {},
+  onConfirmDelete() {},
   onOpenDeleteAllModalTrackedEvent: undefined,
   rows: [],
   withBulkActions: false,

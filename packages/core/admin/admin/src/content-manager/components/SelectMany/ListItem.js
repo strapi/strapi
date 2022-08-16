@@ -79,7 +79,7 @@ function ListItem({
 }
 
 ListItem.defaultProps = {
-  onRemove: () => {},
+  onRemove() {},
   searchToPersist: null,
   targetModel: '',
 };

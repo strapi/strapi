@@ -4,6 +4,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const WebpackBar = require('webpackbar');
@@ -16,12 +17,12 @@ const getClientEnvironment = require('./env');
 const EE_REGEX = /from.* ['"]ee_else_ce\//;
 
 module.exports = ({
-  entry,
   cacheDir,
-  pluginsPath,
   dest,
+  entry,
   env,
   optimize,
+  pluginsPath,
   options = {
     backend: 'http://localhost:1337',
     adminPath: '/admin/',
@@ -31,6 +32,7 @@ module.exports = ({
     eeRoot: './ee/admin',
     ceRoot: './admin/src',
   },
+  tsConfigFilePath,
 }) => {
   const isProduction = env === 'production';
 
@@ -47,16 +49,14 @@ module.exports = ({
       ]
     : [];
 
-  const babelPolyfill = '@babel/polyfill/dist/polyfill.min.js';
-
   return {
     mode: isProduction ? 'production' : 'development',
-    bail: isProduction ? true : false,
-    devtool: false,
+    bail: !!isProduction,
+    devtool: isProduction ? false : 'eval-source-map',
     experiments: {
       topLevelAwait: true,
     },
-    entry: [babelPolyfill, entry],
+    entry: [entry],
     output: {
       path: dest,
       publicPath: options.adminPath,
@@ -73,10 +73,21 @@ module.exports = ({
           css: true, // Apply minification to CSS assets
         }),
       ],
+      moduleIds: 'deterministic',
       runtimeChunk: true,
     },
     module: {
       rules: [
+        {
+          test: /\.tsx?$/,
+          loader: require.resolve('esbuild-loader'),
+          include: [cacheDir, ...pluginsPath],
+          exclude: /node_modules/,
+          options: {
+            loader: 'tsx',
+            target: 'es2015',
+          },
+        },
         {
           test: /\.m?jsx?$/,
           include: cacheDir,
@@ -91,6 +102,10 @@ module.exports = ({
 
                 try {
                   const fileContent = fse.readFileSync(filePath).toString();
+
+                  if (fileContent.match(/from.* ['"]ee_else_ce\//)) {
+                    return true;
+                  }
 
                   return EE_REGEX.test(fileContent);
                 } catch (e) {
@@ -188,7 +203,7 @@ module.exports = ({
     resolve: {
       alias,
       symlinks: false,
-      extensions: ['.js', '.jsx', '.react.js'],
+      extensions: ['.js', '.jsx', '.react.js', '.ts', '.tsx'],
       mainFields: ['browser', 'jsnext:main', 'main'],
       modules: ['node_modules', path.resolve(__dirname, 'node_modules')],
     },
@@ -196,13 +211,19 @@ module.exports = ({
       new HtmlWebpackPlugin({
         inject: true,
         template: path.resolve(__dirname, 'index.html'),
-        // FIXME
-        // favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
       }),
       new webpack.DefinePlugin(envVariables),
 
       new NodePolyfillPlugin(),
+
+      new ForkTsCheckerPlugin({
+        typescript: {
+          configFile: tsConfigFilePath,
+        },
+      }),
+
       !isProduction && process.env.REACT_REFRESH !== 'false' && new ReactRefreshWebpackPlugin(),
+
       ...webpackPlugins,
     ].filter(Boolean),
   };

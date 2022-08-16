@@ -25,8 +25,8 @@ const defaultPlugin = {
   contentTypes: {},
 };
 
-const applyUserExtension = async plugins => {
-  const extensionsDir = strapi.dirs.extensions;
+const applyUserExtension = async (plugins) => {
+  const extensionsDir = strapi.dirs.dist.extensions;
   if (!(await fse.pathExists(extensionsDir))) {
     return;
   }
@@ -40,11 +40,10 @@ const applyUserExtension = async plugins => {
     for (const ctName in plugin.contentTypes) {
       const extendedSchema = get([pluginName, 'content-types', ctName, 'schema'], extendedSchemas);
       if (extendedSchema) {
-        plugin.contentTypes[ctName].schema = Object.assign(
-          {},
-          plugin.contentTypes[ctName].schema,
-          extendedSchema
-        );
+        plugin.contentTypes[ctName].schema = {
+          ...plugin.contentTypes[ctName].schema,
+          ...extendedSchema,
+        };
       }
     }
     // second: execute strapi-server extension
@@ -55,7 +54,7 @@ const applyUserExtension = async plugins => {
   }
 };
 
-const applyUserConfig = async plugins => {
+const applyUserConfig = async (plugins) => {
   const userPluginsConfig = await getUserPluginsConfig();
 
   for (const pluginName in plugins) {
@@ -76,7 +75,7 @@ const applyUserConfig = async plugins => {
   }
 };
 
-const loadPlugins = async strapi => {
+const loadPlugins = async (strapi) => {
   const plugins = {};
 
   const enabledPlugins = await getEnabledPlugins(strapi);

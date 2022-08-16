@@ -81,7 +81,7 @@ const CollectionTypeRecursivePath = ({
     { path: ':id', comp: EditViewLayoutManager },
     { path: '', comp: ListViewLayout },
   ].map(({ path, comp }) => (
-    <Route key={path} path={`${url}/${path}`} render={props => renderRoute(props, comp)} />
+    <Route key={path} path={`${url}/${path}`} render={(props) => renderRoute(props, comp)} />
   ));
 
   return (

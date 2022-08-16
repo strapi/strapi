@@ -45,7 +45,7 @@ const WysiwygNav = ({
   const buttonMoreRef = useRef();
 
   const handleTogglePopover = () => {
-    setVisiblePopover(prev => !prev);
+    setVisiblePopover((prev) => !prev);
   };
 
   if (disabled || isPreviewMode) {
@@ -110,7 +110,7 @@ const WysiwygNav = ({
             id="selectTitle"
             placeholder={selectPlaceholder}
             size="S"
-            onChange={value => onActionClick(value, editorRef)}
+            onChange={(value) => onActionClick(value, editorRef)}
           >
             <Option value="h1">h1</Option>
             <Option value="h2">h2</Option>
@@ -233,8 +233,8 @@ const WysiwygNav = ({
 
 WysiwygNav.defaultProps = {
   isPreviewMode: false,
-  onActionClick: () => {},
-  onToggleMediaLib: () => {},
+  onActionClick() {},
+  onToggleMediaLib() {},
   onTogglePreviewMode: undefined,
 };
 

@@ -20,7 +20,7 @@ describe('Simple Test GraphQL Users API End to End', () => {
     strapi = await createStrapiInstance();
     rq = await createRequest({ strapi });
 
-    graphqlQuery = body => {
+    graphqlQuery = (body) => {
       return rq({
         url: '/graphql',
         method: 'POST',
@@ -220,7 +220,7 @@ describe('Advanced Test GraphQL Users API End to End', () => {
     rq = await createAuthRequest({ strapi });
     authReq = await createAuthRequest({ strapi });
 
-    graphqlQuery = body => {
+    graphqlQuery = (body) => {
       return rq({
         url: '/graphql',
         method: 'POST',
@@ -236,7 +236,7 @@ describe('Advanced Test GraphQL Users API End to End', () => {
     rq = await createRequest({ strapi });
     authReq = await createAuthRequest({ strapi });
 
-    graphqlQuery = body => {
+    graphqlQuery = (body) => {
       return rq({
         url: '/graphql',
         method: 'POST',

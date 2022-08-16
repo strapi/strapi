@@ -7,16 +7,16 @@ const { validateHasPermissionsInput } = require('../validation/policies/hasPermi
 const inputModifiers = [
   {
     check: _.isString,
-    transform: action => ({ action }),
+    transform: (action) => ({ action }),
   },
   {
     check: _.isArray,
-    transform: arr => ({ action: arr[0], subject: arr[1] }),
+    transform: (arr) => ({ action: arr[0], subject: arr[1] }),
   },
   {
     // Has to be after the isArray check since _.isObject also matches arrays
     check: _.isObject,
-    transform: perm => perm,
+    transform: (perm) => perm,
   },
 ];
 
@@ -27,8 +27,8 @@ module.exports = createPolicy({
     const { actions } = config;
     const { userAbility: ability } = ctx.state;
 
-    const permissions = actions.map(action =>
-      inputModifiers.find(modifier => modifier.check(action)).transform(action)
+    const permissions = actions.map((action) =>
+      inputModifiers.find((modifier) => modifier.check(action)).transform(action)
     );
 
     const isAuthorized = permissions.every(({ action, subject }) => ability.can(action, subject));

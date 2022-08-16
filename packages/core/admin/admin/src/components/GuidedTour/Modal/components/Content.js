@@ -18,7 +18,7 @@ const Content = ({ id, defaultMessage }) => {
       {formatMessage(
         { id, defaultMessage },
         {
-          documentationLink: children => (
+          documentationLink: (children) => (
             <a
               target="_blank"
               rel="noopener noreferrer"
@@ -27,15 +27,15 @@ const Content = ({ id, defaultMessage }) => {
               {children}
             </a>
           ),
-          b: children => <Typography fontWeight="semiBold">{children}</Typography>,
-          p: children => <Typography>{children}</Typography>,
-          light: children => <Typography textColor="neutral600">{children}</Typography>,
-          ul: children => (
+          b: (children) => <Typography fontWeight="semiBold">{children}</Typography>,
+          p: (children) => <Typography>{children}</Typography>,
+          light: (children) => <Typography textColor="neutral600">{children}</Typography>,
+          ul: (children) => (
             <Box paddingLeft={6}>
               <ul>{children}</ul>
             </Box>
           ),
-          li: children => <LiStyled>{children}</LiStyled>,
+          li: (children) => <LiStyled>{children}</LiStyled>,
         }
       )}
     </Stack>

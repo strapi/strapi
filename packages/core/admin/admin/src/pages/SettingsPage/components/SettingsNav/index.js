@@ -16,11 +16,11 @@ const SettingsNav = ({ menu }) => {
 
   const filteredMenu = getSectionsToDisplay(menu);
 
-  const sections = filteredMenu.map(section => {
+  const sections = filteredMenu.map((section) => {
     return {
       ...section,
       title: section.intlLabel,
-      links: section.links.map(link => {
+      links: section.links.map((link) => {
         return {
           ...link,
           title: link.intlLabel,
@@ -39,9 +39,9 @@ const SettingsNav = ({ menu }) => {
     <SubNav ariaLabel={label}>
       <SubNavHeader label={label} />
       <SubNavSections>
-        {sections.map(section => (
+        {sections.map((section) => (
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
-            {section.links.map(link => (
+            {section.links.map((link) => (
               <SubNavLink as={NavLink} withBullet={link.hasNotification} to={link.to} key={link.id}>
                 {formatMessage(link.intlLabel)}
               </SubNavLink>

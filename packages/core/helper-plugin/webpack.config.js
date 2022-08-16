@@ -4,10 +4,10 @@ const packageJson = require('./package.json');
 
 const nodeModules = [];
 [
-  ...Object.keys(packageJson.dependencies),
-  ...Object.keys(packageJson.peerDependencies),
-  ...Object.keys(packageJson.devDependencies),
-].forEach(module => {
+  ...Object.keys(packageJson.dependencies || {}),
+  ...Object.keys(packageJson.peerDependencies || {}),
+  ...Object.keys(packageJson.devDependencies || {}),
+].forEach((module) => {
   nodeModules.push(new RegExp(`^${module}(/.+)?$`));
 });
 
@@ -15,7 +15,7 @@ module.exports = {
   entry: `${__dirname}/lib/src/index.js`,
   externals: nodeModules,
   mode: process.env.NODE_ENV,
-  devtool: process.env.NODE_ENV === 'development' ? 'eval-source-map' : false,
+  devtool: process.env.NODE_ENV === 'production' ? false : 'eval-source-map',
   output: {
     path: `${__dirname}/build`,
     filename: `helper-plugin.${process.env.NODE_ENV}.js`,

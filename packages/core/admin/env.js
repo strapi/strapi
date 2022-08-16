@@ -12,9 +12,9 @@ if (fs.existsSync(dotenvFilePath)) {
 
 const STRAPI_ADMIN = /^STRAPI_ADMIN_/i;
 
-const getClientEnvironment = options => {
+const getClientEnvironment = (options) => {
   const raw = Object.keys(process.env)
-    .filter(key => STRAPI_ADMIN.test(key))
+    .filter((key) => STRAPI_ADMIN.test(key))
     .reduce(
       (acc, current) => {
         acc[current] = process.env[current];

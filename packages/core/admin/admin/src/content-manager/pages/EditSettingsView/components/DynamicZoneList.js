@@ -46,7 +46,7 @@ const DynamicZoneList = ({ components }) => {
 
   return (
     <Stack spacing={2} horizontal overflow="scroll hidden" padding={3}>
-      {components.map(componentUid => (
+      {components.map((componentUid) => (
         <CustomLink
           hasRadius
           background="neutral0"

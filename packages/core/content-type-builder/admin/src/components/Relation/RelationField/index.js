@@ -57,7 +57,7 @@ RelationFormBox.defaultProps = {
   error: null,
   header: null,
   isMain: false,
-  onChange: () => {},
+  onChange() {},
   oneThatIsCreatingARelationWithAnother: null,
   target: null,
   value: '',

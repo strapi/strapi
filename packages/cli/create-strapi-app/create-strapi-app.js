@@ -37,8 +37,9 @@ program
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Overwrite database content if any')
   .option('--template <templateurl>', 'Specify a Strapi template')
+  .option('--ts, --typescript', 'Use TypeScript to generate the project')
   .description('create a new application')
-  .action(directory => {
+  .action((directory) => {
     initProject(directory, program);
   })
   .parse(process.argv);
@@ -61,7 +62,7 @@ async function initProject(projectName, program) {
     await checkInstallPath(resolve(projectName));
   }
 
-  const hasDatabaseOptions = databaseOptions.some(opt => program[opt]);
+  const hasDatabaseOptions = databaseOptions.some((opt) => program[opt]);
 
   if (program.quickstart && hasDatabaseOptions) {
     console.error(

@@ -1,6 +1,6 @@
 import { getTrad } from '../../../utils';
 
-const getInputProps = fieldName => {
+const getInputProps = (fieldName) => {
   let type;
 
   switch (fieldName) {

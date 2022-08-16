@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, toRegressedEnumValue, startsWithANumber } = require('@strapi/utils');
+const { yup, toRegressedEnumValue } = require('@strapi/utils');
 
 const LIFECYCLES = [
   'beforeCreate',
@@ -24,12 +24,21 @@ const LIFECYCLES = [
   'afterDeleteMany',
 ];
 
-const lifecyclesShape = _.mapValues(_.keyBy(LIFECYCLES), () =>
-  yup
-    .mixed()
-    .nullable()
-    .isFunction()
-);
+/**
+ * For enumerations the least common denomiator is GraphQL, where
+ * values needs to match the secure name regex:
+ * GraphQL Spec https://spec.graphql.org/June2018/#sec-Names
+ *
+ * Therefore we need to make sure our users only use values, which
+ * can be returned by GraphQL, by checking the regressed values
+ * agains the GraphQL regex.
+ *
+ * TODO V5: check if we can avoid this coupling by moving this logic
+ * into the GraphQL plugin.
+ */
+const GRAPHQL_ENUM_REGEX = /^[_A-Za-z][_0-9A-Za-z]*$/;
+
+const lifecyclesShape = _.mapValues(_.keyBy(LIFECYCLES), () => yup.mixed().nullable().isFunction());
 
 const contentTypeSchemaValidator = yup.object().shape({
   schema: yup.object().shape({
@@ -37,39 +46,40 @@ const contentTypeSchemaValidator = yup.object().shape({
       .object()
       .shape({
         displayName: yup.string().required(),
-        singularName: yup
-          .string()
-          .isKebabCase()
-          .required(),
-        pluralName: yup
-          .string()
-          .isKebabCase()
-          .required(),
+        singularName: yup.string().isKebabCase().required(),
+        pluralName: yup.string().isKebabCase().required(),
       })
       .required(),
     attributes: yup.object().test({
       name: 'valuesCollide',
       message: 'Some values collide when normalized',
       test(attributes) {
-        for (const attrName in attributes) {
+        for (const attrName of Object.keys(attributes)) {
           const attr = attributes[attrName];
           if (attr.type === 'enumeration') {
-            // should not start by a number
-            if (attr.enum.some(startsWithANumber)) {
-              const message = `Enum values should not start with a number. Please modify your enumeration '${attrName}'.`;
+            const regressedValues = attr.enum.map(toRegressedEnumValue);
+
+            // should match the GraphQL regex
+            if (!regressedValues.every((value) => GRAPHQL_ENUM_REGEX.test(value))) {
+              const message = `Invalid enumeration value. Values should have at least one alphabetical character preceeding the first occurence of a number. Update your enumeration '${attrName}'.`;
 
               return this.createError({ message });
             }
 
+            // should not contain empty values
+            if (regressedValues.some((value) => value === '')) {
+              return this.createError({
+                message: `At least one value of the enumeration '${attrName}' appears to be empty. Only alphanumerical characters are taken into account.`,
+              });
+            }
+
             // should not collide
             const duplicates = _.uniq(
-              attr.enum
-                .map(toRegressedEnumValue)
-                .filter((value, index, values) => values.indexOf(value) !== index)
+              regressedValues.filter((value, index, values) => values.indexOf(value) !== index)
             );
 
             if (duplicates.length) {
-              const message = `Some enum values of the field '${attrName}' collide when normalized: ${duplicates.join(
+              const message = `Some enumeration values of the field '${attrName}' collide when normalized: ${duplicates.join(
                 ', '
               )}. Please modify your enumeration.`;
 
@@ -83,13 +93,10 @@ const contentTypeSchemaValidator = yup.object().shape({
     }),
   }),
   actions: yup.object().onlyContainsFunctions(),
-  lifecycles: yup
-    .object()
-    .shape(lifecyclesShape)
-    .noUnknown(),
+  lifecycles: yup.object().shape(lifecyclesShape).noUnknown(),
 });
 
-const validateContentTypeDefinition = data => {
+const validateContentTypeDefinition = (data) => {
   return contentTypeSchemaValidator.validateSync(data, { strict: true, abortEarly: false });
 };
 

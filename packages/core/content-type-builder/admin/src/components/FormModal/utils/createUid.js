@@ -1,6 +1,6 @@
 import nameToSlug from '../../../utils/nameToSlug';
 
-const createUid = name => {
+const createUid = (name) => {
   const modelName = nameToSlug(name);
   const uid = `api::${modelName}.${modelName}`;
 

@@ -20,25 +20,20 @@ const Border = styled.div`
 
 const SubCategory = ({ subCategory }) => {
   const { formatMessage } = useIntl();
-  const {
-    onChange,
-    onChangeSelectAll,
-    onSelectedAction,
-    selectedAction,
-    modifiedData,
-  } = useUsersPermissions();
+  const { onChange, onChangeSelectAll, onSelectedAction, selectedAction, modifiedData } =
+    useUsersPermissions();
 
   const currentScopedModifiedData = useMemo(() => {
     return get(modifiedData, subCategory.name, {});
   }, [modifiedData, subCategory]);
 
   const hasAllActionsSelected = useMemo(() => {
-    return Object.values(currentScopedModifiedData).every(action => action.enabled === true);
+    return Object.values(currentScopedModifiedData).every((action) => action.enabled === true);
   }, [currentScopedModifiedData]);
 
   const hasSomeActionsSelected = useMemo(() => {
     return (
-      Object.values(currentScopedModifiedData).some(action => action.enabled === true) &&
+      Object.values(currentScopedModifiedData).some((action) => action.enabled === true) &&
       !hasAllActionsSelected
     );
   }, [currentScopedModifiedData, hasAllActionsSelected]);
@@ -51,7 +46,7 @@ const SubCategory = ({ subCategory }) => {
   );
 
   const isActionSelected = useCallback(
-    actionName => {
+    (actionName) => {
       return selectedAction === actionName;
     },
     [selectedAction]
@@ -70,8 +65,9 @@ const SubCategory = ({ subCategory }) => {
           <Checkbox
             name={subCategory.name}
             value={hasAllActionsSelected}
-            onValueChange={value =>
-              handleChangeSelectAll({ target: { name: subCategory.name, value } })}
+            onValueChange={(value) =>
+              handleChangeSelectAll({ target: { name: subCategory.name, value } })
+            }
             indeterminate={hasSomeActionsSelected}
           >
             {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
@@ -80,7 +76,7 @@ const SubCategory = ({ subCategory }) => {
       </Flex>
       <Flex paddingTop={6} paddingBottom={6}>
         <Grid gap={2} style={{ flex: 1 }}>
-          {subCategory.actions.map(action => {
+          {subCategory.actions.map((action) => {
             const name = `${action.name}.enabled`;
 
             return (
@@ -89,7 +85,7 @@ const SubCategory = ({ subCategory }) => {
                   <Checkbox
                     value={get(modifiedData, name, false)}
                     name={name}
-                    onValueChange={value => onChange({ target: { name, value } })}
+                    onValueChange={(value) => onChange({ target: { name, value } })}
                   >
                     {action.label}
                   </Checkbox>

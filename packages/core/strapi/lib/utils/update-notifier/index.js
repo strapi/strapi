@@ -8,7 +8,7 @@ const boxen = require('boxen');
 const chalk = require('chalk');
 const { env } = require('@strapi/utils');
 
-const pkg = require('../../../package');
+const pkg = require('../../../package.json');
 
 const CHECK_INTERVAL = 1000 * 60 * 60 * 24 * 1; // 1 day
 const NOTIF_INTERVAL = 1000 * 60 * 60 * 24 * 7; // 1 week
@@ -31,21 +31,21 @@ Check out the new releases at: ${releaseLink}
 `.trim();
 };
 
-const createUpdateNotifier = strapi => {
+const createUpdateNotifier = (strapi) => {
   let config = null;
 
   try {
     config = new Configstore(
       pkg.name,
       {},
-      { configPath: path.join(strapi.dirs.root, '.strapi-updater.json') }
+      { configPath: path.join(strapi.dirs.app.root, '.strapi-updater.json') }
     );
   } catch {
     // we don't have write access to the file system
     // we silence the error
   }
 
-  const checkUpdate = async checkInterval => {
+  const checkUpdate = async (checkInterval) => {
     const now = Date.now();
     const lastUpdateCheck = config.get('lastUpdateCheck') || 0;
     if (lastUpdateCheck + checkInterval > now) {
@@ -63,7 +63,7 @@ const createUpdateNotifier = strapi => {
     }
   };
 
-  const display = notifInterval => {
+  const display = (notifInterval) => {
     const now = Date.now();
     const latestVersion = config.get('latest');
     const lastNotification = config.get('lastNotification') || 0;

@@ -3,7 +3,7 @@ import { render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { useRBAC } from '@strapi/helper-plugin';
+import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import { axiosInstance } from '../../../../../../core/utils';
@@ -47,20 +47,22 @@ const client = new QueryClient({
   },
 });
 
-const makeApp = history => {
+const makeApp = (history) => {
   return (
     <QueryClientProvider client={client}>
-      <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-          <Theme>
-            <Router history={history}>
-              <Route path="/settings/api-tokens">
-                <ListView />
-              </Route>
-            </Router>
-          </Theme>
-        </ThemeToggleProvider>
-      </IntlProvider>
+      <TrackingProvider>
+        <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
+          <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+            <Theme>
+              <Router history={history}>
+                <Route path="/settings/api-tokens">
+                  <ListView />
+                </Route>
+              </Router>
+            </Theme>
+          </ThemeToggleProvider>
+        </IntlProvider>
+      </TrackingProvider>
     </QueryClientProvider>
   );
 };

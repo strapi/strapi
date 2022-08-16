@@ -28,7 +28,7 @@ const ActionRow = ({
     const [label, children] = curr;
     const obj = {
       label: upperFirst(label),
-      children: children.map(child => ({
+      children: children.map((child) => ({
         label: child.displayName,
         value: child.id,
       })),
@@ -39,7 +39,7 @@ const ActionRow = ({
 
   // Output: ['value1', 'value2']
   const values = Object.values(value)
-    .map(x =>
+    .map((x) =>
       Object.entries(x)
         .filter(([, value]) => value)
         .map(([key]) => key)
@@ -47,7 +47,7 @@ const ActionRow = ({
     .flat();
 
   // ! Only expects arrayOfOpt to be [['default', obj]] - might break in future changes
-  const handleChange = val => {
+  const handleChange = (val) => {
     const [[, values]] = arrayOfOptionsGroupedByCategory;
     const formattedValues = values.reduce(
       (acc, curr) => ({ [curr.id]: val.includes(curr.id), ...acc }),
@@ -83,7 +83,7 @@ const ActionRow = ({
       <Box style={{ maxWidth: 430, width: '100%' }}>
         <MultiSelectNested
           id={name}
-          customizeContent={values => `${values.length} currently selected`}
+          customizeContent={(values) => `${values.length} currently selected`}
           onChange={handleChange}
           value={values}
           options={options}

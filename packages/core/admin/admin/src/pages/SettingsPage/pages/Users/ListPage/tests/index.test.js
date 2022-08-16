@@ -4,7 +4,7 @@ import { IntlProvider } from 'react-intl';
 import { Router, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { createMemoryHistory } from 'history';
-import { useRBAC } from '@strapi/helper-plugin';
+import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
@@ -28,20 +28,22 @@ const client = new QueryClient({
   },
 });
 
-const makeApp = history => {
+const makeApp = (history) => {
   return (
     <QueryClientProvider client={client}>
-      <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-          <Theme>
-            <Router history={history}>
-              <Route path="/settings/user">
-                <ListPage />
-              </Route>
-            </Router>
-          </Theme>
-        </ThemeToggleProvider>
-      </IntlProvider>
+      <TrackingProvider>
+        <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
+          <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+            <Theme>
+              <Router history={history}>
+                <Route path="/settings/user">
+                  <ListPage />
+                </Route>
+              </Router>
+            </Theme>
+          </ThemeToggleProvider>
+        </IntlProvider>
+      </TrackingProvider>
     </QueryClientProvider>
   );
 };

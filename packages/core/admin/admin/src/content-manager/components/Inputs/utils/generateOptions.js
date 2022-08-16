@@ -12,7 +12,7 @@ const generateOptions = (options, isRequired = false) => {
       key: '__enum_option_null',
       value: '',
     },
-    ...options.map(option => {
+    ...options.map((option) => {
       return {
         metadatas: {
           intlLabel: {

@@ -27,4 +27,4 @@ class Plugin {
   }
 }
 
-export default pluginConf => new Plugin(pluginConf);
+export default (pluginConf) => new Plugin(pluginConf);

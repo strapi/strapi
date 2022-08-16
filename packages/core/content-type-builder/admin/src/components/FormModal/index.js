@@ -95,7 +95,7 @@ const FormModal = () => {
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
-  const reducerState = useSelector(state => formModalSelector(state), shallowEqual);
+  const reducerState = useSelector((state) => formModalSelector(state), shallowEqual);
   const { push } = useHistory();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
@@ -788,7 +788,7 @@ const FormModal = () => {
     });
   };
 
-  const sendAdvancedTabEvent = tab => {
+  const sendAdvancedTabEvent = (tab) => {
     if (tab !== 'advanced') {
       return;
     }
@@ -804,7 +804,7 @@ const FormModal = () => {
     }
   };
 
-  const sendButtonAddMoreFieldEvent = shouldContinue => {
+  const sendButtonAddMoreFieldEvent = (shouldContinue) => {
     if (
       modalType === 'attribute' &&
       forTarget === 'contentType' &&
@@ -919,159 +919,157 @@ const FormModal = () => {
   const baseFormInputNames = getFormInputNames(baseForm);
 
   const advancedFormInputNames = getFormInputNames(advancedForm);
-  const doesBaseFormHasError = Object.keys(formErrors).some(key =>
+  const doesBaseFormHasError = Object.keys(formErrors).some((key) =>
     baseFormInputNames.includes(key)
   );
 
-  const doesAdvancedFormHasError = Object.keys(formErrors).some(key =>
+  const doesAdvancedFormHasError = Object.keys(formErrors).some((key) =>
     advancedFormInputNames.includes(key)
   );
 
   const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
 
   return (
-    <>
-      <ModalLayout onClose={handleClosed} labelledBy="title">
-        <FormModalHeader
-          actionType={actionType}
-          attributeName={attributeName}
-          categoryName={categoryName}
-          contentTypeKind={kind}
-          dynamicZoneTarget={dynamicZoneTarget}
-          modalType={modalType}
+    <ModalLayout onClose={handleClosed} labelledBy="title">
+      <FormModalHeader
+        actionType={actionType}
+        attributeName={attributeName}
+        categoryName={categoryName}
+        contentTypeKind={kind}
+        dynamicZoneTarget={dynamicZoneTarget}
+        modalType={modalType}
+        forTarget={forTarget}
+        targetUid={targetUid}
+        attributeType={attributeType}
+        customFieldUid={customFieldUid}
+      />
+      {isPickingAttribute && (
+        <AttributeOptions
+          attributes={displayedAttributes}
           forTarget={forTarget}
-          targetUid={targetUid}
-          attributeType={attributeType}
-          customFieldUid={customFieldUid}
+          kind={schemaKind || 'collectionType'}
         />
-        {isPickingAttribute && (
-          <AttributeOptions
-            attributes={displayedAttributes}
-            forTarget={forTarget}
-            kind={schemaKind || 'collectionType'}
-          />
-        )}
-        {!isPickingAttribute && (
-          <form onSubmit={handleSubmit}>
-            <ModalBody>
-              <TabGroup
-                label="todo"
-                id="tabs"
-                variant="simple"
-                ref={tabGroupRef}
-                onTabChange={selectedTab => {
-                  if (selectedTab === 1) {
-                    sendAdvancedTabEvent('advanced');
-                  }
-                }}
-              >
-                <Flex justifyContent="space-between">
-                  <FormModalSubHeader
-                    actionType={actionType}
-                    forTarget={forTarget}
-                    kind={kind}
-                    step={step}
-                    modalType={modalType}
-                    attributeType={attributeType}
-                    attributeName={attributeName}
-                    customField={customField}
-                  />
-                  <Tabs>
-                    <Tab hasError={doesBaseFormHasError}>
-                      {formatMessage({
-                        id: getTrad('popUpForm.navContainer.base'),
-                        defaultMessage: 'Basic settings',
-                      })}
-                    </Tab>
-                    <Tab
-                      hasError={doesAdvancedFormHasError}
-                      // TODO put aria-disabled
-                      disabled={shouldDisableAdvancedTab()}
-                    >
-                      {formatMessage({
-                        id: getTrad('popUpForm.navContainer.advanced'),
-                        defaultMessage: 'Advanced settings',
-                      })}
-                    </Tab>
-                  </Tabs>
-                </Flex>
-
-                <Divider />
-
-                <Box paddingTop={6}>
-                  <TabPanels>
-                    <TabPanel>
-                      <Stack spacing={6}>
-                        <TabForm
-                          form={baseForm}
-                          formErrors={formErrors}
-                          genericInputProps={genericInputProps}
-                          modifiedData={modifiedData}
-                          onChange={handleChange}
-                        />
-                      </Stack>
-                    </TabPanel>
-                    <TabPanel>
-                      <Stack spacing={6}>
-                        <TabForm
-                          form={advancedForm}
-                          formErrors={formErrors}
-                          genericInputProps={genericInputProps}
-                          modifiedData={modifiedData}
-                          onChange={handleChange}
-                        />
-                      </Stack>
-                    </TabPanel>
-                  </TabPanels>
-                </Box>
-              </TabGroup>
-            </ModalBody>
-            <ModalFooter
-              endActions={
-                <FormModalEndActions
-                  deleteCategory={deleteCategory}
-                  deleteContentType={deleteData}
-                  deleteComponent={deleteData}
-                  categoryName={initialData.name}
-                  isAttributeModal={modalType === 'attribute'}
-                  isCustomFieldModal={modalType === 'customField'}
-                  isComponentToDzModal={modalType === 'addComponentToDynamicZone'}
-                  isComponentAttribute={attributeType === 'component'}
-                  isComponentModal={modalType === 'component'}
-                  isContentTypeModal={modalType === 'contentType'}
-                  isCreatingComponent={actionType === 'create'}
-                  isCreatingDz={actionType === 'create'}
-                  isCreatingComponentAttribute={modifiedData.createComponent || false}
-                  isCreatingComponentInDz={modifiedData.createComponent || false}
-                  isCreatingComponentWhileAddingAField={isCreatingComponentWhileAddingAField}
-                  isCreatingContentType={actionType === 'create'}
-                  isEditingAttribute={actionType === 'edit'}
-                  isDzAttribute={attributeType === 'dynamiczone'}
-                  isEditingCategory={modalType === 'editCategory'}
-                  isInFirstComponentStep={step === '1'}
-                  onSubmitAddComponentAttribute={handleSubmit}
-                  onSubmitAddComponentToDz={handleSubmit}
-                  onSubmitCreateComponent={handleSubmit}
-                  onSubmitCreateContentType={handleSubmit}
-                  onSubmitCreateDz={handleSubmit}
-                  onSubmitEditAttribute={handleSubmit}
-                  onSubmitEditCategory={handleSubmit}
-                  onSubmitEditComponent={handleSubmit}
-                  onSubmitEditContentType={handleSubmit}
-                  onSubmitEditCustomFieldAttribute={handleSubmit}
-                  onSubmitEditDz={handleSubmit}
+      )}
+      {!isPickingAttribute && (
+        <form onSubmit={handleSubmit}>
+          <ModalBody>
+            <TabGroup
+              label="todo"
+              id="tabs"
+              variant="simple"
+              ref={tabGroupRef}
+              onTabChange={(selectedTab) => {
+                if (selectedTab === 1) {
+                  sendAdvancedTabEvent('advanced');
+                }
+              }}
+            >
+              <Flex justifyContent="space-between">
+                <FormModalSubHeader
+                  actionType={actionType}
+                  forTarget={forTarget}
+                  kind={kind}
+                  step={step}
+                  modalType={modalType}
+                  attributeType={attributeType}
+                  attributeName={attributeName}
+                  customField={customField}
                 />
-              }
-              startActions={
-                <Button variant="tertiary" onClick={handleClosed}>
-                  {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-                </Button>
-              }
-            />
-          </form>
-        )}
-      </ModalLayout>
-    </>
+                <Tabs>
+                  <Tab hasError={doesBaseFormHasError}>
+                    {formatMessage({
+                      id: getTrad('popUpForm.navContainer.base'),
+                      defaultMessage: 'Basic settings',
+                    })}
+                  </Tab>
+                  <Tab
+                    hasError={doesAdvancedFormHasError}
+                    // TODO put aria-disabled
+                    disabled={shouldDisableAdvancedTab()}
+                  >
+                    {formatMessage({
+                      id: getTrad('popUpForm.navContainer.advanced'),
+                      defaultMessage: 'Advanced settings',
+                    })}
+                  </Tab>
+                </Tabs>
+              </Flex>
+
+              <Divider />
+
+              <Box paddingTop={6}>
+                <TabPanels>
+                  <TabPanel>
+                    <Stack spacing={6}>
+                      <TabForm
+                        form={baseForm}
+                        formErrors={formErrors}
+                        genericInputProps={genericInputProps}
+                        modifiedData={modifiedData}
+                        onChange={handleChange}
+                      />
+                    </Stack>
+                  </TabPanel>
+                  <TabPanel>
+                    <Stack spacing={6}>
+                      <TabForm
+                        form={advancedForm}
+                        formErrors={formErrors}
+                        genericInputProps={genericInputProps}
+                        modifiedData={modifiedData}
+                        onChange={handleChange}
+                      />
+                    </Stack>
+                  </TabPanel>
+                </TabPanels>
+              </Box>
+            </TabGroup>
+          </ModalBody>
+          <ModalFooter
+            endActions={
+              <FormModalEndActions
+                deleteCategory={deleteCategory}
+                deleteContentType={deleteData}
+                deleteComponent={deleteData}
+                categoryName={initialData.name}
+                isAttributeModal={modalType === 'attribute'}
+                isCustomFieldModal={modalType === 'customField'}
+                isComponentToDzModal={modalType === 'addComponentToDynamicZone'}
+                isComponentAttribute={attributeType === 'component'}
+                isComponentModal={modalType === 'component'}
+                isContentTypeModal={modalType === 'contentType'}
+                isCreatingComponent={actionType === 'create'}
+                isCreatingDz={actionType === 'create'}
+                isCreatingComponentAttribute={modifiedData.createComponent || false}
+                isCreatingComponentInDz={modifiedData.createComponent || false}
+                isCreatingComponentWhileAddingAField={isCreatingComponentWhileAddingAField}
+                isCreatingContentType={actionType === 'create'}
+                isEditingAttribute={actionType === 'edit'}
+                isDzAttribute={attributeType === 'dynamiczone'}
+                isEditingCategory={modalType === 'editCategory'}
+                isInFirstComponentStep={step === '1'}
+                onSubmitAddComponentAttribute={handleSubmit}
+                onSubmitAddComponentToDz={handleSubmit}
+                onSubmitCreateComponent={handleSubmit}
+                onSubmitCreateContentType={handleSubmit}
+                onSubmitCreateDz={handleSubmit}
+                onSubmitEditAttribute={handleSubmit}
+                onSubmitEditCategory={handleSubmit}
+                onSubmitEditComponent={handleSubmit}
+                onSubmitEditContentType={handleSubmit}
+                onSubmitEditCustomFieldAttribute={handleSubmit}
+                onSubmitEditDz={handleSubmit}
+              />
+            }
+            startActions={
+              <Button variant="tertiary" onClick={handleClosed}>
+                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+              </Button>
+            }
+          />
+        </form>
+      )}
+    </ModalLayout>
   );
 };
 

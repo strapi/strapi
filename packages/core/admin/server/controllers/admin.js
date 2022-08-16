@@ -5,6 +5,7 @@ const execa = require('execa');
 const _ = require('lodash');
 const { exists } = require('fs-extra');
 const { ValidationError } = require('@strapi/utils').errors;
+const { isUsingTypeScript } = require('@strapi/typescript-utils');
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
 
@@ -20,7 +21,7 @@ const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
 /**
  * Validates a plugin name format
  */
-const isValidPluginName = plugin => {
+const isValidPluginName = (plugin) => {
   return _.isString(plugin) && !_.isEmpty(plugin) && PLUGIN_NAME_REGEX.test(plugin);
 };
 
@@ -79,6 +80,26 @@ module.exports = {
     await validateUpdateProjectSettingsImagesDimensions(formatedFiles);
 
     return projectSettingsService.updateProjectSettings({ ...body, ...formatedFiles });
+  },
+
+  async telemetryProperties(ctx) {
+    // If the telemetry is disabled, ignore the request and return early
+    if (strapi.telemetry.isDisabled) {
+      ctx.status = 204;
+      return;
+    }
+
+    const useTypescriptOnServer = await isUsingTypeScript(strapi.dirs.app.root);
+    const useTypescriptOnAdmin = await isUsingTypeScript(
+      path.join(strapi.dirs.app.root, 'src', 'admin')
+    );
+
+    return {
+      data: {
+        useTypescriptOnServer,
+        useTypescriptOnAdmin,
+      },
+    };
   },
 
   async information() {

@@ -1,7 +1,7 @@
 'use strict';
 
 const { providerFactory } = require('@strapi/utils');
-const domain = require('./');
+const domain = require('.');
 
 /**
  * @typedef ConditionProviderOverride

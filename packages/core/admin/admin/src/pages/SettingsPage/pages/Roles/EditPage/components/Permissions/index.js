@@ -21,7 +21,7 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
 
   useImperativeHandle(ref, () => {
     return {
-      getPermissions: () => {
+      getPermissions() {
         const collectionTypesDiff = difference(
           initialData.collectionTypes,
           modifiedData.collectionTypes
@@ -35,8 +35,8 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
         if (isEmpty(contentTypesDiff)) {
           didUpdateConditions = false;
         } else {
-          didUpdateConditions = Object.values(contentTypesDiff).some(permission => {
-            return Object.values(permission).some(permissionValue =>
+          didUpdateConditions = Object.values(contentTypesDiff).some((permission) => {
+            return Object.values(permission).some((permissionValue) =>
               has(permissionValue, 'conditions')
             );
           });
@@ -44,10 +44,10 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
 
         return { permissionsToSend: formatPermissionsToAPI(modifiedData), didUpdateConditions };
       },
-      resetForm: () => {
+      resetForm() {
         dispatch({ type: 'RESET_FORM' });
       },
-      setFormAfterSubmit: () => {
+      setFormAfterSubmit() {
         dispatch({ type: 'SET_FORM_AFTER_SUBMIT' });
       },
     };
@@ -77,7 +77,7 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
     });
   };
 
-  const handleChangeConditions = conditions => {
+  const handleChangeConditions = (conditions) => {
     dispatch({ type: 'ON_CHANGE_CONDITIONS', conditions });
   };
 
@@ -105,7 +105,8 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
         onChangeConditions: handleChangeConditions,
         onChangeSimpleCheckbox: handleChangeSimpleCheckbox,
         onChangeParentCheckbox: handleChangeParentCheckbox,
-        onChangeCollectionTypeLeftActionRowCheckbox: handleChangeCollectionTypeLeftActionRowCheckbox,
+        onChangeCollectionTypeLeftActionRowCheckbox:
+          handleChangeCollectionTypeLeftActionRowCheckbox,
         onChangeCollectionTypeGlobalActionCheckbox: handleChangeCollectionTypeGlobalActionCheckbox,
       }}
     >
@@ -117,7 +118,7 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
         })}
       >
         <Tabs>
-          {TAB_LABELS.map(tabLabel => (
+          {TAB_LABELS.map((tabLabel) => (
             <Tab key={tabLabel.id}>
               {formatMessage({ id: tabLabel.labelId, defaultMessage: tabLabel.defaultMessage })}
             </Tab>
