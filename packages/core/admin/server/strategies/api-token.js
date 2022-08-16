@@ -40,7 +40,7 @@ const authenticate = async ctx => {
 
   if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
     const ability = await strapi.contentAPI.permissions.engine.generateAbility(
-      apiToken.permissions.map(({ action }) => ({ action }))
+      apiToken.permissions.map(action => ({ action }))
     );
 
     return { authenticated: true, ability, credentials: apiToken };
