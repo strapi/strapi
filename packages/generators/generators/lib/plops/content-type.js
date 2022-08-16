@@ -123,19 +123,19 @@ module.exports = (plop) => {
         baseActions.push(
           {
             type: 'add',
-            path: `${filePath}/controllers/{{singularName}}.${language}`,
+            path: `${filePath}/controllers/{{ singularName }}.${language}`,
             templateFile: `templates/${language}/core-controller.${language}.hbs`,
             data: { uid },
           },
           {
             type: 'add',
-            path: `${filePath}/services/{{singularName}}.${language}`,
+            path: `${filePath}/services/{{ singularName }}.${language}`,
             templateFile: `templates/${language}/core-service.${language}.hbs`,
             data: { uid },
           },
           {
             type: 'add',
-            path: `${filePath}/routes/{{singularName}}.${language}`,
+            path: `${filePath}/routes/{{ singularName }}.${language}`,
             templateFile: `templates/${language}/core-router.${language}.hbs`,
             data: { uid },
           }
