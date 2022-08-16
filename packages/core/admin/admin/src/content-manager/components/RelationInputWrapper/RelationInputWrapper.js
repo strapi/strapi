@@ -94,7 +94,7 @@ export const RelationInputWrapper = ({
       onRelationLoadMore={() => handleRelationLoadMore()}
       onSearch={() => handleSearch()}
       onSearchNextPage={() => handleSearchMore()}
-      relations={filterRemovedRelations(relations, modifiedData)}
+      relations={filterRemovedRelations(relations, modifiedData?.[name])}
       searchResults={search}
     />
   );
@@ -139,6 +139,7 @@ RelationInputWrapper.propTypes = {
     containsKey: PropTypes.string.isRequired,
     defaultParams: PropTypes.object,
     endpoints: PropTypes.shape({
+      fetch: PropTypes.string,
       search: PropTypes.string.isRequired,
     }).isRequired,
     shouldDisplayRelationLink: PropTypes.bool.isRequired,

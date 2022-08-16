@@ -41,7 +41,7 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, q
 
   const relationFetchEndpoint = useMemo(() => {
     if (isCreatingEntry) {
-      return false;
+      return null;
     }
 
     return getRequestUrl(`${slug}/${initialData.id}/${name}`);
