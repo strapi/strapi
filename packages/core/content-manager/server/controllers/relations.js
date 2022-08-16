@@ -1,12 +1,21 @@
 'use strict';
 
-const { prop, isEmpty, isNil } = require('lodash/fp');
-const { convertFiltersQueryParams } = require('@strapi/utils/lib/convert-query-params');
+const { prop, isEmpty, defaultsDeep } = require('lodash/fp');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
+const { transformParamsToQuery } = require('@strapi/utils/lib/convert-query-params');
 
 const { getService } = require('../utils');
 const { validateFindAvailable } = require('./validation/relations');
+
+const addWhereClause = (params, whereClause) => {
+  params.where = params.where || {};
+  if (Array.isArray(params.where)) {
+    params.where.push(whereClause);
+  } else {
+    params.where = [params.where, whereClause];
+  }
+};
 
 module.exports = {
   async findAvailable(ctx) {
@@ -15,7 +24,7 @@ module.exports = {
 
     await validateFindAvailable(ctx.request.query);
 
-    const { component, entityId, idsToOmit, page = 1, pageSize = 10, _q } = ctx.request.query;
+    const { component, entityId, idsToOmit, ...query } = ctx.request.query;
 
     const sourceModelUid = component || model;
 
@@ -64,26 +73,18 @@ module.exports = {
       fieldsToSelect.push(PUBLISHED_AT_ATTRIBUTE);
     }
 
-    const queryParams = {
-      where: { $and: [] },
-      select: fieldsToSelect,
-      orderBy: mainField,
-      page,
-      pageSize,
-    };
-
-    if (!isNil(_q)) {
-      queryParams._q = _q;
-    }
-
-    if (!isNil(ctx.request.query.filters)) {
-      queryParams.where.$and.push(
-        convertFiltersQueryParams(ctx.request.query.filters, targetedModel).filters
-      );
-    }
+    const queryParams = defaultsDeep(
+      {
+        orderBy: mainField,
+      },
+      {
+        ...transformParamsToQuery(targetedModel.uid, query), // ⚠️ Mmmh should not be able to filter for RBAC reasons
+        select: fieldsToSelect, // cannot select other fields as the user may not have the permissions
+      }
+    );
 
     if (!isEmpty(idsToOmit)) {
-      queryParams.where.$and.push({ id: { $notIn: idsToOmit } });
+      addWhereClause(queryParams, { id: { $notIn: idsToOmit } });
     }
 
     if (entityId) {
@@ -97,7 +98,7 @@ module.exports = {
         .select(`${alias}.id`)
         .getKnexQuery();
 
-      queryParams.where.$and.push({ id: { $notIn: knexSubQuery } });
+      addWhereClause(queryParams, { id: { $notIn: knexSubQuery } });
     }
 
     const results = await strapi.query(targetedModel.uid).findPage(queryParams);
