@@ -327,7 +327,7 @@ module.exports = ({ strapi }) => ({
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
     }
 
-    const adminUserId = user.adminUserId ? user.adminUserId : '';
+    const adminUserId = user && user.adminUserId ? user.adminUserId : '';
     sendMediaMetrics(fileValues, adminUserId);
 
     const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
@@ -344,7 +344,7 @@ module.exports = ({ strapi }) => ({
       fileValues[CREATED_BY_ATTRIBUTE] = user.id;
     }
 
-    const adminUserId = user.adminUserId ? user.adminUserId : '';
+    const adminUserId = user && user.adminUserId ? user.adminUserId : '';
     sendMediaMetrics(fileValues, adminUserId);
 
     const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });

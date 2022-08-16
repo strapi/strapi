@@ -15,7 +15,7 @@ describe('User Controller', () => {
 
     test('Fails if user already exist', async () => {
       const exists = jest.fn(() => Promise.resolve(true));
-      const hashAdminUser = jest.fn(() => 'testhash');
+      const generateAdminHashFromContext = jest.fn(() => 'testhash');
       const state = {
         user: {
           id: 1,
@@ -28,7 +28,7 @@ describe('User Controller', () => {
           services: {
             user: {
               exists,
-              hashAdminUser,
+              generateAdminHashFromContext,
             },
           },
         },
@@ -51,7 +51,7 @@ describe('User Controller', () => {
       const exists = jest.fn(() => Promise.resolve(false));
       const sanitizeUser = jest.fn((user) => Promise.resolve(user));
       const created = jest.fn();
-      const hashAdminUser = jest.fn(() => 'testhash');
+      const generateAdminHashFromContext = jest.fn(() => 'testhash');
       const state = {
         user: {
           id: 1,
@@ -66,17 +66,17 @@ describe('User Controller', () => {
               exists,
               create,
               sanitizeUser,
-              hashAdminUser,
+              generateAdminHashFromContext,
             },
           },
         },
       };
 
-      const adminUserId = hashAdminUser();
+      const adminUserId = generateAdminHashFromContext();
 
       await userController.create(ctx);
 
-      expect(hashAdminUser).toHaveBeenCalledWith(ctx.state.user);
+      expect(generateAdminHashFromContext).toHaveBeenCalledWith(ctx);
       expect(exists).toHaveBeenCalledWith({ email: body.email });
       expect(create).toHaveBeenCalledWith(body, adminUserId);
       expect(sanitizeUser).toHaveBeenCalled();

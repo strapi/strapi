@@ -104,7 +104,7 @@ describe('Single Types', () => {
 
     const createFn = jest.fn(() => ({}));
     const sendTelemetry = jest.fn(() => ({}));
-    const hashAdminUser = jest.fn(() => 'testhash');
+    const generateAdminHashFromContext = jest.fn(() => 'testhash');
 
     global.strapi = {
       admin: {
@@ -113,7 +113,7 @@ describe('Single Types', () => {
             createPermissionsManager,
           },
           user: {
-            hashAdminUser,
+            generateAdminHashFromContext,
           },
         },
       },
@@ -169,11 +169,11 @@ describe('Single Types', () => {
       { state }
     );
 
-    const adminUserId = hashAdminUser();
+    const adminUserId = generateAdminHashFromContext();
 
     await singleTypes.createOrUpdate(ctx);
 
-    expect(hashAdminUser).toHaveBeenCalledWith(ctx.state.user);
+    expect(generateAdminHashFromContext).toHaveBeenCalledWith(ctx);
 
     expect(permissionChecker.cannot.create).toHaveBeenCalled();
 

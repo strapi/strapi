@@ -9,8 +9,6 @@ const useTracking = () => {
   const appInfo = useAppInfos();
   const adminUserId = appInfo?.adminUserId;
 
-  console.log(appInfo);
-
   trackRef.current = (event, properties) => {
     if (uuid) {
       try {

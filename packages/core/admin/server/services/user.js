@@ -324,12 +324,17 @@ const getLanguagesInUse = async () => {
   return users.map((user) => user.preferedLanguage || 'en');
 };
 
-const hashAdminUser = (payload) => {
-  if (typeof payload === 'string') {
-    return crypto.createHash('sha256').update(payload).digest('hex');
+const generateAdminHashFromContext = (ctx) => {
+  try {
+    const { uuid } = strapi.config;
+    const adminUserEmailHash = crypto
+      .createHash('sha256')
+      .update(`${ctx.state.user.email}${uuid}`)
+      .digest('hex');
+    return adminUserEmailHash;
+  } catch (error) {
+    return '';
   }
-
-  return crypto.createHash('sha256').update(payload.email).digest('hex');
 };
 
 module.exports = {
@@ -350,5 +355,5 @@ module.exports = {
   displayWarningIfUsersDontHaveRole,
   resetPasswordByEmail,
   getLanguagesInUse,
-  hashAdminUser,
+  generateAdminHashFromContext,
 };

@@ -59,7 +59,7 @@ module.exports = (strapi) => {
 
   addPackageJsonStrapiMetadata(anonymousMetadata, strapi);
 
-  return async (adminUserId = '', event, payload = {}, opts = {}) => {
+  return async (adminUserId, event, payload = {}, opts = {}) => {
     const reqParams = {
       method: 'POST',
       body: JSON.stringify({

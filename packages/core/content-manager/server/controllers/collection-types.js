@@ -65,7 +65,7 @@ module.exports = {
     const { userAbility, user } = ctx.state;
     const { model } = ctx.params;
     const { body } = ctx.request;
-    const adminUserId = strapi.service('admin::user').hashAdminUser(ctx.state.user);
+    const adminUserId = strapi.service('admin::user').generateAdminHashFromContext(ctx);
 
     const totalEntries = await strapi.query(model).count();
 

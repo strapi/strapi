@@ -96,12 +96,13 @@ function App() {
             fetch('https://analytics.strapi.io/track', {
               method: 'POST',
               body: JSON.stringify({
+                adminUserId: '',
                 event: 'didInitializeAdministration',
-                uuid,
                 deviceId,
                 properties: {
                   ...properties,
                   environment: appInfo.currentEnvironment,
+                  projectId: uuid,
                 },
               }),
               headers: {

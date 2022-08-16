@@ -75,7 +75,7 @@ module.exports = {
     const { userAbility } = ctx.state;
     const { uid } = ctx.params;
     const { body } = ctx.request;
-    const adminUserId = strapi.service('admin::user').hashAdminUser(ctx.state.user);
+    const adminUserId = strapi.service('admin::user').generateAdminHashFromContext(ctx);
 
     const contentTypeService = getService('content-types');
     const metricsService = getService('metrics');

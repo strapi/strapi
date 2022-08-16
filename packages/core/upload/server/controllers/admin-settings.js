@@ -16,7 +16,7 @@ module.exports = {
     }
 
     const data = await validateSettings(body);
-    const adminUserId = strapi.service('admin::user').hashAdminUser(ctx.state.user.email);
+    const adminUserId = strapi.service('admin::user').generateAdminHashFromContext(ctx);
 
     await getService('upload').setSettings(data, adminUserId);
 

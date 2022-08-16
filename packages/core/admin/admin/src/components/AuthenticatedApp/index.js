@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect, useRef, useContext } from 'react';
 //  TODO: DS add loader
 import {
   auth,
@@ -6,6 +6,7 @@ import {
   AppInfosContext,
   useGuidedTour,
   useNotification,
+  TrackingContext,
 } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 import get from 'lodash/get';
@@ -30,7 +31,8 @@ const AuthenticatedApp = () => {
   const setGuidedTourVisibilityRef = useRef(setGuidedTourVisibility);
   const userInfo = auth.getUserInfo();
   const userName = get(userInfo, 'username') || getFullName(userInfo.firstname, userInfo.lastname);
-  const adminUserId = userInfo ? hashAdminUser(userInfo.email) : '';
+  const { uuid } = useContext(TrackingContext);
+  const adminUserId = userInfo ? hashAdminUser(`${userInfo.email}${uuid}`) : '';
   const [userDisplayName, setUserDisplayName] = useState(userName);
   const { showReleaseNotification } = useConfigurations();
   const [

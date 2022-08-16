@@ -13,7 +13,7 @@ const { getService } = require('../utils');
 module.exports = {
   async create(ctx) {
     const { body } = ctx.request;
-    const adminUserId = await getService('user').hashAdminUser(ctx.state.user);
+    const adminUserId = await getService('user').generateAdminHashFromContext(ctx);
 
     await validateUserCreationInput(body);
 
