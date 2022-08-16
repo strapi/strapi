@@ -455,7 +455,7 @@ class Strapi {
 
     this.cron.start();
 
-    this.contentAPI.permissions.syncActions();
+    await this.contentAPI.permissions.syncActions();
 
     return this;
   }
