@@ -6,12 +6,12 @@ import { RelationInput, useCMEditViewDataManager, NotAllowedInput } from '@strap
 
 import { useRelation } from '../../hooks/useRelation';
 import { connect, select, filterRemovedRelations } from './utils';
-import { getRequestUrl } from '../../utils';
 
 export const RelationInputWrapper = ({
   editable,
   description,
   intlLabel,
+  isCreatingEntry,
   isFieldAllowed,
   isFieldReadable,
   labelAction,
@@ -20,14 +20,10 @@ export const RelationInputWrapper = ({
   relationType,
 }) => {
   const { formatMessage } = useIntl();
-  const { addRelation, removeRelation, modifiedData, isCreatingEntry, slug, initialData } = useCMEditViewDataManager();
+  const { addRelation, removeRelation, modifiedData } = useCMEditViewDataManager();
 
-  const { relations, search, searchFor } = useRelation({
-    name,
-    endpoints: {
-      ...endpoints,
-      ...(!isCreatingEntry && { fetch: getRequestUrl(`${slug}/${initialData.id}/${name}`) })
-    },
+  const { relations, search, searchFor } = useRelation(name, {
+    endpoints,
   });
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
@@ -121,6 +117,7 @@ RelationInputWrapper.propTypes = {
     values: PropTypes.object,
   }).isRequired,
   labelAction: PropTypes.element,
+  isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool,
   isFieldReadable: PropTypes.bool.isRequired,
   mainField: PropTypes.shape({
