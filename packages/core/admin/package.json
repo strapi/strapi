@@ -57,6 +57,7 @@
     "@strapi/icons": "1.2.1",
     "@strapi/typescript-utils": "4.3.2",
     "@strapi/utils": "4.3.2",
+    "@strapi/permissions": "4.3.2",
     "axios": "0.24.0",
     "babel-loader": "8.2.5",
     "babel-plugin-styled-components": "2.0.2",

@@ -20,7 +20,7 @@ module.exports = params => {
       // If the action isn't registered into the action provider, then ignore the permission
       if (!action) {
         strapi.log.debug(
-          `Unknown action "${permission.action}" supplied when registering a new permission`
+          `Unknown action "${permission.action}" supplied when registering a new permission in engine`
         );
         return false;
       }
