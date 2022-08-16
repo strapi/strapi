@@ -34,6 +34,9 @@ jest.mock('@strapi/helper-plugin', () => ({
     get: jest.fn().mockReturnValue(mockCustomField),
     getAll,
   }),
+  useTracking: jest.fn(() => ({
+    trackUsage: jest.fn(),
+  })),
 }));
 
 const mockAttributes = [
