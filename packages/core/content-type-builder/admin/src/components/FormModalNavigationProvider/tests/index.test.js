@@ -21,7 +21,7 @@ describe('FromModalNavigationProvider', () => {
     expect(currentStateWithoutFunctions).toEqual(INITIAL_STATE_DATA);
   });
 
-  it('updates the form navigation state when selecting a custom field', () => {
+  it('updates the state when selecting a custom field for a new attribute', () => {
     const { result } = renderHook(() => useFormModalNavigation(), {
       wrapper: FormModalNavigationProvider,
     });
@@ -37,7 +37,38 @@ describe('FromModalNavigationProvider', () => {
     const expected = {
       ...INITIAL_STATE_DATA,
       actionType: 'create',
-      modalType: 'attribute',
+      modalType: 'customField',
+      attributeType: 'text',
+      customFieldUid: 'plugin::mycustomfields.color',
+    };
+
+    expect(currentStateWithoutFunctions).toEqual(expected);
+  });
+
+  it('updates the state when editing a custom field attribute', () => {
+    const { result } = renderHook(() => useFormModalNavigation(), {
+      wrapper: FormModalNavigationProvider,
+    });
+
+    act(() => {
+      result.current.onOpenModalEditCustomField({
+        forTarget: 'contentType',
+        targetUid: 'api::test.test',
+        attributeName: 'color',
+        attributeType: 'text',
+        customFieldUid: 'plugin::mycustomfields.color',
+      });
+    });
+
+    const currentStateWithoutFunctions = removeFunctionsFromObject(result.current);
+    const expected = {
+      ...INITIAL_STATE_DATA,
+      isOpen: true,
+      modalType: 'customField',
+      actionType: 'edit',
+      forTarget: 'contentType',
+      targetUid: 'api::test.test',
+      attributeName: 'color',
       attributeType: 'text',
       customFieldUid: 'plugin::mycustomfields.color',
     };

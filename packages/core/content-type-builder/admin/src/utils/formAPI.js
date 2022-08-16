@@ -68,11 +68,13 @@ const formsAPI = {
           },
         };
       }
+
       formType[field].validators.push(validator);
       formType[field].form.advanced.push(advanced);
       formType[field].form.base.push(base);
     });
   },
+
   getAdvancedForm(target, props = null) {
     const sectionsToAdd = get(this.types, [...target, 'form', 'advanced'], []).reduce(
       (acc, current) => {
@@ -84,6 +86,14 @@ const formsAPI = {
     );
 
     return sectionsToAdd;
+  },
+
+  makeCustomFieldValidator(attributeShape, validator, ...validatorArgs) {
+    // When no validator, return the attribute shape
+    if (!validator) return attributeShape;
+
+    // Otherwise extend the shape with the provided validator
+    return attributeShape.shape({ options: yup.object().shape(validator(validatorArgs)) });
   },
 
   makeValidator(target, initShape, ...args) {
