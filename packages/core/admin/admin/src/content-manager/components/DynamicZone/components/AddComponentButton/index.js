@@ -120,26 +120,24 @@ const AddComponentButton = ({
   }
 
   return (
-    <>
-      <Flex justifyContent="center">
-        <Box style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}>
-          <StyledButton type="button" onClick={onClick} disabled={isDisabled} hasError={hasError}>
-            <Flex>
-              <BoxFullHeight aria-hidden paddingRight={2}>
-                <StyledAddIcon $isOpen={isOpen} $hasError={hasError && !isOpen} />
-              </BoxFullHeight>
-              <Typography
-                variant="pi"
-                fontWeight="bold"
-                textColor={hasError && !isOpen ? 'danger600' : 'neutral500'}
-              >
-                {buttonLabel}
-              </Typography>
-            </Flex>
-          </StyledButton>
-        </Box>
-      </Flex>
-    </>
+    <Flex justifyContent="center">
+      <Box style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}>
+        <StyledButton type="button" onClick={onClick} disabled={isDisabled} hasError={hasError}>
+          <Flex>
+            <BoxFullHeight aria-hidden paddingRight={2}>
+              <StyledAddIcon $isOpen={isOpen} $hasError={hasError && !isOpen} />
+            </BoxFullHeight>
+            <Typography
+              variant="pi"
+              fontWeight="bold"
+              textColor={hasError && !isOpen ? 'danger600' : 'neutral500'}
+            >
+              {buttonLabel}
+            </Typography>
+          </Flex>
+        </StyledButton>
+      </Box>
+    </Flex>
   );
 };
 

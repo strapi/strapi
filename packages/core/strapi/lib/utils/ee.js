@@ -114,7 +114,7 @@ Object.defineProperty(module.exports, 'features', {
   enumerable: false,
 });
 
-const mustHaveKey = key => {
+const mustHaveKey = (key) => {
   if (!_.has(internals, key)) {
     const err = new Error('Tampering with license');
     // err.stack = null;

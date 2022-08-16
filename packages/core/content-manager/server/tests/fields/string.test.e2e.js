@@ -51,7 +51,7 @@ describe('Test type string', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.pagination).toBeDefined();
     expect(Array.isArray(res.body.results)).toBe(true);
-    res.body.results.forEach(entry => {
+    res.body.results.forEach((entry) => {
       expect(entry.field).toEqual(expect.any(String));
     });
   });

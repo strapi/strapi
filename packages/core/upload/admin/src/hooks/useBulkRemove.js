@@ -9,7 +9,7 @@ export const useBulkRemove = () => {
   const queryClient = useQueryClient();
   const url = getRequestUrl('actions/bulk-delete');
 
-  const bulkRemoveQuery = filesAndFolders => {
+  const bulkRemoveQuery = (filesAndFolders) => {
     const payload = filesAndFolders.reduce((acc, selected) => {
       const { id, type } = selected;
       const key = type === 'asset' ? 'fileIds' : 'folderIds';
@@ -27,7 +27,7 @@ export const useBulkRemove = () => {
   };
 
   const mutation = useMutation(bulkRemoveQuery, {
-    onSuccess: res => {
+    onSuccess(res) {
       const {
         data: { data },
       } = res;
@@ -49,7 +49,7 @@ export const useBulkRemove = () => {
         },
       });
     },
-    onError: error => {
+    onError(error) {
       toggleNotification({ type: 'warning', message: error.message });
     },
   });

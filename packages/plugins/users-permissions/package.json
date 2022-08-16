@@ -41,12 +41,17 @@
     "react-redux": "7.2.8",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "redux-saga": "^0.16.0",
     "request": "^2.83.0",
-    "url-join": "4.0.1"
+    "url-join": "4.0.1",
+    "koa": "^2.13.4"
   },
   "devDependencies": {
-    "koa": "^2.13.4"
+    "@testing-library/dom": "8.17.1",
+    "@testing-library/react": "12.1.4",
+    "@testing-library/react-hooks": "8.0.1",
+    "@testing-library/user-event": "14.4.2",
+    "msw": "0.42.3",
+    "react-test-renderer": "^17.0.2"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",

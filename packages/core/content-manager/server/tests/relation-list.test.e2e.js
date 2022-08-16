@@ -10,7 +10,7 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
 let rq;
-let data = {
+const data = {
   products: [],
   shops: [],
 };
@@ -65,28 +65,30 @@ const shops = [
   },
 ];
 
-const products = ({ withPublished = false }) => ({ shop }) => {
-  const shops = [shop[0].id];
+const products =
+  ({ withPublished = false }) =>
+  ({ shop }) => {
+    const shops = [shop[0].id];
 
-  const entries = [
-    {
-      name: 'tomato',
-      shops,
-      publishedAt: new Date(),
-    },
-    {
-      name: 'apple',
-      shops,
-      publishedAt: null,
-    },
-  ];
+    const entries = [
+      {
+        name: 'tomato',
+        shops,
+        publishedAt: new Date(),
+      },
+      {
+        name: 'apple',
+        shops,
+        publishedAt: null,
+      },
+    ];
 
-  if (withPublished) {
-    return entries;
-  }
+    if (withPublished) {
+      return entries;
+    }
 
-  return entries.map(omit('publishedAt'));
-};
+    return entries.map(omit('publishedAt'));
+  };
 
 describe('Relation-list route', () => {
   describe('without draftAndPublish', () => {
@@ -167,8 +169,8 @@ describe('Relation-list route', () => {
 
       expect(res.body).toHaveLength(data.products.length);
 
-      const tomatoProductRes = res.body.find(p => p.name === 'tomato');
-      const appleProductRes = res.body.find(p => p.name === 'apple');
+      const tomatoProductRes = res.body.find((p) => p.name === 'tomato');
+      const appleProductRes = res.body.find((p) => p.name === 'apple');
 
       expect(tomatoProductRes).toMatchObject(pick(['_id', 'id', 'name'], data.products[0]));
       expect(tomatoProductRes.publishedAt).toBeISODate();

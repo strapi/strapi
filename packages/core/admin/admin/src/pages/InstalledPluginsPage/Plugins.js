@@ -55,7 +55,7 @@ const Plugins = () => {
           })}
         />
         <ContentLayout>
-          <Table colCount={2} rowCount={data?.plugins.length + 1}>
+          <Table colCount={2} rowCount={data?.plugins?.length ?? 0 + 1}>
             <Thead>
               <Tr>
                 <Th>

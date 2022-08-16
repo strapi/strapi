@@ -3,7 +3,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 import { Status } from '@strapi/helper-plugin';
 
-const getTableHeaders = formatMessage => [
+const getTableHeaders = (formatMessage) => [
   {
     name: 'firstname',
     key: 'firstname',
@@ -38,11 +38,11 @@ const getTableHeaders = formatMessage => [
     key: 'roles',
     name: 'roles',
     metadatas: { label: 'Roles', sortable: false },
-    cellFormatter: ({ roles }, { formatMessage }) => {
+    cellFormatter({ roles }, { formatMessage }) {
       return (
         <Typography textColor="neutral800">
           {roles
-            .map(role =>
+            .map((role) =>
               formatMessage({
                 id: `Settings.permissions.users.${role.code}`,
                 defaultMessage: role.name,
@@ -74,7 +74,7 @@ const getTableHeaders = formatMessage => [
       }),
       sortable: false,
     },
-    cellFormatter: ({ isActive }, { formatMessage }) => {
+    cellFormatter({ isActive }, { formatMessage }) {
       return (
         <Flex>
           <Status isActive={isActive} variant={isActive ? 'success' : 'danger'} />

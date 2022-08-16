@@ -56,10 +56,10 @@ const RelationalFieldButton = ({
 
   const [{ isDragging }, drag, dragPreview] = useDrag({
     type: ItemTypes.EDIT_RELATION,
-    item: () => {
+    item() {
       return { index, labelField: children, name };
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
@@ -94,7 +94,7 @@ const RelationalFieldButton = ({
         as="span"
         type="button"
         ref={dragButtonRef}
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         alignItems="center"
         paddingLeft={3}
         paddingRight={3}

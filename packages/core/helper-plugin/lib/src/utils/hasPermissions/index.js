@@ -6,7 +6,7 @@ const findMatchingPermissions = (userPermissions, permissions) => {
     userPermissions,
     (result, value) => {
       const associatedPermission = permissions.find(
-        perm => perm.action === value.action && perm.subject === value.subject
+        (perm) => perm.action === value.action && perm.subject === value.subject
       );
 
       if (associatedPermission) {
@@ -17,15 +17,15 @@ const findMatchingPermissions = (userPermissions, permissions) => {
   );
 };
 
-const formatPermissionsForRequest = permissions =>
-  permissions.map(permission =>
+const formatPermissionsForRequest = (permissions) =>
+  permissions.map((permission) =>
     pickBy(permission, (value, key) => {
       return ['action', 'subject'].includes(key) && !isEmpty(value);
     })
   );
 
-const shouldCheckPermissions = permissions =>
-  !isEmpty(permissions) && permissions.every(perm => !isEmpty(perm.conditions));
+const shouldCheckPermissions = (permissions) =>
+  !isEmpty(permissions) && permissions.every((perm) => !isEmpty(perm.conditions));
 
 /**
  *
@@ -52,7 +52,7 @@ const hasPermissions = async (userPermissions, permissions, signal) => {
         signal,
       });
 
-      hasPermission = data.every(v => v === true);
+      hasPermission = data.every((v) => v === true);
     } catch (err) {
       console.error('Error while checking permissions', err);
     }

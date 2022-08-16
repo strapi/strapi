@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { NotificationsProvider, TrackingContext } from '@strapi/helper-plugin';
+import { NotificationsProvider, TrackingProvider } from '@strapi/helper-plugin';
 import { EditAssetDialog } from '../index';
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils/downloadFile';
@@ -97,7 +97,7 @@ const renderCompo = (
 ) =>
   render(
     <QueryClientProvider client={queryClient}>
-      <TrackingContext.Provider value={{ uuid: false, telemetryProperties: undefined }}>
+      <TrackingProvider>
         <ThemeProvider theme={lightTheme}>
           <NotificationsProvider toggleNotification={toggleNotification}>
             <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
@@ -105,7 +105,7 @@ const renderCompo = (
             </IntlProvider>
           </NotificationsProvider>
         </ThemeProvider>
-      </TrackingContext.Provider>
+      </TrackingProvider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
   );
@@ -266,7 +266,7 @@ describe('<EditAssetDialog />', () => {
       const file = new File(['Replacement media'], 'test.png', { type: 'image/png' });
 
       const fileList = [file];
-      fileList.item = i => fileList[i];
+      fileList.item = (i) => fileList[i];
 
       renderCompo({
         canUpdate: true,

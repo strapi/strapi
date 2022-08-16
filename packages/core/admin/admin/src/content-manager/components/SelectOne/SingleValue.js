@@ -22,7 +22,7 @@ const StyledBullet = styled.div`
   cursor: pointer;
 `;
 
-const SingleValue = props => {
+const SingleValue = (props) => {
   const { formatMessage } = useIntl();
   const Component = components.SingleValue;
   const hasDraftAndPublish = has(get(props, 'data.value'), 'publishedAt');

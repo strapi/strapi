@@ -1,6 +1,5 @@
 'use strict';
 
-// eslint-disable-next-line node/no-extraneous-require
 const { combineReducers, createStore } = require('redux');
 
 const reducers = {

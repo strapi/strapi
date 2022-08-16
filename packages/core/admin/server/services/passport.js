@@ -21,9 +21,7 @@ const registerAuthEvents = () => {
   const { events = {} } = strapi.config.get('admin.auth', {});
   const { authEventsMapper } = strapi.admin.services.passport;
 
-  const eventList = Object.entries(events)
-    .filter(keyIsValidEventName)
-    .filter(valueIsFunctionType);
+  const eventList = Object.entries(events).filter(keyIsValidEventName).filter(valueIsFunctionType);
 
   for (const [eventName, handler] of eventList) {
     strapi.eventHub.on(authEventsMapper[eventName], handler);
@@ -33,7 +31,7 @@ const registerAuthEvents = () => {
 const init = () => {
   strapi.admin.services.passport
     .getPassportStrategies()
-    .forEach(strategy => passport.use(strategy));
+    .forEach((strategy) => passport.use(strategy));
 
   registerAuthEvents();
 

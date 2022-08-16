@@ -158,7 +158,7 @@ describe('i18n - Content API', () => {
       expect(Array.isArray(body.data)).toBe(true);
       expect(body.data).toHaveLength(2);
       expect(body.data).toEqual(
-        expect.arrayContaining(data.categories.map(category => transformToRESTResource(category)))
+        expect.arrayContaining(data.categories.map((category) => transformToRESTResource(category)))
       );
     });
   });

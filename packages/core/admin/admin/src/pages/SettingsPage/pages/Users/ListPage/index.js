@@ -60,7 +60,7 @@ const ListPage = () => {
     keepPreviousData: true,
     retry: false,
     staleTime: 1000 * 20,
-    onError: () => {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error', defaultMessage: 'An error occured' },
@@ -69,14 +69,14 @@ const ListPage = () => {
   });
 
   const handleToggle = () => {
-    setIsModalOpen(prev => !prev);
+    setIsModalOpen((prev) => !prev);
   };
 
-  const deleteAllMutation = useMutation(ids => deleteData(ids), {
-    onSuccess: async () => {
+  const deleteAllMutation = useMutation((ids) => deleteData(ids), {
+    async onSuccess() {
       await queryClient.invalidateQueries(queryName);
     },
-    onError: err => {
+    onError(err) {
       if (err?.response?.data?.data) {
         toggleNotification({ type: 'warning', message: err.response.data.data });
       } else {
@@ -104,9 +104,7 @@ const ListPage = () => {
         defaultMessage: 'Invite new user',
       })}
     </Button>
-  ) : (
-    undefined
-  );
+  ) : undefined;
 
   return (
     <Main aria-busy={isLoading}>
@@ -144,7 +142,7 @@ const ListPage = () => {
               contentType="Users"
               isLoading={isLoading}
               onConfirmDeleteAll={deleteAllMutation.mutateAsync}
-              onConfirmDelete={id => deleteAllMutation.mutateAsync([id])}
+              onConfirmDelete={(id) => deleteAllMutation.mutateAsync([id])}
               headers={getTableHeaders(formatMessage)}
               rows={data?.results}
               withBulkActions

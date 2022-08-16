@@ -29,7 +29,7 @@ const schemas = {
   },
 };
 
-const getFixtures = file => {
+const getFixtures = (file) => {
   return [
     {
       cover: file.id,

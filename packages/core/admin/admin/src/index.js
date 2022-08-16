@@ -38,7 +38,7 @@ const run = async () => {
     window.strapi.features = {
       ...window.strapi.features,
       allFeatures: features,
-      isEnabled: f => features.includes(f),
+      isEnabled: (f) => features.includes(f),
     };
 
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';

@@ -68,7 +68,7 @@ const ApiTokenCreateView = () => {
     },
     {
       enabled: !isCreating && !apiToken,
-      onError: () => {
+      onError() {
         toggleNotification({
           type: 'warning',
           message: { id: 'notification.error', defaultMessage: 'An error occured' },
@@ -255,7 +255,7 @@ const ApiTokenCreateView = () => {
                                   )
                                 : null
                             }
-                            onChange={value => {
+                            onChange={(value) => {
                               handleChange({ target: { name: 'type', value } });
                             }}
                           >

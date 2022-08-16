@@ -28,7 +28,7 @@ const wrapWithEmitEvent = (event, fn) => async (entity, body, model) => {
   return result;
 };
 
-const findCreatorRoles = entity => {
+const findCreatorRoles = (entity) => {
   const createdByPath = `${CREATED_BY_ATTRIBUTE}.id`;
 
   if (has(createdByPath, entity)) {
@@ -84,7 +84,7 @@ const getBasePopulate = (uid, populate) => {
 
   const { attributes } = strapi.getModel(uid);
 
-  return Object.keys(attributes).filter(attributeName => {
+  return Object.keys(attributes).filter((attributeName) => {
     return ['relation', 'component', 'dynamiczone', 'media'].includes(
       attributes[attributeName].type
     );
@@ -109,7 +109,7 @@ const getCounterPopulate = (uid, populate) => {
   }, {});
 };
 
-const addCreatedByRolesPopulate = populate => {
+const addCreatedByRolesPopulate = (populate) => {
   return {
     ...populate,
     createdBy: {

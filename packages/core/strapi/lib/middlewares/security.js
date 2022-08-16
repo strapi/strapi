@@ -30,12 +30,12 @@ const defaults = {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = config => (ctx, next) => {
+module.exports = (config) => (ctx, next) => {
   let helmetConfig = defaultsDeep(defaults, config);
 
   if (
     ctx.method === 'GET' &&
-    ['/graphql', '/documentation'].some(str => ctx.path.startsWith(str))
+    ['/graphql', '/documentation'].some((str) => ctx.path.startsWith(str))
   ) {
     helmetConfig = merge(helmetConfig, {
       contentSecurityPolicy: {

@@ -15,13 +15,13 @@ export const Filters = () => {
   const [{ query }, setQuery] = useQueryParams();
   const filters = query?.filters?.$and || [];
 
-  const toggleFilter = () => setVisible(prev => !prev);
+  const toggleFilter = () => setVisible((prev) => !prev);
 
-  const handleRemoveFilter = nextFilters => {
+  const handleRemoveFilter = (nextFilters) => {
     setQuery({ filters: { $and: nextFilters }, page: 1 });
   };
 
-  const handleSubmit = filters => {
+  const handleSubmit = (filters) => {
     trackUsage('didFilterMediaLibraryElements', {
       location: 'content-manager',
       filter: Object.keys(filters[filters.length - 1])[0],

@@ -1,6 +1,6 @@
 import useAdminProvider from '../useAdminProvider';
 
-const useInjectionZone = area => {
+const useInjectionZone = (area) => {
   const { getAdminInjectedComponents } = useAdminProvider();
 
   const [moduleName, page, position] = area.split('.');

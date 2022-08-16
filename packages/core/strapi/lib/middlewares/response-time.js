@@ -10,6 +10,6 @@ module.exports = () => {
     await next();
 
     const delta = Math.ceil(Date.now() - start);
-    ctx.set('X-Response-Time', delta + 'ms');
+    ctx.set('X-Response-Time', `${delta}ms`);
   };
 };

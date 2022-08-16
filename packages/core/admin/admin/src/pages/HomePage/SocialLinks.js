@@ -176,7 +176,7 @@ const SocialLinks = () => {
         </Stack>
       </Box>
       <GridGap>
-        {socialLinks.map(socialLink => {
+        {socialLinks.map((socialLink) => {
           return (
             <GridItem col={6} s={12} key={socialLink.name}>
               <LinkCustom

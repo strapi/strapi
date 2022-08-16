@@ -1,3 +1,5 @@
+/* eslint-disable max-classes-per-file */
+
 'use strict';
 
 const { HttpError } = require('http-errors');

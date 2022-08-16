@@ -201,140 +201,143 @@ describe('content-types service', () => {
     });
   });
 
-  describe.each([['singleType'], ['collectionType']])('getAndValidateRelatedEntity - %s', kind => {
-    test("Throw if relatedEntity is provided but doesn't exist", async () => {
-      const findOne = jest.fn(() => Promise.resolve(undefined));
-      const relatedEntityId = 1;
-      const model = 'api::country.country';
-      const locale = 'fr';
+  describe.each([['singleType'], ['collectionType']])(
+    'getAndValidateRelatedEntity - %s',
+    (kind) => {
+      test("Throw if relatedEntity is provided but doesn't exist", async () => {
+        const findOne = jest.fn(() => Promise.resolve(undefined));
+        const relatedEntityId = 1;
+        const model = 'api::country.country';
+        const locale = 'fr';
 
-      global.strapi = {
-        query: () => ({
-          findOne,
-        }),
-        getModel: () => ({ kind }),
-      };
+        global.strapi = {
+          query: () => ({
+            findOne,
+          }),
+          getModel: () => ({ kind }),
+        };
 
-      try {
-        await getAndValidateRelatedEntity(relatedEntityId, model, locale);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
-        expect(e.message).toBe("The related entity doesn't exist");
-      }
+        try {
+          await getAndValidateRelatedEntity(relatedEntityId, model, locale);
+        } catch (e) {
+          expect(e instanceof ApplicationError).toBe(true);
+          expect(e.message).toBe("The related entity doesn't exist");
+        }
 
-      expect(findOne).toHaveBeenCalledWith(
-        kind === 'singleType'
-          ? { populate: ['localizations'] }
-          : { where: { id: relatedEntityId }, populate: ['localizations'] }
-      );
-      expect.assertions(3);
-    });
+        expect(findOne).toHaveBeenCalledWith(
+          kind === 'singleType'
+            ? { populate: ['localizations'] }
+            : { where: { id: relatedEntityId }, populate: ['localizations'] }
+        );
+        expect.assertions(3);
+      });
 
-    test('Throw if locale already exists (1/2)', async () => {
-      const relatedEntityId = 1;
-      const relatedEntity = {
-        id: relatedEntityId,
-        locale: 'en',
-        localizations: [],
-      };
-      const findOne = jest.fn(() => Promise.resolve(relatedEntity));
-      const model = 'api::country.country';
-      const locale = 'en';
+      test('Throw if locale already exists (1/2)', async () => {
+        const relatedEntityId = 1;
+        const relatedEntity = {
+          id: relatedEntityId,
+          locale: 'en',
+          localizations: [],
+        };
+        const findOne = jest.fn(() => Promise.resolve(relatedEntity));
+        const model = 'api::country.country';
+        const locale = 'en';
 
-      global.strapi = {
-        query: () => ({
-          findOne,
-        }),
-        getModel: () => ({ kind }),
-      };
+        global.strapi = {
+          query: () => ({
+            findOne,
+          }),
+          getModel: () => ({ kind }),
+        };
 
-      try {
-        await getAndValidateRelatedEntity(relatedEntityId, model, locale);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
-        expect(e.message).toBe('The entity already exists in this locale');
-      }
+        try {
+          await getAndValidateRelatedEntity(relatedEntityId, model, locale);
+        } catch (e) {
+          expect(e instanceof ApplicationError).toBe(true);
+          expect(e.message).toBe('The entity already exists in this locale');
+        }
 
-      expect(findOne).toHaveBeenCalledWith(
-        kind === 'singleType'
-          ? { populate: ['localizations'] }
-          : { where: { id: relatedEntityId }, populate: ['localizations'] }
-      );
-      expect.assertions(3);
-    });
+        expect(findOne).toHaveBeenCalledWith(
+          kind === 'singleType'
+            ? { populate: ['localizations'] }
+            : { where: { id: relatedEntityId }, populate: ['localizations'] }
+        );
+        expect.assertions(3);
+      });
 
-    test('Throw if locale already exists (2/2)', async () => {
-      const relatedEntityId = 1;
-      const relatedEntity = {
-        id: relatedEntityId,
-        locale: 'fr',
-        localizations: [
-          {
-            id: 2,
-            locale: 'en',
-          },
-        ],
-      };
-      const findOne = jest.fn(() => Promise.resolve(relatedEntity));
-      const model = 'api::country.country';
-      const locale = 'en';
+      test('Throw if locale already exists (2/2)', async () => {
+        const relatedEntityId = 1;
+        const relatedEntity = {
+          id: relatedEntityId,
+          locale: 'fr',
+          localizations: [
+            {
+              id: 2,
+              locale: 'en',
+            },
+          ],
+        };
+        const findOne = jest.fn(() => Promise.resolve(relatedEntity));
+        const model = 'api::country.country';
+        const locale = 'en';
 
-      global.strapi = {
-        query: () => ({
-          findOne,
-        }),
-        getModel: () => ({ kind }),
-      };
+        global.strapi = {
+          query: () => ({
+            findOne,
+          }),
+          getModel: () => ({ kind }),
+        };
 
-      try {
-        await getAndValidateRelatedEntity(relatedEntityId, model, locale);
-      } catch (e) {
-        expect(e instanceof ApplicationError).toBe(true);
-        expect(e.message).toBe('The entity already exists in this locale');
-      }
+        try {
+          await getAndValidateRelatedEntity(relatedEntityId, model, locale);
+        } catch (e) {
+          expect(e instanceof ApplicationError).toBe(true);
+          expect(e.message).toBe('The entity already exists in this locale');
+        }
 
-      expect(findOne).toHaveBeenCalledWith(
-        kind === 'singleType'
-          ? { populate: ['localizations'] }
-          : { where: { id: relatedEntityId }, populate: ['localizations'] }
-      );
-      expect.assertions(3);
-    });
+        expect(findOne).toHaveBeenCalledWith(
+          kind === 'singleType'
+            ? { populate: ['localizations'] }
+            : { where: { id: relatedEntityId }, populate: ['localizations'] }
+        );
+        expect.assertions(3);
+      });
 
-    test('get related entity', async () => {
-      const relatedEntityId = 1;
-      const relatedEntity = {
-        id: relatedEntityId,
-        locale: 'fr',
-        localizations: [
-          {
-            id: 2,
-            locale: 'en',
-          },
-        ],
-      };
-      const findOne = jest.fn(() => Promise.resolve(relatedEntity));
-      const model = 'api::country.country';
-      const locale = 'it';
+      test('get related entity', async () => {
+        const relatedEntityId = 1;
+        const relatedEntity = {
+          id: relatedEntityId,
+          locale: 'fr',
+          localizations: [
+            {
+              id: 2,
+              locale: 'en',
+            },
+          ],
+        };
+        const findOne = jest.fn(() => Promise.resolve(relatedEntity));
+        const model = 'api::country.country';
+        const locale = 'it';
 
-      global.strapi = {
-        query: () => ({
-          findOne,
-        }),
-        getModel: () => ({ kind }),
-      };
+        global.strapi = {
+          query: () => ({
+            findOne,
+          }),
+          getModel: () => ({ kind }),
+        };
 
-      const foundEntity = await getAndValidateRelatedEntity(relatedEntityId, model, locale);
+        const foundEntity = await getAndValidateRelatedEntity(relatedEntityId, model, locale);
 
-      expect(foundEntity).toEqual(relatedEntity);
-      expect(findOne).toHaveBeenCalledWith(
-        kind === 'singleType'
-          ? { populate: ['localizations'] }
-          : { where: { id: relatedEntityId }, populate: ['localizations'] }
-      );
-      expect.assertions(2);
-    });
-  });
+        expect(foundEntity).toEqual(relatedEntity);
+        expect(findOne).toHaveBeenCalledWith(
+          kind === 'singleType'
+            ? { populate: ['localizations'] }
+            : { where: { id: relatedEntityId }, populate: ['localizations'] }
+        );
+        expect.assertions(2);
+      });
+    }
+  );
 
   describe('getNewLocalizationsFrom', () => {
     test('Can get localizations', async () => {
@@ -573,7 +576,7 @@ describe('content-types service', () => {
 
   describe('getNestedPopulateOfNonLocalizedAttributes', () => {
     beforeAll(() => {
-      const getModel = model =>
+      const getModel = (model) =>
         ({
           'api::country.country': {
             attributes: {

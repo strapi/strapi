@@ -1,4 +1,4 @@
-import { fixtures } from '../../../../../../admin-test-utils/lib';
+import { fixtures } from '@strapi/admin-test-utils/lib';
 import addLocaleToSingleTypesLinks from '../addLocaleToSingleTypesLinks';
 
 describe('i18n | contentManagerHooks | addLocaleToSingleTypesLinks', () => {
@@ -18,7 +18,7 @@ describe('i18n | contentManagerHooks | addLocaleToSingleTypesLinks', () => {
       },
     };
 
-    store.getState = function() {
+    store.getState = function () {
       return this;
     };
   });

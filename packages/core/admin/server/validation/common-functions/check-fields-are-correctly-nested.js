@@ -2,11 +2,12 @@
 
 const _ = require('lodash');
 
-const checkFieldsAreCorrectlyNested = fields => {
+const checkFieldsAreCorrectlyNested = (fields) => {
   if (_.isNil(fields)) {
     // Only check if the fields exist
     return true;
-  } else if (!Array.isArray(fields)) {
+  }
+  if (!Array.isArray(fields)) {
     return false;
   }
 
@@ -15,7 +16,8 @@ const checkFieldsAreCorrectlyNested = fields => {
     failed = fields
       .slice(indexA + 1)
       .some(
-        fieldB => fieldB.startsWith(`${fields[indexA]}.`) || fields[indexA].startsWith(`${fieldB}.`)
+        (fieldB) =>
+          fieldB.startsWith(`${fields[indexA]}.`) || fields[indexA].startsWith(`${fieldB}.`)
       );
     if (failed) break;
   }

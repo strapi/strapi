@@ -2,6 +2,6 @@
 
 const contentType = require('./content-type');
 
-module.exports = context => ({
+module.exports = (context) => ({
   ...contentType(context),
 });

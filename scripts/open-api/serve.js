@@ -39,7 +39,7 @@ async function run() {
   });
 }
 
-run().catch(error => {
+run().catch((error) => {
   console.log('Unexpected Error:', error);
   process.exit(1);
 });

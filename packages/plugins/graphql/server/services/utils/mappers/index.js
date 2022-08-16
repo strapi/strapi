@@ -5,7 +5,7 @@ const graphQLFiltersToStrapiQuery = require('./graphql-filters-to-strapi-query')
 const graphqlScalarToOperators = require('./graphql-scalar-to-operators');
 const entityToResponseEntity = require('./entity-to-response-entity');
 
-module.exports = context => ({
+module.exports = (context) => ({
   ...strapiScalarToGraphQLScalar(context),
   ...graphQLFiltersToStrapiQuery(context),
   ...graphqlScalarToOperators(context),

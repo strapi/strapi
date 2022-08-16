@@ -9,7 +9,7 @@ describe('i18n - Migration - disable localization on a field', () => {
         const find = jest.fn();
         global.strapi = {
           query() {
-            find;
+            return { find };
           },
           plugins: {
             i18n: {
@@ -35,7 +35,7 @@ describe('i18n - Migration - disable localization on a field', () => {
 
         global.strapi = {
           query() {
-            find;
+            return { find };
           },
           plugins: {
             i18n: {
@@ -62,7 +62,7 @@ describe('i18n - Migration - disable localization on a field', () => {
         const getLocalizedAttributes = jest.fn(() => ['name']);
         global.strapi = {
           query() {
-            find;
+            return { find };
           },
           plugins: {
             i18n: {
@@ -93,7 +93,7 @@ describe('i18n - Migration - disable localization on a field', () => {
 
         global.strapi = {
           query() {
-            find;
+            return { find };
           },
           plugins: {
             i18n: {
@@ -124,7 +124,7 @@ describe('i18n - Migration - disable localization on a field', () => {
 
         global.strapi = {
           query() {
-            find;
+            return { find };
           },
           plugins: {
             i18n: {

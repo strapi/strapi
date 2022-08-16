@@ -7,10 +7,10 @@ const compose = require('koa-compose');
 const { resolveRouteMiddlewares } = require('./middleware');
 const { resolvePolicies } = require('./policy');
 
-const getMethod = route => trim(toLower(route.method));
-const getPath = route => trim(route.path);
+const getMethod = (route) => trim(toLower(route.method));
+const getPath = (route) => trim(route.path);
 
-const createRouteInfoMiddleware = routeInfo => (ctx, next) => {
+const createRouteInfoMiddleware = (routeInfo) => (ctx, next) => {
   const route = {
     ...routeInfo,
     config: routeInfo.config || {},
@@ -22,7 +22,7 @@ const createRouteInfoMiddleware = routeInfo => (ctx, next) => {
 
 const getAuthConfig = prop('config.auth');
 
-const createAuthorizeMiddleware = strapi => async (ctx, next) => {
+const createAuthorizeMiddleware = (strapi) => async (ctx, next) => {
   const { auth, route } = ctx.state;
 
   const authService = strapi.container.get('auth');
@@ -44,7 +44,7 @@ const createAuthorizeMiddleware = strapi => async (ctx, next) => {
   }
 };
 
-const createAuthenticateMiddleware = strapi => async (ctx, next) => {
+const createAuthenticateMiddleware = (strapi) => async (ctx, next) => {
   return strapi.container.get('auth').authenticate(ctx, next);
 };
 
@@ -56,7 +56,7 @@ const returnBodyMiddleware = async (ctx, next) => {
   }
 };
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   const authenticate = createAuthenticateMiddleware(strapi);
   const authorize = createAuthorizeMiddleware(strapi);
 
@@ -108,7 +108,7 @@ const getController = (name, { pluginName, apiName }, strapi) => {
   return ctrl;
 };
 
-const extractHandlerParts = name => {
+const extractHandlerParts = (name) => {
   const controllerName = name.slice(0, name.lastIndexOf('.'));
   const actionName = name.slice(name.lastIndexOf('.') + 1);
 

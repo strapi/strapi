@@ -49,19 +49,14 @@ module.exports = ({
       ]
     : [];
 
-  // Directly inject a polyfill in the webpack entry point before the entry point
-  // FIXME: I have noticed a bug regarding the helper-plugin and esbuild-loader
-  // The only I could fix it was to inject the babel polyfill
-  const babelPolyfill = '@babel/polyfill/dist/polyfill.min.js';
-
   return {
     mode: isProduction ? 'production' : 'development',
-    bail: isProduction ? true : false,
+    bail: !!isProduction,
     devtool: isProduction ? false : 'eval-source-map',
     experiments: {
       topLevelAwait: true,
     },
-    entry: [babelPolyfill, entry],
+    entry: [entry],
     output: {
       path: dest,
       publicPath: options.adminPath,
