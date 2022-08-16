@@ -23,7 +23,7 @@ import ModalForm from './ModalForm';
 import PaginationFooter from './PaginationFooter';
 import { deleteData, fetchData } from './utils/api';
 import displayedFilters from './utils/displayedFilters';
-import tableHeaders from './utils/tableHeaders';
+import getTableHeaders from './utils/getTableHeaders';
 
 const ListPage = () => {
   const [isModalOpened, setIsModalOpen] = useState(false);
@@ -145,14 +145,14 @@ const ListPage = () => {
               isLoading={isLoading}
               onConfirmDeleteAll={deleteAllMutation.mutateAsync}
               onConfirmDelete={id => deleteAllMutation.mutateAsync([id])}
-              headers={tableHeaders}
+              headers={getTableHeaders(formatMessage)}
               rows={data?.results}
               withBulkActions
               withMainAction={canDelete}
             >
               <TableRows
                 canDelete={canDelete}
-                headers={tableHeaders}
+                headers={getTableHeaders(formatMessage)}
                 rows={data?.results || []}
                 withBulkActions
                 withMainAction={canDelete}
