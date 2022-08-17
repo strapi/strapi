@@ -10,10 +10,10 @@ const { validateFindAvailable } = require('./validation/relations');
 
 const addWhereClause = (params, whereClause) => {
   params.where = params.where || {};
-  if (Array.isArray(params.where)) {
-    params.where.push(whereClause);
+  if (params.where.$and) {
+    params.where.$and.push(whereClause);
   } else {
-    params.where = [params.where, whereClause];
+    params.where.$and = [whereClause];
   }
 };
 
