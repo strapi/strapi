@@ -5,8 +5,8 @@
  */
 const { Writable } = require('stream');
 
-const bytesToKbytes = bytes => Math.round((bytes / 1000) * 100) / 100;
-const kbytesToBytes = kbytes => kbytes * 1000;
+const bytesToKbytes = (bytes) => Math.round((bytes / 1000) * 100) / 100;
+const kbytesToBytes = (kbytes) => kbytes * 1000;
 
 const streamToBuffer = (stream) =>
   new Promise((resolve, reject) => {
