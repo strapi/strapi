@@ -136,14 +136,13 @@ RelationInputWrapper.propTypes = {
   // eslint-disable-next-line react/no-unused-prop-types
   targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.shape({
-    containsKey: PropTypes.string.isRequired,
-    defaultParams: PropTypes.object,
+    defaultParams: PropTypes.shape({
+      _component: PropTypes.string,
+    }),
     endpoints: PropTypes.shape({
-      fetch: PropTypes.string,
       search: PropTypes.string.isRequired,
     }).isRequired,
     shouldDisplayRelationLink: PropTypes.bool.isRequired,
-    paramsToKeep: PropTypes.array,
   }).isRequired,
 };
 
