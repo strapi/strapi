@@ -286,5 +286,19 @@ describe('Populate filters', () => {
       expect(secondItem.attributes.third.data[0].attributes.fooRef).not.toBeNull();
       expect(secondItem.attributes.third.data[1].attributes.fooRef).toBeNull();
     });
+
+    test("Populate with object and 't'", async () => {
+      const qs = {
+        populate: {
+          third: 't',
+        },
+      };
+      const { status, body } = await rq.get(`/${schemas.contentTypes.c.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(2);
+
+      expect(body.data[0].attributes.third.data[0].attributes.fooRef).toBeUndefined();
+    });
   });
 });

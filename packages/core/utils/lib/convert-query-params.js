@@ -215,6 +215,10 @@ const convertNestedPopulate = (subPopulate, schema) => {
     return true;
   }
 
+  if (_.isString(subPopulate)) {
+    return parseType({ type: 'boolean', value: subPopulate, forceCast: true });
+  }
+
   if (_.isBoolean(subPopulate)) {
     return subPopulate;
   }
