@@ -25,6 +25,7 @@ import NotSupported from './NotSupported';
 
 const GenericInput = ({
   autoComplete,
+  customFieldUid,
   customInputs,
   description,
   disabled,
@@ -45,7 +46,11 @@ const GenericInput = ({
   const { formatMessage } = useIntl();
   const [showPassword, setShowPassword] = useState(false);
 
-  const CustomInput = customInputs ? customInputs[type] : null;
+  let CustomInput = null;
+
+  if (customInputs) {
+    CustomInput = customInputs[customFieldUid || type];
+  }
 
   // the API always returns null, which throws an error in React,
   // therefore we cast this case to undefined
@@ -437,6 +442,7 @@ const GenericInput = ({
 GenericInput.defaultProps = {
   autoComplete: undefined,
   customInputs: null,
+  customFieldUid: null,
   description: null,
   disabled: false,
   error: '',
@@ -452,6 +458,7 @@ GenericInput.defaultProps = {
 GenericInput.propTypes = {
   autoComplete: PropTypes.string,
   customInputs: PropTypes.object,
+  customFieldUid: PropTypes.string,
   description: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,

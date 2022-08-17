@@ -218,83 +218,48 @@ function Inputs({
     );
   }
 
+  const customInputs = {
+    json: InputJSON,
+    uid: InputUID,
+    media: fields.media,
+    wysiwyg: Wysiwyg,
+    ...fields,
+  };
+
   if (customFieldUid) {
     const customField = customFieldsRegistry.get(customFieldUid);
-
     const CustomFieldInput = React.lazy(customField.components.Input);
-
-    return (
-      <Suspense fallback="loading...">
-        <CustomFieldInput
-          attribute={fieldSchema}
-          autoComplete="new-password"
-          intlLabel={{ id: label, defaultMessage: label }}
-          // in case the default value of the boolean is null, attribute.default doesn't exist
-          isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
-          description={description ? { id: description, defaultMessage: description } : null}
-          disabled={shouldDisableField}
-          error={error}
-          labelAction={labelAction}
-          contentTypeUID={currentContentTypeLayout.uid}
-          customFieldUid={customFieldUid}
-          customInputs={{
-            json: InputJSON,
-            uid: InputUID,
-            media: fields.media,
-            wysiwyg: Wysiwyg,
-            ...fields,
-          }}
-          multiple={fieldSchema.multiple || false}
-          name={keys}
-          onChange={args => {
-            console.log('on change', args);
-            onChange(args);
-          }}
-          options={options}
-          placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
-          required={fieldSchema.required || false}
-          step={step}
-          type={inputType}
-          // validations={validations}
-          value={inputValue}
-          withDefaultValue={false}
-        />
-      </Suspense>
-    );
+    customInputs[customFieldUid] = CustomFieldInput;
   }
 
   return (
-    <GenericInput
-      attribute={fieldSchema}
-      autoComplete="new-password"
-      intlLabel={{ id: label, defaultMessage: label }}
-      // in case the default value of the boolean is null, attribute.default doesn't exist
-      isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
-      description={description ? { id: description, defaultMessage: description } : null}
-      disabled={shouldDisableField}
-      error={error}
-      labelAction={labelAction}
-      contentTypeUID={currentContentTypeLayout.uid}
-      customFieldUid={customFieldUid}
-      customInputs={{
-        json: InputJSON,
-        uid: InputUID,
-        media: fields.media,
-        wysiwyg: Wysiwyg,
-        ...fields,
-      }}
-      multiple={fieldSchema.multiple || false}
-      name={keys}
-      onChange={onChange}
-      options={options}
-      placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
-      required={fieldSchema.required || false}
-      step={step}
-      type={inputType}
-      // validations={validations}
-      value={inputValue}
-      withDefaultValue={false}
-    />
+    <Suspense fallback="loading...">
+      <GenericInput
+        attribute={fieldSchema}
+        autoComplete="new-password"
+        intlLabel={{ id: label, defaultMessage: label }}
+        // in case the default value of the boolean is null, attribute.default doesn't exist
+        isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
+        description={description ? { id: description, defaultMessage: description } : null}
+        disabled={shouldDisableField}
+        error={error}
+        labelAction={labelAction}
+        contentTypeUID={currentContentTypeLayout.uid}
+        customFieldUid={customFieldUid}
+        customInputs={customInputs}
+        multiple={fieldSchema.multiple || false}
+        name={keys}
+        onChange={onChange}
+        options={options}
+        placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
+        required={fieldSchema.required || false}
+        step={step}
+        type={inputType}
+        // validations={validations}
+        value={inputValue}
+        withDefaultValue={false}
+      />
+    </Suspense>
   );
 }
 
