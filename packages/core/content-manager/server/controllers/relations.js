@@ -24,7 +24,7 @@ module.exports = {
 
     await validateFindAvailable(ctx.request.query);
 
-    const { component, entityId, idsToOmit, ...query } = ctx.request.query;
+    const { component, entityId, idsToOmit, _q, ...query } = ctx.request.query;
 
     const sourceModelUid = component || model;
 
@@ -73,18 +73,25 @@ module.exports = {
       fieldsToSelect.push(PUBLISHED_AT_ATTRIBUTE);
     }
 
+    // TODO: for RBAC reasons, find a way to exclude filters that should not be there
+    // i.e. all filters except locale for i18n
     const queryParams = defaultsDeep(
       {
         orderBy: mainField,
       },
       {
-        ...transformParamsToQuery(targetedModel.uid, query), // ⚠️ Mmmh should not be able to filter for RBAC reasons
+        ...transformParamsToQuery(targetedModel.uid, query),
         select: fieldsToSelect, // cannot select other fields as the user may not have the permissions
       }
     );
 
     if (!isEmpty(idsToOmit)) {
       addWhereClause(queryParams, { id: { $notIn: idsToOmit } });
+    }
+
+    // searching should be allowed only on mainField for permission reasons
+    if (_q) {
+      addWhereClause(queryParams, { [mainField]: { $containsi: _q } });
     }
 
     if (entityId) {
