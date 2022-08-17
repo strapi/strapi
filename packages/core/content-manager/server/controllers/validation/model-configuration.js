@@ -60,7 +60,7 @@ const createMetadasSchema = (schema) => {
                 .test(
                   'isDivisibleBy60',
                   'Step must be divisible by 60',
-                  value => !value || value === 1 || (value * 24) % 60 === 0
+                  (value) => !value || value === 1 || (value * 24) % 60 === 0
                 ),
             })
             .noUnknown()

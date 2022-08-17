@@ -135,13 +135,13 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
       <Select
         value={get(fieldForm, ['metadata', 'step'], 1)}
         name="step"
-        onChange={value => onMetaChange({ target: { name: 'step', value } })}
+        onChange={(value) => onMetaChange({ target: { name: 'step', value } })}
         label={formatMessage({
           id: getTrad('containers.SettingPage.editSettings.step.label'),
           defaultMessage: 'Step',
         })}
       >
-        {TIME_FIELD_OPTIONS.map(value => (
+        {TIME_FIELD_OPTIONS.map((value) => (
           <Option key={value} value={value}>
             {value}
           </Option>
