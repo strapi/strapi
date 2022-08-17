@@ -25,6 +25,7 @@ export const RelationItem = ({ children, endAction, ...props }) => {
       paddingRight={4}
       hasRadius
       borderSize={1}
+      background="neutral0"
       borderColor="neutral200"
       justifyContent="space-between"
       as="li"

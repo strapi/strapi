@@ -4,6 +4,7 @@ import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
 import { BaseLink } from '@strapi/design-system/BaseLink';
 import { Badge } from '@strapi/design-system/Badge';
 import { Icon } from '@strapi/design-system/Icon';
+import { Box } from '@strapi/design-system/Box';
 import Cross from '@strapi/icons/Cross';
 import { RelationInput } from './RelationInput';
 import { relations } from './relationsDataMock';
@@ -18,26 +19,33 @@ WIP
 
 <Canvas>
   <Story name="base">
-    <RelationInput label="Relations" labelLoadMore="Load More" name="options" relations={{
-      data: {
-        pages: [
-          {
-            id: 1,
-            href: '',
-            title: 'Relation 1',
-            isDraft: false
+    <Box padding={8}>
+      <RelationInput
+        label="Relations"
+        labelLoadMore="Load More"
+        name="options"
+        relations={{
+          data: {
+            pages: [
+              {
+                id: 1,
+                href: '',
+                title: 'Relation 1',
+                isDraft: false,
+              },
+              {
+                id: 2,
+                href: '',
+                title: 'Relation 2',
+                isDraft: false,
+              },
+            ],
           },
-          {
-            id: 2,
-            href: '',
-            title: 'Relation 2',
-            isDraft: false
-          }
-        ],
-      },
-      isLoading: false,
-      isSuccess: true
-    }} />
+          isLoading: false,
+          isSuccess: true,
+        }}
+      />
+    </Box>
   </Story>
 </Canvas>
 

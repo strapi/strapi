@@ -6,7 +6,15 @@ import { Flex } from '@strapi/design-system/Flex';
 
 export const Relation = ({ children, loadMore, search, ...props }) => {
   return (
-    <Stack spacing={3}>
+    <Stack
+      spacing={3}
+      paddingTop={4}
+      paddingBottom={4}
+      paddingLeft={6}
+      paddingRight={6}
+      hasRadius
+      background="neutral100"
+    >
       <Flex justifyContent="space-between" alignItems="end">
         <Stack width="55%" spacing={1} {...props}>
           {search}
