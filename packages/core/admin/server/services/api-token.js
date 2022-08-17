@@ -16,6 +16,7 @@ const constants = require('../services/constants');
  * @property {string} name
  * @property {string} [description]
  * @property {string} accessKey
+ * @property {number} lastUsed
  * @property {TokenType} type
  * @property {(number|ApiTokenPermission)[]} [permissions]
  */
@@ -29,7 +30,7 @@ const constants = require('../services/constants');
  */
 
 /** @constant {Array<string>} */
-const SELECT_FIELDS = ['id', 'name', 'description', 'type', 'createdAt'];
+const SELECT_FIELDS = ['id', 'name', 'description', 'lastUsed', 'type', 'createdAt', 'updatedAt'];
 
 /** @constant {Array<string>} */
 const POPULATE_FIELDS = ['permissions'];
@@ -50,6 +51,7 @@ const assertCustomTokenPermissionsValidity = attributes => {
  * @param {Object} whereParams
  * @param {string|number} [whereParams.id]
  * @param {string} [whereParams.name]
+ * @param {number} [whereParams.lastUsed]
  * @param {string} [whereParams.description]
  * @param {string} [whereParams.accessKey]
  *
@@ -77,6 +79,7 @@ const hash = accessKey => {
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
+ * @param {number} attributes.lastUsed
  * @param {string[]} [attributes.permissions]
  * @param {string} [attributes.description]
  *
@@ -199,6 +202,7 @@ const getByName = async name => {
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
+ * @param {number} attributes.lastUsed
  * @param {string} [attributes.description]
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
@@ -307,6 +311,7 @@ const update = async (id, attributes) => {
  * @param {Object} whereParams
  * @param {string|number} [whereParams.id]
  * @param {string} [whereParams.name]
+ * @param {number} [whereParams.lastUsed]
  * @param {string} [whereParams.description]
  * @param {string} [whereParams.accessKey]
  *

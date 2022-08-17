@@ -47,6 +47,10 @@ module.exports = {
       configurable: false,
       required: true,
     },
+    lastUsed: {
+      type: 'datetime',
+      configurable: false,
+    },
     permissions: {
       type: 'relation',
       target: 'admin::token-permission',
