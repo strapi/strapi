@@ -38,6 +38,11 @@ const authenticate = async ctx => {
     return { authenticated: false };
   }
 
+  // update lastUsed
+  await apiTokenService.update(apiToken.id, {
+    lastUsed: new Date(),
+  });
+
   if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
     const ability = await strapi.contentAPI.permissions.engine.generateAbility(
       apiToken.permissions.map(action => ({ action }))
