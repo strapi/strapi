@@ -9,12 +9,14 @@ module.exports = () => ({
   },
 
   include: [
+    // Include root files
+    './',
     // Include all ts files
     './**/*.ts',
     // Include all js files
     './**/*.js',
     // Force the JSON files in the src folder to be included
-    './src/**/*.json',
+    'src/**/*.json',
   ],
 
   exclude: [
