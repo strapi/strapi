@@ -22,7 +22,7 @@ const { NotFoundError } = require('@strapi/utils').errors;
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
-const { ApplicationError, PayloadTooLargeError } = require('@strapi/utils/lib/errors');
+const { ApplicationError } = require('@strapi/utils/lib/errors');
 const { FILE_MODEL_UID } = require('../constants');
 const { getService } = require('../utils');
 const { bytesToKbytes } = require('../utils/file');
@@ -112,8 +112,6 @@ module.exports = ({ strapi }) => ({
   },
 
   async enhanceAndValidateFile(file, fileInfo = {}, metas = {}) {
-    const config = strapi.config.get('plugin.upload');
-
     const currentFile = await this.formatFileInfo(
       {
         filename: file.name,
@@ -131,10 +129,6 @@ module.exports = ({ strapi }) => ({
     const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
       .plugin('upload')
       .service('image-manipulation');
-
-    if (config.sizeLimit && currentFile.size > config.sizeLimit) {
-      throw new PayloadTooLargeError();
-    }
 
     if (await isImage(currentFile)) {
       if (await isFaultyImage(currentFile)) {
