@@ -19,6 +19,7 @@ import ReactSelect from '../ReactSelect';
 
 export const RelationInput = ({
   description,
+  disabled,
   error,
   id,
   name,
@@ -41,6 +42,7 @@ export const RelationInput = ({
           <>
             <FieldLabel>{label}</FieldLabel>
             <ReactSelect
+              isDisabled={disabled}
               error={error}
               inputId={id}
               isSearchable
@@ -55,9 +57,11 @@ export const RelationInput = ({
           </>
         }
         loadMore={
-          <TextButton onClick={() => onRelationLoadMore()} startIcon={<Refresh />}>
-            {labelLoadMore}
-          </TextButton>
+          !disabled && (
+            <TextButton onClick={() => onRelationLoadMore()} startIcon={<Refresh />}>
+              {labelLoadMore}
+            </TextButton>
+          )
         }
       >
         <RelationList>
@@ -68,14 +72,25 @@ export const RelationInput = ({
 
               return (
                 <RelationItem
+                  disabled={disabled}
                   key={`relation-${name}-${id}`}
                   endAction={
-                    <button type="button" onClick={() => onRelationRemove(relation)}>
+                    <button
+                      disabled={disabled}
+                      type="button"
+                      onClick={() => onRelationRemove(relation)}
+                    >
                       <Icon width="12px" as={Cross} />
                     </button>
                   }
                 >
-                  {href ? <BaseLink href={href}>{title}</BaseLink> : title}
+                  {href ? (
+                    <BaseLink disabled={disabled} href={href}>
+                      {title}
+                    </BaseLink>
+                  ) : (
+                    title
+                  )}
 
                   <Badge
                     borderSize={1}
@@ -132,7 +147,6 @@ RelationInput.defaultProps = {
 RelationInput.propTypes = {
   error: PropTypes.string,
   description: PropTypes.string,
-  // eslint-disable-next-line react/no-unused-prop-types
   disabled: PropTypes.bool,
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,

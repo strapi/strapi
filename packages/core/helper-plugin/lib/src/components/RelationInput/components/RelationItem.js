@@ -16,7 +16,7 @@ const ChildrenWrapper = styled(Flex)`
   }
 `;
 
-export const RelationItem = ({ children, endAction, ...props }) => {
+export const RelationItem = ({ children, disabled, endAction, ...props }) => {
   return (
     <Flex
       paddingTop={3}
@@ -25,13 +25,13 @@ export const RelationItem = ({ children, endAction, ...props }) => {
       paddingRight={4}
       hasRadius
       borderSize={1}
-      background="neutral0"
+      background={disabled ? 'neutral150' : 'neutral0'}
       borderColor="neutral200"
       justifyContent="space-between"
       as="li"
       {...props}
     >
-      <TypographyWrapper textColor="primary600" as="div">
+      <TypographyWrapper textColor={disabled ? 'neutral600' : 'primary600'} as="div">
         <ChildrenWrapper width="100%" justifyContent="space-between" color="currentColor">
           {children}
         </ChildrenWrapper>
@@ -42,10 +42,12 @@ export const RelationItem = ({ children, endAction, ...props }) => {
 };
 
 RelationItem.defaultProps = {
+  disabled: false,
   endAction: undefined,
 };
 
 RelationItem.propTypes = {
   children: PropTypes.node.isRequired,
+  disabled: PropTypes.bool,
   endAction: PropTypes.node,
 };
