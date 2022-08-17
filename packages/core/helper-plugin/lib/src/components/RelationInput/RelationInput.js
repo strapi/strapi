@@ -25,6 +25,7 @@ export const RelationInput = ({
   name,
   label,
   labelLoadMore,
+  listHeight,
   relations,
   onRelationClose,
   onRelationAdd,
@@ -64,7 +65,7 @@ export const RelationInput = ({
           )
         }
       >
-        <RelationList>
+        <RelationList height={listHeight}>
           {relations.isSuccess &&
             relations.data.pages.flatMap((relation) => {
               const { isDraft, href, title, id } = relation;
@@ -140,6 +141,7 @@ RelationInput.defaultProps = {
   description: undefined,
   disabled: false,
   error: undefined,
+  listHeight: undefined,
   relations: [],
   searchResults: [],
 };
@@ -151,6 +153,7 @@ RelationInput.propTypes = {
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string.isRequired,
+  listHeight: PropTypes.string,
   name: PropTypes.string.isRequired,
   onRelationAdd: PropTypes.func.isRequired,
   onRelationOpen: PropTypes.func.isRequired,

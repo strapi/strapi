@@ -6,6 +6,8 @@ import { Stack } from '@strapi/design-system/Stack';
 
 const ShadowBox = styled(Box)`
   position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
 
   &:before,
   &:after {
