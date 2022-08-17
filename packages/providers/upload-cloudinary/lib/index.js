@@ -10,7 +10,8 @@ const intoStream = require('into-stream');
 const { PayloadTooLargeError } = require('@strapi/utils').errors;
 
 module.exports = {
-  init(config) {
+  // eslint-disable-next-line no-unused-vars
+  init({ sizeLimit, ...config }) {
     cloudinary.config(config);
 
     const upload = (file, customConfig = {}) =>

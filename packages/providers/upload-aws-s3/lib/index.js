@@ -10,7 +10,7 @@ const _ = require('lodash');
 const AWS = require('aws-sdk');
 
 module.exports = {
-  init(config) {
+  init({ sizeLimit, ...config }) {
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
       ...config,
