@@ -1,11 +1,11 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, Suspense, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
-import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
+import { GenericInput, NotAllowedInput, useLibrary, useCustomFields } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
@@ -39,9 +39,10 @@ function Inputs({
   const { fields } = useLibrary();
   const { formatMessage } = useIntl();
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
+  const customFieldsRegistry = useCustomFields();
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
-  const type = fieldSchema.type;
+  const { type, customField: customFieldUid } = fieldSchema;
   const error = get(formErrors, [keys], null);
 
   const fieldName = useMemo(() => {
@@ -217,6 +218,51 @@ function Inputs({
     );
   }
 
+  if (customFieldUid) {
+    const customField = customFieldsRegistry.get(customFieldUid);
+
+    const CustomFieldInput = React.lazy(customField.components.Input);
+
+    return (
+      <Suspense fallback="loading...">
+        <CustomFieldInput
+          attribute={fieldSchema}
+          autoComplete="new-password"
+          intlLabel={{ id: label, defaultMessage: label }}
+          // in case the default value of the boolean is null, attribute.default doesn't exist
+          isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
+          description={description ? { id: description, defaultMessage: description } : null}
+          disabled={shouldDisableField}
+          error={error}
+          labelAction={labelAction}
+          contentTypeUID={currentContentTypeLayout.uid}
+          customFieldUid={customFieldUid}
+          customInputs={{
+            json: InputJSON,
+            uid: InputUID,
+            media: fields.media,
+            wysiwyg: Wysiwyg,
+            ...fields,
+          }}
+          multiple={fieldSchema.multiple || false}
+          name={keys}
+          onChange={args => {
+            console.log('on change', args);
+            onChange(args);
+          }}
+          options={options}
+          placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
+          required={fieldSchema.required || false}
+          step={step}
+          type={inputType}
+          // validations={validations}
+          value={inputValue}
+          withDefaultValue={false}
+        />
+      </Suspense>
+    );
+  }
+
   return (
     <GenericInput
       attribute={fieldSchema}
@@ -229,6 +275,7 @@ function Inputs({
       error={error}
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
+      customFieldUid={customFieldUid}
       customInputs={{
         json: InputJSON,
         uid: InputUID,
