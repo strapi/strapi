@@ -57,7 +57,7 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
             variant="secondary"
             disabled={editLayoutRemainingFields.length === 0}
           >
-            {editLayoutRemainingFields.map(field => (
+            {editLayoutRemainingFields.map((field) => (
               <MenuItem key={field} onClick={() => onAddField(field)}>
                 {field}
               </MenuItem>

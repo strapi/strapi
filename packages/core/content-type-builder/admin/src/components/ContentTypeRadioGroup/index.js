@@ -7,7 +7,7 @@ import CustomRadioGroup from '../CustomRadioGroup';
 const ContentTypeRadioGroup = ({ onChange, ...rest }) => {
   const toggleNotification = useNotification();
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     toggleNotification({
       type: 'info',
       message: {

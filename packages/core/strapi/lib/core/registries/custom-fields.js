@@ -28,7 +28,9 @@ const customFieldsRegistry = strapi => {
 
         const { name, plugin, type } = cf;
         if (!has(type, validators)) {
-          throw new Error(`Custom field type: '${type}' is not a valid Strapi type`);
+          throw new Error(
+            `Custom field type: '${type}' is not a valid Strapi type or it can't be used with a Custom Field`
+          );
         }
 
         const isValidObjectKey = /^(?![0-9])[a-zA-Z0-9$_-]+$/g;

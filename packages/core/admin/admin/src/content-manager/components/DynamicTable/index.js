@@ -35,7 +35,7 @@ const DynamicTable = ({
       layout,
     });
 
-    const formattedHeaders = headers.displayedHeaders.map(header => {
+    const formattedHeaders = headers.displayedHeaders.map((header) => {
       if (header.fieldSchema.type === 'relation') {
         const sortFieldValue = `${header.name}.${header.metadatas.mainField.name}`;
 
@@ -65,7 +65,7 @@ const DynamicTable = ({
           searchable: false,
           sortable: true,
         },
-        cellFormatter: cellData => {
+        cellFormatter(cellData) {
           const isPublished = !isEmpty(cellData.publishedAt);
 
           return <State isPublished={isPublished} />;

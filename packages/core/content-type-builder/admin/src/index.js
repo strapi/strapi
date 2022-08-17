@@ -20,7 +20,7 @@ export default {
         defaultMessage: 'Content Types Builder',
       },
       permissions: pluginPermissions.main,
-      Component: async () => {
+      async Component() {
         const component = await import(
           /* webpackChunkName: "content-type-builder" */ './pages/App'
         );
@@ -41,7 +41,7 @@ export default {
   bootstrap() {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map(locale => {
+      locales.map((locale) => {
         return import(
           /* webpackChunkName: "content-type-builder-translation-[request]" */ `./translations/${locale}.json`
         )

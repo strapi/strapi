@@ -43,13 +43,10 @@ module.exports = {
       const version =
         major && minor && patch
           ? `${major}.${minor}.${patch}`
-          : strapi
-              .plugin('documentation')
-              .service('documentation')
-              .getDocumentationVersion();
+          : strapi.plugin('documentation').service('documentation').getDocumentationVersion();
 
       const openAPISpecsPath = path.join(
-        strapi.dirs.extensions,
+        strapi.dirs.app.extensions,
         'documentation',
         'documentation',
         version,
@@ -69,7 +66,7 @@ module.exports = {
 
         try {
           const layoutPath = path.resolve(
-            strapi.dirs.extensions,
+            strapi.dirs.app.extensions,
             'documentation',
             'public',
             'index.html'
@@ -81,7 +78,11 @@ module.exports = {
           ctx.url = path.basename(`${ctx.url}/index.html`);
 
           try {
-            const staticFolder = path.resolve(strapi.dirs.extensions, 'documentation', 'public');
+            const staticFolder = path.resolve(
+              strapi.dirs.app.extensions,
+              'documentation',
+              'public'
+            );
             return koaStatic(staticFolder)(ctx, next);
           } catch (e) {
             strapi.log.error(e);
@@ -116,7 +117,7 @@ module.exports = {
 
       try {
         const layoutPath = path.resolve(
-          strapi.dirs.extensions,
+          strapi.dirs.app.extensions,
           'documentation',
           'public',
           'login.html'
@@ -127,7 +128,7 @@ module.exports = {
         ctx.url = path.basename(`${ctx.url}/login.html`);
 
         try {
-          const staticFolder = path.resolve(strapi.dirs.extensions, 'documentation', 'public');
+          const staticFolder = path.resolve(strapi.dirs.app.extensions, 'documentation', 'public');
           return koaStatic(staticFolder)(ctx, next);
         } catch (e) {
           strapi.log.error(e);
@@ -173,7 +174,7 @@ module.exports = {
 
     const service = strapi.service('plugin::documentation.documentation');
 
-    const documentationVersions = service.getDocumentationVersions().map(el => el.version);
+    const documentationVersions = service.getDocumentationVersions().map((el) => el.version);
 
     if (_.isEmpty(version)) {
       return ctx.badRequest('Please provide a version.');
@@ -197,7 +198,7 @@ module.exports = {
 
     const service = strapi.service('plugin::documentation.documentation');
 
-    const documentationVersions = service.getDocumentationVersions().map(el => el.version);
+    const documentationVersions = service.getDocumentationVersions().map((el) => el.version);
 
     if (_.isEmpty(version)) {
       return ctx.badRequest('Please provide a version.');

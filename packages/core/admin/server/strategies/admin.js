@@ -3,7 +3,7 @@
 const { getService } = require('../utils');
 
 /** @type {import('.').AuthenticateFunction} */
-const authenticate = async ctx => {
+const authenticate = async (ctx) => {
   const { authorization } = ctx.request.header;
 
   if (!authorization) {

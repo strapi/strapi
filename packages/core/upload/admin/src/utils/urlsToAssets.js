@@ -2,14 +2,14 @@ import axios from 'axios';
 import { AssetSource } from '../constants';
 import { typeFromMime } from './typeFromMime';
 
-export const urlsToAssets = async urls => {
-  const assetPromises = urls.map(url =>
+export const urlsToAssets = async (urls) => {
+  const assetPromises = urls.map((url) =>
     axios
       .get(url, {
         responseType: 'blob',
         timeout: 60000,
       })
-      .then(res => {
+      .then((res) => {
         const loadedFile = new File([res.data], res.config.url, {
           type: res.headers['content-type'],
         });
@@ -25,7 +25,7 @@ export const urlsToAssets = async urls => {
   // Retrieve the assets metadata
   const assetsResults = await Promise.all(assetPromises);
 
-  const assets = assetsResults.map(fullFilledAsset => ({
+  const assets = assetsResults.map((fullFilledAsset) => ({
     source: AssetSource.Url,
     name: fullFilledAsset.name,
     type: typeFromMime(fullFilledAsset.mime),

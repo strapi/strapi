@@ -21,7 +21,7 @@ describe('Component validator', () => {
     },
   };
 
-  describe.each(['validateComponentInput', 'validateUpdateComponentInput'])('%p', method => {
+  describe.each(['validateComponentInput', 'validateUpdateComponentInput'])('%p', (method) => {
     test('can validate a regular component', async () => {
       const input = {
         components: [],
@@ -39,7 +39,7 @@ describe('Component validator', () => {
 
       expect.assertions(1);
 
-      await componentValidation[method](input).then(data => {
+      await componentValidation[method](input).then((data) => {
         expect(data).toBe(input);
       });
     });
@@ -62,7 +62,7 @@ describe('Component validator', () => {
 
       expect.assertions(1);
 
-      await componentValidation[method](input).then(data => {
+      await componentValidation[method](input).then((data) => {
         expect(data).toBe(input);
       });
     });

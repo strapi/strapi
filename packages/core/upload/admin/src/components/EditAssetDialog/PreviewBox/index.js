@@ -42,20 +42,13 @@ export const PreviewBox = ({
   const { trackUsage } = useTracking();
   const previewRef = useRef(null);
   const [isCropImageReady, setIsCropImageReady] = useState(false);
-  const [hasCropIntent, setHasCropIntent] = useState(false);
+  const [hasCropIntent, setHasCropIntent] = useState(null);
   const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset, false));
   const [thumbnailUrl, setThumbnailUrl] = useState(createAssetUrl(asset, true));
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const {
-    crop,
-    produceFile,
-    stopCropping,
-    isCropping,
-    isCropperReady,
-    width,
-    height,
-  } = useCropImg();
+  const { crop, produceFile, stopCropping, isCropping, isCropperReady, width, height } =
+    useCropImg();
   const { editAsset, error, isLoading, progress, cancel } = useEditAsset();
 
   const {
@@ -75,10 +68,25 @@ export const PreviewBox = ({
       if (asset.isLocal) {
         asset.url = fileLocalUrl;
       }
+
       setAssetUrl(fileLocalUrl);
       setThumbnailUrl(fileLocalUrl);
     }
   }, [replacementFile, asset]);
+
+  useEffect(() => {
+    if (hasCropIntent === false) {
+      stopCropping();
+      onCropCancel();
+    }
+  }, [hasCropIntent, stopCropping, onCropCancel, onCropFinish]);
+
+  useEffect(() => {
+    if (hasCropIntent && isCropImageReady) {
+      crop(previewRef.current);
+      onCropStart();
+    }
+  }, [isCropImageReady, hasCropIntent, onCropStart, crop]);
 
   const handleCropping = async () => {
     const nextAsset = { ...asset, width, height };
@@ -104,10 +112,9 @@ export const PreviewBox = ({
       trackUsage('didCropFile', { duplicatedFile: false, location: trackedLocation });
     }
 
-    stopCropping();
-    onCropCancel();
     setAssetUrl(optimizedCachingImage);
     setThumbnailUrl(optimizedCachingThumbnailImage);
+    setHasCropIntent(false);
   };
 
   const isInCroppingMode = isCropping && !isLoading;
@@ -120,27 +127,17 @@ export const PreviewBox = ({
 
     trackUsage('didCropFile', { duplicatedFile: true, location: trackedLocation });
 
-    stopCropping();
+    setHasCropIntent(false);
     onCropFinish();
   };
 
   const handleCropCancel = () => {
     setHasCropIntent(false);
-    setIsCropImageReady(false);
-    stopCropping();
-    onCropCancel();
   };
 
   const handleCropStart = () => {
     setHasCropIntent(true);
   };
-
-  useEffect(() => {
-    if (hasCropIntent && isCropImageReady) {
-      crop(previewRef.current);
-      onCropStart();
-    }
-  }, [isCropImageReady, hasCropIntent, onCropStart, crop]);
 
   return (
     <>
@@ -214,7 +211,7 @@ export const PreviewBox = ({
             name={asset.name}
             url={hasCropIntent ? assetUrl : thumbnailUrl}
             onLoad={() => {
-              if (hasCropIntent) {
+              if (asset.isLocal || hasCropIntent) {
                 setIsCropImageReady(true);
               }
             }}

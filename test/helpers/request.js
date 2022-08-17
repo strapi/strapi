@@ -13,9 +13,9 @@ const createAuthRequest = ({ strapi, userInfo = superAdmin.credentials }) => {
   return createAgent(strapi).login(userInfo);
 };
 
-const transformToRESTResource = input => {
+const transformToRESTResource = (input) => {
   if (Array.isArray(input)) {
-    return input.map(value => transformToRESTResource(value));
+    return input.map((value) => transformToRESTResource(value));
   }
 
   const { id, ...attributes } = input;

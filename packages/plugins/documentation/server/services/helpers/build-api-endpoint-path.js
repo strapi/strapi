@@ -15,12 +15,12 @@ const { hasFindMethod, isLocalizedPath } = require('./utils/routes');
  * @param {string} routePath - The route's path property
  * @returns {string}
  */
-const parsePathWithVariables = routePath => {
+const parsePathWithVariables = (routePath) => {
   return pathToRegexp
     .parse(routePath)
-    .map(token => {
+    .map((token) => {
       if (_.isObject(token)) {
-        return token.prefix + '{' + token.name + '}';
+        return `${token.prefix}{${token.name}}`;
       }
 
       return token;
@@ -35,11 +35,11 @@ const parsePathWithVariables = routePath => {
  *
  * @returns {object } Swagger path params object
  */
-const getPathParams = routePath => {
+const getPathParams = (routePath) => {
   return pathToRegexp
     .parse(routePath)
-    .filter(token => _.isObject(token))
-    .map(param => {
+    .filter((token) => _.isObject(token))
+    .map((param) => {
       return {
         name: param.name,
         in: 'path',
@@ -83,7 +83,7 @@ const getPathWithPrefix = (prefix, route) => {
  */
 const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
   // Get the routes for the current content type
-  const contentTypeRoutes = routeInfo.routes.filter(route => {
+  const contentTypeRoutes = routeInfo.routes.filter((route) => {
     return (
       route.path.includes(contentTypeInfo.pluralName) ||
       route.path.includes(contentTypeInfo.singularName)
@@ -152,7 +152,7 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo }) => {
  *
  * @returns {object} Open API paths
  */
-const getAllPathsForContentType = apiInfo => {
+const getAllPathsForContentType = (apiInfo) => {
   let paths = {};
 
   const pathsObject = getPaths(apiInfo);
@@ -175,7 +175,7 @@ const getAllPathsForContentType = apiInfo => {
  *
  * @returns {object}
  */
-const buildApiEndpointPath = api => {
+const buildApiEndpointPath = (api) => {
   // A reusable loop for building paths and component schemas
   // Uses the api param to build a new set of params for each content type
   // Passes these new params to the function provided

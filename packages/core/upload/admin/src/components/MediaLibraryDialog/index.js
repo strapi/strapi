@@ -1,29 +1,47 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+
 import { AssetDialog } from '../AssetDialog';
+import { EditFolderDialog } from '../EditFolderDialog';
 import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
 
-const Steps = {
-  SelectAsset: 'SelectAsset',
-  UploadAsset: 'UploadAsset',
+const STEPS = {
+  AssetSelect: 'SelectAsset',
+  AssetUpload: 'UploadAsset',
+  FolderCreate: 'FolderCreate',
 };
 
 export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) => {
-  const [step, setStep] = useState(Steps.SelectAsset);
+  const [step, setStep] = useState(STEPS.AssetSelect);
+  const [folderId, setFolderId] = useState(null);
 
-  if (step === Steps.SelectAsset) {
-    return (
-      <AssetDialog
-        allowedTypes={allowedTypes}
-        onClose={onClose}
-        onValidate={onSelectAssets}
-        onAddAsset={() => setStep(Steps.UploadAsset)}
-        multiple
-      />
-    );
+  switch (step) {
+    case STEPS.AssetSelect:
+      return (
+        <AssetDialog
+          allowedTypes={allowedTypes}
+          folderId={folderId}
+          onClose={() => {
+            setStep(undefined);
+            setFolderId(null);
+            onClose();
+          }}
+          onValidate={onSelectAssets}
+          onAddAsset={() => setStep(STEPS.AssetUpload)}
+          onAddFolder={() => setStep(STEPS.FolderCreate)}
+          onChangeFolder={(folderId) => setFolderId(folderId)}
+          multiple
+        />
+      );
+
+    case STEPS.FolderCreate:
+      return (
+        <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} parentFolderId={folderId} />
+      );
+
+    default:
+      return <UploadAssetDialog onClose={() => setStep(STEPS.AssetSelect)} folderId={folderId} />;
   }
-
-  return <UploadAssetDialog onClose={() => setStep(Steps.SelectAsset)} />;
 };
 
 MediaLibraryDialog.defaultProps = {

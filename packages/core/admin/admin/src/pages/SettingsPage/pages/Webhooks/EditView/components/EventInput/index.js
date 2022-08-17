@@ -87,13 +87,13 @@ const EventInput = ({ isDraftAndPublish }) => {
     let set = new Set(inputValue);
 
     if (value) {
-      events[name].forEach(event => {
+      events[name].forEach((event) => {
         if (!disabledEvents.includes(event)) {
           set.add(event);
         }
       });
     } else {
-      events[name].forEach(event => set.delete(event));
+      events[name].forEach((event) => set.delete(event));
     }
     onChange({ target: { name: inputName, value: Array.from(set) } });
   };
@@ -110,7 +110,7 @@ const EventInput = ({ isDraftAndPublish }) => {
         <thead>
           <tr>
             <td />
-            {headersName.map(header => {
+            {headersName.map((header) => {
               if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
                 return (
                   <td
@@ -139,7 +139,7 @@ const EventInput = ({ isDraftAndPublish }) => {
           </tr>
         </thead>
         <tbody>
-          {Object.keys(events).map(event => {
+          {Object.keys(events).map((event) => {
             return (
               <EventRow
                 disabledEvents={disabledEvents}

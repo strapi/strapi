@@ -4,9 +4,11 @@ const path = require('path');
 const fs = require('fs');
 const { templateConfiguration, env } = require('@strapi/utils');
 
-const loadJsFile = file => {
+const importDefault = require('../../utils/import-default');
+
+const loadJsFile = (file) => {
   try {
-    const jsModule = require(file);
+    const jsModule = importDefault(file);
 
     // call if function
     if (typeof jsModule === 'function') {
@@ -19,7 +21,7 @@ const loadJsFile = file => {
   }
 };
 
-const loadJSONFile = file => {
+const loadJSONFile = (file) => {
   try {
     return templateConfiguration(JSON.parse(fs.readFileSync(file)));
   } catch (error) {
@@ -27,7 +29,7 @@ const loadJSONFile = file => {
   }
 };
 
-const loadFile = file => {
+const loadFile = (file) => {
   const ext = path.extname(file);
 
   switch (ext) {

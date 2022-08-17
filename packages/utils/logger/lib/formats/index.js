@@ -1,6 +1,9 @@
 'use strict';
 
+const prettyPrint = require('./pretty-print');
+const levelFilter = require('./level-filter');
+
 module.exports = {
-  prettyPrint: require('./pretty-print'),
-  levelFilter: require('./level-filter'),
+  prettyPrint,
+  levelFilter,
 };

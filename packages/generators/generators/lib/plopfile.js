@@ -10,10 +10,10 @@ const generatePolicy = require('./plops/policy');
 const generateMiddleware = require('./plops/middleware');
 const generateService = require('./plops/service');
 
-module.exports = plop => {
+module.exports = (plop) => {
   // Plop config
   plop.setWelcomeMessage('Strapi Generators');
-  plop.addHelper('pluralize', text => pluralize(text));
+  plop.addHelper('pluralize', (text) => pluralize(text));
 
   // Generators
   generateApi(plop);

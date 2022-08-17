@@ -24,9 +24,18 @@ const tableHeaders = [
     name: 'roles',
     metadatas: { label: 'Roles', sortable: false },
     /* eslint-disable react/prop-types */
-    cellFormatter: ({ roles }) => {
+    cellFormatter({ roles }, { formatMessage }) {
       return (
-        <Typography textColor="neutral800">{roles.map(role => role.name).join(',\n')}</Typography>
+        <Typography textColor="neutral800">
+          {roles
+            .map((role) =>
+              formatMessage({
+                id: `global.${role.code}`,
+                defaultMessage: role.name,
+              })
+            )
+            .join(',\n')}
+        </Typography>
       );
     },
     /* eslint-enable react/prop-types */
@@ -41,11 +50,16 @@ const tableHeaders = [
     name: 'isActive',
     metadatas: { label: 'User status', sortable: false },
     // eslint-disable-next-line react/prop-types
-    cellFormatter: ({ isActive }) => {
+    cellFormatter({ isActive }, { formatMessage }) {
       return (
         <Flex>
           <Status isActive={isActive} variant={isActive ? 'success' : 'danger'} />
-          <Typography textColor="neutral800">{isActive ? 'Active' : 'Inactive'}</Typography>
+          <Typography textColor="neutral800">
+            {formatMessage({
+              id: isActive ? 'global.active' : 'global.inactive',
+              defaultMessage: isActive ? 'Active' : 'Inactive',
+            })}
+          </Typography>
         </Flex>
       );
     },

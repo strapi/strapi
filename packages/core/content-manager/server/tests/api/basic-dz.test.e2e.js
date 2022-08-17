@@ -7,7 +7,7 @@ const { createAuthRequest } = require('../../../../../../test/helpers/request');
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let data = {
+const data = {
   productsWithDz: [],
 };
 
@@ -47,12 +47,9 @@ const productWithDz = {
   collectionName: '',
 };
 
-describe('Core API - Basic + dz', () => {
+describe('CM API - Basic + dz', () => {
   beforeAll(async () => {
-    await builder
-      .addComponent(compo)
-      .addContentType(productWithDz)
-      .build();
+    await builder.addComponent(compo).addContentType(productWithDz).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });

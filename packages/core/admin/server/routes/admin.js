@@ -51,6 +51,14 @@ module.exports = [
   },
   {
     method: 'GET',
+    path: '/telemetry-properties',
+    handler: 'admin.telemetryProperties',
+    config: {
+      auth: false,
+    },
+  },
+  {
+    method: 'GET',
     path: '/plugins',
     handler: 'admin.plugins',
     config: {

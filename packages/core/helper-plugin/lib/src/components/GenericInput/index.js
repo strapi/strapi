@@ -164,7 +164,7 @@ const GenericInput = ({
             id: 'app.components.ToggleCheckbox.on-label',
             defaultMessage: 'True',
           })}
-          onChange={e => {
+          onChange={(e) => {
             onChange({ target: { name, value: e.target.checked } });
           }}
           required={required}
@@ -180,7 +180,7 @@ const GenericInput = ({
           hint={hint}
           id={name}
           name={name}
-          onValueChange={value => {
+          onValueChange={(value) => {
             onChange({ target: { name, value } });
           }}
           required={required}
@@ -201,7 +201,7 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={date => {
+          onChange={(date) => {
             const formattedDate = date.toISOString();
 
             onChange({ target: { name, value: formattedDate, type } });
@@ -211,7 +211,7 @@ const GenericInput = ({
           placeholder={formattedPlaceholder}
           required={required}
           value={value && new Date(value)}
-          selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
+          selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
         />
       );
     }
@@ -232,7 +232,7 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={date => {
+          onChange={(date) => {
             onChange({
               target: { name, value: formatISO(date, { representation: 'date' }), type },
             });
@@ -241,7 +241,7 @@ const GenericInput = ({
           placeholder={formattedPlaceholder}
           required={required}
           selectedDate={selectedDate}
-          selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
+          selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
         />
       );
     }
@@ -255,7 +255,7 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onValueChange={value => onChange({ target: { name, value, type } })}
+          onValueChange={(value) => onChange({ target: { name, value, type } })}
           placeholder={formattedPlaceholder}
           required={required}
           step={step}
@@ -316,7 +316,7 @@ const GenericInput = ({
                 defaultMessage: 'Show password',
               })}
               onClick={() => {
-                setShowPassword(prev => !prev);
+                setShowPassword((prev) => !prev);
               }}
               style={{
                 border: 'none',
@@ -355,7 +355,7 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={value => onChange({ target: { name, value, type: 'select' } })}
+          onChange={(value) => onChange({ target: { name, value, type: 'select' } })}
           placeholder={formattedPlaceholder}
           required={required}
           value={value}
@@ -411,7 +411,7 @@ const GenericInput = ({
           id={name}
           hint={hint}
           name={name}
-          onChange={time => {
+          onChange={(time) => {
             onChange({ target: { name, value: `${time}`, type } });
           }}
           onClear={() => {

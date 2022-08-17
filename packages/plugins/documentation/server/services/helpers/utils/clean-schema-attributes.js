@@ -13,7 +13,7 @@ const getSchemaData = require('./get-schema-data');
 const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = false } = {}) => {
   const attributesCopy = _.cloneDeep(attributes);
 
-  for (const prop in attributesCopy) {
+  for (const prop of Object.keys(attributesCopy)) {
     const attribute = attributesCopy[prop];
     if (attribute.default) {
       delete attributesCopy[prop].default;
@@ -113,7 +113,7 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
         break;
       }
       case 'dynamiczone': {
-        const components = attribute.components.map(component => {
+        const components = attribute.components.map((component) => {
           const componentAttributes = strapi.components[component].attributes;
           return {
             type: 'object',

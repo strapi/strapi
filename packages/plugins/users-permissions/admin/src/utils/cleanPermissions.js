@@ -1,6 +1,6 @@
 import { isEmpty } from 'lodash';
 
-const cleanPermissions = permissions =>
+const cleanPermissions = (permissions) =>
   Object.keys(permissions).reduce((acc, current) => {
     const currentPermission = permissions[current].controllers;
     const cleanedControllers = Object.keys(currentPermission).reduce((acc2, curr) => {

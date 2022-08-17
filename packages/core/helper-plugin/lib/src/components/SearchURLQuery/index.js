@@ -8,7 +8,7 @@ import { Icon } from '@strapi/design-system/Icon';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
 
-const SearchURLQuery = ({ label, placeholder, trackedEvent }) => {
+const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails }) => {
   const wrapperRef = useRef(null);
   const iconButtonRef = useRef(null);
 
@@ -18,7 +18,7 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const handleToggle = () => setIsOpen(prev => !prev);
+  const handleToggle = () => setIsOpen((prev) => !prev);
 
   useLayoutEffect(() => {
     if (isOpen) {
@@ -33,12 +33,12 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent }) => {
     setQuery({ _q: '' }, 'remove');
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (value) {
       if (trackedEvent) {
-        trackUsage(trackedEvent);
+        trackUsage(trackedEvent, trackedEventDetails);
       }
       setQuery({ _q: value, page: 1 });
     } else {
@@ -79,12 +79,14 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent }) => {
 
 SearchURLQuery.defaultProps = {
   placeholder: undefined,
+  trackedEventDetails: undefined,
   trackedEvent: null,
 };
 
 SearchURLQuery.propTypes = {
   label: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
+  trackedEventDetails: PropTypes.object,
   trackedEvent: PropTypes.string,
 };
 

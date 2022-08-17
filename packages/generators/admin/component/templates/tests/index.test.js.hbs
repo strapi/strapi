@@ -1,6 +1,6 @@
 /**
  *
- * Tests for {{name}}
+ * Tests for {{ name }}
  *
  */
 
@@ -16,7 +16,7 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 {{#if useI18n}}
   import { IntlProvider } from 'react-intl';
 {{/if}}
-import {{name}} from '../index';
+import {{ name }} from '../index';
 
 {{#if useRedux}}
   const rootReducer = combineReducers(reducers);
@@ -25,7 +25,7 @@ import {{name}} from '../index';
     ui,
     {
       preloadedState = initialState,
-      store = createStore(rootReducer, { '{{plugin}}_{{camelCase name}}': preloadedState }),
+      store = createStore(rootReducer, { '{{ plugin }}_{{ camelCase name }}': preloadedState }),
       ...renderOptions
     } = {},
   ) => {
@@ -40,11 +40,11 @@ import {{name}} from '../index';
 {{/if}}
 {{#if useI18n}}
   const messages = {
-    '{{plugin}}.component.name': '{{titleCase name}}',
+    '{{ plugin }}.component.name': '{{titleCase name}}',
   };
 
 {{/if}}
-describe('<{{name}} />', () => {
+describe('<{{ name }} />', () => {
   it('renders and matches the snapshot', () => {
     const {
       container: { firstChild },
@@ -52,12 +52,12 @@ describe('<{{name}} />', () => {
       {{#if useI18n}}
         <ThemeProvider theme={lightTheme}>
           <IntlProvider locale="en" messages={messages} defaultLocale="en">
-            <{{name}} />
+            <{{ name }} />
           </IntlProvider>
         </ThemeProvider>
       {{else}}
         <ThemeProvider theme={lightTheme}>
-          <{{name}} />
+          <{{ name }} />
         </ThemeProvider>
       {{/if}}
     );

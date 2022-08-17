@@ -10,7 +10,7 @@ const SectionTitle = ({ isSettings }) => {
 
   return (
     <div style={{ marginBottom: '18px' }}>
-      <FormattedMessage id={msgId}>{msg => <Title>{msg}</Title>}</FormattedMessage>
+      <FormattedMessage id={msgId}>{(msg) => <Title>{msg}</Title>}</FormattedMessage>
     </div>
   );
 };

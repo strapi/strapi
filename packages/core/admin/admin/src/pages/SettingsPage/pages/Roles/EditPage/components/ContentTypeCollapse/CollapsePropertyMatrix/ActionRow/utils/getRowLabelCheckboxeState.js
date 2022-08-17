@@ -6,7 +6,7 @@ import { getCheckboxState } from '../../../../utils';
  * @param {array<object>} propertyActions
  * @returns {string} actionId
  */
-const getActionIdsFromPropertyActions = propertyActions => {
+const getActionIdsFromPropertyActions = (propertyActions) => {
   const actionIds = propertyActions.reduce((acc, current) => {
     if (current.isActionRelatedToCurrentProperty) {
       acc.push(current.actionId);

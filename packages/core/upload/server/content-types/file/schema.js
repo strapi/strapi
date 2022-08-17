@@ -1,8 +1,6 @@
 'use strict';
 
-/**
- * Lifecycle callbacks for the `File` model.
- */
+const { FOLDER_MODEL_UID } = require('../../constants');
 
 module.exports = {
   collectionName: 'files',
@@ -89,5 +87,26 @@ module.exports = {
       relation: 'morphToMany',
       configurable: false,
     },
+    folder: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: FOLDER_MODEL_UID,
+      inversedBy: 'files',
+      private: true,
+    },
+    folderPath: {
+      type: 'string',
+      min: 1,
+      required: true,
+      private: true,
+    },
   },
+  // experimental feature:
+  indexes: [
+    {
+      name: 'upload_files_folder_path_index',
+      columns: ['folder_path'],
+      type: null,
+    },
+  ],
 };

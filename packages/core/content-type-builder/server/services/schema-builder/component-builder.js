@@ -8,6 +8,7 @@ const { nameToSlug, nameToCollectionName } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { isConfigurable } = require('../../utils/attributes');
 const createSchemaHandler = require('./schema-handler');
+const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
 module.exports = function createComponentBuilder() {
   return {
@@ -32,14 +33,17 @@ module.exports = function createComponentBuilder() {
      * create a component in the tmpComponent map
      */
     createComponent(infos) {
+      const { attributes } = infos;
       const uid = this.createComponentUID(infos);
 
       if (this.components.has(uid)) {
         throw new ApplicationError('component.alreadyExists');
       }
 
+      convertCustomFieldType(attributes);
+
       const handler = createSchemaHandler({
-        dir: path.join(strapi.dirs.components, nameToSlug(infos.category)),
+        dir: path.join(strapi.dirs.app.components, nameToSlug(infos.category)),
         filename: `${nameToSlug(infos.displayName)}.json`,
       });
 
@@ -72,12 +76,13 @@ module.exports = function createComponentBuilder() {
      * create a component in the tmpComponent map
      */
     editComponent(infos) {
-      const { uid } = infos;
+      const { uid, attributes } = infos;
 
       if (!this.components.has(uid)) {
         throw new ApplicationError('component.notFound');
       }
 
+      convertCustomFieldType(attributes);
       const component = this.components.get(uid);
 
       const [, nameUID] = uid.split('.');
@@ -89,7 +94,7 @@ module.exports = function createComponentBuilder() {
         throw new ApplicationError('component.edit.alreadyExists');
       }
 
-      const newDir = path.join(strapi.dirs.components, newCategory);
+      const newDir = path.join(strapi.dirs.app.components, newCategory);
 
       const oldAttributes = component.schema.attributes;
 
@@ -107,11 +112,11 @@ module.exports = function createComponentBuilder() {
         .setAttributes(this.convertAttributes(newAttributes));
 
       if (newUID !== uid) {
-        this.components.forEach(compo => {
+        this.components.forEach((compo) => {
           compo.updateComponent(uid, newUID);
         });
 
-        this.contentTypes.forEach(ct => {
+        this.contentTypes.forEach((ct) => {
           ct.updateComponent(uid, newUID);
         });
       }
@@ -124,11 +129,11 @@ module.exports = function createComponentBuilder() {
         throw new ApplicationError('component.notFound');
       }
 
-      this.components.forEach(compo => {
+      this.components.forEach((compo) => {
         compo.removeComponent(uid);
       });
 
-      this.contentTypes.forEach(ct => {
+      this.contentTypes.forEach((ct) => {
         ct.removeComponent(uid);
       });
 

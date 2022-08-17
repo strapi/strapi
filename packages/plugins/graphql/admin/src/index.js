@@ -14,7 +14,7 @@ export default {
   bootstrap() {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map(locale => {
+      locales.map((locale) => {
         return import(
           /* webpackChunkName: "graphql-translation-[request]" */ `./translations/${locale}.json`
         )

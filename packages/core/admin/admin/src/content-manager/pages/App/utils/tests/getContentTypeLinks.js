@@ -70,7 +70,7 @@ describe('checkPermissions', () => {
       },
     ];
 
-    request.mockImplementation(url => {
+    request.mockImplementation((url) => {
       if (url === '/content-manager/content-types') {
         return Promise.resolve({ data });
       }

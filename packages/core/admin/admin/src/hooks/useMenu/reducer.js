@@ -43,7 +43,7 @@ const initialState = {
 };
 
 const reducer = (state = initialState, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'SET_SECTION_LINKS': {
         const { authorizedGeneralSectionLinks, authorizedPluginSectionLinks } = action.data;

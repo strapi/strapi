@@ -77,7 +77,7 @@ const RelationalFields = ({
             variant="secondary"
             disabled={editRelationsLayoutRemainingFields.length === 0}
           >
-            {editRelationsLayoutRemainingFields.map(remainingRelation => (
+            {editRelationsLayoutRemainingFields.map((remainingRelation) => (
               <MenuItem
                 id={`menuItem-${remainingRelation}`}
                 key={`menuItem-${remainingRelation}`}

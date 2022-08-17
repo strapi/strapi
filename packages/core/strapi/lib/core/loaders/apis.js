@@ -5,6 +5,7 @@ const { existsSync } = require('fs-extra');
 const _ = require('lodash');
 const fse = require('fs-extra');
 const { isKebabCase } = require('@strapi/utils');
+const { importDefault } = require('../../utils');
 
 const DEFAULT_CONTENT_TYPE = {
   schema: {},
@@ -13,17 +14,17 @@ const DEFAULT_CONTENT_TYPE = {
 };
 
 // to handle names with numbers in it we first check if it is already in kebabCase
-const normalizeName = name => (isKebabCase(name) ? name : _.kebabCase(name));
+const normalizeName = (name) => (isKebabCase(name) ? name : _.kebabCase(name));
 
-const isDirectory = fd => fd.isDirectory();
-const isDotFile = fd => fd.name.startsWith('.');
+const isDirectory = (fd) => fd.isDirectory();
+const isDotFile = (fd) => fd.name.startsWith('.');
 
-module.exports = async strapi => {
-  if (!existsSync(strapi.dirs.api)) {
-    throw new Error('Missing api folder. Please create one at `./src/api`');
+module.exports = async (strapi) => {
+  if (!existsSync(strapi.dirs.dist.api)) {
+    return;
   }
 
-  const apisFDs = await (await fse.readdir(strapi.dirs.api, { withFileTypes: true }))
+  const apisFDs = await (await fse.readdir(strapi.dirs.dist.api, { withFileTypes: true }))
     .filter(isDirectory)
     .filter(_.negate(isDotFile));
 
@@ -32,7 +33,7 @@ module.exports = async strapi => {
   // only load folders
   for (const apiFD of apisFDs) {
     const apiName = normalizeName(apiFD.name);
-    const api = await loadAPI(join(strapi.dirs.api, apiFD.name));
+    const api = await loadAPI(join(strapi.dirs.dist.api, apiFD.name));
 
     apis[apiName] = api;
   }
@@ -44,8 +45,8 @@ module.exports = async strapi => {
   }
 };
 
-const validateContentTypesUnicity = apis => {
-  const allApisSchemas = Object.values(apis).flatMap(api => Object.values(api.contentTypes));
+const validateContentTypesUnicity = (apis) => {
+  const allApisSchemas = Object.values(apis).flatMap((api) => Object.values(api.contentTypes));
 
   const names = [];
   allApisSchemas.forEach(({ schema }) => {
@@ -67,26 +68,18 @@ const validateContentTypesUnicity = apis => {
   });
 };
 
-const loadAPI = async dir => {
-  const [
-    index,
-    config,
-    routes,
-    controllers,
-    services,
-    policies,
-    middlewares,
-    contentTypes,
-  ] = await Promise.all([
-    loadIndex(dir),
-    loadDir(join(dir, 'config')),
-    loadDir(join(dir, 'routes')),
-    loadDir(join(dir, 'controllers')),
-    loadDir(join(dir, 'services')),
-    loadDir(join(dir, 'policies')),
-    loadDir(join(dir, 'middlewares')),
-    loadContentTypes(join(dir, 'content-types')),
-  ]);
+const loadAPI = async (dir) => {
+  const [index, config, routes, controllers, services, policies, middlewares, contentTypes] =
+    await Promise.all([
+      loadIndex(dir),
+      loadDir(join(dir, 'config')),
+      loadDir(join(dir, 'routes')),
+      loadDir(join(dir, 'controllers')),
+      loadDir(join(dir, 'services')),
+      loadDir(join(dir, 'policies')),
+      loadDir(join(dir, 'middlewares')),
+      loadContentTypes(join(dir, 'content-types')),
+    ]);
 
   return {
     ...(index || {}),
@@ -100,13 +93,13 @@ const loadAPI = async dir => {
   };
 };
 
-const loadIndex = async dir => {
+const loadIndex = async (dir) => {
   if (await fse.pathExists(join(dir, 'index.js'))) {
     return loadFile(join(dir, 'index.js'));
   }
 };
 
-const loadContentTypes = async dir => {
+const loadContentTypes = async (dir) => {
   if (!(await fse.pathExists(dir))) {
     return;
   }
@@ -129,7 +122,7 @@ const loadContentTypes = async dir => {
   return contentTypes;
 };
 
-const loadDir = async dir => {
+const loadDir = async (dir) => {
   if (!(await fse.pathExists(dir))) {
     return;
   }
@@ -149,12 +142,12 @@ const loadDir = async dir => {
   return root;
 };
 
-const loadFile = file => {
+const loadFile = (file) => {
   const ext = extname(file);
 
   switch (ext) {
     case '.js':
-      return require(file);
+      return importDefault(file);
     case '.json':
       return fse.readJSON(file);
     default:

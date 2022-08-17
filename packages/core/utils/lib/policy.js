@@ -1,6 +1,7 @@
 /**
  * Policies util
  */
+
 'use strict';
 
 const _ = require('lodash');
@@ -9,7 +10,7 @@ const { eq } = require('lodash/fp');
 const PLUGIN_PREFIX = 'plugin::';
 const API_PREFIX = 'api::';
 
-const parsePolicy = policy => {
+const parsePolicy = (policy) => {
   if (typeof policy === 'string') {
     return { policyName: policy, config: {} };
   }
@@ -43,7 +44,7 @@ const globalPolicy = ({ method, endpoint, controller, action, plugin }) => {
 };
 
 const resolvePolicies = (config, { pluginName, apiName } = {}) => {
-  return config.map(policyConfig => {
+  return config.map((policyConfig) => {
     return {
       handler: getPolicy(policyConfig, { pluginName, apiName }),
       config: policyConfig.config || {},
@@ -87,10 +88,10 @@ const getPolicy = (policyConfig, { pluginName, apiName } = {}) => {
   return policy.handler;
 };
 
-const createPolicy = options => {
+const createPolicy = (options) => {
   const { name = 'unnamed', validator, handler } = options;
 
-  const wrappedValidator = config => {
+  const wrappedValidator = (config) => {
     if (validator) {
       try {
         validator(config);

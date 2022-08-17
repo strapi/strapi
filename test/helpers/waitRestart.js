@@ -2,7 +2,7 @@
 
 const request = require('request-promise-native');
 
-module.exports = function(initTime = 200) {
+module.exports = (initTime = 200) => {
   const ping = async () => {
     return new Promise((resolve, reject) => {
       // ping _health
@@ -17,9 +17,13 @@ module.exports = function(initTime = 200) {
         },
       }).then(resolve, reject);
     }).catch(() => {
-      return new Promise(resolve => setTimeout(resolve, 200)).then(ping);
+      return new Promise((resolve) => {
+        setTimeout(resolve, 200);
+      }).then(ping);
     });
   };
 
-  return new Promise(resolve => setTimeout(resolve, initTime)).then(ping);
+  return new Promise((resolve) => {
+    setTimeout(resolve, initTime);
+  }).then(ping);
 };
