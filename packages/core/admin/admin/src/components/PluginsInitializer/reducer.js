@@ -7,7 +7,7 @@ const initialState = {
 
 const reducer = (state = initialState, action) =>
   /* eslint-disable-next-line consistent-return */
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'SET_PLUGIN_READY': {
         set(draftState, ['plugins', action.pluginId, 'isReady'], true);

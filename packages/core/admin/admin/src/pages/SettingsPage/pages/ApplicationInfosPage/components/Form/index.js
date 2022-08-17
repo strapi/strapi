@@ -20,7 +20,7 @@ const Form = forwardRef(({ projectSettingsStored }, ref) => {
     init(initialState, projectSettingsStored)
   );
 
-  const handleChangeMenuLogo = asset => {
+  const handleChangeMenuLogo = (asset) => {
     dispatch({
       type: 'SET_CUSTOM_MENU_LOGO',
       value: asset,

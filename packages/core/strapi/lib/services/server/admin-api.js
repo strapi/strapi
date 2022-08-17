@@ -2,7 +2,7 @@
 
 const { createAPI } = require('./api');
 
-const createAdminAPI = strapi => {
+const createAdminAPI = (strapi) => {
   const opts = {
     prefix: '', // '/admin';
     type: 'admin',

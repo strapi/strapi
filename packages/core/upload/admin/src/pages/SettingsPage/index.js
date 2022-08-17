@@ -73,7 +73,7 @@ export const SettingsPage = () => {
 
   const isSaveButtonDisabled = isEqual(initialData, modifiedData);
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (isSaveButtonDisabled) {
@@ -186,7 +186,7 @@ export const SettingsPage = () => {
                             id: 'app.components.ToggleCheckbox.on-label',
                             defaultMessage: 'On',
                           })}
-                          onChange={e => {
+                          onChange={(e) => {
                             handleChange({
                               target: { name: 'responsiveDimensions', value: e.target.checked },
                             });
@@ -216,7 +216,7 @@ export const SettingsPage = () => {
                             id: 'app.components.ToggleCheckbox.on-label',
                             defaultMessage: 'On',
                           })}
-                          onChange={e => {
+                          onChange={(e) => {
                             handleChange({
                               target: { name: 'sizeOptimization', value: e.target.checked },
                             });
@@ -246,7 +246,7 @@ export const SettingsPage = () => {
                             id: 'app.components.ToggleCheckbox.on-label',
                             defaultMessage: 'On',
                           })}
-                          onChange={e => {
+                          onChange={(e) => {
                             handleChange({
                               target: { name: 'autoOrientation', value: e.target.checked },
                             });

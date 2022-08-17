@@ -53,7 +53,7 @@ describe('Auth', () => {
       expect(res).toEqual([null, false, { message: 'Invalid credentials' }]);
     });
 
-    test.each([false, null, 1, 0])('Fails when user is not active (%s)', async isActive => {
+    test.each([false, null, 1, 0])('Fails when user is not active (%s)', async (isActive) => {
       const user = {
         id: 1,
         firstname: '',

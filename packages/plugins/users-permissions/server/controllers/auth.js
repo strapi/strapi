@@ -91,6 +91,18 @@ module.exports = {
         user: await sanitizeUser(user, ctx),
       });
     }
+
+    // Connect the user with the third-party provider.
+    try {
+      const user = await getService('providers').connect(provider, ctx.query);
+
+      return ctx.send({
+        jwt: getService('jwt').issue({ id: user.id }),
+        user: await sanitizeUser(user, ctx),
+      });
+    } catch (error) {
+      throw new ApplicationError(error.message);
+    }
   },
 
   async changePassword(ctx) {
@@ -247,10 +259,7 @@ module.exports = {
     await getService('user').edit(user.id, { resetPasswordToken });
 
     // Send an email to the user.
-    await strapi
-      .plugin('email')
-      .service('email')
-      .send(emailToSend);
+    await strapi.plugin('email').service('email').send(emailToSend);
 
     ctx.send({ ok: true });
   },
@@ -314,7 +323,7 @@ module.exports = {
       }
     }
 
-    let newUser = {
+    const newUser = {
       ...params,
       role: role.id,
       email: email.toLowerCase(),

@@ -9,7 +9,7 @@ const getAdvancedSettings = () => {
   return strapi.store({ type: 'plugin', name: 'users-permissions' }).get({ key: 'advanced' });
 };
 
-const authenticate = async ctx => {
+const authenticate = async (ctx) => {
   try {
     const token = await getService('jwt').getToken(ctx);
 
@@ -77,7 +77,7 @@ const verify = async (auth, config) => {
     }
   }
 
-  let allowedActions = auth.allowedActions;
+  let { allowedActions } = auth;
 
   if (!allowedActions) {
     const permissions = await strapi.query('plugin::users-permissions.permission').findMany({
@@ -88,7 +88,7 @@ const verify = async (auth, config) => {
     auth.allowedActions = allowedActions;
   }
 
-  const isAllowed = castArray(config.scope).every(scope => allowedActions.includes(scope));
+  const isAllowed = castArray(config.scope).every((scope) => allowedActions.includes(scope));
 
   if (!isAllowed) {
     throw new ForbiddenError();

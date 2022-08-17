@@ -8,19 +8,13 @@ const callbackSchema = yup.object({
 });
 
 const registerSchema = yup.object({
-  email: yup
-    .string()
-    .email()
-    .required(),
+  email: yup.string().email().required(),
   username: yup.string().required(),
   password: yup.string().required(),
 });
 
 const sendEmailConfirmationSchema = yup.object({
-  email: yup
-    .string()
-    .email()
-    .required(),
+  email: yup.string().email().required(),
 });
 
 const validateEmailConfirmationSchema = yup.object({
@@ -29,10 +23,7 @@ const validateEmailConfirmationSchema = yup.object({
 
 const forgotPasswordSchema = yup
   .object({
-    email: yup
-      .string()
-      .email()
-      .required(),
+    email: yup.string().email().required(),
   })
   .noUnknown();
 

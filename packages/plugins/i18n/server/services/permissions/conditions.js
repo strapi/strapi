@@ -9,7 +9,7 @@ const conditions = [
       const { locales } = options.permission.properties || {};
       const { superAdminCode } = strapi.admin.services.role.constants;
 
-      const isSuperAdmin = user.roles.some(role => role.code === superAdminCode);
+      const isSuperAdmin = user.roles.some((role) => role.code === superAdminCode);
 
       if (isSuperAdmin) {
         return true;

@@ -15,12 +15,12 @@ class MysqlDialect extends Dialect {
     this.db.config.connection.connection.bigNumberStrings = true;
     this.db.config.connection.connection.typeCast = (field, next) => {
       if (field.type === 'DECIMAL' || field.type === 'NEWDECIMAL') {
-        var value = field.string();
+        const value = field.string();
         return value === null ? null : Number(value);
       }
 
       if (field.type === 'TINY' && field.length === 1) {
-        let value = field.string();
+        const value = field.string();
         return value ? value === '1' : null;
       }
 

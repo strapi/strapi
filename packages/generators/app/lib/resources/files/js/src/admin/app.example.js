@@ -29,7 +29,7 @@ const config = {
   ],
 };
 
-const bootstrap = app => {
+const bootstrap = (app) => {
   console.log(app);
 };
 

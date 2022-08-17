@@ -18,7 +18,7 @@ const getPassportStrategies = () => {
   }
 
   const providers = sso.providerRegistry.getAll();
-  const strategies = providers.map(provider => provider.createStrategy(strapi));
+  const strategies = providers.map((provider) => provider.createStrategy(strapi));
 
   return [localStrategy, ...strategies];
 };

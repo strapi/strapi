@@ -22,7 +22,7 @@ export const Breadcrumbs = ({ breadcrumbs, onChangeFolder, currentFolderId, ...p
             <CrumbSimpleMenuAsync
               parentsToOmit={[...breadcrumbs]
                 .splice(index + 1, breadcrumbs.length - 1)
-                .map(parent => parent.id)}
+                .map((parent) => parent.id)}
               key={`breadcrumb-${crumb?.id ?? 'menu'}`}
               currentFolderId={currentFolderId}
               onChangeFolder={onChangeFolder}

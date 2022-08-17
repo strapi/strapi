@@ -3,7 +3,7 @@ import { components } from 'react-select';
 import Cross from '@strapi/icons/Cross';
 import IconBox from './IconBox';
 
-const ClearIndicator = props => {
+const ClearIndicator = (props) => {
   const Component = components.ClearIndicator;
 
   return (

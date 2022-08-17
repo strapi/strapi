@@ -49,7 +49,7 @@ const sanitizeConditionAttributes = pick(conditionFields);
  * @param condition
  * @return {string}
  */
-const computeConditionId = condition => {
+const computeConditionId = (condition) => {
   const { name, plugin } = condition;
 
   if (!plugin) {
@@ -68,7 +68,7 @@ const computeConditionId = condition => {
  * @param {CreateConditionPayload} attrs - Payload used to create a condition
  * @return {CreateConditionPayload}
  */
-const assignConditionId = attrs => set('id', computeConditionId(attrs), attrs);
+const assignConditionId = (attrs) => set('id', computeConditionId(attrs), attrs);
 
 /**
  * Transform the given attributes into a domain representation of a Condition

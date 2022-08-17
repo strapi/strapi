@@ -18,7 +18,7 @@ const { buildTypeScript, buildAdmin } = require('./builders');
  *
  */
 
-module.exports = async function({ build, watchAdmin, polling, browser }) {
+module.exports = async ({ build, watchAdmin, polling, browser }) => {
   const appDir = process.cwd();
 
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
@@ -96,8 +96,10 @@ const primaryProcess = async ({ distDir, appDir, build, isTSProject, watchAdmin,
         break;
       case 'stop':
         process.exit(1);
-      default:
-        return;
+        break;
+      default: {
+        break;
+      }
     }
   });
 
@@ -108,7 +110,7 @@ const workerProcess = ({ appDir, distDir, watchAdmin, polling, isTSProject }) =>
   const strapiInstance = strapi({
     distDir,
     autoReload: true,
-    serveAdminPanel: watchAdmin ? false : true,
+    serveAdminPanel: !watchAdmin,
   });
 
   const adminWatchIgnoreFiles = strapiInstance.config.get('admin.watchIgnoreFiles', []);
@@ -120,13 +122,17 @@ const workerProcess = ({ appDir, distDir, watchAdmin, polling, isTSProject }) =>
     isTSProject,
   });
 
-  process.on('message', async message => {
+  process.on('message', async (message) => {
     switch (message) {
-      case 'kill':
+      case 'kill': {
         await strapiInstance.destroy();
         process.send('killed');
         process.exit();
-      default:
+        break;
+      }
+      default: {
+        break;
+      }
       // Do nothing.
     }
   });
@@ -178,15 +184,15 @@ function watchFileChanges({ appDir, strapiInstance, watchIgnoreFiles, polling })
   });
 
   watcher
-    .on('add', path => {
+    .on('add', (path) => {
       strapiInstance.log.info(`File created: ${path}`);
       restart();
     })
-    .on('change', path => {
+    .on('change', (path) => {
       strapiInstance.log.info(`File changed: ${path}`);
       restart();
     })
-    .on('unlink', path => {
+    .on('unlink', (path) => {
       strapiInstance.log.info(`File deleted: ${path}`);
       restart();
     });

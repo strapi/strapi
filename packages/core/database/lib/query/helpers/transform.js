@@ -7,7 +7,7 @@ const { createField } = require('../../fields');
 
 const fromRow = (meta, row) => {
   if (Array.isArray(row)) {
-    return row.map(singleRow => fromRow(meta, singleRow));
+    return row.map((singleRow) => fromRow(meta, singleRow));
   }
 
   const { attributes } = meta;
@@ -48,7 +48,7 @@ const toRow = (meta, data = {}) => {
   }
 
   if (_.isArray(data)) {
-    return data.map(datum => toRow(meta, datum));
+    return data.map((datum) => toRow(meta, datum));
   }
 
   const { attributes } = meta;

@@ -1,4 +1,4 @@
-const getMethodColor = verb => {
+const getMethodColor = (verb) => {
   switch (verb) {
     case 'POST': {
       return {

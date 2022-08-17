@@ -81,10 +81,10 @@ export const BrowseStep = ({
   const allAllowedAsset = getAllowedFiles(allowedTypes, assets);
   const areAllAssetSelected =
     allAllowedAsset.every(
-      asset => selectedAssets.findIndex(currAsset => currAsset.id === asset.id) !== -1
+      (asset) => selectedAssets.findIndex((currAsset) => currAsset.id === asset.id) !== -1
     ) && selectedAssets.length > 0;
   const hasSomeAssetSelected = allAllowedAsset.some(
-    asset => selectedAssets.findIndex(currAsset => currAsset.id === asset.id) !== -1
+    (asset) => selectedAssets.findIndex((currAsset) => currAsset.id === asset.id) !== -1
   );
   const isSearching = !!queryObject?._q;
   const isFiltering = queryObject?.filters?.$and?.length > 0;
@@ -209,7 +209,7 @@ export const BrowseStep = ({
             ''
           }
         >
-          {folders.map(folder => {
+          {folders.map((folder) => {
             return (
               <GridItem col={3} key={`folder-${folder.id}`}>
                 <FolderCard

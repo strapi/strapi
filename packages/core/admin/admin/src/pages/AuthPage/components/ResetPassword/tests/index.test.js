@@ -9,7 +9,7 @@ import { IntlProvider } from 'react-intl';
 import ResetPassword from '..';
 
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale: () => {},
+  changeLocale() {},
   localeNames: { en: 'English' },
   messages: ['test'],
 }));

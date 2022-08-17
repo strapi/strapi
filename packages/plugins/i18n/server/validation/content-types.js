@@ -9,7 +9,7 @@ const validateGetNonLocalizedAttributesSchema = yup
   .shape({
     model: yup.string().required(),
     id: yup.mixed().when('model', {
-      is: model => get('kind', strapi.contentType(model)) === 'singleType',
+      is: (model) => get('kind', strapi.contentType(model)) === 'singleType',
       then: yup.strapiID().nullable(),
       otherwise: yup.strapiID().required(),
     }),

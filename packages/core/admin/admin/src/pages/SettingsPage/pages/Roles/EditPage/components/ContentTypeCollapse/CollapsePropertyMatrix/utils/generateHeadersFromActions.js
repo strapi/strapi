@@ -1,5 +1,5 @@
 const generateHeadersFromActions = (actions, propertyName) => {
-  return actions.map(action => {
+  return actions.map((action) => {
     const isActionRelatedToCurrentProperty =
       Array.isArray(action.applyToProperties) &&
       action.applyToProperties.indexOf(propertyName) !== -1 &&

@@ -9,12 +9,12 @@ import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 
 import isFieldTypeNumber from '../../../utils/isFieldTypeNumber';
 
-yup.addMethod(yup.mixed, 'defined', function() {
-  return this.test('defined', errorsTrads.required, value => value !== undefined);
+yup.addMethod(yup.mixed, 'defined', function () {
+  return this.test('defined', errorsTrads.required, (value) => value !== undefined);
 });
 
-yup.addMethod(yup.array, 'notEmptyMin', function(min) {
-  return this.test('notEmptyMin', errorsTrads.min, value => {
+yup.addMethod(yup.array, 'notEmptyMin', function (min) {
+  return this.test('notEmptyMin', errorsTrads.min, (value) => {
     if (isEmpty(value)) {
       return true;
     }
@@ -23,8 +23,8 @@ yup.addMethod(yup.array, 'notEmptyMin', function(min) {
   });
 });
 
-yup.addMethod(yup.string, 'isInferior', function(message, max) {
-  return this.test('isInferior', message, function(value) {
+yup.addMethod(yup.string, 'isInferior', function (message, max) {
+  return this.test('isInferior', message, function (value) {
     if (!value) {
       return true;
     }
@@ -37,8 +37,8 @@ yup.addMethod(yup.string, 'isInferior', function(message, max) {
   });
 });
 
-yup.addMethod(yup.string, 'isSuperior', function(message, min) {
-  return this.test('isSuperior', message, function(value) {
+yup.addMethod(yup.string, 'isSuperior', function (message, min) {
+  return this.test('isSuperior', message, function (value) {
     if (!value) {
       return true;
     }
@@ -51,7 +51,7 @@ yup.addMethod(yup.string, 'isSuperior', function(message, min) {
   });
 });
 
-const getAttributes = data => get(data, ['attributes'], {});
+const getAttributes = (data) => get(data, ['attributes'], {});
 
 const createYupSchema = (
   model,
@@ -97,7 +97,7 @@ const createYupSchema = (
         if (attribute.repeatable === true) {
           const { min, max, required } = attribute;
 
-          let componentSchema = yup.lazy(value => {
+          let componentSchema = yup.lazy((value) => {
             let baseSchema = yup.array().of(componentFieldSchema);
 
             if (min) {
@@ -123,7 +123,7 @@ const createYupSchema = (
 
           return acc;
         }
-        const componentSchema = yup.lazy(obj => {
+        const componentSchema = yup.lazy((obj) => {
           if (obj !== undefined) {
             return attribute.required === true && !options.isDraft
               ? componentFieldSchema.defined()
@@ -154,7 +154,7 @@ const createYupSchema = (
         if (min) {
           if (attribute.required) {
             dynamicZoneSchema = dynamicZoneSchema
-              .test('min', errorsTrads.min, value => {
+              .test('min', errorsTrads.min, (value) => {
                 if (options.isCreatingEntry) {
                   return value && value.length >= min;
                 }
@@ -165,7 +165,7 @@ const createYupSchema = (
 
                 return value !== null && value.length >= min;
               })
-              .test('required', errorsTrads.required, value => {
+              .test('required', errorsTrads.required, (value) => {
                 if (options.isCreatingEntry) {
                   return value !== null || value !== undefined;
                 }
@@ -180,7 +180,7 @@ const createYupSchema = (
             dynamicZoneSchema = dynamicZoneSchema.notEmptyMin(min);
           }
         } else if (attribute.required && !options.isDraft) {
-          dynamicZoneSchema = dynamicZoneSchema.test('required', errorsTrads.required, value => {
+          dynamicZoneSchema = dynamicZoneSchema.test('required', errorsTrads.required, (value) => {
             if (options.isCreatingEntry) {
               return value !== null || value !== undefined;
             }
@@ -215,7 +215,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
   if (type === 'json') {
     schema = yup
       .mixed(errorsTrads.json)
-      .test('isJSON', errorsTrads.json, value => {
+      .test('isJSON', errorsTrads.json, (value) => {
         if (value === undefined) {
           return true;
         }
@@ -238,7 +238,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
   if (['number', 'integer', 'float', 'decimal'].includes(type)) {
     schema = yup
       .number()
-      .transform(cv => (isNaN(cv) ? undefined : cv))
+      .transform((cv) => (isNaN(cv) ? undefined : cv))
       .typeError();
   }
 
@@ -250,7 +250,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
     schema = yup.date();
   }
 
-  Object.keys(validations).forEach(validation => {
+  Object.keys(validations).forEach((validation) => {
     const validationValue = validations[validation];
 
     if (
@@ -269,7 +269,7 @@ const createYupSchemaAttribute = (type, validations, options) => {
               if (options.isCreatingEntry) {
                 schema = schema.required(errorsTrads.required);
               } else {
-                schema = schema.test('required', errorsTrads.required, value => {
+                schema = schema.test('required', errorsTrads.required, (value) => {
                   // Field is not touched and the user is editing the entry
                   if (value === undefined && !options.isFromComponent) {
                     return true;

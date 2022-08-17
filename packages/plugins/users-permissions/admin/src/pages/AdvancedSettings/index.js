@@ -53,7 +53,7 @@ const AdvancedSettingsPage = () => {
   } = useRBAC(updatePermissions);
 
   const { status: isLoadingData, data } = useQuery('advanced', () => fetchData(), {
-    onSuccess: () => {
+    onSuccess() {
       notifyStatus(
         formatMessage({
           id: getTrad('Form.advancedSettings.data.loaded'),
@@ -61,7 +61,7 @@ const AdvancedSettingsPage = () => {
         })
       );
     },
-    onError: () => {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
@@ -71,8 +71,8 @@ const AdvancedSettingsPage = () => {
 
   const isLoading = isLoadingForPermissions || isLoadingData !== 'success';
 
-  const submitMutation = useMutation(body => putAdvancedSettings(body), {
-    onSuccess: async () => {
+  const submitMutation = useMutation((body) => putAdvancedSettings(body), {
+    async onSuccess() {
       await queryClient.invalidateQueries('advanced');
       toggleNotification({
         type: 'success',
@@ -81,7 +81,7 @@ const AdvancedSettingsPage = () => {
 
       unlockApp();
     },
-    onError: () => {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
@@ -93,7 +93,7 @@ const AdvancedSettingsPage = () => {
 
   const { isLoading: isSubmittingForm } = submitMutation;
 
-  const handleSubmit = async body => {
+  const handleSubmit = async (body) => {
     lockApp();
 
     const urlConfirmation = body.email_confirmation ? body.email_confirmation_redirection : '';
@@ -188,10 +188,11 @@ const AdvancedSettingsPage = () => {
                             defaultMessage:
                               'It will attach the new authenticated user to the selected role.',
                           })}
-                          onChange={e =>
-                            handleChange({ target: { name: 'default_role', value: e } })}
+                          onChange={(e) =>
+                            handleChange({ target: { name: 'default_role', value: e } })
+                          }
                         >
-                          {data.roles.map(role => {
+                          {data.roles.map((role) => {
                             return (
                               <Option key={role.type} value={role.type}>
                                 {role.name}
@@ -200,7 +201,7 @@ const AdvancedSettingsPage = () => {
                           })}
                         </Select>
                       </GridItem>
-                      {layout.map(input => {
+                      {layout.map((input) => {
                         let value = values[input.name];
 
                         if (!value) {

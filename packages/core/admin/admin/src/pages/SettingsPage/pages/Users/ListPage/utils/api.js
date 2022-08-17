@@ -10,7 +10,7 @@ const fetchData = async (search, notify) => {
   return data;
 };
 
-const deleteData = async ids => {
+const deleteData = async (ids) => {
   await axiosInstance.post('/admin/users/batch-delete', { ids });
 };
 

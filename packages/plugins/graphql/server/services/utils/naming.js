@@ -50,7 +50,7 @@ module.exports = ({ strapi }) => {
    * @param {object} contentType
    * @return {string}
    */
-  const getEntityName = contentType => {
+  const getEntityName = (contentType) => {
     return `${getTypeName(contentType)}Entity`;
   };
 
@@ -59,7 +59,7 @@ module.exports = ({ strapi }) => {
    * @param {object} contentType
    * @return {string}
    */
-  const getEntityMetaName = contentType => {
+  const getEntityMetaName = (contentType) => {
     return `${getEntityName(contentType)}Meta`;
   };
 
@@ -68,7 +68,7 @@ module.exports = ({ strapi }) => {
    * @param {object} contentType
    * @return {string}
    */
-  const getEntityResponseName = contentType => {
+  const getEntityResponseName = (contentType) => {
     return `${getEntityName(contentType)}Response`;
   };
 
@@ -77,7 +77,7 @@ module.exports = ({ strapi }) => {
    * @param {object} contentType
    * @return {string}
    */
-  const getEntityResponseCollectionName = contentType => {
+  const getEntityResponseCollectionName = (contentType) => {
     return `${getEntityName(contentType)}ResponseCollection`;
   };
 
@@ -86,7 +86,7 @@ module.exports = ({ strapi }) => {
    * @param {object} contentType
    * @return {string}
    */
-  const getRelationResponseCollectionName = contentType => {
+  const getRelationResponseCollectionName = (contentType) => {
     return `${getTypeName(contentType)}RelationResponseCollection`;
   };
 
@@ -95,7 +95,7 @@ module.exports = ({ strapi }) => {
    * @param {object} contentType
    * @return {string}
    */
-  const getComponentName = contentType => {
+  const getComponentName = (contentType) => {
     return contentType.globalId;
   };
 
@@ -104,7 +104,7 @@ module.exports = ({ strapi }) => {
    * @param {object} attribute
    * @return {string}
    */
-  const getComponentNameFromAttribute = attribute => {
+  const getComponentNameFromAttribute = (attribute) => {
     return strapi.components[attribute.component].globalId;
   };
 
@@ -139,7 +139,7 @@ module.exports = ({ strapi }) => {
    * @param {object} contentType
    * @return {string}
    */
-  const getComponentInputName = contentType => {
+  const getComponentInputName = (contentType) => {
     const componentName = getComponentName(contentType);
 
     return `${componentName}Input`;
@@ -150,7 +150,7 @@ module.exports = ({ strapi }) => {
    * @param {object} contentType
    * @return {string}
    */
-  const getContentTypeInputName = contentType => {
+  const getContentTypeInputName = (contentType) => {
     const typeName = getTypeName(contentType);
 
     return `${typeName}Input`;
@@ -161,7 +161,7 @@ module.exports = ({ strapi }) => {
    * @param {object} contentType
    * @return {string}
    */
-  const getEntityQueriesTypeName = contentType => {
+  const getEntityQueriesTypeName = (contentType) => {
     return `${getEntityName(contentType)}Queries`;
   };
 
@@ -170,7 +170,7 @@ module.exports = ({ strapi }) => {
    * @param {object} contentType
    * @return {string}
    */
-  const getEntityMutationsTypeName = contentType => {
+  const getEntityMutationsTypeName = (contentType) => {
     return `${getEntityName(contentType)}Mutations`;
   };
 
@@ -179,7 +179,7 @@ module.exports = ({ strapi }) => {
    * @param {object} contentType
    * @return {string}
    */
-  const getFiltersInputTypeName = contentType => {
+  const getFiltersInputTypeName = (contentType) => {
     const isComponent = contentType.modelType === 'component';
 
     const baseName = isComponent ? getComponentName(contentType) : getTypeName(contentType);
@@ -192,7 +192,7 @@ module.exports = ({ strapi }) => {
    * @param {NexusGenScalars} scalarType
    * @return {string}
    */
-  const getScalarFilterInputTypeName = scalarType => {
+  const getScalarFilterInputTypeName = (scalarType) => {
     return `${scalarType}FilterInput`;
   };
 
@@ -229,11 +229,11 @@ module.exports = ({ strapi }) => {
     }
 
     const getCustomTypeName = pipe(
-      ct => getTypeName(ct, { plurality }),
+      (ct) => getTypeName(ct, { plurality }),
       firstLetterCase === 'upper' ? upperFirst : lowerFirst
     );
 
-    return contentType => `${prefix}${getCustomTypeName(contentType)}${suffix}`;
+    return (contentType) => `${prefix}${getCustomTypeName(contentType)}${suffix}`;
   };
 
   const getFindQueryName = buildCustomTypeNameGenerator({

@@ -34,7 +34,7 @@ const defaultBreadcrumbs = [
   { id: 22, label: 'current folder' },
 ];
 
-const setup = props =>
+const setup = (props) =>
   renderTL(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
