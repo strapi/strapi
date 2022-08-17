@@ -5,7 +5,7 @@ import { Badge } from '@strapi/design-system/Badge';
 import { Box } from '@strapi/design-system/Box';
 import { BaseLink } from '@strapi/design-system/BaseLink';
 import { Icon } from '@strapi/design-system/Icon';
-import { FieldLabel } from '@strapi/design-system/Field';
+import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/Field';
 import { TextButton } from '@strapi/design-system/TextButton';
 
 import Cross from '@strapi/icons/Cross';
@@ -18,6 +18,8 @@ import { RelationList } from './components/RelationList';
 import ReactSelect from '../ReactSelect';
 
 export const RelationInput = ({
+  description,
+  error,
   id,
   name,
   label,
@@ -33,12 +35,13 @@ export const RelationInput = ({
   placeholder,
 }) => {
   return (
-    <Box>
+    <Field error={error} name={name} hint={description} id={id}>
       <Relation
         search={
           <>
-            <FieldLabel htmlFor={id}>{label}</FieldLabel>
+            <FieldLabel>{label}</FieldLabel>
             <ReactSelect
+              error={error}
               inputId={id}
               isSearchable
               isClear
@@ -86,8 +89,12 @@ export const RelationInput = ({
               );
             })}
         </RelationList>
+        <Box paddingTop={2}>
+          <FieldHint />
+          <FieldError />
+        </Box>
       </Relation>
-    </Box>
+    </Field>
   );
 };
 
@@ -123,9 +130,7 @@ RelationInput.defaultProps = {
 };
 
 RelationInput.propTypes = {
-  // eslint-disable-next-line react/no-unused-prop-types
   error: PropTypes.string,
-  // eslint-disable-next-line react/no-unused-prop-types
   description: PropTypes.string,
   // eslint-disable-next-line react/no-unused-prop-types
   disabled: PropTypes.bool,
