@@ -78,7 +78,6 @@ const verify = (auth, config) => {
   // Custom
   else if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
     if (!ability) {
-      console.log('missing ability');
       throw new ForbiddenError();
     }
 
