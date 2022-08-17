@@ -104,7 +104,7 @@ const SortDisplayedFields = ({
           >
             {listRemainingFields.map((field) => (
               <MenuItem key={field} onClick={() => handleAddField(field)}>
-                {field}
+                {metadatas[field].list.label || field}
               </MenuItem>
             ))}
           </SimpleMenu>
