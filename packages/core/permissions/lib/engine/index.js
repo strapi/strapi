@@ -54,7 +54,7 @@ module.exports = {
      * @param {Function} params.register
      * @param {Permission} params.permission
      */
-    const evaluate = async params => {
+    const evaluate = async (params) => {
       const { options, register } = params;
 
       const preFormatValidation = await runValidationHook(
@@ -87,11 +87,11 @@ module.exports = {
 
       const resolveConditions = _.map(providers.condition.get);
 
-      const removeInvalidConditions = _.filter(condition => _.isFunction(condition.handler));
+      const removeInvalidConditions = _.filter((condition) => _.isFunction(condition.handler));
 
-      const evaluateConditions = conditions => {
+      const evaluateConditions = (conditions) => {
         return Promise.all(
-          conditions.map(async condition => ({
+          conditions.map(async (condition) => ({
             condition,
             result: await condition.handler(
               _.merge(options, { permission: _.cloneDeep(permission) })
@@ -150,7 +150,7 @@ module.exports = {
        * @return {Function}
        */
       createRegisterFunction(can, options) {
-        return async permission => {
+        return async (permission) => {
           const hookContext = createWillRegisterContext({ options, permission });
 
           await state.hooks['before-register.permission'].call(hookContext);

@@ -49,7 +49,7 @@ const client = new QueryClient({
   },
 });
 
-const makeApp = history => {
+const makeApp = (history) => {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">

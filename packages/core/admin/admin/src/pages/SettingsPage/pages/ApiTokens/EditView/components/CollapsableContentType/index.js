@@ -29,12 +29,12 @@ const CollapsableContentType = ({ actions, label, orderNumber, name, disabled })
   }, [modifiedData, name]);
 
   const hasAllActionsSelected = useMemo(() => {
-    return Object.values(currentScopedModifiedData).every(action => action === true);
+    return Object.values(currentScopedModifiedData).every((action) => action === true);
   }, [currentScopedModifiedData]);
 
   const hasSomeActionsSelected = useMemo(() => {
     return (
-      Object.values(currentScopedModifiedData).some(action => action === true) &&
+      Object.values(currentScopedModifiedData).some((action) => action === true) &&
       !hasAllActionsSelected
     );
   }, [currentScopedModifiedData, hasAllActionsSelected]);
@@ -42,7 +42,7 @@ const CollapsableContentType = ({ actions, label, orderNumber, name, disabled })
   return (
     <Accordion
       expanded={expanded}
-      onToggle={() => setExpanded(s => !s)}
+      onToggle={() => setExpanded((s) => !s)}
       variant={orderNumber % 2 ? 'primary' : 'secondary'}
     >
       <AccordionToggle title={capitalize(label)} />
@@ -58,7 +58,7 @@ const CollapsableContentType = ({ actions, label, orderNumber, name, disabled })
             <Checkbox
               value={hasAllActionsSelected}
               indeterminate={hasSomeActionsSelected}
-              onValueChange={value => {
+              onValueChange={(value) => {
                 onChangeSelectAll({ target: { name, value } });
               }}
               disabled={disabled}
@@ -68,7 +68,7 @@ const CollapsableContentType = ({ actions, label, orderNumber, name, disabled })
           </Box>
         </Flex>
         <Grid gap={4} padding={4}>
-          {Object.keys(actions).map(action => {
+          {Object.keys(actions).map((action) => {
             const currentName = `${name}.${action}`;
 
             return (
@@ -76,7 +76,7 @@ const CollapsableContentType = ({ actions, label, orderNumber, name, disabled })
                 <Checkbox
                   value={actions[action]}
                   name={currentName}
-                  onValueChange={value => {
+                  onValueChange={(value) => {
                     onChange({ target: { name: currentName, value } });
                   }}
                   disabled={disabled}
