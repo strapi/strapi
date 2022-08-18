@@ -38,6 +38,7 @@ const apiTokenUpdateSchema = yup
       .array()
       .of(yup.string())
       .nullable(),
+    lastUsed: yup.date().nullable(),
   })
   .noUnknown();
 
