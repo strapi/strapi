@@ -1,4 +1,4 @@
-import React, { memo, Suspense, useMemo } from 'react';
+import React, { Suspense, memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
@@ -27,7 +27,6 @@ import {
   select,
   VALIDATIONS_TO_OMIT,
 } from './utils';
-import InputLoader from './InputLoader';
 
 function Inputs({
   allowedFields,
@@ -172,6 +171,19 @@ function Inputs({
 
   const { label, description, placeholder, visible } = metadatas;
 
+  // Memoize the component to avoid remounting it and losing state
+  const CustomFieldInput = useMemo(() => {
+    if (customFieldUid) {
+      const customField = customFieldsRegistry.get(customFieldUid);
+      const CustomFieldInput = React.lazy(customField.components.Input);
+
+      return CustomFieldInput;
+    }
+
+    // Not a custom field, component won't be used
+    return null;
+  }, [customFieldUid, customFieldsRegistry]);
+
   if (visible === false) {
     return null;
   }
@@ -225,23 +237,6 @@ function Inputs({
     );
   }
 
-  const customInputs = {
-    json: InputJSON,
-    uid: InputUID,
-    media: fields.media,
-    wysiwyg: Wysiwyg,
-    ...fields,
-  };
-
-  if (customFieldUid) {
-    const customField = customFieldsRegistry.get(customFieldUid);
-    // const CustomFieldInput = TestColorPicker;
-    const CustomFieldInput = (props) => (
-      <InputLoader component={customField.components.Input} {...props} />
-    );
-    customInputs[customFieldUid] = CustomFieldInput;
-  }
-
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
       <GenericInput
@@ -256,7 +251,14 @@ function Inputs({
         labelAction={labelAction}
         contentTypeUID={currentContentTypeLayout.uid}
         customFieldUid={customFieldUid}
-        customInputs={customInputs}
+        customInputs={{
+          json: InputJSON,
+          uid: InputUID,
+          media: fields.media,
+          wysiwyg: Wysiwyg,
+          [customFieldUid]: CustomFieldInput,
+          ...fields,
+        }}
         multiple={fieldSchema.multiple || false}
         name={keys}
         onChange={onChange}
