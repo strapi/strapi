@@ -1,31 +1,38 @@
 import React from 'react';
 import { Stack } from '@strapi/design-system/Stack';
-import { FieldHint, FieldError, FieldLabel } from '@strapi/design-system/Field';
+import { Field, FieldHint, FieldError, FieldLabel } from '@strapi/design-system/Field';
 import { useIntl } from 'react-intl';
 
 const ColorPickerInput = ({
-  intlLabel,
-  id,
-  name,
-  required,
-  labelAction,
-  onChange,
-  value,
   attribute,
+  description,
+  error,
+  hint,
+  id,
+  intlLabel,
+  name,
+  onChange,
+  required,
+  value,
 }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <div>
-      <Stack spacing={1}>
-        <FieldLabel action={labelAction} name={name} required={required} htmlFor={id || name}>
+    <Stack spacing={1}>
+      <Field
+        name={name}
+        id={name}
+        error={error && formatMessage(error)}
+        hint={description && formatMessage(description)}
+      >
+        <FieldLabel name={name} required={required}>
           {formatMessage(intlLabel)}
         </FieldLabel>
-        <input type="color" id={id || name} name={name} value={value} onChange={onChange} />
+        <input type="color" id={name} name={name} value={value} onChange={onChange} />
         <FieldHint />
         <FieldError />
-      </Stack>
-    </div>
+      </Field>
+    </Stack>
   );
 };
 
