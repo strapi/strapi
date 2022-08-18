@@ -263,6 +263,41 @@ describe('API Token', () => {
       expect(res).toEqual(attributes);
     });
   });
+
+  describe('regenerate', () => {
+    test('It regenerates the accessKey', async () => {
+      const update = jest.fn(({ data }) => Promise.resolve(data));
+
+      global.strapi = {
+        query() {
+          return { update };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      const id = 1;
+      const attributes = {
+        name: 'api-token_tests-updated-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+      };
+
+      const res = await apiTokenService.regenerate(id);
+
+      expect(update).toHaveBeenCalledWith(id, {
+        select: ['id', 'accessKey'],
+        where: { id },
+        data: {
+          ...attributes,
+          accessKey: expect.any(String),
+        },
+      });
+      expect(res).toEqual(attributes);
+    });
+  });
+
   describe('getByName', () => {
     const token = {
       id: 1,
