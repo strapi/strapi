@@ -10,7 +10,7 @@ const TypographyWrapper = styled(Typography)`
 `;
 
 const ChildrenWrapper = styled(Flex)`
-  > a {
+  div > a {
     color: currentColor;
     text-decoration: none;
   }

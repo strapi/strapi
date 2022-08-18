@@ -14,6 +14,7 @@ import Refresh from '@strapi/icons/Refresh';
 import { Relation } from './components/Relation';
 import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
+import Option from './components/Option';
 
 import ReactSelect from '../ReactSelect';
 
@@ -35,6 +36,7 @@ export const RelationInput = ({
   onSearchNextPage,
   onSearch,
   placeholder,
+  searchResults,
 }) => {
   return (
     <Field error={error} name={name} hint={description} id={id}>
@@ -43,6 +45,8 @@ export const RelationInput = ({
           <>
             <FieldLabel>{label}</FieldLabel>
             <ReactSelect
+              components={{ Option }}
+              options={searchResults}
               isDisabled={disabled}
               error={error}
               inputId={id}
@@ -85,22 +89,26 @@ export const RelationInput = ({
                     </button>
                   }
                 >
-                  {href ? (
-                    <BaseLink disabled={disabled} href={href}>
-                      {title}
-                    </BaseLink>
-                  ) : (
-                    title
-                  )}
+                  <Box paddingTop={1} paddingBottom={1}>
+                    {href ? (
+                      <BaseLink disabled={disabled} href={href}>
+                        {title}
+                      </BaseLink>
+                    ) : (
+                      title
+                    )}
+                  </Box>
 
-                  <Badge
-                    borderSize={1}
-                    borderColor={`${badgeColor}200`}
-                    backgroundColor={`${badgeColor}100`}
-                    textColor={`${badgeColor}700`}
-                  >
-                    {isDraft ? 'Draft' : 'Published'}
-                  </Badge>
+                  {isDraft !== undefined && (
+                    <Badge
+                      borderSize={1}
+                      borderColor={`${badgeColor}200`}
+                      backgroundColor={`${badgeColor}100`}
+                      textColor={`${badgeColor}700`}
+                    >
+                      {isDraft ? 'Draft' : 'Published'}
+                    </Badge>
+                  )}
                 </RelationItem>
               );
             })}
@@ -114,28 +122,31 @@ export const RelationInput = ({
   );
 };
 
-const RelationTypeDef = PropTypes.shape({
-  id: PropTypes.number.isRequired,
-  isDraft: PropTypes.bool,
-  href: PropTypes.string,
-  title: PropTypes.string.isRequired,
-});
-
 const ReactQueryRelationResult = PropTypes.shape({
   data: PropTypes.shape({
-    pages: PropTypes.arrayOf(RelationTypeDef),
+    pages: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        isDraft: PropTypes.bool,
+        href: PropTypes.string,
+        title: PropTypes.string.isRequired,
+      })
+    ),
   }),
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
 });
 
-const ReactQuerySearchResult = PropTypes.shape({
-  data: PropTypes.shape({
-    pages: PropTypes.arrayOf(RelationTypeDef),
-  }),
-  isLoading: PropTypes.bool.isRequired,
-  isSuccess: PropTypes.bool.isRequired,
-});
+const ReactQuerySearchResult = PropTypes.arrayOf(
+  PropTypes.shape({
+    label: PropTypes.string,
+    value: {
+      id: PropTypes.number,
+      name: PropTypes.string,
+      publishedAt: PropTypes.string,
+    },
+  })
+);
 
 RelationInput.defaultProps = {
   description: undefined,
@@ -163,7 +174,6 @@ RelationInput.propTypes = {
   onSearch: PropTypes.func.isRequired,
   onSearchNextPage: PropTypes.func.isRequired,
   placeholder: PropTypes.string.isRequired,
-  // eslint-disable-next-line react/no-unused-prop-types
   searchResults: ReactQuerySearchResult,
   relations: ReactQueryRelationResult,
 };
