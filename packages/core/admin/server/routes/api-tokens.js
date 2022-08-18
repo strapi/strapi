@@ -57,7 +57,7 @@ module.exports = [
     },
   },
   {
-    method: 'PUT',
+    method: 'POST',
     path: '/api-tokens/:id/regenerate',
     handler: 'api-token.regenerate',
     config: {

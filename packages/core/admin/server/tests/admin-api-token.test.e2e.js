@@ -608,4 +608,18 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       updatedAt: expect.any(String),
     });
   });
+
+  test('Regenerates an api token access key)', async () => {
+    const token = await createValidToken();
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}/regenerate`,
+      method: 'POST',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toMatchObject({
+      accessKey: expect.any(String),
+    });
+  });
 });

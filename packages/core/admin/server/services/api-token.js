@@ -138,8 +138,9 @@ const create = async (attributes) => {
 const regenerate = async (id) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
-  const apiToken = await strapi.query('admin::api-token').update(id, {
+  const apiToken = await strapi.query('admin::api-token').update({
     select: ['id', 'accessKey'],
+    where: { id },
     data: {
       accessKey: hash(accessKey),
     },

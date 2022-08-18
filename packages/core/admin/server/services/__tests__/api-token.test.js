@@ -258,7 +258,8 @@ describe('API Token', () => {
       const id = 1;
       const res = await apiTokenService.regenerate(id);
 
-      expect(update).toHaveBeenCalledWith(id, {
+      expect(update).toHaveBeenCalledWith({
+        where: { id },
         select: ['id', 'accessKey'],
         data: {
           accessKey: apiTokenService.hash(mockedApiToken.hexedString),

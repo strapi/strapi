@@ -39,16 +39,17 @@ module.exports = {
   },
 
   async regenerate(ctx) {
-    const { body } = ctx.request;
+    const { id } = ctx.params;
     const apiTokenService = getService('api-token');
 
-    const alreadyExists = await apiTokenService.exists({ name: body.id });
-    if (!alreadyExists) {
+    const apiTokenExists = await apiTokenService.getById(id);
+    if (!apiTokenExists) {
       ctx.notFound('API Token not found');
       return;
     }
 
-    const accessToken = await apiTokenService.regenerate(body.id);
+    const accessToken = await apiTokenService.regenerate(id);
+
     ctx.created({ data: accessToken });
   },
 
