@@ -25,10 +25,8 @@ const ColorPickerInput = ({
         error={error && formatMessage(error)}
         hint={description && formatMessage(description)}
       >
-        <FieldLabel name={name} required={required}>
-          {formatMessage(intlLabel)}
-        </FieldLabel>
-        <input type="color" id={name} name={name} value={value} onChange={onChange} />
+        <FieldLabel required={required}>{formatMessage(intlLabel)}</FieldLabel>
+        <input type="color" id={name} name={name} value={value || ''} onChange={onChange} />
         <FieldHint />
         <FieldError />
       </Field>
