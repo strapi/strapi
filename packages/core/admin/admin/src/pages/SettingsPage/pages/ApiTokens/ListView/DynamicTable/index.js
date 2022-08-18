@@ -1,4 +1,8 @@
 import React from 'react';
+import { useIntl } from 'react-intl';
+import PropTypes from 'prop-types';
+import { useHistory } from 'react-router-dom';
+
 import { Typography } from '@strapi/design-system/Typography';
 import { Tbody, Tr, Td } from '@strapi/design-system/Table';
 import { Flex } from '@strapi/design-system/Flex';
@@ -9,9 +13,7 @@ import {
   pxToRem,
   useTracking,
 } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
-import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
+
 import DeleteButton from './DeleteButton';
 import UpdateButton from './UpdateButton';
 

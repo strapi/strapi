@@ -37,8 +37,6 @@ jest.spyOn(axiosInstance, 'get').mockResolvedValue({
   },
 });
 
-jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
-
 const client = new QueryClient({
   defaultOptions: {
     queries: {
@@ -910,7 +908,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             datetime="2021-11-15T00:00:00.000Z"
                             title="11/15/2021 12:00 AM"
                           >
-                            in 6 years
+                            9 months ago
                           </time>
                         </span>
                       </td>
