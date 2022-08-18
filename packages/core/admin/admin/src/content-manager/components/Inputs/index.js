@@ -237,6 +237,18 @@ function Inputs({
     );
   }
 
+  const customInputs = {
+    json: InputJSON,
+    uid: InputUID,
+    media: fields.media,
+    wysiwyg: Wysiwyg,
+    ...fields,
+  };
+
+  if (customFieldUid) {
+    customInputs[customFieldUid] = CustomFieldInput;
+  }
+
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
       <GenericInput
@@ -251,14 +263,7 @@ function Inputs({
         labelAction={labelAction}
         contentTypeUID={currentContentTypeLayout.uid}
         customFieldUid={customFieldUid}
-        customInputs={{
-          json: InputJSON,
-          uid: InputUID,
-          media: fields.media,
-          wysiwyg: Wysiwyg,
-          [customFieldUid]: CustomFieldInput,
-          ...fields,
-        }}
+        customInputs={customInputs}
         multiple={fieldSchema.multiple || false}
         name={keys}
         onChange={onChange}
