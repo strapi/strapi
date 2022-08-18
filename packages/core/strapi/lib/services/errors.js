@@ -1,12 +1,8 @@
 'use strict';
 
 const createError = require('http-errors');
-const {
-  NotFoundError,
-  UnauthorizedError,
-  ForbiddenError,
-  PayloadTooLargeError,
-} = require('@strapi/utils').errors;
+const { NotFoundError, UnauthorizedError, ForbiddenError, PayloadTooLargeError } =
+  require('@strapi/utils').errors;
 
 const mapErrorsAndStatus = [
   {
@@ -27,8 +23,8 @@ const mapErrorsAndStatus = [
   },
 ];
 
-const formatApplicationError = error => {
-  const errorAndStatus = mapErrorsAndStatus.find(pair => error instanceof pair.classError);
+const formatApplicationError = (error) => {
+  const errorAndStatus = mapErrorsAndStatus.find((pair) => error instanceof pair.classError);
   const status = errorAndStatus ? errorAndStatus.status : 400;
 
   return {
@@ -45,7 +41,7 @@ const formatApplicationError = error => {
   };
 };
 
-const formatHttpError = error => {
+const formatHttpError = (error) => {
   return {
     status: error.status,
     body: {
@@ -60,7 +56,7 @@ const formatHttpError = error => {
   };
 };
 
-const formatInternalError = error => {
+const formatInternalError = (error) => {
   const httpError = createError(error);
 
   if (httpError.expose) {

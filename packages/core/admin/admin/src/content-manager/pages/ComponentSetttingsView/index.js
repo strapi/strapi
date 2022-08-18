@@ -16,14 +16,14 @@ const cmPermissions = permissions.contentManager;
 const ComponentSettingsView = () => {
   const [{ isLoading, data: layout }, dispatch] = useReducer(crudReducer, crudInitialState);
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const { schemas } = useSelector(state => schemasSelector(state), shallowEqual);
+  const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
   const { uid } = useParams();
 
   useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
 
-    const fetchData = async source => {
+    const fetchData = async (source) => {
       try {
         dispatch(getData());
 

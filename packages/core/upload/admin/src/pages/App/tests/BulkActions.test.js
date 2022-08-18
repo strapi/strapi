@@ -61,8 +61,8 @@ describe('BulkActions', () => {
     const { queryByText } = setup({
       onSuccess: jest.fn(),
       selected: [
-        ...[...Array(ASSET_COUNT).keys()].map(index => ({ id: index, type: 'asset' })),
-        ...[...Array(FOLDER_COUNT).keys()].map(index => ({ id: index, type: 'folder' })),
+        ...[...Array(ASSET_COUNT).keys()].map((index) => ({ id: index, type: 'asset' })),
+        ...[...Array(FOLDER_COUNT).keys()].map((index) => ({ id: index, type: 'folder' })),
       ],
     });
 

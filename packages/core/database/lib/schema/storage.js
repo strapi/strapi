@@ -4,11 +4,11 @@ const crypto = require('crypto');
 
 const TABLE_NAME = 'strapi_database_schema';
 
-module.exports = db => {
+module.exports = (db) => {
   const hasSchemaTable = () => db.getSchemaConnection().hasTable(TABLE_NAME);
 
   const createSchemaTable = () => {
-    return db.getSchemaConnection().createTable(TABLE_NAME, t => {
+    return db.getSchemaConnection().createTable(TABLE_NAME, (t) => {
       t.increments('id');
       t.json('schema');
       t.datetime('time', { useTz: false });
@@ -46,10 +46,7 @@ module.exports = db => {
     },
 
     hashSchema(schema) {
-      return crypto
-        .createHash('md5')
-        .update(JSON.stringify(schema))
-        .digest('hex');
+      return crypto.createHash('md5').update(JSON.stringify(schema)).digest('hex');
     },
 
     async add(schema) {

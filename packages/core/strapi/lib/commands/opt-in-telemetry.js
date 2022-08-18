@@ -7,7 +7,7 @@ const fetch = require('node-fetch');
 const { v4: uuidv4 } = require('uuid');
 const machineID = require('../utils/machine-id');
 
-const readPackageJSON = async path => {
+const readPackageJSON = async (path) => {
   try {
     const packageObj = await fse.readJson(path);
     return packageObj;
@@ -31,7 +31,7 @@ const writePackageJSON = async (path, file, spacing) => {
   }
 };
 
-const generateNewPackageJSON = packageObj => {
+const generateNewPackageJSON = (packageObj) => {
   if (!packageObj.strapi) {
     return {
       ...packageObj,
@@ -40,19 +40,18 @@ const generateNewPackageJSON = packageObj => {
         telemetryDisabled: false,
       },
     };
-  } else {
-    return {
-      ...packageObj,
-      strapi: {
-        ...packageObj.strapi,
-        uuid: packageObj.strapi.uuid ? packageObj.strapi.uuid : uuidv4(),
-        telemetryDisabled: false,
-      },
-    };
   }
+  return {
+    ...packageObj,
+    strapi: {
+      ...packageObj.strapi,
+      uuid: packageObj.strapi.uuid ? packageObj.strapi.uuid : uuidv4(),
+      telemetryDisabled: false,
+    },
+  };
 };
 
-const sendEvent = async uuid => {
+const sendEvent = async (uuid) => {
   try {
     await fetch('https://analytics.strapi.io/track', {
       method: 'POST',
@@ -64,7 +63,7 @@ const sendEvent = async uuid => {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (e) {
-    //...
+    // ...
   }
 };
 

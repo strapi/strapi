@@ -6,30 +6,18 @@ const constants = require('../services/constants');
 const apiTokenCreationSchema = yup
   .object()
   .shape({
-    name: yup
-      .string()
-      .min(1)
-      .required(),
+    name: yup.string().min(1).required(),
     description: yup.string().optional(),
-    type: yup
-      .string()
-      .oneOf(Object.values(constants.API_TOKEN_TYPE))
-      .required(),
+    type: yup.string().oneOf(Object.values(constants.API_TOKEN_TYPE)).required(),
   })
   .noUnknown();
 
 const apiTokenUpdateSchema = yup
   .object()
   .shape({
-    name: yup
-      .string()
-      .min(1)
-      .notNull(),
+    name: yup.string().min(1).notNull(),
     description: yup.string().nullable(),
-    type: yup
-      .string()
-      .oneOf(Object.values(constants.API_TOKEN_TYPE))
-      .notNull(),
+    type: yup.string().oneOf(Object.values(constants.API_TOKEN_TYPE)).notNull(),
   })
   .noUnknown();
 

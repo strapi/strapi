@@ -14,7 +14,7 @@ module.exports = async function loadMiddlewares(strapi) {
   strapi.container.get('middlewares').add(`strapi::`, internalMiddlewares);
 };
 
-const loadLocalMiddlewares = async strapi => {
+const loadLocalMiddlewares = async (strapi) => {
   const dir = strapi.dirs.dist.middlewares;
 
   if (!(await fse.pathExists(dir))) {

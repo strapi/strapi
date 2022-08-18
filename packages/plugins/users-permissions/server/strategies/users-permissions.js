@@ -9,7 +9,7 @@ const getAdvancedSettings = () => {
   return strapi.store({ type: 'plugin', name: 'users-permissions' }).get({ key: 'advanced' });
 };
 
-const authenticate = async ctx => {
+const authenticate = async (ctx) => {
   try {
     const token = await getService('jwt').getToken(ctx);
 
@@ -99,7 +99,7 @@ const verify = async (auth, config) => {
     // Make sure we're dealing with an array
     castArray,
     // Transform the scope array into an action array
-    every(scope => ability.can(scope))
+    every((scope) => ability.can(scope))
   )(config.scope);
 
   if (!isAllowed) {

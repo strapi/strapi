@@ -74,7 +74,7 @@ const ActionRow = ({
 
   const handleClick = useCallback(() => {
     if (isCollapsable) {
-      setRowToOpen(prev => {
+      setRowToOpen((prev) => {
         if (prev === name) {
           return null;
         }
@@ -144,7 +144,7 @@ const ActionRow = ({
                         { label: `${name} ${label}` }
                       )}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onValueChange={value => {
+                      onValueChange={(value) => {
                         onChangeSimpleCheckbox({
                           target: {
                             name: checkboxName.join('..'),
@@ -168,7 +168,7 @@ const ActionRow = ({
                     disabled={isFormDisabled || IS_DISABLED}
                     name={checkboxName.join('..')}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                    onValueChange={value => {
+                    onValueChange={(value) => {
                       onChangeParentCheckbox({
                         target: {
                           name: checkboxName.join('..'),

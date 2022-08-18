@@ -19,7 +19,13 @@ export const useFolderStructure = jest.fn().mockReturnValue({
             {
               value: 21,
               name: 'first child of the second child',
-              children: [],
+              children: [
+                {
+                  value: 22,
+                  name: 'another child',
+                  children: [],
+                },
+              ],
             },
           ],
         },

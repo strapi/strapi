@@ -53,7 +53,7 @@ const ApiTokenCreateView = () => {
   const {
     allowedActions: { canCreate, canUpdate },
   } = useRBAC(adminPermissions.settings['api-tokens']);
-  const [state, dispatch] = useReducer(reducer, initialState, state => init(state, permissions));
+  const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, permissions));
   const [lang] = usePersistentState('strapi-admin-language', 'en');
 
   const {
@@ -81,7 +81,7 @@ const ApiTokenCreateView = () => {
     },
     {
       enabled: !isCreating && !apiToken,
-      onError: () => {
+      onError() {
         toggleNotification({
           type: 'warning',
           message: { id: 'notification.error', defaultMessage: 'An error occured' },
@@ -202,8 +202,8 @@ const ApiTokenCreateView = () => {
     const { modifiedData } = state;
 
     if (value === 'full-access') {
-      Object.keys(modifiedData).forEach(contentTypes => {
-        Object.keys(modifiedData[contentTypes]).forEach(contentType => {
+      Object.keys(modifiedData).forEach((contentTypes) => {
+        Object.keys(modifiedData[contentTypes]).forEach((contentType) => {
           dispatch({
             type: 'ON_CHANGE_SELECT_ALL',
             keys: [contentTypes, contentType],
@@ -213,8 +213,8 @@ const ApiTokenCreateView = () => {
       });
     }
     if (value === 'read-only') {
-      Object.keys(modifiedData).forEach(contentTypes => {
-        Object.keys(modifiedData[contentTypes]).forEach(contentType => {
+      Object.keys(modifiedData).forEach((contentTypes) => {
+        Object.keys(modifiedData[contentTypes]).forEach((contentType) => {
           dispatch({
             type: 'ON_CHANGE_READ_ONLY',
             keys: [contentTypes, contentType],
@@ -373,7 +373,7 @@ const ApiTokenCreateView = () => {
                                     )
                                   : null
                               }
-                              onChange={value => {
+                              onChange={(value) => {
                                 handleChange({ target: { name: 'duration', value } });
                               }}
                               required
@@ -435,7 +435,7 @@ const ApiTokenCreateView = () => {
                                     )
                                   : null
                               }
-                              onChange={value => {
+                              onChange={(value) => {
                                 handleChangeSelectApiTokenType({ target: { value } });
                                 handleChange({ target: { name: 'type', value } });
                               }}

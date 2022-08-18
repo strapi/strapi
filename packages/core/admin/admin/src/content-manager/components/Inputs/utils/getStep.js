@@ -1,4 +1,4 @@
-const getStep = type => {
+const getStep = (type) => {
   let step;
 
   if (type === 'float' || type === 'decimal') {

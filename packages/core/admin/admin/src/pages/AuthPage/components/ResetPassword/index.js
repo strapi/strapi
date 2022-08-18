@@ -87,9 +87,9 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                     }
                     endAction={
                       <FieldActionWrapper
-                        onClick={e => {
+                        onClick={(e) => {
                           e.preventDefault();
-                          setPasswordShown(prev => !prev);
+                          setPasswordShown((prev) => !prev);
                         }}
                         label={formatMessage(
                           passwordShown
@@ -132,9 +132,9 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                     }
                     endAction={
                       <FieldActionWrapper
-                        onClick={e => {
+                        onClick={(e) => {
                           e.preventDefault();
-                          setConfirmPasswordShown(prev => !prev);
+                          setConfirmPasswordShown((prev) => !prev);
                         }}
                         label={formatMessage(
                           passwordShown
@@ -182,7 +182,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
 };
 
 ForgotPassword.defaultProps = {
-  onSubmit: e => e.preventDefault(),
+  onSubmit: (e) => e.preventDefault(),
 };
 
 ForgotPassword.propTypes = {

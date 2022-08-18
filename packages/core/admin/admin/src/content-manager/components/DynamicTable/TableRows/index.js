@@ -38,7 +38,7 @@ const TableRows = ({
   return (
     <Tbody>
       {rows.map((data, index) => {
-        const isChecked = entriesToDelete.findIndex(id => id === data.id) !== -1;
+        const isChecked = entriesToDelete.findIndex((id) => id === data.id) !== -1;
         const itemLineText = formatMessage(
           {
             id: 'content-manager.components.DynamicTable.row-line',
@@ -51,7 +51,7 @@ const TableRows = ({
           <Tr
             key={data.id}
             {...onRowClick({
-              fn: () => {
+              fn() {
                 trackUsage('willEditEntryFromList');
                 push({
                   pathname: `${pathname}/${data.id}`,
@@ -170,8 +170,8 @@ TableRows.defaultProps = {
   canCreate: false,
   canDelete: false,
   entriesToDelete: [],
-  onClickDelete: () => {},
-  onSelectRow: () => {},
+  onClickDelete() {},
+  onSelectRow() {},
   rows: [],
   withBulkActions: false,
   withMainAction: false,

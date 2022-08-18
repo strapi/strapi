@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const createProvider = emailConfig => {
+const createProvider = (emailConfig) => {
   const providerName = _.toLower(emailConfig.provider);
   let provider;
 

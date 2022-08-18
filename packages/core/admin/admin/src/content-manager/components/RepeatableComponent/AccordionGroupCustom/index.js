@@ -73,7 +73,7 @@ const LabelAction = styled(Box)`
 
 const AccordionGroupCustom = ({ children, footer, label, labelAction, error }) => {
   const { formatMessage } = useIntl();
-  const childrenArray = Children.toArray(children).map(child => {
+  const childrenArray = Children.toArray(children).map((child) => {
     return cloneElement(child, { hasErrorMessage: false });
   });
 

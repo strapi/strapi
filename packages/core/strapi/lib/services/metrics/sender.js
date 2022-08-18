@@ -33,7 +33,7 @@ const addPackageJsonStrapiMetadata = (metadata, strapi) => {
  * @param {Object} strapi strapi app
  * @returns {Function} (event, payload) -> Promise{boolean}
  */
-module.exports = strapi => {
+module.exports = (strapi) => {
   const { uuid } = strapi.config;
   const deviceId = machineID();
   const isEE = strapi.EE === true && ee.isEE === true;
@@ -41,7 +41,7 @@ module.exports = strapi => {
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
 
-  const anonymous_metadata = {
+  const anonymousMetadata = {
     environment: strapi.config.environment,
     os: os.type(),
     osPlatform: os.platform(),
@@ -56,7 +56,7 @@ module.exports = strapi => {
     useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
   };
 
-  addPackageJsonStrapiMetadata(anonymous_metadata, strapi);
+  addPackageJsonStrapiMetadata(anonymousMetadata, strapi);
 
   return async (event, payload = {}, opts = {}) => {
     const reqParams = {
@@ -67,7 +67,7 @@ module.exports = strapi => {
         deviceId,
         properties: stringifyDeep({
           ...payload,
-          ...anonymous_metadata,
+          ...anonymousMetadata,
         }),
       }),
       ..._.merge({}, defaultQueryOpts, opts),

@@ -30,7 +30,7 @@ export const AssetList = ({
 
       <Grid gap={4}>
         {assets.map((asset, index) => {
-          const isSelected = !!selectedAssets.find(currentAsset => currentAsset.id === asset.id);
+          const isSelected = !!selectedAssets.find((currentAsset) => currentAsset.id === asset.id);
 
           if (onReorderAsset) {
             return (

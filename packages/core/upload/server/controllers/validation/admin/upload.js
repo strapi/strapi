@@ -11,7 +11,7 @@ const fileInfoSchema = yup.object({
   folder: yup
     .strapiID()
     .nullable()
-    .test('folder-exists', 'the folder does not exist', async folderId => {
+    .test('folder-exists', 'the folder does not exist', async (folderId) => {
       if (isNil(folderId)) {
         return true;
       }

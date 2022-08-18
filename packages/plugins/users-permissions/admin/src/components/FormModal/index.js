@@ -41,13 +41,13 @@ const FormModal = ({
     <ModalLayout onClose={onToggle} labelledBy="title">
       <ModalHeader>
         <Breadcrumbs label={headerBreadcrumbs.join(', ')}>
-          {headerBreadcrumbs.map(crumb => (
+          {headerBreadcrumbs.map((crumb) => (
             <Crumb key={crumb}>{crumb}</Crumb>
           ))}
         </Breadcrumbs>
       </ModalHeader>
       <Formik
-        onSubmit={values => onSubmit(values)}
+        onSubmit={(values) => onSubmit(values)}
         initialValues={initialData}
         validationSchema={layout.schema}
         validateOnChange={false}
@@ -58,8 +58,8 @@ const FormModal = ({
               <ModalBody>
                 <Stack spacing={1}>
                   <Grid gap={5}>
-                    {layout.form.map(row => {
-                      return row.map(input => {
+                    {layout.form.map((row) => {
+                      return row.map((input) => {
                         return (
                           <GridItem key={input.name} col={input.size} xs={12}>
                             <Input
@@ -86,11 +86,9 @@ const FormModal = ({
                   </Button>
                 }
                 endActions={
-                  <>
-                    <Button type="submit" loading={isSubmiting}>
-                      {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-                    </Button>
-                  </>
+                  <Button type="submit" loading={isSubmiting}>
+                    {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
+                  </Button>
                 }
               />
             </Form>

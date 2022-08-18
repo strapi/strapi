@@ -25,7 +25,9 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => null,
 }));
 
-jest.mock('../../NoContentType', () => () => <div>NoContentType</div>);
+jest.mock('../../NoContentType', () => () => {
+  return <div>NoContentType</div>;
+});
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),

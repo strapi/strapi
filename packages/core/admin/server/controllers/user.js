@@ -51,7 +51,7 @@ module.exports = {
 
     ctx.body = {
       data: {
-        results: results.map(user => userService.sanitizeUser(user)),
+        results: results.map((user) => userService.sanitizeUser(user)),
         pagination,
       },
     };
