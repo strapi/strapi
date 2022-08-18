@@ -131,6 +131,27 @@ const create = async (attributes) => {
 };
 
 /**
+ * @param {string|number} id
+ *
+ * @returns {Promise<ApiToken>}
+ */
+const regenerate = async (id) => {
+  const accessKey = crypto.randomBytes(128).toString('hex');
+
+  const apiToken = await strapi.query('admin::api-token').update(id, {
+    select: ['id', 'accessKey'],
+    data: {
+      accessKey: hash(accessKey),
+    },
+  });
+
+  return {
+    ...apiToken,
+    accessKey,
+  };
+};
+
+/**
  * @returns {void}
  */
 const checkSaltIsDefined = () => {
@@ -341,6 +362,7 @@ const mapTokenPermissions = (token) => {
 
 module.exports = {
   create,
+  regenerate,
   exists,
   checkSaltIsDefined,
   hash,

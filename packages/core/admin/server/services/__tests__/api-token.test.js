@@ -242,6 +242,32 @@ describe('API Token', () => {
     });
   });
 
+  describe('regenerate', () => {
+    test('It regenerates the accessKey', async () => {
+      const update = jest.fn(({ data }) => Promise.resolve(data));
+
+      global.strapi = {
+        query() {
+          return { update };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      const id = 1;
+      const res = await apiTokenService.regenerate(id);
+
+      expect(update).toHaveBeenCalledWith(id, {
+        select: ['id', 'accessKey'],
+        data: {
+          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+        },
+      });
+      expect(res).toEqual({ accessKey: mockedApiToken.hexedString });
+    });
+  });
+
   describe('update', () => {
     test('Updates a non-custom token', async () => {
       const token = {
@@ -327,7 +353,7 @@ describe('API Token', () => {
       // first call to load original permissions
       .mockResolvedValueOnce(
         Promise.resolve(
-          originalToken.permissions.map(p => {
+          originalToken.permissions.map((p) => {
             return {
               action: p,
             };
@@ -337,7 +363,7 @@ describe('API Token', () => {
       // second call to check new permissions
       .mockResolvedValueOnce(
         Promise.resolve(
-          updatedAttributes.permissions.map(p => {
+          updatedAttributes.permissions.map((p) => {
             return {
               action: p,
             };
@@ -433,7 +459,7 @@ describe('API Token', () => {
       // first call to load original permissions
       .mockResolvedValueOnce(
         Promise.resolve(
-          originalToken.permissions.map(p => {
+          originalToken.permissions.map((p) => {
             return {
               action: p,
             };
@@ -443,7 +469,7 @@ describe('API Token', () => {
       // second call to check new permissions
       .mockResolvedValueOnce(
         Promise.resolve(
-          originalToken.permissions.map(p => {
+          originalToken.permissions.map((p) => {
             return {
               action: p,
             };

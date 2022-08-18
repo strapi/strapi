@@ -56,4 +56,15 @@ module.exports = [
       ],
     },
   },
+  {
+    method: 'PUT',
+    path: '/api-tokens/:id/regenerate',
+    handler: 'api-token.regenerate',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', config: { actions: ['admin::api-tokens.update'] } },
+      ],
+    },
+  },
 ];
