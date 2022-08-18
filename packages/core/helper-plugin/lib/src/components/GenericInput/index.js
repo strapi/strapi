@@ -46,7 +46,7 @@ const GenericInput = ({
   const { formatMessage } = useIntl();
   const [showPassword, setShowPassword] = useState(false);
 
-  const CustomInput = customInputs ? customInputs[customFieldUid || type] : null;
+  const CustomInput = customInputs ? customInputs[type] : null;
 
   // the API always returns null, which throws an error in React,
   // therefore we cast this case to undefined
