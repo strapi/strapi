@@ -10,6 +10,8 @@ describe('API Token', () => {
     hexedString: '6170692d746f6b656e5f746573742d72616e646f6d2d6279746573',
   };
 
+  const SELECT_FIELDS = ['id', 'name', 'description', 'lastUsed', 'type', 'createdAt', 'updatedAt'];
+
   beforeAll(() => {
     jest
       .spyOn(crypto, 'randomBytes')
@@ -42,7 +44,7 @@ describe('API Token', () => {
       const res = await apiTokenService.create(attributes);
 
       expect(create).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type', 'createdAt'],
+        select: SELECT_FIELDS,
         data: {
           ...attributes,
           accessKey: apiTokenService.hash(mockedApiToken.hexedString),
@@ -138,7 +140,7 @@ describe('API Token', () => {
       const res = await apiTokenService.list();
 
       expect(findMany).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type', 'createdAt'],
+        select: SELECT_FIELDS,
         orderBy: { name: 'ASC' },
         populate: ['permissions'],
       });
@@ -166,7 +168,7 @@ describe('API Token', () => {
       const res = await apiTokenService.revoke(token.id);
 
       expect(mockedDelete).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type', 'createdAt'],
+        select: SELECT_FIELDS,
         where: { id: token.id },
         populate: ['permissions'],
       });
@@ -185,7 +187,7 @@ describe('API Token', () => {
       const res = await apiTokenService.revoke(42);
 
       expect(mockedDelete).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type', 'createdAt'],
+        select: SELECT_FIELDS,
         where: { id: 42 },
         populate: ['permissions'],
       });
@@ -213,7 +215,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getById(token.id);
 
       expect(findOne).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type', 'createdAt'],
+        select: SELECT_FIELDS,
         where: { id: token.id },
         populate: ['permissions'],
       });
@@ -232,7 +234,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getById(42);
 
       expect(findOne).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type', 'createdAt'],
+        select: SELECT_FIELDS,
         where: { id: 42 },
         populate: ['permissions'],
       });
@@ -285,7 +287,7 @@ describe('API Token', () => {
         },
       });
       expect(update).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type', 'createdAt'],
+        select: SELECT_FIELDS,
         where: { id },
         data: attributes,
         populate: ['permissions'],
@@ -397,13 +399,88 @@ describe('API Token', () => {
     });
 
     expect(update).toHaveBeenCalledWith({
-      select: ['id', 'name', 'description', 'type', 'createdAt'],
+      select: SELECT_FIELDS,
       where: { id },
       data: omit(['permissions'], updatedAttributes),
       populate: expect.anything(), // it doesn't matter how this is used
     });
 
     expect(res).toEqual(updatedAttributes);
+  });
+
+  test('Updates a non-permissions field of a custom token', async () => {
+    const id = 1;
+
+    const originalToken = {
+      id,
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'custom',
+      permissions: ['admin::subject.keepThisAction', 'admin::subject.oldAction'],
+    };
+
+    const updatedAttributes = {
+      name: 'api-token_tests-updated-name',
+      type: 'custom',
+    };
+
+    const update = jest.fn(({ data }) => Promise.resolve(data));
+    const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+    const deleteFn = jest.fn();
+    const create = jest.fn();
+    const load = jest
+      .fn()
+      // first call to load original permissions
+      .mockResolvedValueOnce(
+        Promise.resolve(
+          originalToken.permissions.map(p => {
+            return {
+              action: p,
+            };
+          })
+        )
+      )
+      // second call to check new permissions
+      .mockResolvedValueOnce(
+        Promise.resolve(
+          originalToken.permissions.map(p => {
+            return {
+              action: p,
+            };
+          })
+        )
+      );
+
+    global.strapi = {
+      query() {
+        return {
+          update,
+          findOne,
+          delete: deleteFn,
+          create,
+        };
+      },
+      config: {
+        get: jest.fn(() => ''),
+      },
+      entityService: {
+        load,
+      },
+    };
+
+    const res = await apiTokenService.update(id, updatedAttributes);
+
+    expect(update).toHaveBeenCalledWith({
+      select: SELECT_FIELDS,
+      where: { id },
+      data: omit(['permissions'], updatedAttributes),
+      populate: expect.anything(), // it doesn't matter how this is used
+    });
+
+    expect(res).toEqual({
+      permissions: originalToken.permissions,
+      ...updatedAttributes,
+    });
   });
 
   describe('getByName', () => {
@@ -426,7 +503,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getByName(token.name);
 
       expect(findOne).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type', 'createdAt'],
+        select: SELECT_FIELDS,
         where: { name: token.name },
         populate: ['permissions'],
       });
@@ -445,7 +522,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getByName('unexistant-name');
 
       expect(findOne).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type', 'createdAt'],
+        select: SELECT_FIELDS,
         where: { name: 'unexistant-name' },
         populate: ['permissions'],
       });

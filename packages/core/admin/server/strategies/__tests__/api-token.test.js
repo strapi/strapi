@@ -22,6 +22,7 @@ describe('API Token Auth Strategy', () => {
 
     test('Authenticates a valid hashed access key', async () => {
       const getBy = jest.fn(() => apiToken);
+      const update = jest.fn(() => apiToken);
       const ctx = createContext({}, { request });
 
       global.strapi = {
@@ -30,6 +31,7 @@ describe('API Token Auth Strategy', () => {
             'api-token': {
               getBy,
               hash,
+              update,
             },
           },
         },
@@ -38,6 +40,7 @@ describe('API Token Auth Strategy', () => {
       const response = await apiTokenStrategy.authenticate(ctx);
 
       expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
+      expect(update).toHaveBeenCalledWith(apiToken.id, { lastUsed: expect.any(Date) });
       expect(response).toStrictEqual({ authenticated: true, credentials: apiToken });
     });
 
