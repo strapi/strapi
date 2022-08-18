@@ -79,7 +79,6 @@ const hash = (accessKey) => {
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
- * @param {number} attributes.lastUsed
  * @param {string[]} [attributes.permissions]
  * @param {string} [attributes.description]
  *
