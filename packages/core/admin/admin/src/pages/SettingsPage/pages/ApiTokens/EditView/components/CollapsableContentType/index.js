@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { get, capitalize } from 'lodash';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Checkbox } from '@strapi/design-system/Checkbox';
@@ -17,7 +17,15 @@ const Border = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const CollapsableContentType = ({ actions, label, orderNumber, name, disabled }) => {
+const CollapsableContentType = ({
+  actions,
+  label,
+  orderNumber,
+  name,
+  disabled,
+  onExpanded,
+  indexExpandendCollapsedContent,
+}) => {
   //   const { formatMessage } = useIntl();
   const {
     value: { onChange, onChangeSelectAll, modifiedData },
@@ -39,10 +47,25 @@ const CollapsableContentType = ({ actions, label, orderNumber, name, disabled })
     );
   }, [currentScopedModifiedData, hasAllActionsSelected]);
 
+  const handleExpandedAccordion = () => {
+    setExpanded(s => !s);
+    onExpanded(orderNumber);
+  };
+
+  useEffect(() => {
+    if (
+      indexExpandendCollapsedContent !== null &&
+      indexExpandendCollapsedContent !== orderNumber &&
+      expanded
+    ) {
+      setExpanded(false);
+    }
+  }, [indexExpandendCollapsedContent, orderNumber, expanded]);
+
   return (
     <Accordion
       expanded={expanded}
-      onToggle={() => setExpanded(s => !s)}
+      onToggle={handleExpandedAccordion}
       variant={orderNumber % 2 ? 'primary' : 'secondary'}
     >
       <AccordionToggle title={capitalize(label)} />
@@ -96,6 +119,8 @@ CollapsableContentType.defaultProps = {
   actions: null,
   orderNumber: 0,
   disabled: false,
+  onExpanded: () => null,
+  indexExpandendCollapsedContent: null,
 };
 
 CollapsableContentType.propTypes = {
@@ -104,6 +129,8 @@ CollapsableContentType.propTypes = {
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
+  onExpanded: PropTypes.func,
+  indexExpandendCollapsedContent: PropTypes.number,
 };
 
 export default CollapsableContentType;

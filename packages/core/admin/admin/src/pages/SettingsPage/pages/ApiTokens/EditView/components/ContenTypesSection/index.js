@@ -1,23 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import CollapsableContentType from '../CollapsableContentType';
 
 const ContentTypesSection = ({ section, name, ...props }) => {
-  return (
-    <Box padding={4} background="neutral0">
-      {section &&
+  const [indexExpandedCollpsedContent, setIndexExpandedCollpsedContent] = useState(null);
+  const handleExpandedCollpsedContentIndex = index => setIndexExpandedCollpsedContent(index);
+  
+return (
+  <Box padding={4} background="neutral0">
+    {section &&
         Object.keys(section).map((contentType, index) => (
           <CollapsableContentType
             key={contentType}
             label={contentType.split('::')[1]}
             actions={section[contentType]}
             orderNumber={index}
+            indexExpandendCollapsedContent={indexExpandedCollpsedContent}
+            onExpanded={handleExpandedCollpsedContentIndex}
             name={`${name}.${contentType}`}
             {...props}
           />
         ))}
-    </Box>
+  </Box>
   );
 };
 
