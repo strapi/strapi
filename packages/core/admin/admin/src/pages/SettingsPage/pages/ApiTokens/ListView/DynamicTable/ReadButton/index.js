@@ -1,19 +1,19 @@
 import React from 'react';
-import Pencil from '@strapi/icons/Pencil';
+import Eye from '@strapi/icons/Eye';
 import PropTypes from 'prop-types';
 import DefaultButton from '../DefaultButton';
 
-const UpdateButton = ({ tokenName, tokenId }) => {
+const ReadButton = ({ tokenName, tokenId }) => {
   return (
-    <DefaultButton tokenName={tokenName} tokenId={tokenId}>
-      <Pencil />
+    <DefaultButton tokenName={tokenName} tokenId={tokenId} buttonType="read">
+      <Eye />
     </DefaultButton>
   );
 };
 
-UpdateButton.propTypes = {
+ReadButton.propTypes = {
   tokenName: PropTypes.string.isRequired,
   tokenId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
-export default UpdateButton;
+export default ReadButton;
