@@ -36,7 +36,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
   const createValidToken = async (token = {}) => {
     const body = {
       type: 'read-only',
-      name: 'token_' + String(currentTokens++),
+      name: `token_${String(currentTokens++)}`,
       description: 'generic description',
       ...token,
     };
@@ -313,7 +313,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     await deleteAllTokens();
 
     // create 4 tokens
-    let tokens = [];
+    const tokens = [];
     tokens.push(
       await createValidToken({
         type: 'custom',
@@ -332,7 +332,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.data.length).toBe(4);
     expect(orderBy(res.body.data, ['id'])).toStrictEqual(
-      map(orderBy(tokens, ['id']), t => omit(t, ['accessKey']))
+      map(orderBy(tokens, ['id']), (t) => omit(t, ['accessKey']))
     );
   });
 
