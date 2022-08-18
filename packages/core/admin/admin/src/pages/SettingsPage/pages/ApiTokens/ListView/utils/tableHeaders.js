@@ -16,18 +16,18 @@ const tableHeaders = [
     },
   },
   {
-    name: 'type',
-    key: 'type',
-    metadatas: {
-      label: 'Token type',
-      sortable: false,
-    },
-  },
-  {
     name: 'createdAt',
     key: 'createdAt',
     metadatas: {
       label: 'Created at',
+      sortable: false,
+    },
+  },
+  {
+    name: 'updatedAt',
+    key: 'updatedAt',
+    metadatas: {
+      label: 'Last used',
       sortable: false,
     },
   },
