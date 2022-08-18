@@ -100,6 +100,34 @@ const createComponents = async (uid, data) => {
   return componentBody;
 };
 
+/**
+ * @param {str} uid
+ * @param {*} entity
+ * @return {Array<{uid: string, data: *}>}
+ */
+const getComponents = async (uid, entity) => {
+  const { attributes } = strapi.getModel(uid);
+  const components = [];
+
+  for (const attributeName in attributes) {
+    const attribute = attributes[attributeName];
+
+    if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
+      const value = await strapi.query(uid).load(entity, attributeName);
+      if (!value) continue;
+
+      _.castArray(value).forEach((component) => {
+        components.push({
+          uid: attribute.type === 'component' ? attribute.component : component.__component,
+          data: component,
+        });
+      });
+    }
+  }
+
+  return components;
+};
+
 /*
   delete old components
   create or update
@@ -352,7 +380,9 @@ const deleteComponent = async (uid, componentToDelete) => {
 
 module.exports = {
   omitComponentData,
+  getComponents,
   createComponents,
   updateComponents,
   deleteComponents,
+  deleteComponent,
 };
