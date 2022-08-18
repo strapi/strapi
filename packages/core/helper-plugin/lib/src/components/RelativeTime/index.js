@@ -8,7 +8,7 @@ const RelativeTime = ({ timestamp }) => {
 
   const interval = intervalToDuration({
     start: timestamp,
-    end: new Date(),
+    end: Date.now(),
   });
 
   const unit = ['years', 'months', 'days', 'hours', 'minutes', 'seconds'].find((intervalUnit) => {
