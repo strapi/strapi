@@ -9,7 +9,7 @@ const { createAuthRequest } = require('../../../../../../test/helpers/request');
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let data = {
+const data = {
   productsWithDP: [],
 };
 
@@ -50,10 +50,7 @@ const compo = {
 
 describe('CM API - Basic + draftAndPublish', () => {
   beforeAll(async () => {
-    await builder
-      .addComponent(compo)
-      .addContentType(productWithDP)
-      .build();
+    await builder.addComponent(compo).addContentType(productWithDP).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -116,7 +113,7 @@ describe('CM API - Basic + draftAndPublish', () => {
         }),
       ])
     );
-    res.body.results.forEach(p => {
+    res.body.results.forEach((p) => {
       expect(p.publishedAt).toBeNull();
     });
   });
@@ -161,7 +158,7 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Publish a product, expect publishedAt to be defined', async () => {
     const entry = data.productsWithDP[0];
 
-    let { body } = await rq({
+    const { body } = await rq({
       url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
       method: 'POST',
     });
@@ -174,7 +171,7 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Publish article1, expect article1 to be already published', async () => {
     const entry = data.productsWithDP[0];
 
-    let { body } = await rq({
+    const { body } = await rq({
       url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
       method: 'POST',
     });
@@ -193,7 +190,7 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Unpublish article1, expect article1 to be set to null', async () => {
     const entry = data.productsWithDP[0];
 
-    let { body } = await rq({
+    const { body } = await rq({
       url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
       method: 'POST',
     });
@@ -206,7 +203,7 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Unpublish article1, expect article1 to already be a draft', async () => {
     const entry = data.productsWithDP[0];
 
-    let { body } = await rq({
+    const { body } = await rq({
       url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
       method: 'POST',
     });

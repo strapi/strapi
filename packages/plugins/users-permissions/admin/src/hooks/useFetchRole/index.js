@@ -4,7 +4,7 @@ import reducer, { initialState } from './reducer';
 import axiosIntance from '../../utils/axiosInstance';
 import pluginId from '../../pluginId';
 
-const useFetchRole = id => {
+const useFetchRole = (id) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const toggleNotification = useNotification();
   const isMounted = useRef(null);
@@ -25,7 +25,7 @@ const useFetchRole = id => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const fetchRole = async roleId => {
+  const fetchRole = async (roleId) => {
     try {
       const {
         data: { role },
@@ -51,7 +51,7 @@ const useFetchRole = id => {
     }
   };
 
-  const handleSubmitSucceeded = useCallback(data => {
+  const handleSubmitSucceeded = useCallback((data) => {
     dispatch({
       type: 'ON_SUBMIT_SUCCEEDED',
       ...data,

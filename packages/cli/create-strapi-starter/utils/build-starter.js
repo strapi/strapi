@@ -72,10 +72,7 @@ async function installWithLogs(path, options) {
   const installPrefix = chalk.yellow('Installing dependencies:');
   const loader = ora(installPrefix).start();
   const logInstall = (chunk = '') => {
-    loader.text = `${installPrefix} ${chunk
-      .toString()
-      .split('\n')
-      .join(' ')}`;
+    loader.text = `${installPrefix} ${chunk.toString().split('\n').join(' ')}`;
   };
 
   const runner = runInstall(path, options);
@@ -94,7 +91,7 @@ async function installWithLogs(path, options) {
  * @param {boolean} options.useYarn Use yarn instead of npm
  */
 async function getStarterInfo(starter, { useYarn } = {}) {
-  const isLocalStarter = ['./', '../', '/'].some(filePrefix => starter.startsWith(filePrefix));
+  const isLocalStarter = ['./', '../', '/'].some((filePrefix) => starter.startsWith(filePrefix));
 
   let starterPath;
   let starterParentPath;
@@ -125,12 +122,8 @@ async function getStarterInfo(starter, { useYarn } = {}) {
  */
 module.exports = async function buildStarter({ projectName, starter }, program) {
   const hasYarnInstalled = await hasYarn();
-  const {
-    isLocalStarter,
-    starterPath,
-    starterParentPath,
-    starterPackageInfo,
-  } = await getStarterInfo(starter, { useYarn: hasYarnInstalled });
+  const { isLocalStarter, starterPath, starterParentPath, starterPackageInfo } =
+    await getStarterInfo(starter, { useYarn: hasYarnInstalled });
 
   // Project directory
   const rootPath = resolve(projectName);

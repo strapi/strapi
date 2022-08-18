@@ -939,6 +939,14 @@ Array [
     "name": "Igbo (Nigeria) (ig-NG)",
   },
   Object {
+    "code": "smn",
+    "name": "Inari Sami",
+  },
+  Object {
+    "code": "smn-FI",
+    "name": "Inari Sami (Finland)",
+  },
+  Object {
     "code": "id",
     "name": "Indonesian (id)",
   },
@@ -1319,6 +1327,22 @@ Array [
     "name": "Nepali (Nepal) (ne-NP)",
   },
   Object {
+    "code": "se",
+    "name": "Northern Sami",
+  },
+  Object {
+    "code": "se-FI",
+    "name": "Northern Sami (Finland)",
+  },
+  Object {
+    "code": "se-NO",
+    "name": "Northern Sami (Norway)",
+  },
+  Object {
+    "code": "se-SE",
+    "name": "Northern Sami (Sweden)",
+  },
+  Object {
     "code": "nd",
     "name": "North Ndebele (nd)",
   },
@@ -1541,6 +1565,14 @@ Array [
   Object {
     "code": "sa",
     "name": "Sanskrit (sa)",
+  },
+  Object {
+    "code": "gd",
+    "name": "Scottish Gaelic (gd)",
+  },
+  Object {
+    "code": "gd-GB",
+    "name": "Scottish Gaelic (United Kingdom)",
   },
   Object {
     "code": "seh",
@@ -1929,6 +1961,14 @@ Array [
   Object {
     "code": "ur-PK",
     "name": "Urdu (Pakistan) (ur-PK)",
+  },
+  Object {
+    "code": "ug",
+    "name": "Uyghur",
+  },
+  Object {
+    "code": "ug-CN",
+    "name": "Uyghur (China)",
   },
   Object {
     "code": "uz",

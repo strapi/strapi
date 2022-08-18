@@ -23,7 +23,7 @@ const createEngineHooks = () => ({
  * @param {Permission} permission
  * @return {{ readonly permission: Permission }}
  */
-const createValidateContext = permission => ({
+const createValidateContext = (permission) => ({
   get permission() {
     return cloneDeep(permission);
   },
@@ -34,7 +34,7 @@ const createValidateContext = permission => ({
  * @param {Permission} permission
  * @return {{readonly permission: Permission, addCondition(string): this}}
  */
-const createBeforeEvaluateContext = permission => ({
+const createBeforeEvaluateContext = (permission) => ({
   get permission() {
     return cloneDeep(permission);
   },

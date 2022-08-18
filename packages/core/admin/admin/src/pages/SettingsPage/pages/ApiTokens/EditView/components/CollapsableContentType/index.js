@@ -37,18 +37,18 @@ const CollapsableContentType = ({
   }, [modifiedData, name]);
 
   const hasAllActionsSelected = useMemo(() => {
-    return Object.values(currentScopedModifiedData).every(action => action === true);
+    return Object.values(currentScopedModifiedData).every((action) => action === true);
   }, [currentScopedModifiedData]);
 
   const hasSomeActionsSelected = useMemo(() => {
     return (
-      Object.values(currentScopedModifiedData).some(action => action === true) &&
+      Object.values(currentScopedModifiedData).some((action) => action === true) &&
       !hasAllActionsSelected
     );
   }, [currentScopedModifiedData, hasAllActionsSelected]);
 
   const handleExpandedAccordion = () => {
-    setExpanded(s => !s);
+    setExpanded((s) => !s);
     onExpanded(orderNumber);
   };
 
@@ -81,7 +81,7 @@ const CollapsableContentType = ({
             <Checkbox
               value={hasAllActionsSelected}
               indeterminate={hasSomeActionsSelected}
-              onValueChange={value => {
+              onValueChange={(value) => {
                 onChangeSelectAll({ target: { name, value } });
               }}
               disabled={disabled}
@@ -91,7 +91,7 @@ const CollapsableContentType = ({
           </Box>
         </Flex>
         <Grid gap={4} padding={4}>
-          {Object.keys(actions).map(action => {
+          {Object.keys(actions).map((action) => {
             const currentName = `${name}.${action}`;
 
             return (
@@ -99,7 +99,7 @@ const CollapsableContentType = ({
                 <Checkbox
                   value={actions[action]}
                   name={currentName}
-                  onValueChange={value => {
+                  onValueChange={(value) => {
                     onChange({ target: { name: currentName, value } });
                   }}
                   disabled={disabled}

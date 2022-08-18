@@ -45,7 +45,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
               </Typography>
               <BaseCheckbox
                 disabled={isFormDisabled || IS_DISABLED}
-                onValueChange={value => {
+                onValueChange={(value) => {
                   onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value);
                 }}
                 name={actionId}

@@ -24,7 +24,7 @@ const processOrderBy = (orderBy, ctx) => {
   }
 
   if (Array.isArray(orderBy)) {
-    return orderBy.flatMap(value => processOrderBy(value, ctx));
+    return orderBy.flatMap((value) => processOrderBy(value, ctx));
   }
 
   if (_.isPlainObject(orderBy)) {

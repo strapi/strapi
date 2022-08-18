@@ -34,12 +34,12 @@ const TableRows = ({ canDelete, canUpdate, canRead, onClickDelete, withBulkActio
 
   return (
     <Tbody>
-      {apiTokens.map(apiToken => {
+      {apiTokens.map((apiToken) => {
         return (
           <Tr
             key={apiToken.id}
             {...onRowClick({
-              fn: () => {
+              fn() {
                 trackUsage('willEditTokenFromList');
                 push(`${pathname}/${apiToken.id}`);
               },
@@ -97,7 +97,7 @@ TableRows.defaultProps = {
   canDelete: false,
   canUpdate: false,
   canRead: false,
-  onClickDelete: () => {},
+  onClickDelete() {},
   rows: [],
   withBulkActions: false,
 };

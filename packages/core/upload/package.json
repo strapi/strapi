@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-upload",
-  "version": "4.3.2",
+  "version": "4.3.4",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -23,9 +23,9 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
   },
   "dependencies": {
-    "@strapi/helper-plugin": "4.3.2",
-    "@strapi/provider-upload-local": "4.3.2",
-    "@strapi/utils": "4.3.2",
+    "@strapi/helper-plugin": "4.3.4",
+    "@strapi/provider-upload-local": "4.3.4",
+    "@strapi/utils": "4.3.4",
     "byte-size": "7.0.1",
     "cropperjs": "1.5.12",
     "date-fns": "2.28.0",
@@ -43,6 +43,14 @@
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
     "sharp": "0.30.7"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "8.17.1",
+    "@testing-library/react": "11.2.7",
+    "@testing-library/react-hooks": "3.7.0",
+    "@testing-library/user-event": "13.5.0",
+    "msw": "0.42.3",
+    "react-test-renderer": "^17.0.2"
   },
   "engines": {
     "node": ">=14.19.1 <=16.x.x",

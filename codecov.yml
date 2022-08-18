@@ -1,7 +1,6 @@
 comment:
   branches:
-    - master
-    - develop
+    - main
 
 github_checks:
   annotations: false

@@ -3,7 +3,7 @@
 const { isNil, isPlainObject } = require('lodash/fp');
 const { parseMultipartData } = require('@strapi/utils');
 
-const parseBody = ctx => {
+const parseBody = (ctx) => {
   if (ctx.is('multipart')) {
     return parseMultipartData(ctx);
   }
@@ -26,7 +26,7 @@ const transformResponse = (resource, meta = {}, { contentType } = {}) => {
 
 const transformComponent = (data, component) => {
   if (Array.isArray(data)) {
-    return data.map(datum => transformComponent(datum, component));
+    return data.map((datum) => transformComponent(datum, component));
   }
 
   const res = transformEntry(data, component);
@@ -45,7 +45,7 @@ const transformEntry = (entry, type) => {
   }
 
   if (Array.isArray(entry)) {
-    return entry.map(singleEntry => transformEntry(singleEntry, type));
+    return entry.map((singleEntry) => transformEntry(singleEntry, type));
   }
 
   if (!isPlainObject(entry)) {
@@ -71,7 +71,7 @@ const transformEntry = (entry, type) => {
         attributeValues[key] = property;
       }
 
-      attributeValues[key] = property.map(subProperty => {
+      attributeValues[key] = property.map((subProperty) => {
         return transformComponent(subProperty, strapi.components[subProperty.__component]);
       });
     } else if (attribute && attribute.type === 'media') {

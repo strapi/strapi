@@ -24,7 +24,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
   const { formatMessage } = useIntl();
   const { modifiedData, selectedField, attributes, fieldForm } = useLayoutDnd();
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const { schemas } = useSelector(state => schemasSelector(state), shallowEqual);
+  const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
 
   const formToDisplay = useMemo(() => {
     if (!selectedField) {
@@ -33,7 +33,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
 
     const associatedMetas = get(modifiedData, ['metadatas', selectedField, 'edit'], {});
 
-    return Object.keys(associatedMetas).filter(meta => meta !== 'visible');
+    return Object.keys(associatedMetas).filter((meta) => meta !== 'visible');
   }, [selectedField, modifiedData]);
 
   const componentsAndModelsPossibleMainFields = useMemo(() => {
@@ -41,7 +41,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
   }, [schemas]);
 
   const getSelectedItemSelectOptions = useCallback(
-    formType => {
+    (formType) => {
       if (formType !== 'relation' && formType !== 'component') {
         return [];
       }
@@ -55,7 +55,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
     [selectedField, componentsAndModelsPossibleMainFields, modifiedData]
   );
 
-  const metaFields = formToDisplay.map(meta => {
+  const metaFields = formToDisplay.map((meta) => {
     const formType = get(attributes, [selectedField, 'type']);
 
     if (
@@ -103,7 +103,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
       <Select
         value={fieldForm?.size}
         name="size"
-        onChange={value => {
+        onChange={(value) => {
           onSizeChange({ name: selectedField, value });
         }}
         label={formatMessage({

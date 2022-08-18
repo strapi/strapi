@@ -1,6 +1,6 @@
 import pluginId from '../pluginId';
 
-const getRequestUrl = path => {
+const getRequestUrl = (path) => {
   if (path.startsWith('/')) {
     return `/${pluginId}${path}`;
   }

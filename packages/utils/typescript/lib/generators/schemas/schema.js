@@ -9,12 +9,42 @@ const attributeToPropertySignature = require('./attributes');
 const { addImport } = require('./imports');
 
 /**
+ * Generate a property signature for the schema's `attributes` field
+ *
+ * @param {object} schema
+ * @returns {ts.PropertySignature}
+ */
+const generateAttributePropertySignature = (schema) => {
+  const { attributes } = schema;
+
+  const properties = Object.entries(attributes).map(([attributeName, attribute]) => {
+    return attributeToPropertySignature(schema, attributeName, attribute);
+  });
+
+  return factory.createPropertySignature(
+    undefined,
+    factory.createIdentifier('attributes'),
+    undefined,
+    factory.createTypeLiteralNode(properties)
+  );
+};
+
+const generatePropertyLiteralDefinitionFactory = (schema) => (key) => {
+  return factory.createPropertySignature(
+    undefined,
+    factory.createIdentifier(key),
+    undefined,
+    toTypeLiteral(schema[key])
+  );
+};
+
+/**
  * Generate an interface declaration for a given schema
  *
  * @param {object} schema
  * @returns {ts.InterfaceDeclaration}
  */
-const generateSchemaDefinition = schema => {
+const generateSchemaDefinition = (schema) => {
   const { uid } = schema;
 
   // Resolve the different interface names needed to declare the schema's interface
@@ -27,7 +57,7 @@ const generateSchemaDefinition = schema => {
   // Properties whose values can be mapped to a literal type expression
   const literalPropertiesDefinitions = ['info', 'options', 'pluginOptions']
     // Ignore non-existent or empty declarations
-    .filter(key => !isEmpty(schema[key]))
+    .filter((key) => !isEmpty(schema[key]))
     // Generate literal definition for each property
     .map(generatePropertyLiteralDefinitionFactory(schema));
 
@@ -52,36 +82,6 @@ const generateSchemaDefinition = schema => {
   );
 
   return schemaType;
-};
-
-/**
- * Generate a property signature for the schema's `attributes` field
- *
- * @param {object} schema
- * @returns {ts.PropertySignature}
- */
-const generateAttributePropertySignature = schema => {
-  const { attributes } = schema;
-
-  const properties = Object.entries(attributes).map(([attributeName, attribute]) => {
-    return attributeToPropertySignature(schema, attributeName, attribute);
-  });
-
-  return factory.createPropertySignature(
-    undefined,
-    factory.createIdentifier('attributes'),
-    undefined,
-    factory.createTypeLiteralNode(properties)
-  );
-};
-
-const generatePropertyLiteralDefinitionFactory = schema => key => {
-  return factory.createPropertySignature(
-    undefined,
-    factory.createIdentifier(key),
-    undefined,
-    toTypeLiteral(schema[key])
-  );
 };
 
 module.exports = { generateSchemaDefinition };

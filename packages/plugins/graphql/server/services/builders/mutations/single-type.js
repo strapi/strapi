@@ -108,7 +108,7 @@ module.exports = ({ strapi }) => {
         return extension.use({ resolversConfig: { [action]: { auth } } });
       };
 
-      const isActionEnabled = action => {
+      const isActionEnabled = (action) => {
         return extension.shadowCRUD(contentType.uid).isActionEnabled(action);
       };
 

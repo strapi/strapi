@@ -5,7 +5,7 @@ import isEqual from 'react-fast-compare';
 import EditView from '../EditView';
 import { generatePermissionsObject } from '../../utils';
 
-const Permissions = props => {
+const Permissions = (props) => {
   const viewPermissions = useMemo(() => generatePermissionsObject(props.slug), [props.slug]);
   const { isLoading, allowedActions } = useRBAC(viewPermissions, props.userPermissions);
 

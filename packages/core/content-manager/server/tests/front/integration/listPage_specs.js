@@ -3,15 +3,15 @@ const animDelay = Cypress.config('animDelay');
 const frontLoadingDelay = Cypress.config('frontLoadingDelay');
 const backendUrl = Cypress.config('backendUrl');
 
-describe('Testing Content Manager ListPages', function() {
+describe('Testing Content Manager ListPages', function () {
   before(() => {
     cy.login()
-      .then(data => {
+      .then((data) => {
         jwt = data.jwt;
 
         return cy.createCTMApis(data.jwt).then(() => jwt);
       })
-      .then(jwt => {
+      .then((jwt) => {
         cy.seedData('product', jwt);
       })
       .wait(1000);
@@ -19,15 +19,13 @@ describe('Testing Content Manager ListPages', function() {
 
   after(() => {
     cy.deleteAllModelData('product', jwt);
-    cy.deleteApi('tag', jwt)
-      .deleteApi('category', jwt)
-      .deleteApi('product', jwt);
+    cy.deleteApi('tag', jwt).deleteApi('category', jwt).deleteApi('product', jwt);
   });
 
   context('Testing sorting options', () => {
     beforeEach(() => {
       cy.login()
-        .then(data => {
+        .then((data) => {
           jwt = data.jwt;
         })
         .visit('/admin')
@@ -143,7 +141,7 @@ describe('Testing Content Manager ListPages', function() {
   context('Testing filters', () => {
     beforeEach(() => {
       cy.login()
-        .then(data => {
+        .then((data) => {
           jwt = data.jwt;
         })
         .visit('/admin')
