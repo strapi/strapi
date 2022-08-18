@@ -16,6 +16,7 @@ const constants = require('../services/constants');
  * @property {string} name
  * @property {string} [description]
  * @property {string} accessKey
+ * @property {number} lastUsed
  * @property {TokenType} type
  * @property {(number|ApiTokenPermission)[]} [permissions]
  */
@@ -29,7 +30,7 @@ const constants = require('../services/constants');
  */
 
 /** @constant {Array<string>} */
-const SELECT_FIELDS = ['id', 'name', 'description', 'type', 'createdAt'];
+const SELECT_FIELDS = ['id', 'name', 'description', 'lastUsed', 'type', 'createdAt', 'updatedAt'];
 
 /** @constant {Array<string>} */
 const POPULATE_FIELDS = ['permissions'];
@@ -50,6 +51,7 @@ const assertCustomTokenPermissionsValidity = attributes => {
  * @param {Object} whereParams
  * @param {string|number} [whereParams.id]
  * @param {string} [whereParams.name]
+ * @param {number} [whereParams.lastUsed]
  * @param {string} [whereParams.description]
  * @param {string} [whereParams.accessKey]
  *
@@ -77,6 +79,7 @@ const hash = accessKey => {
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
+ * @param {number} attributes.lastUsed
  * @param {string[]} [attributes.permissions]
  * @param {string} [attributes.description]
  *
@@ -199,6 +202,8 @@ const getByName = async name => {
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
+ * @param {number} attributes.lastUsed
+ * @param {string[]} [attributes.permissions]
  * @param {string} [attributes.description]
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
@@ -211,12 +216,19 @@ const update = async (id, attributes) => {
     throw new NotFoundError('Token not found');
   }
 
-  // TODO: allow updating only the non-permissions attributes of a custom token
-  assertCustomTokenPermissionsValidity({
-    ...omit(['permissions'], originalToken),
-    ...attributes,
-    type: attributes.type || originalToken.type,
-  });
+  const changingTypeToCustom =
+    attributes.type === constants.API_TOKEN_TYPE.custom &&
+    originalToken.type !== constants.API_TOKEN_TYPE.custom;
+
+  // if we're updating the permissions on any token type, or changing from non-custom to custom, ensure they're still valid
+  // if neither type nor permissions are changing, we don't need to validate again or else we can't allow partial update
+  if (attributes.permissions || changingTypeToCustom) {
+    assertCustomTokenPermissionsValidity({
+      ...originalToken,
+      ...attributes,
+      type: attributes.type || originalToken.type,
+    });
+  }
 
   const updatedToken = await strapi.query('admin::api-token').update({
     select: SELECT_FIELDS,
@@ -225,7 +237,8 @@ const update = async (id, attributes) => {
     data: omit('permissions', attributes),
   });
 
-  if (updatedToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
+  // custom tokens need to have their permissions updated as well
+  if (updatedToken.type === constants.API_TOKEN_TYPE.CUSTOM && attributes.permissions) {
     const currentPermissionsResult =
       (await strapi.entityService.load('admin::api-token', updatedToken, 'permissions')) || [];
 
@@ -284,7 +297,7 @@ const update = async (id, attributes) => {
     // method attempting to createMany permissions, then update token with those permissions -- createMany doesn't return the ids, and we can't query for them
   }
   // if type is not custom, make sure any old permissions get removed
-  else {
+  else if (updatedToken.type !== constants.API_TOKEN_TYPE.CUSTOM) {
     await strapi.query('admin::token-permission').delete({
       where: { token: id },
     });
@@ -307,6 +320,7 @@ const update = async (id, attributes) => {
  * @param {Object} whereParams
  * @param {string|number} [whereParams.id]
  * @param {string} [whereParams.name]
+ * @param {number} [whereParams.lastUsed]
  * @param {string} [whereParams.description]
  * @param {string} [whereParams.accessKey]
  *
