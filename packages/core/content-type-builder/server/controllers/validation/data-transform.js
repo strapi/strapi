@@ -2,9 +2,9 @@
 
 const _ = require('lodash');
 
-const removeEmptyDefaults = data => {
+const removeEmptyDefaults = (data) => {
   if (_.has(data, 'attributes')) {
-    Object.keys(data.attributes).forEach(attribute => {
+    Object.keys(data.attributes).forEach((attribute) => {
       if (data.attributes[attribute].default === '') {
         data.attributes[attribute].default = undefined;
       }
@@ -12,9 +12,9 @@ const removeEmptyDefaults = data => {
   }
 };
 
-const removeDeletedUIDTargetFields = data => {
+const removeDeletedUIDTargetFields = (data) => {
   if (_.has(data, 'attributes')) {
-    Object.values(data.attributes).forEach(attribute => {
+    Object.values(data.attributes).forEach((attribute) => {
       if (
         attribute.type === 'uid' &&
         !_.isUndefined(attribute.targetField) &&

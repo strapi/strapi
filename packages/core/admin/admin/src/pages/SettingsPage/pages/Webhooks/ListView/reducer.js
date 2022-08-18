@@ -10,7 +10,7 @@ const initialState = {
 
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'GET_DATA_SUCCEEDED': {
         draftState.webhooks = action.data;
@@ -36,14 +36,14 @@ const reducer = (state, action) =>
         if (action.value) {
           draftState.webhooksToDelete.push(action.id);
         } else {
-          draftState.webhooksToDelete = state.webhooksToDelete.filter(id => id !== action.id);
+          draftState.webhooksToDelete = state.webhooksToDelete.filter((id) => id !== action.id);
         }
 
         break;
       }
       case 'SET_ALL_WEBHOOKS_TO_DELETE': {
         if (state.webhooksToDelete.length === 0) {
-          draftState.webhooksToDelete = state.webhooks.map(webhook => webhook.id);
+          draftState.webhooksToDelete = state.webhooks.map((webhook) => webhook.id);
         } else {
           draftState.webhooksToDelete = [];
         }
@@ -52,7 +52,7 @@ const reducer = (state, action) =>
       }
       case 'WEBHOOKS_DELETED': {
         draftState.webhooks = state.webhooks.filter(
-          webhook => !state.webhooksToDelete.includes(webhook.id)
+          (webhook) => !state.webhooksToDelete.includes(webhook.id)
         );
         draftState.webhooksToDelete = [];
         break;

@@ -89,14 +89,18 @@ module.exports = {
       request: { body, files: { files } = {} },
     } = ctx;
 
-    const data = await validateUploadBody(body);
+    const data = await validateUploadBody(body, Array.isArray(files));
 
     const apiUploadFolderService = getService('api-upload-folder');
 
     const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
-    data.fileInfo = data.fileInfo || {};
-    data.fileInfo = Array.isArray(data.fileInfo) ? data.fileInfo : [data.fileInfo];
-    data.fileInfo.forEach(fileInfo => (fileInfo.folder = apiUploadFolder.id));
+
+    if (Array.isArray(files)) {
+      data.fileInfo = data.fileInfo || [];
+      data.fileInfo = files.map((_f, i) => ({ ...data.fileInfo[i], folder: apiUploadFolder.id }));
+    } else {
+      data.fileInfo = { ...data.fileInfo, folder: apiUploadFolder.id };
+    }
 
     const uploadedFiles = await getService('upload').upload({
       data,

@@ -22,7 +22,7 @@ describe('Content Manager | App | reducer', () => {
   it('should handle the getData action correctly', () => {
     state.status = 'resolved';
 
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.status = 'loading';
     });
 
@@ -50,7 +50,7 @@ describe('Content Manager | App | reducer', () => {
         isDisplayed: true,
       },
     ];
-    const expected = produce(state, draft => {
+    const expected = produce(state, (draft) => {
       draft.status = 'resolved';
       draft.components = ['test'];
       draft.models = ['test'];

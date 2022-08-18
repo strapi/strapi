@@ -9,7 +9,7 @@ on:
       - labeled
       - unlabeled
     branches:
-      - master
+      - main
 
 jobs:
   check-pr-status:

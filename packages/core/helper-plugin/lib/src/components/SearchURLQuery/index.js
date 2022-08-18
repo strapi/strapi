@@ -18,7 +18,7 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails 
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const handleToggle = () => setIsOpen(prev => !prev);
+  const handleToggle = () => setIsOpen((prev) => !prev);
 
   useLayoutEffect(() => {
     if (isOpen) {
@@ -33,7 +33,7 @@ const SearchURLQuery = ({ label, placeholder, trackedEvent, trackedEventDetails 
     setQuery({ _q: '' }, 'remove');
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (value) {

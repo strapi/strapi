@@ -14,8 +14,9 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import DeleteButton from './DeleteButton';
 import UpdateButton from './UpdateButton';
+import ReadButton from './ReadButton';
 
-const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows }) => {
+const TableRows = ({ canDelete, canUpdate, canRead, onClickDelete, withBulkActions, rows }) => {
   const { formatMessage } = useIntl();
   const [{ query }] = useQueryParams();
   const [, sortOrder] = query.sort.split(':');
@@ -33,12 +34,12 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
 
   return (
     <Tbody>
-      {apiTokens.map(apiToken => {
+      {apiTokens.map((apiToken) => {
         return (
           <Tr
             key={apiToken.id}
             {...onRowClick({
-              fn: () => {
+              fn() {
                 trackUsage('willEditTokenFromList');
                 push(`${pathname}/${apiToken.id}`);
               },
@@ -73,6 +74,9 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
               <Td>
                 <Flex justifyContent="end">
                   {canUpdate && <UpdateButton tokenName={apiToken.name} tokenId={apiToken.id} />}
+                  {!canUpdate && canRead && (
+                    <ReadButton tokenName={apiToken.name} tokenId={apiToken.id} />
+                  )}
                   {canDelete && (
                     <DeleteButton
                       tokenName={apiToken.name}
@@ -92,7 +96,8 @@ const TableRows = ({ canDelete, canUpdate, onClickDelete, withBulkActions, rows 
 TableRows.defaultProps = {
   canDelete: false,
   canUpdate: false,
-  onClickDelete: () => {},
+  canRead: false,
+  onClickDelete() {},
   rows: [],
   withBulkActions: false,
 };
@@ -100,6 +105,7 @@ TableRows.defaultProps = {
 TableRows.propTypes = {
   canDelete: PropTypes.bool,
   canUpdate: PropTypes.bool,
+  canRead: PropTypes.bool,
   onClickDelete: PropTypes.func,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,

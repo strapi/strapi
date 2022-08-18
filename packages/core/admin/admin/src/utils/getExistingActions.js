@@ -1,10 +1,10 @@
 import { get } from 'lodash';
 
-const getExistingActions = permissions => {
+const getExistingActions = (permissions) => {
   return Array.from(
     new Set(
       Object.entries(permissions).reduce((acc, current) => {
-        const getActionsPermission = permission =>
+        const getActionsPermission = (permission) =>
           permission.reduce((accAction, currentAction) => {
             let actionsToReturn = accAction;
 

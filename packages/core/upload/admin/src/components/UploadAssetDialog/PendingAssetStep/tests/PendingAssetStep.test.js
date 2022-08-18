@@ -5,7 +5,7 @@ import { render as renderTL } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { PendingAssetStep } from '../PendingAssetStep';
 
-jest.mock('../../../../utils/getTrad', () => x => x);
+jest.mock('../../../../utils/getTrad', () => (x) => x);
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -24,7 +24,7 @@ describe('PendingAssetStep', () => {
   beforeAll(() => {
     // see https://github.com/testing-library/react-testing-library/issues/470
     Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
-      set: () => {},
+      set() {},
     });
   });
 

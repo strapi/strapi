@@ -6,7 +6,7 @@ import { createArrayOfValues } from '../../utils';
  * @param {object} obj the modifiedData state
  * @returns {object} the mutated modifiedData
  */
-const updateConditionsToFalse = obj => {
+const updateConditionsToFalse = (obj) => {
   return Object.keys(obj).reduce((acc, current) => {
     const currentValue = obj[current];
 
@@ -16,7 +16,7 @@ const updateConditionsToFalse = obj => {
 
     if (isObject(currentValue) && has(currentValue, 'conditions')) {
       const isActionEnabled = createArrayOfValues(omit(currentValue, 'conditions')).some(
-        val => val
+        (val) => val
       );
 
       if (!isActionEnabled) {

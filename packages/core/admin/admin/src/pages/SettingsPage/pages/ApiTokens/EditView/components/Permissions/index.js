@@ -5,7 +5,7 @@ import ContentTypesSection from '../ContenTypesSection';
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
 import TAB_LABELS from './utils/tabLabels';
 
-const Permissions = () => {
+const Permissions = ({ ...props }) => {
   const {
     value: { modifiedData },
   } = useApiTokenPermissionsContext();
@@ -20,7 +20,7 @@ const Permissions = () => {
       })}
     >
       <Tabs>
-        {TAB_LABELS.map(tabLabel => (
+        {TAB_LABELS.map((tabLabel) => (
           <Tab key={tabLabel.id}>
             {formatMessage({ id: tabLabel.labelId, defaultMessage: tabLabel.defaultMessage })}
           </Tab>
@@ -29,17 +29,25 @@ const Permissions = () => {
       <TabPanels style={{ position: 'relative' }}>
         <TabPanel>
           {modifiedData?.singleTypes && (
-            <ContentTypesSection section={modifiedData?.collectionTypes} name="collectionTypes" />
+            <ContentTypesSection
+              section={modifiedData?.collectionTypes}
+              name="collectionTypes"
+              {...props}
+            />
           )}
         </TabPanel>
         <TabPanel>
           {modifiedData?.singleTypes && (
-            <ContentTypesSection section={modifiedData?.singleTypes} name="singleTypes" />
+            <ContentTypesSection
+              section={modifiedData?.singleTypes}
+              name="singleTypes"
+              {...props}
+            />
           )}
         </TabPanel>
         <TabPanel>
           {modifiedData?.custom && (
-            <ContentTypesSection section={modifiedData?.custom} name="custom" />
+            <ContentTypesSection section={modifiedData?.custom} name="custom" {...props} />
           )}
         </TabPanel>
       </TabPanels>

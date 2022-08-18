@@ -17,7 +17,7 @@ const Border = styled.div`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const CollapsableContentType = ({ actions, label, orderNumber, name }) => {
+const CollapsableContentType = ({ actions, label, orderNumber, name, disabled }) => {
   //   const { formatMessage } = useIntl();
   const {
     value: { onChange, onChangeSelectAll, modifiedData },
@@ -29,12 +29,12 @@ const CollapsableContentType = ({ actions, label, orderNumber, name }) => {
   }, [modifiedData, name]);
 
   const hasAllActionsSelected = useMemo(() => {
-    return Object.values(currentScopedModifiedData).every(action => action === true);
+    return Object.values(currentScopedModifiedData).every((action) => action === true);
   }, [currentScopedModifiedData]);
 
   const hasSomeActionsSelected = useMemo(() => {
     return (
-      Object.values(currentScopedModifiedData).some(action => action === true) &&
+      Object.values(currentScopedModifiedData).some((action) => action === true) &&
       !hasAllActionsSelected
     );
   }, [currentScopedModifiedData, hasAllActionsSelected]);
@@ -42,7 +42,7 @@ const CollapsableContentType = ({ actions, label, orderNumber, name }) => {
   return (
     <Accordion
       expanded={expanded}
-      onToggle={() => setExpanded(s => !s)}
+      onToggle={() => setExpanded((s) => !s)}
       variant={orderNumber % 2 ? 'primary' : 'secondary'}
     >
       <AccordionToggle title={capitalize(label)} />
@@ -58,16 +58,17 @@ const CollapsableContentType = ({ actions, label, orderNumber, name }) => {
             <Checkbox
               value={hasAllActionsSelected}
               indeterminate={hasSomeActionsSelected}
-              onValueChange={value => {
+              onValueChange={(value) => {
                 onChangeSelectAll({ target: { name, value } });
               }}
+              disabled={disabled}
             >
               Select all
             </Checkbox>
           </Box>
         </Flex>
         <Grid gap={4} padding={4}>
-          {Object.keys(actions).map(action => {
+          {Object.keys(actions).map((action) => {
             const currentName = `${name}.${action}`;
 
             return (
@@ -75,9 +76,10 @@ const CollapsableContentType = ({ actions, label, orderNumber, name }) => {
                 <Checkbox
                   value={actions[action]}
                   name={currentName}
-                  onValueChange={value => {
+                  onValueChange={(value) => {
                     onChange({ target: { name: currentName, value } });
                   }}
+                  disabled={disabled}
                 >
                   {action}
                 </Checkbox>
@@ -93,6 +95,7 @@ const CollapsableContentType = ({ actions, label, orderNumber, name }) => {
 CollapsableContentType.defaultProps = {
   actions: null,
   orderNumber: 0,
+  disabled: false,
 };
 
 CollapsableContentType.propTypes = {
@@ -100,6 +103,7 @@ CollapsableContentType.propTypes = {
   orderNumber: PropTypes.number,
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
 };
 
 export default CollapsableContentType;

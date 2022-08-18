@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useAppInfos, TrackingContext } from '@strapi/helper-plugin';
+import { useAppInfos, TrackingProvider } from '@strapi/helper-plugin';
 import ApplicationInfosPage from '../index';
 import server from './server';
 
@@ -24,13 +24,13 @@ const client = new QueryClient();
 
 const App = (
   <QueryClientProvider client={client}>
-    <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+    <TrackingProvider>
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={{}} textComponent="span">
           <ApplicationInfosPage />
         </IntlProvider>
       </ThemeProvider>
-    </TrackingContext.Provider>
+    </TrackingProvider>
   </QueryClientProvider>
 );
 

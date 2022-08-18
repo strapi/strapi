@@ -2,7 +2,7 @@
 
 const sanitize = require('./sanitize');
 
-const getService = name => {
+const getService = (name) => {
   return strapi.plugin('users-permissions').service(name);
 };
 

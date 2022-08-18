@@ -10,7 +10,7 @@ const removePasswordAndRelationsFieldFromData = (data, contentTypeSchema, compon
       const isRepeatable = getOtherInfos(schema, [current, 'repeatable']);
 
       if (attrType === 'dynamiczone') {
-        acc[current] = value.map(componentValue => {
+        acc[current] = value.map((componentValue) => {
           const subCleanedData = recursiveCleanData(
             componentValue,
             componentSchema[componentValue.__component]
@@ -26,7 +26,7 @@ const removePasswordAndRelationsFieldFromData = (data, contentTypeSchema, compon
         if (isRepeatable) {
           /* eslint-disable indent */
           acc[current] = value
-            ? value.map(compoData => {
+            ? value.map((compoData) => {
                 const subCleanedData = recursiveCleanData(compoData, componentSchema[component]);
 
                 return subCleanedData;

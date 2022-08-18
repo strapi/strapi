@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-new",
-  "version": "4.3.2",
+  "version": "4.3.4",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "generate",
@@ -46,6 +46,7 @@
     "node-machine-id": "^1.1.10",
     "ora": "^5.4.1",
     "tar": "6.1.11",
+    "semver": "^7.3.4",
     "uuid": "^8.3.2"
   },
   "engines": {

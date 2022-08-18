@@ -38,7 +38,7 @@ const PermissionRow = ({ name, permissions }) => {
 
   return (
     <Box padding={6}>
-      {subCategories.map(subCategory => (
+      {subCategories.map((subCategory) => (
         <SubCategory key={subCategory.name} subCategory={subCategory} />
       ))}
     </Box>

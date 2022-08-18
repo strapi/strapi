@@ -10,6 +10,7 @@ import {
   useGuidedTour,
   Link,
   usePersistentState,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -33,6 +34,7 @@ import { getDateOfExpiration, schema, getActionsState } from './utils';
 import LoadingView from './components/LoadingView';
 import HeaderContentBox from './components/ContentBox';
 import Permissions from './components/Permissions';
+import adminPermissions from '../../../../../permissions';
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
 import { data as permissions } from './utils/tests/dataMock';
 import init from './init';
@@ -48,7 +50,10 @@ const ApiTokenCreateView = () => {
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
-  const [state, dispatch] = useReducer(reducer, initialState, state => init(state, permissions));
+  const {
+    allowedActions: { canCreate, canUpdate },
+  } = useRBAC(adminPermissions.settings['api-tokens']);
+  const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, permissions));
   const [lang] = usePersistentState('strapi-admin-language', 'en');
 
   const {
@@ -76,7 +81,7 @@ const ApiTokenCreateView = () => {
     },
     {
       enabled: !isCreating && !apiToken,
-      onError: () => {
+      onError() {
         toggleNotification({
           type: 'warning',
           message: { id: 'notification.error', defaultMessage: 'An error occured' },
@@ -197,8 +202,8 @@ const ApiTokenCreateView = () => {
     const { modifiedData } = state;
 
     if (value === 'full-access') {
-      Object.keys(modifiedData).forEach(contentTypes => {
-        Object.keys(modifiedData[contentTypes]).forEach(contentType => {
+      Object.keys(modifiedData).forEach((contentTypes) => {
+        Object.keys(modifiedData[contentTypes]).forEach((contentType) => {
           dispatch({
             type: 'ON_CHANGE_SELECT_ALL',
             keys: [contentTypes, contentType],
@@ -208,8 +213,8 @@ const ApiTokenCreateView = () => {
       });
     }
     if (value === 'read-only') {
-      Object.keys(modifiedData).forEach(contentTypes => {
-        Object.keys(modifiedData[contentTypes]).forEach(contentType => {
+      Object.keys(modifiedData).forEach((contentTypes) => {
+        Object.keys(modifiedData[contentTypes]).forEach((contentType) => {
           dispatch({
             type: 'ON_CHANGE_READ_ONLY',
             keys: [contentTypes, contentType],
@@ -226,6 +231,7 @@ const ApiTokenCreateView = () => {
     onChangeSelectAll: handleChangeSelectAllCheckbox,
   };
 
+  const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
   const isLoading = !isCreating && !apiToken && status !== 'success';
 
   if (isLoading) {
@@ -259,18 +265,20 @@ const ApiTokenCreateView = () => {
                     })
                   }
                   primaryAction={
-                    <Button
-                      disabled={isSubmitting}
-                      loading={isSubmitting}
-                      startIcon={<Check />}
-                      type="submit"
-                      size="L"
-                    >
-                      {formatMessage({
-                        id: 'global.save',
-                        defaultMessage: 'Save',
-                      })}
-                    </Button>
+                    canEditInputs && (
+                      <Button
+                        disabled={isSubmitting}
+                        loading={isSubmitting}
+                        startIcon={<Check />}
+                        type="submit"
+                        size="L"
+                      >
+                        {formatMessage({
+                          id: 'global.save',
+                          defaultMessage: 'Save',
+                        })}
+                      </Button>
+                    )
                   }
                   navigationAction={
                     <Link startIcon={<ArrowLeft />} to="/settings/api-tokens">
@@ -319,6 +327,7 @@ const ApiTokenCreateView = () => {
                               })}
                               onChange={handleChange}
                               value={values.name}
+                              disabled={!canEditInputs}
                               required
                             />
                           </GridItem>
@@ -342,6 +351,7 @@ const ApiTokenCreateView = () => {
                                   : null
                               }
                               onChange={handleChange}
+                              disabled={!canEditInputs}
                             >
                               {values.description}
                             </Textarea>
@@ -363,7 +373,7 @@ const ApiTokenCreateView = () => {
                                     )
                                   : null
                               }
-                              onChange={value => {
+                              onChange={(value) => {
                                 handleChange({ target: { name: 'duration', value } });
                               }}
                               required
@@ -425,12 +435,13 @@ const ApiTokenCreateView = () => {
                                     )
                                   : null
                               }
-                              onChange={value => {
+                              onChange={(value) => {
                                 handleChangeSelectApiTokenType({ target: { value } });
                                 handleChange({ target: { name: 'type', value } });
                               }}
                               placeholder="Select"
                               required
+                              disabled={!canEditInputs}
                             >
                               <Option value="read-only">
                                 {formatMessage({
@@ -455,7 +466,7 @@ const ApiTokenCreateView = () => {
                         </Grid>
                       </Stack>
                     </Box>
-                    <Permissions />
+                    <Permissions disabled={!canEditInputs} />
                   </Stack>
                 </ContentLayout>
               </Form>

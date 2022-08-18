@@ -9,7 +9,7 @@ export const initialState = {
 };
 
 const reducer = (state, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'GET_MODELS': {
         draftState.collectionTypes = initialState.collectionTypes;
@@ -26,9 +26,9 @@ const reducer = (state, action) =>
         break;
       }
       case 'GET_MODELS_SUCCEDED': {
-        const getContentTypeByKind = kind =>
+        const getContentTypeByKind = (kind) =>
           action.contentTypes.filter(
-            contentType => contentType.isDisplayed && contentType.kind === kind
+            (contentType) => contentType.isDisplayed && contentType.kind === kind
           );
 
         draftState.isLoading = false;

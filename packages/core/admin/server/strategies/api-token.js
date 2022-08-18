@@ -5,9 +5,9 @@ const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 const { getService } = require('../utils');
 
-const isReadScope = scope => scope.endsWith('find') || scope.endsWith('findOne');
+const isReadScope = (scope) => scope.endsWith('find') || scope.endsWith('findOne');
 
-const extractToken = ctx => {
+const extractToken = (ctx) => {
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     const parts = ctx.request.header.authorization.split(/\s+/);
 
@@ -22,7 +22,7 @@ const extractToken = ctx => {
 };
 
 /** @type {import('.').AuthenticateFunction} */
-const authenticate = async ctx => {
+const authenticate = async (ctx) => {
   const apiTokenService = getService('api-token');
   const token = extractToken(ctx);
 
@@ -45,7 +45,7 @@ const authenticate = async ctx => {
 
   if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
     const ability = await strapi.contentAPI.permissions.engine.generateAbility(
-      apiToken.permissions.map(action => ({ action }))
+      apiToken.permissions.map((action) => ({ action }))
     );
 
     return { authenticated: true, ability, credentials: apiToken };
@@ -68,7 +68,7 @@ const verify = (auth, config) => {
   }
 
   // Read only
-  else if (apiToken.type === constants.API_TOKEN_TYPE.READ_ONLY) {
+  if (apiToken.type === constants.API_TOKEN_TYPE.READ_ONLY) {
     /**
      * If you don't have `full-access` you can only access `find` and `findOne`
      * scopes. If the route has no scope, then you can't get access to it.
@@ -88,7 +88,7 @@ const verify = (auth, config) => {
 
     const scopes = castArray(config.scope);
 
-    const isAllowed = scopes.every(scope => ability.can(scope));
+    const isAllowed = scopes.every((scope) => ability.can(scope));
 
     if (isAllowed) {
       return;

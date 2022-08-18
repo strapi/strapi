@@ -9,11 +9,11 @@ const BATCH_SIZE = 1000;
 const migrateBatch = async (entries, { model, attributesToMigrate }, { transacting }) => {
   const { copyNonLocalizedAttributes } = getService('content-types');
 
-  const updatePromises = entries.map(entity => {
+  const updatePromises = entries.map((entity) => {
     const updateValues = pick(attributesToMigrate, copyNonLocalizedAttributes(model, entity));
     const entriesIdsToUpdate = entity.localizations.map(prop('id'));
     return Promise.all(
-      entriesIdsToUpdate.map(id =>
+      entriesIdsToUpdate.map((id) =>
         strapi.query(model.uid).update({ id }, updateValues, { transacting })
       )
     );

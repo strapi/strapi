@@ -7,17 +7,17 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
 let rq;
-let data = {};
-let internals = {
+const data = {};
+const internals = {
   role: {
     name: 'Test Role',
     description: 'Some random test role',
   },
 };
 
-/*****************************
+/** ***************************
  * TESTS
- *****************************/
+ **************************** */
 describe('Roles API', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
@@ -53,7 +53,7 @@ describe('Roles API', () => {
       expect.arrayContaining([expect.objectContaining(internals.role)])
     );
 
-    data.role = res.body.roles.find(r => r.name === internals.role.name);
+    data.role = res.body.roles.find((r) => r.name === internals.role.name);
   });
 
   test('Delete Role', async () => {

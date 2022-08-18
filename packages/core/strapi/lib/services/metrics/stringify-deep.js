@@ -7,7 +7,7 @@ const { map, mapValues, isObject, isArray, toString } = require('lodash/fp');
  * @param {object} obj
  * @returns {object}
  */
-const stringifyDeep = value => {
+const stringifyDeep = (value) => {
   if (isArray(value)) {
     return map(stringifyDeep, value);
   }

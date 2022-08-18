@@ -29,8 +29,8 @@ const createSection = ({
   };
 
   // Register initial hooks
-  handlers.forEach(handler => state.hooks.handlers.register(handler));
-  matchers.forEach(matcher => state.hooks.matchers.register(matcher));
+  handlers.forEach((handler) => state.hooks.handlers.register(handler));
+  matchers.forEach((matcher) => state.hooks.matchers.register(matcher));
 
   return {
     hooks: state.hooks,

@@ -14,25 +14,25 @@ const createContentAPI = (/* strapi */) => {
      * Could providerFactory not be providing a new provider, and instead sharing the registry with everything that uses it?
      *
      * If this isn't an issue to fix and is expected, we don't need the route registration code below and it should be removed
-     **/
+     * */
     // Start of route registration
     const apiRoutesName = Object.values(strapi.api)
-      .map(api => api.routes)
+      .map((api) => api.routes)
       .reduce((acc, routesMap) => {
         const routes = Object.values(routesMap)
           // Only content api routes
-          .filter(p => p.type === 'content-api')
+          .filter((p) => p.type === 'content-api')
           // Resolve every handler name for each route
-          .reduce((a, p) => a.concat(p.routes.map(i => i.handler)), []);
+          .reduce((a, p) => a.concat(p.routes.map((i) => i.handler)), []);
         return acc.concat(routes);
       }, []);
     const pluginsRoutesname = Object.values(strapi.plugins)
-      .map(plugin => plugin.routes['content-api'] || {})
-      .map(p => (p.routes || []).map(i => i.handler))
+      .map((plugin) => plugin.routes['content-api'] || {})
+      .map((p) => (p.routes || []).map((i) => i.handler))
       .flat();
     const actions = apiRoutesName.concat(pluginsRoutesname);
     Promise.all(
-      uniq(actions).map(action =>
+      uniq(actions).map((action) =>
         providers.action.register(action).catch(() => {
           console.log('Key already exists', action);
         })
@@ -64,16 +64,18 @@ const createContentAPI = (/* strapi */) => {
 /**
  * Creates an handler which check that the permission's action exists in the action registry
  */
-const createValidatePermissionHandler = actionProvider => ({ permission }) => {
-  const action = actionProvider.get(permission.action);
+const createValidatePermissionHandler =
+  (actionProvider) =>
+  ({ permission }) => {
+    const action = actionProvider.get(permission.action);
 
-  // If the action isn't registered into the action provider, then ignore the permission and warn the user
-  if (!action) {
-    strapi.log.debug(
-      `Unknown action "${permission.action}" supplied when registering a new permission`
-    );
-    return false;
-  }
-};
+    // If the action isn't registered into the action provider, then ignore the permission and warn the user
+    if (!action) {
+      strapi.log.debug(
+        `Unknown action "${permission.action}" supplied when registering a new permission`
+      );
+      return false;
+    }
+  };
 
 module.exports = createContentAPI;

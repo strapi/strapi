@@ -6,7 +6,7 @@ const getDestinationPrompts = require('./prompts/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
 const validateInput = require('./utils/validate-input');
 
-module.exports = plop => {
+module.exports = (plop) => {
   // Controller generator
   plop.setGenerator('controller', {
     description: 'Generate a controller for an API',
@@ -15,7 +15,7 @@ module.exports = plop => {
         type: 'input',
         name: 'id',
         message: 'Controller name',
-        validate: input => validateInput(input),
+        validate: (input) => validateInput(input),
       },
       ...getDestinationPrompts('controller', plop.getDestBasePath()),
     ],

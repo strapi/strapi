@@ -92,7 +92,7 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
     schema: { icon: null },
   });
 
-  const onClose = e => {
+  const onClose = (e) => {
     e.stopPropagation();
     removeComponentFromDynamicZone(dzName, index);
   };
@@ -117,7 +117,7 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
           <CloseButton
             role="button"
             tabIndex={0}
-            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onClose(e)}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClose(e)}
             onClick={onClose}
           >
             <Cross />
@@ -132,7 +132,7 @@ ComponentCard.defaultProps = {
   component: null,
   isActive: false,
   isInDevelopmentMode: false,
-  onClick: () => {},
+  onClick() {},
 };
 
 ComponentCard.propTypes = {

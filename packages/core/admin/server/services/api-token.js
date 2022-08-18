@@ -3,7 +3,7 @@
 const crypto = require('crypto');
 const { omit, difference, isEmpty, map, isArray } = require('lodash/fp');
 const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
-const constants = require('../services/constants');
+const constants = require('./constants');
 
 /**
  * @typedef {'read-only'|'full-access'|'custom'} TokenType
@@ -35,7 +35,7 @@ const SELECT_FIELDS = ['id', 'name', 'description', 'lastUsed', 'type', 'created
 /** @constant {Array<string>} */
 const POPULATE_FIELDS = ['permissions'];
 
-const assertCustomTokenPermissionsValidity = attributes => {
+const assertCustomTokenPermissionsValidity = (attributes) => {
   // Ensure non-custom tokens doesn't have permissions
   if (attributes.type !== constants.API_TOKEN_TYPE.CUSTOM && !isEmpty(attributes.permissions)) {
     throw new ValidationError('Non-custom tokens should not reference permissions');
@@ -68,7 +68,7 @@ const exists = async (whereParams = {}) => {
  *
  * @returns {string}
  */
-const hash = accessKey => {
+const hash = (accessKey) => {
   return crypto
     .createHmac('sha512', strapi.config.get('admin.apiToken.salt'))
     .update(accessKey)
@@ -85,7 +85,7 @@ const hash = accessKey => {
  *
  * @returns {Promise<ApiToken>}
  */
-const create = async attributes => {
+const create = async (attributes) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
   assertCustomTokenPermissionsValidity(attributes);
@@ -110,7 +110,7 @@ const create = async attributes => {
     //   data: attributes.permissions.map(action => ({ action, token: apiToken })),
     // });
     await Promise.all(
-      attributes.permissions.map(action =>
+      attributes.permissions.map((action) =>
         strapi.query('admin::token-permission').create({
           data: { action, token: apiToken },
         })
@@ -162,7 +162,7 @@ const list = async () => {
   });
 
   if (!tokens) return tokens;
-  return tokens.map(token => mapTokenPermissions(token));
+  return tokens.map((token) => mapTokenPermissions(token));
 };
 
 /**
@@ -170,7 +170,7 @@ const list = async () => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const revoke = async id => {
+const revoke = async (id) => {
   return strapi
     .query('admin::api-token')
     .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
@@ -181,7 +181,7 @@ const revoke = async id => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const getById = async id => {
+const getById = async (id) => {
   return getBy({ id });
 };
 
@@ -190,7 +190,7 @@ const getById = async id => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const getByName = async name => {
+const getByName = async (name) => {
   return getBy({ name });
 };
 
@@ -248,7 +248,7 @@ const update = async (id, attributes) => {
     // TODO: improve efficiency here
     // method using a loop -- works but very inefficient
     await Promise.all(
-      actionsToDelete.map(action =>
+      actionsToDelete.map((action) =>
         strapi.query('admin::token-permission').delete({
           where: { action, token: id },
         })
@@ -263,7 +263,7 @@ const update = async (id, attributes) => {
     // TODO: improve efficiency here
     // using a loop -- works but very inefficient
     await Promise.all(
-      actionsToAdd.map(action =>
+      actionsToAdd.map((action) =>
         strapi.query('admin::token-permission').create({
           data: { action, token: id },
         })
@@ -305,7 +305,7 @@ const update = async (id, attributes) => {
 
   return {
     ...updatedToken,
-    permissions: permissionsFromDb ? permissionsFromDb.map(p => p.action) : undefined,
+    permissions: permissionsFromDb ? permissionsFromDb.map((p) => p.action) : undefined,
   };
 };
 
@@ -332,7 +332,7 @@ const getBy = async (whereParams = {}) => {
   return mapTokenPermissions(token);
 };
 
-const mapTokenPermissions = token => {
+const mapTokenPermissions = (token) => {
   if (!token) return token;
   return {
     ...token,

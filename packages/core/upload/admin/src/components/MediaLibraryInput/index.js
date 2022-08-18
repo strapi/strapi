@@ -44,7 +44,7 @@ export const MediaLibraryInput = ({
 
   const selectedAssets = Array.isArray(value) ? value : [value];
 
-  const handleValidation = nextSelectedAssets => {
+  const handleValidation = (nextSelectedAssets) => {
     onChange({
       target: { name, value: multiple ? nextSelectedAssets : nextSelectedAssets[0] },
     });
@@ -70,11 +70,11 @@ export const MediaLibraryInput = ({
     setSelectedIndex(0);
   };
 
-  const handleDeleteAsset = asset => {
+  const handleDeleteAsset = (asset) => {
     let nextValue;
 
     if (multiple) {
-      const nextSelectedAssets = selectedAssets.filter(prevAsset => prevAsset.id !== asset.id);
+      const nextSelectedAssets = selectedAssets.filter((prevAsset) => prevAsset.id !== asset.id);
 
       nextValue = nextSelectedAssets.length > 0 ? nextSelectedAssets : null;
     } else {
@@ -88,8 +88,8 @@ export const MediaLibraryInput = ({
     setSelectedIndex(0);
   };
 
-  const handleAssetEdit = asset => {
-    const nextSelectedAssets = selectedAssets.map(prevAsset =>
+  const handleAssetEdit = (asset) => {
+    const nextSelectedAssets = selectedAssets.map((prevAsset) =>
       prevAsset.id === asset.id ? asset : prevAsset
     );
 
@@ -98,7 +98,7 @@ export const MediaLibraryInput = ({
     });
   };
 
-  const handleAssetDrop = assets => {
+  const handleAssetDrop = (assets) => {
     setDroppedAssets(assets);
     setStep(STEPS.AssetUpload);
   };
@@ -110,15 +110,15 @@ export const MediaLibraryInput = ({
   }
 
   const handleNext = () => {
-    setSelectedIndex(current => (current < selectedAssets.length - 1 ? current + 1 : 0));
+    setSelectedIndex((current) => (current < selectedAssets.length - 1 ? current + 1 : 0));
   };
 
   const handlePrevious = () => {
-    setSelectedIndex(current => (current > 0 ? current - 1 : selectedAssets.length - 1));
+    setSelectedIndex((current) => (current > 0 ? current - 1 : selectedAssets.length - 1));
   };
 
-  const handleFilesUploadSucceeded = uploadedFiles => {
-    setUploadedFiles(prev => [...prev, ...uploadedFiles]);
+  const handleFilesUploadSucceeded = (uploadedFiles) => {
+    setUploadedFiles((prev) => [...prev, ...uploadedFiles]);
   };
 
   const hint = description
@@ -171,7 +171,7 @@ export const MediaLibraryInput = ({
           multiple={multiple}
           onAddAsset={() => setStep(STEPS.AssetUpload)}
           onAddFolder={() => setStep(STEPS.FolderCreate)}
-          onChangeFolder={folder => setFolderId(folder)}
+          onChangeFolder={(folder) => setFolderId(folder)}
           trackedLocation="content-manager"
         />
       )}

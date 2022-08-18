@@ -17,9 +17,9 @@ const EMPTY_CONFIG = {
   layouts: {},
 };
 
-const configurationKey = key => `${keys.CONFIGURATION}_${key}`;
+const configurationKey = (key) => `${keys.CONFIGURATION}_${key}`;
 
-const getModelConfiguration = async key => {
+const getModelConfiguration = async (key) => {
   const config = await getStore().get({ key: configurationKey(key) });
   return _.merge({}, EMPTY_CONFIG, config);
 };
@@ -28,7 +28,7 @@ const setModelConfiguration = async (key, value) => {
   const storedConfig = (await getStore().get({ key: configurationKey(key) })) || {};
   const currentConfig = { ...storedConfig };
 
-  Object.keys(value).forEach(key => {
+  Object.keys(value).forEach((key) => {
     if (value[key] !== null && value[key] !== undefined) {
       _.set(currentConfig, key, value[key]);
     }
@@ -42,13 +42,13 @@ const setModelConfiguration = async (key, value) => {
   }
 };
 
-const deleteKey = key => {
+const deleteKey = (key) => {
   return strapi
     .query('strapi::core-store')
     .delete({ where: { key: `plugin_content_manager_configuration_${key}` } });
 };
 
-const findByKey = async key => {
+const findByKey = async (key) => {
   const results = await strapi.query('strapi::core-store').findMany({
     where: {
       key: {

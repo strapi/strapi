@@ -24,7 +24,7 @@ const ALL_ACTIONS = '*';
 module.exports = () => {
   const configs = new Map();
 
-  return uid => {
+  return (uid) => {
     if (!configs.has(uid)) {
       configs.set(uid, getDefaultContentTypeConfig());
     }
@@ -57,7 +57,9 @@ module.exports = () => {
       isActionEnabled(action) {
         const matchingActions = [action, ALL_ACTIONS];
 
-        return configs.get(uid).disabledActions.every(action => !matchingActions.includes(action));
+        return configs
+          .get(uid)
+          .disabledActions.every((action) => !matchingActions.includes(action));
       },
 
       isActionDisabled(action) {
@@ -93,7 +95,7 @@ module.exports = () => {
       },
 
       disableActions(actions = []) {
-        actions.forEach(action => this.disableAction(action));
+        actions.forEach((action) => this.disableAction(action));
 
         return this;
       },

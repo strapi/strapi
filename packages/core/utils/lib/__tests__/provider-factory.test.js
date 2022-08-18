@@ -21,7 +21,7 @@ describe('Provider Factory', () => {
 
       expect(provider).toHaveProperty('hooks', expect.any(Object));
 
-      providerMethods.forEach(methodName =>
+      providerMethods.forEach((methodName) =>
         expect(provider).toHaveProperty(methodName, expect.any(Function))
       );
     });
@@ -30,11 +30,13 @@ describe('Provider Factory', () => {
   describe('Hooks', () => {
     test.each(['willRegister'])(
       'AsyncSeries: %s hook can be triggered and mutate the given context',
-      async hookName => {
+      async (hookName) => {
         const provider = providerFactory();
         const ctx = { bar: 'foo' };
 
-        const handler = jest.fn(context => (context.foo = 'bar'));
+        const handler = jest.fn((context) => {
+          context.foo = 'bar';
+        });
 
         provider.hooks[hookName].register(handler);
 
@@ -47,11 +49,11 @@ describe('Provider Factory', () => {
 
     test.each(['didRegister', 'willDelete', 'didDelete'])(
       'AsyncParallel: %s hook can be triggered, but cannot mutate the given context',
-      async hookName => {
+      async (hookName) => {
         const provider = providerFactory();
         const ctx = { bar: 'foo' };
 
-        const handler = jest.fn(context => {
+        const handler = jest.fn((context) => {
           context.foo = 'bar';
           return context;
         });
@@ -109,7 +111,9 @@ describe('Provider Factory', () => {
       });
 
       test('Register hooks are triggered on item registration', async () => {
-        const willRegister = jest.fn(({ value }) => (value.bar = 'foo'));
+        const willRegister = jest.fn(({ value }) => {
+          value.bar = 'foo';
+        });
         const didRegister = jest.fn();
 
         const key = 'key';
@@ -212,7 +216,7 @@ describe('Provider Factory', () => {
       const provider = providerFactory();
 
       const sortItems = (a, b) => (a.key < b.key ? -1 : 1);
-      const pickItems = (...indexes) => indexes.map(index => items[index].value);
+      const pickItems = (...indexes) => indexes.map((index) => items[index].value);
 
       beforeAll(async () => {
         for (const item of items) {
@@ -221,7 +225,7 @@ describe('Provider Factory', () => {
       });
 
       test('Calling getWhere without filters returns every registered items', async () => {
-        const expected = items.map(i => i.value).sort(sortItems);
+        const expected = items.map((i) => i.value).sort(sortItems);
 
         const results = provider.getWhere();
 
@@ -271,7 +275,7 @@ describe('Provider Factory', () => {
 
         const values = provider.values();
 
-        expect(values).toStrictEqual(items.map(item => item.value));
+        expect(values).toStrictEqual(items.map((item) => item.value));
       });
     });
 
@@ -300,7 +304,7 @@ describe('Provider Factory', () => {
 
         const keys = provider.keys();
 
-        expect(keys).toStrictEqual(items.map(item => item.key));
+        expect(keys).toStrictEqual(items.map((item) => item.key));
       });
     });
 

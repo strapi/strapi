@@ -3,7 +3,7 @@
 const { isFunction, map } = require('lodash/fp');
 const modelsUtils = require('../models');
 
-const stringifyDates = object =>
+const stringifyDates = (object) =>
   JSON.parse(
     JSON.stringify(object, (key, value) => {
       if (this[key] instanceof Date) {

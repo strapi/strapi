@@ -36,11 +36,8 @@ const LinkToCMSettingsView = ({
 }) => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
-  const {
-    collectionTypesConfigurations,
-    componentsConfigurations,
-    singleTypesConfigurations,
-  } = cmPermissions;
+  const { collectionTypesConfigurations, componentsConfigurations, singleTypesConfigurations } =
+    cmPermissions;
   const label = formatMessage({ id: 'content-type-builder.form.button.configure-view' });
   let permissionsToApply = collectionTypesConfigurations;
 

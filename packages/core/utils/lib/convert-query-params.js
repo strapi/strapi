@@ -1,3 +1,5 @@
+/* eslint-disable max-classes-per-file */
+
 'use strict';
 
 /**
@@ -70,7 +72,7 @@ const convertSingleSortQueryParam = (sortQuery) => {
 
 const convertNestedSortQueryParam = (sortQuery) => {
   const transformedSort = {};
-  for (const field in sortQuery) {
+  for (const field of Object.keys(sortQuery)) {
     const order = sortQuery[field];
 
     // this is a deep sort
@@ -324,24 +326,23 @@ const convertAndSanitizeFilters = (filters, schema) => {
         removeOperator(key);
       }
 
+      // Password attributes
+      else if (attribute.type === 'password') {
+        // Always remove password attributes from filters object
+        removeOperator(key);
+      }
+
       // Scalar attributes
       else {
-        // Always remove password attributes from filters object
-        if (attribute.type === 'password') {
-          removeOperator(key);
-        } else {
-          filters[key] = convertAndSanitizeFilters(value, schema);
-        }
+        filters[key] = convertAndSanitizeFilters(value, schema);
       }
     }
 
     // Handle operators
-    else {
-      if (['$null', '$notNull'].includes(key)) {
-        filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
-      } else if (isObject(value)) {
-        filters[key] = convertAndSanitizeFilters(value, schema);
-      }
+    else if (['$null', '$notNull'].includes(key)) {
+      filters[key] = parseType({ type: 'boolean', value: filters[key], forceCast: true });
+    } else if (isObject(value)) {
+      filters[key] = convertAndSanitizeFilters(value, schema);
     }
 
     // Remove empty objects & arrays

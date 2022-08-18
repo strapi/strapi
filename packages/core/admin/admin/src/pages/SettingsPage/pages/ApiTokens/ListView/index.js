@@ -47,7 +47,11 @@ const ApiTokenListView = () => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
   }, [push]);
 
-  const { data: apiTokens, status, isFetching } = useQuery(
+  const {
+    data: apiTokens,
+    status,
+    isFetching,
+  } = useQuery(
     ['api-tokens'],
     async () => {
       trackUsage('willAccessTokenList');
@@ -61,7 +65,7 @@ const ApiTokenListView = () => {
     },
     {
       enabled: canRead,
-      onError: () => {
+      onError() {
         toggleNotification({
           type: 'warning',
           message: { id: 'notification.error', defaultMessage: 'An error occured' },
@@ -75,15 +79,15 @@ const ApiTokenListView = () => {
     ((status !== 'success' && status !== 'error') || (status === 'success' && isFetching));
 
   const deleteMutation = useMutation(
-    async id => {
+    async (id) => {
       await axiosInstance.delete(`/admin/api-tokens/${id}`);
     },
     {
-      onSuccess: async () => {
+      async onSuccess() {
         await queryClient.invalidateQueries(['api-tokens']);
         trackUsage('didDeleteToken');
       },
-      onError: err => {
+      onError(err) {
         if (err?.response?.data?.data) {
           toggleNotification({ type: 'warning', message: err.response.data.data });
         } else {
@@ -123,9 +127,7 @@ const ApiTokenListView = () => {
                 defaultMessage: 'Create new API Token',
               })}
             </LinkButton>
-          ) : (
-            undefined
-          )
+          ) : undefined
         }
       />
       <ContentLayout>
@@ -135,15 +137,16 @@ const ApiTokenListView = () => {
             headers={tableHeaders}
             contentType="api-tokens"
             rows={apiTokens}
-            withBulkActions={canDelete || canUpdate}
+            withBulkActions={canDelete || canUpdate || canRead}
             isLoading={isLoading}
-            onConfirmDelete={id => deleteMutation.mutateAsync(id)}
+            onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
           >
             <TableRows
+              canRead={canRead}
               canDelete={canDelete}
               canUpdate={canUpdate}
               rows={apiTokens}
-              withBulkActions={canDelete || canUpdate}
+              withBulkActions={canDelete || canUpdate || canRead}
             />
           </DynamicTable>
         )}

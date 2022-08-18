@@ -31,7 +31,7 @@ const sections = [
   },
 ];
 
-const App = children => (
+const App = (children) => (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} textComponent="span">
       {children}
