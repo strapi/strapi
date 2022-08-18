@@ -23,12 +23,16 @@ function getFiles(ctx) {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = (config) => {
+
+module.exports = (config, { strapi }) => {
   const bodyConfig = defaultsDeep(defaults, config);
+
+  const { config: gqlConfig } = strapi.plugin('graphql');
+  const gqlEndpoint = gqlConfig('endpoint');
 
   return async (ctx, next) => {
     // TODO: find a better way later
-    if (ctx.url === '/graphql') {
+    if (ctx.url === gqlEndpoint) {
       await next();
     } else {
       try {
