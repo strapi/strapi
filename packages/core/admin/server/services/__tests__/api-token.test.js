@@ -327,7 +327,7 @@ describe('API Token', () => {
       // first call to load original permissions
       .mockResolvedValueOnce(
         Promise.resolve(
-          originalToken.permissions.map(p => {
+          originalToken.permissions.map((p) => {
             return {
               action: p,
             };
@@ -337,7 +337,7 @@ describe('API Token', () => {
       // second call to check new permissions
       .mockResolvedValueOnce(
         Promise.resolve(
-          updatedAttributes.permissions.map(p => {
+          updatedAttributes.permissions.map((p) => {
             return {
               action: p,
             };
@@ -433,7 +433,7 @@ describe('API Token', () => {
       // first call to load original permissions
       .mockResolvedValueOnce(
         Promise.resolve(
-          originalToken.permissions.map(p => {
+          originalToken.permissions.map((p) => {
             return {
               action: p,
             };
@@ -443,7 +443,7 @@ describe('API Token', () => {
       // second call to check new permissions
       .mockResolvedValueOnce(
         Promise.resolve(
-          originalToken.permissions.map(p => {
+          originalToken.permissions.map((p) => {
             return {
               action: p,
             };

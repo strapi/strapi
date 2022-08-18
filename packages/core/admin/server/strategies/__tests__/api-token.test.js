@@ -115,7 +115,7 @@ describe('API Token Auth Strategy', () => {
 
     // mock ability.can (since normally it only gets added to credentials in authenticate)
     const ability = {
-      can: jest.fn(ability => {
+      can: jest.fn((ability) => {
         if (customApiToken.permissions.includes(ability)) return true;
         return false;
       }),
