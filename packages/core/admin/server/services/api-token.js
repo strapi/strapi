@@ -109,16 +109,13 @@ const create = async attributes => {
     //   populate: POPULATE_FIELDS,
     //   data: attributes.permissions.map(action => ({ action, token: apiToken })),
     // });
-
-    let promises = [];
-    attributes.permissions.forEach(action => {
-      promises.push(
+    await Promise.all(
+      attributes.permissions.map(action =>
         strapi.query('admin::token-permission').create({
           data: { action, token: apiToken },
         })
-      );
-    });
-    await Promise.all(promises);
+      )
+    );
 
     const currentPermissions = await strapi.entityService.load(
       'admin::api-token',
@@ -250,15 +247,13 @@ const update = async (id, attributes) => {
 
     // TODO: improve efficiency here
     // method using a loop -- works but very inefficient
-    let promises = [];
-    actionsToDelete.forEach(action => {
-      promises.push(
+    await Promise.all(
+      actionsToDelete.map(action =>
         strapi.query('admin::token-permission').delete({
           where: { action, token: id },
         })
-      );
-    });
-    await Promise.all(promises);
+      )
+    );
 
     // method using deleteMany -- leaves relations in _links table!
     // await strapi
@@ -267,15 +262,13 @@ const update = async (id, attributes) => {
 
     // TODO: improve efficiency here
     // using a loop -- works but very inefficient
-    promises = [];
-    actionsToAdd.forEach(action => {
-      promises.push(
+    await Promise.all(
+      actionsToAdd.map(action =>
         strapi.query('admin::token-permission').create({
           data: { action, token: id },
         })
-      );
-    });
-    await Promise.all(promises);
+      )
+    );
 
     // method using createMany -- doesn't create relations in _links table!
     // await strapi
