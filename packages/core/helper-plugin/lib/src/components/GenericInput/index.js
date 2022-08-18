@@ -25,7 +25,6 @@ import NotSupported from './NotSupported';
 
 const GenericInput = ({
   autoComplete,
-  customFieldUid,
   customInputs,
   description,
   disabled,
@@ -438,7 +437,6 @@ const GenericInput = ({
 GenericInput.defaultProps = {
   autoComplete: undefined,
   customInputs: null,
-  customFieldUid: null,
   description: null,
   disabled: false,
   error: '',
@@ -454,7 +452,6 @@ GenericInput.defaultProps = {
 GenericInput.propTypes = {
   autoComplete: PropTypes.string,
   customInputs: PropTypes.object,
-  customFieldUid: PropTypes.string,
   description: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,

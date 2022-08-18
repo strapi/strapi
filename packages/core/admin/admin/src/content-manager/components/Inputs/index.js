@@ -255,7 +255,6 @@ function Inputs({
       error={error}
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
-      customFieldUid={customFieldUid}
       customInputs={customInputs}
       multiple={fieldSchema.multiple || false}
       name={keys}
