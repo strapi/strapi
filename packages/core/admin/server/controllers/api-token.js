@@ -86,6 +86,11 @@ module.exports = {
       attributes.description = trim(body.description);
     }
 
+    // Don't allow updating lastUsed time
+    if (has(attributes, 'lastUsed')) {
+      throw new ApplicationError('lastUsed cannot be updated');
+    }
+
     await validateApiTokenUpdateInput(attributes);
 
     const apiTokenExists = await apiTokenService.getById(id);
