@@ -5,7 +5,13 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
-import { GenericInput, NotAllowedInput, useLibrary, useCustomFields } from '@strapi/helper-plugin';
+import {
+  GenericInput,
+  NotAllowedInput,
+  LoadingIndicatorPage,
+  useLibrary,
+  useCustomFields,
+} from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
@@ -21,6 +27,7 @@ import {
   select,
   VALIDATIONS_TO_OMIT,
 } from './utils';
+import InputLoader from './InputLoader';
 
 function Inputs({
   allowedFields,
@@ -228,12 +235,15 @@ function Inputs({
 
   if (customFieldUid) {
     const customField = customFieldsRegistry.get(customFieldUid);
-    const CustomFieldInput = React.lazy(customField.components.Input);
+    // const CustomFieldInput = TestColorPicker;
+    const CustomFieldInput = (props) => (
+      <InputLoader component={customField.components.Input} {...props} />
+    );
     customInputs[customFieldUid] = CustomFieldInput;
   }
 
   return (
-    <Suspense fallback="loading...">
+    <Suspense fallback={<LoadingIndicatorPage />}>
       <GenericInput
         attribute={fieldSchema}
         autoComplete="new-password"
