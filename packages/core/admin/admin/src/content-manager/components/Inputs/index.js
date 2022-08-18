@@ -1,17 +1,11 @@
-import React, { Suspense, memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
-import {
-  GenericInput,
-  NotAllowedInput,
-  LoadingIndicatorPage,
-  useLibrary,
-  useCustomFields,
-} from '@strapi/helper-plugin';
+import { GenericInput, NotAllowedInput, useLibrary, useCustomFields } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
@@ -250,33 +244,31 @@ function Inputs({
   }
 
   return (
-    <Suspense fallback={<LoadingIndicatorPage />}>
-      <GenericInput
-        attribute={fieldSchema}
-        autoComplete="new-password"
-        intlLabel={{ id: label, defaultMessage: label }}
-        // in case the default value of the boolean is null, attribute.default doesn't exist
-        isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
-        description={description ? { id: description, defaultMessage: description } : null}
-        disabled={shouldDisableField}
-        error={error}
-        labelAction={labelAction}
-        contentTypeUID={currentContentTypeLayout.uid}
-        customFieldUid={customFieldUid}
-        customInputs={customInputs}
-        multiple={fieldSchema.multiple || false}
-        name={keys}
-        onChange={onChange}
-        options={options}
-        placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
-        required={fieldSchema.required || false}
-        step={step}
-        type={customFieldUid || inputType}
-        // validations={validations}
-        value={inputValue}
-        withDefaultValue={false}
-      />
-    </Suspense>
+    <GenericInput
+      attribute={fieldSchema}
+      autoComplete="new-password"
+      intlLabel={{ id: label, defaultMessage: label }}
+      // in case the default value of the boolean is null, attribute.default doesn't exist
+      isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
+      description={description ? { id: description, defaultMessage: description } : null}
+      disabled={shouldDisableField}
+      error={error}
+      labelAction={labelAction}
+      contentTypeUID={currentContentTypeLayout.uid}
+      customFieldUid={customFieldUid}
+      customInputs={customInputs}
+      multiple={fieldSchema.multiple || false}
+      name={keys}
+      onChange={onChange}
+      options={options}
+      placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
+      required={fieldSchema.required || false}
+      step={step}
+      type={customFieldUid || inputType}
+      // validations={validations}
+      value={inputValue}
+      withDefaultValue={false}
+    />
   );
 }
 
