@@ -92,7 +92,7 @@ const layout = {
   uid: 'api::restaurant.restaurant',
 };
 
-const makeApp = history => (
+const makeApp = (history) => (
   <Router history={history}>
     <ModelsContext.Provider value={{ refetchData: jest.fn() }}>
       <QueryClientProvider client={client}>

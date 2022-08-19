@@ -73,7 +73,7 @@ const createAsyncParallelHook = () => ({
   ...createHook(),
 
   async call(context) {
-    const promises = this.getHandlers().map(handler => handler(cloneDeep(context)));
+    const promises = this.getHandlers().map((handler) => handler(cloneDeep(context)));
 
     return Promise.all(promises);
   },

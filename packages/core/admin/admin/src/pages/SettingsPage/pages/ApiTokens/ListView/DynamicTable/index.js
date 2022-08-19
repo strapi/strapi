@@ -1,4 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { useHistory } from 'react-router-dom';
+
 import { Typography } from '@strapi/design-system/Typography';
 import { Tbody, Tr, Td } from '@strapi/design-system/Table';
 import { Flex } from '@strapi/design-system/Flex';
@@ -9,8 +12,6 @@ import {
   pxToRem,
   useTracking,
 } from '@strapi/helper-plugin';
-import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
 import DeleteButton from './DeleteButton';
 import UpdateButton from './UpdateButton';
 import ReadButton from './ReadButton';
@@ -32,12 +33,12 @@ const TableRows = ({ canDelete, canUpdate, canRead, onClickDelete, withBulkActio
 
   return (
     <Tbody>
-      {apiTokens.map(apiToken => {
+      {apiTokens.map((apiToken) => {
         return (
           <Tr
             key={apiToken.id}
             {...onRowClick({
-              fn: () => {
+              fn() {
                 trackUsage('willEditTokenFromList');
                 push(`${pathname}/${apiToken.id}`);
               },
@@ -92,7 +93,7 @@ TableRows.defaultProps = {
   canDelete: false,
   canUpdate: false,
   canRead: false,
-  onClickDelete: () => {},
+  onClickDelete() {},
   rows: [],
   withBulkActions: false,
 };

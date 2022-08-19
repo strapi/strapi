@@ -2,7 +2,7 @@
 
 const tsUtils = require('@strapi/typescript-utils');
 
-module.exports = async dir => {
+module.exports = async (dir) => {
   const appDir = dir || process.cwd();
   const isTSProject = await tsUtils.isUsingTypeScript(appDir);
   const outDir = await tsUtils.resolveOutDir(appDir);

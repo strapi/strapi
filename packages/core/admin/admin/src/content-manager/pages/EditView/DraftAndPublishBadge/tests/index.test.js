@@ -12,7 +12,7 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { DraftAndPublishBadge } from '../index';
 
-const makeApp = props => (
+const makeApp = (props) => (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} defaultLocale="en">
       <DraftAndPublishBadge {...props} />

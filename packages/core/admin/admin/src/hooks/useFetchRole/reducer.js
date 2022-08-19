@@ -8,7 +8,7 @@ export const initialState = {
 };
 
 const reducer = (state, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'GET_DATA_SUCCEEDED': {
         draftState.role = action.role;

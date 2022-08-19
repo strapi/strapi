@@ -41,7 +41,7 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed,
 
   const handleChange = (name, values) => {
     setState(
-      produce(draft => {
+      produce((draft) => {
         if (!draft[name]) {
           draft[name] = {};
         }
@@ -76,7 +76,7 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed,
     <ModalLayout labelledBy="condition-modal-breadcrumbs" onClose={onClosed}>
       <ModalHeader>
         <Breadcrumbs id="condition-modal-breadcrumbs" label={headerBreadCrumbs.join(', ')}>
-          {headerBreadCrumbs.map(label => (
+          {headerBreadCrumbs.map((label) => (
             <Crumb key={label}>
               {upperFirst(
                 formatMessage({

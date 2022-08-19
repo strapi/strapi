@@ -18,12 +18,12 @@ const SelectCategory = ({ error, intlLabel, name, onChange, value }) => {
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const label = formatMessage(intlLabel);
 
-  const handleChange = value => {
+  const handleChange = (value) => {
     onChange({ target: { name, value, type: 'select-category' } });
   };
 
-  const handleCreateOption = value => {
-    setCategories(prev => [...prev, value]);
+  const handleCreateOption = (value) => {
+    setCategories((prev) => [...prev, value]);
     handleChange(value);
   };
 
@@ -37,7 +37,7 @@ const SelectCategory = ({ error, intlLabel, name, onChange, value }) => {
       onCreateOption={handleCreateOption}
       value={value}
     >
-      {categories.map(category => (
+      {categories.map((category) => (
         <ComboboxOption key={category} value={category}>
           {category}
         </ComboboxOption>

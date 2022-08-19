@@ -18,7 +18,7 @@ const LocaleSelect = React.memo(({ value, onClear, onLocaleChange, error }) => {
   const { locales } = useLocales();
 
   const options = (defaultLocales || [])
-    .map(locale => ({
+    .map((locale) => ({
       label: locale.name,
       value: locale.code,
     }))
@@ -40,8 +40,8 @@ const LocaleSelect = React.memo(({ value, onClear, onLocaleChange, error }) => {
       })}
       value={computedValue}
       onClear={value ? onClear : undefined}
-      onChange={selectedLocaleKey => {
-        const selectedLocale = options.find(locale => locale.value === selectedLocaleKey);
+      onChange={(selectedLocaleKey) => {
+        const selectedLocale = options.find((locale) => locale.value === selectedLocaleKey);
 
         if (selectedLocale) {
           onLocaleChange({ code: selectedLocale.value, displayName: selectedLocale.label });
@@ -52,7 +52,7 @@ const LocaleSelect = React.memo(({ value, onClear, onLocaleChange, error }) => {
         defaultMessage: 'Select',
       })}
     >
-      {options.map(option => (
+      {options.map((option) => (
         <ComboboxOption value={option.value} key={option.value}>
           {option.label}
         </ComboboxOption>
@@ -64,7 +64,7 @@ const LocaleSelect = React.memo(({ value, onClear, onLocaleChange, error }) => {
 LocaleSelect.defaultProps = {
   error: undefined,
   value: undefined,
-  onClear: () => {},
+  onClear() {},
   onLocaleChange: () => undefined,
 };
 

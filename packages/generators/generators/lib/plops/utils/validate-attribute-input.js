@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = input => {
+module.exports = (input) => {
   const regex = /^[A-Za-z-|_]+$/g;
 
   if (!input) {

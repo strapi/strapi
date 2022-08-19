@@ -30,22 +30,27 @@ const defaults = {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = config => (ctx, next) => {
-  let helmetConfig = defaultsDeep(defaults, config);
 
-  if (
-    ctx.method === 'GET' &&
-    ['/graphql', '/documentation'].some(str => ctx.path.startsWith(str))
-  ) {
-    helmetConfig = merge(helmetConfig, {
-      contentSecurityPolicy: {
-        directives: {
-          'script-src': ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net'],
-          'img-src': ["'self'", 'data:', 'cdn.jsdelivr.net', 'strapi.io'],
+module.exports =
+  (config, { strapi }) =>
+  (ctx, next) => {
+    let helmetConfig = defaultsDeep(defaults, config);
+    const { config: gqlConfig } = strapi.plugin('graphql');
+    const gqlEndpoint = gqlConfig('endpoint');
+
+    if (
+      ctx.method === 'GET' &&
+      [gqlEndpoint, '/documentation'].some((str) => ctx.path.startsWith(str))
+    ) {
+      helmetConfig = merge(helmetConfig, {
+        contentSecurityPolicy: {
+          directives: {
+            'script-src': ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net'],
+            'img-src': ["'self'", 'data:', 'cdn.jsdelivr.net', 'strapi.io'],
+          },
         },
-      },
-    });
-  }
+      });
+    }
 
-  return helmet(helmetConfig)(ctx, next);
-};
+    return helmet(helmetConfig)(ctx, next);
+  };

@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { subject } = require('@casl/ability');
-const permissions = require('../');
+const permissions = require('..');
 
 describe('Permissions Engine', () => {
   const allowedCondition = 'plugin::test.isAuthor';
@@ -13,14 +13,16 @@ describe('Permissions Engine', () => {
       name: 'plugin::test.isAuthor',
       category: 'default',
       async handler() {
-        return new Promise(resolve => resolve(true));
+        // eslint-disable-next-line no-promise-executor-return
+        return new Promise((resolve) => resolve(true));
       },
     },
     {
       name: 'plugin::test.isAdmin',
       category: 'default',
       async handler() {
-        return new Promise(resolve => resolve(false));
+        // eslint-disable-next-line no-promise-executor-return
+        return new Promise((resolve) => resolve(false));
       },
     },
     {
@@ -35,7 +37,7 @@ describe('Permissions Engine', () => {
   const providers = {
     condition: {
       get(condition) {
-        const c = conditions.find(c => c.name === condition);
+        const c = conditions.find((c) => c.name === condition);
         if (c) return c;
         return {
           async handler() {
@@ -53,8 +55,8 @@ describe('Permissions Engine', () => {
    *
    * @return {(params) => boolean | undefined)}
    */
-  const generateInvalidateActionHook = action => {
-    return params => {
+  const generateInvalidateActionHook = (action) => {
+    return (params) => {
       if (params.permission.action === action) {
         return false;
       }
@@ -96,7 +98,7 @@ describe('Permissions Engine', () => {
     engineHooks,
     abilityOptions,
   }) => {
-    let registerFunctions = [];
+    const registerFunctions = [];
     const engine = buildEngineWithHooks({ providers: engineProviders }, engineHooks);
     const engineCrf = engine.createRegisterFunction;
     const createRegisterFunction = jest
@@ -127,8 +129,8 @@ describe('Permissions Engine', () => {
    *   fields: [string]
    * }}
    */
-  const expectedAbilityRules = permissions => {
-    return permissions.map(permission => {
+  const expectedAbilityRules = (permissions) => {
+    return permissions.map((permission) => {
       const rules = _.omit(permission, ['properties', 'conditions']);
 
       if (permission.properties && permission.properties.fields) {

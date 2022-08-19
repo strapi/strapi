@@ -90,7 +90,7 @@ const resolveMiddlewares = (config, strapi) => {
     );
   }
 
-  middlewares.forEach(middleware => {
+  middlewares.forEach((middleware) => {
     // NOTE: we replace null middlewares by a dumb one to avoid having to filter later on
     if (isNil(middleware.handler)) {
       middleware.handler = (_, next) => next();

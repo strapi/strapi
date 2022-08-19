@@ -5,13 +5,13 @@ const { merge } = require('lodash/fp');
 const { readAllTranslationFiles } = require('../utils/translation-files');
 const allowedKeys = require('./allowed-keys');
 
-const printResults = results => {
+const printResults = (results) => {
   let valuesCount = 0;
   let keysCount = 0;
 
   Object.entries(results).forEach(([value, pkgs]) => {
     Object.entries(pkgs).forEach(([packageName, keys]) => {
-      keys.forEach(key => {
+      keys.forEach((key) => {
         console.log(`"${chalk.yellow(value)}" ${packageName} ${chalk.blue(key)}`);
         keysCount++;
       });
@@ -24,7 +24,10 @@ const printResults = results => {
   console.log(`${keysCount} keys can be merged`);
 };
 
-const getDuplicatesObject = (prevDups = {}, { f1Key, f2Keys, f1PackageName, f2PackageName }) => {
+const getDuplicatesObject = (
+  prevDups = {},
+  { f1Key, f2Keys, f1PackageName, f2PackageName } = {}
+) => {
   const f1PackagePrevDups = prevDups[f1PackageName] || [];
   const f2PackagePrevDups = prevDups[f2PackageName] || [];
   const duplicates = {};
@@ -72,7 +75,7 @@ const findDuplicatedTranslations = () => {
 
   // Separate core/admin file from plugin files
   const [coreFile] = files.splice(
-    files.findIndex(file => file.packageName === 'core/admin'),
+    files.findIndex((file) => file.packageName === 'core/admin'),
     1
   );
   const pluginFiles = files;
@@ -80,7 +83,7 @@ const findDuplicatedTranslations = () => {
   // Find duplicates inside every file separately
   const coreAdminDuplicates = findDuplicates(coreFile, coreFile, { sameFile: true });
   let crossPackagesDuplicates = { ...coreAdminDuplicates };
-  pluginFiles.forEach(pluginFile => {
+  pluginFiles.forEach((pluginFile) => {
     crossPackagesDuplicates = merge(
       crossPackagesDuplicates,
       findDuplicates(pluginFile, pluginFile, { sameFile: true })
@@ -90,7 +93,7 @@ const findDuplicatedTranslations = () => {
   // Find duplicates between core/admin and every plugin file
   // Merge the results with core/admin duplicates to avoid showing the same key twice
   // (in case core/admin contains duplicate values that also exists in a plugin)
-  pluginFiles.forEach(file => {
+  pluginFiles.forEach((file) => {
     crossPackagesDuplicates = merge(crossPackagesDuplicates, findDuplicates(coreFile, file));
   });
 

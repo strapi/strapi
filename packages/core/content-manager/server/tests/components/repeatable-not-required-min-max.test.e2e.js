@@ -36,10 +36,7 @@ describe('Non repeatable and Not required component', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
-    await builder
-      .addComponent(component)
-      .addContentType(ct)
-      .build();
+    await builder.addComponent(component).addContentType(ct).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -83,7 +80,7 @@ describe('Non repeatable and Not required component', () => {
 
     test.each(['someString', 128219, false, {}, null])(
       'Throws if the field is not an array %p',
-      async value => {
+      async (value) => {
         const res = await rq.post('/', {
           body: {
             field: value,
@@ -205,7 +202,7 @@ describe('Non repeatable and Not required component', () => {
 
       expect(res.body.pagination).toBeDefined();
       expect(Array.isArray(res.body.results)).toBe(true);
-      res.body.results.forEach(entry => {
+      res.body.results.forEach((entry) => {
         expect(Array.isArray(entry.field)).toBe(true);
 
         if (entry.field.length === 0) return;
@@ -224,7 +221,7 @@ describe('Non repeatable and Not required component', () => {
   describe('PUT entry', () => {
     test.each(['someString', 128219, false, {}, null])(
       'Throws when sending invalid updated field %p',
-      async value => {
+      async (value) => {
         const res = await rq.post('/', {
           body: {
             field: [
@@ -509,8 +506,8 @@ describe('Non repeatable and Not required component', () => {
 
       expect(updateRes.statusCode).toBe(200);
 
-      const oldIds = res.body.field.map(val => val.id);
-      updateRes.body.field.forEach(val => {
+      const oldIds = res.body.field.map((val) => val.id);
+      updateRes.body.field.forEach((val) => {
         expect(oldIds.includes(val.id)).toBe(false);
       });
 

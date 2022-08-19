@@ -1,6 +1,6 @@
 'use strict';
 
-const withDefaultPagination = params => {
+const withDefaultPagination = (params) => {
   const { page = 1, pageSize = 10, ...rest } = params;
 
   return {

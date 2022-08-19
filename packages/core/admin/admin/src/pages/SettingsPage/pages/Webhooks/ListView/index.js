@@ -60,7 +60,7 @@ const ListView = () => {
   const { pathname } = useLocation();
   const rowsCount = webhooks.length;
   const webhooksToDeleteLength = webhooksToDelete.length;
-  const getWebhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
+  const getWebhookIndex = (id) => webhooks.findIndex((webhook) => webhook.id === id);
 
   useEffect(() => {
     isMounted.current = true;
@@ -108,7 +108,7 @@ const ListView = () => {
   };
 
   const handleToggleModal = () => {
-    setShowModal(prev => !prev);
+    setShowModal((prev) => !prev);
   };
 
   const handleConfirmDelete = () => {
@@ -169,7 +169,7 @@ const ListView = () => {
     setShowModal(false);
   };
 
-  const handleDeleteClick = id => {
+  const handleDeleteClick = (id) => {
     setShowModal(true);
 
     if (id !== 'all') {
@@ -235,7 +235,7 @@ const ListView = () => {
     });
   };
 
-  const handleGoTo = to => {
+  const handleGoTo = (to) => {
     push(`${pathname}/${to}`);
   };
 
@@ -363,7 +363,7 @@ const ListView = () => {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {webhooks.map(webhook => (
+                    {webhooks.map((webhook) => (
                       <Tr
                         key={webhook.id}
                         {...onRowClick({
@@ -378,7 +378,7 @@ const ListView = () => {
                               defaultMessage: 'Select',
                             })} ${webhook.name}`}
                             value={webhooksToDelete?.includes(webhook.id)}
-                            onValueChange={value => handleSelectOneCheckbox(value, webhook.id)}
+                            onValueChange={(value) => handleSelectOneCheckbox(value, webhook.id)}
                             id="select"
                             name="select"
                           />

@@ -6,7 +6,7 @@ const permissions = require('@strapi/permissions');
 const permissionDomain = require('../../domain/permission/index');
 const { getService } = require('../../utils');
 
-module.exports = params => {
+module.exports = (params) => {
   const { providers } = params;
 
   const engine = permissions.engine
@@ -29,7 +29,7 @@ module.exports = params => {
     /**
      * Remove invalid properties from the permission based on the action (applyToProperties)
      */
-    .on('format.permission', permission => {
+    .on('format.permission', (permission) => {
       const action = providers.action.get(permission.action);
       const properties = permission.properties || {};
 
@@ -41,7 +41,7 @@ module.exports = params => {
       );
 
       const permissionWithSanitizedProperties = invalidProperties.reduce(
-        property => permissionDomain.deleteProperty(property, permission),
+        (property) => permissionDomain.deleteProperty(property, permission),
         permission
       );
 

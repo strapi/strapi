@@ -19,7 +19,7 @@ const operatorsMap = {
   $not: '$not',
 };
 
-const mapKey = key => {
+const mapKey = (key) => {
   if (_.isString(key) && key.startsWith('$') && key in operatorsMap) {
     return operatorsMap[key];
   }
@@ -27,19 +27,19 @@ const mapKey = key => {
 };
 
 const buildCaslQuery = (ability, action, model) => {
-  return rulesToQuery(ability, action, model, o => o.conditions);
+  return rulesToQuery(ability, action, model, (o) => o.conditions);
 };
 
-const buildStrapiQuery = caslQuery => {
+const buildStrapiQuery = (caslQuery) => {
   return unwrapDeep(caslQuery);
 };
 
-const unwrapDeep = obj => {
+const unwrapDeep = (obj) => {
   if (!_.isPlainObject(obj) && !_.isArray(obj)) {
     return obj;
   }
   if (_.isArray(obj)) {
-    return obj.map(v => unwrapDeep(v));
+    return obj.map((v) => unwrapDeep(v));
   }
 
   return _.reduce(

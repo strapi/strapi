@@ -64,7 +64,7 @@ function ComponentFixture({ children }) {
 }
 
 function setup(...args) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     act(() => {
       resolve(renderHook(() => useFolders(...args), { wrapper: ComponentFixture }));
     });

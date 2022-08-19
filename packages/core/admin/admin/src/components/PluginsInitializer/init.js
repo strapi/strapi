@@ -1,4 +1,4 @@
-const init = plugins => {
+const init = (plugins) => {
   return {
     plugins: Object.keys(plugins).reduce((acc, current) => {
       acc[current] = { ...plugins[current] };

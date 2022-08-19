@@ -6,7 +6,7 @@ const tsUtils = require('@strapi/typescript-utils');
 
 const validateInput = require('./utils/validate-input');
 
-module.exports = plop => {
+module.exports = (plop) => {
   // API generator
   plop.setGenerator('api', {
     description: 'Generate a basic API',
@@ -15,7 +15,7 @@ module.exports = plop => {
         type: 'input',
         name: 'id',
         message: 'API name',
-        validate: input => validateInput(input),
+        validate: (input) => validateInput(input),
       },
       {
         type: 'confirm',
@@ -23,7 +23,7 @@ module.exports = plop => {
         message: 'Is this API for a plugin?',
       },
       {
-        when: answers => answers.isPluginApi,
+        when: (answers) => answers.isPluginApi,
         type: 'list',
         name: 'plugin',
         message: 'Plugin name',
@@ -36,7 +36,7 @@ module.exports = plop => {
           }
 
           const pluginsDir = await fs.readdir(pluginsPath, { withFileTypes: true });
-          const pluginsDirContent = pluginsDir.filter(fd => fd.isDirectory());
+          const pluginsDirContent = pluginsDir.filter((fd) => fd.isDirectory());
 
           if (pluginsDirContent.length === 0) {
             throw Error('The "plugins" directory is empty');
@@ -47,19 +47,20 @@ module.exports = plop => {
       },
     ],
     actions(answers) {
-      const filePath = answers.isPluginApi && answers.plugin ? 'plugins/{{plugin}}' : 'api/{{id}}';
+      const filePath =
+        answers.isPluginApi && answers.plugin ? 'plugins/{{ plugin }}' : 'api/{{ id }}';
       const currentDir = process.cwd();
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions = [
         {
           type: 'add',
-          path: `${filePath}/controllers/{{id}}.${language}`,
+          path: `${filePath}/controllers/{{ id }}.${language}`,
           templateFile: `templates/${language}/controller.${language}.hbs`,
         },
         {
           type: 'add',
-          path: `${filePath}/services/{{id}}.${language}`,
+          path: `${filePath}/services/{{ id }}.${language}`,
           templateFile: `templates/${language}/service.${language}.hbs`,
         },
       ];
@@ -71,7 +72,7 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/routes/{{id}}.${language}`,
+          path: `${filePath}/routes/{{ id }}.${language}`,
           templateFile: `templates/${language}/single-route.${language}.hbs`,
         },
         ...baseActions,

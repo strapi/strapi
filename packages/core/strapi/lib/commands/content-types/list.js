@@ -5,7 +5,7 @@ const chalk = require('chalk');
 
 const strapi = require('../../index');
 
-module.exports = async function() {
+module.exports = async function () {
   const appContext = await strapi.compile();
   const app = await strapi(appContext).register();
 
@@ -15,7 +15,7 @@ module.exports = async function() {
     head: [chalk.blue('Name')],
   });
 
-  list.forEach(name => infoTable.push([name]));
+  list.forEach((name) => infoTable.push([name]));
 
   console.log(infoTable.toString());
 

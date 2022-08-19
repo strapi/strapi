@@ -13,13 +13,17 @@ const nodeResolvePath = (modulePath, basedir, extensions) => {
   }
 };
 
-const toPosixPath = modulePath => {
+const toPosixPath = (modulePath) => {
   return modulePath.replace(/\\/g, '/');
+};
+
+const isRelativePath = (nodePath) => {
+  return nodePath.match(/^\.?\.\//);
 };
 
 const stripExtension = (modulePath, stripExtensions) => {
   let name = path.basename(modulePath);
-  stripExtensions.some(extension => {
+  stripExtensions.some((extension) => {
     if (name.endsWith(extension)) {
       name = name.slice(0, name.length - extension.length);
       return true;
@@ -34,7 +38,7 @@ const replaceExtension = (modulePath, opts) => {
   return path.join(path.dirname(modulePath), filename);
 };
 
-const toLocalPath = modulePath => {
+const toLocalPath = (modulePath) => {
   let localPath = modulePath.replace(/\/index$/, ''); // remove trailing /index
 
   if (!isRelativePath(localPath)) {
@@ -42,10 +46,6 @@ const toLocalPath = modulePath => {
   }
 
   return localPath;
-};
-
-const isRelativePath = nodePath => {
-  return nodePath.match(/^\.?\.\//);
 };
 
 module.exports = {

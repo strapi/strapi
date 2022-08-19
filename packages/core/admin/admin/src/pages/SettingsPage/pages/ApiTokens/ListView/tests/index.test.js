@@ -3,7 +3,7 @@ import { render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { useRBAC, TrackingContext } from '@strapi/helper-plugin';
+import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import { axiosInstance } from '../../../../../../core/utils';
@@ -45,10 +45,10 @@ const client = new QueryClient({
   },
 });
 
-const makeApp = history => {
+const makeApp = (history) => {
   return (
     <QueryClientProvider client={client}>
-      <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+      <TrackingProvider>
         <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
           <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
             <Theme>
@@ -60,7 +60,7 @@ const makeApp = history => {
             </Theme>
           </ThemeToggleProvider>
         </IntlProvider>
-      </TrackingContext.Provider>
+      </TrackingProvider>
     </QueryClientProvider>
   );
 };

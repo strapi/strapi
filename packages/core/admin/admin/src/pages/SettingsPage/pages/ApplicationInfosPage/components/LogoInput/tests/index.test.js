@@ -1,8 +1,10 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { render as renderTL, fireEvent, screen, waitFor } from '@testing-library/react';
+import { render as renderTL, fireEvent, screen, waitFor, configure } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import LogoInput from '../index';
+
+configure({ asyncUtilTimeout: 8000 });
 
 const getFakeSize = jest.fn(() => ({
   width: 500,
@@ -21,14 +23,14 @@ global.Image = class extends Image {
   }
 };
 
-const render = props =>
+const render = (props) =>
   renderTL(
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} textComponent="span">
         <LogoInput
           {...props}
           defaultLogo="/admin/defaultLogo.png"
-          onChangeLogo={() => jest.fn()}
+          onChangeLogo={jest.fn()}
           onResetMenuLogo={jest.fn()}
         />
       </IntlProvider>
@@ -172,7 +174,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
     it('should show error message when uploading wrong file format', async () => {
       render();
-      const changeLogoButton = document.querySelector('button');
+      const changeLogoButton = screen.getByRole('button');
       fireEvent.click(changeLogoButton);
       fireEvent.click(screen.getByText('From url'));
 
@@ -247,8 +249,11 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
     it('should accept upload and lead user to next modal', async () => {
       render();
+
       const changeLogoButton = document.querySelector('button');
+
       fireEvent.click(changeLogoButton);
+
       fireEvent.click(screen.getByText('From url'));
 
       const textInput = document.querySelector('input[name="logo-url"]');

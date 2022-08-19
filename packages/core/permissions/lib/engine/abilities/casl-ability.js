@@ -21,7 +21,7 @@ const allowedOperations = [
 
 const operations = pick(allowedOperations, sift);
 
-const conditionsMatcher = conditions => {
+const conditionsMatcher = (conditions) => {
   return sift.createQueryTester(conditions, { operations });
 };
 

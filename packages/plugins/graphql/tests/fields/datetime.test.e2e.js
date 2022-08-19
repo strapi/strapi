@@ -30,7 +30,7 @@ describe('Test Graphql API End to End', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    graphqlQuery = body => {
+    graphqlQuery = (body) => {
       return rq({
         url: '/graphql',
         method: 'POST',
@@ -47,7 +47,7 @@ describe('Test Graphql API End to End', () => {
   describe('GraphQL - Datetime field', () => {
     test.each(['2022-03-17T15:06:57.000Z', null])(
       'Can create an entity with datetime equals: %s',
-      async value => {
+      async (value) => {
         const res = await graphqlQuery({
           query: /* GraphQL */ `
             mutation createPost($data: PostInput!) {
@@ -84,7 +84,7 @@ describe('Test Graphql API End to End', () => {
 
     test.each(['2022-03-17', {}, [], 'something'])(
       'Cannot create an entity with datetime equals: %s',
-      async value => {
+      async (value) => {
         const res = await graphqlQuery({
           query: /* GraphQL */ `
             mutation createPost($data: PostInput!) {
@@ -117,7 +117,7 @@ describe('Test Graphql API End to End', () => {
       }
     );
 
-    test.each(['2022-03-17T15:06:57.878Z'])('Can filter query with datetime: %s', async value => {
+    test.each(['2022-03-17T15:06:57.878Z'])('Can filter query with datetime: %s', async (value) => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           query posts($myDatetime: DateTime!) {

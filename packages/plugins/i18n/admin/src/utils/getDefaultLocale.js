@@ -2,7 +2,7 @@ import get from 'lodash/get';
 
 const hasLocalePermission = (permissions, localeCode) => {
   if (permissions) {
-    const hasPermission = permissions.some(permission =>
+    const hasPermission = permissions.some((permission) =>
       get(permission, 'properties.locales', []).includes(localeCode)
     );
 
@@ -14,7 +14,7 @@ const hasLocalePermission = (permissions, localeCode) => {
   return false;
 };
 
-const getFirstLocale = permissions => {
+const getFirstLocale = (permissions) => {
   if (permissions && permissions.length > 0) {
     const firstAuthorizedNonDefaultLocale = get(permissions, [0, 'properties', 'locales', 0], null);
 
@@ -30,7 +30,7 @@ const getFirstLocale = permissions => {
  * Entry point of the module
  */
 const getDefaultLocale = (ctPermissions, locales = []) => {
-  const defaultLocale = locales.find(locale => locale.isDefault);
+  const defaultLocale = locales.find((locale) => locale.isDefault);
 
   if (!defaultLocale) {
     return null;

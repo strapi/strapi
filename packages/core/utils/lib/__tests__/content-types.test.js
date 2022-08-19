@@ -34,7 +34,7 @@ const createConfig = (privateAttributes = []) => ({
   get: jest.fn(() => privateAttributes),
 });
 
-const createModel = opts => ({
+const createModel = (opts) => ({
   ...opts,
 });
 

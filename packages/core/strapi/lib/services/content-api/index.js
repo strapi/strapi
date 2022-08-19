@@ -46,16 +46,18 @@ const createContentAPI = (/* strapi */) => {
 /**
  * Creates an handler which check that the permission's action exists in the action registry
  */
-const createValidatePermissionHandler = actionProvider => ({ permission }) => {
-  const action = actionProvider.get(permission.action);
+const createValidatePermissionHandler =
+  (actionProvider) =>
+  ({ permission }) => {
+    const action = actionProvider.get(permission.action);
 
-  // If the action isn't registered into the action provider, then ignore the permission and warn the user
-  if (!action) {
-    strapi.log.debug(
-      `Unknown action "${permission.action}" supplied when registering a new permission`
-    );
-    return false;
-  }
-};
+    // If the action isn't registered into the action provider, then ignore the permission and warn the user
+    if (!action) {
+      strapi.log.debug(
+        `Unknown action "${permission.action}" supplied when registering a new permission`
+      );
+      return false;
+    }
+  };
 
 module.exports = createContentAPI;
