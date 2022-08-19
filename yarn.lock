@@ -2313,17 +2313,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@koa/cors@3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@koa/cors/-/cors-3.1.0.tgz#618bb073438cfdbd3ebd0e648a76e33b84f3a3b2"
-  integrity sha512-7ulRC1da/rBa6kj6P4g2aJfnET3z8Uf3SWu60cjbtxTA5g8lxRdX/Bd2P92EagGwwAhANeNw8T8if99rJliR6Q==
-  dependencies:
-    vary "^1.1.2"
-
-"@koa/cors@^3.1.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@koa/cors/-/cors-3.3.0.tgz#b4c1c7ee303b7c968c8727f2a638a74675b50bb2"
-  integrity sha512-lzlkqLlL5Ond8jb6JLnVVDmD2OPym0r5kvZlMgAWiS9xle+Q5ulw1T358oW+RVguxUkANquZQz82i/STIRmsqQ==
+"@koa/cors@3.4.0", "@koa/cors@^3.1.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@koa/cors/-/cors-3.4.0.tgz#b585f899b9ba2cfceaff6ce6ed414ce8a11be04d"
+  integrity sha512-KLT0fI6oJiasMD57+/0AdWG3Wg0v59x7yHLyXKiXiwTqyCIbaRekmM6CjXsQXndobPdr3z+1pkp8l7OoPfhcYg==
   dependencies:
     vary "^1.1.2"
 
