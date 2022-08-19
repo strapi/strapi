@@ -7,7 +7,7 @@ module.exports = ({ strapi }) => {
     {
       name: 'color',
       plugin: 'mycustomfields',
-      type: 'text',
+      type: 'string',
     },
     {
       name: 'map',

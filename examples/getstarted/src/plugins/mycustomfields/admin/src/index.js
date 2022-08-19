@@ -26,7 +26,7 @@ export default {
       {
         name: 'color',
         pluginId: 'mycustomfields',
-        type: 'text',
+        type: 'string',
         icon: ColorPickerIcon,
         intlLabel: {
           id: 'mycustomfields.color.label',
@@ -121,7 +121,7 @@ export default {
               ],
             },
           ],
-          validator: args => ({
+          validator: (args) => ({
             format: yup.string().required({
               id: 'options.color-picker.format.error',
               defaultMessage: 'The color format is required',
@@ -134,7 +134,7 @@ export default {
   bootstrap(app) {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map(locale => {
+      locales.map((locale) => {
         return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
