@@ -27,6 +27,7 @@ class YupValidationError extends ValidationError {
     super();
     const { errors, message: yupMessage } = formatYupErrors(yupError);
     this.message = message || yupMessage;
+    if(errors.length > 0) this.message += ` (${errors.map(({message}) => `'${message}'`).join(', ')})`
     this.details = { errors };
   }
 }
