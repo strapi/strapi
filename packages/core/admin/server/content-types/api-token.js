@@ -60,5 +60,15 @@ module.exports = {
       configurable: false,
       required: false,
     },
+    expiresAt: {
+      type: 'datetime',
+      configurable: false,
+      required: false,
+    },
+    lifespan: {
+      type: 'number',
+      configurable: false,
+      required: false,
+    },
   },
 };

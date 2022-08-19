@@ -10,6 +10,7 @@ const apiTokenCreationSchema = yup
     description: yup.string().optional(),
     type: yup.string().oneOf(Object.values(constants.API_TOKEN_TYPE)).required(),
     permissions: yup.array().of(yup.string()).nullable(),
+    lifespan: yup.number().nullable(),
   })
   .noUnknown();
 

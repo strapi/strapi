@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const { isNumber, isNil } = require('lodash');
 const { omit, difference, isEmpty, map, isArray } = require('lodash/fp');
 const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
 const constants = require('./constants');
@@ -17,6 +18,8 @@ const constants = require('./constants');
  * @property {string} [description]
  * @property {string} accessKey
  * @property {number} lastUsed
+ * @property {number} lifespan
+ * @property {number} expiresAt
  * @property {TokenType} type
  * @property {(number|ApiTokenPermission)[]} [permissions]
  */
@@ -30,7 +33,17 @@ const constants = require('./constants');
  */
 
 /** @constant {Array<string>} */
-const SELECT_FIELDS = ['id', 'name', 'description', 'lastUsed', 'type', 'createdAt', 'updatedAt'];
+const SELECT_FIELDS = [
+  'id',
+  'name',
+  'description',
+  'lastUsed',
+  'type',
+  'lifespan',
+  'expiresAt',
+  'createdAt',
+  'updatedAt',
+];
 
 /** @constant {Array<string>} */
 const POPULATE_FIELDS = ['permissions'];
@@ -76,9 +89,26 @@ const hash = (accessKey) => {
 };
 
 /**
+ * @param {number} lifespan
+ *
+ * @returns {null|number}
+ */
+const getExpirationFields = (lifespan) => {
+  if (!isNumber(lifespan) && !isNil(lifespan)) {
+    throw new ValidationError('lifespan must be a number or null');
+  }
+
+  return {
+    lifespan: lifespan || null,
+    expiresAt: lifespan ? Date.now() + lifespan : null,
+  };
+};
+
+/**
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
+ * @param {number} attributes.lifespan
  * @param {string[]} [attributes.permissions]
  * @param {string} [attributes.description]
  *
@@ -96,6 +126,7 @@ const create = async (attributes) => {
     data: {
       ...omit('permissions', attributes),
       accessKey: hash(accessKey),
+      ...getExpirationFields(attributes.lifespan),
     },
   });
 

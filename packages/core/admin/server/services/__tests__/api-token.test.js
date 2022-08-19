@@ -10,7 +10,17 @@ describe('API Token', () => {
     hexedString: '6170692d746f6b656e5f746573742d72616e646f6d2d6279746573',
   };
 
-  const SELECT_FIELDS = ['id', 'name', 'description', 'lastUsed', 'type', 'createdAt', 'updatedAt'];
+  const SELECT_FIELDS = [
+    'id',
+    'name',
+    'description',
+    'lastUsed',
+    'type',
+    'lifespan',
+    'expiresAt',
+    'createdAt',
+    'updatedAt',
+  ];
 
   beforeAll(() => {
     jest
@@ -48,12 +58,16 @@ describe('API Token', () => {
         data: {
           ...attributes,
           accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          expiresAt: null,
+          lifespan: null,
         },
         populate: ['permissions'],
       });
       expect(res).toEqual({
         ...attributes,
         accessKey: mockedApiToken.hexedString,
+        expiresAt: null,
+        lifespan: null,
       });
     });
   });
