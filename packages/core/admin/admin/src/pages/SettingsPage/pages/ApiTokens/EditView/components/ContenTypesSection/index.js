@@ -5,11 +5,11 @@ import CollapsableContentType from '../CollapsableContentType';
 
 const ContentTypesSection = ({ section, name, ...props }) => {
   const [indexExpandedCollpsedContent, setIndexExpandedCollpsedContent] = useState(null);
-  const handleExpandedCollpsedContentIndex = index => setIndexExpandedCollpsedContent(index);
-  
-return (
-  <Box padding={4} background="neutral0">
-    {section &&
+  const handleExpandedCollpsedContentIndex = (index) => setIndexExpandedCollpsedContent(index);
+
+  return (
+    <Box padding={4} background="neutral0">
+      {section &&
         Object.keys(section).map((contentType, index) => (
           <CollapsableContentType
             key={contentType}
@@ -22,7 +22,7 @@ return (
             {...props}
           />
         ))}
-  </Box>
+    </Box>
   );
 };
 

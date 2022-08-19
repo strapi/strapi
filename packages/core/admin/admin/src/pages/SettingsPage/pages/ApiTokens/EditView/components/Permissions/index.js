@@ -22,7 +22,7 @@ const Permissions = ({ ...props }) => {
         })}
       >
         <Tabs>
-          {TAB_LABELS.map(tabLabel => (
+          {TAB_LABELS.map((tabLabel) => (
             <Tab key={tabLabel.id}>
               {formatMessage({ id: tabLabel.labelId, defaultMessage: tabLabel.defaultMessage })}
             </Tab>
