@@ -24,8 +24,8 @@ const tableHeaders = [
     },
   },
   {
-    name: 'updatedAt',
-    key: 'updatedAt',
+    name: 'lastUsedAt',
+    key: 'lastUsedAt',
     metadatas: {
       label: 'Last used',
       sortable: false,
