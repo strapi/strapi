@@ -1,6 +1,6 @@
 # Contribute to Strapi
 
-Strapi is an open-source project administered by [the Strapi team](https://strapi.io/about-us). We appreciate your interest and efforts to contribute to Strapi. See the [LICENSE](https://github.com/strapi/strapi/blob/master/LICENSE) licensing information. All work done is available on GitHub.
+Strapi is an open-source project administered by [the Strapi team](https://strapi.io/about-us). We appreciate your interest and efforts to contribute to Strapi. See the [LICENSE](https://github.com/strapi/strapi/blob/main/LICENSE) licensing information. All work done is available on GitHub.
 
 We highly appreciate your effort to contribute, but we recommend you talk to a maintainer before spending a lot of time making a pull request that may not align with the project roadmap. Whether it is from Strapi or contributors, every pull request goes through the same process.
 
@@ -51,7 +51,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
 
-- Fork the repository and create your new branch from `master`.
+- Fork the repository and create your new branch from `main`.
 - Run `yarn setup` in the root of the repository.
 - If you've fixed a bug or added code that should be tested, please make sure to add tests
 - Ensure the following test suites are passing:

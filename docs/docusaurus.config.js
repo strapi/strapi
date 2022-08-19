@@ -32,7 +32,7 @@ const config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
-          // editUrl: 'https://github.com/strapi/strapi/tree/master/docs//docs',
+          // editUrl: 'https://github.com/strapi/strapi/tree/main/docs//docs',
         },
         blog: false,
       },
