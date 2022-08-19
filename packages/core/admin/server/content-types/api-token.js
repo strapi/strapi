@@ -38,7 +38,7 @@ module.exports = {
       type: 'enumeration',
       enum: Object.values(constants.API_TOKEN_TYPE),
       configurable: false,
-      required: false,
+      required: true,
       default: constants.API_TOKEN_TYPE.READ_ONLY,
     },
     accessKey: {
@@ -46,6 +46,19 @@ module.exports = {
       minLength: 1,
       configurable: false,
       required: true,
+    },
+    lastUsedAt: {
+      type: 'datetime',
+      configurable: false,
+      required: false,
+    },
+    permissions: {
+      type: 'relation',
+      target: 'admin::token-permission',
+      relation: 'oneToMany',
+      mappedBy: 'token',
+      configurable: false,
+      required: false,
     },
   },
 };

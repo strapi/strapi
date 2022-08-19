@@ -1,5 +1,6 @@
 'use strict';
 
+const { castArray } = require('lodash/fp');
 const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 const { getService } = require('../utils');
@@ -37,29 +38,61 @@ const authenticate = async (ctx) => {
     return { authenticated: false };
   }
 
+  // update lastUsedAt
+  await apiTokenService.update(apiToken.id, {
+    lastUsedAt: new Date(),
+  });
+
+  if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
+    const ability = await strapi.contentAPI.permissions.engine.generateAbility(
+      apiToken.permissions.map((action) => ({ action }))
+    );
+
+    return { authenticated: true, ability, credentials: apiToken };
+  }
+
   return { authenticated: true, credentials: apiToken };
 };
 
 /** @type {import('.').VerifyFunction} */
 const verify = (auth, config) => {
-  const { credentials: apiToken } = auth;
+  const { credentials: apiToken, ability } = auth;
 
   if (!apiToken) {
     throw new UnauthorizedError();
   }
 
+  // Full access
   if (apiToken.type === constants.API_TOKEN_TYPE.FULL_ACCESS) {
     return;
   }
 
-  /**
-   * If you don't have `full-access` you can only access `find` and `findOne`
-   * scopes. If the route has no scope, then you can't get access to it.
-   */
+  // Read only
+  if (apiToken.type === constants.API_TOKEN_TYPE.READ_ONLY) {
+    /**
+     * If you don't have `full-access` you can only access `find` and `findOne`
+     * scopes. If the route has no scope, then you can't get access to it.
+     */
+    const scopes = castArray(config.scope);
 
-  const scopes = Array.isArray(config.scope) ? config.scope : [config.scope];
-  if (config.scope && scopes.every(isReadScope)) {
-    return;
+    if (config.scope && scopes.every(isReadScope)) {
+      return;
+    }
+  }
+
+  // Custom
+  else if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
+    if (!ability) {
+      throw new ForbiddenError();
+    }
+
+    const scopes = castArray(config.scope);
+
+    const isAllowed = scopes.every((scope) => ability.can(scope));
+
+    if (isAllowed) {
+      return;
+    }
   }
 
   throw new ForbiddenError();
