@@ -61,9 +61,11 @@ const TableRows = ({ canDelete, canUpdate, canRead, onClickDelete, withBulkActio
               </Typography>
             </Td>
             <Td>
-              <Typography textColor="neutral800">
-                <RelativeTime timestamp={new Date(apiToken.lastUsedAt)} />
-              </Typography>
+              {apiToken.lastUsedAt && (
+                <Typography textColor="neutral800">
+                  <RelativeTime timestamp={new Date(apiToken.lastUsedAt)} />
+                </Typography>
+              )}
             </Td>
 
             {withBulkActions && (
