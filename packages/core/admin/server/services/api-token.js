@@ -14,11 +14,11 @@ const constants = require('./constants');
  *
  * @property {number|string} id
  * @property {string} name
- * @property {string} [description]
+ * @property {string} description
  * @property {string} accessKey
  * @property {number} lastUsedAt
  * @property {TokenType} type
- * @property {(number|ApiTokenPermission)[]} [permissions]
+ * @property {(number|ApiTokenPermission)[]} permissions
  */
 
 /**
@@ -26,7 +26,7 @@ const constants = require('./constants');
  *
  * @property {number|string} id
  * @property {string} action
- * @property {ApiToken|number} [token]
+ * @property {ApiToken|number} token
  */
 
 /** @constant {Array<string>} */
@@ -49,11 +49,11 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
 
 /**
  * @param {Object} whereParams
- * @param {string|number} [whereParams.id]
- * @param {string} [whereParams.name]
- * @param {number} [whereParams.lastUsedAt]
- * @param {string} [whereParams.description]
- * @param {string} [whereParams.accessKey]
+ * @param {string|number} whereParams.id
+ * @param {string} whereParams.name
+ * @param {number} whereParams.lastUsedAt
+ * @param {string} whereParams.description
+ * @param {string} whereParams.accessKey
  *
  * @returns {Promise<boolean>}
  */
@@ -79,8 +79,8 @@ const hash = (accessKey) => {
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
- * @param {string[]} [attributes.permissions]
- * @param {string} [attributes.description]
+ * @param {string[]} attributes.permissions
+ * @param {string} attributes.description
  *
  * @returns {Promise<ApiToken>}
  */
@@ -199,8 +199,8 @@ const getByName = async (name) => {
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
  * @param {number} attributes.lastUsedAt
- * @param {string[]} [attributes.permissions]
- * @param {string} [attributes.description]
+ * @param {string[]} attributes.permissions
+ * @param {string} attributes.description
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
@@ -310,11 +310,11 @@ const update = async (id, attributes) => {
 
 /**
  * @param {Object} whereParams
- * @param {string|number} [whereParams.id]
- * @param {string} [whereParams.name]
- * @param {number} [whereParams.lastUsedAt]
- * @param {string} [whereParams.description]
- * @param {string} [whereParams.accessKey]
+ * @param {string|number} whereParams.id
+ * @param {string} whereParams.name
+ * @param {number} whereParams.lastUsedAt
+ * @param {string} whereParams.description
+ * @param {string} whereParams.accessKey
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'> | null>}
  */
