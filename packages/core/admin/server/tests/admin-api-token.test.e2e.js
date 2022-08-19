@@ -138,7 +138,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: body.type,
       id: expect.any(Number),
       createdAt: expect.any(String),
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
   });
@@ -197,7 +197,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: body.type,
       id: expect.any(Number),
       createdAt: expect.any(String),
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
   });
@@ -225,7 +225,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: body.type,
       id: expect.any(Number),
       createdAt: expect.any(String),
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
   });
@@ -277,7 +277,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: body.type,
       id: expect.any(Number),
       createdAt: expect.any(String),
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
   });
@@ -304,7 +304,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: body.type,
       id: expect.any(Number),
       createdAt: expect.any(String),
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
   });
@@ -352,7 +352,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: token.type,
       id: token.id,
       createdAt: token.createdAt,
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
   });
@@ -385,7 +385,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: token.type,
       id: token.id,
       createdAt: token.createdAt,
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
   });
@@ -409,7 +409,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: token.type,
       id: token.id,
       createdAt: token.createdAt,
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
   });
@@ -467,7 +467,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: updatedBody.type,
       id: token.id,
       createdAt: token.createdAt,
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
     // expect(updatedRes.body.data.updated)
@@ -519,7 +519,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: token.type,
       id: token.id,
       createdAt: token.createdAt,
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
   });
@@ -578,7 +578,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: token.type,
       id: token.id,
       createdAt: token.createdAt,
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
   });
@@ -604,7 +604,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       type: token.type,
       id: token.id,
       createdAt: token.createdAt,
-      lastUsed: null,
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
   });

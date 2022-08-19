@@ -10,7 +10,15 @@ describe('API Token', () => {
     hexedString: '6170692d746f6b656e5f746573742d72616e646f6d2d6279746573',
   };
 
-  const SELECT_FIELDS = ['id', 'name', 'description', 'lastUsed', 'type', 'createdAt', 'updatedAt'];
+  const SELECT_FIELDS = [
+    'id',
+    'name',
+    'description',
+    'lastUsedAt',
+    'type',
+    'createdAt',
+    'updatedAt',
+  ];
 
   beforeAll(() => {
     jest
