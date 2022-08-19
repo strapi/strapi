@@ -24,7 +24,7 @@
     "test:unit": "jest --verbose"
   },
   "dependencies": {
-    "@sentry/node": "6.19.6"
+    "@sentry/node": "6.19.7"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.0.0"
