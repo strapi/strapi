@@ -35,6 +35,11 @@ const SELECT_FIELDS = ['id', 'name', 'description', 'lastUsedAt', 'type', 'creat
 /** @constant {Array<string>} */
 const POPULATE_FIELDS = ['permissions'];
 
+/**
+ * Assert that a token's permissions attribute is valid for its type
+ *
+ * @param {ApiToken} token
+ */
 const assertCustomTokenPermissionsValidity = (attributes) => {
   // Ensure non-custom tokens doesn't have permissions
   if (attributes.type !== constants.API_TOKEN_TYPE.CUSTOM && !isEmpty(attributes.permissions)) {
@@ -46,7 +51,10 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
     throw new ValidationError('Missing permissions attribute for custom token');
   }
 };
+
 /**
+ * Flatten a token's database permissions objects to an array of strings
+ *
  * @param {ApiToken} token
  *
  * @returns {ApiToken}
@@ -60,6 +68,8 @@ const flattenTokenPermissions = (token) => {
 };
 
 /**
+ *  Get a token
+ *
  * @param {Object} whereParams
  * @param {string|number} whereParams.id
  * @param {string} whereParams.name
@@ -83,6 +93,8 @@ const getBy = async (whereParams = {}) => {
 };
 
 /**
+ * Check if token exists
+ *
  * @param {Object} whereParams
  * @param {string|number} whereParams.id
  * @param {string} whereParams.name
@@ -99,6 +111,8 @@ const exists = async (whereParams = {}) => {
 };
 
 /**
+ * Return a secure sha512 hash of an accessKey
+ *
  * @param {string} accessKey
  *
  * @returns {string}
@@ -111,6 +125,8 @@ const hash = (accessKey) => {
 };
 
 /**
+ * Create a token and its permissions
+ *
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
@@ -186,6 +202,8 @@ For security reasons, prefer storing the secret in an environment variable and r
 };
 
 /**
+ * Return a list of all tokens and their permissions
+ *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const list = async () => {
@@ -200,6 +218,8 @@ const list = async () => {
 };
 
 /**
+ * Revoke (delete) a token
+ *
  * @param {string|number} id
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
@@ -211,6 +231,8 @@ const revoke = async (id) => {
 };
 
 /**
+ * Retrieve a token by id
+ *
  * @param {string|number} id
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
@@ -220,6 +242,8 @@ const getById = async (id) => {
 };
 
 /**
+ * Retrieve a token by name
+ *
  * @param {string} name
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
@@ -229,6 +253,8 @@ const getByName = async (name) => {
 };
 
 /**
+ * Update a token and its permissions
+ *
  * @param {string|number} id
  * @param {Object} attributes
  * @param {TokenType} attributes.type
