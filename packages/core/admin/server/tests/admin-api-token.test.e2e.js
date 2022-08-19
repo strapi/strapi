@@ -1,41 +1,29 @@
 'use strict';
 
+const { omit, map, orderBy } = require('lodash');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
-/**
- * == Test Suite Overview ==
- *
- * N°   Description
- * -------------------------------------------
- * 1. Fails to create an api token (missing parameters from the body)
- * 2. Fails to create an api token (invalid `type` in the body)
- * 3. Creates an api token (successfully)
- * 4. Creates an api token without a description (successfully)
- * 5. Creates an api token with trimmed description and name (successfully)
- * 6. List all tokens (successfully)
- * 7. Deletes a token (successfully)
- * 8. Does not return an error if the ressource to delete does not exist
- * 9. Retrieves a token (successfully)
- * 10. Returns a 404 if the ressource to retrieve does not exist
- * 11. Updates a token (successfully)
- * 12. Returns a 404 if the ressource to update does not exist
- * 13. Updates a token with partial payload (successfully)
- * 14. Fails to update an api token (invalid `type` in the body)
- * 15. Updates a token when passing a `null` description (successfully)
- * 16. Updates a token but not the description if no description is passed (successfully)
- */
-
-describe('Admin API Token CRUD (e2e)', () => {
+describe('Admin API Token v2 CRUD (e2e)', () => {
   let rq;
   let strapi;
 
-  const apiTokens = [];
+  const deleteAllTokens = async () => {
+    const tokens = await strapi.admin.services['api-token'].list();
+    const promises = [];
+    tokens.forEach(({ id }) => {
+      promises.push(strapi.admin.services['api-token'].revoke(id));
+    });
+    await Promise.all(promises);
+  };
 
   // Initialization Actions
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+
+    // delete tokens
+    await deleteAllTokens();
   });
 
   // Cleanup actions
@@ -43,9 +31,29 @@ describe('Admin API Token CRUD (e2e)', () => {
     await strapi.destroy();
   });
 
-  test('1. Fails to create an api token (missing parameters from the body)', async () => {
+  // create a random valid token that we can test with (delete, list, etc)
+  let currentTokens = 0;
+  const createValidToken = async (token = {}) => {
     const body = {
-      name: 'api-token_tests-name',
+      type: 'read-only',
+      name: `token_${String(currentTokens++)}`,
+      description: 'generic description',
+      ...token,
+    };
+
+    const req = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(req.status).toEqual(201);
+    return req.body.data;
+  };
+
+  test('Fails to create an api token (missing parameters from the body)', async () => {
+    const body = {
+      name: 'api-token_tests-failBody',
       description: 'api-token_tests-description',
     };
 
@@ -75,9 +83,9 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
   });
 
-  test('2. Fails to create an api token (invalid `type` in the body)', async () => {
+  test('Fails to create an api token (invalid `type` in the body)', async () => {
     const body = {
-      name: 'api-token_tests-name',
+      name: 'api-token_tests-failType',
       description: 'api-token_tests-description',
       type: 'invalid-type',
     };
@@ -94,13 +102,13 @@ describe('Admin API Token CRUD (e2e)', () => {
       error: {
         status: 400,
         name: 'ValidationError',
-        message: 'type must be one of the following values: read-only, full-access',
+        message: 'type must be one of the following values: read-only, full-access, custom',
         details: {
           errors: [
             {
               path: ['type'],
               name: 'ValidationError',
-              message: 'type must be one of the following values: read-only, full-access',
+              message: 'type must be one of the following values: read-only, full-access, custom',
             },
           ],
         },
@@ -108,9 +116,9 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
   });
 
-  test('3. Creates an api token (successfully)', async () => {
+  test('Creates a read-only api token (successfully)', async () => {
     const body = {
-      name: 'api-token_tests-name',
+      name: 'api-token_tests-readonly',
       description: 'api-token_tests-description',
       type: 'read-only',
     };
@@ -125,17 +133,130 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
+      permissions: [],
       description: body.description,
       type: body.type,
       id: expect.any(Number),
       createdAt: expect.any(String),
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
-
-    apiTokens.push(res.body.data);
   });
 
-  test('4. Creates an api token without a description (successfully)', async () => {
+  test('Fails to create a non-custom api token with permissions', async () => {
+    const body = {
+      name: 'api-token_tests-readonlyFailWithPermissions',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+      permissions: ['admin::thing.action'],
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'Non-custom tokens should not reference permissions',
+        details: {},
+      },
+    });
+  });
+
+  /**
+   * TODO: Discuss: Which behaviour do we want? Should an empty array be treated the same as omitted/undefined?
+   * Easy to change in assertCustomTokenPermissionsValidity by checking isEmpty (to allow empty) vs !attributes.permissions
+   */
+
+  test('Creates a non-custom api token with empty permissions attribute', async () => {
+    const body = {
+      name: 'api-token_tests-fullAccessFailWithEmptyPermissions',
+      description: 'api-token_tests-description',
+      type: 'full-access',
+      permissions: [],
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toStrictEqual({
+      accessKey: expect.any(String),
+      name: body.name,
+      permissions: [],
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+      createdAt: expect.any(String),
+      lastUsedAt: null,
+      updatedAt: expect.any(String),
+    });
+  });
+
+  test('Creates a custom api token (successfully)', async () => {
+    const body = {
+      name: 'api-token_tests-customSuccess',
+      description: 'api-token_tests-description',
+      type: 'custom',
+      permissions: ['admin::subject.action', 'plugin::foo.bar.action'],
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toStrictEqual({
+      accessKey: expect.any(String),
+      name: body.name,
+      permissions: body.permissions,
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+      createdAt: expect.any(String),
+      lastUsedAt: null,
+      updatedAt: expect.any(String),
+    });
+  });
+
+  test('Fails to create a custom api token without permissions', async () => {
+    const body = {
+      name: 'api-token_tests-customFail',
+      description: 'api-token_tests-description',
+      type: 'custom',
+      permissions: [],
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'Missing permissions attribute for custom token',
+        details: {},
+      },
+    });
+  });
+
+  test('Creates an api token without a description (successfully)', async () => {
     const body = {
       name: 'api-token_tests-without-description',
       type: 'full-access',
@@ -151,20 +272,20 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
+      permissions: [],
       description: '',
       type: body.type,
       id: expect.any(Number),
       createdAt: expect.any(String),
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
-
-    apiTokens.push(res.body.data);
   });
 
-  test('5. Creates an api token with trimmed description and name (successfully)', async () => {
+  test('Creates an api token with trimmed description and name (successfully)', async () => {
     const body = {
-      name: 'api-token_tests-spaces-at-the-end   ',
-      description: 'api-token_tests-description-with-spaces-at-the-end   ',
+      name: '  api-token_tests-spaces-at-the-end   ',
+      description: '  api-token_tests-description-with-spaces-at-the-end   ',
       type: 'read-only',
     };
 
@@ -178,70 +299,65 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: 'api-token_tests-spaces-at-the-end',
+      permissions: [],
       description: 'api-token_tests-description-with-spaces-at-the-end',
       type: body.type,
       id: expect.any(Number),
       createdAt: expect.any(String),
+      lastUsedAt: null,
       updatedAt: expect.any(String),
     });
-
-    apiTokens.push(res.body.data);
   });
 
-  test('6. List all tokens (successfully)', async () => {
+  test('List all tokens (successfully)', async () => {
+    await deleteAllTokens();
+
+    // create 4 tokens
+    const tokens = [];
+    tokens.push(
+      await createValidToken({
+        type: 'custom',
+        permissions: ['admin::model.model.read', 'admin::model.model.create'],
+      })
+    );
+    tokens.push(await createValidToken({ type: 'full-access' }));
+    tokens.push(await createValidToken({ type: 'read-only' }));
+    tokens.push(await createValidToken());
+
     const res = await rq({
       url: '/admin/api-tokens',
       method: 'GET',
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.length).toBe(3);
-    expect(res.body.data).toStrictEqual([
-      {
-        id: expect.any(Number),
-        name: 'api-token_tests-name',
-        description: 'api-token_tests-description',
-        type: 'read-only',
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-      },
-      {
-        id: expect.any(Number),
-        name: 'api-token_tests-spaces-at-the-end',
-        description: 'api-token_tests-description-with-spaces-at-the-end',
-        type: 'read-only',
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-      },
-      {
-        id: expect.any(Number),
-        name: 'api-token_tests-without-description',
-        description: '',
-        type: 'full-access',
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-      },
-    ]);
+    expect(res.body.data.length).toBe(4);
+    expect(orderBy(res.body.data, ['id'])).toStrictEqual(
+      map(orderBy(tokens, ['id']), (t) => omit(t, ['accessKey']))
+    );
   });
 
-  test('7. Deletes a token (successfully)', async () => {
+  test('Deletes a token (successfully)', async () => {
+    const token = await createValidToken();
+
     const res = await rq({
-      url: `/admin/api-tokens/${apiTokens[2].id}`,
+      url: `/admin/api-tokens/${token.id}`,
       method: 'DELETE',
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toStrictEqual({
-      name: apiTokens[2].name,
-      description: apiTokens[2].description,
-      type: apiTokens[2].type,
-      id: apiTokens[2].id,
-      createdAt: apiTokens[2].createdAt,
-      updatedAt: apiTokens[2].updatedAt,
+      name: token.name,
+      permissions: token.permissions,
+      description: token.description,
+      type: token.type,
+      id: token.id,
+      createdAt: token.createdAt,
+      lastUsedAt: null,
+      updatedAt: expect.any(String),
     });
   });
 
-  test('8. Does not return an error if the ressource to delete does not exist', async () => {
+  test('Does not return an error if the ressource to delete does not exist', async () => {
     const res = await rq({
       url: '/admin/api-tokens/42',
       method: 'DELETE',
@@ -251,24 +367,54 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.body.data).toBeNull();
   });
 
-  test('9. Retrieves a token (successfully)', async () => {
+  test('Retrieves a non-custom token (successfully)', async () => {
+    const token = await createValidToken({
+      type: 'read-only',
+    });
+
     const res = await rq({
-      url: `/admin/api-tokens/${apiTokens[0].id}`,
+      url: `/admin/api-tokens/${token.id}`,
       method: 'GET',
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toStrictEqual({
-      name: apiTokens[0].name,
-      description: apiTokens[0].description,
-      type: apiTokens[0].type,
-      id: apiTokens[0].id,
-      createdAt: apiTokens[0].createdAt,
-      updatedAt: apiTokens[0].updatedAt,
+      name: token.name,
+      permissions: token.permissions,
+      description: token.description,
+      type: token.type,
+      id: token.id,
+      createdAt: token.createdAt,
+      lastUsedAt: null,
+      updatedAt: expect.any(String),
     });
   });
 
-  test('10. Returns a 404 if the ressource to retrieve does not exist', async () => {
+  test('Retrieves a custom token (successfully)', async () => {
+    const token = await createValidToken({
+      type: 'custom',
+      permissions: ['admin::model.model.read'],
+    });
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}`,
+      method: 'GET',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toStrictEqual({
+      name: token.name,
+      permissions: token.permissions,
+      description: token.description,
+      type: token.type,
+      id: token.id,
+      createdAt: token.createdAt,
+      lastUsedAt: null,
+      updatedAt: expect.any(String),
+    });
+  });
+
+  test('Returns a 404 if the ressource to retrieve does not exist', async () => {
     const res = await rq({
       url: '/admin/api-tokens/42',
       method: 'GET',
@@ -286,33 +432,48 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
   });
 
-  test('11. Updates a token (successfully)', async () => {
+  test('Updates a token (successfully)', async () => {
+    // create a token
     const body = {
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    const token = res.body.data;
+
+    const updatedBody = {
       name: 'api-token_tests-updated-name',
       description: 'api-token_tests-description',
       type: 'read-only',
     };
 
-    const res = await rq({
-      url: `/admin/api-tokens/${apiTokens[0].id}`,
+    const updatedRes = await rq({
+      url: `/admin/api-tokens/${token.id}`,
       method: 'PUT',
-      body,
+      body: updatedBody,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data).toStrictEqual({
-      name: body.name,
-      description: body.description,
-      type: body.type,
-      id: apiTokens[0].id,
-      createdAt: apiTokens[0].createdAt,
-      updatedAt: apiTokens[0].updatedAt,
+    expect(updatedRes.statusCode).toBe(200);
+    expect(updatedRes.body.data).toStrictEqual({
+      name: updatedBody.name,
+      permissions: [],
+      description: updatedBody.description,
+      type: updatedBody.type,
+      id: token.id,
+      createdAt: token.createdAt,
+      lastUsedAt: null,
+      updatedAt: expect.any(String),
     });
-
-    apiTokens[0] = res.body.data;
+    // expect(updatedRes.body.data.updated)
   });
 
-  test('12. Returns a 404 if the ressource to update does not exist', async () => {
+  test('Returns a 404 if the ressource to update does not exist', async () => {
     const body = {
       name: 'api-token_tests-updated-name',
       description: 'api-token_tests-updated-description',
@@ -337,31 +498,33 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
   });
 
-  test('13. Updates a token with partial payload (successfully)', async () => {
+  test('Updates a token with partial payload (successfully)', async () => {
+    const token = await createValidToken();
+
     const body = {
       description: 'api-token_tests-re-updated-description',
     };
 
     const res = await rq({
-      url: `/admin/api-tokens/${apiTokens[0].id}`,
+      url: `/admin/api-tokens/${token.id}`,
       method: 'PUT',
       body,
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toMatchObject({
-      name: apiTokens[0].name,
-      description: body.description,
-      type: apiTokens[0].type,
-      id: apiTokens[0].id,
-      createdAt: apiTokens[0].createdAt,
-      updatedAt: apiTokens[0].updatedAt,
+      name: token.name,
+      permissions: token.permissions,
+      description: body.description, // updated field
+      type: token.type,
+      id: token.id,
+      createdAt: token.createdAt,
+      lastUsedAt: null,
+      updatedAt: expect.any(String),
     });
-
-    apiTokens[0] = res.body.data;
   });
 
-  test('14. Fails to update an api token (invalid `type` in the body)', async () => {
+  test('Fails to update an api token (invalid `type` in the body)', async () => {
     const body = {
       name: 'api-token_tests-name',
       description: 'api-token_tests-description',
@@ -381,50 +544,54 @@ describe('Admin API Token CRUD (e2e)', () => {
         details: {
           errors: [
             {
-              message: 'type must be one of the following values: read-only, full-access',
+              message: 'type must be one of the following values: read-only, full-access, custom',
               name: 'ValidationError',
               path: ['type'],
             },
           ],
         },
-        message: 'type must be one of the following values: read-only, full-access',
+        message: 'type must be one of the following values: read-only, full-access, custom',
         name: 'ValidationError',
         status: 400,
       },
     });
   });
 
-  test('15. Updates a token when passing a `null` description (successfully)', async () => {
+  test('Updates a token when passing a `null` description (successfully)', async () => {
+    const token = await createValidToken();
+
     const body = {
       description: null,
     };
 
     const res = await rq({
-      url: `/admin/api-tokens/${apiTokens[0].id}`,
+      url: `/admin/api-tokens/${token.id}`,
       method: 'PUT',
       body,
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toMatchObject({
-      name: apiTokens[0].name,
+      name: token.name,
+      permissions: token.permissions,
       description: '',
-      type: apiTokens[0].type,
-      id: apiTokens[0].id,
-      createdAt: apiTokens[0].createdAt,
-      updatedAt: apiTokens[0].updatedAt,
+      type: token.type,
+      id: token.id,
+      createdAt: token.createdAt,
+      lastUsedAt: null,
+      updatedAt: expect.any(String),
     });
-
-    apiTokens[0] = res.body.data;
   });
 
-  test('16. Updates a token but not the description if no description is passed (successfully)', async () => {
+  test('Updates a token but not the description if no description is passed (successfully)', async () => {
+    const token = await createValidToken();
+
     const body = {
-      name: 'api-token_tests-name',
+      name: 'api-token_tests-newNameWithoutDescUpdate',
     };
 
     const res = await rq({
-      url: `/admin/api-tokens/${apiTokens[0].id}`,
+      url: `/admin/api-tokens/${token.id}`,
       method: 'PUT',
       body,
     });
@@ -432,13 +599,13 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toMatchObject({
       name: body.name,
-      description: apiTokens[0].description,
-      type: apiTokens[0].type,
-      id: apiTokens[0].id,
-      createdAt: apiTokens[0].createdAt,
-      updatedAt: apiTokens[0].updatedAt,
+      description: token.description,
+      permissions: token.permissions,
+      type: token.type,
+      id: token.id,
+      createdAt: token.createdAt,
+      lastUsedAt: null,
+      updatedAt: expect.any(String),
     });
-
-    apiTokens[0] = res.body.data;
   });
 });
