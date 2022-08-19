@@ -46,8 +46,12 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
     throw new ValidationError('Missing permissions attribute for custom token');
   }
 };
-
-const mapTokenPermissions = (token) => {
+/**
+ * @param {ApiToken} token
+ *
+ * @returns {ApiToken}
+ */
+const flattenTokenPermissions = (token) => {
   if (!token) return token;
   return {
     ...token,
@@ -75,7 +79,7 @@ const getBy = async (whereParams = {}) => {
     .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
 
   if (!token) return token;
-  return mapTokenPermissions(token);
+  return flattenTokenPermissions(token);
 };
 
 /**
@@ -192,7 +196,7 @@ const list = async () => {
   });
 
   if (!tokens) return tokens;
-  return tokens.map((token) => mapTokenPermissions(token));
+  return tokens.map((token) => flattenTokenPermissions(token));
 };
 
 /**
