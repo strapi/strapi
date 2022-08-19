@@ -47,6 +47,37 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
   }
 };
 
+const mapTokenPermissions = (token) => {
+  if (!token) return token;
+  return {
+    ...token,
+    permissions: isArray(token.permissions) ? map('action', token.permissions) : token.permissions,
+  };
+};
+
+/**
+ * @param {Object} whereParams
+ * @param {string|number} whereParams.id
+ * @param {string} whereParams.name
+ * @param {number} whereParams.lastUsedAt
+ * @param {string} whereParams.description
+ * @param {string} whereParams.accessKey
+ *
+ * @returns {Promise<Omit<ApiToken, 'accessKey'> | null>}
+ */
+const getBy = async (whereParams = {}) => {
+  if (Object.keys(whereParams).length === 0) {
+    return null;
+  }
+
+  const token = await strapi
+    .query('admin::api-token')
+    .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
+
+  if (!token) return token;
+  return mapTokenPermissions(token);
+};
+
 /**
  * @param {Object} whereParams
  * @param {string|number} whereParams.id
@@ -305,37 +336,6 @@ const update = async (id, attributes) => {
   return {
     ...updatedToken,
     permissions: permissionsFromDb ? permissionsFromDb.map((p) => p.action) : undefined,
-  };
-};
-
-/**
- * @param {Object} whereParams
- * @param {string|number} whereParams.id
- * @param {string} whereParams.name
- * @param {number} whereParams.lastUsedAt
- * @param {string} whereParams.description
- * @param {string} whereParams.accessKey
- *
- * @returns {Promise<Omit<ApiToken, 'accessKey'> | null>}
- */
-const getBy = async (whereParams = {}) => {
-  if (Object.keys(whereParams).length === 0) {
-    return null;
-  }
-
-  const token = await strapi
-    .query('admin::api-token')
-    .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
-
-  if (!token) return token;
-  return mapTokenPermissions(token);
-};
-
-const mapTokenPermissions = (token) => {
-  if (!token) return token;
-  return {
-    ...token,
-    permissions: isArray(token.permissions) ? map('action', token.permissions) : token.permissions,
   };
 };
 
