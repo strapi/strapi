@@ -40,7 +40,7 @@
     "graphql-upload": "^13.0.0",
     "koa-compose": "^4.1.0",
     "lodash": "4.17.21",
-    "nexus": "1.2.0",
+    "nexus": "1.3.0",
     "pluralize": "^8.0.0",
     "subscriptions-transport-ws": "0.9.19"
   },

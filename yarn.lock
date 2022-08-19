@@ -16403,10 +16403,10 @@ netmask@^2.0.2:
   resolved "https://registry.yarnpkg.com/netmask/-/netmask-2.0.2.tgz#8b01a07644065d536383835823bc52004ebac5e7"
   integrity sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg==
 
-nexus@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/nexus/-/nexus-1.2.0.tgz#12c4611702184fac170c98c1a2c778a76a9e9827"
-  integrity sha512-7+0240LrQNnKKLTgbxM6KLLdfMgm4wp1TPAULim0lGmHfX7QsJK39i2KmFdMr3WdsAKoybMmwyrJtaYOq0q62g==
+nexus@1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/nexus/-/nexus-1.3.0.tgz#d7e2671d48bf887e30e2815f509bbf4b0ee2a02b"
+  integrity sha512-w/s19OiNOs0LrtP7pBmD9/FqJHvZLmCipVRt6v1PM8cRUYIbhEswyNKGHVoC4eHZGPSnD+bOf5A3+gnbt0A5/A==
   dependencies:
     iterall "^1.3.0"
     tslib "^2.0.3"
