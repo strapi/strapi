@@ -10,7 +10,7 @@ module.exports = async (dir) => {
   if (isTSProject) {
     await tsUtils.compile(appDir, {
       watch: false,
-      configOptions: { options: { incremental: true } },
+      compileOptions: { options: { incremental: true } },
     });
   }
 

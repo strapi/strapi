@@ -15,7 +15,7 @@ const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
  *
  * @return {string | undefined}
  */
-module.exports = (dir, { filename = DEFAULT_TS_CONFIG_FILENAME, ancestorsLookup = false } = {}) => {
+module.exports = (dir = "", { filename = DEFAULT_TS_CONFIG_FILENAME, ancestorsLookup = false } = {}) => {
   const dirAbsolutePath = path.resolve(dir);
   const configFilePath = ts.findConfigFile(dirAbsolutePath, ts.sys.fileExists, filename);
 
