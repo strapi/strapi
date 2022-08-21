@@ -455,8 +455,24 @@ Array [
     "name": "English (American Samoa) (en-AS)",
   },
   Object {
+    "code": "en-AI",
+    "name": "English (Anguilla) (en-AI)",
+  },
+  Object {
+    "code": "en-AG",
+    "name": "English (Antigua & Barbuda) (en-AG)",
+  },
+  Object {
     "code": "en-AU",
     "name": "English (Australia) (en-AU)",
+  },
+  Object {
+    "code": "en-AT",
+    "name": "English (Austria) (en-AT)",
+  },
+  Object {
+    "code": "en-BS",
+    "name": "English (Bahamas) (en-BS)",
   },
   Object {
     "code": "en-BB",
@@ -479,20 +495,108 @@ Array [
     "name": "English (Botswana) (en-BW)",
   },
   Object {
+    "code": "en-IO",
+    "name": "English (British Indian Ocean Territory) (en-IO)",
+  },
+  Object {
+    "code": "en-VG",
+    "name": "English (British Virgin Islands) (en-VG)",
+  },
+  Object {
+    "code": "en-BI",
+    "name": "English (Burundi) (en-BI)",
+  },
+  Object {
+    "code": "en-CM",
+    "name": "English (Cameroon) (en-CM)",
+  },
+  Object {
     "code": "en-CA",
     "name": "English (Canada) (en-CA)",
+  },
+  Object {
+    "code": "en-KY",
+    "name": "English (Cayman Islands) (en-KY)",
+  },
+  Object {
+    "code": "en-CX",
+    "name": "English (Christmas Island) (en-CX)",
+  },
+  Object {
+    "code": "en-CC",
+    "name": "English (Cocos [Keeling] Islands) (en-CC)",
+  },
+  Object {
+    "code": "en-CK",
+    "name": "English (Cook Islands) (en-CK)",
+  },
+  Object {
+    "code": "en-CY",
+    "name": "English (Cyprus) (en-CY)",
+  },
+  Object {
+    "code": "en-DK",
+    "name": "English (Denmark) (en-DK)",
+  },
+  Object {
+    "code": "en-DG",
+    "name": "English (Diego Garcia) (en-DG)",
+  },
+  Object {
+    "code": "en-DM",
+    "name": "English (Dominica) (en-DM)",
   },
   Object {
     "code": "en-EG",
     "name": "English (Egypt) (en-EG)",
   },
   Object {
+    "code": "en-ER",
+    "name": "English (Eritrea) (en-ER)",
+  },
+  Object {
     "code": "en-EU",
     "name": "English (Europe) (en-EU)",
   },
   Object {
+    "code": "en-FK",
+    "name": "English (Falkland Islands) (en-FK)",
+  },
+  Object {
+    "code": "en-FJ",
+    "name": "English (Fiji) (en-FJ)",
+  },
+  Object {
+    "code": "en-FI",
+    "name": "English (Finland) (en-FI)",
+  },
+  Object {
+    "code": "en-GM",
+    "name": "English (Gambia) (en-GM)",
+  },
+  Object {
+    "code": "en-DE",
+    "name": "English (Germany) (en-DE)",
+  },
+  Object {
+    "code": "en-GH",
+    "name": "English (Ghana) (en-GH)",
+  },
+  Object {
+    "code": "en-GI",
+    "name": "English (Gibraltar) (en-GI)",
+  },
+  Object {
+    "code": "en-GD",
+    "name": "English (Grenada) (en-GD)",
+  },
+  Object {
     "code": "en-GU",
     "name": "English (Guam) (en-GU)",
+  },
+  Object {
+    "code": "en-GG",
+    "name": "English (Guernsey) (en-GG)",
   },
   Object {
     "code": "en-GY",
@@ -511,8 +615,52 @@ Array [
     "name": "English (Ireland) (en-IE)",
   },
   Object {
+    "code": "en-IM",
+    "name": "English (Isle of Man) (en-IM)",
+  },
+  Object {
+    "code": "en-IL",
+    "name": "English (Israel) (en-IL)",
+  },
+  Object {
     "code": "en-JM",
     "name": "English (Jamaica) (en-JM)",
+  },
+  Object {
+    "code": "en-JE",
+    "name": "English (Jersey) (en-JE)",
+  },
+  Object {
+    "code": "en-KE",
+    "name": "English (Kenya) (en-KE)",
+  },
+  Object {
+    "code": "en-KI",
+    "name": "English (Kiribati) (en-KI)",
+  },
+  Object {
+    "code": "en-LS",
+    "name": "English (Lesotho) (en-LS)",
+  },
+  Object {
+    "code": "en-LR",
+    "name": "English (Liberia) (en-LR)",
+  },
+  Object {
+    "code": "en-MO",
+    "name": "English (Macau SAR China) (en-MO)",
+  },
+  Object {
+    "code": "en-MG",
+    "name": "English (Madagascar) (en-MG)",
+  },
+  Object {
+    "code": "en-MW",
+    "name": "English (Malawi) (en-MW)",
+  },
+  Object {
+    "code": "en-MY",
+    "name": "English (Malaysia) (en-MY)",
   },
   Object {
     "code": "en-MT",
@@ -527,12 +675,40 @@ Array [
     "name": "English (Mauritius) (en-MU)",
   },
   Object {
+    "code": "en-FM",
+    "name": "English (Micronesia) (en-FM)",
+  },
+  Object {
+    "code": "en-MS",
+    "name": "English (Montserrat) (en-MS)",
+  },
+  Object {
     "code": "en-NA",
     "name": "English (Namibia) (en-NA)",
   },
   Object {
+    "code": "en-NR",
+    "name": "English (Nauru) (en-NR)",
+  },
+  Object {
+    "code": "en-NL",
+    "name": "English (Netherlands) (en-NL)",
+  },
+  Object {
     "code": "en-NZ",
     "name": "English (New Zealand) (en-NZ)",
+  },
+  Object {
+    "code": "en-NG",
+    "name": "English (Nigeria) (en-NG)",
+  },
+  Object {
+    "code": "en-NU",
+    "name": "English (Niue) (en-NU)",
+  },
+  Object {
+    "code": "en-NF",
+    "name": "English (Norfolk Island) (en-NF)",
   },
   Object {
     "code": "en-MP",
@@ -543,24 +719,124 @@ Array [
     "name": "English (Pakistan) (en-PK)",
   },
   Object {
+    "code": "en-PW",
+    "name": "English (Palau) (en-PW)",
+  },
+  Object {
+    "code": "en-PG",
+    "name": "English (Papua New Guinea) (en-PG)",
+  },
+  Object {
     "code": "en-PH",
     "name": "English (Philippines) (en-PH)",
+  },
+  Object {
+    "code": "en-PN",
+    "name": "English (Pitcairn Islands) (en-PN)",
+  },
+  Object {
+    "code": "en-PR",
+    "name": "English (Puerto Rico) (en-PR)",
+  },
+  Object {
+    "code": "en-RW",
+    "name": "English (Rwanda) (en-RW)",
+  },
+  Object {
+    "code": "en-WS",
+    "name": "English (Samoa) (en-WS)",
   },
   Object {
     "code": "en-SA",
     "name": "English (Saudi Arabia) (en-SA)",
   },
   Object {
+    "code": "en-SC",
+    "name": "English (Seychelles) (en-SC)",
+  },
+  Object {
+    "code": "en-SL",
+    "name": "English (Sierra Leone) (en-SL)",
+  },
+  Object {
     "code": "en-SG",
     "name": "English (Singapore) (en-SG)",
+  },
+  Object {
+    "code": "en-SX",
+    "name": "English (Sint Maarten) (en-SX)",
+  },
+  Object {
+    "code": "en-SI",
+    "name": "English (Slovenia) (en-SI)",
+  },
+  Object {
+    "code": "en-SB",
+    "name": "English (Solomon Islands) (en-SB)",
   },
   Object {
     "code": "en-ZA",
     "name": "English (South Africa) (en-ZA)",
   },
   Object {
+    "code": "en-SS",
+    "name": "English (South Sudan) (en-SS)",
+  },
+  Object {
+    "code": "en-SH",
+    "name": "English (St Helena) (en-SH)",
+  },
+  Object {
+    "code": "en-KN",
+    "name": "English (St Kitts & Nevis) (en-KN)",
+  },
+  Object {
+    "code": "en-LC",
+    "name": "English (St Lucia) (en-LC)",
+  },
+  Object {
+    "code": "en-VC",
+    "name": "English (St Vincent & Grenadines) (en-VC)",
+  },
+  Object {
+    "code": "en-SD",
+    "name": "English (Sudan) (en-SD)",
+  },
+  Object {
+    "code": "en-SZ",
+    "name": "English (Swaziland) (en-SZ)",
+  },
+  Object {
+    "code": "en-SE",
+    "name": "English (Sweden) (en-SE)",
+  },
+  Object {
+    "code": "en-CH",
+    "name": "English (Switzerland) (en-CH)",
+  },
+  Object {
+    "code": "en-TZ",
+    "name": "English (Tanzania) (en-TZ)",
+  },
+  Object {
+    "code": "en-TK",
+    "name": "English (Tokelau) (en-TK)",
+  },
+  Object {
+    "code": "en-TO",
+    "name": "English (Tonga) (en-TO)",
+  },
+  Object {
     "code": "en-TT",
     "name": "English (Trinidad and Tobago) (en-TT)",
+  },
+  Object {
+    "code": "en-TC",
+    "name": "English (Turks & Caicos Islands) (en-TC)",
+  },
+  Object {
+    "code": "en-TV",
+    "name": "English (Tuvalu) (en-TV)",
   },
   Object {
     "code": "en-AE",
@@ -579,12 +855,24 @@ Array [
     "name": "English (U.S., Computer) (en-US-POSIX)",
   },
   Object {
+    "code": "en-UG",
+    "name": "English (Uganda) (en-UG)",
+  },
+  Object {
     "code": "en-GB",
     "name": "English (United Kingdom) (en-GB)",
   },
   Object {
     "code": "en-US",
     "name": "English (United States) (en-US)",
+  },
+  Object {
+    "code": "en-VU",
+    "name": "English (Vanuatu) (en-VU)",
+  },
+  Object {
+    "code": "en-ZM",
+    "name": "English (Zambia) (en-ZM)",
   },
   Object {
     "code": "en-ZW",
