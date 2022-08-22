@@ -30,9 +30,7 @@ const ColorPickerInput = ({
     >
       <Stack spacing={1}>
         <Flex>
-          <FieldLabel required={required} labelAction={labelAction}>
-            {formatMessage(intlLabel)}
-          </FieldLabel>
+          <FieldLabel required={required}>{formatMessage(intlLabel)}</FieldLabel>
           {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
         </Flex>
         <Typography variant="pi" as="p">
