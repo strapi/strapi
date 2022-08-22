@@ -2,20 +2,36 @@
 
 const { uniq } = require('lodash');
 const permissions = require('./permissions');
+
+/**
+ * Creates an handler which check that the permission's action exists in the action registry
+ */
+const createValidatePermissionHandler =
+  (actionProvider) =>
+  ({ permission }) => {
+    const action = actionProvider.get(permission.action);
+
+    // If the action isn't registered into the action provider, then ignore the permission and warn the user
+    if (!action) {
+      strapi.log.debug(
+        `Unknown action "${permission.action}" supplied when registering a new permission`
+      );
+      return false;
+    }
+  };
+
 /**
  * Create a content API container that holds logic, tools and utils. (eg: permissions, ...)
  */
 const createContentAPI = (/* strapi */) => {
+  // Add providers
+  const providers = {
+    action: permissions.providers.createActionProvider(),
+    condition: permissions.providers.createConditionProvider(),
+  };
+
   const syncActions = async () => {
-    /**
-     * NOTE: For some reason, this doesn't seem to be necessary because all the routes exist
-     * createActionProvider uses a providerFactory, which seems to already include everything, and when we try
-     * to register our actions we get an error that the keys already exist
-     * Could providerFactory not be providing a new provider, and instead sharing the registry with everything that uses it?
-     *
-     * If this isn't an issue to fix and is expected, we don't need the route registration code below and it should be removed
-     * */
-    // Start of route registration
+    // Register actions
     const apiRoutesName = Object.values(strapi.api)
       .map((api) => api.routes)
       .reduce((acc, routesMap) => {
@@ -34,17 +50,10 @@ const createContentAPI = (/* strapi */) => {
     Promise.all(
       uniq(actions).map((action) =>
         providers.action.register(action).catch(() => {
-          // console.log('Key already exists', action);
+          console.warn('Trying to add action that already exists', action);
         })
       )
     );
-  };
-  // End of route registration
-
-  // Add providers
-  const providers = {
-    action: permissions.providers.createActionProvider(),
-    condition: permissions.providers.createConditionProvider(),
   };
 
   // create permission engine
@@ -60,22 +69,5 @@ const createContentAPI = (/* strapi */) => {
     },
   };
 };
-
-/**
- * Creates an handler which check that the permission's action exists in the action registry
- */
-const createValidatePermissionHandler =
-  (actionProvider) =>
-  ({ permission }) => {
-    const action = actionProvider.get(permission.action);
-
-    // If the action isn't registered into the action provider, then ignore the permission and warn the user
-    if (!action) {
-      strapi.log.debug(
-        `Unknown action "${permission.action}" supplied when registering a new permission`
-      );
-      return false;
-    }
-  };
 
 module.exports = createContentAPI;

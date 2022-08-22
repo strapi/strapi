@@ -171,9 +171,7 @@ module.exports = ({ strapi }) => ({
 
     const toDelete = _.difference(permissionsFoundInDB, allActions);
 
-    // Register actions into the content API action provider
-    // TODO: do this in the content API bootstrap phase instead
-    allActions.forEach((action) => strapi.contentAPI.permissions.providers.action.register(action));
+    // NOTE: actions are registered in content API bootstrap syncActions
 
     await Promise.all(
       toDelete.map((action) => {
