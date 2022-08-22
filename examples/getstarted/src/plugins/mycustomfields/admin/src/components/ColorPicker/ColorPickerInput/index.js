@@ -1,6 +1,8 @@
 import React from 'react';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
+import { Flex } from '@strapi/design-system/Flex';
+import { Box } from '@strapi/design-system/Box';
 import { Field, FieldHint, FieldError, FieldLabel } from '@strapi/design-system/Field';
 import { useIntl } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
@@ -11,6 +13,7 @@ const ColorPickerInput = ({
   disabled,
   error,
   intlLabel,
+  labelAction,
   name,
   onChange,
   required,
@@ -26,7 +29,12 @@ const ColorPickerInput = ({
       hint={description && formatMessage(description)}
     >
       <Stack spacing={1}>
-        <FieldLabel required={required}>{formatMessage(intlLabel)}</FieldLabel>
+        <Flex>
+          <FieldLabel required={required} labelAction={labelAction}>
+            {formatMessage(intlLabel)}
+          </FieldLabel>
+          {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
+        </Flex>
         <Typography variant="pi" as="p">
           {formatMessage(
             {
