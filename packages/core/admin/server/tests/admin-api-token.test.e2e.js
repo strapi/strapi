@@ -608,4 +608,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       updatedAt: expect.any(String),
     });
   });
+
+  test.todo('Sets expiration time correctly');
+  test.todo("Doesn't have expiration if not set");
 });

@@ -243,5 +243,9 @@ describe('API Token Auth Strategy', () => {
         expect(err).toBeInstanceOf(Error);
       }
     });
+
+    test.todo('works if token does not have an expiration');
+    test.todo('works if token has expiration but is not expired');
+    test.todo('Throws an error if token is expired');
   });
 });
