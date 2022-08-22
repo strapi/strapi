@@ -300,5 +300,19 @@ describe('Populate filters', () => {
 
       expect(body.data[0].attributes.third.data[0].attributes.fooRef).toBeUndefined();
     });
+
+    test("Don't populate with object and 'f'", async () => {
+      const qs = {
+        populate: {
+          third: 'f',
+        },
+      };
+      const { status, body } = await rq.get(`/${schemas.contentTypes.c.pluralName}`, { qs });
+
+      expect(status).toBe(200);
+      expect(body.data).toHaveLength(2);
+
+      expect(body.data[0].attributes.third).toBeUndefined();
+    });
   });
 });

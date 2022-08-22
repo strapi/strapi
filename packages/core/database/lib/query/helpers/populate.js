@@ -83,6 +83,10 @@ const processPopulate = (populate, ctx) => {
       continue;
     }
 
+    if (populateMap[key] === false) {
+      continue;
+    }
+
     // make sure id is present for future populate queries
     if (_.has('id', meta.attributes)) {
       qb.addSelect('id');
