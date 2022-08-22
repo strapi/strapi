@@ -621,6 +621,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
     });
+    expect(res.body.data.accessKey).not.toEqual(token.accessKey);
   });
 
   test.todo('Regenerated access key works');
