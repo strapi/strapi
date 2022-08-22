@@ -30,6 +30,91 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-left: 32px;
 }
 
+.c33 {
+  margin-top: 8px;
+}
+
+.c36 {
+  padding-right: 8px;
+}
+
+.c37 {
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c34 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c35 {
+  background: transparent;
+  border: none;
+  position: relative;
+  outline: none;
+}
+
+.c35[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c35[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c35 svg {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 0.625rem;
+}
+
+.c35 svg path {
+  fill: #4945ff;
+}
+
+.c35:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c35:focus-visible {
+  outline: none;
+}
+
+.c35:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
 .c2 {
   padding-top: 24px;
   padding-right: 16px;
@@ -469,91 +554,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c17 svg path {
   fill: #8e8ea9;
-}
-
-.c33 {
-  margin-top: 8px;
-}
-
-.c36 {
-  padding-right: 8px;
-}
-
-.c37 {
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c34 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c35 {
-  background: transparent;
-  border: none;
-  position: relative;
-  outline: none;
-}
-
-.c35[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c35[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c35 svg {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  font-size: 0.625rem;
-}
-
-.c35 svg path {
-  fill: #4945ff;
-}
-
-.c35:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c35:focus-visible {
-  outline: none;
-}
-
-.c35:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
 }
 
 <div>

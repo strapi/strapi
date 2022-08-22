@@ -14,6 +14,7 @@ exports[`RelationList should render and match snapshot 1`] = `
 }
 
 .c3 {
+  background: #ffffff;
   padding-top: 12px;
   padding-right: 16px;
   padding-bottom: 12px;
@@ -55,7 +56,7 @@ exports[`RelationList should render and match snapshot 1`] = `
   width: 100%;
 }
 
-.c8 > a {
+.c8 div > a {
   color: currentColor;
   -webkit-text-decoration: none;
   text-decoration: none;
@@ -86,6 +87,8 @@ exports[`RelationList should render and match snapshot 1`] = `
 
 .c0 {
   position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .c0:before,
