@@ -47,7 +47,7 @@ module.exports = {
       configurable: false,
       required: true,
     },
-    lastUsed: {
+    lastUsedAt: {
       type: 'datetime',
       configurable: false,
       required: false,

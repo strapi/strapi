@@ -42,9 +42,9 @@ const authenticate = async (ctx) => {
     return { authenticated: false };
   }
 
-  // update lastUsed
+  // update lastUsedAt
   await apiTokenService.update(apiToken.id, {
-    lastUsed: new Date(),
+    lastUsedAt: new Date(),
   });
 
   if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {

@@ -15,13 +15,13 @@ const constants = require('./constants');
  *
  * @property {number|string} id
  * @property {string} name
- * @property {string} [description]
+ * @property {string} description
  * @property {string} accessKey
  * @property {number} lastUsed
  * @property {number} lifespan
  * @property {number} expiresAt
  * @property {TokenType} type
- * @property {(number|ApiTokenPermission)[]} [permissions]
+ * @property {(number|ApiTokenPermission)[]} permissions
  */
 
 /**
@@ -29,7 +29,7 @@ const constants = require('./constants');
  *
  * @property {number|string} id
  * @property {string} action
- * @property {ApiToken|number} [token]
+ * @property {ApiToken|number} token
  */
 
 /** @constant {Array<string>} */
@@ -48,6 +48,11 @@ const SELECT_FIELDS = [
 /** @constant {Array<string>} */
 const POPULATE_FIELDS = ['permissions'];
 
+/**
+ * Assert that a token's permissions attribute is valid for its type
+ *
+ * @param {ApiToken} token
+ */
 const assertCustomTokenPermissionsValidity = (attributes) => {
   // Ensure non-custom tokens doesn't have permissions
   if (attributes.type !== constants.API_TOKEN_TYPE.CUSTOM && !isEmpty(attributes.permissions)) {
@@ -61,12 +66,54 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
 };
 
 /**
+ * Flatten a token's database permissions objects to an array of strings
+ *
+ * @param {ApiToken} token
+ *
+ * @returns {ApiToken}
+ */
+const flattenTokenPermissions = (token) => {
+  if (!token) return token;
+  return {
+    ...token,
+    permissions: isArray(token.permissions) ? map('action', token.permissions) : token.permissions,
+  };
+};
+
+/**
+ *  Get a token
+ *
  * @param {Object} whereParams
- * @param {string|number} [whereParams.id]
- * @param {string} [whereParams.name]
- * @param {number} [whereParams.lastUsed]
- * @param {string} [whereParams.description]
- * @param {string} [whereParams.accessKey]
+ * @param {string|number} whereParams.id
+ * @param {string} whereParams.name
+ * @param {number} whereParams.lastUsedAt
+ * @param {string} whereParams.description
+ * @param {string} whereParams.accessKey
+ *
+ * @returns {Promise<Omit<ApiToken, 'accessKey'> | null>}
+ */
+const getBy = async (whereParams = {}) => {
+  if (Object.keys(whereParams).length === 0) {
+    return null;
+  }
+
+  const token = await strapi
+    .query('admin::api-token')
+    .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
+
+  if (!token) return token;
+  return flattenTokenPermissions(token);
+};
+
+/**
+ * Check if token exists
+ *
+ * @param {Object} whereParams
+ * @param {string|number} whereParams.id
+ * @param {string} whereParams.name
+ * @param {number} whereParams.lastUsedAt
+ * @param {string} whereParams.description
+ * @param {string} whereParams.accessKey
  *
  * @returns {Promise<boolean>}
  */
@@ -77,6 +124,8 @@ const exists = async (whereParams = {}) => {
 };
 
 /**
+ * Return a secure sha512 hash of an accessKey
+ *
  * @param {string} accessKey
  *
  * @returns {string}
@@ -105,12 +154,14 @@ const getExpirationFields = (lifespan) => {
 };
 
 /**
+ * Create a token and its permissions
+ *
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
  * @param {number} attributes.lifespan
- * @param {string[]} [attributes.permissions]
- * @param {string} [attributes.description]
+ * @param {string[]} attributes.permissions
+ * @param {string} attributes.description
  *
  * @returns {Promise<ApiToken>}
  */
@@ -204,6 +255,8 @@ For security reasons, prefer storing the secret in an environment variable and r
 };
 
 /**
+ * Return a list of all tokens and their permissions
+ *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const list = async () => {
@@ -214,10 +267,12 @@ const list = async () => {
   });
 
   if (!tokens) return tokens;
-  return tokens.map((token) => mapTokenPermissions(token));
+  return tokens.map((token) => flattenTokenPermissions(token));
 };
 
 /**
+ * Revoke (delete) a token
+ *
  * @param {string|number} id
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
@@ -229,6 +284,8 @@ const revoke = async (id) => {
 };
 
 /**
+ * Retrieve a token by id
+ *
  * @param {string|number} id
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
@@ -238,6 +295,8 @@ const getById = async (id) => {
 };
 
 /**
+ * Retrieve a token by name
+ *
  * @param {string} name
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
@@ -247,13 +306,15 @@ const getByName = async (name) => {
 };
 
 /**
+ * Update a token and its permissions
+ *
  * @param {string|number} id
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
- * @param {number} attributes.lastUsed
- * @param {string[]} [attributes.permissions]
- * @param {string} [attributes.description]
+ * @param {number} attributes.lastUsedAt
+ * @param {string[]} attributes.permissions
+ * @param {string} attributes.description
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
@@ -358,37 +419,6 @@ const update = async (id, attributes) => {
   return {
     ...updatedToken,
     permissions: permissionsFromDb ? permissionsFromDb.map((p) => p.action) : undefined,
-  };
-};
-
-/**
- * @param {Object} whereParams
- * @param {string|number} [whereParams.id]
- * @param {string} [whereParams.name]
- * @param {number} [whereParams.lastUsed]
- * @param {string} [whereParams.description]
- * @param {string} [whereParams.accessKey]
- *
- * @returns {Promise<Omit<ApiToken, 'accessKey'> | null>}
- */
-const getBy = async (whereParams = {}) => {
-  if (Object.keys(whereParams).length === 0) {
-    return null;
-  }
-
-  const token = await strapi
-    .query('admin::api-token')
-    .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
-
-  if (!token) return token;
-  return mapTokenPermissions(token);
-};
-
-const mapTokenPermissions = (token) => {
-  if (!token) return token;
-  return {
-    ...token,
-    permissions: isArray(token.permissions) ? map('action', token.permissions) : token.permissions,
   };
 };
 

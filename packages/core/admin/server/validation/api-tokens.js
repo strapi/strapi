@@ -21,7 +21,6 @@ const apiTokenUpdateSchema = yup
     description: yup.string().nullable(),
     type: yup.string().oneOf(Object.values(constants.API_TOKEN_TYPE)).notNull(),
     permissions: yup.array().of(yup.string()).nullable(),
-    lastUsed: yup.date().nullable(),
   })
   .noUnknown();
 
