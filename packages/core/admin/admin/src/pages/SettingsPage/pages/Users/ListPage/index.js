@@ -23,7 +23,7 @@ import ModalForm from './ModalForm';
 import PaginationFooter from './PaginationFooter';
 import { deleteData, fetchData } from './utils/api';
 import displayedFilters from './utils/displayedFilters';
-import getTableHeaders from './utils/getTableHeaders';
+import tableHeaders from './utils/tableHeaders';
 
 const ListPage = () => {
   const [isModalOpened, setIsModalOpen] = useState(false);
@@ -37,6 +37,14 @@ const ListPage = () => {
   useFocusWhenNavigate();
   const { notifyStatus } = useNotifyAT();
   const queryName = ['users', search];
+
+  const headers = tableHeaders.map((header) => ({
+    ...header,
+    metadatas: {
+      ...header.metadatas,
+      label: formatMessage(header.metadatas.label),
+    },
+  }));
 
   const title = formatMessage({
     id: 'global.users',
@@ -143,14 +151,14 @@ const ListPage = () => {
               isLoading={isLoading}
               onConfirmDeleteAll={deleteAllMutation.mutateAsync}
               onConfirmDelete={(id) => deleteAllMutation.mutateAsync([id])}
-              headers={getTableHeaders(formatMessage)}
+              headers={headers}
               rows={data?.results}
               withBulkActions
               withMainAction={canDelete}
             >
               <TableRows
                 canDelete={canDelete}
-                headers={getTableHeaders(formatMessage)}
+                headers={headers}
                 rows={data?.results || []}
                 withBulkActions
                 withMainAction={canDelete}

@@ -81,7 +81,7 @@ const DynamicTable = ({
         metadatas: {
           label: formatMessage({
             id: getTrad(`containers.ListPage.table-headers.publishedAt`),
-            defaultMessage: 'publishedAt default',
+            defaultMessage: 'publishedAt',
           }),
           searchable: false,
           sortable: true,

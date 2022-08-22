@@ -1,12 +1,12 @@
-const getTableHeaders = (formatMessage) => [
+const tableHeaders = [
   {
     name: 'name',
     key: 'name',
     metadatas: {
-      label: formatMessage({
+      label: {
         id: 'Settings.apiTokens.ListView.headers.name',
         defaultMessage: 'Name',
-      }),
+      },
       sortable: true,
     },
   },
@@ -14,10 +14,10 @@ const getTableHeaders = (formatMessage) => [
     name: 'description',
     key: 'description',
     metadatas: {
-      label: formatMessage({
+      label: {
         id: 'Settings.apiTokens.ListView.headers.description',
         defaultMessage: 'Description',
-      }),
+      },
       sortable: false,
     },
   },
@@ -25,10 +25,10 @@ const getTableHeaders = (formatMessage) => [
     name: 'type',
     key: 'type',
     metadatas: {
-      label: formatMessage({
+      label: {
         id: 'Settings.apiTokens.ListView.headers.type',
         defaultMessage: 'Token type',
-      }),
+      },
       sortable: false,
     },
   },
@@ -36,13 +36,13 @@ const getTableHeaders = (formatMessage) => [
     name: 'createdAt',
     key: 'createdAt',
     metadatas: {
-      label: formatMessage({
+      label: {
         id: 'Settings.apiTokens.ListView.headers.createdAt',
         defaultMessage: 'Created at',
-      }),
+      },
       sortable: false,
     },
   },
 ];
 
-export default getTableHeaders;
+export default tableHeaders;

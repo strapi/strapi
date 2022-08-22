@@ -21,7 +21,7 @@ import { useHistory } from 'react-router-dom';
 import qs from 'qs';
 import { axiosInstance } from '../../../../../core/utils';
 import adminPermissions from '../../../../../permissions';
-import getTableHeaders from './utils/getTableHeaders';
+import tableHeaders from './utils/tableHeaders';
 import TableRows from './DynamicTable';
 
 const ApiTokenListView = () => {
@@ -46,6 +46,14 @@ const ApiTokenListView = () => {
   useEffect(() => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
   }, [push]);
+
+  const headers = tableHeaders.map((header) => ({
+    ...header,
+    metadatas: {
+      ...header.metadatas,
+      label: formatMessage(header.metadatas.label),
+    },
+  }));
 
   const {
     data: apiTokens,
@@ -134,7 +142,7 @@ const ApiTokenListView = () => {
         {!canRead && <NoPermissions />}
         {shouldDisplayDynamicTable && (
           <DynamicTable
-            headers={getTableHeaders(formatMessage)}
+            headers={headers}
             contentType="api-tokens"
             rows={apiTokens}
             withBulkActions={canDelete || canUpdate}

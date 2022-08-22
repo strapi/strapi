@@ -3,15 +3,15 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 import { Status } from '@strapi/helper-plugin';
 
-const getTableHeaders = (formatMessage) => [
+const tableHeaders = [
   {
     name: 'firstname',
     key: 'firstname',
     metadatas: {
-      label: formatMessage({
+      label: {
         id: 'Settings.permissions.users.firstname',
         defaultMessage: 'Firstname',
-      }),
+      },
       sortable: true,
     },
   },
@@ -19,10 +19,10 @@ const getTableHeaders = (formatMessage) => [
     name: 'lastname',
     key: 'lastname',
     metadatas: {
-      label: formatMessage({
+      label: {
         id: 'Settings.permissions.users.lastname',
         defaultMessage: 'Lastname',
-      }),
+      },
       sortable: true,
     },
   },
@@ -30,14 +30,20 @@ const getTableHeaders = (formatMessage) => [
     key: 'email',
     name: 'email',
     metadatas: {
-      label: formatMessage({ id: 'Settings.permissions.users.email', defaultMessage: 'Email' }),
+      label: { id: 'Settings.permissions.users.email', defaultMessage: 'Email' },
       sortable: true,
     },
   },
   {
     key: 'roles',
     name: 'roles',
-    metadatas: { label: 'Roles', sortable: false },
+    metadatas: {
+      label: {
+        id: 'Settings.permissions.users.roles',
+        defaultMessage: 'Roles',
+      },
+      sortable: false,
+    },
     cellFormatter({ roles }, { formatMessage }) {
       return (
         <Typography textColor="neutral800">
@@ -57,10 +63,10 @@ const getTableHeaders = (formatMessage) => [
     key: 'username',
     name: 'username',
     metadatas: {
-      label: formatMessage({
+      label: {
         id: 'Settings.permissions.users.username',
         defaultMessage: 'Username',
-      }),
+      },
       sortable: true,
     },
   },
@@ -68,10 +74,10 @@ const getTableHeaders = (formatMessage) => [
     key: 'isActive',
     name: 'isActive',
     metadatas: {
-      label: formatMessage({
+      label: {
         id: 'Settings.permissions.users.user-status',
         defaultMessage: 'User status',
-      }),
+      },
       sortable: false,
     },
     cellFormatter({ isActive }, { formatMessage }) {
@@ -92,4 +98,4 @@ const getTableHeaders = (formatMessage) => [
   },
 ];
 
-export default getTableHeaders;
+export default tableHeaders;
