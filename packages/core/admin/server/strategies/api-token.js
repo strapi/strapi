@@ -21,7 +21,10 @@ const extractToken = (ctx) => {
   return null;
 };
 
-/** @type {import('.').AuthenticateFunction} */
+/**
+ * Authenticate the validity of the token
+ *
+ *  @type {import('.').AuthenticateFunction} */
 const authenticate = async (ctx) => {
   const apiTokenService = getService('api-token');
   const token = extractToken(ctx);
@@ -34,6 +37,7 @@ const authenticate = async (ctx) => {
     accessKey: apiTokenService.hash(token),
   });
 
+  // token not found
   if (!apiToken) {
     return { authenticated: false };
   }
@@ -54,11 +58,19 @@ const authenticate = async (ctx) => {
   return { authenticated: true, credentials: apiToken };
 };
 
-/** @type {import('.').VerifyFunction} */
+/**
+ * Verify the token has the required abilities for the requested scope
+ *
+ *  @type {import('.').VerifyFunction} */
 const verify = (auth, config) => {
   const { credentials: apiToken, ability } = auth;
 
   if (!apiToken) {
+    throw new UnauthorizedError();
+  }
+
+  // token has expired
+  if (apiToken.expiresAt && apiToken.expiresAt < Date.now()) {
     throw new UnauthorizedError();
   }
 
