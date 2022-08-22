@@ -63,6 +63,42 @@ describe('API Token Controller', () => {
       expect(create).toHaveBeenCalledWith(body);
       expect(created).toHaveBeenCalled();
     });
+
+    test.only('Create API Token with lifespan', async () => {
+      const lifespan = 90 * 24 * 60 * 60 * 1000; // 90 days
+      const createBody = {
+        ...body,
+        lifespan,
+      };
+      const tokenBody = {
+        ...createBody,
+        expirationDate: Date.now() + lifespan,
+      };
+
+      const create = jest.fn().mockResolvedValue(tokenBody);
+      const exists = jest.fn(() => false);
+      const badRequest = jest.fn();
+      const created = jest.fn();
+      const ctx = createContext({ body: createBody }, { badRequest, created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              exists,
+              create,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.create(ctx);
+
+      expect(exists).toHaveBeenCalledWith({ name: body.name });
+      expect(badRequest).not.toHaveBeenCalled();
+      expect(create).toHaveBeenCalledWith(body);
+      expect(created).toHaveBeenCalled();
+    });
   });
 
   describe('List API tokens', () => {
