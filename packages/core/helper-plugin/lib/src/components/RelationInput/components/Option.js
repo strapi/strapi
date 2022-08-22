@@ -19,7 +19,7 @@ const StyledBullet = styled.div`
   border-radius: 50%;
 `;
 
-const Option = (props) => {
+export const Option = (props) => {
   const { formatMessage } = useIntl();
   const Component = components.Option;
   const hasDraftAndPublish = has(get(props, 'data.value'), 'publishedAt');
@@ -68,5 +68,3 @@ Option.propTypes = {
     }).isRequired,
   }).isRequired,
 };
-
-export default Option;

@@ -14,7 +14,7 @@ import Refresh from '@strapi/icons/Refresh';
 import { Relation } from './components/Relation';
 import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
-import Option from './components/Option';
+import { Option } from './components/Option';
 
 import ReactSelect from '../ReactSelect';
 
