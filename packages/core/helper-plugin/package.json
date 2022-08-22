@@ -34,7 +34,7 @@
     "prepublishOnly": "npm run build",
     "storybook": "start-storybook -p 6006",
     "test:front": "jest --config ./jest.config.front.js",
-    "test:front:cov": "jest --config ./jest.config.front.js --coverage --collectCoverageFrom='<rootDir>/packages/core/helper-plugin/lib/src/**/*.js' --coverageDirectory='<rootDir>/packages/core/helper-plugin/coverage'",
+    "test:front:cov": "jest --config ./jest.config.front.js --coverage",
     "test:front:watch": "jest --config ./jest.config.front.js --watchAll",
     "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w"
   },
