@@ -8,6 +8,7 @@ import getTrad from '../../../utils/getTrad';
 const ColorPickerInput = ({
   attribute,
   description,
+  disabled,
   error,
   intlLabel,
   name,
@@ -37,7 +38,14 @@ const ColorPickerInput = ({
             }
           )}
         </Typography>
-        <input type="color" id={name} name={name} value={value || ''} onChange={onChange} />
+        <input
+          type="color"
+          id={name}
+          name={name}
+          value={value || ''}
+          onChange={onChange}
+          disabled={disabled}
+        />
         <FieldHint />
         <FieldError />
       </Stack>
