@@ -3,7 +3,7 @@
 {{else}}
   /**
    *
-   * {{name}}
+   * {{ name }}
    *
    */
 
@@ -17,22 +17,22 @@
   {{/if}}
   {{#if useRedux}}
     import { useDispatch, useSelector } from 'react-redux';
-    import { select{{name}}Domain } from './selectors';
+    import { select{{ name }}Domain } from './selectors';
     import { defaultAction } from './actions';
   {{/if}}
 {{/if}}
 
 {{#if styled}}
-  const {{name}} = styled.{{ htmlTag }}``;
+  const {{ name }} = styled.{{ htmlTag }}``;
 {{else}}
-  const {{name}} = () => {
+  const {{ name }} = () => {
     {{#if useI18n}}
       const { formatMessage } = useIntl();
     {{/if}}
     {{#if useRedux}}
       const dispatch = useDispatch();
       // eslint-disable-next-line no-unused-vars
-      const state = useSelector(select{{name}}Domain);
+      const state = useSelector(select{{ name }}Domain);
 
       const handleClick = () => dispatch(defaultAction())
     {{/if}}
@@ -55,7 +55,7 @@
     );
   };
 
-  {{name}}.propTypes = {};
+  {{ name }}.propTypes = {};
 {{/if}}
 
-export default {{name}};
+export default {{ name }};

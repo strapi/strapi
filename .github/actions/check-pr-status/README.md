@@ -1,6 +1,6 @@
 # PR checker for status
 
-This action checks a PR labels, milestone and status to validate it is ready for merging into master.
+This action checks a PR labels, milestone and status to validate it is ready for merging into main.
 
 > ❗️ When making changes to this code, make sure to run the build before committing. See [Development](#development) to know more.
 

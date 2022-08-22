@@ -12,6 +12,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const fse = require('fs-extra');
 const _ = require('lodash');
+const { extension } = require('mime-types');
 const {
   sanitize,
   nameToSlug,
@@ -72,7 +73,10 @@ module.exports = ({ strapi }) => ({
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const fileService = getService('file');
 
-    const ext = path.extname(filename);
+    let ext = path.extname(filename);
+    if (!ext) {
+      ext = `.${extension(type)}`;
+    }
     const basename = path.basename(fileInfo.name || filename, ext);
     const usedName = fileInfo.name || filename;
 
@@ -190,37 +194,47 @@ module.exports = ({ strapi }) => ({
     // Store width and height of the original image
     const { width, height } = await getDimensions(fileData);
 
-    // Make sure this is assigned before calling upload
+    // Make sure this is assigned before calling any upload
     // That way it can mutate the width and height
     _.assign(fileData, {
       width,
       height,
     });
 
-    // Upload image
-    await getService('provider').upload(fileData);
+    // For performance reasons, all uploads are wrapped in a single Promise.all
+    const uploadThumbnail = async (thumbnailFile) => {
+      await getService('provider').upload(thumbnailFile);
+      _.set(fileData, 'formats.thumbnail', thumbnailFile);
+    };
 
-    // Generate thumbnail and responsive formats
+    const uploadResponsiveFormat = async (format) => {
+      const { key, file } = format;
+      await getService('provider').upload(file);
+      _.set(fileData, ['formats', key], file);
+    };
+
+    const uploadPromises = [];
+
+    // Upload image
+    uploadPromises.push(getService('provider').upload(fileData));
+
+    // Generate & Upload thumbnail and responsive formats
     if (await isOptimizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
-        await getService('provider').upload(thumbnailFile);
-        _.set(fileData, 'formats.thumbnail', thumbnailFile);
+        uploadPromises.push(uploadThumbnail(thumbnailFile));
       }
 
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
           if (!format) continue;
-
-          const { key, file } = format;
-
-          await getService('provider').upload(file);
-
-          _.set(fileData, ['formats', key], file);
+          uploadPromises.push(uploadResponsiveFormat(format));
         }
       }
     }
+    // Wait for all uploads to finish
+    await Promise.all(uploadPromises);
   },
 
   /**
