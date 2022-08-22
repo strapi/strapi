@@ -6,7 +6,8 @@ import PropTypes from 'prop-types';
 import { get, has, isEmpty } from 'lodash';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
-import { pxToRem } from '@strapi/helper-plugin';
+
+import pxToRem from '../../../utils/pxToRem';
 
 const StyledBullet = styled.div`
   flex-shrink: 0;
@@ -30,6 +31,7 @@ const Option = (props) => {
       id: 'content-manager.components.Select.draft-info-title',
       defaultMessage: 'State: Draft',
     };
+    // To fix: use getTrad utils from CM once component is migrated into CM components
     const publishedMessage = {
       id: 'content-manager.components.Select.publish-info-title',
       defaultMessage: 'State: Published',
