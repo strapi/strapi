@@ -624,6 +624,19 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     expect(res.body.data.accessKey).not.toEqual(token.accessKey);
   });
 
+  test('Regenerate throws a NotFound if provided an invalid id', async () => {
+    const res = await rq({
+      url: `/admin/api-tokens/999999/regenerate`,
+      method: 'POST',
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body.error).toMatchObject({
+      name: 'NotFoundError',
+      status: 404,
+    });
+  });
+
   test.todo('Regenerated access key works');
   test.todo('Tokens access content for which they are authorized');
   test.todo('Tokens fail to access content for which they are not authorized');
