@@ -67,9 +67,6 @@
       "eslint --fix"
     ]
   },
-  "dependencies": {
-    "@babel/polyfill": "7.12.1"
-  },
   "devDependencies": {
     "@babel/core": "7.18.10",
     "@babel/eslint-parser": "7.18.9",
@@ -77,10 +74,6 @@
     "@strapi/eslint-config": "0.1.1",
     "@swc/core": "1.2.224",
     "@swc/jest": "0.2.22",
-    "@testing-library/react": "11.2.7",
-    "@testing-library/react-hooks": "3.7.0",
-    "@testing-library/user-event": "13.5.0",
-    "axios-mock-adapter": "1.20.0",
     "babel-eslint": "10.1.0",
     "chalk": "4.1.2",
     "chokidar": "3.5.3",
@@ -98,16 +91,14 @@
     "jest-circus": "26.6.3",
     "jest-cli": "26.6.3",
     "jest-watch-typeahead": "0.6.5",
-    "lerna": "5.1.6",
+    "lerna": "5.4.3",
     "lint-staged": "10.5.4",
     "lodash": "4.17.21",
-    "msw": "0.42.3",
     "npm-run-all": "4.1.5",
     "nx": "14.4.2",
     "plop": "2.7.6",
     "prettier": "2.7.1",
     "qs": "6.11.0",
-    "react-test-renderer": "17.0.2",
     "request": "2.88.2",
     "request-promise-native": "1.0.9",
     "rimraf": "3.0.2",
