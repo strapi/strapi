@@ -50,7 +50,7 @@ const createContentAPI = (/* strapi */) => {
     Promise.all(
       uniq(actions).map((action) =>
         providers.action.register(action).catch(() => {
-          console.warn('Trying to add action that already exists', action);
+          strapi.log.warn(`Trying to add action that already exists: ${action}`);
         })
       )
     );
