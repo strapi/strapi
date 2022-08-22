@@ -609,6 +609,23 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
+  test('Regenerates an api token access key', async () => {
+    const token = await createValidToken();
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}/regenerate`,
+      method: 'POST',
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toMatchObject({
+      accessKey: expect.any(String),
+    });
+  });
+
+  test.todo('Regenerated access key works');
+  test.todo('Tokens access content for which they are authorized');
+  test.todo('Tokens fail to access content for which they are not authorized');
   test.todo('Sets expiration time correctly');
   test.todo("Doesn't have expiration if not set");
 });

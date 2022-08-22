@@ -38,6 +38,21 @@ module.exports = {
     ctx.created({ data: apiToken });
   },
 
+  async regenerate(ctx) {
+    const { id } = ctx.params;
+    const apiTokenService = getService('api-token');
+
+    const apiTokenExists = await apiTokenService.getById(id);
+    if (!apiTokenExists) {
+      ctx.notFound('API Token not found');
+      return;
+    }
+
+    const accessToken = await apiTokenService.regenerate(id);
+
+    ctx.created({ data: accessToken });
+  },
+
   async list(ctx) {
     const apiTokenService = getService('api-token');
     const apiTokens = await apiTokenService.list();
@@ -60,7 +75,6 @@ module.exports = {
 
     if (!apiToken) {
       ctx.notFound('API Token not found');
-
       return;
     }
 

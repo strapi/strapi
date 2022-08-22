@@ -256,6 +256,33 @@ describe('API Token', () => {
     });
   });
 
+  describe('regenerate', () => {
+    test('It regenerates the accessKey', async () => {
+      const update = jest.fn(({ data }) => Promise.resolve(data));
+
+      global.strapi = {
+        query() {
+          return { update };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      const id = 1;
+      const res = await apiTokenService.regenerate(id);
+
+      expect(update).toHaveBeenCalledWith({
+        where: { id },
+        select: ['id', 'accessKey'],
+        data: {
+          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+        },
+      });
+      expect(res).toEqual({ accessKey: mockedApiToken.hexedString });
+    });
+  });
+
   describe('update', () => {
     test('Updates a non-custom token', async () => {
       const token = {
