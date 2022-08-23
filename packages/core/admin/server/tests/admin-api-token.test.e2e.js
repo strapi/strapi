@@ -1,6 +1,6 @@
 'use strict';
 
-const { omit, map } = require('lodash');
+const { omit } = require('lodash');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
@@ -332,7 +332,16 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data.length).toBe(4);
-    expect(res.body.data).toMatchObject(map(tokens, (t) => omit(t, ['accessKey'])));
+    // check that each token exists in data
+    tokens.forEach((token) => {
+      const t = res.body.data.find((t) => t.id === token.id);
+      if (t.permissions) {
+        t.permissions = t.permissions.sort();
+        // eslint-disable-next-line no-param-reassign
+        token.permissions = token.permissions.sort();
+      }
+      expect(t).toMatchObject(omit(token, ['accessKey']));
+    });
   });
 
   test('Deletes a token (successfully)', async () => {
