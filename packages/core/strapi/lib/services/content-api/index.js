@@ -85,11 +85,12 @@ const createContentAPI = (strapi) => {
           actions.map((action) => {
             const actionUID = `${api}.${controller}.${action}`;
 
-            return providers.action
-              .register(actionUID, { api, controller, action, uid: actionUID })
-              .catch(() => {
-                strapi.log.warn(`Trying to add action that already exists: ${actionUID}`);
-              });
+            return providers.action.register(actionUID, {
+              api,
+              controller,
+              action,
+              uid: actionUID,
+            });
           })
         );
       }
