@@ -576,7 +576,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
         )
       ).toEqual({
         endpoints: {
-          search: '/content-manager/relations/api::address.address/categories'
+          search: '/content-manager/relations/api::address.address/categories',
         },
         defaultParams: {
           _component: 'api::address.address',
