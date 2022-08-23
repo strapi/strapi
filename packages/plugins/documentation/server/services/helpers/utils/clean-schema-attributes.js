@@ -12,7 +12,12 @@ const pascalCase = require('./pascal-case');
  */
 const cleanSchemaAttributes = (
   attributes,
-  { typeMap = new Map(), isRequest = false, addComponentSchema = () => {}, componentSchemaRefName = '' } = {}
+  {
+    typeMap = new Map(),
+    isRequest = false,
+    addComponentSchema = () => {},
+    componentSchemaRefName = '',
+  } = {}
 ) => {
   const attributesCopy = _.cloneDeep(attributes);
 
@@ -125,7 +130,11 @@ const cleanSchemaAttributes = (
             properties: {
               ...(isRequest ? {} : { id: { type: 'string' } }),
               __component: { type: 'string' },
-              ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest, addComponentSchema }),
+              ...cleanSchemaAttributes(componentAttributes, {
+                typeMap,
+                isRequest,
+                addComponentSchema,
+              }),
             },
           };
           const refComponentSchema = { $ref: `#/components/schemas/${pascalCase(component)}` };
