@@ -1,6 +1,6 @@
 'use strict';
 
-const { omit, map, orderBy } = require('lodash');
+const { omit, map } = require('lodash');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
@@ -36,6 +36,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
   const createValidToken = async (token = {}) => {
     const body = {
       type: 'read-only',
+      // eslint-disable-next-line no-plusplus
       name: `token_${String(currentTokens++)}`,
       description: 'generic description',
       ...token,
@@ -130,7 +131,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: body.name,
       permissions: [],
@@ -189,7 +190,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: body.name,
       permissions: [],
@@ -217,7 +218,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: body.name,
       permissions: body.permissions,
@@ -269,7 +270,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: body.name,
       permissions: [],
@@ -296,7 +297,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: 'api-token_tests-spaces-at-the-end',
       permissions: [],
@@ -331,9 +332,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data.length).toBe(4);
-    expect(orderBy(res.body.data, ['id'])).toStrictEqual(
-      map(orderBy(tokens, ['id']), (t) => omit(t, ['accessKey']))
-    );
+    expect(res.body.data).toMatchObject(map(tokens, (t) => omit(t, ['accessKey'])));
   });
 
   test('Deletes a token (successfully)', async () => {
@@ -345,7 +344,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       name: token.name,
       permissions: token.permissions,
       description: token.description,
@@ -378,7 +377,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       name: token.name,
       permissions: token.permissions,
       description: token.description,
@@ -402,7 +401,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       name: token.name,
       permissions: token.permissions,
       description: token.description,
@@ -460,7 +459,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(updatedRes.statusCode).toBe(200);
-    expect(updatedRes.body.data).toStrictEqual({
+    expect(updatedRes.body.data).toMatchObject({
       name: updatedBody.name,
       permissions: [],
       description: updatedBody.description,
