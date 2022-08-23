@@ -9,6 +9,7 @@ const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
+const data = { dogs: [] };
 let strapi;
 let rq;
 
@@ -24,7 +25,7 @@ const dogModel = {
   },
 };
 
-describe('Upload plugin end to end tests', () => {
+describe('Upload plugin', () => {
   beforeAll(async () => {
     await builder.addContentType(dogModel).build();
     strapi = await createStrapiInstance();
@@ -155,6 +156,8 @@ describe('Upload plugin end to end tests', () => {
           id: expect.anything(),
         },
       });
+
+      data.dogs.push(res.body);
     });
 
     test('With a pdf', async () => {
@@ -183,6 +186,51 @@ describe('Upload plugin end to end tests', () => {
           id: expect.anything(),
         },
       });
+      data.dogs.push(res.body);
+    });
+  });
+
+  // see https://github.com/strapi/strapi/issues/14125
+  describe('File relations are correctly removed', () => {
+    test('Update an entity with a file correctly removes the relation between the entity and its old file', async () => {
+      const res = await rq({
+        method: 'PUT',
+        url: `/dogs/${data.dogs[0].data.id}?populate=*`,
+        formData: {
+          data: '{}',
+          'files.profilePicture': fs.createReadStream(path.join(__dirname, '../utils/strapi.jpg')),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.attributes.profilePicture.data.id).not.toBe(
+        data.dogs[0].data.attributes.profilePicture.data.id
+      );
+
+      data.dogs[0] = res.body;
+    });
+
+    test('Update a file with an entity correctly removes the relation between the entity and its old file', async () => {
+      const fileId = data.dogs[1].data.attributes.profilePicture.data.id;
+      await strapi.entityService.update('plugin::upload.file', fileId, {
+        data: {
+          related: [
+            {
+              id: data.dogs[0].data.id,
+              __type: 'api::dog.dog',
+              __pivot: { field: 'profilePicture' },
+            },
+          ],
+        },
+      });
+
+      const res = await rq({
+        method: 'GET',
+        url: `/dogs/${data.dogs[0].data.id}?populate=*`,
+      });
+      expect(res.body.data.attributes.profilePicture.data.id).toBe(fileId);
+
+      data.dogs[0] = res.body;
     });
   });
 });

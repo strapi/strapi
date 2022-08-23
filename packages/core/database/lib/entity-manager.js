@@ -402,6 +402,21 @@ const createEntityManager = (db) => {
             continue;
           }
 
+          // delete previous relations
+          const where = { $or: [] };
+
+          for (const { field, related_type: relatedType, related_id: relatedId } of rows) {
+            const isMorphOne =
+              db.metadata.get(relatedType).attributes[field].relation === 'morphOne';
+            if (isMorphOne) {
+              where.$or.push({ related_type: relatedType, field, related_id: relatedId });
+            }
+          }
+
+          if (!_.isEmpty(where.$or)) {
+            await this.createQueryBuilder(joinTable.name).delete().where(where).execute();
+          }
+
           await this.createQueryBuilder(joinTable.name).insert(rows).execute();
 
           continue;
@@ -503,6 +518,8 @@ const createEntityManager = (db) => {
             // set columns
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
+            // update instead of deleting because the relation is directly on the entity table
+            // and not in a join table
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: null, [typeColumn.name]: null })
               .where({ [idColumn.name]: id, [typeColumn.name]: uid })
@@ -579,6 +596,21 @@ const createEntityManager = (db) => {
 
           if (_.isEmpty(rows)) {
             continue;
+          }
+
+          // delete previous relations
+          const where = { $or: [] };
+
+          for (const { field, related_type: relatedType, related_id: relatedId } of rows) {
+            const isMorphOne =
+              db.metadata.get(relatedType).attributes[field].relation === 'morphOne';
+            if (isMorphOne) {
+              where.$or.push({ related_type: relatedType, field, related_id: relatedId });
+            }
+          }
+
+          if (!_.isEmpty(where.$or)) {
+            await this.createQueryBuilder(joinTable.name).delete().where(where).execute();
           }
 
           await this.createQueryBuilder(joinTable.name).insert(rows).execute();
