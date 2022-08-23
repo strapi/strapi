@@ -1,6 +1,6 @@
 'use strict';
 
-const { uniq } = require('lodash');
+const _ = require('lodash');
 const permissions = require('./permissions');
 
 /**
@@ -30,30 +30,70 @@ const createContentAPI = (/* strapi */) => {
     condition: permissions.providers.createConditionProvider(),
   };
 
-  const syncActions = async () => {
-    // Register actions
-    const apiRoutesName = Object.values(strapi.api)
-      .map((api) => api.routes)
-      .reduce((acc, routesMap) => {
-        const routes = Object.values(routesMap)
-          // Only content api routes
-          .filter((p) => p.type === 'content-api')
-          // Resolve every handler name for each route
-          .reduce((a, p) => a.concat(p.routes.map((i) => i.handler)), []);
-        return acc.concat(routes);
-      }, []);
-    const pluginsRoutesname = Object.values(strapi.plugins)
-      .map((plugin) => plugin.routes['content-api'] || {})
-      .map((p) => (p.routes || []).map((i) => i.handler))
-      .flat();
-    const actions = apiRoutesName.concat(pluginsRoutesname);
-    Promise.all(
-      uniq(actions).map((action) =>
-        providers.action.register(action).catch(() => {
-          strapi.log.warn(`Trying to add action that already exists: ${action}`);
-        })
-      )
-    );
+  const getActionsMap = () => {
+    const actionMap = {};
+
+    const isContentApi = (action) => {
+      if (!_.has(action, Symbol.for('__type__'))) {
+        return false;
+      }
+
+      return action[Symbol.for('__type__')].includes('content-api');
+    };
+
+    const registerAPIsActions = (apis, source) => {
+      _.forEach(apis, (api, apiName) => {
+        const controllers = _.reduce(
+          api.controllers,
+          (acc, controller, controllerName) => {
+            const contentApiActions = _.pickBy(controller, isContentApi);
+
+            if (_.isEmpty(contentApiActions)) {
+              return acc;
+            }
+
+            acc[controllerName] = Object.keys(contentApiActions);
+
+            return acc;
+          },
+          {}
+        );
+
+        if (!_.isEmpty(controllers)) {
+          actionMap[`${source}::${apiName}`] = { controllers };
+        }
+      });
+    };
+
+    registerAPIsActions(strapi.api, 'api');
+    registerAPIsActions(strapi.plugins, 'plugin');
+
+    return actionMap;
+  };
+
+  const registerActions = async () => {
+    const actionsMap = getActionsMap();
+
+    // For each API
+    for (const [api, value] of Object.entries(actionsMap)) {
+      const { controllers } = value;
+
+      // Register controllers methods as actions
+      for (const [controller, actions] of Object.entries(controllers)) {
+        // Register each action individually
+        await Promise.all(
+          actions.map((action) => {
+            const actionUID = `${api}.${controller}.${action}`;
+
+            return providers.action
+              .register(actionUID, { api, controller, action, uid: actionUID })
+              .catch(() => {
+                strapi.log.warn(`Trying to add action that already exists: ${actionUID}`);
+              });
+          })
+        );
+      }
+    }
   };
 
   // create permission engine
@@ -65,7 +105,8 @@ const createContentAPI = (/* strapi */) => {
     permissions: {
       engine,
       providers,
-      syncActions,
+      registerActions,
+      getActionsMap,
     },
   };
 };

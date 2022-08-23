@@ -171,8 +171,6 @@ module.exports = ({ strapi }) => ({
 
     const toDelete = _.difference(permissionsFoundInDB, allActions);
 
-    // NOTE: actions are registered in content API bootstrap syncActions
-
     await Promise.all(
       toDelete.map((action) => {
         return strapi.query('plugin::users-permissions.permission').delete({ where: { action } });

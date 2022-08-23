@@ -454,7 +454,7 @@ class Strapi {
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
     // TODO: is this the best place for this?
-    await this.contentAPI.permissions.syncActions();
+    await this.contentAPI.permissions.registerActions();
 
     this.cron.start();
 
