@@ -335,7 +335,12 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     // check that each token exists in data
     tokens.forEach((token) => {
       const t = res.body.data.find((t) => t.id === token.id);
-      expect(t).toMatchObject(omit(token, 'accessKey'));
+      if (t.permissions) {
+        t.permissions = t.permissions.sort();
+        // eslint-disable-next-line no-param-reassign
+        token.permissions = token.permissions.sort();
+      }
+      expect(t).toMatchObject(omit(token, ['accessKey']));
     });
   });
 
