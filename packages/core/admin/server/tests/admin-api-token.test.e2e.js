@@ -624,8 +624,10 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
   });
 
   test.todo('Regenerated access key works');
-  test.todo('Tokens access content for which they are authorized');
-  test.todo('Tokens fail to access content for which they are not authorized');
+  test.todo('Custom tokens access content for which they are authorized');
+  test.todo('Custom tokens fail to access content for which they are not authorized');
   test.todo('Sets expiration time correctly');
   test.todo("Doesn't have expiration if not set");
+  test.todo("Expired token can't be used");
+  test.todo('Custom token can only be created with valid permissions that exist');
 });
