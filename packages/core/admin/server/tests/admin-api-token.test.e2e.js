@@ -1,6 +1,6 @@
 'use strict';
 
-const { omit, map } = require('lodash');
+const { omit } = require('lodash');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
@@ -332,15 +332,11 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data.length).toBe(4);
-    const mappedTokens = map(tokens, (t) => omit(t, ['accessKey']));
-    expect(res.body.data).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining(mappedTokens[0]),
-        expect.objectContaining(mappedTokens[1]),
-        expect.objectContaining(mappedTokens[2]),
-        expect.objectContaining(mappedTokens[3]),
-      ])
-    );
+    // check that each token exists in data
+    tokens.forEach((token) => {
+      const t = res.body.data.find((t) => t.id === token.id);
+      expect(t).toMatchObject(omit(token, 'accessKey'));
+    });
   });
 
   test('Deletes a token (successfully)', async () => {
