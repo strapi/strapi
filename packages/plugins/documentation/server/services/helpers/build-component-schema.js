@@ -68,7 +68,10 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         [`${pascalCase(uniqueName)}LocalizationRequest`]: {
           required: [...requiredAttributes, 'locale'],
           type: 'object',
-          properties: cleanSchemaAttributes(attributesForRequest, { isRequest: true, addComponentSchema }),
+          properties: cleanSchemaAttributes(attributesForRequest, {
+            isRequest: true,
+            addComponentSchema,
+          }),
         },
       };
     }
@@ -83,7 +86,10 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
           data: {
             required: requiredAttributes,
             type: 'object',
-            properties: cleanSchemaAttributes(attributesForRequest, { isRequest: true, addComponentSchema }),
+            properties: cleanSchemaAttributes(attributesForRequest, {
+              isRequest: true,
+              addComponentSchema,
+            }),
           },
         },
       },
