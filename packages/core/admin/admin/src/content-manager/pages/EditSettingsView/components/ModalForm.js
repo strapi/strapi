@@ -138,7 +138,7 @@ const ModalForm = ({ onMetaChange, onSizeChange }) => {
         onChange={(value) => onMetaChange({ target: { name: 'step', value } })}
         label={formatMessage({
           id: getTrad('containers.SettingPage.editSettings.step.label'),
-          defaultMessage: 'Step',
+          defaultMessage: 'Time interval (minutes)',
         })}
       >
         {TIME_FIELD_OPTIONS.map((value) => (
