@@ -17,7 +17,7 @@ const ParentFolderDefinition = PropTypes.shape({
   createdAt: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   updatedAt: PropTypes.string.isRequired,
-  pathId: PropTypes.number.isRequired,
+  pathId: PropTypes.string.isRequired,
   path: PropTypes.string.isRequired,
 });
 
@@ -37,7 +37,7 @@ export const FolderDefinition = PropTypes.shape({
   parent: PropTypes.oneOfType([ParentFolderDefinition, PropTypes.number]),
   updatedAt: PropTypes.string.isRequired,
   updatedBy: PropTypes.shape(),
-  pathId: PropTypes.number.isRequired,
+  pathId: PropTypes.string.isRequired,
   path: PropTypes.string.isRequired,
 });
 
