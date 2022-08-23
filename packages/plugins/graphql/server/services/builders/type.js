@@ -276,6 +276,7 @@ module.exports = (context) => {
         null,
         contentType
       );
+      const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
 
       return objectType({
         name,
@@ -312,7 +313,7 @@ module.exports = (context) => {
               // rules only on the current attribute (eg: nonNull, list, ...)
               let builder = t;
 
-              if (attribute.required) {
+              if (attribute.required && !hasDraftAndPublish) {
                 builder = builder.nonNull;
               }
 
