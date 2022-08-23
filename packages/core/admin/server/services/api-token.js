@@ -144,7 +144,7 @@ const hash = (accessKey) => {
  */
 const getExpirationFields = (lifespan) => {
   // it must be nil or a finite number >= 0
-  const isValidNumber = isNumber(lifespan) && (!isFinite(lifespan) || lifespan < 0);
+  const isValidNumber = isNumber(lifespan) && isFinite(lifespan) && lifespan > 0;
   if (!isValidNumber && !isNil(lifespan)) {
     throw new ValidationError('lifespan must be a positive number or null');
   }

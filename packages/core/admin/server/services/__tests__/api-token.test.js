@@ -33,7 +33,7 @@ describe('API Token', () => {
   });
 
   describe('create', () => {
-    test('Creates a new token', async () => {
+    test('Creates a new read-only token', async () => {
       const create = jest.fn(({ data }) => Promise.resolve(data));
 
       global.strapi = {
@@ -63,6 +63,132 @@ describe('API Token', () => {
         },
         populate: ['permissions'],
       });
+      expect(res).toEqual({
+        ...attributes,
+        accessKey: mockedApiToken.hexedString,
+        expiresAt: null,
+        lifespan: null,
+      });
+    });
+
+    test('Creates a new token with lifespan', async () => {
+      const attributes = {
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+        lifespan: 123456,
+      };
+
+      const minExpires = Date.now() + attributes.lifespan;
+
+      const create = jest.fn(({ data }) => Promise.resolve(data));
+      global.strapi = {
+        query() {
+          return { create };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      const res = await apiTokenService.create(attributes);
+
+      expect(create).toHaveBeenCalledWith({
+        select: SELECT_FIELDS,
+        data: {
+          ...attributes,
+          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          expiresAt: expect.any(Number),
+          lifespan: attributes.lifespan,
+        },
+        populate: ['permissions'],
+      });
+      expect(res).toEqual({
+        ...attributes,
+        accessKey: mockedApiToken.hexedString,
+        expiresAt: expect.any(Number),
+        lifespan: attributes.lifespan,
+      });
+      expect(res.expiresAt).toBeGreaterThanOrEqual(minExpires);
+    });
+
+    test('Creates a custom token', async () => {
+      const id = 1;
+
+      const attributes = {
+        id,
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'custom',
+        permissions: ['admin::content.content.read'],
+      };
+      const createTokenResult = {
+        ...attributes,
+        lifespan: null,
+        expiresAt: null,
+        id: 1,
+      };
+
+      const findOne = jest.fn().mockResolvedValue(omit('permissions', attributes));
+      const create = jest.fn().mockResolvedValue(createTokenResult);
+      const load = jest.fn().mockResolvedValueOnce(
+        Promise.resolve(
+          attributes.permissions.map((p) => {
+            return {
+              action: p,
+            };
+          })
+        )
+      );
+
+      global.strapi = {
+        query() {
+          return {
+            findOne,
+            create,
+          };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+        entityService: {
+          load,
+        },
+      };
+
+      const res = await apiTokenService.create(attributes);
+
+      expect(load).toHaveBeenCalledWith(
+        'admin::api-token',
+        {
+          ...createTokenResult,
+        },
+        'permissions'
+      );
+
+      // call to create token
+      expect(create).toHaveBeenNthCalledWith(1, {
+        select: SELECT_FIELDS,
+        data: {
+          ...omit('permissions', attributes),
+          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          expiresAt: null,
+          lifespan: null,
+        },
+        populate: ['permissions'],
+      });
+      // call to create permission
+      expect(create).toHaveBeenNthCalledWith(2, {
+        data: {
+          action: 'admin::content.content.read',
+          token: {
+            ...attributes,
+            expiresAt: null,
+            lifespan: null,
+          },
+        },
+      });
+
       expect(res).toEqual({
         ...attributes,
         accessKey: mockedApiToken.hexedString,
