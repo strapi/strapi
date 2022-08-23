@@ -23,7 +23,7 @@ const createValidatePermissionHandler =
 /**
  * Create a content API container that holds logic, tools and utils. (eg: permissions, ...)
  */
-const createContentAPI = (/* strapi */) => {
+const createContentAPI = (strapi) => {
   // Add providers
   const providers = {
     action: permissions.providers.createActionProvider(),
