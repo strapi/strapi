@@ -34,7 +34,8 @@
     "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
+    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce:cov": "cross-env IS_EE=false jest --config ./jest.config.front.js --coverage"
   },
   "dependencies": {
     "@babel/core": "7.18.10",
