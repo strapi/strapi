@@ -49,6 +49,14 @@ const ApiTokenListView = () => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
   }, [push]);
 
+  const headers = tableHeaders.map((header) => ({
+    ...header,
+    metadatas: {
+      ...header.metadatas,
+      label: formatMessage(header.metadatas.label),
+    },
+  }));
+
   const {
     data: apiTokens,
     status,
@@ -136,7 +144,7 @@ const ApiTokenListView = () => {
         {!canRead && <NoPermissions />}
         {shouldDisplayDynamicTable && (
           <DynamicTable
-            headers={tableHeaders}
+            headers={headers}
             contentType="api-tokens"
             rows={apiTokens}
             withBulkActions={canDelete || canUpdate || canRead}
