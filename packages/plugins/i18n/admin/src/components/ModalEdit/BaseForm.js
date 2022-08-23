@@ -13,8 +13,7 @@ const BaseForm = ({ locale }) => {
   const { values, handleChange, errors } = useFormikContext();
   const { defaultLocales, isLoading } = useDefaultLocales();
 
-  const localeDetails =
-    !isLoading && defaultLocales.find(defaultLocale => defaultLocale.code === locale.code);
+  const localeDetails = !isLoading && defaultLocales.find((row) => row.code === locale.code);
 
   return (
     <Grid gap={4}>
