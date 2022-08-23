@@ -131,7 +131,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: body.name,
       permissions: [],
@@ -190,7 +190,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: body.name,
       permissions: [],
@@ -218,7 +218,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: body.name,
       permissions: body.permissions,
@@ -270,7 +270,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: body.name,
       permissions: [],
@@ -297,7 +297,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       accessKey: expect.any(String),
       name: 'api-token_tests-spaces-at-the-end',
       permissions: [],
@@ -353,7 +353,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       name: token.name,
       permissions: token.permissions,
       description: token.description,
@@ -386,7 +386,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       name: token.name,
       permissions: token.permissions,
       description: token.description,
@@ -410,7 +410,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toStrictEqual({
+    expect(res.body.data).toMatchObject({
       name: token.name,
       permissions: token.permissions,
       description: token.description,
@@ -468,7 +468,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(updatedRes.statusCode).toBe(200);
-    expect(updatedRes.body.data).toStrictEqual({
+    expect(updatedRes.body.data).toMatchObject({
       name: updatedBody.name,
       permissions: [],
       description: updatedBody.description,
@@ -616,4 +616,36 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       updatedAt: expect.any(String),
     });
   });
+
+  test('Regenerates an api token access key', async () => {
+    const token = await createValidToken();
+
+    const res = await rq({
+      url: `/admin/api-tokens/${token.id}/regenerate`,
+      method: 'POST',
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toMatchObject({
+      accessKey: expect.any(String),
+    });
+    expect(res.body.data.accessKey).not.toEqual(token.accessKey);
+  });
+
+  test('Regenerate throws a NotFound if provided an invalid id', async () => {
+    const res = await rq({
+      url: `/admin/api-tokens/999999/regenerate`,
+      method: 'POST',
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body.error).toMatchObject({
+      name: 'NotFoundError',
+      status: 404,
+    });
+  });
+
+  test.todo('Regenerated access key works');
+  test.todo('Tokens access content for which they are authorized');
+  test.todo('Tokens fail to access content for which they are not authorized');
 });
