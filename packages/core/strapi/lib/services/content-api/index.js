@@ -34,7 +34,7 @@ const createContentAPI = (/* strapi */) => {
     Promise.all(
       uniq(actions).map((action) =>
         providers.action.register(action).catch(() => {
-          console.log('Key already exists', action);
+          // console.log('Key already exists', action);
         })
       )
     );

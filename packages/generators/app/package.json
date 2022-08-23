@@ -36,7 +36,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@sentry/node": "6.19.6",
+    "@sentry/node": "6.19.7",
     "chalk": "^4.1.1",
     "execa": "^1.0.0",
     "fs-extra": "10.0.0",
