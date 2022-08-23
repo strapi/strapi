@@ -2,15 +2,18 @@
 
 const _ = require('lodash');
 const getSchemaData = require('./get-schema-data');
-
+const pascalCase = require('./pascal-case');
 /**
  * @description - Converts types found on attributes to OpenAPI acceptable data types
  *
  * @param {object} attributes - The attributes found on a contentType
- * @param {{ typeMap: Map, isRequest: boolean }} opts
+ * @param {{ typeMap: Map, isRequest: boolean, addComponentSchema: function, componentSchemaRefName: string }} opts
  * @returns Attributes using OpenAPI acceptable data types
  */
-const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = false } = {}) => {
+const cleanSchemaAttributes = (
+  attributes,
+  { typeMap = new Map(), isRequest = false, addComponentSchema = () => {}, componentSchemaRefName = '' } = {}
+) => {
   const attributesCopy = _.cloneDeep(attributes);
 
   for (const prop of Object.keys(attributesCopy)) {
@@ -86,43 +89,49 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
       }
       case 'component': {
         const componentAttributes = strapi.components[attribute.component].attributes;
-
+        const rawComponentSchema = {
+          type: 'object',
+          properties: {
+            ...(isRequest ? {} : { id: { type: 'string' } }),
+            ...cleanSchemaAttributes(componentAttributes, {
+              typeMap,
+              isRequest,
+            }),
+          },
+        };
+        const refComponentSchema = {
+          $ref: `#/components/schemas/${pascalCase(attribute.component)}Component`,
+        };
+        const componentExists = addComponentSchema(
+          `${pascalCase(attribute.component)}Component`,
+          rawComponentSchema
+        );
+        const finalComponentSchema = componentExists ? refComponentSchema : rawComponentSchema;
         if (attribute.repeatable) {
           attributesCopy[prop] = {
             type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                ...(isRequest ? {} : { id: { type: 'string' } }),
-                ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest }),
-              },
-            },
+            items: finalComponentSchema,
           };
         } else {
-          attributesCopy[prop] = {
-            type: 'object',
-            properties: {
-              ...(isRequest ? {} : { id: { type: 'string' } }),
-              ...cleanSchemaAttributes(componentAttributes, {
-                typeMap,
-                isRequest,
-              }),
-            },
-          };
+          attributesCopy[prop] = finalComponentSchema;
         }
         break;
       }
       case 'dynamiczone': {
         const components = attribute.components.map((component) => {
           const componentAttributes = strapi.components[component].attributes;
-          return {
+          const rawComponentSchema = {
             type: 'object',
             properties: {
               ...(isRequest ? {} : { id: { type: 'string' } }),
               __component: { type: 'string' },
-              ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest }),
+              ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest, addComponentSchema }),
             },
           };
+          const refComponentSchema = { $ref: `#/components/schemas/${pascalCase(component)}` };
+          const componentExists = addComponentSchema(pascalCase(component), rawComponentSchema);
+          const finalComponentSchema = componentExists ? refComponentSchema : rawComponentSchema;
+          return finalComponentSchema;
         });
 
         attributesCopy[prop] = {
@@ -171,8 +180,13 @@ const cleanSchemaAttributes = (attributes, { typeMap = new Map(), isRequest = fa
 
         if (prop === 'localizations') {
           attributesCopy[prop] = {
-            type: 'array',
-            items: { type: 'object', properties: {} },
+            type: 'object',
+            properties: {
+              data: {
+                type: 'array',
+                items: componentSchemaRefName.length ? { $ref: componentSchemaRefName } : {},
+              },
+            },
           };
           break;
         }
