@@ -14,7 +14,7 @@ describe('API Token', () => {
     'id',
     'name',
     'description',
-    'lastUsed',
+    'lastUsedAt',
     'type',
     'lifespan',
     'expiresAt',

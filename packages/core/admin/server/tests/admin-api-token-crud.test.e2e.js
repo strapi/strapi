@@ -117,7 +117,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test('Creates a read-only api token (successfully)', async () => {
+  test('Creates a read-only api token', async () => {
     const body = {
       name: 'api-token_tests-readonly',
       description: 'api-token_tests-description',
@@ -144,6 +144,96 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       expiresAt: null,
       lifespan: null,
     });
+  });
+
+  test('Creates a token with a lifespan', async () => {
+    const body = {
+      name: 'api-token_tests-lifespan',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+      lifespan: 12345,
+    };
+
+    const minExpires = Date.now() + body.lifespan;
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toStrictEqual({
+      accessKey: expect.any(String),
+      name: body.name,
+      permissions: [],
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+      createdAt: expect.any(String),
+      lastUsedAt: null,
+      updatedAt: expect.any(String),
+      expiresAt: expect.any(String),
+      lifespan: body.lifespan,
+    });
+    expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThanOrEqual(minExpires);
+  });
+
+  test('Creates a token with a null lifespan', async () => {
+    const body = {
+      name: 'api-token_tests-nulllifespan',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+      lifespan: null,
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toStrictEqual({
+      accessKey: expect.any(String),
+      name: body.name,
+      permissions: [],
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+      createdAt: expect.any(String),
+      lastUsedAt: null,
+      updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: body.lifespan,
+    });
+  });
+
+  test('Fails to create a token with invalid lifespan', async () => {
+    const body = {
+      name: 'api-token_tests-lifespan',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+      lifespan: -1,
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: expect.any(String),
+        details: {},
+      },
+    });
+    expect(res.body.error.message).toContain('lifespan');
   });
 
   test('Fails to create a non-custom api token with permissions', async () => {
@@ -207,7 +297,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test('Creates a custom api token (successfully)', async () => {
+  test('Creates a custom api token', async () => {
     const body = {
       name: 'api-token_tests-customSuccess',
       description: 'api-token_tests-description',
@@ -333,6 +423,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     );
     tokens.push(await createValidToken({ type: 'full-access' }));
     tokens.push(await createValidToken({ type: 'read-only' }));
+    tokens.push(await createValidToken({ lifespan: 12345 }));
     tokens.push(await createValidToken());
 
     const res = await rq({
@@ -341,7 +432,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.length).toBe(4);
+    expect(res.body.data.length).toBe(tokens.length);
     expect(orderBy(res.body.data, ['id'])).toStrictEqual(
       map(orderBy(tokens, ['id']), (t) => omit(t, ['accessKey']))
     );
@@ -648,7 +739,5 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test.todo('Sets expiration time correctly');
-  test.todo("Doesn't have expiration if not set");
   test.todo('Custom token can only be created with valid permissions that exist');
 });
