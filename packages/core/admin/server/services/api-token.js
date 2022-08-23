@@ -17,7 +17,7 @@ const constants = require('./constants');
  * @property {string} name
  * @property {string} description
  * @property {string} accessKey
- * @property {number} lastUsed
+ * @property {number} lastUsedAt
  * @property {number} lifespan
  * @property {number} expiresAt
  * @property {TokenType} type
@@ -37,7 +37,7 @@ const SELECT_FIELDS = [
   'id',
   'name',
   'description',
-  'lastUsed',
+  'lastUsedAt',
   'type',
   'lifespan',
   'expiresAt',
