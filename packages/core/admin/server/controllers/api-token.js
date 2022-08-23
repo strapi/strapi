@@ -101,6 +101,7 @@ module.exports = {
       attributes.description = trim(body.description);
     }
 
+    // TODO: can yup handle this and throw an error if an unexpected field is included?
     // Don't allow updating lastUsedAt time
     if (has(attributes, 'lastUsedAt')) {
       throw new ApplicationError('lastUsedAt cannot be updated');
