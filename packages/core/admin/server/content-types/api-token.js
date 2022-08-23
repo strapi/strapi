@@ -66,7 +66,7 @@ module.exports = {
       required: false,
     },
     lifespan: {
-      type: 'number',
+      type: 'integer',
       configurable: false,
       required: false,
     },
