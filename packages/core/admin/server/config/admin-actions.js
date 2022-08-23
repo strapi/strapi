@@ -119,11 +119,20 @@ module.exports = {
       subCategory: 'roles',
     },
     {
+      uid: 'api-tokens.access',
+      displayName: 'Access the API tokens settings page',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'api tokens',
+      subCategory: 'api Tokens',
+    },
+    {
       uid: 'api-tokens.create',
       displayName: 'Create (generate)',
       pluginName: 'admin',
       section: 'settings',
       category: 'api tokens',
+      subCategory: 'general',
     },
     {
       uid: 'api-tokens.read',
@@ -131,6 +140,7 @@ module.exports = {
       pluginName: 'admin',
       section: 'settings',
       category: 'api tokens',
+      subCategory: 'general',
     },
     {
       uid: 'api-tokens.update',
@@ -138,6 +148,7 @@ module.exports = {
       pluginName: 'admin',
       section: 'settings',
       category: 'api tokens',
+      subCategory: 'general',
     },
     {
       uid: 'api-tokens.delete',
@@ -145,6 +156,7 @@ module.exports = {
       pluginName: 'admin',
       section: 'settings',
       category: 'api tokens',
+      subCategory: 'general',
     },
     {
       uid: 'project-settings.update',
