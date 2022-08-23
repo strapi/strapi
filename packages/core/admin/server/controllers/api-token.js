@@ -25,6 +25,7 @@ module.exports = {
       description: trim(body.description),
       type: body.type,
       permissions: body.permissions,
+      lifespan: body.lifespan,
     };
 
     await validateApiTokenCreationInput(attributes);

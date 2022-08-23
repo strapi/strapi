@@ -1,7 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const { isNumber, isNil } = require('lodash');
+const { isNumber, isNil, isFinite } = require('lodash');
 const { omit, difference, isEmpty, map, isArray } = require('lodash/fp');
 const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
 const constants = require('./constants');
@@ -143,8 +143,10 @@ const hash = (accessKey) => {
  * @returns {null|number}
  */
 const getExpirationFields = (lifespan) => {
-  if (!isNumber(lifespan) && !isNil(lifespan)) {
-    throw new ValidationError('lifespan must be a number or null');
+  // it must be nil or a finite number >= 0
+  const isValidNumber = isNumber(lifespan) && (!isFinite(lifespan) || lifespan < 0);
+  if (!isValidNumber && !isNil(lifespan)) {
+    throw new ValidationError('lifespan must be a positive number or null');
   }
 
   return {
