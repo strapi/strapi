@@ -4,6 +4,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
 import { Field, FieldHint, FieldError, FieldLabel } from '@strapi/design-system/Field';
+import { TextInput } from '@strapi/design-system/TextInput';
 import { useIntl } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 
@@ -25,7 +26,8 @@ const ColorPickerInput = ({
     <Field
       name={name}
       id={name}
-      error={error && formatMessage(error)}
+      // GenericInput calls formatMessage and returns a string for the error
+      error={error && error}
       hint={description && formatMessage(description)}
     >
       <Stack spacing={1}>
