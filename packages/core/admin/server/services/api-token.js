@@ -48,6 +48,8 @@ const SELECT_FIELDS = [
 /** @constant {Array<string>} */
 const POPULATE_FIELDS = ['permissions'];
 
+// TODO: we need to ensure the permissions are actually valid registered permissions!
+
 /**
  * Assert that a token's permissions attribute is valid for its type
  *
