@@ -1,6 +1,6 @@
 'use strict';
 
-const { omit, map, orderBy } = require('lodash');
+const { omit, map } = require('lodash');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 
@@ -36,6 +36,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
   const createValidToken = async (token = {}) => {
     const body = {
       type: 'read-only',
+      // eslint-disable-next-line no-plusplus
       name: `token_${String(currentTokens++)}`,
       description: 'generic description',
       ...token,
@@ -331,9 +332,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data.length).toBe(4);
-    expect(orderBy(res.body.data, ['id'])).toStrictEqual(
-      map(orderBy(tokens, ['id']), (t) => omit(t, ['accessKey']))
-    );
+    expect(res.body.data).toMatchObject(map(tokens, (t) => omit(t, ['accessKey'])));
   });
 
   test('Deletes a token (successfully)', async () => {
