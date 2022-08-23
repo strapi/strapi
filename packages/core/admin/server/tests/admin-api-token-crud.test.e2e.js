@@ -31,11 +31,12 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     await strapi.destroy();
   });
 
-  // create a random valid token that we can test with (delete, list, etc)
+  // create a predictable valid token that we can test with (delete, list, etc)
   let currentTokens = 0;
   const createValidToken = async (token = {}) => {
     const body = {
       type: 'read-only',
+      // eslint-disable-next-line no-plusplus
       name: `token_${String(currentTokens++)}`,
       description: 'generic description',
       ...token,
@@ -140,6 +141,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: expect.any(String),
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -199,6 +202,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: expect.any(String),
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -227,6 +232,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: expect.any(String),
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -279,6 +286,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: expect.any(String),
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -306,6 +315,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: expect.any(String),
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -354,6 +365,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -387,6 +400,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -411,6 +426,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -469,6 +486,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
     // expect(updatedRes.body.data.updated)
   });
@@ -521,6 +540,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -580,6 +601,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -606,6 +629,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -623,11 +648,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test.todo('Regenerated access key works');
-  test.todo('Custom tokens access content for which they are authorized');
-  test.todo('Custom tokens fail to access content for which they are not authorized');
   test.todo('Sets expiration time correctly');
   test.todo("Doesn't have expiration if not set");
-  test.todo("Expired token can't be used");
   test.todo('Custom token can only be created with valid permissions that exist');
 });
