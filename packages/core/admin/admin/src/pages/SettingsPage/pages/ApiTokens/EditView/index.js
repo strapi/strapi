@@ -271,7 +271,7 @@ const ApiTokenCreateView = () => {
                         loading={isSubmitting}
                         startIcon={<Check />}
                         type="submit"
-                        size="L"
+                        size="S"
                       >
                         {formatMessage({
                           id: 'global.save',
