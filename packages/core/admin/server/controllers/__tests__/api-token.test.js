@@ -259,6 +259,92 @@ describe('API Token Controller', () => {
     });
   });
 
+  describe('Refresh an API token', () => {
+    const token = {
+      id: 1,
+      name: 'api-token_tests-regenerate',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+
+    test('Refresh an API token successfully', async () => {
+      const lifespanToken = {
+        ...token,
+        lifespan: 1000,
+        expiresAt: 12345,
+      };
+      const refresh = jest.fn().mockResolvedValue(lifespanToken);
+      const getById = jest.fn().mockResolvedValue(lifespanToken);
+      const created = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              refresh,
+              getById,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.refresh(ctx);
+
+      expect(refresh).toHaveBeenCalledWith(token.id);
+    });
+
+    test('Fails if token not found', async () => {
+      const refresh = jest.fn().mockResolvedValue(token);
+      const getById = jest.fn().mockResolvedValue(null);
+      const created = jest.fn();
+      const notFound = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { created, notFound });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              refresh,
+              getById,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.refresh(ctx);
+
+      expect(refresh).not.toHaveBeenCalled();
+      expect(getById).toHaveBeenCalledWith(token.id);
+      expect(notFound).toHaveBeenCalledWith('API Token not found');
+    });
+
+    test("Fails if token doesn't have lifespan", async () => {
+      const refresh = jest.fn().mockResolvedValue(token);
+      const getById = jest.fn().mockResolvedValue(token);
+      const created = jest.fn();
+      const badRequest = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { created, badRequest });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              refresh,
+              getById,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.refresh(ctx);
+
+      expect(refresh).not.toHaveBeenCalled();
+      expect(getById).toHaveBeenCalledWith(token.id);
+      expect(badRequest).toHaveBeenCalledWith("API Token doesn't have a lifespan to refresh");
+    });
+  });
+
   describe('Retrieve an API token', () => {
     const token = {
       id: 1,
