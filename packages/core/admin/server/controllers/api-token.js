@@ -128,4 +128,11 @@ module.exports = {
     const apiToken = await apiTokenService.update(id, attributes);
     ctx.send({ data: apiToken });
   },
+
+  async getLayout(ctx) {
+    const apiTokenService = getService('api-token');
+    const layout = await apiTokenService.getApiTokenLayout();
+
+    ctx.send({ data: layout });
+  },
 };

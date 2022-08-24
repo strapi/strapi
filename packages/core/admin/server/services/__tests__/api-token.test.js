@@ -591,4 +591,63 @@ describe('API Token', () => {
       expect(res).toEqual(null);
     });
   });
+
+  describe('Api token permissions layout', () => {
+    const actionsMap = {
+      'api::address': {
+        controllers: {
+          address: ['find', 'findOne'],
+        },
+      },
+      'api::category': {
+        controllers: {
+          category: ['find', 'findOne', 'create', 'update', 'delete', 'createLocalization'],
+        },
+      },
+    };
+
+    test('It returns all the permissions', async () => {
+      const getActionsMap = jest.fn().mockResolvedValue(actionsMap);
+
+      global.strapi = {
+        contentAPI: {
+          permissions: {
+            getActionsMap,
+          },
+        },
+      };
+
+      const res = await apiTokenService.getApiTokenLayout();
+
+      expect(res).toEqual([
+        {
+          label: 'address',
+          subjectId: 'api::address',
+          controllers: [
+            {
+              label: 'address',
+              actions: ['api::address.address.find', 'api::address.address.findOne'],
+            },
+          ],
+        },
+        {
+          label: 'category',
+          subjectId: 'api::category',
+          controllers: [
+            {
+              label: 'category',
+              actions: [
+                'api::category.category.find',
+                'api::category.category.findOne',
+                'api::category.category.create',
+                'api::category.category.update',
+                'api::category.category.delete',
+                'api::category.category.createLocalization',
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+  });
 });
