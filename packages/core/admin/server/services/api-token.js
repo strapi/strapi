@@ -232,6 +232,10 @@ const regenerate = async (id) => {
     },
   });
 
+  if (!apiToken) {
+    throw new NotFoundError('The provided token id does not exist');
+  }
+
   return {
     ...apiToken,
     accessKey,
