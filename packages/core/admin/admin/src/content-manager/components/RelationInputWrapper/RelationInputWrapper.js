@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { RelationInput, useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
 import { useRelation } from '../../hooks/useRelation';
-import { connect, select, filterRemovedRelations } from './utils';
+import { connect, select, normalizeRelations } from './utils';
 
 export const RelationInputWrapper = ({
   editable,
@@ -15,9 +15,11 @@ export const RelationInputWrapper = ({
   isFieldAllowed,
   isFieldReadable,
   labelAction,
+  mainField,
   name,
-  queryInfos: { endpoints },
+  queryInfos: { endpoints, shouldDisplayRelationLink },
   relationType,
+  targetModel,
 }) => {
   const { formatMessage } = useIntl();
   const { addRelation, removeRelation, modifiedData } = useCMEditViewDataManager();
@@ -94,7 +96,12 @@ export const RelationInputWrapper = ({
       onRelationLoadMore={() => handleRelationLoadMore()}
       onSearch={() => handleSearch()}
       onSearchNextPage={() => handleSearchMore()}
-      relations={filterRemovedRelations(relations, modifiedData?.[name])}
+      relations={normalizeRelations(relations, {
+        deletions: modifiedData?.[name],
+        mainFieldName: mainField.name,
+        shouldAddLink: shouldDisplayRelationLink,
+        targetModel,
+      })}
       searchResults={search}
     />
   );
@@ -133,13 +140,13 @@ RelationInputWrapper.propTypes = {
     values: PropTypes.object,
   }),
   relationType: PropTypes.string.isRequired,
-  // eslint-disable-next-line react/no-unused-prop-types
   targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.shape({
     defaultParams: PropTypes.shape({
       _component: PropTypes.string,
     }),
     endpoints: PropTypes.shape({
+      relation: PropTypes.string,
       search: PropTypes.string.isRequired,
     }).isRequired,
     shouldDisplayRelationLink: PropTypes.bool.isRequired,
