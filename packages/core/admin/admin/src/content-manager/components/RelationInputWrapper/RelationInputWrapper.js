@@ -6,6 +6,7 @@ import { RelationInput, useCMEditViewDataManager, NotAllowedInput } from '@strap
 
 import { useRelation } from '../../hooks/useRelation';
 import { connect, select, normalizeRelations } from './utils';
+import { PUBLICATION_STATES } from './constants';
 
 export const RelationInputWrapper = ({
   editable,
@@ -97,12 +98,12 @@ export const RelationInputWrapper = ({
       onSearch={() => handleSearch()}
       onSearchNextPage={() => handleSearchMore()}
       publicationStateTranslations={{
-        draft: formatMessage({
+        [PUBLICATION_STATES.DRAFT]: formatMessage({
           id: 'tbd',
           defaultMessage: 'Draft',
         }),
 
-        published: formatMessage({
+        [PUBLICATION_STATES.PUBLISHED]: formatMessage({
           id: 'tbd',
           defaultMessage: 'Published',
         }),
