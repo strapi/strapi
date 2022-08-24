@@ -38,6 +38,8 @@ export const RelationInput = ({
   placeholder,
   searchResults,
 }) => {
+  const { data } = searchResults;
+
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
@@ -46,7 +48,7 @@ export const RelationInput = ({
             <FieldLabel>{label}</FieldLabel>
             <ReactSelect
               components={{ Option }}
-              options={searchResults}
+              options={data?.pages || []}
               isDisabled={disabled}
               error={error}
               inputId={id}
@@ -72,7 +74,7 @@ export const RelationInput = ({
         <RelationList height={listHeight}>
           {relations.isSuccess &&
             relations.data.pages.flatMap((relation) => {
-              const { isDraft, href, title, id } = relation;
+              const { isDraft, href, mainField, id } = relation;
               const badgeColor = isDraft ? 'secondary' : 'success';
 
               return (
@@ -92,23 +94,22 @@ export const RelationInput = ({
                   <Box paddingTop={1} paddingBottom={1}>
                     {href ? (
                       <BaseLink disabled={disabled} href={href}>
-                        {title}
+                        {mainField}
                       </BaseLink>
                     ) : (
-                      title
+                      mainField
                     )}
                   </Box>
 
-                  {isDraft !== undefined && (
-                    <Badge
-                      borderSize={1}
-                      borderColor={`${badgeColor}200`}
-                      backgroundColor={`${badgeColor}100`}
-                      textColor={`${badgeColor}700`}
-                    >
-                      {isDraft ? 'Draft' : 'Published'}
-                    </Badge>
-                  )}
+                  {/* TO FIX: not showing badge if D&P is not activated  */}
+                  <Badge
+                    borderSize={1}
+                    borderColor={`${badgeColor}200`}
+                    backgroundColor={`${badgeColor}100`}
+                    textColor={`${badgeColor}700`}
+                  >
+                    {isDraft ? 'Draft' : 'Published'}
+                  </Badge>
                 </RelationItem>
               );
             })}
@@ -126,10 +127,10 @@ const ReactQueryRelationResult = PropTypes.shape({
   data: PropTypes.shape({
     pages: PropTypes.arrayOf(
       PropTypes.shape({
+        href: PropTypes.string,
         id: PropTypes.number.isRequired,
         isDraft: PropTypes.bool,
-        href: PropTypes.string,
-        title: PropTypes.string.isRequired,
+        mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       })
     ),
   }),
@@ -137,16 +138,18 @@ const ReactQueryRelationResult = PropTypes.shape({
   isSuccess: PropTypes.bool.isRequired,
 });
 
-const ReactQuerySearchResult = PropTypes.arrayOf(
-  PropTypes.shape({
-    label: PropTypes.string,
-    value: {
-      id: PropTypes.number,
-      name: PropTypes.string,
-      publishedAt: PropTypes.string,
-    },
-  })
-);
+const ReactQuerySearchResult = PropTypes.shape({
+  data: PropTypes.shape({
+    pages: PropTypes.arrayOf(
+      PropTypes.shape({
+        isDraft: PropTypes.bool,
+        mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      })
+    ),
+  }),
+  isLoading: PropTypes.bool.isRequired,
+  isSuccess: PropTypes.bool.isRequired,
+});
 
 RelationInput.defaultProps = {
   description: undefined,
