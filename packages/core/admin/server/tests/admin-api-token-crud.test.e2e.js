@@ -34,10 +34,11 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
   // create a predictable valid token that we can test with (delete, list, etc)
   let currentTokens = 0;
   const createValidToken = async (token = {}) => {
+    currentTokens += 1;
+
     const body = {
       type: 'read-only',
-      // eslint-disable-next-line no-plusplus
-      name: `token_${String(currentTokens++)}`,
+      name: `token_${String(currentTokens)}`,
       description: 'generic description',
       ...token,
     };
