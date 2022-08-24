@@ -15,6 +15,11 @@ const FIXTURE_RELATIONS = {
           name: 'Relation 2',
           publishedAt: '',
         },
+
+        {
+          id: 3,
+          name: 'Relation 3',
+        },
       ],
     ],
   },
@@ -28,7 +33,12 @@ describe('normalizeRelations', () => {
       })
     ).toStrictEqual({
       data: {
-        pages: [[expect.objectContaining(FIXTURE_RELATIONS.data.pages[0][1])]],
+        pages: [
+          [
+            expect.objectContaining(FIXTURE_RELATIONS.data.pages[0][1]),
+            expect.objectContaining(FIXTURE_RELATIONS.data.pages[0][2]),
+          ],
+        ],
       },
     });
   });
@@ -36,7 +46,7 @@ describe('normalizeRelations', () => {
   test('returns empty array if all relations are deleted', () => {
     expect(
       normalizeRelations(FIXTURE_RELATIONS, {
-        deletions: [{ id: 1 }, { id: 2 }],
+        deletions: [{ id: 1 }, { id: 2 }, { id: 3 }],
       })
     ).toStrictEqual({
       data: {
@@ -58,13 +68,14 @@ describe('normalizeRelations', () => {
           [
             expect.objectContaining({ href: '/content-manager/collectionType/something/1' }),
             expect.objectContaining({ href: '/content-manager/collectionType/something/2' }),
+            expect.objectContaining({ href: '/content-manager/collectionType/something/3' }),
           ],
         ],
       },
     });
   });
 
-  test('add isDraft attribute to each relation', () => {
+  test('add publicationState attribute to each relation', () => {
     expect(
       normalizeRelations(FIXTURE_RELATIONS, {
         deletions: [],
@@ -72,7 +83,11 @@ describe('normalizeRelations', () => {
     ).toStrictEqual({
       data: {
         pages: [
-          [expect.objectContaining({ isDraft: false }), expect.objectContaining({ isDraft: true })],
+          [
+            expect.objectContaining({ publicationState: 'published' }),
+            expect.objectContaining({ publicationState: 'draft' }),
+            expect.objectContaining({ publicationState: false }),
+          ],
         ],
       },
     });
@@ -90,6 +105,7 @@ describe('normalizeRelations', () => {
           [
             expect.objectContaining({ mainField: FIXTURE_RELATIONS.data.pages[0][0].name }),
             expect.objectContaining({ mainField: FIXTURE_RELATIONS.data.pages[0][1].name }),
+            expect.objectContaining({ mainField: FIXTURE_RELATIONS.data.pages[0][2].name }),
           ],
         ],
       },

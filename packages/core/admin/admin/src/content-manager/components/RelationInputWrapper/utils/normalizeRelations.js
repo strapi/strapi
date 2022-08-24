@@ -20,7 +20,12 @@ export const normalizeRelations = (
                 nextRelation.href = getRelationLink(targetModel, nextRelation.id);
               }
 
-              nextRelation.isDraft = !nextRelation.publishedAt;
+              nextRelation.publicationState = false;
+
+              if (nextRelation?.publishedAt !== undefined) {
+                nextRelation.publicationState = nextRelation.publishedAt ? 'published' : 'draft';
+              }
+
               nextRelation.mainField = nextRelation[mainFieldName];
 
               return nextRelation;
