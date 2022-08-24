@@ -102,7 +102,9 @@ export const RelationInputWrapper = ({
         shouldAddLink: shouldDisplayRelationLink,
         targetModel,
       })}
-      searchResults={search}
+      searchResults={normalizeRelations(search, {
+        mainFieldName: mainField.name,
+      })}
     />
   );
 };

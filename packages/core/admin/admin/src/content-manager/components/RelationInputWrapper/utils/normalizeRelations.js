@@ -2,7 +2,7 @@ import { getRelationLink } from './getRelationLink';
 
 export const normalizeRelations = (
   relations,
-  { deletions, shouldAddLink, mainFieldName, targetModel }
+  { deletions = [], shouldAddLink = false, mainFieldName, targetModel }
 ) => {
   return {
     data: {
