@@ -154,6 +154,62 @@ describe('API Token Controller', () => {
     });
   });
 
+  describe('Regenerate an API token', () => {
+    const token = {
+      id: 1,
+      name: 'api-token_tests-regenerate',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+
+    test('Regenerates an API token successfully', async () => {
+      const regenerate = jest.fn().mockResolvedValue(token);
+      const getById = jest.fn().mockResolvedValue(token);
+      const created = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              regenerate,
+              getById,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.regenerate(ctx);
+
+      expect(regenerate).toHaveBeenCalledWith(token.id);
+    });
+
+    test('Fails if token not found', async () => {
+      const regenerate = jest.fn().mockResolvedValue(token);
+      const getById = jest.fn().mockResolvedValue(null);
+      const created = jest.fn();
+      const notFound = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { created, notFound });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              regenerate,
+              getById,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.regenerate(ctx);
+
+      expect(regenerate).not.toHaveBeenCalled();
+      expect(getById).toHaveBeenCalledWith(token.id);
+      expect(notFound).toHaveBeenCalledWith('API Token not found');
+    });
+  });
+
   describe('Retrieve an API token', () => {
     const token = {
       id: 1,
