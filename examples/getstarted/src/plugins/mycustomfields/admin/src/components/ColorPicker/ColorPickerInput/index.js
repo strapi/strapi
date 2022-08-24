@@ -4,7 +4,6 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
 import { Field, FieldHint, FieldError, FieldLabel } from '@strapi/design-system/Field';
-import { TextInput } from '@strapi/design-system/TextInput';
 import { useIntl } from 'react-intl';
 import getTrad from '../../../utils/getTrad';
 
