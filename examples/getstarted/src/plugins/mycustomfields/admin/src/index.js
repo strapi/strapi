@@ -100,6 +100,19 @@ export default {
                   defaultMessage: 'This field will not show up in the API response',
                 },
               },
+              {
+                name: 'unique',
+                type: 'checkbox',
+                intlLabel: {
+                  id: 'form.attribute.item.uniqueField',
+                  defaultMessage: 'Unique field',
+                },
+                description: {
+                  id: 'form.attribute.item.uniqueField.description',
+                  defaultMessage:
+                    "You won't be able to create an entry if there is an existing entry with identical content",
+                },
+              },
             ],
           },
         ],
