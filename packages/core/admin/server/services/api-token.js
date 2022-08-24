@@ -108,6 +108,28 @@ const getBy = async (whereParams = {}) => {
 };
 
 /**
+ * Retrieve a token by id
+ *
+ * @param {string|number} id
+ *
+ * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
+ */
+const getById = async (id) => {
+  return getBy({ id });
+};
+
+/**
+ * Retrieve a token by name
+ *
+ * @param {string} name
+ *
+ * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
+ */
+const getByName = async (name) => {
+  return getBy({ name });
+};
+
+/**
  * Check if token exists
  *
  * @param {Object} whereParams
@@ -217,6 +239,8 @@ const create = async (attributes) => {
 };
 
 /**
+ * Invalidate the accessKey and generate a new one
+ *
  * @param {string|number} id
  *
  * @returns {Promise<ApiToken>}
@@ -240,6 +264,37 @@ const regenerate = async (id) => {
     ...apiToken,
     accessKey,
   };
+};
+
+/**
+ * Refresh the expiresAt date to now + lifespan
+ *
+ * @param {string|number} id
+ *
+ * @returns {Promise<ApiToken>}
+ */
+const refresh = async (id) => {
+  const apiToken = await getById(id);
+  if (!apiToken) {
+    throw new NotFoundError('The provided token id does not exist');
+  }
+  if (!apiToken.lifespan) {
+    throw new ValidationError('Token must have lifespan to refresh');
+  }
+
+  const updatedToken = await strapi.query('admin::api-token').update({
+    select: ['id', 'accessKey'],
+    where: { id },
+    data: {
+      ...getExpirationFields(apiToken.lifespan),
+    },
+  });
+
+  if (!apiToken) {
+    throw new NotFoundError('The provided token id does not exist');
+  }
+
+  return updatedToken;
 };
 
 /**
@@ -289,28 +344,6 @@ const revoke = async (id) => {
   return strapi
     .query('admin::api-token')
     .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } });
-};
-
-/**
- * Retrieve a token by id
- *
- * @param {string|number} id
- *
- * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
- */
-const getById = async (id) => {
-  return getBy({ id });
-};
-
-/**
- * Retrieve a token by name
- *
- * @param {string} name
- *
- * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
- */
-const getByName = async (name) => {
-  return getBy({ name });
 };
 
 /**
@@ -433,6 +466,7 @@ const update = async (id, attributes) => {
 module.exports = {
   create,
   regenerate,
+  refresh,
   exists,
   checkSaltIsDefined,
   hash,

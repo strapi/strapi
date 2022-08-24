@@ -67,4 +67,15 @@ module.exports = [
       ],
     },
   },
+  {
+    method: 'POST',
+    path: '/api-tokens/:id/refresh',
+    handler: 'api-token.refresh',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', config: { actions: ['admin::api-tokens.update'] } },
+      ],
+    },
+  },
 ];

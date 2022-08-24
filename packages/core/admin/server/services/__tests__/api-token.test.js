@@ -1,6 +1,6 @@
 'use strict';
 
-const { NotFoundError } = require('@strapi/utils/lib/errors');
+const { NotFoundError, ValidationError } = require('@strapi/utils/lib/errors');
 const crypto = require('crypto');
 const { omit } = require('lodash/fp');
 const apiTokenService = require('../api-token');
@@ -23,14 +23,19 @@ describe('API Token', () => {
     'updatedAt',
   ];
 
+  const now = new Date();
   beforeAll(() => {
     jest
       .spyOn(crypto, 'randomBytes')
       .mockImplementation(() => Buffer.from(mockedApiToken.randomBytes));
+
+    jest.useFakeTimers('modern').setSystemTime(now);
   });
 
   afterAll(() => {
     jest.clearAllMocks();
+
+    jest.useRealTimers();
   });
 
   describe('create', () => {
@@ -433,6 +438,126 @@ describe('API Token', () => {
           accessKey: apiTokenService.hash(mockedApiToken.hexedString),
         },
       });
+    });
+  });
+
+  describe('refresh', () => {
+    test('It refreshes the expiresAt date', async () => {
+      const attributes = {
+        id: 2,
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'custom',
+        permissions: ['admin::content.content.read'],
+        lifespan: 1000,
+        expiresAt: now.getTime(),
+      };
+      const updatedAttributes = {
+        ...attributes,
+        lifespan: 1000,
+        expiresAt: now.getTime() + 1000,
+      };
+
+      const update = jest.fn(() => Promise.resolve(updatedAttributes));
+      const findOne = jest.fn(() =>
+        Promise.resolve({
+          ...attributes,
+        })
+      );
+
+      global.strapi = {
+        query() {
+          return { update, findOne };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      const res = await apiTokenService.refresh(attributes.id);
+
+      expect(update).toHaveBeenCalledWith({
+        where: { id: attributes.id },
+        select: ['id', 'accessKey'],
+        data: {
+          expiresAt: updatedAttributes.expiresAt,
+          lifespan: updatedAttributes.lifespan,
+        },
+      });
+
+      expect(res).toMatchObject({
+        description: 'api-token_tests-description',
+        expiresAt: updatedAttributes.expiresAt,
+        id: 2,
+        lifespan: updatedAttributes.lifespan,
+        name: 'api-token_tests-name',
+        permissions: ['admin::content.content.read'],
+        type: 'custom',
+      });
+    });
+
+    test("It throws a BadRequest if token doesn't have a lifespan", async () => {
+      const attributes = {
+        id: 2,
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'custom',
+        permissions: ['admin::content.content.read'],
+        lifespan: null,
+        expiresAt: null,
+      };
+
+      const update = jest.fn(() => Promise.resolve(attributes));
+      const findOne = jest.fn(() =>
+        Promise.resolve({
+          ...attributes,
+        })
+      );
+
+      global.strapi = {
+        query() {
+          return { update, findOne };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      expect(async () => {
+        await apiTokenService.refresh(attributes.id);
+      }).rejects.toThrowError(new ValidationError('Token must have lifespan to refresh'));
+
+      expect(update).not.toHaveBeenCalled();
+    });
+
+    test('It throws a NotFound if the id is not found', async () => {
+      const attributes = {
+        id: 2,
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'custom',
+        permissions: ['admin::content.content.read'],
+        lifespan: null,
+        expiresAt: null,
+      };
+
+      const update = jest.fn(() => Promise.resolve(attributes));
+      const findOne = jest.fn(() => null);
+
+      global.strapi = {
+        query() {
+          return { update, findOne };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      expect(async () => {
+        await apiTokenService.refresh(attributes.id);
+      }).rejects.toThrowError(new NotFoundError('The provided token id does not exist'));
+
+      expect(update).not.toHaveBeenCalled();
     });
   });
 

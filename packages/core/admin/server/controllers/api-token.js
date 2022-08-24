@@ -54,6 +54,26 @@ module.exports = {
     ctx.created({ data: accessToken });
   },
 
+  async refresh(ctx) {
+    const { id } = ctx.params;
+    const apiTokenService = getService('api-token');
+
+    const apiToken = await apiTokenService.getById(id);
+    if (!apiToken) {
+      ctx.notFound('API Token not found');
+      return;
+    }
+
+    if (!apiToken.lifespan) {
+      ctx.badRequest(`API Token doesn't have a lifespan to refresh`);
+      return;
+    }
+
+    const token = await apiTokenService.refresh(id);
+
+    ctx.created({ data: token });
+  },
+
   async list(ctx) {
     const apiTokenService = getService('api-token');
     const apiTokens = await apiTokenService.list();
