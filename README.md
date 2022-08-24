@@ -22,6 +22,9 @@
   <a href="https://discord.strapi.io">
     <img src="https://img.shields.io/discord/811989166782021633?label=Discord" alt="Strapi on Discord" />
   </a>
+  <a href="https://github.com/strapi/strapi/actions/workflows/nightly.yml">
+    <img src="https://github.com/strapi/strapi/actions/workflows/nightly.yml/badge.svg" alt="Strapi Nightly Release Build Status" />
+  </a>
 </p>
 
 <br>

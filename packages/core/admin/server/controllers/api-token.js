@@ -24,6 +24,7 @@ module.exports = {
       name: trim(body.name),
       description: trim(body.description),
       type: body.type,
+      permissions: body.permissions,
     };
 
     await validateApiTokenCreationInput(attributes);
@@ -35,6 +36,21 @@ module.exports = {
 
     const apiToken = await apiTokenService.create(attributes);
     ctx.created({ data: apiToken });
+  },
+
+  async regenerate(ctx) {
+    const { id } = ctx.params;
+    const apiTokenService = getService('api-token');
+
+    const apiTokenExists = await apiTokenService.getById(id);
+    if (!apiTokenExists) {
+      ctx.notFound('API Token not found');
+      return;
+    }
+
+    const accessToken = await apiTokenService.regenerate(id);
+
+    ctx.created({ data: accessToken });
   },
 
   async list(ctx) {
@@ -59,7 +75,6 @@ module.exports = {
 
     if (!apiToken) {
       ctx.notFound('API Token not found');
-
       return;
     }
 
@@ -83,6 +98,11 @@ module.exports = {
 
     if (has(attributes, 'description') || attributes.description === null) {
       attributes.description = trim(body.description);
+    }
+
+    // Don't allow updating lastUsedAt time
+    if (has(attributes, 'lastUsedAt')) {
+      throw new ApplicationError('lastUsedAt cannot be updated');
     }
 
     await validateApiTokenUpdateInput(attributes);

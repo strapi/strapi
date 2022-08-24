@@ -22,6 +22,7 @@ describe('API Token Auth Strategy', () => {
 
     test('Authenticates a valid hashed access key', async () => {
       const getBy = jest.fn(() => apiToken);
+      const update = jest.fn(() => apiToken);
       const ctx = createContext({}, { request });
 
       global.strapi = {
@@ -30,6 +31,7 @@ describe('API Token Auth Strategy', () => {
             'api-token': {
               getBy,
               hash,
+              update,
             },
           },
         },
@@ -38,6 +40,7 @@ describe('API Token Auth Strategy', () => {
       const response = await apiTokenStrategy.authenticate(ctx);
 
       expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
+      expect(update).toHaveBeenCalledWith(apiToken.id, { lastUsedAt: expect.any(Date) });
       expect(response).toStrictEqual({ authenticated: true, credentials: apiToken });
     });
 
@@ -95,6 +98,12 @@ describe('API Token Auth Strategy', () => {
       type: 'full-access',
     };
 
+    const customApiToken = {
+      ...readOnlyApiToken,
+      type: 'custom',
+      permissions: ['api::model.model.update', 'api::model.model.read'],
+    };
+
     const container = {
       get: jest.fn(() => ({
         errors: {
@@ -104,7 +113,15 @@ describe('API Token Auth Strategy', () => {
       })),
     };
 
-    test('Verify read only access', () => {
+    // mock ability.can (since normally it only gets added to credentials in authenticate)
+    const ability = {
+      can: jest.fn((ability) => {
+        if (customApiToken.permissions.includes(ability)) return true;
+        return false;
+      }),
+    };
+
+    test('Verify read-only access', () => {
       global.strapi = {
         container,
       };
@@ -117,7 +134,7 @@ describe('API Token Auth Strategy', () => {
       ).toBeUndefined();
     });
 
-    test('Verify full access', () => {
+    test('Verify full-access access', () => {
       global.strapi = {
         container,
       };
@@ -126,6 +143,19 @@ describe('API Token Auth Strategy', () => {
         apiTokenStrategy.verify(
           { credentials: fullAccessApiToken },
           { scope: ['api::model.model.create'] }
+        )
+      ).toBeUndefined();
+    });
+
+    test('Verify custom access', async () => {
+      global.strapi = {
+        container,
+      };
+
+      expect(
+        apiTokenStrategy.verify(
+          { credentials: customApiToken, ability },
+          { scope: ['api::model.model.update'] }
         )
       ).toBeUndefined();
     });
@@ -140,6 +170,23 @@ describe('API Token Auth Strategy', () => {
       try {
         apiTokenStrategy.verify(
           { credentials: { readOnlyApiToken } },
+          { scope: ['api::model.model.create'] }
+        );
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+    });
+
+    test('Throws an error if trying to access an action with a custom access key without the permission', () => {
+      global.strapi = {
+        container,
+      };
+
+      expect.assertions(1);
+
+      try {
+        apiTokenStrategy.verify(
+          { credentials: { customApiToken, ability } },
           { scope: ['api::model.model.create'] }
         );
       } catch (err) {
@@ -178,6 +225,20 @@ describe('API Token Auth Strategy', () => {
 
       try {
         apiTokenStrategy.verify({ credentials: readOnlyApiToken }, {});
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+    });
+
+    test('Throws an error if no scope is passed with a `custom` token', () => {
+      global.strapi = {
+        container,
+      };
+
+      expect.assertions(1);
+
+      try {
+        apiTokenStrategy.verify({ credentials: customApiToken }, {});
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
       }
