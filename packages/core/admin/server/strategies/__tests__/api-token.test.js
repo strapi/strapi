@@ -116,32 +116,6 @@ describe('API Token Auth Strategy', () => {
 
       expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
     });
-
-    test('Expired token throws on verify', async () => {
-      const pastDate = Date.now() - 1;
-      const token = {
-        ...apiToken,
-        expiresAt: pastDate,
-        lifespan: 1000,
-      };
-      const update = jest.fn(() => apiToken);
-      const ctx = createContext({}, { request });
-
-      global.strapi = {
-        admin: {
-          services: {
-            'api-token': {
-              hash,
-              update,
-            },
-          },
-        },
-      };
-
-      expect(async () => {
-        await apiTokenStrategy.verify({ ...ctx, credentials: token });
-      }).rejects.toThrow(new UnauthorizedError('Token expired'));
-    });
   });
 
   describe('Verify an access key', () => {
@@ -217,6 +191,44 @@ describe('API Token Auth Strategy', () => {
           { scope: ['api::model.model.update'] }
         )
       ).toBeUndefined();
+    });
+
+    test('Verify with expiration in future', () => {
+      global.strapi = {
+        container,
+      };
+
+      expect(
+        apiTokenStrategy.verify(
+          {
+            credentials: {
+              ...readOnlyApiToken,
+              lifespan: 1000,
+              expiresAt: Date.now() + 99999,
+            },
+          },
+          { scope: ['api::model.model.find'] }
+        )
+      ).toBeUndefined();
+    });
+
+    test('Throws with expired token', () => {
+      global.strapi = {
+        container,
+      };
+
+      expect(async () => {
+        apiTokenStrategy.verify(
+          {
+            credentials: {
+              ...readOnlyApiToken,
+              lifespan: 1000,
+              expiresAt: Date.now() - 1,
+            },
+          },
+          { scope: ['api::model.model.find'] }
+        );
+      }).rejects.toThrow(new UnauthorizedError('Token expired'));
     });
 
     test('Throws an error if trying to access a `full-access` action with a read only access key', () => {
@@ -303,8 +315,18 @@ describe('API Token Auth Strategy', () => {
       }
     });
 
-    test.todo('works if token does not have an expiration');
-    test.todo('works if token has expiration but is not expired');
-    test.todo('Throws an error if token is expired');
+    test('Throws an error if token is expird', () => {
+      global.strapi = {
+        container,
+      };
+
+      expect.assertions(1);
+
+      try {
+        apiTokenStrategy.verify({ credentials: customApiToken }, {});
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+    });
   });
 });
