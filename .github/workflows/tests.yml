@@ -6,7 +6,7 @@ on:
       - main
   pull_request:
     paths-ignore:
-      - 'docs'
+      - 'docs/**'
       - '**/**.md'
 
 concurrency:
