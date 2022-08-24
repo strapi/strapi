@@ -1,5 +1,7 @@
 import { getRelationLink } from './getRelationLink';
 
+import { PUBLICATION_STATES } from '../constants';
+
 export const normalizeRelations = (
   relations,
   { deletions = [], shouldAddLink = false, mainFieldName, targetModel }
@@ -23,7 +25,9 @@ export const normalizeRelations = (
               nextRelation.publicationState = false;
 
               if (nextRelation?.publishedAt !== undefined) {
-                nextRelation.publicationState = nextRelation.publishedAt ? 'published' : 'draft';
+                nextRelation.publicationState = nextRelation.publishedAt
+                  ? PUBLICATION_STATES.PUBLISHED
+                  : PUBLICATION_STATES.DRAFT;
               }
 
               nextRelation.mainField = nextRelation[mainFieldName];
