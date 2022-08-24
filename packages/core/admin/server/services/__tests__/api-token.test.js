@@ -496,7 +496,7 @@ describe('API Token', () => {
       });
     });
 
-    test("It throws a BadRequest if token doesn't have a lifespan", async () => {
+    test("It throws a ValidationError if token doesn't have a lifespan", async () => {
       const attributes = {
         id: 2,
         name: 'api-token_tests-name',
