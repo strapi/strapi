@@ -71,7 +71,7 @@
     "@babel/core": "7.18.10",
     "@babel/eslint-parser": "7.18.9",
     "@babel/preset-react": "7.18.6",
-    "@strapi/eslint-config": "0.1.1",
+    "@strapi/eslint-config": "0.1.2",
     "@swc/core": "1.2.224",
     "@swc/jest": "0.2.22",
     "babel-eslint": "10.1.0",
