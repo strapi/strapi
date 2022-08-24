@@ -27,12 +27,15 @@ function getFiles(ctx) {
 module.exports = (config, { strapi }) => {
   const bodyConfig = defaultsDeep(defaults, config);
 
-  const { config: gqlConfig } = strapi.plugin('graphql');
-  const gqlEndpoint = gqlConfig('endpoint');
+  let gqlEndpoint;
+  if (strapi.plugin('graphql')) {
+    const { config: gqlConfig } = strapi.plugin('graphql');
+    gqlEndpoint = gqlConfig('endpoint');
+  }
 
   return async (ctx, next) => {
     // TODO: find a better way later
-    if (ctx.url === gqlEndpoint) {
+    if (gqlEndpoint && ctx.url === gqlEndpoint) {
       await next();
     } else {
       try {
