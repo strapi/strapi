@@ -78,7 +78,7 @@
     "test:unit": "jest --verbose"
   },
   "dependencies": {
-    "@koa/cors": "3.1.0",
+    "@koa/cors": "3.4.1",
     "@koa/router": "10.1.1",
     "@strapi/admin": "4.3.6",
     "@strapi/database": "4.3.6",
