@@ -141,7 +141,19 @@ module.exports = ({ strapi }) => {
 
         const apiDocPath = path.join(apiDirPath, `${apiName}.json`);
 
-        const apiPath = builApiEndpointPath(api);
+        const overideApiDocPath = path.join(apiDirPath, `overrides/${apiName}.json`);
+
+        let overideApi;
+
+        if (await fs.pathExists(overideApiDocPath)) {
+          overideApi = await fs.readJson(overideApiDocPath);
+        }
+
+        let apiPath = builApiEndpointPath(api);
+
+        if (overideApi) {
+          apiPath = _.merge({}, apiPath, overideApi);
+        }
 
         if (!apiPath) {
           continue;
