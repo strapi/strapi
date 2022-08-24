@@ -184,7 +184,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       name: 'api-token_tests-lifespan',
       description: 'api-token_tests-description',
       type: 'read-only',
-      lifespan: 12345,
+      lifespan: 7 * 24 * 60 * 60 * 1000, // 7 days
     };
 
     const res = await rq({
@@ -208,7 +208,9 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       lifespan: body.lifespan,
     });
 
-    expect(Date.parse(res.body.data.expiresAt)).toEqual(now + body.lifespan);
+    // ISO date only stores with accuracy of seconds, not milliseconds, so allow a range of 2 seconds for timing edge cases
+    expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
+    expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
 
     jest.useRealTimers();
   });
