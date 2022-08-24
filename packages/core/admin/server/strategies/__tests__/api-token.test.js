@@ -315,7 +315,7 @@ describe('API Token Auth Strategy', () => {
       }
     });
 
-    test('Throws an error if token is expird', () => {
+    test('Throws an error if token is expired', () => {
       global.strapi = {
         container,
       };
