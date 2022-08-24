@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.3.5",
+  "version": "4.3.6",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
