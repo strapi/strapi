@@ -8,7 +8,7 @@ import { useRelation } from '../useRelation';
 jest.mock('../../../../core/utils', () => ({
   ...jest.requireActual('../../../../core/utils'),
   axiosInstance: {
-    get: jest.fn().mockResolvedValue({ data: [] }),
+    get: jest.fn().mockResolvedValue({ data: { values: [], pagination: { page: 1, total: 10 } } }),
   },
 }));
 
@@ -25,19 +25,34 @@ const ComponentFixture = ({ children }) => (
   <QueryClientProvider client={client}>{children}</QueryClientProvider>
 );
 
-function setup(name = 'test', opts) {
-  const options = {
-    ...opts,
-    endpoints: {
-      relation: '/',
-      search: '/',
-      ...opts?.endpoints,
-    },
-  };
-
+function setup(name = 'test', args) {
   return new Promise((resolve) => {
     act(() => {
-      resolve(renderHook(() => useRelation(name, options), { wrapper: ComponentFixture }));
+      resolve(
+        renderHook(
+          () =>
+            useRelation(name, {
+              relation: {
+                endpoint: '/',
+                pageParams: {
+                  limit: 10,
+                  ...(args?.relation?.pageParams ?? {}),
+                },
+                ...(args?.relation ?? {}),
+              },
+
+              search: {
+                endpoint: '/',
+                pageParams: {
+                  limit: 10,
+                  ...(args?.search?.pageParams ?? {}),
+                },
+                ...(args?.search ?? {}),
+              },
+            }),
+          { wrapper: ComponentFixture }
+        )
+      );
     });
   });
 }
@@ -48,7 +63,7 @@ describe('useRelation', () => {
   });
 
   test('fetch relations', async () => {
-    const { result, waitForNextUpdate } = await setup();
+    const { result, waitForNextUpdate } = await setup(undefined);
 
     await waitForNextUpdate();
 
@@ -61,7 +76,9 @@ describe('useRelation', () => {
   });
 
   test('fetch relations with different limit', async () => {
-    const { waitForNextUpdate } = await setup(undefined, { relationsToShow: 5 });
+    const { waitForNextUpdate } = await setup(undefined, {
+      relation: { pageParams: { limit: 5 } },
+    });
 
     await waitForNextUpdate();
 
@@ -72,7 +89,7 @@ describe('useRelation', () => {
   });
 
   test('doesn not fetch relations if a relation endpoint was not passed', async () => {
-    await setup(undefined, { endpoints: { relation: undefined } });
+    await setup(undefined, { relation: { endpoint: undefined } });
 
     expect(axiosInstance.get).not.toBeCalled();
   });
@@ -90,12 +107,18 @@ describe('useRelation', () => {
     });
   });
 
-  test('fetch relations next page, if a full page was returned', async () => {
+  test('fetch relations next page, if there is one', async () => {
     axiosInstance.get = jest.fn().mockResolvedValue({
-      data: [1, 2],
+      data: {
+        values: [],
+        pagination: {
+          page: 1,
+          total: 3,
+        },
+      },
     });
 
-    const { result, waitForNextUpdate } = await setup(undefined, { relationsToShow: 1 });
+    const { result, waitForNextUpdate } = await setup(undefined);
 
     await waitForNextUpdate();
 
@@ -116,12 +139,18 @@ describe('useRelation', () => {
     });
   });
 
-  test('does not fetch relations next page, if a full page was not returned', async () => {
+  test("does not fetch relations next page, if there isn't one", async () => {
     axiosInstance.get = jest.fn().mockResolvedValue({
-      data: [1, 2],
+      data: {
+        values: [],
+        pagination: {
+          page: 1,
+          total: 2,
+        },
+      },
     });
 
-    const { result, waitForNextUpdate } = await setup(undefined, { relationsToShow: 3 });
+    const { result, waitForNextUpdate } = await setup(undefined);
 
     await waitForNextUpdate();
 
@@ -147,7 +176,9 @@ describe('useRelation', () => {
 
     await waitForNextUpdate();
 
-    const spy = jest.fn().mockResolvedValue({ data: [] });
+    const spy = jest
+      .fn()
+      .mockResolvedValue({ data: { values: [], pagination: { page: 1, total: 2 } } });
     axiosInstance.get = spy;
 
     act(() => {
@@ -161,11 +192,15 @@ describe('useRelation', () => {
   });
 
   test('does fetch search results with a different limit', async () => {
-    const { result, waitForNextUpdate } = await setup(undefined, { searchResultsToShow: 5 });
+    const { result, waitForNextUpdate } = await setup(undefined, {
+      search: { pageParams: { limit: 5 } },
+    });
 
     await waitForNextUpdate();
 
-    const spy = jest.fn().mockResolvedValue({ data: [] });
+    const spy = jest
+      .fn()
+      .mockResolvedValue({ data: { values: [], pagination: { page: 1, total: 2 } } });
     axiosInstance.get = spy;
 
     act(() => {
@@ -178,27 +213,12 @@ describe('useRelation', () => {
     expect(spy).toBeCalledWith(expect.any(String), { limit: 5, page: expect.any(Number) });
   });
 
-  test('does not fetch search results once a term was provided, but no endpoint was set', async () => {
-    const { result, waitForNextUpdate } = await setup(undefined, {
-      endpoints: { search: undefined },
-    });
+  test('fetch search next page, if there is one', async () => {
+    const { result, waitForNextUpdate } = await setup(undefined);
 
-    const spy = jest.fn().mockResolvedValue({ data: [] });
-    axiosInstance.get = spy;
-
-    act(() => {
-      result.current.searchFor('something');
-    });
-
-    await waitForNextUpdate();
-
-    expect(spy).not.toBeCalled();
-  });
-
-  test('fetch search next page, if a full page was returned', async () => {
-    const { result, waitForNextUpdate } = await setup(undefined, { searchResultsToShow: 1 });
-
-    const spy = jest.fn().mockResolvedValue({ data: [1, 2] });
+    const spy = jest
+      .fn()
+      .mockResolvedValue({ data: { values: [], pagination: { page: 1, total: 3 } } });
     axiosInstance.get = spy;
 
     act(() => {
@@ -224,10 +244,12 @@ describe('useRelation', () => {
     });
   });
 
-  test('doesn not fetch search next page, if a full page was not returned', async () => {
-    const { result, waitForNextUpdate } = await setup(undefined, { searchResultsToShow: 3 });
+  test("doesn not fetch search next page, if there isn't one", async () => {
+    const { result, waitForNextUpdate } = await setup(undefined);
 
-    const spy = jest.fn().mockResolvedValue({ data: [1, 2] });
+    const spy = jest
+      .fn()
+      .mockResolvedValue({ data: { values: [], pagination: { page: 1, total: 2 } } });
     axiosInstance.get = spy;
 
     act(() => {

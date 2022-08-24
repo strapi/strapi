@@ -18,7 +18,7 @@ export const RelationInputWrapper = ({
   labelAction,
   mainField,
   name,
-  queryInfos: { endpoints, shouldDisplayRelationLink },
+  queryInfos: { endpoints, defaultParams, shouldDisplayRelationLink },
   relationType,
   targetModel,
 }) => {
@@ -26,7 +26,22 @@ export const RelationInputWrapper = ({
   const { addRelation, removeRelation, modifiedData } = useCMEditViewDataManager();
 
   const { relations, search, searchFor } = useRelation(name, {
-    endpoints,
+    relation: {
+      endpoint: endpoints.relation,
+      pageParams: {
+        pageSize: 10,
+      },
+    },
+
+    search: {
+      endpoint: endpoints.search,
+      pageParams: {
+        ...defaultParams,
+        entityId: isCreatingEntry ? undefined : 'id',
+        omitIds: isCreatingEntry ? [] : undefined,
+        pageSize: 10,
+      },
+    },
   });
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
