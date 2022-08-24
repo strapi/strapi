@@ -14,6 +14,7 @@ exports[`RelationItem should render and match snapshot 1`] = `
 }
 
 .c0 {
+  background: #ffffff;
   padding-top: 12px;
   padding-right: 16px;
   padding-bottom: 12px;
@@ -55,7 +56,7 @@ exports[`RelationItem should render and match snapshot 1`] = `
   width: 100%;
 }
 
-.c5 > a {
+.c5 div > a {
   color: currentColor;
   -webkit-text-decoration: none;
   text-decoration: none;

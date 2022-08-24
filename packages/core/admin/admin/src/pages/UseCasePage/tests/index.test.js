@@ -171,7 +171,7 @@ describe('Admin | UseCasePage', () => {
         width: 100%;
       }
 
-      .c35 .sc-ezHhwS {
+      .c35 .sc-fGoOlv {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -460,17 +460,6 @@ describe('Admin | UseCasePage', () => {
         margin-top: 24px;
       }
 
-      .c17 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c10:focus-visible {
-        outline: none;
-      }
-
       .c42 {
         color: #4945ff;
         font-size: 0.75rem;
@@ -546,6 +535,17 @@ describe('Admin | UseCasePage', () => {
         left: -5px;
         right: -5px;
         border: 2px solid #4945ff;
+      }
+
+      .c17 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+      }
+
+      .c10:focus-visible {
+        outline: none;
       }
 
       .c15 {
