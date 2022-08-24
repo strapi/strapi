@@ -47,7 +47,7 @@ module.exports = (strapi) => {
     platform: os.platform(),
     osArch: os.arch(),
     osRelease: os.release(),
-    nodeVersion: process.version,
+    nodeVersion: process.versions.node,
     docker: process.env.DOCKER || isDocker(),
     isCI: ciEnv.isCI,
     version: strapi.config.get('info.strapi'),
