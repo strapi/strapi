@@ -66,7 +66,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toMatchObject({
+    expect(res.body).toStrictEqual({
       data: null,
       error: {
         status: 400,
@@ -99,7 +99,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toMatchObject({
+    expect(res.body).toStrictEqual({
       data: null,
       error: {
         status: 400,
@@ -132,16 +132,16 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toMatchObject({
+    expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
       permissions: [],
       description: body.description,
       type: body.type,
       id: expect.any(Number),
-      createdAt: expect.any(String),
+      createdAt: expect.toBeISODate(),
       lastUsedAt: null,
-      updatedAt: expect.any(String),
+      updatedAt: expect.toBeISODate(),
       expiresAt: null,
       lifespan: null,
     });
@@ -161,30 +161,31 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toMatchObject({
+    expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
       permissions: [],
       description: body.description,
       type: body.type,
       id: expect.any(Number),
-      createdAt: expect.any(String),
+      createdAt: expect.toBeISODate(),
       lastUsedAt: null,
-      updatedAt: expect.any(String),
+      updatedAt: expect.toBeISODate(),
       expiresAt: null,
       lifespan: null,
     });
   });
 
   test('Creates a token with a lifespan', async () => {
+    const now = Date.now();
+    jest.useFakeTimers('modern').setSystemTime(now);
+
     const body = {
       name: 'api-token_tests-lifespan',
       description: 'api-token_tests-description',
       type: 'read-only',
       lifespan: 12345,
     };
-
-    const minExpires = Date.now();
 
     const res = await rq({
       url: '/admin/api-tokens',
@@ -200,14 +201,16 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       description: body.description,
       type: body.type,
       id: expect.any(Number),
-      createdAt: expect.any(String),
+      createdAt: expect.toBeISODate(),
       lastUsedAt: null,
-      updatedAt: expect.any(String),
-      expiresAt: expect.any(String),
+      updatedAt: expect.toBeISODate(),
+      expiresAt: expect.toBeISODate(),
       lifespan: body.lifespan,
     });
-    // check that expiresAt has increased
-    expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(minExpires);
+
+    expect(Date.parse(res.body.data.expiresAt)).toEqual(now + body.lifespan);
+
+    jest.useRealTimers();
   });
 
   test('Creates a token with a null lifespan', async () => {
@@ -232,9 +235,9 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       description: body.description,
       type: body.type,
       id: expect.any(Number),
-      createdAt: expect.any(String),
+      createdAt: expect.toBeISODate(),
       lastUsedAt: null,
-      updatedAt: expect.any(String),
+      updatedAt: expect.toBeISODate(),
       expiresAt: null,
       lifespan: body.lifespan,
     });
@@ -255,16 +258,22 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toMatchObject({
+    expect(res.body).toStrictEqual({
       data: null,
       error: {
         status: 400,
         name: 'ValidationError',
-        message: expect.any(String),
-        details: {},
+        message: 'lifespan must be greater than or equal to 1',
+        details: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              message: 'lifespan must be greater than or equal to 1',
+              name: 'ValidationError',
+            }),
+          ]),
+        },
       },
     });
-    expect(res.body.error.message).toContain('lifespan');
   });
 
   test('Fails to create a non-custom api token with permissions', async () => {
@@ -282,7 +291,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toMatchObject({
+    expect(res.body).toStrictEqual({
       data: null,
       error: {
         status: 400,
@@ -469,10 +478,9 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       const t = res.body.data.find((t) => t.id === token.id);
       if (t.permissions) {
         t.permissions = t.permissions.sort();
-        // eslint-disable-next-line no-param-reassign
-        token.permissions = token.permissions.sort();
+        Object.assign(token, { permissions: token.permissions.sort() });
       }
-      expect(t).toMatchObject(omit(token, ['accessKey']));
+      expect(t).toStrictEqual(omit(token, ['accessKey']));
     });
   });
 

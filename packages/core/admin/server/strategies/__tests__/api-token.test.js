@@ -92,7 +92,6 @@ describe('API Token Auth Strategy', () => {
         return {
           ...apiToken,
           expiresAt: pastDate,
-          lifespan: 1000,
         };
       });
       const update = jest.fn(() => apiToken);
@@ -203,7 +202,6 @@ describe('API Token Auth Strategy', () => {
           {
             credentials: {
               ...readOnlyApiToken,
-              lifespan: 1000,
               expiresAt: Date.now() + 99999,
             },
           },
@@ -217,18 +215,17 @@ describe('API Token Auth Strategy', () => {
         container,
       };
 
-      expect(async () => {
+      expect(() => {
         apiTokenStrategy.verify(
           {
             credentials: {
               ...readOnlyApiToken,
-              lifespan: 1000,
               expiresAt: Date.now() - 1,
             },
           },
           { scope: ['api::model.model.find'] }
         );
-      }).rejects.toThrow(new UnauthorizedError('Token expired'));
+      }).toThrow(new UnauthorizedError('Token expired'));
     });
 
     test('Throws an error if trying to access a `full-access` action with a read only access key', () => {
@@ -302,20 +299,6 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Throws an error if no scope is passed with a `custom` token', () => {
-      global.strapi = {
-        container,
-      };
-
-      expect.assertions(1);
-
-      try {
-        apiTokenStrategy.verify({ credentials: customApiToken }, {});
-      } catch (err) {
-        expect(err).toBeInstanceOf(Error);
-      }
-    });
-
-    test('Throws an error if token is expired', () => {
       global.strapi = {
         container,
       };

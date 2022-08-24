@@ -11,26 +11,19 @@ describe('API Token', () => {
     hexedString: '6170692d746f6b656e5f746573742d72616e646f6d2d6279746573',
   };
 
-  const SELECT_FIELDS = [
-    'id',
-    'name',
-    'description',
-    'lastUsedAt',
-    'type',
-    'lifespan',
-    'expiresAt',
-    'createdAt',
-    'updatedAt',
-  ];
-
+  const now = Date.now();
   beforeAll(() => {
     jest
       .spyOn(crypto, 'randomBytes')
       .mockImplementation(() => Buffer.from(mockedApiToken.randomBytes));
+
+    jest.useFakeTimers('modern').setSystemTime(now);
   });
 
   afterAll(() => {
     jest.clearAllMocks();
+
+    jest.useRealTimers();
   });
 
   describe('create', () => {
@@ -55,7 +48,7 @@ describe('API Token', () => {
       const res = await apiTokenService.create(attributes);
 
       expect(create).toHaveBeenCalledWith({
-        select: SELECT_FIELDS,
+        select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...attributes,
           accessKey: apiTokenService.hash(mockedApiToken.hexedString),
@@ -80,7 +73,7 @@ describe('API Token', () => {
         lifespan: 123456,
       };
 
-      const minExpires = Date.now() + attributes.lifespan;
+      const expectedExpires = Date.now() + attributes.lifespan;
 
       const create = jest.fn(({ data }) => Promise.resolve(data));
       global.strapi = {
@@ -95,11 +88,11 @@ describe('API Token', () => {
       const res = await apiTokenService.create(attributes);
 
       expect(create).toHaveBeenCalledWith({
-        select: SELECT_FIELDS,
+        select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...attributes,
           accessKey: apiTokenService.hash(mockedApiToken.hexedString),
-          expiresAt: expect.any(Number),
+          expiresAt: expectedExpires,
           lifespan: attributes.lifespan,
         },
         populate: ['permissions'],
@@ -107,17 +100,14 @@ describe('API Token', () => {
       expect(res).toEqual({
         ...attributes,
         accessKey: mockedApiToken.hexedString,
-        expiresAt: expect.any(Number),
+        expiresAt: expectedExpires,
         lifespan: attributes.lifespan,
       });
-      expect(res.expiresAt).toBeGreaterThanOrEqual(minExpires);
+      expect(res.expiresAt).toBe(expectedExpires);
     });
 
     test('Creates a custom token', async () => {
-      const id = 1;
-
       const attributes = {
-        id,
         name: 'api-token_tests-name',
         description: 'api-token_tests-description',
         type: 'custom',
@@ -130,7 +120,7 @@ describe('API Token', () => {
         id: 1,
       };
 
-      const findOne = jest.fn().mockResolvedValue(omit('permissions', attributes));
+      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
       const create = jest.fn().mockResolvedValue(createTokenResult);
       const load = jest.fn().mockResolvedValueOnce(
         Promise.resolve(
@@ -169,7 +159,7 @@ describe('API Token', () => {
 
       // call to create token
       expect(create).toHaveBeenNthCalledWith(1, {
-        select: SELECT_FIELDS,
+        select: expect.arrayContaining([expect.any(String)]),
         data: {
           ...omit('permissions', attributes),
           accessKey: apiTokenService.hash(mockedApiToken.hexedString),
@@ -183,7 +173,7 @@ describe('API Token', () => {
         data: {
           action: 'admin::content.content.read',
           token: {
-            ...attributes,
+            ...createTokenResult,
             expiresAt: null,
             lifespan: null,
           },
@@ -191,7 +181,7 @@ describe('API Token', () => {
       });
 
       expect(res).toEqual({
-        ...attributes,
+        ...createTokenResult,
         accessKey: mockedApiToken.hexedString,
         expiresAt: null,
         lifespan: null,
@@ -281,7 +271,7 @@ describe('API Token', () => {
       const res = await apiTokenService.list();
 
       expect(findMany).toHaveBeenCalledWith({
-        select: SELECT_FIELDS,
+        select: expect.arrayContaining([expect.any(String)]),
         orderBy: { name: 'ASC' },
         populate: ['permissions'],
       });
@@ -309,7 +299,7 @@ describe('API Token', () => {
       const res = await apiTokenService.revoke(token.id);
 
       expect(mockedDelete).toHaveBeenCalledWith({
-        select: SELECT_FIELDS,
+        select: expect.arrayContaining([expect.any(String)]),
         where: { id: token.id },
         populate: ['permissions'],
       });
@@ -328,7 +318,7 @@ describe('API Token', () => {
       const res = await apiTokenService.revoke(42);
 
       expect(mockedDelete).toHaveBeenCalledWith({
-        select: SELECT_FIELDS,
+        select: expect.arrayContaining([expect.any(String)]),
         where: { id: 42 },
         populate: ['permissions'],
       });
@@ -356,7 +346,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getById(token.id);
 
       expect(findOne).toHaveBeenCalledWith({
-        select: SELECT_FIELDS,
+        select: expect.arrayContaining([expect.any(String)]),
         where: { id: token.id },
         populate: ['permissions'],
       });
@@ -375,7 +365,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getById(42);
 
       expect(findOne).toHaveBeenCalledWith({
-        select: SELECT_FIELDS,
+        select: expect.arrayContaining([expect.any(String)]),
         where: { id: 42 },
         populate: ['permissions'],
       });
@@ -481,7 +471,7 @@ describe('API Token', () => {
         },
       });
       expect(update).toHaveBeenCalledWith({
-        select: SELECT_FIELDS,
+        select: expect.arrayContaining([expect.any(String)]),
         where: { id },
         data: attributes,
         populate: ['permissions'],
@@ -593,7 +583,7 @@ describe('API Token', () => {
     });
 
     expect(update).toHaveBeenCalledWith({
-      select: SELECT_FIELDS,
+      select: expect.arrayContaining([expect.any(String)]),
       where: { id },
       data: omit(['permissions'], updatedAttributes),
       populate: expect.anything(), // it doesn't matter how this is used
@@ -665,7 +655,7 @@ describe('API Token', () => {
     const res = await apiTokenService.update(id, updatedAttributes);
 
     expect(update).toHaveBeenCalledWith({
-      select: SELECT_FIELDS,
+      select: expect.arrayContaining([expect.any(String)]),
       where: { id },
       data: omit(['permissions'], updatedAttributes),
       populate: expect.anything(), // it doesn't matter how this is used
@@ -697,7 +687,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getByName(token.name);
 
       expect(findOne).toHaveBeenCalledWith({
-        select: SELECT_FIELDS,
+        select: expect.arrayContaining([expect.any(String)]),
         where: { name: token.name },
         populate: ['permissions'],
       });
@@ -716,7 +706,7 @@ describe('API Token', () => {
       const res = await apiTokenService.getByName('unexistant-name');
 
       expect(findOne).toHaveBeenCalledWith({
-        select: SELECT_FIELDS,
+        select: expect.arrayContaining([expect.any(String)]),
         where: { name: 'unexistant-name' },
         populate: ['permissions'],
       });
