@@ -208,7 +208,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       lifespan: body.lifespan,
     });
 
-    // ISO date only stores with accuracy of seconds, not milliseconds, so allow a range of 2 seconds for timing edge cases
+    // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
     expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
     expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
 
