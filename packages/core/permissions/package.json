@@ -24,7 +24,7 @@
     "test:unit": "jest --verbose"
   },
   "dependencies": {
-    "@strapi/utils": "4.3.4",
+    "@strapi/utils": "4.3.6",
     "lodash": "4.17.21",
     "@casl/ability": "5.4.4",
     "sift": "16.0.0"
