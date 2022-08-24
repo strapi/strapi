@@ -72,7 +72,7 @@ export const RelationInput = ({
       >
         <RelationList height={listHeight}>
           {relations.isSuccess &&
-            relations.data.pages.flatMap((relation) => {
+            relations.data.pages.flat().map((relation) => {
               const { publicationState, href, mainField, id } = relation;
               const badgeColor = publicationState === 'draft' ? 'secondary' : 'success';
 
@@ -126,12 +126,14 @@ export const RelationInput = ({
 const ReactQueryRelationResult = PropTypes.shape({
   data: PropTypes.shape({
     pages: PropTypes.arrayOf(
-      PropTypes.shape({
-        href: PropTypes.string,
-        id: PropTypes.number.isRequired,
-        publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-        mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      })
+      PropTypes.arrayOf(
+        PropTypes.shape({
+          href: PropTypes.string,
+          id: PropTypes.number.isRequired,
+          publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+          mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        })
+      )
     ),
   }),
   isLoading: PropTypes.bool.isRequired,
@@ -141,11 +143,13 @@ const ReactQueryRelationResult = PropTypes.shape({
 const ReactQuerySearchResult = PropTypes.shape({
   data: PropTypes.shape({
     pages: PropTypes.arrayOf(
-      PropTypes.shape({
-        isDraft: PropTypes.bool,
-        mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-      })
+      PropTypes.arrayOf(
+        PropTypes.shape({
+          isDraft: PropTypes.bool,
+          mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+          publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+        })
+      )
     ),
   }),
   isLoading: PropTypes.bool.isRequired,
