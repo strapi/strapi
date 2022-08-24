@@ -27,7 +27,7 @@ const ColorPickerInput = ({
       name={name}
       id={name}
       // GenericInput calls formatMessage and returns a string for the error
-      error={error && error}
+      error={error}
       hint={description && formatMessage(description)}
     >
       <Stack spacing={1}>
