@@ -184,7 +184,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       lifespan: 12345,
     };
 
-    const minExpires = Date.now() + body.lifespan;
+    const minExpires = Date.now();
 
     const res = await rq({
       url: '/admin/api-tokens',
@@ -206,7 +206,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       expiresAt: expect.any(String),
       lifespan: body.lifespan,
     });
-    expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThanOrEqual(minExpires);
+    // check that expiresAt has increased
+    expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(minExpires);
   });
 
   test('Creates a token with a null lifespan', async () => {
