@@ -5288,10 +5288,10 @@
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"
 
-"@strapi/eslint-config@0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@strapi/eslint-config/-/eslint-config-0.1.1.tgz#0020d5724edc6dc7453f26917ed2d1dff434c814"
-  integrity sha512-/aokDkPVxX9vS8oRQnmR6EYOy2O6Xd/zxus3I8yC4yKiF/uEflzsNeLUCRPt4BCbm6X5d0K+NzVesHUPERLRrQ==
+"@strapi/eslint-config@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@strapi/eslint-config/-/eslint-config-0.1.2.tgz#e8327169eccce78b5f9e1589cb243c0f84343caf"
+  integrity sha512-8Pf0xNhEK77tLWzUL3/FSeGJipkmFjx8LqmwTouXgTVgtiXbF+p3iNOxmkkZWB92cDoA4BXkIB17Fus+6qXEkQ==
   dependencies:
     "@babel/eslint-parser" "^7.18.9"
     "@typescript-eslint/eslint-plugin" "^5.14.0"
