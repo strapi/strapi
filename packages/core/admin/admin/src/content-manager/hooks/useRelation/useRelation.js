@@ -3,15 +3,12 @@ import { useInfiniteQuery } from 'react-query';
 
 import { axiosInstance } from '../../../core/utils';
 
-export const useRelation = (
-  name,
-  { endpoints, relationsToShow = 10, searchResultsToShow = 10 }
-) => {
+export const useRelation = (name, { relation, search }) => {
   const [searchTerm, setSearchTerm] = useState(null);
 
   const fetchRelations = async ({ pageParam = 1 }) => {
-    const { data } = await axiosInstance.get(endpoints?.relation, {
-      limit: relationsToShow,
+    const { data } = await axiosInstance.get(relation?.endpoint, {
+      ...(relation.pageParams ?? {}),
       page: pageParam,
     });
 
@@ -19,8 +16,8 @@ export const useRelation = (
   };
 
   const fetchSearch = async ({ pageParam = 1 }) => {
-    const { data } = await axiosInstance.get(endpoints?.search, {
-      limit: searchResultsToShow,
+    const { data } = await axiosInstance.get(search.endpoint, {
+      ...(search.pageParams ?? {}),
       page: pageParam,
     });
 
@@ -28,26 +25,26 @@ export const useRelation = (
   };
 
   const relationsRes = useInfiniteQuery(['relation', name], fetchRelations, {
-    enabled: !!endpoints?.relation,
-    getNextPageParam(lastPage, pages) {
-      if (lastPage.length < relationsToShow) {
+    enabled: !!relation?.endpoint,
+    getNextPageParam(lastPage) {
+      if (lastPage.pagination.page + 1 === lastPage.pagination.total) {
         return undefined;
       }
 
       // eslint-disable-next-line consistent-return
-      return (pages?.length || 0) + 1;
+      return lastPage.pagination.page + 1;
     },
   });
 
   const searchRes = useInfiniteQuery(['relation', name, 'search', searchTerm], fetchSearch, {
-    enabled: !!endpoints?.search && !!searchTerm,
-    getNextPageParam(lastPage, pages) {
-      if (lastPage.length < searchResultsToShow) {
+    enabled: !!searchTerm,
+    getNextPageParam(lastPage) {
+      if (lastPage.pagination.page + 1 === lastPage.pagination.total) {
         return undefined;
       }
 
       // eslint-disable-next-line consistent-return
-      return (pages?.length || 0) + 1;
+      return lastPage.pagination.page + 1;
     },
   });
 
