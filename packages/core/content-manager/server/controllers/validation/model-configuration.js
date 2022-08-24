@@ -53,6 +53,15 @@ const createMetadasSchema = (schema) => {
               editable: yup.boolean(),
               visible: yup.boolean(),
               mainField: yup.string(),
+              step: yup
+                .number()
+                .integer()
+                .positive()
+                .test(
+                  'isDivisibleBy60',
+                  'Step must be either 1 or divisible by 60',
+                  (value) => !value || value === 1 || (value * 24) % 60 === 0
+                ),
             })
             .noUnknown()
             .required(),
