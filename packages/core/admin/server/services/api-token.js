@@ -142,7 +142,7 @@ const hash = (accessKey) => {
 /**
  * @param {number} lifespan
  *
- * @returns {null|number}
+ * @returns { { lifespan: null | number, expiresAt: null | number } }
  */
 const getExpirationFields = (lifespan) => {
   // it must be nil or a finite number >= 0
