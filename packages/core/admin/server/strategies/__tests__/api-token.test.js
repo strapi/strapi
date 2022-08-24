@@ -1,5 +1,6 @@
 'use strict';
 
+const { UnauthorizedError } = require('@strapi/utils/lib/errors');
 const createContext = require('../../../../../../test/helpers/create-context');
 const apiTokenStrategy = require('../api-token');
 
@@ -82,6 +83,64 @@ describe('API Token Auth Strategy', () => {
 
       expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
       expect(response).toStrictEqual({ authenticated: false });
+    });
+
+    test('Expired token throws on authorize', async () => {
+      const pastDate = Date.now() - 1;
+
+      const getBy = jest.fn(() => {
+        return {
+          ...apiToken,
+          expiresAt: pastDate,
+          lifespan: 1000,
+        };
+      });
+      const update = jest.fn(() => apiToken);
+      const ctx = createContext({}, { request });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              getBy,
+              hash,
+              update,
+            },
+          },
+        },
+      };
+
+      expect(async () => {
+        await apiTokenStrategy.authenticate(ctx);
+      }).rejects.toThrow(new UnauthorizedError('Token expired'));
+
+      expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
+    });
+
+    test('Expired token throws on verify', async () => {
+      const pastDate = Date.now() - 1;
+      const token = {
+        ...apiToken,
+        expiresAt: pastDate,
+        lifespan: 1000,
+      };
+      const update = jest.fn(() => apiToken);
+      const ctx = createContext({}, { request });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              hash,
+              update,
+            },
+          },
+        },
+      };
+
+      expect(async () => {
+        await apiTokenStrategy.verify({ ...ctx, credentials: token });
+      }).rejects.toThrow(new UnauthorizedError('Token expired'));
     });
   });
 

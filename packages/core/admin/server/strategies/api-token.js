@@ -42,6 +42,11 @@ const authenticate = async (ctx) => {
     return { authenticated: false };
   }
 
+  // token has expired
+  if (apiToken.expiresAt && apiToken.expiresAt < Date.now()) {
+    throw new UnauthorizedError('Token expired');
+  }
+
   // update lastUsedAt
   await apiTokenService.update(apiToken.id, {
     lastUsedAt: new Date(),
@@ -66,12 +71,12 @@ const verify = (auth, config) => {
   const { credentials: apiToken, ability } = auth;
 
   if (!apiToken) {
-    throw new UnauthorizedError();
+    throw new UnauthorizedError('Token not found');
   }
 
   // token has expired
   if (apiToken.expiresAt && apiToken.expiresAt < Date.now()) {
-    throw new UnauthorizedError();
+    throw new UnauthorizedError('Token expired');
   }
 
   // Full access
