@@ -17,7 +17,7 @@ const setup = (props) =>
 
 describe('RelationInput || Option', () => {
   it('should render custom Option with published state title', () => {
-    setup({ options: [{ mainField: 'relation 1', isDraft: false }] });
+    setup({ options: [{ mainField: 'relation 1', publicationState: 'published' }] });
 
     act(() => {
       fireEvent.mouseDown(screen.getByRole('button'));
@@ -28,7 +28,7 @@ describe('RelationInput || Option', () => {
   });
 
   it('should render custom Option with draft state title', () => {
-    setup({ options: [{ mainField: 'relation 1', isDraft: true }] });
+    setup({ options: [{ mainField: 'relation 1', publicationState: 'draft' }] });
 
     act(() => {
       fireEvent.mouseDown(screen.getByRole('button'));

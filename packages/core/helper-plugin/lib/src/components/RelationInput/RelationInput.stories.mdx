@@ -26,16 +26,24 @@ WIP
         labelLoadMore="Load More"
         listHeight="200px"
         name="options"
+        publicationStateTranslations={{ draft: 'Draft', published: 'Published' }}
         searchResults={{
           data: {
             pages: [
               {
                 isDraft: true,
                 mainField: 'Relation 6',
+                publicationState: 'draft',
               },
               {
                 isDraft: false,
                 mainField: 'Relation 7',
+                publicationState: 'published',
+              },
+              {
+                isDraft: false,
+                mainField: 'Relation 8',
+                publicationState: false,
               },
             ],
             isLoading: false,
@@ -49,30 +57,31 @@ WIP
                 id: 1,
                 href: '/',
                 mainField: 'Relation 1',
+                publicationState: 'draft',
               },
               {
                 id: 2,
                 href: '',
                 mainField: 'Relation 2',
-                isDraft: true,
+                publicationState: false,
               },
               {
                 id: 3,
                 href: '',
                 mainField: 'Relation 3',
-                isDraft: false,
+                publicationState: 'published',
               },
               {
                 id: 4,
                 href: '',
                 mainField: 'Relation 4',
-                isDraft: false,
+                publicationState: 'draft',
               },
               {
                 id: 5,
                 href: '',
                 mainField: 'Relation 5',
-                isDraft: true,
+                publicationState: false,
               },
             ],
           },
