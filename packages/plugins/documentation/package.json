@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-documentation",
-  "version": "4.3.4",
+  "version": "4.3.5",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "repository": {
     "type": "git",
@@ -24,8 +24,8 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@strapi/helper-plugin": "4.3.4",
-    "@strapi/utils": "4.3.4",
+    "@strapi/helper-plugin": "4.3.5",
+    "@strapi/utils": "4.3.5",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
     "fs-extra": "10.0.0",
