@@ -2,7 +2,7 @@
 
 const { ApplicationError } = require('@strapi/utils').errors;
 const { YupValidationError } = require('@strapi/utils/lib/errors');
-const { omit } = require('lodash');
+const { omit } = require('lodash/fp');
 const createContext = require('../../../../../../test/helpers/create-context');
 const apiTokenController = require('../api-token');
 
@@ -165,7 +165,7 @@ describe('API Token Controller', () => {
 
       expect(exists).toHaveBeenCalledWith({ name: tokenBody.name });
       expect(badRequest).not.toHaveBeenCalled();
-      expect(create).toHaveBeenCalledWith(omit(createBody, 'expiresAt'));
+      expect(create).toHaveBeenCalledWith(omit(['expiresAt'], createBody));
       expect(created).toHaveBeenCalled();
     });
   });
