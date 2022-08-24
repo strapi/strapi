@@ -11,7 +11,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c68 {
+.c57 {
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c69 {
   background: #ffffff;
   padding: 16px;
 }
@@ -706,7 +710,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   display: flex;
 }
 
-.c90 {
+.c91 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -789,31 +793,31 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   max-width: 100%;
 }
 
-.c64 {
+.c65 {
   font-weight: 600;
   color: #271fe0;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c67 {
+.c68 {
   font-weight: 600;
   color: #666687;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c62 {
+.c63 {
   background: #ffffff;
   padding: 16px;
 }
 
-.c65 {
+.c66 {
   background: #f6f6f9;
   padding: 12px;
 }
 
-.c57 {
+.c58 {
   -webkit-align-items: flex-end;
   -webkit-box-align: flex-end;
   -ms-flex-align: flex-end;
@@ -827,60 +831,60 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: row;
 }
 
-.c63 {
+.c64 {
   border-bottom: 1px solid #ffffff;
 }
 
-.c66 {
+.c67 {
   border-bottom: 1px solid #eaeaef;
 }
 
-.c60 {
+.c61 {
   border: none;
   background: transparent;
   padding: 0;
   outline-offset: -2px;
 }
 
-.c59 + .c59 > .c61 {
+.c60 + .c60 > .c62 {
   border-left: 1px solid #eaeaef;
 }
 
-.c60 .c61 {
+.c61 .c62 {
   border-right: none;
 }
 
-.c60[aria-disabled='true'] {
+.c61[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c58 > * {
+.c59 > * {
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c58 .c59:first-of-type .c61 {
+.c59 .c60:first-of-type .c62 {
   border-radius: 4px 0 0 0;
 }
 
-.c58 .c59:last-of-type .c61 {
+.c59 .c60:last-of-type .c62 {
   border-radius: 0 4px 0 0;
 }
 
-.c58 .c59[aria-selected="true"] .c61 {
+.c59 .c60[aria-selected="true"] .c62 {
   border-radius: 4px 4px 0 0;
   border-left: none;
   border-right: none;
 }
 
-.c82 {
+.c83 {
   color: #4945ff;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c83 {
+.c84 {
   color: #4a4a6a;
   display: block;
   white-space: nowrap;
@@ -891,11 +895,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   line-height: 1.25;
 }
 
-.c69 {
+.c70 {
   border-radius: 4px;
 }
 
-.c72 {
+.c73 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 24px;
@@ -903,21 +907,21 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c75 {
+.c76 {
   max-width: 100%;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c78 {
+.c79 {
   min-width: 0px;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c84 {
+.c85 {
   background: #dcdce4;
   border-radius: 50%;
   cursor: pointer;
@@ -929,12 +933,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   cursor: pointer;
 }
 
-.c86 {
+.c87 {
   color: #666687;
   width: 0.6875rem;
 }
 
-.c89 {
+.c90 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 24px;
@@ -942,7 +946,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c73 {
+.c74 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -960,7 +964,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: space-between;
 }
 
-.c76 {
+.c77 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -974,7 +978,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: row;
 }
 
-.c85 {
+.c86 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -995,70 +999,70 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: center;
 }
 
-.c70 {
+.c71 {
   border: 1px solid #f6f6f9;
 }
 
-.c70:hover:not([aria-disabled='true']) {
+.c71:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c70:hover:not([aria-disabled='true']) .sc-wAsCI {
+.c71:hover:not([aria-disabled='true']) .sc-wAsCI {
   color: #271fe0;
 }
 
-.c70:hover:not([aria-disabled='true']) .c81 {
+.c71:hover:not([aria-disabled='true']) .c82 {
   color: #4945ff;
 }
 
-.c70:hover:not([aria-disabled='true']) > .c71 {
+.c71:hover:not([aria-disabled='true']) > .c72 {
   background: #f0f0ff;
 }
 
-.c70:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c71:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c88 {
+.c89 {
   border: 1px solid #ffffff;
 }
 
-.c88:hover:not([aria-disabled='true']) {
+.c89:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c88:hover:not([aria-disabled='true']) .sc-wAsCI {
+.c89:hover:not([aria-disabled='true']) .sc-wAsCI {
   color: #271fe0;
 }
 
-.c88:hover:not([aria-disabled='true']) .c81 {
+.c89:hover:not([aria-disabled='true']) .c82 {
   color: #4945ff;
 }
 
-.c88:hover:not([aria-disabled='true']) > .c71 {
+.c89:hover:not([aria-disabled='true']) > .c72 {
   background: #f0f0ff;
 }
 
-.c88:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c89:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c79 {
+.c80 {
   background: transparent;
   border: none;
   position: relative;
   outline: none;
 }
 
-.c79[aria-disabled='true'] {
+.c80[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c79[aria-disabled='true'] svg path {
+.c80[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c79 svg {
+.c80 svg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1066,11 +1070,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   font-size: 0.625rem;
 }
 
-.c79 svg path {
+.c80 svg path {
   fill: #4945ff;
 }
 
-.c79:after {
+.c80:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -1085,11 +1089,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid transparent;
 }
 
-.c79:focus-visible {
+.c80:focus-visible {
   outline: none;
 }
 
-.c79:focus-visible:after {
+.c80:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -1100,42 +1104,42 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c77 > * {
+.c78 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c77 > * + * {
+.c78 > * + * {
   margin-left: 12px;
 }
 
-.c87 path {
+.c88 path {
   fill: #666687;
 }
 
-.c80 {
+.c81 {
   text-align: left;
 }
 
-.c80 > span {
+.c81 > span {
   max-width: 100%;
 }
 
-.c80 svg {
+.c81 svg {
   width: 0.875rem;
   height: 0.875rem;
 }
 
-.c80 svg path {
+.c81 svg path {
   fill: #8e8ea9;
 }
 
-.c74 {
+.c75 {
   min-height: 5.5rem;
   border-radius: 4px;
 }
 
-.c74:hover svg path {
+.c75:hover svg path {
   fill: #4945ff;
 }
 
@@ -1536,209 +1540,213 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               </div>
             </div>
           </div>
-          <div>
-            <div
-              aria-label="Tabs Permissions"
-              class="c57 c58"
-              role="tablist"
-            >
-              <button
-                aria-controls="tabs-0-tabpanel"
-                aria-disabled="false"
-                aria-selected="true"
-                class="c59 c60"
-                id="tabs-0-tab"
-                role="tab"
-                tabindex="0"
-                type="button"
-              >
-                <div
-                  class="c61 c62 c63"
-                >
-                  <span
-                    class="c64"
-                  >
-                    Collection Types
-                  </span>
-                </div>
-              </button>
-              <button
-                aria-disabled="false"
-                aria-selected="false"
-                class="c59 c60"
-                id="tabs-1-tab"
-                role="tab"
-                tabindex="-1"
-                type="button"
-              >
-                <div
-                  class="c61 c65 c66"
-                >
-                  <span
-                    class="c67"
-                  >
-                    Single Types
-                  </span>
-                </div>
-              </button>
-              <button
-                aria-disabled="false"
-                aria-selected="false"
-                class="c59 c60"
-                id="tabs-2-tab"
-                role="tab"
-                tabindex="-1"
-                type="button"
-              >
-                <div
-                  class="c61 c65 c66"
-                >
-                  <span
-                    class="c67"
-                  >
-                    Custom
-                  </span>
-                </div>
-              </button>
-            </div>
-            <div
-              style="position: relative;"
-            >
+          <div
+            class="c57"
+          >
+            <div>
               <div
-                aria-labelledby="tabs-0-tab"
-                id="tabs-0-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                aria-label="Tabs Permissions"
+                class="c58 c59"
+                role="tablist"
               >
-                <div
-                  class="c68"
+                <button
+                  aria-controls="tabs-0-tabpanel"
+                  aria-disabled="false"
+                  aria-selected="true"
+                  class="c60 c61"
+                  id="tabs-0-tab"
+                  role="tab"
+                  tabindex="0"
+                  type="button"
                 >
                   <div
-                    aria-disabled="false"
-                    class="c69 c70"
-                    data-strapi-expanded="false"
+                    class="c62 c63 c64"
+                  >
+                    <span
+                      class="c65"
+                    >
+                      Collection Types
+                    </span>
+                  </div>
+                </button>
+                <button
+                  aria-disabled="false"
+                  aria-selected="false"
+                  class="c60 c61"
+                  id="tabs-1-tab"
+                  role="tab"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <div
+                    class="c62 c66 c67"
+                  >
+                    <span
+                      class="c68"
+                    >
+                      Single Types
+                    </span>
+                  </div>
+                </button>
+                <button
+                  aria-disabled="false"
+                  aria-selected="false"
+                  class="c60 c61"
+                  id="tabs-2-tab"
+                  role="tab"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <div
+                    class="c62 c66 c67"
+                  >
+                    <span
+                      class="c68"
+                    >
+                      Custom
+                    </span>
+                  </div>
+                </button>
+              </div>
+              <div
+                style="position: relative;"
+              >
+                <div
+                  aria-labelledby="tabs-0-tab"
+                  id="tabs-0-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <div
+                    class="c69"
                   >
                     <div
-                      class="c71 c72 c73 c74"
-                      cursor=""
+                      aria-disabled="false"
+                      class="c70 c71"
+                      data-strapi-expanded="false"
                     >
                       <div
-                        class="c71 c75 c76 c77"
-                        spacing="3"
+                        class="c72 c73 c74 c75"
+                        cursor=""
                       >
-                        <button
-                          aria-controls="accordion-content-accordion-1"
-                          aria-disabled="false"
-                          aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-1"
-                          class="c71 c78 c76 c79 c80"
-                          data-strapi-accordion-toggle="true"
-                          type="button"
-                        >
-                          <span
-                            class="c81 c82"
-                          >
-                            <span
-                              class="c81 sc-wAsCI c83"
-                              id="accordion-label-accordion-1"
-                            >
-                              Category
-                            </span>
-                          </span>
-                        </button>
                         <div
-                          class="c71 c76 c77"
+                          class="c72 c76 c77 c78"
                           spacing="3"
                         >
-                          <span
-                            aria-hidden="true"
-                            class="c71 c84 c85"
-                            cursor="pointer"
-                            data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
+                          <button
+                            aria-controls="accordion-content-accordion-1"
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-labelledby="accordion-label-accordion-1"
+                            class="c72 c79 c77 c80 c81"
+                            data-strapi-accordion-toggle="true"
+                            type="button"
                           >
-                            <svg
-                              class="c86 c87"
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 14 8"
-                              width="0.6875rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <span
+                              class="c82 c83"
                             >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </span>
+                              <span
+                                class="c82 sc-wAsCI c84"
+                                id="accordion-label-accordion-1"
+                              >
+                                Category
+                              </span>
+                            </span>
+                          </button>
+                          <div
+                            class="c72 c77 c78"
+                            spacing="3"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c72 c85 c86"
+                              cursor="pointer"
+                              data-strapi-dropdown="true"
+                              height="2rem"
+                              width="2rem"
+                            >
+                              <svg
+                                class="c87 c88"
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 14 8"
+                                width="0.6875rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div
-                    aria-disabled="false"
-                    class="c69 c88"
-                    data-strapi-expanded="false"
-                  >
                     <div
-                      class="c71 c89 c73 c74"
-                      cursor=""
+                      aria-disabled="false"
+                      class="c70 c89"
+                      data-strapi-expanded="false"
                     >
                       <div
-                        class="c71 c75 c76 c77"
-                        spacing="3"
+                        class="c72 c90 c74 c75"
+                        cursor=""
                       >
-                        <button
-                          aria-controls="accordion-content-accordion-2"
-                          aria-disabled="false"
-                          aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-2"
-                          class="c71 c78 c76 c79 c80"
-                          data-strapi-accordion-toggle="true"
-                          type="button"
-                        >
-                          <span
-                            class="c81 c82"
-                          >
-                            <span
-                              class="c81 sc-wAsCI c83"
-                              id="accordion-label-accordion-2"
-                            >
-                              Country
-                            </span>
-                          </span>
-                        </button>
                         <div
-                          class="c71 c76 c77"
+                          class="c72 c76 c77 c78"
                           spacing="3"
                         >
-                          <span
-                            aria-hidden="true"
-                            class="c71 c84 c85"
-                            cursor="pointer"
-                            data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
+                          <button
+                            aria-controls="accordion-content-accordion-2"
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-labelledby="accordion-label-accordion-2"
+                            class="c72 c79 c77 c80 c81"
+                            data-strapi-accordion-toggle="true"
+                            type="button"
                           >
-                            <svg
-                              class="c86 c87"
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 14 8"
-                              width="0.6875rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <span
+                              class="c82 c83"
                             >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </span>
+                              <span
+                                class="c82 sc-wAsCI c84"
+                                id="accordion-label-accordion-2"
+                              >
+                                Country
+                              </span>
+                            </span>
+                          </button>
+                          <div
+                            class="c72 c77 c78"
+                            spacing="3"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c72 c85 c86"
+                              cursor="pointer"
+                              data-strapi-dropdown="true"
+                              height="2rem"
+                              width="2rem"
+                            >
+                              <svg
+                                class="c87 c88"
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 14 8"
+                                width="0.6875rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1752,7 +1760,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
     </form>
   </main>
   <div
-    class="c90"
+    class="c91"
   >
     <p
       aria-live="polite"
@@ -1787,7 +1795,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c79 {
+.c68 {
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c80 {
   background: #ffffff;
   padding: 16px;
 }
@@ -1865,7 +1877,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   height: 100%;
 }
 
-.c102 .c12 {
+.c103 .c12 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1876,15 +1888,15 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   align-items: center;
 }
 
-.c102 .c15 {
+.c103 .c15 {
   color: #ffffff;
 }
 
-.c102[aria-disabled='true'] .c15 {
+.c103[aria-disabled='true'] .c15 {
   color: #666687;
 }
 
-.c102[aria-disabled='true']:active .c15 {
+.c103[aria-disabled='true']:active .c15 {
   color: #666687;
 }
 
@@ -2614,7 +2626,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   word-break: break-all;
 }
 
-.c101 {
+.c102 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -2697,31 +2709,31 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   max-width: 100%;
 }
 
-.c75 {
+.c76 {
   font-weight: 600;
   color: #271fe0;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c78 {
+.c79 {
   font-weight: 600;
   color: #666687;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c73 {
+.c74 {
   background: #ffffff;
   padding: 16px;
 }
 
-.c76 {
+.c77 {
   background: #f6f6f9;
   padding: 12px;
 }
 
-.c68 {
+.c69 {
   -webkit-align-items: flex-end;
   -webkit-box-align: flex-end;
   -ms-flex-align: flex-end;
@@ -2735,60 +2747,60 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: row;
 }
 
-.c74 {
+.c75 {
   border-bottom: 1px solid #ffffff;
 }
 
-.c77 {
+.c78 {
   border-bottom: 1px solid #eaeaef;
 }
 
-.c71 {
+.c72 {
   border: none;
   background: transparent;
   padding: 0;
   outline-offset: -2px;
 }
 
-.c70 + .c70 > .c72 {
+.c71 + .c71 > .c73 {
   border-left: 1px solid #eaeaef;
 }
 
-.c71 .c72 {
+.c72 .c73 {
   border-right: none;
 }
 
-.c71[aria-disabled='true'] {
+.c72[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c69 > * {
+.c70 > * {
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c69 .c70:first-of-type .c72 {
+.c70 .c71:first-of-type .c73 {
   border-radius: 4px 0 0 0;
 }
 
-.c69 .c70:last-of-type .c72 {
+.c70 .c71:last-of-type .c73 {
   border-radius: 0 4px 0 0;
 }
 
-.c69 .c70[aria-selected="true"] .c72 {
+.c70 .c71[aria-selected="true"] .c73 {
   border-radius: 4px 4px 0 0;
   border-left: none;
   border-right: none;
 }
 
-.c93 {
+.c94 {
   color: #4945ff;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c94 {
+.c95 {
   color: #4a4a6a;
   display: block;
   white-space: nowrap;
@@ -2799,11 +2811,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   line-height: 1.25;
 }
 
-.c80 {
+.c81 {
   border-radius: 4px;
 }
 
-.c83 {
+.c84 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 24px;
@@ -2811,21 +2823,21 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c86 {
+.c87 {
   max-width: 100%;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c89 {
+.c90 {
   min-width: 0px;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c95 {
+.c96 {
   background: #dcdce4;
   border-radius: 50%;
   cursor: pointer;
@@ -2837,12 +2849,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   cursor: pointer;
 }
 
-.c97 {
+.c98 {
   color: #666687;
   width: 0.6875rem;
 }
 
-.c100 {
+.c101 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 24px;
@@ -2850,7 +2862,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c84 {
+.c85 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2868,7 +2880,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: space-between;
 }
 
-.c87 {
+.c88 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2882,7 +2894,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: row;
 }
 
-.c96 {
+.c97 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2903,70 +2915,70 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: center;
 }
 
-.c81 {
+.c82 {
   border: 1px solid #f6f6f9;
 }
 
-.c81:hover:not([aria-disabled='true']) {
+.c82:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c81:hover:not([aria-disabled='true']) .sc-wAsCI {
+.c82:hover:not([aria-disabled='true']) .sc-wAsCI {
   color: #271fe0;
 }
 
-.c81:hover:not([aria-disabled='true']) .c92 {
+.c82:hover:not([aria-disabled='true']) .c93 {
   color: #4945ff;
 }
 
-.c81:hover:not([aria-disabled='true']) > .c82 {
+.c82:hover:not([aria-disabled='true']) > .c83 {
   background: #f0f0ff;
 }
 
-.c81:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c82:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c99 {
+.c100 {
   border: 1px solid #ffffff;
 }
 
-.c99:hover:not([aria-disabled='true']) {
+.c100:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c99:hover:not([aria-disabled='true']) .sc-wAsCI {
+.c100:hover:not([aria-disabled='true']) .sc-wAsCI {
   color: #271fe0;
 }
 
-.c99:hover:not([aria-disabled='true']) .c92 {
+.c100:hover:not([aria-disabled='true']) .c93 {
   color: #4945ff;
 }
 
-.c99:hover:not([aria-disabled='true']) > .c82 {
+.c100:hover:not([aria-disabled='true']) > .c83 {
   background: #f0f0ff;
 }
 
-.c99:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c100:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c90 {
+.c91 {
   background: transparent;
   border: none;
   position: relative;
   outline: none;
 }
 
-.c90[aria-disabled='true'] {
+.c91[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c90[aria-disabled='true'] svg path {
+.c91[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c90 svg {
+.c91 svg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2974,11 +2986,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   font-size: 0.625rem;
 }
 
-.c90 svg path {
+.c91 svg path {
   fill: #4945ff;
 }
 
-.c90:after {
+.c91:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2993,11 +3005,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid transparent;
 }
 
-.c90:focus-visible {
+.c91:focus-visible {
   outline: none;
 }
 
-.c90:focus-visible:after {
+.c91:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -3008,42 +3020,42 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c88 > * {
+.c89 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c88 > * + * {
+.c89 > * + * {
   margin-left: 12px;
 }
 
-.c98 path {
+.c99 path {
   fill: #666687;
 }
 
-.c91 {
+.c92 {
   text-align: left;
 }
 
-.c91 > span {
+.c92 > span {
   max-width: 100%;
 }
 
-.c91 svg {
+.c92 svg {
   width: 0.875rem;
   height: 0.875rem;
 }
 
-.c91 svg path {
+.c92 svg path {
   fill: #8e8ea9;
 }
 
-.c85 {
+.c86 {
   min-height: 5.5rem;
   border-radius: 4px;
 }
 
-.c85:hover svg path {
+.c86:hover svg path {
   fill: #4945ff;
 }
 
@@ -3491,209 +3503,213 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               </div>
             </div>
           </div>
-          <div>
-            <div
-              aria-label="Tabs Permissions"
-              class="c68 c69"
-              role="tablist"
-            >
-              <button
-                aria-controls="tabs-0-tabpanel"
-                aria-disabled="false"
-                aria-selected="true"
-                class="c70 c71"
-                id="tabs-0-tab"
-                role="tab"
-                tabindex="0"
-                type="button"
-              >
-                <div
-                  class="c72 c73 c74"
-                >
-                  <span
-                    class="c75"
-                  >
-                    Collection Types
-                  </span>
-                </div>
-              </button>
-              <button
-                aria-disabled="false"
-                aria-selected="false"
-                class="c70 c71"
-                id="tabs-1-tab"
-                role="tab"
-                tabindex="-1"
-                type="button"
-              >
-                <div
-                  class="c72 c76 c77"
-                >
-                  <span
-                    class="c78"
-                  >
-                    Single Types
-                  </span>
-                </div>
-              </button>
-              <button
-                aria-disabled="false"
-                aria-selected="false"
-                class="c70 c71"
-                id="tabs-2-tab"
-                role="tab"
-                tabindex="-1"
-                type="button"
-              >
-                <div
-                  class="c72 c76 c77"
-                >
-                  <span
-                    class="c78"
-                  >
-                    Custom
-                  </span>
-                </div>
-              </button>
-            </div>
-            <div
-              style="position: relative;"
-            >
+          <div
+            class="c68"
+          >
+            <div>
               <div
-                aria-labelledby="tabs-0-tab"
-                id="tabs-0-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                aria-label="Tabs Permissions"
+                class="c69 c70"
+                role="tablist"
               >
-                <div
-                  class="c79"
+                <button
+                  aria-controls="tabs-0-tabpanel"
+                  aria-disabled="false"
+                  aria-selected="true"
+                  class="c71 c72"
+                  id="tabs-0-tab"
+                  role="tab"
+                  tabindex="0"
+                  type="button"
                 >
                   <div
-                    aria-disabled="false"
-                    class="c80 c81"
-                    data-strapi-expanded="false"
+                    class="c73 c74 c75"
+                  >
+                    <span
+                      class="c76"
+                    >
+                      Collection Types
+                    </span>
+                  </div>
+                </button>
+                <button
+                  aria-disabled="false"
+                  aria-selected="false"
+                  class="c71 c72"
+                  id="tabs-1-tab"
+                  role="tab"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <div
+                    class="c73 c77 c78"
+                  >
+                    <span
+                      class="c79"
+                    >
+                      Single Types
+                    </span>
+                  </div>
+                </button>
+                <button
+                  aria-disabled="false"
+                  aria-selected="false"
+                  class="c71 c72"
+                  id="tabs-2-tab"
+                  role="tab"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <div
+                    class="c73 c77 c78"
+                  >
+                    <span
+                      class="c79"
+                    >
+                      Custom
+                    </span>
+                  </div>
+                </button>
+              </div>
+              <div
+                style="position: relative;"
+              >
+                <div
+                  aria-labelledby="tabs-0-tab"
+                  id="tabs-0-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <div
+                    class="c80"
                   >
                     <div
-                      class="c82 c83 c84 c85"
-                      cursor=""
+                      aria-disabled="false"
+                      class="c81 c82"
+                      data-strapi-expanded="false"
                     >
                       <div
-                        class="c82 c86 c87 c88"
-                        spacing="3"
+                        class="c83 c84 c85 c86"
+                        cursor=""
                       >
-                        <button
-                          aria-controls="accordion-content-accordion-3"
-                          aria-disabled="false"
-                          aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-3"
-                          class="c82 c89 c87 c90 c91"
-                          data-strapi-accordion-toggle="true"
-                          type="button"
-                        >
-                          <span
-                            class="c92 c93"
-                          >
-                            <span
-                              class="c92 sc-wAsCI c94"
-                              id="accordion-label-accordion-3"
-                            >
-                              Category
-                            </span>
-                          </span>
-                        </button>
                         <div
-                          class="c82 c87 c88"
+                          class="c83 c87 c88 c89"
                           spacing="3"
                         >
-                          <span
-                            aria-hidden="true"
-                            class="c82 c95 c96"
-                            cursor="pointer"
-                            data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
+                          <button
+                            aria-controls="accordion-content-accordion-3"
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-labelledby="accordion-label-accordion-3"
+                            class="c83 c90 c88 c91 c92"
+                            data-strapi-accordion-toggle="true"
+                            type="button"
                           >
-                            <svg
-                              class="c97 c98"
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 14 8"
-                              width="0.6875rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <span
+                              class="c93 c94"
                             >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </span>
+                              <span
+                                class="c93 sc-wAsCI c95"
+                                id="accordion-label-accordion-3"
+                              >
+                                Category
+                              </span>
+                            </span>
+                          </button>
+                          <div
+                            class="c83 c88 c89"
+                            spacing="3"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c83 c96 c97"
+                              cursor="pointer"
+                              data-strapi-dropdown="true"
+                              height="2rem"
+                              width="2rem"
+                            >
+                              <svg
+                                class="c98 c99"
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 14 8"
+                                width="0.6875rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div
-                    aria-disabled="false"
-                    class="c80 c99"
-                    data-strapi-expanded="false"
-                  >
                     <div
-                      class="c82 c100 c84 c85"
-                      cursor=""
+                      aria-disabled="false"
+                      class="c81 c100"
+                      data-strapi-expanded="false"
                     >
                       <div
-                        class="c82 c86 c87 c88"
-                        spacing="3"
+                        class="c83 c101 c85 c86"
+                        cursor=""
                       >
-                        <button
-                          aria-controls="accordion-content-accordion-4"
-                          aria-disabled="false"
-                          aria-expanded="false"
-                          aria-labelledby="accordion-label-accordion-4"
-                          class="c82 c89 c87 c90 c91"
-                          data-strapi-accordion-toggle="true"
-                          type="button"
-                        >
-                          <span
-                            class="c92 c93"
-                          >
-                            <span
-                              class="c92 sc-wAsCI c94"
-                              id="accordion-label-accordion-4"
-                            >
-                              Country
-                            </span>
-                          </span>
-                        </button>
                         <div
-                          class="c82 c87 c88"
+                          class="c83 c87 c88 c89"
                           spacing="3"
                         >
-                          <span
-                            aria-hidden="true"
-                            class="c82 c95 c96"
-                            cursor="pointer"
-                            data-strapi-dropdown="true"
-                            height="2rem"
-                            width="2rem"
+                          <button
+                            aria-controls="accordion-content-accordion-4"
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-labelledby="accordion-label-accordion-4"
+                            class="c83 c90 c88 c91 c92"
+                            data-strapi-accordion-toggle="true"
+                            type="button"
                           >
-                            <svg
-                              class="c97 c98"
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 14 8"
-                              width="0.6875rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <span
+                              class="c93 c94"
                             >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </span>
+                              <span
+                                class="c93 sc-wAsCI c95"
+                                id="accordion-label-accordion-4"
+                              >
+                                Country
+                              </span>
+                            </span>
+                          </button>
+                          <div
+                            class="c83 c88 c89"
+                            spacing="3"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="c83 c96 c97"
+                              cursor="pointer"
+                              data-strapi-dropdown="true"
+                              height="2rem"
+                              width="2rem"
+                            >
+                              <svg
+                                class="c98 c99"
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 14 8"
+                                width="0.6875rem"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -3707,7 +3723,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
     </form>
   </main>
   <div
-    class="c101"
+    class="c102"
   >
     <p
       aria-live="polite"
