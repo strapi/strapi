@@ -1877,7 +1877,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   height: 100%;
 }
 
-.c102 .c12 {
+.c103 .c12 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1888,15 +1888,15 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   align-items: center;
 }
 
-.c102 .c15 {
+.c103 .c15 {
   color: #ffffff;
 }
 
-.c102[aria-disabled='true'] .c15 {
+.c103[aria-disabled='true'] .c15 {
   color: #666687;
 }
 
-.c102[aria-disabled='true']:active .c15 {
+.c103[aria-disabled='true']:active .c15 {
   color: #666687;
 }
 
