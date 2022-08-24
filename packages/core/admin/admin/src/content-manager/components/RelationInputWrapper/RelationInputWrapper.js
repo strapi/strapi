@@ -96,6 +96,17 @@ export const RelationInputWrapper = ({
       onRelationLoadMore={() => handleRelationLoadMore()}
       onSearch={() => handleSearch()}
       onSearchNextPage={() => handleSearchMore()}
+      publicationStateTranslations={{
+        draft: formatMessage({
+          id: 'tbd',
+          defaultMessage: 'Draft',
+        }),
+
+        published: formatMessage({
+          id: 'tbd',
+          defaultMessage: 'Published',
+        }),
+      }}
       relations={normalizeRelations(relations, {
         deletions: modifiedData?.[name],
         mainFieldName: mainField.name,
