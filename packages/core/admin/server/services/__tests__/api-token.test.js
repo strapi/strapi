@@ -1,5 +1,6 @@
 'use strict';
 
+const { NotFoundError } = require('@strapi/utils/lib/errors');
 const crypto = require('crypto');
 const { omit } = require('lodash/fp');
 const apiTokenService = require('../api-token');
@@ -247,6 +248,59 @@ describe('API Token', () => {
         populate: ['permissions'],
       });
       expect(res).toEqual(null);
+    });
+  });
+
+  describe('regenerate', () => {
+    test('It regenerates the accessKey', async () => {
+      const update = jest.fn(({ data }) => Promise.resolve(data));
+
+      global.strapi = {
+        query() {
+          return { update };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      const id = 1;
+      const res = await apiTokenService.regenerate(id);
+
+      expect(update).toHaveBeenCalledWith({
+        where: { id },
+        select: ['id', 'accessKey'],
+        data: {
+          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+        },
+      });
+      expect(res).toEqual({ accessKey: mockedApiToken.hexedString });
+    });
+
+    test('It throws a NotFound if the id is not found', async () => {
+      const update = jest.fn(() => Promise.resolve(null));
+
+      global.strapi = {
+        query() {
+          return { update };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      const id = 1;
+      await expect(async () => {
+        await apiTokenService.regenerate(id);
+      }).rejects.toThrowError(NotFoundError);
+
+      expect(update).toHaveBeenCalledWith({
+        where: { id },
+        select: ['id', 'accessKey'],
+        data: {
+          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+        },
+      });
     });
   });
 

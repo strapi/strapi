@@ -56,4 +56,15 @@ module.exports = [
       ],
     },
   },
+  {
+    method: 'POST',
+    path: '/api-tokens/:id/regenerate',
+    handler: 'api-token.regenerate',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', config: { actions: ['admin::api-tokens.update'] } },
+      ],
+    },
+  },
 ];

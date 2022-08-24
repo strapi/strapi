@@ -8,12 +8,12 @@ module.exports = (options = {}) => {
   return {
     ...provider,
 
-    async register(action) {
+    async register(action, payload) {
       if (strapi.isLoaded) {
         throw new Error(`You can't register new actions outside the bootstrap function.`);
       }
 
-      return provider.register(action, { name: action });
+      return provider.register(action, payload);
     },
   };
 };
