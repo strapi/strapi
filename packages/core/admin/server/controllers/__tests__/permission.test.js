@@ -197,4 +197,38 @@ describe('Permission Controller', () => {
       expect(ctx.body.data).toHaveLength(localTestData.permissions.valid.length);
     });
   });
+
+  describe('Content API permissions', () => {
+    const actionsMap = {
+      'api::address': {
+        controllers: {
+          address: ['find', 'findOne'],
+        },
+      },
+      'api::category': {
+        controllers: {
+          category: ['find', 'findOne', 'create', 'update', 'delete', 'createLocalization'],
+        },
+      },
+    };
+
+    test('return API tokens layout successfully', async () => {
+      const getActionsMap = jest.fn().mockResolvedValue(actionsMap);
+      const send = jest.fn();
+      const ctx = createContext({}, { send });
+
+      global.strapi = {
+        contentAPI: {
+          permissions: {
+            getActionsMap,
+          },
+        },
+      };
+
+      await permissionController.getContentApiPermissions(ctx);
+
+      expect(getActionsMap).toHaveBeenCalled();
+      expect(send).toHaveBeenCalledWith({ data: actionsMap });
+    });
+  });
 });

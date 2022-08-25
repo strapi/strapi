@@ -1,7 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const { omit, difference, isEmpty, map, isArray, flatten } = require('lodash/fp');
+const { omit, difference, isEmpty, map, isArray } = require('lodash/fp');
 const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
 const constants = require('./constants');
 
@@ -27,21 +27,6 @@ const constants = require('./constants');
  * @property {number|string} id
  * @property {string} action
  * @property {ApiToken|number} token
- */
-
-/**
- * @typedef ApiTokenPermissionSubject
- *
- * @property {string} label
- * @property {string} subjectId
- * @property {Controller[]} controllers
- */
-
-/**
- * @typedef Controller
- *
- * @property {string} label
- * @property {string[]} actions
  */
 
 /** @constant {Array<string>} */
@@ -410,35 +395,6 @@ const update = async (id, attributes) => {
   };
 };
 
-/**
- * Return a layout of the api actions
- *
- * @returns {Promise<ApiTokenPermissionSubject[]>}
- */
-const getApiTokenLayout = async () => {
-  const actions = await strapi.contentAPI.permissions.getActionsMap();
-  const subjects = Object.keys(actions)
-    .map((subjectId) => {
-      return {
-        label: subjectId.split('::')[1],
-        subjectId,
-        controllers: flatten(
-          Object.keys(actions[subjectId].controllers).map((controller) => {
-            return {
-              label: controller,
-              actions: actions[subjectId].controllers[controller].map(
-                (action) => `${subjectId}.${controller}.${action}`
-              ),
-            };
-          })
-        ),
-      };
-    })
-    .filter((actions) => actions.subjectId.includes('api::'));
-
-  return subjects;
-};
-
 module.exports = {
   create,
   regenerate,
@@ -451,5 +407,4 @@ module.exports = {
   update,
   getByName,
   getBy,
-  getApiTokenLayout,
 };
