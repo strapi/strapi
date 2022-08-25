@@ -3,7 +3,7 @@
 const crypto = require('crypto');
 const { isNil } = require('lodash/fp');
 const { omit, difference, isEmpty, map, isArray } = require('lodash/fp');
-const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
+const { ValidationError, NotFoundError, ApplicationError } = require('@strapi/utils').errors;
 const constants = require('./constants');
 
 /**
@@ -290,8 +290,8 @@ const refresh = async (id) => {
     },
   });
 
-  if (!apiToken) {
-    throw new NotFoundError('The provided token id does not exist');
+  if (!updatedToken) {
+    throw new ApplicationError('The provided token id could not be updated');
   }
 
   return updatedToken;
