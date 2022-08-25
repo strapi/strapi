@@ -195,7 +195,7 @@ const create = async (attributes) => {
     //   data: attributes.permissions.map(action => ({ action, token: apiToken })),
     // });
     await Promise.all(
-      attributes.permissions.map((action) =>
+      uniq(attributes.permissions).map((action) =>
         strapi.query('admin::token-permission').create({
           data: { action, token: apiToken },
         })
