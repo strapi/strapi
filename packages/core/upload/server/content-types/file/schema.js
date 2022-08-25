@@ -87,6 +87,10 @@ module.exports = {
       relation: 'morphToMany',
       configurable: false,
     },
+    path: {
+      type: 'string',
+      configurable: false,
+    },
     folder: {
       type: 'relation',
       relation: 'manyToOne',
