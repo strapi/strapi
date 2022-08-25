@@ -435,12 +435,12 @@ describe('API Token', () => {
         type: 'custom',
         permissions: ['admin::content.content.read'],
         lifespan: 1000,
-        expiresAt: now.getTime(),
+        expiresAt: now,
       };
       const updatedAttributes = {
         ...attributes,
         lifespan: 1000,
-        expiresAt: now.getTime() + 1000,
+        expiresAt: now + attributes.lifespan,
       };
 
       const update = jest.fn(() => Promise.resolve(updatedAttributes));
