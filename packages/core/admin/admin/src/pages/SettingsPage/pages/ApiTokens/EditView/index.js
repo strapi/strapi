@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useReducer, useMemo } from 'react';
+import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
@@ -15,7 +16,9 @@ import {
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
+import { Flex } from '@strapi/design-system/Flex';
 import Check from '@strapi/icons/Check';
+import Refresh from '@strapi/icons/Refresh';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { Formik } from 'formik';
 import { Stack } from '@strapi/design-system/Stack';
@@ -39,6 +42,10 @@ import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiT
 import { data as permissions } from './utils/tests/dataMock';
 import init from './init';
 import reducer, { initialState } from './reducer';
+
+const ButtonWithRightMargin = styled(Button)`
+  margin-right: 8px;
+`;
 
 const ApiTokenCreateView = () => {
   let apiToken;
@@ -266,18 +273,33 @@ const ApiTokenCreateView = () => {
                   }
                   primaryAction={
                     canEditInputs && (
-                      <Button
-                        disabled={isSubmitting}
-                        loading={isSubmitting}
-                        startIcon={<Check />}
-                        type="submit"
-                        size="S"
-                      >
-                        {formatMessage({
-                          id: 'global.save',
-                          defaultMessage: 'Save',
-                        })}
-                      </Button>
+                      <Flex justifyContent="center">
+                        <ButtonWithRightMargin
+                          disabled={isSubmitting}
+                          loading={isSubmitting}
+                          startIcon={<Refresh />}
+                          type="button"
+                          size="S"
+                          variant="tertiary"
+                        >
+                          {formatMessage({
+                            id: 'global.regenerate',
+                            defaultMessage: 'Regenerate',
+                          })}
+                        </ButtonWithRightMargin>
+                        <Button
+                          disabled={isSubmitting}
+                          loading={isSubmitting}
+                          startIcon={<Check />}
+                          type="submit"
+                          size="S"
+                        >
+                          {formatMessage({
+                            id: 'global.save',
+                            defaultMessage: 'Save',
+                          })}
+                        </Button>
+                      </Flex>
                     )
                   }
                   navigationAction={
