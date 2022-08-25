@@ -294,6 +294,12 @@ describe('Role CRUD End to End', () => {
             ],
             "settings": Array [
               Object {
+                "action": "admin::api-tokens.access",
+                "category": "api tokens",
+                "displayName": "Access the API tokens settings page",
+                "subCategory": "api Tokens",
+              },
+              Object {
                 "action": "admin::api-tokens.create",
                 "category": "api tokens",
                 "displayName": "Create (generate)",
