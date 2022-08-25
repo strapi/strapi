@@ -9,6 +9,7 @@ import { BaseLink } from '@strapi/design-system/BaseLink';
 import { Icon } from '@strapi/design-system/Icon';
 import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/Field';
 import { TextButton } from '@strapi/design-system/TextButton';
+import { Typography } from '@strapi/design-system/Typography';
 import { Loader } from '@strapi/design-system/Loader';
 
 import Cross from '@strapi/icons/Cross';
@@ -21,10 +22,10 @@ import { Option } from './components/Option';
 
 import ReactSelect from '../ReactSelect';
 
-const BoxEllipsis = styled(Box)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+const RelationItemCenterChildren = styled(RelationItem)`
+  div {
+    justify-content: center;
+  }
 `;
 
 export const RelationInput = ({
@@ -36,6 +37,7 @@ export const RelationInput = ({
   label,
   labelLoadMore,
   listHeight,
+  loadingMessage,
   relations,
   onRelationClose,
   onRelationAdd,
@@ -65,13 +67,7 @@ export const RelationInput = ({
               inputId={id}
               isSearchable
               isClear
-              loadingMessage={() =>
-                // To fix: use getTrad utils from CM once component is migrated into CM components
-                formatMessage({
-                  id: 'content-manager.DynamicTable.relation-search-loading',
-                  defaultMessage: 'Entries are loading',
-                })
-              }
+              loadingMessage={() => <Loader small>{formatMessage(loadingMessage)}</Loader>}
               onChange={onRelationAdd}
               onInputChange={onSearch}
               onMenuClose={onRelationOpen}
@@ -109,15 +105,19 @@ export const RelationInput = ({
                     </button>
                   }
                 >
-                  <BoxEllipsis paddingTop={1} paddingBottom={1} paddingRight={4}>
+                  <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                     {href ? (
                       <BaseLink disabled={disabled} href={href}>
-                        {mainField}
+                        <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
+                          {mainField}
+                        </Typography>
                       </BaseLink>
                     ) : (
-                      mainField
+                      <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
+                        {mainField}
+                      </Typography>
                     )}
-                  </BoxEllipsis>
+                  </Box>
 
                   {publicationState && (
                     <Badge
@@ -134,14 +134,9 @@ export const RelationInput = ({
               );
             })}
           {relations.isLoading && (
-            <RelationItem>
-              <Loader small>
-                {formatMessage({
-                  id: 'content-manager.DynamicTable.relation-loading',
-                  defaultMessage: 'Relations are loading',
-                })}
-              </Loader>
-            </RelationItem>
+            <RelationItemCenterChildren>
+              <Loader small>{formatMessage(loadingMessage)}</Loader>
+            </RelationItemCenterChildren>
           )}
         </RelationList>
         <Box paddingTop={2}>
@@ -203,6 +198,10 @@ RelationInput.propTypes = {
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string.isRequired,
   listHeight: PropTypes.string,
+  loadingMessage: PropTypes.shape({
+    id: PropTypes.string,
+    defaultMessage: PropTypes.string,
+  }).isRequired,
   name: PropTypes.string.isRequired,
   onRelationAdd: PropTypes.func.isRequired,
   onRelationOpen: PropTypes.func.isRequired,

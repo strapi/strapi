@@ -25,6 +25,7 @@ WIP
         label="Relations"
         labelLoadMore="Load More"
         listHeight="200px"
+        loadingMessage={{ id: 'translation-key', defaultMessage: 'Relations are loading' }}
         name="options"
         publicationStateTranslations={{ draft: 'Draft', published: 'Published' }}
         searchResults={{
@@ -59,13 +60,15 @@ WIP
                 {
                   id: 1,
                   href: '/',
-                  mainField: 'Relation 1 with a very very very very very very very very very very very very very very very very very very very super huge really really long title',
+                  mainField:
+                    'Relation 1 with a very very very very very very very very very very very very very very very very very very very super huge really really long title',
                   publicationState: 'draft',
                 },
                 {
                   id: 2,
                   href: '',
-                  mainField: 'Relation 2 with a very very very very very very very very very very very very very very very very very very very super huge really really long title',
+                  mainField:
+                    'Relation 2 with a very very very very very very very very very very very very very very very very very very very super huge really really long title',
                   publicationState: 'published',
                 },
                 {
@@ -89,7 +92,7 @@ WIP
               ],
             ],
           },
-          isLoading: true,
+          isLoading: false,
           isSuccess: true,
         }}
       />
