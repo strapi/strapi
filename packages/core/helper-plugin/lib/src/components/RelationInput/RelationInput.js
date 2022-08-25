@@ -36,6 +36,7 @@ export const RelationInput = ({
   onSearchNextPage,
   onSearch,
   placeholder,
+  publicationStateTranslations,
   searchResults,
 }) => {
   return (
@@ -46,7 +47,7 @@ export const RelationInput = ({
             <FieldLabel>{label}</FieldLabel>
             <ReactSelect
               components={{ Option }}
-              options={searchResults}
+              options={searchResults.data.pages.flat()}
               isDisabled={disabled}
               error={error}
               inputId={id}
@@ -71,9 +72,9 @@ export const RelationInput = ({
       >
         <RelationList height={listHeight}>
           {relations.isSuccess &&
-            relations.data.pages.flatMap((relation) => {
-              const { isDraft, href, title, id } = relation;
-              const badgeColor = isDraft ? 'secondary' : 'success';
+            relations.data.pages.flat().map((relation) => {
+              const { publicationState, href, mainField, id } = relation;
+              const badgeColor = publicationState === 'draft' ? 'secondary' : 'success';
 
               return (
                 <RelationItem
@@ -92,21 +93,21 @@ export const RelationInput = ({
                   <Box paddingTop={1} paddingBottom={1}>
                     {href ? (
                       <BaseLink disabled={disabled} href={href}>
-                        {title}
+                        {mainField}
                       </BaseLink>
                     ) : (
-                      title
+                      mainField
                     )}
                   </Box>
 
-                  {isDraft !== undefined && (
+                  {publicationState && (
                     <Badge
                       borderSize={1}
                       borderColor={`${badgeColor}200`}
                       backgroundColor={`${badgeColor}100`}
                       textColor={`${badgeColor}700`}
                     >
-                      {isDraft ? 'Draft' : 'Published'}
+                      {publicationStateTranslations[publicationState]}
                     </Badge>
                   )}
                 </RelationItem>
@@ -125,28 +126,35 @@ export const RelationInput = ({
 const ReactQueryRelationResult = PropTypes.shape({
   data: PropTypes.shape({
     pages: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.number.isRequired,
-        isDraft: PropTypes.bool,
-        href: PropTypes.string,
-        title: PropTypes.string.isRequired,
-      })
+      PropTypes.arrayOf(
+        PropTypes.shape({
+          href: PropTypes.string,
+          id: PropTypes.number.isRequired,
+          publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+          mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        })
+      )
     ),
   }),
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
 });
 
-const ReactQuerySearchResult = PropTypes.arrayOf(
-  PropTypes.shape({
-    label: PropTypes.string,
-    value: {
-      id: PropTypes.number,
-      name: PropTypes.string,
-      publishedAt: PropTypes.string,
-    },
-  })
-);
+const ReactQuerySearchResult = PropTypes.shape({
+  data: PropTypes.shape({
+    pages: PropTypes.arrayOf(
+      PropTypes.arrayOf(
+        PropTypes.shape({
+          id: PropTypes.number.isRequired,
+          mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+          publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+        })
+      )
+    ),
+  }),
+  isLoading: PropTypes.bool.isRequired,
+  isSuccess: PropTypes.bool.isRequired,
+});
 
 RelationInput.defaultProps = {
   description: undefined,
@@ -174,6 +182,10 @@ RelationInput.propTypes = {
   onSearch: PropTypes.func.isRequired,
   onSearchNextPage: PropTypes.func.isRequired,
   placeholder: PropTypes.string.isRequired,
+  publicationStateTranslations: PropTypes.shape({
+    draft: PropTypes.string.isRequired,
+    published: PropTypes.string.isRequired,
+  }).isRequired,
   searchResults: ReactQuerySearchResult,
   relations: ReactQueryRelationResult,
 };

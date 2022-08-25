@@ -21,52 +21,72 @@ WIP
   <Story name="base">
     <Box padding={8}>
       <RelationInput
+        id="relations-1"
         label="Relations"
         labelLoadMore="Load More"
         listHeight="200px"
         name="options"
-        searchResults={[
-          {
-            label: 'Relation 6',
-            value: {
-              id: 6,
-              name: 'Relation 6',
-              publishedAt: 'something'
-            }
-          }
-        ]}
+        publicationStateTranslations={{ draft: 'Draft', published: 'Published' }}
+        searchResults={{
+          data: {
+            pages: [
+              [
+                {
+                  id: 6
+                  mainField: 'Relation 6',
+                  publicationState: 'draft',
+                },
+                {
+                  id: 7,
+                  mainField: 'Relation 7',
+                  publicationState: 'published',
+                },
+                {
+                  id: 8,
+                  mainField: 'Relation 8',
+                  publicationState: false,
+                },
+              ],
+            ],
+            isLoading: false,
+            isSuccess: true,
+          },
+        }}
         relations={{
           data: {
             pages: [
-              {
-                id: 1,
-                href: '/',
-                title: 'Relation 1',
-              },
-              {
-                id: 2,
-                href: '',
-                title: 'Relation 2',
-                isDraft: true,
-              },
-              {
-                id: 3,
-                href: '',
-                title: 'Relation 3',
-                isDraft: false,
-              },
-              {
-                id: 4,
-                href: '',
-                title: 'Relation 4',
-                isDraft: false,
-              },
-              {
-                id: 5,
-                href: '',
-                title: 'Relation 5',
-                isDraft: true,
-              },
+              [
+                {
+                  id: 1,
+                  href: '/',
+                  mainField: 'Relation 1',
+                  publicationState: 'draft',
+                },
+                {
+                  id: 2,
+                  href: '',
+                  mainField: 'Relation 2',
+                  publicationState: false,
+                },
+                {
+                  id: 3,
+                  href: '',
+                  mainField: 'Relation 3',
+                  publicationState: 'published',
+                },
+                {
+                  id: 4,
+                  href: '',
+                  mainField: 'Relation 4',
+                  publicationState: 'draft',
+                },
+                {
+                  id: 5,
+                  href: '',
+                  mainField: 'Relation 5',
+                  publicationState: false,
+                },
+              ],
             ],
           },
           isLoading: false,

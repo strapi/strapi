@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { components } from 'react-select';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { get, has, isEmpty } from 'lodash';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 
@@ -22,10 +21,10 @@ const StyledBullet = styled.div`
 export const Option = (props) => {
   const { formatMessage } = useIntl();
   const Component = components.Option;
-  const hasDraftAndPublish = has(get(props, 'data.value'), 'publishedAt');
+  const { publicationState, mainField } = props.data;
 
-  if (hasDraftAndPublish) {
-    const isDraft = isEmpty(get(props, 'data.value.publishedAt'));
+  if (publicationState) {
+    const isDraft = publicationState === 'draft';
     // To fix: use getTrad utils from CM once component is migrated into CM components
     const draftMessage = {
       id: 'content-manager.components.Select.draft-info-title',
@@ -42,29 +41,20 @@ export const Option = (props) => {
       <Component {...props}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
-          <Typography ellipsis>{props.label || '-'}</Typography>
+          <Typography ellipsis>{mainField ?? '-'}</Typography>
         </Flex>
       </Component>
     );
   }
 
-  return <Component {...props}>{props.label || '-'}</Component>;
-};
-
-Option.defaultProps = {
-  label: '',
+  return <Component {...props}>{mainField ?? '-'}</Component>;
 };
 
 Option.propTypes = {
-  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   isFocused: PropTypes.bool.isRequired,
-  selectProps: PropTypes.shape({
-    hasDraftAndPublish: PropTypes.bool,
-    mainField: PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      schema: PropTypes.shape({
-        type: PropTypes.string.isRequired,
-      }).isRequired,
-    }).isRequired,
+  data: PropTypes.shape({
+    isDraft: PropTypes.bool,
+    mainField: PropTypes.string,
+    publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
   }).isRequired,
 };

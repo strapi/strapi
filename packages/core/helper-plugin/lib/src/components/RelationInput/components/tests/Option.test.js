@@ -17,7 +17,7 @@ const setup = (props) =>
 
 describe('RelationInput || Option', () => {
   it('should render custom Option with published state title', () => {
-    setup({ options: [{ value: { id: 1, publishedAt: 'something' }, label: 'relation 1' }] });
+    setup({ options: [{ mainField: 'relation 1', publicationState: 'published' }] });
 
     act(() => {
       fireEvent.mouseDown(screen.getByRole('button'));
@@ -27,8 +27,8 @@ describe('RelationInput || Option', () => {
     expect(screen.getByTitle('State: Published')).toBeInTheDocument();
   });
 
-  it('should render custom Option with published state title', () => {
-    setup({ options: [{ value: { id: 1, publishedAt: null }, label: 'relation 1' }] });
+  it('should render custom Option with draft state title', () => {
+    setup({ options: [{ mainField: 'relation 1', publicationState: 'draft' }] });
 
     act(() => {
       fireEvent.mouseDown(screen.getByRole('button'));
