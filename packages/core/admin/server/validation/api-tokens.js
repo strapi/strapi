@@ -12,7 +12,8 @@ const apiTokenCreationSchema = yup
     permissions: yup.array().of(yup.string()).nullable(),
     lifespan: yup.number().integer().min(1).nullable(),
   })
-  .noUnknown();
+  .noUnknown()
+  .strict();
 
 const apiTokenUpdateSchema = yup
   .object()
@@ -23,7 +24,8 @@ const apiTokenUpdateSchema = yup
     permissions: yup.array().of(yup.string()).nullable(),
     lifespan: yup.number().integer().min(1).nullable(),
   })
-  .noUnknown();
+  .noUnknown()
+  .strict();
 
 module.exports = {
   validateApiTokenCreationInput: validateYupSchema(apiTokenCreationSchema),
