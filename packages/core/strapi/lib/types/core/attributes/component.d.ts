@@ -1,9 +1,10 @@
+import { ComponentUIDs } from '../schemas';
 import { Attribute, ConfigurableOption, MinMaxOption, PrivateOption, RequiredOption } from './base';
 import { GetAttributesValues } from './utils';
 
 export interface ComponentAttributeProperties<
   // Targeted component
-  T extends Strapi.ComponentUIDs,
+  T extends ComponentUIDs,
   // Repeatable
   R extends boolean = false
 > {
@@ -13,7 +14,7 @@ export interface ComponentAttributeProperties<
 
 export type ComponentAttribute<
   // Targeted component
-  T extends Strapi.ComponentUIDs,
+  T extends ComponentUIDs,
   // Repeatable
   R extends boolean = false
 > = Attribute<'component'> &
@@ -25,7 +26,7 @@ export type ComponentAttribute<
   PrivateOption &
   RequiredOption;
 
-export type ComponentValue<T extends Strapi.ComponentUIDs, R extends boolean> = GetAttributesValues<
+export type ComponentValue<T extends ComponentUIDs, R extends boolean> = GetAttributesValues<
   T
 > extends infer V
   ? R extends true

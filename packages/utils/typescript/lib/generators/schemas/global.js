@@ -38,26 +38,15 @@ const generateGlobalDefinition = (schemasDefinitions = []) => {
   return factory.createModuleDeclaration(
     undefined,
     [factory.createModifier(ts.SyntaxKind.DeclareKeyword)],
-    factory.createIdentifier('global'),
+    factory.createIdentifier('@strapi/strapi/lib/types/core/schemas'),
     factory.createModuleBlock([
-      factory.createModuleDeclaration(
+      factory.createInterfaceDeclaration(
+        undefined,
+        [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+        factory.createIdentifier('Schemas'),
         undefined,
         undefined,
-        factory.createIdentifier('Strapi'),
-        factory.createModuleBlock([
-          factory.createInterfaceDeclaration(
-            undefined,
-            undefined,
-            factory.createIdentifier('Schemas'),
-            undefined,
-            undefined,
-            properties
-          ),
-        ]),
-        ts.NodeFlags.Namespace |
-          ts.NodeFlags.ExportContext |
-          ts.NodeFlags.Ambient |
-          ts.NodeFlags.ContextFlags
+        properties
       ),
     ]),
     ts.NodeFlags.ExportContext |

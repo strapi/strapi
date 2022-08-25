@@ -124,3 +124,40 @@ export interface SingleTypeSchema extends ContentTypeSchema {
 export interface ComponentSchema extends Schema {
   modelType: 'component';
 }
+
+/**
+ * Map of UID / schemas used as a schemas database for other types.
+ * It must be extended by the user application or plugins.
+ * 
+ * @example
+ * ```ts
+ * declare module '@strapi/strapi/lib/types/core/schemas' {
+ *   export interface Schemas {
+ *     'xxx::xxx.uid': ContentTypeSchema | ComponentSchema;
+ *   }
+ * }
+ * ```
+ */
+export interface Schemas {
+  [key: string]: ContentTypeSchema | ComponentSchema
+}
+
+/**
+ * Literal union type of every content type registered in Schemas
+ */
+export type ContentTypeUIDs = KeysBy<Schemas, ContentTypeSchema>;
+
+/**
+ * Literal union type of every collection type registered in Schemas
+ */
+export type CollectionTypeUIDs = KeysBy<Schemas, CollectionTypeSchema>;
+
+/**
+ * Literal union type of every single type registered in Schemas
+ */
+export type SingleTypeUIDs = KeysBy<Schemas, SingleTypeSchema>;
+
+/**
+ * Literal union type of every component registered in Schemas
+ */
+export type ComponentUIDs = KeysBy<Schemas, ComponentSchema>;

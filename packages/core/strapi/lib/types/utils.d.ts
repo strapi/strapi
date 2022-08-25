@@ -62,24 +62,22 @@ export type PickBy<T, U> = Pick<T, KeysBy<T, U>>;
 export type NeverGuard<T, U = unknown> = [T] extends [never] ? U : T;
 
 /**
- * Dynamic type based on the keys of `Strapi.Schemas`.
+ * Dynamic type based on the keys of `Schemas`.
  * It represents all the registered schemas' UID as a union type.
  *
  * @example
  *
- * declare global {
- *   namespace Strapi {
- *     interface Schemas {
- *       'api::foo.foo': CollectionTypeSchema;
- *       'api::bar.bar': ComponentSchema;
- *     }
+ * declare module '@strapi/strapi/lib/types/core/schemas' {
+ *   export interface Schemas {
+ *     'api::foo.foo': CollectionTypeSchema;
+ *     'api::bar.bar': ComponentSchema;
  *   }
  * }
  *
  * type X = SchemaUID;
  * // 'api::foo.foo' | 'api::bar.bar'
  */
-export type SchemaUID = keyof Strapi.Schemas;
+export type SchemaUID = keyof Schemas;
 
 /**
  * Get the type of a specific key `U` in `T`

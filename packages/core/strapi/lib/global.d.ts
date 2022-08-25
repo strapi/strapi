@@ -3,50 +3,6 @@ import type { CollectionTypeSchema, SingleTypeSchema, ComponentSchema, ContentTy
 import type { KeysBy } from './types/utils';
 
 declare global {
-  namespace Strapi {
-    /**
-     * Map of UID / schemas used as a schemas database for other types.
-     * It must be extended by the user application or plugins.
-     * 
-     * @example
-     * ```ts
-     * declare global {
-     *   namespace Strapi {
-     *     interface Schemas {
-     *       'xxx::xxx.uid: ContentTypeSchema | ComponentSchema;
-     *     }
-     *   }
-     * }
-     * ```
-     */
-    interface Schemas {}
-
-    /**
-     * Literal union type of every content type registered in Strapi.Schemas
-     */
-    type ContentTypeUIDs = KeysBy<Schemas, ContentTypeSchema>;
-
-    /**
-     * Literal union type of every collection type registered in Strapi.Schemas
-     */
-    type CollectionTypeUIDs = KeysBy<Schemas, CollectionTypeSchema>;
-
-    /**
-     * Literal union type of every single type registered in Strapi.Schemas
-     */
-    type SingleTypeUIDs = KeysBy<Schemas, SingleTypeSchema>;
-
-    /**
-     * Literal union type of every component registered in Strapi.Schemas
-     */
-     type ComponentUIDs = KeysBy<Schemas, ComponentSchema>;
-
-     /**
-      * Global shorthand to access the `StrapiInterface` type
-      */
-     type Strapi = StrapiInterface;
-  }
-
   /**
    * Strapi global variable definition
    **/

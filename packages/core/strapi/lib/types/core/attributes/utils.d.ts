@@ -43,7 +43,7 @@ export type GetAttribute<T extends SchemaUID, U extends GetAttributesKey<T>> = G
   U
 >;
 
-export type GetAttributes<T extends SchemaUID> = Get<Strapi.Schemas[T], 'attributes'>;
+export type GetAttributes<T extends SchemaUID> = Get<Schemas[T], 'attributes'>;
 
 export type GetAttributesKey<T extends SchemaUID> = keyof GetAttributes<T>;
 

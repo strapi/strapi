@@ -68,10 +68,7 @@ try {
   // Your code here
 } catch (error) {
   // Either send a simple error
-  strapi
-    .plugin('sentry')
-    .service('sentry')
-    .sendError(error);
+  strapi.plugin('sentry').service('sentry').sendError(error);
 
   // Or send an error with a customized Sentry scope
   strapi
@@ -92,10 +89,7 @@ Use it if you need direct access to the Sentry instance, which should already al
 **Example**
 
 ```js
-const sentryInstance = strapi
-  .plugin('sentry')
-  .service('sentry')
-  .getInstance();
+const sentryInstance = strapi.plugin('sentry').service('sentry').getInstance();
 ```
 
 ## Disabling
