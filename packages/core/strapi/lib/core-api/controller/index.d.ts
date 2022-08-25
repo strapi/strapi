@@ -2,7 +2,7 @@ import { Context, Next } from 'koa';
 
 type ControllerResponse<T = unknown> = T | Promise<T> | undefined;
 
-interface BaseController {
+export interface BaseController {
   transformResponse(data: object, meta: object): object;
   sanitizeOutput(data: object, ctx: Context): Promise<object>;
   sanitizeInput(data: object, ctx: Context): Promise<object>;

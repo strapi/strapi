@@ -60,7 +60,7 @@ export interface CollectionTypeRouterConfig {
   delete?: HandlerConfig;
 };
 
-export type RouterConfig = {
+export interface RouterConfig {
   prefix?: string;
   only: string[];
   except?: string[];

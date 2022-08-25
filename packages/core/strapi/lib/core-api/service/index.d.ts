@@ -1,6 +1,6 @@
 type Entity = object;
 
-interface BaseService {
+export interface BaseService {
   getFetchParams?(params: object): object;
 }
 
