@@ -1,6 +1,6 @@
 'use strict';
 
-const { castArray, isNil } = require('lodash/fp');
+const { castArray } = require('lodash/fp');
 const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 const { getService } = require('../utils');
@@ -42,14 +42,17 @@ const authenticate = async (ctx) => {
     return { authenticated: false };
   }
 
+  const expirationDate = new Date(apiToken.expiresAt);
+  const currentDate = new Date();
+
   // token has expired
-  if (!isNil(apiToken.expiresAt) && apiToken.expiresAt < Date.now()) {
+  if (expirationDate < currentDate) {
     throw new UnauthorizedError('Token expired');
   }
 
   // update lastUsedAt
   await apiTokenService.update(apiToken.id, {
-    lastUsedAt: new Date(),
+    lastUsedAt: currentDate,
   });
 
   if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
@@ -74,8 +77,11 @@ const verify = (auth, config) => {
     throw new UnauthorizedError('Token not found');
   }
 
+  const expirationDate = new Date(apiToken.expiresAt);
+  const currentDate = new Date();
+
   // token has expired
-  if (!isNil(apiToken.expiresAt) && apiToken.expiresAt < Date.now()) {
+  if (expirationDate < currentDate) {
     throw new UnauthorizedError('Token expired');
   }
 
