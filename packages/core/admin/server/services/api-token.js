@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const { isNil } = require('lodash/fp');
 const { omit, difference, isEmpty, map, isArray } = require('lodash/fp');
 const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
 const constants = require('./constants');
@@ -17,6 +18,8 @@ const constants = require('./constants');
  * @property {string} description
  * @property {string} accessKey
  * @property {number} lastUsedAt
+ * @property {number} lifespan
+ * @property {number} expiresAt
  * @property {TokenType} type
  * @property {(number|ApiTokenPermission)[]} permissions
  */
@@ -30,10 +33,22 @@ const constants = require('./constants');
  */
 
 /** @constant {Array<string>} */
-const SELECT_FIELDS = ['id', 'name', 'description', 'lastUsedAt', 'type', 'createdAt', 'updatedAt'];
+const SELECT_FIELDS = [
+  'id',
+  'name',
+  'description',
+  'lastUsedAt',
+  'type',
+  'lifespan',
+  'expiresAt',
+  'createdAt',
+  'updatedAt',
+];
 
 /** @constant {Array<string>} */
 const POPULATE_FIELDS = ['permissions'];
+
+// TODO: we need to ensure the permissions are actually valid registered permissions!
 
 /**
  * Assert that a token's permissions attribute is valid for its type
@@ -125,11 +140,30 @@ const hash = (accessKey) => {
 };
 
 /**
+ * @param {number} lifespan
+ *
+ * @returns { { lifespan: null | number, expiresAt: null | number } }
+ */
+const getExpirationFields = (lifespan) => {
+  // it must be nil or a finite number >= 0
+  const isValidNumber = Number.isFinite(lifespan) && lifespan > 0;
+  if (!isValidNumber && !isNil(lifespan)) {
+    throw new ValidationError('lifespan must be a positive number or null');
+  }
+
+  return {
+    lifespan: lifespan || null,
+    expiresAt: lifespan ? Date.now() + lifespan : null,
+  };
+};
+
+/**
  * Create a token and its permissions
  *
  * @param {Object} attributes
  * @param {TokenType} attributes.type
  * @param {string} attributes.name
+ * @param {number} attributes.lifespan
  * @param {string[]} attributes.permissions
  * @param {string} attributes.description
  *
@@ -147,6 +181,7 @@ const create = async (attributes) => {
     data: {
       ...omit('permissions', attributes),
       accessKey: hash(accessKey),
+      ...getExpirationFields(attributes.lifespan),
     },
   });
 
@@ -300,8 +335,8 @@ const update = async (id, attributes) => {
   }
 
   const changingTypeToCustom =
-    attributes.type === constants.API_TOKEN_TYPE.custom &&
-    originalToken.type !== constants.API_TOKEN_TYPE.custom;
+    attributes.type === constants.API_TOKEN_TYPE.CUSTOM &&
+    originalToken.type !== constants.API_TOKEN_TYPE.CUSTOM;
 
   // if we're updating the permissions on any token type, or changing from non-custom to custom, ensure they're still valid
   // if neither type nor permissions are changing, we don't need to validate again or else we can't allow partial update
@@ -341,11 +376,6 @@ const update = async (id, attributes) => {
       )
     );
 
-    // method using deleteMany -- leaves relations in _links table!
-    // await strapi
-    //   .query('admin::token-permission')
-    //   .deleteMany({ where: { action: map('action', permissionsToDelete), token: id } });
-
     // TODO: improve efficiency here
     // using a loop -- works but very inefficient
     await Promise.all(
@@ -355,25 +385,6 @@ const update = async (id, attributes) => {
         })
       )
     );
-
-    // method using createMany -- doesn't create relations in _links table!
-    // await strapi
-    //   .query('admin::token-permission')
-    //   .createMany({ data: actionsToAdd.map(action => ({ action, token: id })) });
-
-    // method attempting to use entityService -- can't create new items in entityservice, permissions need to already exist
-    // await strapi.entityService.update('admin::api-token', originalToken.id, {
-    //   data: {
-    //     permissions: [
-    //       actionsToAdd.map(action => {
-    //         return { action };
-    //       }),
-    //     ],
-    //   },
-    //   populate: POPULATE_FIELDS,
-    // });
-
-    // method attempting to createMany permissions, then update token with those permissions -- createMany doesn't return the ids, and we can't query for them
   }
   // if type is not custom, make sure any old permissions get removed
   else if (updatedToken.type !== constants.API_TOKEN_TYPE.CUSTOM) {

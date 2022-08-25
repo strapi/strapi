@@ -25,6 +25,7 @@ module.exports = {
       description: trim(body.description),
       type: body.type,
       permissions: body.permissions,
+      lifespan: body.lifespan,
     };
 
     await validateApiTokenCreationInput(attributes);
@@ -98,11 +99,6 @@ module.exports = {
 
     if (has(attributes, 'description') || attributes.description === null) {
       attributes.description = trim(body.description);
-    }
-
-    // Don't allow updating lastUsedAt time
-    if (has(attributes, 'lastUsedAt')) {
-      throw new ApplicationError('lastUsedAt cannot be updated');
     }
 
     await validateApiTokenUpdateInput(attributes);
