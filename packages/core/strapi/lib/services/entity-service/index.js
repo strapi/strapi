@@ -18,7 +18,7 @@ const {
   updateComponents,
   deleteComponents,
 } = require('./components');
-const { transformParamsToQuery, pickSelectionParams } = require('./params');
+const { transformParamsToQuery, pickSelectionParams, pickFindParams } = require('./params');
 const { applyTransforms } = require('./attributes');
 
 // TODO: those should be strapi events used by the webhooks not the other way arround
@@ -103,9 +103,11 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   async findOne(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findOne' });
 
-    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
+    const query = transformParamsToQuery(uid, pickFindParams(wrappedParams));
 
-    return db.query(uid).findOne({ ...query, where: { id: entityId } });
+    const where = _.merge(query.where, { id: entityId });
+
+    return db.query(uid).findOne({ where });
   },
 
   async count(uid, opts) {
@@ -152,11 +154,14 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
   async update(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'update' });
-    const { data, files } = wrappedParams;
+    const query = transformParamsToQuery(uid, pickFindParams(wrappedParams));
 
+    const { data, files } = wrappedParams;
     const model = strapi.getModel(uid);
 
-    const entityToUpdate = await db.query(uid).findOne({ where: { id: entityId } });
+    const where = _.merge(query.where, { id: entityId });
+
+    const entityToUpdate = await db.query(uid).findOne({ where });
 
     if (!entityToUpdate) {
       return null;
@@ -173,14 +178,12 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       entityToUpdate
     );
 
-    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
-
     // TODO: wrap in transaction
     const componentData = await updateComponents(uid, entityToUpdate, validData);
 
     let entity = await db.query(uid).update({
       ...query,
-      where: { id: entityId },
+      where,
       data: updatePipeline(Object.assign(omitComponentData(model, validData), componentData), {
         contentType: model,
       }),
@@ -202,18 +205,19 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'delete' });
 
     // select / populate
-    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
+    const query = transformParamsToQuery(uid, pickFindParams(wrappedParams));
+    const where = _.merge(query.where, { id: entityId });
 
     const entityToDelete = await db.query(uid).findOne({
       ...query,
-      where: { id: entityId },
+      where,
     });
 
     if (!entityToDelete) {
       return null;
     }
 
-    await db.query(uid).delete({ where: { id: entityToDelete.id } });
+    await db.query(uid).delete({ where });
     await deleteComponents(uid, entityToDelete);
 
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);

@@ -15,6 +15,8 @@ const {
 
 const pickSelectionParams = pick(['fields', 'populate']);
 
+const pickFindParams = pick(['fields', 'populate', 'filters']);
+
 const transformParamsToQuery = (uid, params) => {
   // NOTE: can be a CT, a Compo or nothing in the case of polymorphism (DZ & morph relations)
   const schema = strapi.getModel(uid);
@@ -92,4 +94,5 @@ const transformParamsToQuery = (uid, params) => {
 module.exports = {
   transformParamsToQuery,
   pickSelectionParams,
+  pickFindParams,
 };
