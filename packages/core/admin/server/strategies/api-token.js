@@ -47,7 +47,7 @@ const authenticate = async (ctx) => {
 
   // token has expired
   if (expirationDate < currentDate) {
-    throw new UnauthorizedError('Token expired');
+    return { authenticated: false, error: new UnauthorizedError('Token expired') };
   }
 
   // update lastUsedAt
