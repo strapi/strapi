@@ -10,7 +10,7 @@ import { Field, FieldHint, FieldError, FieldLabel, FieldInput } from '@strapi/de
 import CarretDown from '@strapi/icons/CarretDown';
 import { useIntl } from 'react-intl';
 import { HexColorPicker } from 'react-colorful';
-import useOnClickOutside from '../../../hooks/use-on-click-outside';
+import useOnClickOutside from '../../../hooks/useOnClickOutside';
 import getTrad from '../../../utils/getTrad';
 
 const ColorPreview = styled.div`
