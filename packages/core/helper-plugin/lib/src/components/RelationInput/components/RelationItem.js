@@ -7,6 +7,8 @@ import { Typography } from '@strapi/design-system/Typography';
 
 const TypographyWrapper = styled(Typography)`
   width: 100%;
+  // Used to prevent endAction to be pushed out of container
+  min-width: 0;
 `;
 
 const ChildrenWrapper = styled(Flex)`
@@ -32,7 +34,7 @@ export const RelationItem = ({ children, disabled, endAction, ...props }) => {
       {...props}
     >
       <TypographyWrapper textColor={disabled ? 'neutral600' : 'primary600'} as="div">
-        <ChildrenWrapper width="100%" justifyContent="space-between" color="currentColor">
+        <ChildrenWrapper justifyContent="space-between" color="currentColor">
           {children}
         </ChildrenWrapper>
       </TypographyWrapper>
