@@ -489,7 +489,6 @@
   "content-manager.App.schemas.data-loaded": "The schemas have been successfully loaded",
   "content-manager.DynamicTable.relation-loaded": "Relations have been loaded",
   "content-manager.DynamicTable.relation-loading": "Relations are loading",
-  "content-manager.DynamicTable.relation-search-loading": "Entries are loading",
   "content-manager.DynamicTable.relation-more": "This relation contains more entities than displayed",
   "content-manager.EditRelations.title": "Relational data",
   "content-manager.HeaderLayout.button.label-add-entry": "Create new entry",
