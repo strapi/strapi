@@ -1,4 +1,4 @@
-import { Service,GenericService } from '../core-api/service';
+import { Service, GenericService } from '../core-api/service';
 import { Controller, GenericController } from '../core-api/controller';
 import { Middleware } from '../middlewares';
 import { Policy } from '../core/registries/policies';
@@ -30,7 +30,8 @@ export interface ServiceUidMap {
  * ```ts
  * declare module '@strapi/strapi/lib/types/core/factories' {
  *   export interface ControllerUidMap {
- *     'xxx::xxx.uid': Controller;
+ *     'xxx::xxx.uid': SingleTypeController;
+ *     'yyy::yyy.uid': CollectionTypeController;
  *   }
  * }
  * ```
