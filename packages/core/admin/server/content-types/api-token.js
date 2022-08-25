@@ -26,6 +26,7 @@ module.exports = {
       minLength: 1,
       configurable: false,
       required: true,
+      unique: true,
     },
     description: {
       type: 'string',

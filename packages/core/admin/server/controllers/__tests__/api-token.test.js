@@ -1,8 +1,7 @@
 'use strict';
 
 const { ApplicationError } = require('@strapi/utils').errors;
-const { YupValidationError } = require('@strapi/utils/lib/errors');
-const { omit } = require('lodash');
+const { omit } = require('lodash/fp');
 const createContext = require('../../../../../../test/helpers/create-context');
 const apiTokenController = require('../api-token');
 
@@ -100,7 +99,7 @@ describe('API Token Controller', () => {
       expect(exists).toHaveBeenCalledWith({ name: tokenBody.name });
       expect(badRequest).not.toHaveBeenCalled();
       expect(create).toHaveBeenCalledWith(createBody);
-      expect(created).toHaveBeenCalled();
+      expect(created).toHaveBeenCalledWith({ data: tokenBody });
     });
 
     test('Throws with invalid lifespan', async () => {
@@ -126,7 +125,7 @@ describe('API Token Controller', () => {
 
       expect(async () => {
         await apiTokenController.create(ctx);
-      }).rejects.toThrow(YupValidationError);
+      }).rejects.toThrow('lifespan must be greater than or equal to 1');
       expect(create).not.toHaveBeenCalled();
       expect(created).not.toHaveBeenCalled();
     });
@@ -165,8 +164,8 @@ describe('API Token Controller', () => {
 
       expect(exists).toHaveBeenCalledWith({ name: tokenBody.name });
       expect(badRequest).not.toHaveBeenCalled();
-      expect(create).toHaveBeenCalledWith(omit(createBody, 'expiresAt'));
-      expect(created).toHaveBeenCalled();
+      expect(create).toHaveBeenCalledWith(omit(['expiresAt'], createBody));
+      expect(created).toHaveBeenCalledWith({ data: tokenBody });
     });
   });
 

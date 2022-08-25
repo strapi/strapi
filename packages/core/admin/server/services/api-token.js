@@ -164,7 +164,7 @@ const hash = (accessKey) => {
 /**
  * @param {number} lifespan
  *
- * @returns {null|number}
+ * @returns { { lifespan: null | number, expiresAt: null | number } }
  */
 const getExpirationFields = (lifespan) => {
   // it must be nil or a finite number >= 0
@@ -409,11 +409,6 @@ const update = async (id, attributes) => {
       )
     );
 
-    // method using deleteMany -- leaves relations in _links table!
-    // await strapi
-    //   .query('admin::token-permission')
-    //   .deleteMany({ where: { action: map('action', permissionsToDelete), token: id } });
-
     // TODO: improve efficiency here
     // using a loop -- works but very inefficient
     await Promise.all(
@@ -423,25 +418,6 @@ const update = async (id, attributes) => {
         })
       )
     );
-
-    // method using createMany -- doesn't create relations in _links table!
-    // await strapi
-    //   .query('admin::token-permission')
-    //   .createMany({ data: actionsToAdd.map(action => ({ action, token: id })) });
-
-    // method attempting to use entityService -- can't create new items in entityservice, permissions need to already exist
-    // await strapi.entityService.update('admin::api-token', originalToken.id, {
-    //   data: {
-    //     permissions: [
-    //       actionsToAdd.map(action => {
-    //         return { action };
-    //       }),
-    //     ],
-    //   },
-    //   populate: POPULATE_FIELDS,
-    // });
-
-    // method attempting to createMany permissions, then update token with those permissions -- createMany doesn't return the ids, and we can't query for them
   }
   // if type is not custom, make sure any old permissions get removed
   else if (updatedToken.type !== constants.API_TOKEN_TYPE.CUSTOM) {

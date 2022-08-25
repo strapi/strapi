@@ -2325,17 +2325,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@koa/cors@3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@koa/cors/-/cors-3.1.0.tgz#618bb073438cfdbd3ebd0e648a76e33b84f3a3b2"
-  integrity sha512-7ulRC1da/rBa6kj6P4g2aJfnET3z8Uf3SWu60cjbtxTA5g8lxRdX/Bd2P92EagGwwAhANeNw8T8if99rJliR6Q==
-  dependencies:
-    vary "^1.1.2"
-
-"@koa/cors@^3.1.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@koa/cors/-/cors-3.3.0.tgz#b4c1c7ee303b7c968c8727f2a638a74675b50bb2"
-  integrity sha512-lzlkqLlL5Ond8jb6JLnVVDmD2OPym0r5kvZlMgAWiS9xle+Q5ulw1T358oW+RVguxUkANquZQz82i/STIRmsqQ==
+"@koa/cors@3.4.1", "@koa/cors@^3.1.0":
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/@koa/cors/-/cors-3.4.1.tgz#ddd5c6ff07a1e60831e1281411a3b9fdb95a5b26"
+  integrity sha512-/sG9NlpGZ/aBpnRamIlGs+wX+C/IJ5DodNK7iPQIVCG4eUQdGeshGhWQ6JCi7tpnD9sCtFXcS04iTimuaJfh4Q==
   dependencies:
     vary "^1.1.2"
 
@@ -5300,10 +5293,10 @@
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"
 
-"@strapi/eslint-config@0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@strapi/eslint-config/-/eslint-config-0.1.1.tgz#0020d5724edc6dc7453f26917ed2d1dff434c814"
-  integrity sha512-/aokDkPVxX9vS8oRQnmR6EYOy2O6Xd/zxus3I8yC4yKiF/uEflzsNeLUCRPt4BCbm6X5d0K+NzVesHUPERLRrQ==
+"@strapi/eslint-config@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@strapi/eslint-config/-/eslint-config-0.1.2.tgz#e8327169eccce78b5f9e1589cb243c0f84343caf"
+  integrity sha512-8Pf0xNhEK77tLWzUL3/FSeGJipkmFjx8LqmwTouXgTVgtiXbF+p3iNOxmkkZWB92cDoA4BXkIB17Fus+6qXEkQ==
   dependencies:
     "@babel/eslint-parser" "^7.18.9"
     "@typescript-eslint/eslint-plugin" "^5.14.0"
