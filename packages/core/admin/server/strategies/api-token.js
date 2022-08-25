@@ -42,14 +42,19 @@ const authenticate = async (ctx) => {
     return { authenticated: false };
   }
 
-  // token has expired
-  if (!isNil(apiToken.expiresAt) && apiToken.expiresAt < Date.now()) {
-    throw new UnauthorizedError('Token expired');
+  const currentDate = new Date();
+
+  if (!isNil(apiToken.expiresAt)) {
+    const expirationDate = new Date(apiToken.expiresAt);
+    // token has expired
+    if (expirationDate < currentDate) {
+      return { authenticated: false, error: new UnauthorizedError('Token expired') };
+    }
   }
 
   // update lastUsedAt
   await apiTokenService.update(apiToken.id, {
-    lastUsedAt: new Date(),
+    lastUsedAt: currentDate,
   });
 
   if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
@@ -74,9 +79,14 @@ const verify = (auth, config) => {
     throw new UnauthorizedError('Token not found');
   }
 
-  // token has expired
-  if (!isNil(apiToken.expiresAt) && apiToken.expiresAt < Date.now()) {
-    throw new UnauthorizedError('Token expired');
+  const currentDate = new Date();
+
+  if (!isNil(apiToken.expiresAt)) {
+    const expirationDate = new Date(apiToken.expiresAt);
+    // token has expired
+    if (expirationDate < currentDate) {
+      throw new UnauthorizedError('Token expired');
+    }
   }
 
   // Full access
