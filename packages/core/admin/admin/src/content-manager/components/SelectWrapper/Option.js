@@ -41,13 +41,13 @@ const Option = (props) => {
       <Component {...props}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
-          <Typography ellipsis>{props.label || '-'}</Typography>
+          <Typography ellipsis>{props.label ?? '-'}</Typography>
         </Flex>
       </Component>
     );
   }
 
-  return <Component {...props}>{props.label || '-'}</Component>;
+  return <Component {...props}>{props.label ?? '-'}</Component>;
 };
 
 Option.defaultProps = {
