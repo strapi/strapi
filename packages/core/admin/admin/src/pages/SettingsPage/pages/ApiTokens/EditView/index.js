@@ -274,19 +274,21 @@ const ApiTokenCreateView = () => {
                   primaryAction={
                     canEditInputs && (
                       <Flex justifyContent="center">
-                        <ButtonWithRightMargin
-                          disabled={isSubmitting}
-                          loading={isSubmitting}
-                          startIcon={<Refresh />}
-                          type="button"
-                          size="S"
-                          variant="tertiary"
-                        >
-                          {formatMessage({
-                            id: 'global.regenerate',
-                            defaultMessage: 'Regenerate',
-                          })}
-                        </ButtonWithRightMargin>
+                        {apiToken?.name && (
+                          <ButtonWithRightMargin
+                            disabled={isSubmitting}
+                            loading={isSubmitting}
+                            startIcon={<Refresh />}
+                            type="button"
+                            size="S"
+                            variant="tertiary"
+                          >
+                            {formatMessage({
+                              id: 'global.regenerate',
+                              defaultMessage: 'Regenerate',
+                            })}
+                          </ButtonWithRightMargin>
+                        )}
                         <Button
                           disabled={isSubmitting}
                           loading={isSubmitting}
