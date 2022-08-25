@@ -145,7 +145,7 @@ const ReactQuerySearchResult = PropTypes.shape({
     pages: PropTypes.arrayOf(
       PropTypes.arrayOf(
         PropTypes.shape({
-          isDraft: PropTypes.bool,
+          id: PropTypes.number.isRequired,
           mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
           publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
         })
