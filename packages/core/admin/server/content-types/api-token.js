@@ -26,6 +26,7 @@ module.exports = {
       minLength: 1,
       configurable: false,
       required: true,
+      unique: true,
     },
     description: {
       type: 'string',
@@ -57,6 +58,16 @@ module.exports = {
       target: 'admin::token-permission',
       relation: 'oneToMany',
       mappedBy: 'token',
+      configurable: false,
+      required: false,
+    },
+    expiresAt: {
+      type: 'datetime',
+      configurable: false,
+      required: false,
+    },
+    lifespan: {
+      type: 'integer',
       configurable: false,
       required: false,
     },

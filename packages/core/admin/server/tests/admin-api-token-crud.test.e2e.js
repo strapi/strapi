@@ -31,13 +31,14 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     await strapi.destroy();
   });
 
-  // create a random valid token that we can test with (delete, list, etc)
+  // create a predictable valid token that we can test with (delete, list, etc)
   let currentTokens = 0;
   const createValidToken = async (token = {}) => {
+    currentTokens += 1;
+
     const body = {
       type: 'read-only',
-      // eslint-disable-next-line no-plusplus
-      name: `token_${String(currentTokens++)}`,
+      name: `token_${String(currentTokens)}`,
       description: 'generic description',
       ...token,
     };
@@ -65,7 +66,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toMatchObject({
+    expect(res.body).toStrictEqual({
       data: null,
       error: {
         status: 400,
@@ -98,7 +99,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toMatchObject({
+    expect(res.body).toStrictEqual({
       data: null,
       error: {
         status: 400,
@@ -117,7 +118,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test('Creates a read-only api token (successfully)', async () => {
+  test('Creates a read-only api token', async () => {
     const body = {
       name: 'api-token_tests-readonly',
       description: 'api-token_tests-description',
@@ -131,16 +132,149 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toMatchObject({
+    expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
       permissions: [],
       description: body.description,
       type: body.type,
       id: expect.any(Number),
-      createdAt: expect.any(String),
+      createdAt: expect.toBeISODate(),
       lastUsedAt: null,
-      updatedAt: expect.any(String),
+      updatedAt: expect.toBeISODate(),
+      expiresAt: null,
+      lifespan: null,
+    });
+  });
+
+  test('Creates a token without a lifespan', async () => {
+    const body = {
+      name: 'api-token_tests-no-lifespan',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toStrictEqual({
+      accessKey: expect.any(String),
+      name: body.name,
+      permissions: [],
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+      createdAt: expect.toBeISODate(),
+      lastUsedAt: null,
+      updatedAt: expect.toBeISODate(),
+      expiresAt: null,
+      lifespan: null,
+    });
+  });
+
+  test('Creates a token with a lifespan', async () => {
+    const now = Date.now();
+    jest.useFakeTimers('modern').setSystemTime(now);
+
+    const body = {
+      name: 'api-token_tests-lifespan',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+      lifespan: 7 * 24 * 60 * 60 * 1000, // 7 days
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toStrictEqual({
+      accessKey: expect.any(String),
+      name: body.name,
+      permissions: [],
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+      createdAt: expect.toBeISODate(),
+      lastUsedAt: null,
+      updatedAt: expect.toBeISODate(),
+      expiresAt: expect.toBeISODate(),
+      lifespan: body.lifespan,
+    });
+
+    // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
+    expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
+    expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
+
+    jest.useRealTimers();
+  });
+
+  test('Creates a token with a null lifespan', async () => {
+    const body = {
+      name: 'api-token_tests-nulllifespan',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+      lifespan: null,
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toStrictEqual({
+      accessKey: expect.any(String),
+      name: body.name,
+      permissions: [],
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+      createdAt: expect.toBeISODate(),
+      lastUsedAt: null,
+      updatedAt: expect.toBeISODate(),
+      expiresAt: null,
+      lifespan: body.lifespan,
+    });
+  });
+
+  test('Fails to create a token with invalid lifespan', async () => {
+    const body = {
+      name: 'api-token_tests-lifespan',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+      lifespan: -1,
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toStrictEqual({
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'lifespan must be greater than or equal to 1',
+        details: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              message: 'lifespan must be greater than or equal to 1',
+              name: 'ValidationError',
+            }),
+          ]),
+        },
+      },
     });
   });
 
@@ -159,7 +293,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toMatchObject({
+    expect(res.body).toStrictEqual({
       data: null,
       error: {
         status: 400,
@@ -200,10 +334,12 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: expect.any(String),
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
-  test('Creates a custom api token (successfully)', async () => {
+  test('Creates a custom api token', async () => {
     const body = {
       name: 'api-token_tests-customSuccess',
       description: 'api-token_tests-description',
@@ -228,6 +364,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: expect.any(String),
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -280,6 +418,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: expect.any(String),
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -307,6 +447,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: expect.any(String),
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -323,6 +465,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     );
     tokens.push(await createValidToken({ type: 'full-access' }));
     tokens.push(await createValidToken({ type: 'read-only' }));
+    tokens.push(await createValidToken({ lifespan: 12345 }));
     tokens.push(await createValidToken());
 
     const res = await rq({
@@ -331,16 +474,15 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.length).toBe(4);
+    expect(res.body.data.length).toBe(tokens.length);
     // check that each token exists in data
     tokens.forEach((token) => {
       const t = res.body.data.find((t) => t.id === token.id);
       if (t.permissions) {
         t.permissions = t.permissions.sort();
-        // eslint-disable-next-line no-param-reassign
-        token.permissions = token.permissions.sort();
+        Object.assign(token, { permissions: token.permissions.sort() });
       }
-      expect(t).toMatchObject(omit(token, ['accessKey']));
+      expect(t).toStrictEqual(omit(token, ['accessKey']));
     });
   });
 
@@ -362,6 +504,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -395,6 +539,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -419,6 +565,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -477,6 +625,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
     // expect(updatedRes.body.data.updated)
   });
@@ -529,6 +679,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -588,6 +740,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -614,6 +768,8 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       createdAt: token.createdAt,
       lastUsedAt: null,
       updatedAt: expect.any(String),
+      expiresAt: null,
+      lifespan: null,
     });
   });
 
@@ -645,7 +801,5 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  test.todo('Regenerated access key works');
-  test.todo('Tokens access content for which they are authorized');
-  test.todo('Tokens fail to access content for which they are not authorized');
+  test.todo('Custom token can only be created with valid permissions that exist');
 });

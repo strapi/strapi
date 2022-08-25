@@ -1,6 +1,6 @@
 'use strict';
 
-const { castArray } = require('lodash/fp');
+const { castArray, isNil } = require('lodash/fp');
 const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 const { getService } = require('../utils');
@@ -21,7 +21,10 @@ const extractToken = (ctx) => {
   return null;
 };
 
-/** @type {import('.').AuthenticateFunction} */
+/**
+ * Authenticate the validity of the token
+ *
+ *  @type {import('.').AuthenticateFunction} */
 const authenticate = async (ctx) => {
   const apiTokenService = getService('api-token');
   const token = extractToken(ctx);
@@ -34,8 +37,14 @@ const authenticate = async (ctx) => {
     accessKey: apiTokenService.hash(token),
   });
 
+  // token not found
   if (!apiToken) {
     return { authenticated: false };
+  }
+
+  // token has expired
+  if (!isNil(apiToken.expiresAt) && apiToken.expiresAt < Date.now()) {
+    throw new UnauthorizedError('Token expired');
   }
 
   // update lastUsedAt
@@ -54,12 +63,20 @@ const authenticate = async (ctx) => {
   return { authenticated: true, credentials: apiToken };
 };
 
-/** @type {import('.').VerifyFunction} */
+/**
+ * Verify the token has the required abilities for the requested scope
+ *
+ *  @type {import('.').VerifyFunction} */
 const verify = (auth, config) => {
   const { credentials: apiToken, ability } = auth;
 
   if (!apiToken) {
-    throw new UnauthorizedError();
+    throw new UnauthorizedError('Token not found');
+  }
+
+  // token has expired
+  if (!isNil(apiToken.expiresAt) && apiToken.expiresAt < Date.now()) {
+    throw new UnauthorizedError('Token expired');
   }
 
   // Full access
