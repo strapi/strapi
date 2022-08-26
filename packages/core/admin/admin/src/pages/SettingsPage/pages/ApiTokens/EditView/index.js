@@ -286,7 +286,7 @@ const ApiTokenCreateView = () => {
                             variant="tertiary"
                           >
                             {formatMessage({
-                              id: 'global.regenerate',
+                              id: 'Settings.apiTokens.regenerate',
                               defaultMessage: 'Regenerate',
                             })}
                           </ButtonWithRightMargin>
