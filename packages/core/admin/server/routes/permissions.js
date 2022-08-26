@@ -17,12 +17,4 @@ module.exports = [
       policies: ['admin::isAuthenticatedAdmin'],
     },
   },
-  {
-    method: 'GET',
-    path: '/content-api-permissions',
-    handler: 'permission.getContentApiPermissions',
-    config: {
-      policies: ['admin::isAuthenticatedAdmin'],
-    },
-  },
 ];

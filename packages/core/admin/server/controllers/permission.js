@@ -44,10 +44,4 @@ module.exports = {
       },
     };
   },
-
-  async getContentApiPermissions(ctx) {
-    const actionsMap = await strapi.contentAPI.permissions.getActionsMap();
-
-    ctx.send({ data: actionsMap });
-  },
 };
