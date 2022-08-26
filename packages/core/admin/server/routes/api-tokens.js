@@ -78,4 +78,12 @@ module.exports = [
       ],
     },
   },
+  {
+    method: 'GET',
+    path: '/api-token-layout',
+    handler: 'api-token.getLayout',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
 ];

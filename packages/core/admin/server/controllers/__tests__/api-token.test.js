@@ -274,8 +274,8 @@ describe('API Token Controller', () => {
       };
       const refresh = jest.fn().mockResolvedValue(lifespanToken);
       const getById = jest.fn().mockResolvedValue(lifespanToken);
-      const created = jest.fn();
-      const ctx = createContext({ params: { id: token.id } }, { created });
+      const send = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { send });
 
       global.strapi = {
         admin: {
@@ -291,6 +291,11 @@ describe('API Token Controller', () => {
       await apiTokenController.refresh(ctx);
 
       expect(refresh).toHaveBeenCalledWith(token.id);
+      expect(send).toHaveBeenCalledWith({
+        data: {
+          ...lifespanToken,
+        },
+      });
     });
 
     test('Fails if token not found', async () => {
