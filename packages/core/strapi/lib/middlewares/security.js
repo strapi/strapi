@@ -35,13 +35,14 @@ module.exports =
   (config, { strapi }) =>
   (ctx, next) => {
     let helmetConfig = defaultsDeep(defaults, config);
-    const { config: gqlConfig } = strapi.plugin('graphql');
-    const gqlEndpoint = gqlConfig('endpoint');
+    const specialPaths = ['/documentation'];
 
-    if (
-      ctx.method === 'GET' &&
-      [gqlEndpoint, '/documentation'].some((str) => ctx.path.startsWith(str))
-    ) {
+    if (strapi.plugin('graphql')) {
+      const { config: gqlConfig } = strapi.plugin('graphql');
+      specialPaths.push(gqlConfig('endpoint'));
+    }
+
+    if (ctx.method === 'GET' && specialPaths.some((str) => ctx.path.startsWith(str))) {
       helmetConfig = merge(helmetConfig, {
         contentSecurityPolicy: {
           directives: {
