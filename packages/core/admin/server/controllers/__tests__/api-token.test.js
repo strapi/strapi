@@ -1,6 +1,7 @@
 'use strict';
 
 const { ApplicationError } = require('@strapi/utils').errors;
+const { omit } = require('lodash/fp');
 const createContext = require('../../../../../../test/helpers/create-context');
 const apiTokenController = require('../api-token');
 
@@ -62,6 +63,109 @@ describe('API Token Controller', () => {
       expect(badRequest).not.toHaveBeenCalled();
       expect(create).toHaveBeenCalledWith(body);
       expect(created).toHaveBeenCalled();
+    });
+
+    test('Create API Token with lifespan', async () => {
+      const lifespan = 90 * 24 * 60 * 60 * 1000; // 90 days
+      const createBody = {
+        ...body,
+        lifespan,
+      };
+      const tokenBody = {
+        ...createBody,
+        expiresAt: Date.now() + lifespan,
+        permissions: undefined,
+      };
+
+      const create = jest.fn().mockResolvedValue(tokenBody);
+      const exists = jest.fn(() => false);
+      const badRequest = jest.fn();
+      const created = jest.fn();
+      const ctx = createContext({ body: createBody }, { badRequest, created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              exists,
+              create,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.create(ctx);
+
+      expect(exists).toHaveBeenCalledWith({ name: tokenBody.name });
+      expect(badRequest).not.toHaveBeenCalled();
+      expect(create).toHaveBeenCalledWith(createBody);
+      expect(created).toHaveBeenCalledWith({ data: tokenBody });
+    });
+
+    test('Throws with invalid lifespan', async () => {
+      const lifespan = -1;
+      const createBody = {
+        ...body,
+        lifespan,
+      };
+
+      const create = jest.fn();
+      const created = jest.fn();
+      const ctx = createContext({ body: createBody }, { created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              create,
+            },
+          },
+        },
+      };
+
+      expect(async () => {
+        await apiTokenController.create(ctx);
+      }).rejects.toThrow('lifespan must be greater than or equal to 1');
+      expect(create).not.toHaveBeenCalled();
+      expect(created).not.toHaveBeenCalled();
+    });
+
+    test('Ignores a received expiresAt', async () => {
+      const lifespan = 90 * 24 * 60 * 60 * 1000; // 90 days
+      const createBody = {
+        ...body,
+        expiresAt: 1234,
+        lifespan,
+      };
+      const tokenBody = {
+        ...createBody,
+        expiresAt: Date.now() + lifespan,
+        permissions: undefined,
+      };
+
+      const create = jest.fn().mockResolvedValue(tokenBody);
+      const exists = jest.fn(() => false);
+      const badRequest = jest.fn();
+      const created = jest.fn();
+      const ctx = createContext({ body: createBody }, { badRequest, created });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              exists,
+              create,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.create(ctx);
+
+      expect(exists).toHaveBeenCalledWith({ name: tokenBody.name });
+      expect(badRequest).not.toHaveBeenCalled();
+      expect(create).toHaveBeenCalledWith(omit(['expiresAt'], createBody));
+      expect(created).toHaveBeenCalledWith({ data: tokenBody });
     });
   });
 

@@ -8,10 +8,7 @@ const schema = yup.object().shape({
     .oneOf(['read-only', 'full-access', 'custom'])
     .required(translatedErrors.required),
   description: yup.string().nullable(),
-  duration: yup
-    .string(translatedErrors.string)
-    .oneOf(['7', '30', '90', 'unlimited'])
-    .required(translatedErrors.required),
+  lifespan: yup.number().integer().min(1).nullable(),
 });
 
 export default schema;

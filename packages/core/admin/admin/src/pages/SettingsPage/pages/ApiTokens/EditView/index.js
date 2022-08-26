@@ -191,6 +191,8 @@ const ApiTokenCreateView = () => {
     return 'custom';
   }, [hasAllActionsSelected, hasReadOnlyActionsSelected, hasAllActionsNotSelected]);
 
+  console.log('tokenType', tokenTypeValue);
+
   const handleChangeCheckbox = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
@@ -257,7 +259,7 @@ const ApiTokenCreateView = () => {
             name: apiToken?.name || '',
             description: apiToken?.description || '',
             type: apiToken?.type,
-            duration: apiToken?.duration,
+            lifespan: apiToken?.lifespan,
           }}
           onSubmit={handleSubmit}
         >
@@ -279,7 +281,7 @@ const ApiTokenCreateView = () => {
                         loading={isSubmitting}
                         startIcon={<Check />}
                         type="submit"
-                        size="L"
+                        size="S"
                       >
                         {formatMessage({
                           id: 'global.save',
@@ -364,49 +366,49 @@ const ApiTokenCreateView = () => {
                               {values.description}
                             </Textarea>
                           </GridItem>
-                          <GridItem key="duration" col={6} xs={12}>
+                          <GridItem key="lifespan" col={6} xs={12}>
                             <Select
-                              name="duration"
+                              name="lifespan"
                               label={formatMessage({
                                 id: 'Settings.apiTokens.form.duration',
                                 defaultMessage: 'Token duration',
                               })}
-                              value={isCreating ? values.duration : '7'}
+                              value={values.lifespan}
                               error={
-                                errors.duration
+                                errors.lifespan
                                   ? formatMessage(
-                                      errors.duration?.id
-                                        ? errors.duration
-                                        : { id: errors.duration, defaultMessage: errors.duration }
+                                      errors.lifespan?.id
+                                        ? errors.lifespan
+                                        : { id: errors.lifespan, defaultMessage: errors.lifespan }
                                     )
                                   : null
                               }
                               onChange={(value) => {
-                                handleChange({ target: { name: 'duration', value } });
+                                handleChange({ target: { name: 'lifespan', value } });
                               }}
                               required
                               disabled={!isCreating}
                               placeholder="Select"
                             >
-                              <Option value="7">
+                              <Option value={7}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.7-days',
                                   defaultMessage: '7 days',
                                 })}
                               </Option>
-                              <Option value="30">
+                              <Option value={30}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.30-days',
                                   defaultMessage: '30 days',
                                 })}
                               </Option>
-                              <Option value="90">
+                              <Option value={90}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.90-days',
                                   defaultMessage: '90 days',
                                 })}
                               </Option>
-                              <Option value="unlimited">
+                              <Option>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.unlimited',
                                   defaultMessage: 'Unlimited',
@@ -420,7 +422,7 @@ const ApiTokenCreateView = () => {
                                   defaultMessage: 'Expiration date',
                                 })}: ${getDateOfExpiration(
                                   apiToken?.createdAt,
-                                  values.duration || '7',
+                                  values.lifespan || 7,
                                   lang
                                 )}`}
                             </Typography>
@@ -433,7 +435,7 @@ const ApiTokenCreateView = () => {
                                 id: 'Settings.apiTokens.form.type',
                                 defaultMessage: 'Token type',
                               })}
-                              value={tokenTypeValue}
+                              value={values.type}
                               error={
                                 errors.type
                                   ? formatMessage(

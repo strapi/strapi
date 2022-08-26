@@ -5,8 +5,6 @@ const os = require('os');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const sentry = require('@sentry/node');
-// FIXME
-/* eslint-disable import/extensions */
 const hasYarn = require('./utils/has-yarn');
 const checkRequirements = require('./utils/check-requirements');
 const { trackError, captureException } = require('./utils/usage');
@@ -60,6 +58,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
 
   sentry.configureScope(function scope(sentryScope) {
     const tags = {
+      os_arch: os.arch(),
       os_type: os.type(),
       os_platform: os.platform(),
       os_release: os.release(),
