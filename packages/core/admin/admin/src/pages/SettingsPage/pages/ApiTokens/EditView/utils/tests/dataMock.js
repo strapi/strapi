@@ -1,100 +1,82 @@
 export const data = {
-  sections: {
-    collectionTypes: {
-      subjects: [
-        {
-          subjectId: 'api::category.category',
-          label: 'Category',
-          actions: [
-            {
-              label: 'create',
-              actionId: 'api-token.create',
-            },
-            {
-              label: 'findOne',
-              actionId: 'api-token.findOne',
-            },
-            {
-              label: 'find',
-              actionId: 'api-token.find',
-            },
-            {
-              label: 'update',
-              actionId: 'api-token.update',
-            },
-            {
-              label: 'delete',
-              actionId: 'api-token.delete',
-            },
-          ],
-        },
-        {
-          subjectId: 'api::country.country',
-          label: 'Country',
-          actions: [
-            {
-              label: 'create',
-              actionId: 'api-token.create',
-            },
-            {
-              label: 'findOne',
-              actionId: 'api-token.findOne',
-            },
-            {
-              label: 'find',
-              actionId: 'api-token.find',
-            },
-            {
-              label: 'update',
-              actionId: 'api-token.update',
-            },
-            {
-              label: 'delete',
-              actionId: 'api-token.delete',
-            },
-          ],
-        },
-      ],
+  data: {
+    'api::address': {
+      controllers: {
+        address: ['find', 'findOne'],
+      },
     },
-    singleTypes: {
-      subjects: [
-        {
-          subjectId: 'api::homepage.homepage',
-          label: 'Homepage',
-          actions: [
-            {
-              label: 'create',
-              actionId: 'api-token.create',
-            },
-            {
-              label: 'find',
-              actionId: 'api-token.find',
-            },
-            {
-              label: 'update',
-              actionId: 'api-token.update',
-            },
-          ],
-        },
-      ],
-    },
-    custom: {
-      subjects: [
-        {
-          subjectId: 'api::ticket.ticket',
-          label: 'Ticket',
-          actions: [
-            {
-              label: 'getTicket',
-              actionId: 'api-token.getTicket',
-            },
-            {
-              label: 'createTicket',
-              actionId: 'api-token.createTicket',
-            },
-          ],
-        },
-      ],
+    'api::category': {
+      controllers: {
+        category: ['find', 'findOne', 'create', 'update', 'delete', 'createLocalization'],
+        categor: ['find', 'findOne', 'create', 'update', 'delete', 'createLocalization'],
+      },
     },
   },
 };
+
+// allActionsIds: [
+//   'api::address.address.find',
+//   'api::address.address.findOne',
+//   'api::category.category.find',
+//   'api::category.category.findOne',
+//   'api::category.category.create',
+//   'api::category.category.update',
+//   'api::category.category.delete',
+//   'api::category.category.createLocalization',
+// ],
+// permissions: [
+//   {
+//     subjectId: 'api::address',
+//     label: 'address',
+//     controllers: [
+//       {
+//         controller: 'address',
+//         actions: [
+//           {
+//             action: 'find',
+//             actionId: 'api::address.address.find',
+//           },
+//           {
+//             action: 'findOne',
+//             actionId: 'api::address.address.findOne',
+//           },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     subjectId: 'api::category',
+//     label: 'category',
+//     controllers: [
+//       {
+//         controller: 'category',
+//         actions: [
+//           {
+//             action: 'find',
+//             actionId: 'api::category.category.find',
+//           },
+//           {
+//             action: 'findOne',
+//             actionId: 'api::category.category.findOne',
+//           },
+//           {
+//             action: 'create',
+//             actionId: 'api::category.category.create',
+//           },
+//           {
+//             action: 'update',
+//             actionId: 'api::category.category.update',
+//           },
+//           {
+//             action: 'delete',
+//             actionId: 'api::category.category.delete',
+//           },
+//           {
+//             action: 'createLocalization',
+//             actionId: 'api::category.category.createLocalization',
+//           },
+//         ],
+//       },
+//     ],
+//   },
+// ]

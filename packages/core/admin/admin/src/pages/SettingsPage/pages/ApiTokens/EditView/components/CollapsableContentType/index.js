@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { get, capitalize } from 'lodash';
+import React, { useState, useEffect } from 'react';
+import { capitalize } from 'lodash';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -18,34 +18,33 @@ const Border = styled.div`
 `;
 
 const CollapsableContentType = ({
-  actions,
+  controllers,
   label,
   orderNumber,
-  name,
   disabled,
   onExpanded,
   indexExpandendCollapsedContent,
 }) => {
   //   const { formatMessage } = useIntl();
   const {
-    value: { onChange, onChangeSelectAll, modifiedData },
+    value: { onChangeSelectAll, onChange, selectedActions },
   } = useApiTokenPermissionsContext();
   const [expanded, setExpanded] = useState(false);
 
-  const currentScopedModifiedData = useMemo(() => {
-    return get(modifiedData, name, {});
-  }, [modifiedData, name]);
+  // const currentScopedModifiedData = useMemo(() => {
+  //   return get(modifiedData, name, {});
+  // }, [modifiedData, name]);
 
-  const hasAllActionsSelected = useMemo(() => {
-    return Object.values(currentScopedModifiedData).every((action) => action === true);
-  }, [currentScopedModifiedData]);
+  // const hasAllActionsSelected = useMemo(() => {
+  //   return Object.values(currentScopedModifiedData).every((action) => action === true);
+  // }, [currentScopedModifiedData]);
 
-  const hasSomeActionsSelected = useMemo(() => {
-    return (
-      Object.values(currentScopedModifiedData).some((action) => action === true) &&
-      !hasAllActionsSelected
-    );
-  }, [currentScopedModifiedData, hasAllActionsSelected]);
+  // const hasSomeActionsSelected = useMemo(() => {
+  //   return (
+  //     Object.values(currentScopedModifiedData).some((action) => action === true) &&
+  //     !hasAllActionsSelected
+  //   );
+  // }, [currentScopedModifiedData, hasAllActionsSelected]);
 
   const handleExpandedAccordion = () => {
     setExpanded((s) => !s);
@@ -70,53 +69,62 @@ const CollapsableContentType = ({
     >
       <AccordionToggle title={capitalize(label)} />
       <AccordionContent>
-        <Flex justifyContent="space-between" alignItems="center" padding={4}>
-          <Box paddingRight={4}>
-            <Typography variant="sigma" textColor="neutral600">
-              permissions
-            </Typography>
-          </Box>
-          <Border />
-          <Box paddingLeft={4}>
-            <Checkbox
-              value={hasAllActionsSelected}
-              indeterminate={hasSomeActionsSelected}
-              onValueChange={(value) => {
-                onChangeSelectAll({ target: { name, value } });
-              }}
-              disabled={disabled}
-            >
-              Select all
-            </Checkbox>
-          </Box>
-        </Flex>
-        <Grid gap={4} padding={4}>
-          {Object.keys(actions).map((action) => {
-            const currentName = `${name}.${action}`;
-
-            return (
-              <GridItem col={4} key={action}>
-                <Checkbox
-                  value={actions[action]}
-                  name={currentName}
-                  onValueChange={(value) => {
-                    onChange({ target: { name: currentName, value } });
-                  }}
-                  disabled={disabled}
-                >
-                  {action}
-                </Checkbox>
-              </GridItem>
-            );
-          })}
-        </Grid>
+        {controllers?.map((controller) => {
+          return (
+            <Box>
+              <Flex justifyContent="space-between" alignItems="center" padding={4}>
+                <Box paddingRight={4}>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {controller?.controller}
+                  </Typography>
+                </Box>
+                <Border />
+                <Box paddingLeft={4}>
+                  <Checkbox
+                    value={controller.actions.every((action) =>
+                      selectedActions.includes(action.actionId)
+                    )}
+                    indeterminate={controller.actions.some((action) =>
+                      selectedActions.includes(action.actionId)
+                    )}
+                    onValueChange={() => {
+                      onChangeSelectAll({ target: { value: [...controller.actions] } });
+                    }}
+                    disabled={disabled}
+                  >
+                    Select all
+                  </Checkbox>
+                </Box>
+              </Flex>
+              <Grid gap={4} padding={4}>
+                {controller?.actions &&
+                  controller?.actions.map((action) => {
+                    return (
+                      <GridItem col={4} key={action.actionId}>
+                        <Checkbox
+                          value={selectedActions.includes(action.actionId)}
+                          name={action.actionId}
+                          onValueChange={() => {
+                            onChange({ target: { value: action.actionId } });
+                          }}
+                          disabled={disabled}
+                        >
+                          {action.action}
+                        </Checkbox>
+                      </GridItem>
+                    );
+                  })}
+              </Grid>
+            </Box>
+          );
+        })}
       </AccordionContent>
     </Accordion>
   );
 };
 
 CollapsableContentType.defaultProps = {
-  actions: null,
+  controllers: [],
   orderNumber: 0,
   disabled: false,
   onExpanded: () => null,
@@ -124,10 +132,9 @@ CollapsableContentType.defaultProps = {
 };
 
 CollapsableContentType.propTypes = {
-  actions: PropTypes.objectOf(PropTypes.bool),
+  controllers: PropTypes.array,
   orderNumber: PropTypes.number,
   label: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   onExpanded: PropTypes.func,
   indexExpandendCollapsedContent: PropTypes.number,

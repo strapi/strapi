@@ -1,18 +1,23 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { set } from 'lodash';
+import { set, pull } from 'lodash';
 import togglePermissions from './utils/togglePermissions';
 
 export const initialState = {
-  initialData: {},
-  modifiedData: {},
+  data: {},
+  selectedActions: [],
 };
 
 const reducer = (state, action) =>
   produce(state, (draftState) => {
     switch (action.type) {
       case 'ON_CHANGE': {
-        set(draftState, ['modifiedData', ...action.name.split('.')], action.value);
+        if (draftState.selectedActions.includes(action.value)) {
+          pull(draftState.selectedActions, action.value);
+        } else {
+          // fill(draftState.selectedActions, action.value);
+          draftState.selectedActions.push(action.value);
+        }
         break;
       }
       case 'ON_CHANGE_SELECT_ALL': {

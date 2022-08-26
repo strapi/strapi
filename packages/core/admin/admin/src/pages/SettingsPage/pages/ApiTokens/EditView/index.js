@@ -30,7 +30,7 @@ import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
 import { axiosInstance } from '../../../../../core/utils';
-import { getDateOfExpiration, schema, getActionsState } from './utils';
+import { getDateOfExpiration, schema } from './utils';
 import LoadingView from './components/LoadingView';
 import HeaderContentBox from './components/ContentBox';
 import Permissions from './components/Permissions';
@@ -53,7 +53,9 @@ const ApiTokenCreateView = () => {
   const {
     allowedActions: { canCreate, canUpdate },
   } = useRBAC(adminPermissions.settings['api-tokens']);
-  const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, permissions));
+  const [state, dispatch] = useReducer(reducer, initialState, (state) =>
+    init(state, permissions.data)
+  );
   const [lang] = usePersistentState('strapi-admin-language', 'en');
 
   const {
@@ -137,66 +139,67 @@ const ApiTokenCreateView = () => {
     unlockApp();
   };
 
-  const hasAllActionsSelected = useMemo(() => {
-    const {
-      modifiedData: { collectionTypes, singleTypes, custom },
-    } = state;
+  // const hasAllActionsSelected = useMemo(() => {
+  //   const {
+  //     modifiedData: { collectionTypes, singleTypes, custom },
+  //   } = state;
 
-    const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
+  //   const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
 
-    const areAllActionsSelected = getActionsState(dataToCheck, true);
+  //   const areAllActionsSelected = getActionsState(dataToCheck, true);
 
-    return areAllActionsSelected;
-  }, [state]);
+  //   return areAllActionsSelected;
+  // }, [state]);
 
-  const hasAllActionsNotSelected = useMemo(() => {
-    const {
-      modifiedData: { collectionTypes, singleTypes, custom },
-    } = state;
+  // const hasAllActionsNotSelected = useMemo(() => {
+  //   const {
+  //     modifiedData: { collectionTypes, singleTypes, custom },
+  //   } = state;
 
-    const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
+  //   const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
 
-    const areAllActionsNotSelected = getActionsState(dataToCheck, false);
+  //   const areAllActionsNotSelected = getActionsState(dataToCheck, false);
 
-    return areAllActionsNotSelected;
-  }, [state]);
+  //   return areAllActionsNotSelected;
+  // }, [state]);
 
-  const hasReadOnlyActionsSelected = useMemo(() => {
-    const {
-      modifiedData: { collectionTypes, singleTypes, custom },
-    } = state;
+  // const hasReadOnlyActionsSelected = useMemo(() => {
+  //   const {
+  //     modifiedData: { collectionTypes, singleTypes, custom },
+  //   } = state;
 
-    const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
+  //   const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
 
-    const areAllActionsReadOnly = getActionsState(dataToCheck, false, ['find', 'findOne']);
+  //   const areAllActionsReadOnly = getActionsState(dataToCheck, false, ['find', 'findOne']);
 
-    return areAllActionsReadOnly;
-  }, [state]);
+  //   return areAllActionsReadOnly;
+  // }, [state]);
 
   const tokenTypeValue = useMemo(() => {
-    if (hasAllActionsSelected && !hasReadOnlyActionsSelected) return 'full-access';
+    // if (hasAllActionsSelected && !hasReadOnlyActionsSelected) return 'full-access';
 
-    if (hasReadOnlyActionsSelected) return 'read-only';
+    // if (hasReadOnlyActionsSelected) return 'read-only';
 
-    if (hasAllActionsNotSelected) return null;
+    // if (hasAllActionsNotSelected) return null;
 
     return 'custom';
-  }, [hasAllActionsSelected, hasReadOnlyActionsSelected, hasAllActionsNotSelected]);
+  }, []);
 
-  const handleChangeCheckbox = ({ target: { name, value } }) => {
+  const handleChangeCheckbox = ({ target: { value } }) => {
     dispatch({
       type: 'ON_CHANGE',
-      name,
       value,
     });
   };
 
-  const handleChangeSelectAllCheckbox = ({ target: { name, value } }) =>
-    dispatch({
-      type: 'ON_CHANGE_SELECT_ALL',
-      keys: name.split('.'),
-      value,
+  const handleChangeSelectAllCheckbox = ({ target: { value } }) => {
+    value.forEach((action) => {
+      dispatch({
+        type: 'ON_CHANGE',
+        value: action.actionId,
+      });
     });
+  };
 
   const handleChangeSelectApiTokenType = ({ target: { value } }) => {
     const { modifiedData } = state;
