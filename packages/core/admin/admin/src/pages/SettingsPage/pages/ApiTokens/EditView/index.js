@@ -44,7 +44,7 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 
 const ButtonWithRightMargin = styled(Button)`
-  margin-right: 8px;
+  margin-right: ${({ theme }) => theme.spaces[2]}; ;
 `;
 
 const ApiTokenCreateView = () => {
