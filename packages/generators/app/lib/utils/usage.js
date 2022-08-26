@@ -56,7 +56,7 @@ function captureStderr(name, error) {
 const getProperties = (scope, error) => ({
   error: typeof error === 'string' ? error : error && error.message,
   os: os.type(),
-  platform: os.platform(),
+  osPlatform: os.platform(),
   osArch: os.arch(),
   osRelease: os.release(),
   version: scope.strapiVersion,

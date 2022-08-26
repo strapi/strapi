@@ -59,7 +59,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
   sentry.configureScope(function scope(sentryScope) {
     const tags = {
       os: os.type(),
-      platform: os.platform(),
+      osPlatform: os.platform(),
       osArch: os.arch(),
       osRelease: os.release(),
       version: scope.strapiVersion,

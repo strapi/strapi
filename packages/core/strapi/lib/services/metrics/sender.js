@@ -44,7 +44,7 @@ module.exports = (strapi) => {
   const anonymousMetadata = {
     environment: strapi.config.environment,
     os: os.type(),
-    platform: os.platform(),
+    osPlatform: os.platform(),
     osArch: os.arch(),
     osRelease: os.release(),
     nodeVersion: process.versions.node,
