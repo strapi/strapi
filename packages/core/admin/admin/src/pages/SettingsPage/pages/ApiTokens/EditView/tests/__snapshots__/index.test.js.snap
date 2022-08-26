@@ -1416,7 +1416,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-labelledby="select-1-label select-1-content"
                             class="c49"
                             id="select-1"
-                            name="duration"
+                            name="lifespan"
                             type="button"
                           />
                           <div
@@ -1432,7 +1432,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                   class="c53"
                                   id="select-1-content"
                                 >
-                                  Select
+                                  Unlimited
                                 </span>
                               </div>
                             </div>
@@ -2195,7 +2195,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 }
 
 .c63 {
-  color: #32324d;
+  color: #666687;
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -2205,7 +2205,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 }
 
 .c69 {
-  color: #666687;
+  color: #32324d;
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -3504,7 +3504,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-labelledby="select-3-label select-3-content"
                             class="c59"
                             id="select-3"
-                            name="duration"
+                            name="lifespan"
                             type="button"
                           />
                           <div
@@ -3520,7 +3520,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                   class="c63"
                                   id="select-3-content"
                                 >
-                                  7 days
+                                  Unlimited
                                 </span>
                               </div>
                             </div>
@@ -3615,7 +3615,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                   class="c69"
                                   id="select-4-content"
                                 >
-                                  Select
+                                  Read-only
                                 </span>
                               </div>
                             </div>
