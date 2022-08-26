@@ -1,5 +1,7 @@
 'use strict';
 
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
 module.exports = {
   CONTENT_TYPE_SECTION: 'contentTypes',
   SUPER_ADMIN_CODE: 'strapi-super-admin',
@@ -14,5 +16,12 @@ module.exports = {
     READ_ONLY: 'read-only',
     FULL_ACCESS: 'full-access',
     CUSTOM: 'custom',
+  },
+  // The front-end only displays these values
+  API_TOKEN_LIFESPANS: {
+    UNLIMITED: null,
+    DAYS_7: 7 * DAY_IN_MS,
+    DAYS_30: 30 * DAY_IN_MS,
+    DAYS_90: 90 * DAY_IN_MS,
   },
 };

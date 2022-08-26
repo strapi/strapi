@@ -10,7 +10,12 @@ const apiTokenCreationSchema = yup
     description: yup.string().optional(),
     type: yup.string().oneOf(Object.values(constants.API_TOKEN_TYPE)).required(),
     permissions: yup.array().of(yup.string()).nullable(),
-    lifespan: yup.number().integer().min(1).nullable(),
+    lifespan: yup
+      .number()
+      .integer()
+      .min(1)
+      .oneOf(Object.values(constants.API_TOKEN_LIFESPANS))
+      .nullable(),
   })
   .noUnknown()
   .strict();
@@ -22,7 +27,12 @@ const apiTokenUpdateSchema = yup
     description: yup.string().nullable(),
     type: yup.string().oneOf(Object.values(constants.API_TOKEN_TYPE)).notNull(),
     permissions: yup.array().of(yup.string()).nullable(),
-    lifespan: yup.number().integer().min(1).nullable(),
+    lifespan: yup
+      .number()
+      .integer()
+      .min(1)
+      .oneOf(Object.values(constants.API_TOKEN_LIFESPANS))
+      .nullable(),
   })
   .noUnknown()
   .strict();
