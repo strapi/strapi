@@ -12,6 +12,10 @@ export const useRelation = (name, { relation, search }) => {
       page: pageParam,
     });
 
+    if (relation?.onLoad) {
+      relation.onLoad(data);
+    }
+
     return data;
   };
 

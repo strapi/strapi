@@ -75,6 +75,30 @@ describe('useRelation', () => {
     });
   });
 
+  test('calls onLoad callback', async () => {
+    const spy = jest.fn();
+    const FIXTURE_DATA = {
+      values: [1, 2],
+      pagination: {
+        page: 1,
+        total: 3,
+      },
+    };
+    axiosInstance.get = jest.fn().mockResolvedValue({
+      data: FIXTURE_DATA,
+    });
+    const { waitForNextUpdate } = await setup(undefined, {
+      relation: {
+        onLoad: spy,
+      },
+    });
+
+    await waitForNextUpdate();
+
+    expect(spy).toBeCalledTimes(1);
+    expect(spy).toBeCalledWith(FIXTURE_DATA);
+  });
+
   test('fetch relations with different limit', async () => {
     const { waitForNextUpdate } = await setup(undefined, {
       relation: { pageParams: { limit: 5 } },

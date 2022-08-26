@@ -23,11 +23,14 @@ export const RelationInputWrapper = ({
   targetModel,
 }) => {
   const { formatMessage } = useIntl();
-  const { addRelation, removeRelation, modifiedData } = useCMEditViewDataManager();
+  const { addRelation, removeRelation, loadRelation, modifiedData } = useCMEditViewDataManager();
 
   const { relations, search, searchFor } = useRelation(name, {
     relation: {
       endpoint: endpoints.relation,
+      onload(data) {
+        loadRelation({ target: { name, value: data } });
+      },
       pageParams: {
         pageSize: 10,
       },

@@ -294,6 +294,41 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
     });
   });
 
+  describe('LOAD_RELATION', () => {
+    it('should add loaded relations to initalData', () => {
+      const state = {
+        ...initialState,
+        initialData: {},
+      };
+
+      let nextState = reducer(state, {
+        type: 'LOAD_RELATION',
+        keys: ['relation'],
+        value: [{ id: 1 }],
+      });
+
+      expect(nextState).toEqual({
+        ...initialState,
+        initialData: {
+          relation: [{ id: 1 }],
+        },
+      });
+
+      expect(
+        reducer(nextState, {
+          type: 'LOAD_RELATION',
+          keys: ['relation'],
+          value: [{ id: 2 }],
+        })
+      ).toEqual({
+        ...initialState,
+        initialData: {
+          relation: [{ id: 2 }, { id: 1 }],
+        },
+      });
+    });
+  });
+
   describe('REMOVE_RELATION', () => {
     it('should remove a relation from modifiedData', () => {
       const state = {

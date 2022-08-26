@@ -72,6 +72,19 @@ const reducer = (state, action) =>
 
         break;
       }
+      case 'LOAD_RELATION': {
+        const path = ['initialData', ...action.keys];
+        const currentValue = get(state, path);
+        const { value } = action;
+
+        if (Array.isArray(currentValue)) {
+          set(draftState, path, [...value, ...currentValue]);
+        } else {
+          set(draftState, path, value);
+        }
+
+        break;
+      }
       case 'ADD_RELATION': {
         const path = ['modifiedData', ...action.keys, 'add'];
         const currentValue = get(state, path);
