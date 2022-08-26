@@ -71,7 +71,7 @@ module.exports = {
 
     const token = await apiTokenService.refresh(id);
 
-    ctx.created({ data: token });
+    ctx.send({ data: token });
   },
 
   async list(ctx) {
