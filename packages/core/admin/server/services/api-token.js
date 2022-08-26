@@ -2,7 +2,7 @@
 
 const crypto = require('crypto');
 const { isNil } = require('lodash/fp');
-const { omit, difference, isEmpty, map, isArray } = require('lodash/fp');
+const { omit, difference, isEmpty, map, isArray, uniq } = require('lodash/fp');
 const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
 const constants = require('./constants');
 
@@ -195,7 +195,7 @@ const create = async (attributes) => {
     //   data: attributes.permissions.map(action => ({ action, token: apiToken })),
     // });
     await Promise.all(
-      attributes.permissions.map((action) =>
+      uniq(attributes.permissions).map((action) =>
         strapi.query('admin::token-permission').create({
           data: { action, token: apiToken },
         })
@@ -357,14 +357,17 @@ const update = async (id, attributes) => {
 
   // custom tokens need to have their permissions updated as well
   if (updatedToken.type === constants.API_TOKEN_TYPE.CUSTOM && attributes.permissions) {
-    const currentPermissionsResult =
-      (await strapi.entityService.load('admin::api-token', updatedToken, 'permissions')) || [];
-
-    const actionsToDelete = difference(
-      map('action', currentPermissionsResult),
-      attributes.permissions
+    const currentPermissionsResult = await strapi.entityService.load(
+      'admin::api-token',
+      updatedToken,
+      'permissions'
     );
-    const actionsToAdd = difference(attributes.permissions, originalToken.permissions);
+
+    const currentPermissions = map('action', currentPermissionsResult || []);
+    const newPermissions = uniq(attributes.permissions);
+
+    const actionsToDelete = difference(currentPermissions, newPermissions);
+    const actionsToAdd = difference(newPermissions, currentPermissions);
 
     // TODO: improve efficiency here
     // method using a loop -- works but very inefficient
