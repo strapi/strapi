@@ -38,7 +38,7 @@ const deleteFixtures = async () => {
   }
 };
 
-describe('Content Manager End to End', () => {
+describe('Relations', () => {
   beforeAll(async () => {
     await builder
       .addContentTypes(
