@@ -62,7 +62,7 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
   }
 
   // Custom type tokens should always have permissions attached to them
-  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM && isEmpty(attributes.permissions)) {
+  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM && !isArray(attributes.permissions)) {
     throw new ValidationError('Missing permissions attribute for custom token');
   }
 };
