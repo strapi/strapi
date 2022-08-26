@@ -183,6 +183,8 @@ const ApiTokenCreateView = () => {
     return 'custom';
   }, [hasAllActionsSelected, hasReadOnlyActionsSelected, hasAllActionsNotSelected]);
 
+  console.log('tokenType', tokenTypeValue);
+
   const handleChangeCheckbox = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
@@ -425,7 +427,7 @@ const ApiTokenCreateView = () => {
                                 id: 'Settings.apiTokens.form.type',
                                 defaultMessage: 'Token type',
                               })}
-                              value={tokenTypeValue}
+                              value={values.type}
                               error={
                                 errors.type
                                   ? formatMessage(
