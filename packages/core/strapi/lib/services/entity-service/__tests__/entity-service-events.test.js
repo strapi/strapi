@@ -16,27 +16,33 @@ describe('Entity service triggers webhooks', () => {
   let entity = { attr: 'value' };
 
   beforeAll(() => {
+    const fakeDB = {
+      count: () => 0,
+      create: ({ data }) => data,
+      update: ({ data }) => data,
+      findOne: () => entity,
+      findMany: () => [entity, entity],
+      delete: () => ({}),
+      deleteMany: () => ({}),
+      load: () => ({}),
+    };
+
+    global.strapi = {
+      getModel: () => ({
+        kind: 'singleType',
+        modelName: 'test-model',
+        privateAttributes: [],
+        attributes: {
+          attr: { type: 'string' },
+        },
+      }),
+      query: () => fakeDB,
+    };
+
     instance = createEntityService({
-      strapi: {
-        getModel: () => ({
-          kind: 'singleType',
-          modelName: 'test-model',
-          privateAttributes: [],
-          attributes: {
-            attr: { type: 'string' },
-          },
-        }),
-      },
+      strapi: global.strapi,
       db: {
-        query: () => ({
-          count: () => 0,
-          create: ({ data }) => data,
-          update: ({ data }) => data,
-          findOne: () => entity,
-          findMany: () => [entity, entity],
-          delete: () => ({}),
-          deleteMany: () => ({}),
-        }),
+        query: () => fakeDB,
       },
       eventHub,
       entityValidator,
