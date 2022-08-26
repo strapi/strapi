@@ -3,6 +3,7 @@
 const { ApplicationError } = require('@strapi/utils').errors;
 const { omit } = require('lodash/fp');
 const createContext = require('../../../../../../test/helpers/create-context');
+const constants = require('../../services/constants');
 const apiTokenController = require('../api-token');
 
 describe('API Token Controller', () => {
@@ -65,8 +66,8 @@ describe('API Token Controller', () => {
       expect(created).toHaveBeenCalled();
     });
 
-    test('Create API Token with lifespan', async () => {
-      const lifespan = 90 * 24 * 60 * 60 * 1000; // 90 days
+    test('Create API Token with valid lifespan', async () => {
+      const lifespan = constants.API_TOKEN_LIFESPANS.DAYS_7;
       const createBody = {
         ...body,
         lifespan,
@@ -159,7 +160,8 @@ describe('API Token Controller', () => {
     });
 
     test('Ignores a received expiresAt', async () => {
-      const lifespan = 90 * 24 * 60 * 60 * 1000; // 90 days
+      const lifespan = constants.API_TOKEN_LIFESPANS.DAYS_7;
+
       const createBody = {
         ...body,
         expiresAt: 1234,
