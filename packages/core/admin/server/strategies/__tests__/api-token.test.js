@@ -86,7 +86,7 @@ describe('API Token Auth Strategy', () => {
     });
 
     test('Expired token throws on authorize', async () => {
-      const pastDate = Date.now() - 1;
+      const pastDate = new Date(Date.now() - 1).toISOString();
 
       const getBy = jest.fn(() => {
         return {
@@ -109,9 +109,11 @@ describe('API Token Auth Strategy', () => {
         },
       };
 
-      expect(async () => {
-        await apiTokenStrategy.authenticate(ctx);
-      }).rejects.toThrow(new UnauthorizedError('Token expired'));
+      const { authenticated, error } = await apiTokenStrategy.authenticate(ctx);
+
+      expect(authenticated).toBe(false);
+      expect(error).toBeInstanceOf(UnauthorizedError);
+      expect(error.message).toBe('Token expired');
 
       expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
     });

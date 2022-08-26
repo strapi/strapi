@@ -368,8 +368,8 @@ const update = async (id, attributes) => {
   }
 
   const changingTypeToCustom =
-    attributes.type === constants.API_TOKEN_TYPE.custom &&
-    originalToken.type !== constants.API_TOKEN_TYPE.custom;
+    attributes.type === constants.API_TOKEN_TYPE.CUSTOM &&
+    originalToken.type !== constants.API_TOKEN_TYPE.CUSTOM;
 
   // if we're updating the permissions on any token type, or changing from non-custom to custom, ensure they're still valid
   // if neither type nor permissions are changing, we don't need to validate again or else we can't allow partial update

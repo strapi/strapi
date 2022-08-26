@@ -13,7 +13,7 @@ const RelationSingle = ({ metadatas, value }) => {
     <TypographyMaxWidth textColor="neutral800" ellipsis>
       <CellValue
         type={metadatas.mainField.schema.type}
-        value={value[metadatas.mainField.name] || value.id}
+        value={value[metadatas.mainField.name] ?? value.id}
       />
     </TypographyMaxWidth>
   );
