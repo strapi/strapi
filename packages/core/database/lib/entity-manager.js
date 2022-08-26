@@ -346,7 +346,7 @@ const createEntityManager = (db) => {
     async attachRelations(uid, id, data) {
       const { attributes } = db.metadata.get(uid);
 
-      for (const attributeName in attributes) {
+      for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
         const isValidLink = has(attributeName, data) && !isNil(data[attributeName]);
@@ -419,6 +419,8 @@ const createEntityManager = (db) => {
           const typeAndFieldIdsMap = {};
 
           for (const { field, related_type: relatedType, related_id: relatedId } of rows) {
+            if (!relatedType) continue; // if !relatedType then it's a component. No need to handle that case
+
             const isMorphOne =
               db.metadata.get(relatedType).attributes[field].relation === 'morphOne';
             if (isMorphOne) {
@@ -525,7 +527,7 @@ const createEntityManager = (db) => {
     async updateRelations(uid, id, data) {
       const { attributes } = db.metadata.get(uid);
 
-      for (const attributeName in attributes) {
+      for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
         if (attribute.type !== 'relation' || !has(attributeName, data)) {
@@ -625,6 +627,8 @@ const createEntityManager = (db) => {
           const where = { $or: [] };
 
           for (const { field, related_type: relatedType, related_id: relatedId } of rows) {
+            if (!relatedType) continue; // if !relatedType then it's a component. No need to handle that case
+
             const isMorphOne =
               db.metadata.get(relatedType).attributes[field].relation === 'morphOne';
             if (isMorphOne) {
