@@ -5,6 +5,7 @@ const { has, prop, omit, toString } = require('lodash/fp');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { getComponentAttributes } = require('@strapi/utils').contentTypes;
 
 const omitComponentData = (contentType, data) => {
   const { attributes } = contentType;
@@ -102,30 +103,12 @@ const createComponents = async (uid, data) => {
 
 /**
  * @param {str} uid
- * @param {*} entity
- * @return {Array<{uid: string, data: *}>}
+ * @param {object} entity
+ * @return {Promise<Array<{uid: string, data: object}>>}
  */
 const getComponents = async (uid, entity) => {
-  const { attributes } = strapi.getModel(uid);
-  const components = [];
-
-  for (const attributeName in attributes) {
-    const attribute = attributes[attributeName];
-
-    if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
-      const value = await strapi.query(uid).load(entity, attributeName);
-      if (!value) continue;
-
-      _.castArray(value).forEach((component) => {
-        components.push({
-          uid: attribute.type === 'component' ? attribute.component : component.__component,
-          data: component,
-        });
-      });
-    }
-  }
-
-  return components;
+  const componentAttributes = getComponentAttributes(strapi.getModel(uid));
+  return strapi.query(uid).load(entity, componentAttributes);
 };
 
 /*
@@ -298,7 +281,10 @@ const deleteComponents = async (uid, entityToDelete) => {
     if (attribute.type === 'component') {
       const { component: componentUID } = attribute;
 
-      const value = await strapi.query(uid).load(entityToDelete, attributeName);
+      // Load attribute value if it's not already loaded
+      const value =
+        entityToDelete[attributeName] ||
+        (await strapi.query(uid).load(entityToDelete, attributeName));
 
       if (!value) {
         continue;
@@ -314,7 +300,9 @@ const deleteComponents = async (uid, entityToDelete) => {
     }
 
     if (attribute.type === 'dynamiczone') {
-      const value = await strapi.query(uid).load(entityToDelete, attributeName);
+      const value =
+        entityToDelete[attributeName] ||
+        (await strapi.query(uid).load(entityToDelete, attributeName));
 
       if (!value) {
         continue;

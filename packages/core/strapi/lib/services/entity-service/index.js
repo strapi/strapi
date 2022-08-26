@@ -18,6 +18,7 @@ const {
   createComponents,
   updateComponents,
   deleteComponent,
+  deleteComponents,
 } = require('./components');
 const { transformParamsToQuery, pickSelectionParams } = require('./params');
 const { applyTransforms } = require('./attributes');
@@ -217,7 +218,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const componentsToDelete = await getComponents(uid, entityToDelete);
 
     await db.query(uid).delete({ where: { id: entityToDelete.id } });
-    await Promise.all(componentsToDelete.map((compo) => deleteComponent(compo.uid, compo.data)));
+    await deleteComponents(uid, componentsToDelete);
 
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
