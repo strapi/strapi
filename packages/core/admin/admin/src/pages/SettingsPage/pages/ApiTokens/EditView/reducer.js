@@ -1,7 +1,6 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { set, pull } from 'lodash';
-import togglePermissions from './utils/togglePermissions';
+import { pull } from 'lodash';
 
 export const initialState = {
   data: {},
@@ -15,26 +14,20 @@ const reducer = (state, action) =>
         if (draftState.selectedActions.includes(action.value)) {
           pull(draftState.selectedActions, action.value);
         } else {
-          // fill(draftState.selectedActions, action.value);
           draftState.selectedActions.push(action.value);
         }
         break;
       }
-      case 'ON_CHANGE_SELECT_ALL': {
-        const { pathToValue, updatedValues } = togglePermissions(action, state);
-
-        set(draftState, pathToValue, { ...updatedValues });
+      case 'SELECT_ALL_ACTIONS': {
+        draftState.selectedActions = [...draftState.data.allActionsIds];
 
         break;
       }
       case 'ON_CHANGE_READ_ONLY': {
-        const { pathToValue, updatedValues } = togglePermissions(action, state, [
-          'find',
-          'findOne',
-        ]);
-
-        set(draftState, pathToValue, { ...updatedValues });
-
+        const onlyReadOnlyActions = draftState.data.allActionsIds.filter(
+          (actionId) => actionId.includes('find') || actionId.includes('findOne')
+        );
+        draftState.selectedActions = [...onlyReadOnlyActions];
         break;
       }
       default:

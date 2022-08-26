@@ -139,51 +139,47 @@ const ApiTokenCreateView = () => {
     unlockApp();
   };
 
-  // const hasAllActionsSelected = useMemo(() => {
-  //   const {
-  //     modifiedData: { collectionTypes, singleTypes, custom },
-  //   } = state;
+  const hasAllActionsSelected = useMemo(() => {
+    const { data, selectedActions } = state;
 
-  //   const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
+    const areAllActionsSelected = data.allActionsIds.every((actionId) =>
+      selectedActions.includes(actionId)
+    );
 
-  //   const areAllActionsSelected = getActionsState(dataToCheck, true);
+    return areAllActionsSelected;
+  }, [state]);
 
-  //   return areAllActionsSelected;
-  // }, [state]);
+  const hasAllActionsNotSelected = useMemo(() => {
+    const { selectedActions } = state;
 
-  // const hasAllActionsNotSelected = useMemo(() => {
-  //   const {
-  //     modifiedData: { collectionTypes, singleTypes, custom },
-  //   } = state;
+    const areAllActionsNotSelected = selectedActions.length === 0;
 
-  //   const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
+    return areAllActionsNotSelected;
+  }, [state]);
 
-  //   const areAllActionsNotSelected = getActionsState(dataToCheck, false);
+  const hasReadOnlyActionsSelected = useMemo(() => {
+    const { data, selectedActions } = state;
 
-  //   return areAllActionsNotSelected;
-  // }, [state]);
+    const areAllActionsReadOnly = data.allActionsIds.every((actionId) => {
+      if (actionId.includes('find') || actionId.includes('findOne')) {
+        return selectedActions.includes(actionId);
+      }
 
-  // const hasReadOnlyActionsSelected = useMemo(() => {
-  //   const {
-  //     modifiedData: { collectionTypes, singleTypes, custom },
-  //   } = state;
+      return !selectedActions.includes(actionId);
+    });
 
-  //   const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
-
-  //   const areAllActionsReadOnly = getActionsState(dataToCheck, false, ['find', 'findOne']);
-
-  //   return areAllActionsReadOnly;
-  // }, [state]);
+    return areAllActionsReadOnly;
+  }, [state]);
 
   const tokenTypeValue = useMemo(() => {
-    // if (hasAllActionsSelected && !hasReadOnlyActionsSelected) return 'full-access';
+    if (hasAllActionsSelected && !hasReadOnlyActionsSelected) return 'full-access';
 
-    // if (hasReadOnlyActionsSelected) return 'read-only';
+    if (hasReadOnlyActionsSelected) return 'read-only';
 
-    // if (hasAllActionsNotSelected) return null;
+    if (hasAllActionsNotSelected) return null;
 
     return 'custom';
-  }, []);
+  }, [hasAllActionsSelected, hasReadOnlyActionsSelected, hasAllActionsNotSelected]);
 
   const handleChangeCheckbox = ({ target: { value } }) => {
     dispatch({
@@ -202,28 +198,14 @@ const ApiTokenCreateView = () => {
   };
 
   const handleChangeSelectApiTokenType = ({ target: { value } }) => {
-    const { modifiedData } = state;
-
     if (value === 'full-access') {
-      Object.keys(modifiedData).forEach((contentTypes) => {
-        Object.keys(modifiedData[contentTypes]).forEach((contentType) => {
-          dispatch({
-            type: 'ON_CHANGE_SELECT_ALL',
-            keys: [contentTypes, contentType],
-            value: true,
-          });
-        });
+      dispatch({
+        type: 'SELECT_ALL_ACTIONS',
       });
     }
     if (value === 'read-only') {
-      Object.keys(modifiedData).forEach((contentTypes) => {
-        Object.keys(modifiedData[contentTypes]).forEach((contentType) => {
-          dispatch({
-            type: 'ON_CHANGE_READ_ONLY',
-            keys: [contentTypes, contentType],
-            value: false,
-          });
-        });
+      dispatch({
+        type: 'ON_CHANGE_READ_ONLY',
       });
     }
   };
