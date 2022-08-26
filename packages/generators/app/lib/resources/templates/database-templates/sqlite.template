@@ -1,0 +1,3 @@
+# Database
+DATABASE_CLIENT=<%= client %>
+DATABASE_FILENAME=<%= connection.filename %>

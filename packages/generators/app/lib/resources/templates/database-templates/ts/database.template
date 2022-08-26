@@ -1,0 +1,43 @@
+import path from 'path';
+
+export default ({ env }) => {
+	const client = env('DATABASE_CLIENT', 'sqlite')
+
+	const connections = {
+		mysql: {
+			connection: {
+		    host: env('DATABASE_HOST', 'localhost'),
+		    port: env.int('DATABASE_PORT', 3306),
+		    database: env('DATABASE_NAME', 'strapi'),
+		    user: env('DATABASE_USERNAME', 'strapi'),
+		    password: env('DATABASE_PASSWORD', 'strapi'),
+		    ssl: env.bool('DATABASE_SSL', false),
+			},
+		},
+		postgres: {
+			connection: {
+		    host: env('DATABASE_HOST', 'localhost'),
+		    port: env.int('DATABASE_PORT', 5431),
+		    database: env('DATABASE_NAME', 'strapi'),
+		    user: env('DATABASE_USERNAME', 'strapi'),
+		    password: env('DATABASE_PASSWORD', 'strapi'),
+		    ssl: env.bool('DATABASE_SSL', false),
+			},
+	  },
+		sqlite: {
+			connection: {
+	      filename: path.join(__dirname, '..', '..', env('DATABASE_FILENAME', 'data.db')),
+	    },
+	    useNullAsDefault: true,
+		}
+	}
+
+	const connection = env('DATABASE_URL') ? { connection: env('DATABASE_URL') } : connections[client]
+
+	return {
+    connection: {
+      client,
+      ...connection,
+    },
+	};
+}

@@ -4,11 +4,18 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 
-module.exports = ({ connection, client, useTypescript }) => {
+const createDatabaseConfig = ({ useTypescript }) => {
   const language = useTypescript ? 'ts' : 'js';
   const tmpl = fs.readFileSync(
-    path.join(__dirname, language, 'database-templates', `${client}.template`)
+    path.join(__dirname, 'database-templates', language, `database.template`)
   );
+  const compile = _.template(tmpl);
+
+  return compile();
+};
+
+const generateDbEnvariables = ({ connection, client }) => {
+  const tmpl = fs.readFileSync(path.join(__dirname, 'database-templates', `${client}.template`));
   const compile = _.template(tmpl);
 
   return compile({
@@ -19,3 +26,5 @@ module.exports = ({ connection, client, useTypescript }) => {
     },
   });
 };
+
+module.exports = { createDatabaseConfig, generateDbEnvariables };
