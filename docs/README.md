@@ -1,8 +1,10 @@
-# Docs
+# Strapi contributor documentation
 
-This is the technical documentation of the project. If you want to contribute to Strapi you are in the right place 🚀.
+> If you are looking for the official Strapi documentation, it is available [here](https://docs.strapi.io)
 
-> If you are looking for the official Strapi document it is available [here](https://docs.strapi.io)
+This documentation is a contributor documentation made for anyone that wants to contribute to the project.
+
+To run the documentation website, follow the instructions below.
 
 ### Installation
 
