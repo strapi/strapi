@@ -3,11 +3,6 @@
 const createEntityService = require('..');
 const entityValidator = require('../../entity-validator');
 
-jest.mock('../components', () => ({
-  ...jest.requireActual('../components'),
-  getComponents: jest.fn(),
-}));
-
 describe('Entity service triggers webhooks', () => {
   global.strapi = {
     getModel: () => ({}),

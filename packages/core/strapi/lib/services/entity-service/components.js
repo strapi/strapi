@@ -104,10 +104,12 @@ const createComponents = async (uid, data) => {
 /**
  * @param {str} uid
  * @param {object} entity
- * @return {Promise<{uid: string, entity: object}[]>}
+ * @return {Promise<{uid: string, entity: object}>}
  */
 const getComponents = async (uid, entity) => {
   const componentAttributes = getComponentAttributes(strapi.getModel(uid));
+
+  if (_.isEmpty(componentAttributes)) return {};
   return strapi.query(uid).load(entity, componentAttributes);
 };
 
