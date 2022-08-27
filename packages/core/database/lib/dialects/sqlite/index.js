@@ -68,6 +68,10 @@ class SqliteDialect extends Dialect {
       }
     }
   }
+
+  canAddIncrements() {
+    return false;
+  }
 }
 
 module.exports = SqliteDialect;

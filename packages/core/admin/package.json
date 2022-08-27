@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "4.3.4",
+  "version": "4.3.6",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -34,7 +34,8 @@
     "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
-    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
+    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce:cov": "cross-env IS_EE=false jest --config ./jest.config.front.js --coverage"
   },
   "dependencies": {
     "@babel/core": "7.18.10",
@@ -50,12 +51,12 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.7",
-    "@strapi/babel-plugin-switch-ee-ce": "4.3.4",
+    "@strapi/babel-plugin-switch-ee-ce": "4.3.6",
     "@strapi/design-system": "1.2.1",
-    "@strapi/helper-plugin": "4.3.4",
+    "@strapi/helper-plugin": "4.3.6",
     "@strapi/icons": "1.2.1",
-    "@strapi/typescript-utils": "4.3.4",
-    "@strapi/utils": "4.3.4",
+    "@strapi/typescript-utils": "4.3.6",
+    "@strapi/utils": "4.3.6",
     "axios": "0.27.2",
     "babel-loader": "8.2.5",
     "babel-plugin-styled-components": "2.0.2",
@@ -112,7 +113,7 @@
     "react-error-boundary": "3.1.1",
     "react-fast-compare": "^3.2.0",
     "react-helmet": "^6.1.0",
-    "react-intl": "5.20.2",
+    "react-intl": "5.25.1",
     "react-is": "^17.0.2",
     "react-query": "3.24.3",
     "react-redux": "7.2.8",
@@ -140,9 +141,9 @@
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
     "@testing-library/user-event": "13.5.0",
-    "react-test-renderer": "^17.0.2",
     "duplicate-dependencies-webpack-plugin": "^1.0.2",
     "glob": "8.0.3",
+    "react-test-renderer": "^17.0.2",
     "speed-measure-webpack-plugin": "1.5.0",
     "webpack-bundle-analyzer": "^4.5.0"
   },

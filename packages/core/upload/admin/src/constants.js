@@ -77,7 +77,13 @@ export const AssetDefinition = PropTypes.shape({
 
 export const CrumbDefinition = PropTypes.shape({
   id: PropTypes.number,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string.isRequired,
+    }),
+  ]).isRequired,
   href: PropTypes.string,
 });
 
