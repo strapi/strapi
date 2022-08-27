@@ -3,6 +3,11 @@
 const createEntityService = require('..');
 const entityValidator = require('../../entity-validator');
 
+jest.mock('../components', () => ({
+  ...jest.requireActual('../components'),
+  getComponents: jest.fn(),
+}));
+
 describe('Entity service triggers webhooks', () => {
   global.strapi = {
     getModel: () => ({}),
@@ -16,33 +21,27 @@ describe('Entity service triggers webhooks', () => {
   let entity = { attr: 'value' };
 
   beforeAll(() => {
-    const fakeDB = {
-      count: () => 0,
-      create: ({ data }) => data,
-      update: ({ data }) => data,
-      findOne: () => entity,
-      findMany: () => [entity, entity],
-      delete: () => ({}),
-      deleteMany: () => ({}),
-      load: () => ({}),
-    };
-
-    global.strapi = {
-      getModel: () => ({
-        kind: 'singleType',
-        modelName: 'test-model',
-        privateAttributes: [],
-        attributes: {
-          attr: { type: 'string' },
-        },
-      }),
-      query: () => fakeDB,
-    };
-
     instance = createEntityService({
-      strapi: global.strapi,
+      strapi: {
+        getModel: () => ({
+          kind: 'singleType',
+          modelName: 'test-model',
+          privateAttributes: [],
+          attributes: {
+            attr: { type: 'string' },
+          },
+        }),
+      },
       db: {
-        query: () => fakeDB,
+        query: () => ({
+          count: () => 0,
+          create: ({ data }) => data,
+          update: ({ data }) => data,
+          findOne: () => entity,
+          findMany: () => [entity, entity],
+          delete: () => ({}),
+          deleteMany: () => ({}),
+        }),
       },
       eventHub,
       entityValidator,
