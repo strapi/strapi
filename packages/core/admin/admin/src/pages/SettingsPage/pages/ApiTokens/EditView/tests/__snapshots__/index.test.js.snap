@@ -1432,7 +1432,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                   class="c53"
                                   id="select-1-content"
                                 >
-                                  Unlimited
+                                  Select
                                 </span>
                               </div>
                             </div>
@@ -3520,7 +3520,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                   class="c63"
                                   id="select-3-content"
                                 >
-                                  Unlimited
+                                  Select
                                 </span>
                               </div>
                             </div>
@@ -3557,7 +3557,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                     <span
                       class="c67"
                     >
-                      Expiration date: November 22nd, 2021
+                      Expiration date: Unlimited
                     </span>
                   </div>
                 </div>

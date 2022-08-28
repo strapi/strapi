@@ -424,7 +424,7 @@ const ApiTokenCreateView = () => {
                                   defaultMessage: '90 days',
                                 })}
                               </Option>
-                              <Option>
+                              <Option value={null}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.unlimited',
                                   defaultMessage: 'Unlimited',
@@ -438,7 +438,7 @@ const ApiTokenCreateView = () => {
                                   defaultMessage: 'Expiration date',
                                 })}: ${getDateOfExpiration(
                                   apiToken?.createdAt,
-                                  values.lifespan || 7,
+                                  values.lifespan,
                                   lang
                                 )}`}
                             </Typography>
