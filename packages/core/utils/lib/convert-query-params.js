@@ -6,16 +6,7 @@
  * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
-const {
-  has,
-  isEmpty,
-  isObject,
-  isPlainObject,
-  cloneDeep,
-  get,
-  mergeAll,
-  isBoolean,
-} = require('lodash/fp');
+const { has, isEmpty, isObject, isPlainObject, cloneDeep, get, mergeAll } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
 const contentTypesUtils = require('./content-types');
@@ -183,10 +174,8 @@ const convertPopulateObject = (populate, schema) => {
     if (attribute.type === 'dynamiczone') {
       const populates = attribute.components
         .map((uid) => strapi.getModel(uid))
-        .map((schema) => {
-          const populate = convertNestedPopulate(subPopulate, schema);
-          return isBoolean(populate) && populate ? {} : populate;
-        })
+        .map((schema) => convertNestedPopulate(subPopulate, schema))
+        .map((populate) => (populate === true ? {} : populate)) // cast boolean to empty object to avoid merging issues
         .filter((populate) => populate !== false);
 
       if (isEmpty(populates)) {
