@@ -1,6 +1,7 @@
 'use strict';
 
-const { merge } = require('lodash/fp');
+const { merge, map, difference, uniq } = require('lodash/fp');
+const { pipeAsync } = require('@strapi/utils');
 const { getService } = require('./utils');
 const adminActions = require('./config/admin-actions');
 const adminConditions = require('./config/admin-conditions');
@@ -52,6 +53,35 @@ const syncAuthSettings = async () => {
   await adminStore.set({ key: 'auth', value: newAuthSettings });
 };
 
+const syncAPITokensPermissions = async () => {
+  const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
+  const permissionsInDB = await pipeAsync(
+    strapi.query('admin::api-token-permission').findMany,
+    map('action')
+  )();
+
+  const unknownPermissions = uniq(difference(permissionsInDB, validPermissions));
+
+  if (unknownPermissions.length > 0) {
+    console.log('about to delete', unknownPermissions.length, 'permissions from db');
+    console.log(JSON.stringify(unknownPermissions, null, 2));
+
+    await Promise.all(
+      unknownPermissions.map((action) =>
+        strapi.query('admin::api-token-permission').deleteMany({ where: { action } })
+      )
+    );
+  } else {
+    console.log(
+      'No permission outdated, step ignored... (check made on ',
+      permissionsInDB.length,
+      '-',
+      validPermissions.length,
+      'permissions)'
+    );
+  }
+};
+
 module.exports = async () => {
   await registerAdminConditions();
   await registerPermissionActions();
@@ -73,6 +103,7 @@ module.exports = async () => {
   await userService.displayWarningIfUsersDontHaveRole();
 
   await syncAuthSettings();
+  await syncAPITokensPermissions();
 
   apiTokenService.checkSaltIsDefined();
   tokenService.checkSecretIsDefined();
