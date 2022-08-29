@@ -68,6 +68,24 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
 };
 
 /**
+ * Assert that a token's permissions attribute is valid for its type
+ *
+ * @param {ApiToken} token
+ */
+const assertValidLifespan = ({ lifespan }) => {
+  if (isNil(lifespan)) {
+    return;
+  }
+
+  if (!Object.values(constants.API_TOKEN_LIFESPANS).includes(lifespan)) {
+    throw new ValidationError(
+      `lifespan must be one of the following values: 
+      ${Object.values(constants.API_TOKEN_LIFESPANS).join(', ')}`
+    );
+  }
+};
+
+/**
  * Flatten a token's database permissions objects to an array of strings
  *
  * @param {ApiToken} token
@@ -173,6 +191,7 @@ const create = async (attributes) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
   assertCustomTokenPermissionsValidity(attributes);
+  assertValidLifespan(attributes);
 
   // Create the token
   const apiToken = await strapi.query('admin::api-token').create({
@@ -347,6 +366,8 @@ const update = async (id, attributes) => {
       type: attributes.type || originalToken.type,
     });
   }
+
+  assertValidLifespan(attributes);
 
   const updatedToken = await strapi.query('admin::api-token').update({
     select: SELECT_FIELDS,

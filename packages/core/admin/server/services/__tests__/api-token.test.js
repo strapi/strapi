@@ -4,6 +4,7 @@ const { NotFoundError } = require('@strapi/utils/lib/errors');
 const crypto = require('crypto');
 const { omit, uniq } = require('lodash/fp');
 const apiTokenService = require('../api-token');
+const constants = require('../constants');
 
 describe('API Token', () => {
   const mockedApiToken = {
@@ -70,7 +71,7 @@ describe('API Token', () => {
         name: 'api-token_tests-name',
         description: 'api-token_tests-description',
         type: 'read-only',
-        lifespan: 123456,
+        lifespan: constants.API_TOKEN_LIFESPANS.DAYS_90,
       };
 
       const expectedExpires = Date.now() + attributes.lifespan;
@@ -104,6 +105,31 @@ describe('API Token', () => {
         lifespan: attributes.lifespan,
       });
       expect(res.expiresAt).toBe(expectedExpires);
+    });
+
+    test('It throws when creating a token with invalid lifespan', async () => {
+      const attributes = {
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+        lifespan: 12345,
+      };
+
+      const create = jest.fn(({ data }) => Promise.resolve(data));
+      global.strapi = {
+        query() {
+          return { create };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      expect(async () => {
+        await apiTokenService.create(attributes);
+      }).rejects.toThrow(/lifespan/);
+
+      expect(create).not.toHaveBeenCalled();
     });
 
     test('Creates a custom token', async () => {
