@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
-import { useIntl } from 'react-intl';
 
 import { Badge } from '@strapi/design-system/Badge';
 import { Box } from '@strapi/design-system/Box';
@@ -50,8 +49,6 @@ export const RelationInput = ({
   publicationStateTranslations,
   searchResults,
 }) => {
-  const { formatMessage } = useIntl();
-
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
@@ -67,7 +64,7 @@ export const RelationInput = ({
               inputId={id}
               isSearchable
               isClear
-              loadingMessage={() => <Loader small>{formatMessage(loadingMessage)}</Loader>}
+              loadingMessage={() => loadingMessage}
               onChange={onRelationAdd}
               onInputChange={onSearch}
               onMenuClose={onRelationOpen}
@@ -135,7 +132,7 @@ export const RelationInput = ({
             })}
           {relations.isLoading && (
             <RelationItemCenterChildren>
-              <Loader small>{formatMessage(loadingMessage)}</Loader>
+              <Loader small>{loadingMessage}</Loader>
             </RelationItemCenterChildren>
           )}
         </RelationList>
@@ -198,10 +195,7 @@ RelationInput.propTypes = {
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string.isRequired,
   listHeight: PropTypes.string,
-  loadingMessage: PropTypes.shape({
-    id: PropTypes.string,
-    defaultMessage: PropTypes.string,
-  }).isRequired,
+  loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onRelationAdd: PropTypes.func.isRequired,
   onRelationOpen: PropTypes.func.isRequired,
