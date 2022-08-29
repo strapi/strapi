@@ -9,7 +9,6 @@ import { Flex } from '@strapi/design-system/Flex';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
-// import { useIntl } from 'react-intl';
 
 const Border = styled.div`
   flex: 1;
@@ -25,26 +24,10 @@ const CollapsableContentType = ({
   onExpanded,
   indexExpandendCollapsedContent,
 }) => {
-  //   const { formatMessage } = useIntl();
   const {
     value: { onChangeSelectAll, onChange, selectedActions },
   } = useApiTokenPermissionsContext();
   const [expanded, setExpanded] = useState(false);
-
-  // const currentScopedModifiedData = useMemo(() => {
-  //   return get(modifiedData, name, {});
-  // }, [modifiedData, name]);
-
-  // const hasAllActionsSelected = useMemo(() => {
-  //   return Object.values(currentScopedModifiedData).every((action) => action === true);
-  // }, [currentScopedModifiedData]);
-
-  // const hasSomeActionsSelected = useMemo(() => {
-  //   return (
-  //     Object.values(currentScopedModifiedData).some((action) => action === true) &&
-  //     !hasAllActionsSelected
-  //   );
-  // }, [currentScopedModifiedData, hasAllActionsSelected]);
 
   const handleExpandedAccordion = () => {
     setExpanded((s) => !s);
@@ -70,6 +53,14 @@ const CollapsableContentType = ({
       <AccordionToggle title={capitalize(label)} />
       <AccordionContent>
         {controllers?.map((controller) => {
+          const allActionsSelected = controller.actions.every((action) =>
+            selectedActions.includes(action.actionId)
+          );
+
+          const someActionsSelected = controller.actions.some((action) =>
+            selectedActions.includes(action.actionId)
+          );
+
           return (
             <Box>
               <Flex justifyContent="space-between" alignItems="center" padding={4}>
@@ -81,12 +72,8 @@ const CollapsableContentType = ({
                 <Border />
                 <Box paddingLeft={4}>
                   <Checkbox
-                    value={controller.actions.every((action) =>
-                      selectedActions.includes(action.actionId)
-                    )}
-                    indeterminate={controller.actions.some((action) =>
-                      selectedActions.includes(action.actionId)
-                    )}
+                    value={allActionsSelected}
+                    indeterminate={!allActionsSelected && someActionsSelected}
                     onValueChange={() => {
                       onChangeSelectAll({ target: { value: [...controller.actions] } });
                     }}

@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
 import { pull } from 'lodash';
+import { transformPermissionsData } from './utils';
 
 export const initialState = {
   data: {},
@@ -28,6 +29,14 @@ const reducer = (state, action) =>
           (actionId) => actionId.includes('find') || actionId.includes('findOne')
         );
         draftState.selectedActions = [...onlyReadOnlyActions];
+        break;
+      }
+      case 'UPDATE_PERMISSIONS_LAYOUT': {
+        draftState.data = transformPermissionsData(action.value);
+        break;
+      }
+      case 'UPDATE_PERMISSIONS': {
+        draftState.selectedActions = [...action.value];
         break;
       }
       default:

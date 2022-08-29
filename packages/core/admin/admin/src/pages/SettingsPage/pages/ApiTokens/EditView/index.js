@@ -36,7 +36,6 @@ import HeaderContentBox from './components/ContentBox';
 import Permissions from './components/Permissions';
 import adminPermissions from '../../../../../permissions';
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
-import { data as permissions } from './utils/tests/dataMock';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -53,16 +52,36 @@ const ApiTokenCreateView = () => {
   const {
     allowedActions: { canCreate, canUpdate },
   } = useRBAC(adminPermissions.settings['api-tokens']);
-  const [state, dispatch] = useReducer(reducer, initialState, (state) =>
-    init(state, permissions.data)
-  );
   const [lang] = usePersistentState('strapi-admin-language', 'en');
-
+  const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, []));
   const {
     params: { id },
   } = useRouteMatch('/settings/api-tokens/:id');
 
   const isCreating = id === 'create';
+
+  useQuery(
+    'content-api-permissions',
+    async () => {
+      const {
+        data: { data },
+      } = await axiosInstance.get(`/admin/content-api/permissions`);
+      dispatch({
+        type: 'UPDATE_PERMISSIONS_LAYOUT',
+        value: data || [],
+      });
+
+      return data;
+    },
+    {
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        });
+      },
+    }
+  );
 
   useEffect(() => {
     trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList');
@@ -78,6 +97,11 @@ const ApiTokenCreateView = () => {
       const {
         data: { data },
       } = await axiosInstance.get(`/admin/api-tokens/${id}`);
+
+      dispatch({
+        type: 'UPDATE_PERMISSIONS',
+        value: data.permissions,
+      });
 
       return data;
     },
@@ -104,11 +128,16 @@ const ApiTokenCreateView = () => {
       const {
         data: { data: response },
       } = isCreating
-        ? await axiosInstance.post(`/admin/api-tokens`, body)
+        ? await axiosInstance.post(`/admin/api-tokens`, {
+            ...body,
+            lifespan: null,
+            permissions: body.type === 'custom' ? state.data.selectedActions : null,
+          })
         : await axiosInstance.put(`/admin/api-tokens/${id}`, {
             name: body.name,
             description: body.description,
             type: body.type,
+            permissions: body.type === 'custom' ? state.data.selectedActions : null,
           });
 
       apiToken = response;

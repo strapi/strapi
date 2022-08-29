@@ -102,6 +102,8 @@
   "Settings.apiTokens.form.duration":"Token duration",
   "Settings.apiTokens.form.type":"Token type",
   "Settings.apiTokens.duration.expiration-date":"Expiration date",
+  "Settings.apiTokens.createPage.permissions.title":"Permissions",
+  "Settings.apiTokens.createPage.permissions.description":"Only actions bound by a route are listed below.",
   "Settings.application.description": "Administration panel’s global information",
   "Settings.application.edition-title": "current plan",
   "Settings.application.get-help": "Get help",
