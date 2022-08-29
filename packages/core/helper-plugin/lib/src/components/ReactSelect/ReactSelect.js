@@ -6,6 +6,7 @@ import { useTheme } from 'styled-components';
 import ClearIndicator from './components/ClearIndicator';
 import DropdownIndicator from './components/DropdownIndicator';
 import IndicatorSeparator from './components/IndicatorSeparator';
+import LoadingMessage from './components/LoadingMessage';
 
 import getSelectStyles from './utils/getSelectStyles';
 
@@ -17,7 +18,13 @@ const ReactSelect = ({ components, styles, error, ariaErrorMessage, ...props }) 
     <Select
       {...props}
       menuPosition="fixed"
-      components={{ ClearIndicator, DropdownIndicator, IndicatorSeparator, ...components }}
+      components={{
+        ClearIndicator,
+        DropdownIndicator,
+        IndicatorSeparator,
+        LoadingMessage,
+        ...components,
+      }}
       aria-errormessage={error && ariaErrorMessage}
       aria-invalid={!!error}
       styles={{ ...customStyles, ...styles }}
