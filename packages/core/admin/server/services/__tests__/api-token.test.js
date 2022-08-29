@@ -188,6 +188,78 @@ describe('API Token', () => {
       });
     });
 
+    test('Creates a custom token with no permissions', async () => {
+      const attributes = {
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'custom',
+        permissions: [],
+      };
+      const createTokenResult = {
+        ...attributes,
+        lifespan: null,
+        expiresAt: null,
+        id: 1,
+      };
+
+      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
+      const create = jest.fn().mockResolvedValue(createTokenResult);
+      const load = jest.fn().mockResolvedValueOnce(
+        Promise.resolve(
+          attributes.permissions.map((p) => {
+            return {
+              action: p,
+            };
+          })
+        )
+      );
+
+      global.strapi = {
+        query() {
+          return {
+            findOne,
+            create,
+          };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+        entityService: {
+          load,
+        },
+      };
+
+      const res = await apiTokenService.create(attributes);
+
+      expect(load).toHaveBeenCalledWith(
+        'admin::api-token',
+        {
+          ...createTokenResult,
+        },
+        'permissions'
+      );
+
+      // call to create token
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(create).toHaveBeenNthCalledWith(1, {
+        select: expect.arrayContaining([expect.any(String)]),
+        data: {
+          ...omit('permissions', attributes),
+          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          expiresAt: null,
+          lifespan: null,
+        },
+        populate: ['permissions'],
+      });
+
+      expect(res).toEqual({
+        ...createTokenResult,
+        accessKey: mockedApiToken.hexedString,
+        expiresAt: null,
+        lifespan: null,
+      });
+    });
+
     test('Creates a custom token with duplicate permissions should ignore duplicates', async () => {
       const attributes = {
         name: 'api-token_tests-name',
