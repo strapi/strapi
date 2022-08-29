@@ -789,7 +789,7 @@ describe('API Token', () => {
       name: 'api-token_tests-name',
       description: 'api-token_tests-description',
       type: 'custom',
-      permissions: ['admin::subject.keepThisAction', 'admin::subject.oldAction'],
+      permissions: ['valid-permission-A'],
     };
 
     const updatedAttributes = {
