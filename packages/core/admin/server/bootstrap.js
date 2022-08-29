@@ -63,21 +63,10 @@ const syncAPITokensPermissions = async () => {
   const unknownPermissions = uniq(difference(permissionsInDB, validPermissions));
 
   if (unknownPermissions.length > 0) {
-    console.log('about to delete', unknownPermissions.length, 'permissions from db');
-    console.log(JSON.stringify(unknownPermissions, null, 2));
-
     await Promise.all(
       unknownPermissions.map((action) =>
         strapi.query('admin::api-token-permission').deleteMany({ where: { action } })
       )
-    );
-  } else {
-    console.log(
-      'No permission outdated, step ignored... (check made on ',
-      permissionsInDB.length,
-      '-',
-      validPermissions.length,
-      'permissions)'
     );
   }
 };
