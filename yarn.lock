@@ -5261,10 +5261,10 @@
     regenerator-runtime "^0.13.7"
     resolve-from "^5.0.0"
 
-"@strapi/design-system@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.2.1.tgz#d0e611709ab10930e8723960813b60ce1ef80890"
-  integrity sha512-Jrlk3xzwM+Cskt1hjgYy0MwN0NQ7lramBoS6lAvHW1AFOGv2vnshU+jcZNXtIYU1N7/Xjko4oimBWXxXry0g/Q==
+"@strapi/design-system@1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.2.2.tgz#eafa22acf0e098805520af7d928c727232a3edeb"
+  integrity sha512-W9TeUp/umZe7AySFUelSYYa8iKy/Pygh8OEeR8DRwxqTINTQJbzdQiFJt+np3mlESSaXFiQsaTRvl6GPvWuWIg==
   dependencies:
     "@internationalized/number" "^3.1.1"
     compute-scroll-into-view "^1.0.17"
@@ -5292,10 +5292,10 @@
   optionalDependencies:
     typescript "^4.6.2"
 
-"@strapi/icons@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.2.1.tgz#780e74a8284bc18c268e61b37ff8a1b75d49c9b3"
-  integrity sha512-MJ3GAHfsKwviR/ZxfCs7AA2uZ4nZ7It9NT9JTUOatR3H0ehG8TIh1ky7NgwN26KPbqBWHqXd1zSb/Wbpo5KqVQ==
+"@strapi/icons@1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.2.2.tgz#01fcef41a941f3be40a89f5cb4ace3f908670825"
+  integrity sha512-kHDdLzZHz1tFfb/htfP/swj5w20dvQsI5eRUdnmnk3wsd8xhbeUG8ImBkslzsIPh9F4dE2PvMEijLtr8bekkpQ==
   dependencies:
     rimraf "^3.0.2"
 
@@ -17699,8 +17699,6 @@ path-case@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/path-case/-/path-case-2.1.1.tgz#94b8037c372d3fe2906e465bb45e25d226e8eea5"
   integrity sha1-lLgDfDctP+KQbkZbtF4l0ibo7qU=
-  dependencies:
-    no-case "^2.2.0"
 
 path-dirname@^1.0.0:
   version "1.0.2"
@@ -18823,7 +18821,12 @@ react-redux@7.2.8:
     prop-types "^15.7.2"
     react-is "^17.0.2"
 
-react-refresh@0.11.0, react-refresh@^0.11.0:
+react-refresh@0.14.0:
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.14.0.tgz#4e02825378a5f227079554d4284889354e5f553e"
+  integrity sha512-wViHqhAd8OHeLS/IRMJjTSDHF3U9eWi62F/MledQGPdJGDhodXJ9PBLNGr6WWL7qlH12Mt3TyTpbS+hGXMjCzQ==
+
+react-refresh@^0.11.0:
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.11.0.tgz#77198b944733f0f1f1a90e791de4541f9f074046"
   integrity sha512-F27qZr8uUqwhWZboondsPx8tnC3Ct3SxZA3V5WyEvujRyyNv0VYPhoBg1gZ8/MV5tubQp76Trw8lTv9hzRBa+A==
