@@ -1,12 +1,12 @@
 'use strict';
 
 module.exports = {
-  collectionName: 'strapi_token_permissions',
+  collectionName: 'strapi_api_token_permissions',
   info: {
     name: 'API Token Permission',
     description: '',
-    singularName: 'token-permission',
-    pluralName: 'token-permissions',
+    singularName: 'api-token-permission',
+    pluralName: 'api-token-permissions',
     displayName: 'API Token Permission',
   },
   options: {},
