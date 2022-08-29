@@ -119,7 +119,15 @@ const ApiTokenCreateView = () => {
 
       toggleNotification({
         type: 'success',
-        message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
+        message: isCreating
+          ? formatMessage({
+              id: 'notification.success.tokencreated',
+              defaultMessage: 'API Token successfully created',
+            })
+          : formatMessage({
+              id: 'notification.success.tokenedited',
+              defaultMessage: 'API Token successfully edited',
+            }),
       });
 
       trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
