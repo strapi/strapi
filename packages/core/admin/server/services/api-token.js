@@ -65,6 +65,16 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
   if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM && isEmpty(attributes.permissions)) {
     throw new ValidationError('Missing permissions attribute for custom token');
   }
+
+  // Permissions provided for a custom type token should be valid/registered permissions UID
+  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM) {
+    const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
+    const invalidPermissions = difference(attributes.permissions, validPermissions);
+
+    if (!isEmpty(invalidPermissions)) {
+      throw new ValidationError(`Unknown permissions provided: ${invalidPermissions.join(', ')}`);
+    }
+  }
 };
 
 /**
