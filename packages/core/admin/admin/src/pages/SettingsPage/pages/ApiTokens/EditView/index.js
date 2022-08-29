@@ -112,6 +112,11 @@ const ApiTokenCreateView = () => {
             description: body.description,
             type: body.type,
           });
+
+      if (isCreating) {
+        history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
+        setCurrentStep('apiTokens.success');
+      }
       unlockApp();
       setApiToken({
         ...response,
@@ -133,11 +138,6 @@ const ApiTokenCreateView = () => {
       trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
         type: apiToken.type,
       });
-
-      if (isCreating) {
-        history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
-        setCurrentStep('apiTokens.success');
-      }
     } catch (err) {
       const errors = formatAPIErrors(err.response.data);
       actions.setErrors(errors);

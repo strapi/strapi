@@ -8,7 +8,7 @@ import { ConfirmDialog } from '@strapi/helper-plugin';
 import { axiosInstance } from '../../../../../../../core/utils';
 
 const ButtonWithRightMargin = styled(Button)`
-  margin-right: ${({ theme }) => theme.spaces[2]}; ;
+  margin-right: ${({ theme }) => theme.spaces[2]};
 `;
 
 export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
