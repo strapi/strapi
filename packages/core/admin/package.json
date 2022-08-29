@@ -117,7 +117,7 @@
     "react-is": "^17.0.2",
     "react-query": "3.24.3",
     "react-redux": "7.2.8",
-    "react-refresh": "0.11.0",
+    "react-refresh": "0.14.0",
     "react-router": "5.2.0",
     "react-router-dom": "5.2.0",
     "react-window": "1.8.7",
