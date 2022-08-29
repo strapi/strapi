@@ -784,10 +784,19 @@ describe('API Token', () => {
   test('Updates permissions field of a custom token with unknown permissions', async () => {
     const id = 1;
 
+    const originalToken = {
+      id,
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'custom',
+      permissions: ['admin::subject.keepThisAction', 'admin::subject.oldAction'],
+    };
+
     const updatedAttributes = {
       permissions: ['valid-permission-A', 'unknown-permission'],
     };
 
+    const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
     const update = jest.fn(({ data }) => Promise.resolve(data));
     const deleteFn = jest.fn();
     const create = jest.fn();
@@ -798,6 +807,7 @@ describe('API Token', () => {
       query() {
         return {
           update,
+          findOne,
           delete: deleteFn,
           create,
         };
