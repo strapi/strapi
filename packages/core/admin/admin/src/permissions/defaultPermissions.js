@@ -76,7 +76,7 @@ const permissions = {
       update: [{ action: 'admin::webhooks.update', subject: null }],
     },
     'api-tokens': {
-      main: [],
+      main: [{ action: 'admin::api-tokens.access', subject: null }],
       create: [{ action: 'admin::api-tokens.create', subject: null }],
       delete: [{ action: 'admin::api-tokens.delete', subject: null }],
       read: [{ action: 'admin::api-tokens.read', subject: null }],
