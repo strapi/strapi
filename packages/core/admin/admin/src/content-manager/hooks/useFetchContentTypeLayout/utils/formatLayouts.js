@@ -122,7 +122,9 @@ const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
 
     if (type === 'relation') {
       const queryInfos = {
-        endPoint: `collection-types/${contentTypeConfiguration.uid}`,
+        endpoints: {
+          search: `collection-types/${contentTypeConfiguration.uid}`,
+        },
         defaultParams: {},
       };
 
