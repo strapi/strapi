@@ -1,5 +1,4 @@
 import React from 'react';
-import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 
@@ -13,13 +12,11 @@ import {
   pxToRem,
   useTracking,
 } from '@strapi/helper-plugin';
-
 import DeleteButton from './DeleteButton';
 import UpdateButton from './UpdateButton';
 import ReadButton from './ReadButton';
 
 const TableRows = ({ canDelete, canUpdate, canRead, onClickDelete, withBulkActions, rows }) => {
-  const { formatMessage } = useIntl();
   const [{ query }] = useQueryParams();
   const [, sortOrder] = query.sort.split(':');
   const {
@@ -60,16 +57,15 @@ const TableRows = ({ canDelete, canUpdate, canRead, onClickDelete, withBulkActio
             </Td>
             <Td>
               <Typography textColor="neutral800">
-                {formatMessage({
-                  id: `Settings.apiTokens.types.${apiToken.type}`,
-                  defaultMessage: 'Type unknown',
-                })}
+                <RelativeTime timestamp={new Date(apiToken.createdAt)} />
               </Typography>
             </Td>
             <Td>
-              <Typography textColor="neutral800">
-                <RelativeTime timestamp={new Date(apiToken.createdAt)} />
-              </Typography>
+              {apiToken.lastUsedAt && (
+                <Typography textColor="neutral800">
+                  <RelativeTime timestamp={new Date(apiToken.lastUsedAt)} />
+                </Typography>
+              )}
             </Td>
 
             {withBulkActions && (

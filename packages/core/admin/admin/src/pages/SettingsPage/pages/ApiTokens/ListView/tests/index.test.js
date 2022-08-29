@@ -806,10 +806,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             <span
                               aria-labelledby="tooltip-5"
                               class="c23"
-                              label="Token type"
+                              label="Created at"
                               tabindex="-1"
                             >
-                              Token type
+                              Created at
                             </span>
                           </span>
                           <span
@@ -828,10 +828,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             <span
                               aria-labelledby="tooltip-7"
                               class="c23"
-                              label="Created at"
+                              label="Last used"
                               tabindex="-1"
                             >
-                              Created at
+                              Last used
                             </span>
                           </span>
                           <span
@@ -897,17 +897,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         <span
                           class="c33"
                         >
-                          Type unknown
-                        </span>
-                      </td>
-                      <td
-                        aria-colindex="4"
-                        class="c21"
-                        tabindex="-1"
-                      >
-                        <span
-                          class="c33"
-                        >
                           <time
                             datetime="2021-11-15T00:00:00.000Z"
                             title="11/15/2021 12:00 AM"
@@ -916,6 +905,11 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                           </time>
                         </span>
                       </td>
+                      <td
+                        aria-colindex="4"
+                        class="c21"
+                        tabindex="-1"
+                      />
                       <td
                         aria-colindex="5"
                         class="c21"

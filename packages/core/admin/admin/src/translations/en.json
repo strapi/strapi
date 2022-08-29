@@ -91,6 +91,7 @@
   "Settings.apiTokens.ListView.headers.description": "Description",
   "Settings.apiTokens.ListView.headers.type": "Token type",
   "Settings.apiTokens.ListView.headers.createdAt": "Created at",
+  "Settings.apiTokens.ListView.headers.lastUsedAt": "Last used",
   "Settings.apiTokens.notification.copied": "Token copied to clipboard.",
   "Settings.apiTokens.title": "API Tokens",
   "Settings.apiTokens.types.full-access": "Full access",
