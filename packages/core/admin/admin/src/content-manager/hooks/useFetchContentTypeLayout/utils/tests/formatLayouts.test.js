@@ -557,7 +557,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
     it('should return an object with the correct keys', () => {
       expect(generateRelationQueryInfos(addressSchema, 'categories', simpleModels)).toEqual({
         endpoints: {
-          search: '/content-manager/relations/api::address.address/categories',
+          search: '/content-manager/api::address.address/categories',
         },
         defaultParams: {},
         shouldDisplayRelationLink: true,
@@ -576,7 +576,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
         )
       ).toEqual({
         endpoints: {
-          search: '/content-manager/relations/api::address.address/categories',
+          search: '/content-manager/api::address.address/categories',
         },
         defaultParams: {
           _component: 'api::address.address',
