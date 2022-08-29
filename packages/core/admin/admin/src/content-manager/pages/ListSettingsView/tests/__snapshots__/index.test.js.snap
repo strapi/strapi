@@ -694,8 +694,8 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 
 .c9 {
   color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c7 {
@@ -2557,8 +2557,8 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
 
 .c9 {
   color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c7 {
