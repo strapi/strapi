@@ -5,5 +5,5 @@ module.exports = {
   user: { schema: require('./User') },
   role: { schema: require('./Role') },
   'api-token': { schema: require('./api-token') },
-  'token-permission': { schema: require('./token-permission') },
+  'api-token-permission': { schema: require('./api-token-permission') },
 };
