@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useReducer, useMemo } from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useState, useRef, useReducer, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
@@ -18,7 +17,6 @@ import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
 import { Flex } from '@strapi/design-system/Flex';
 import Check from '@strapi/icons/Check';
-import Refresh from '@strapi/icons/Refresh';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { Formik } from 'formik';
 import { Stack } from '@strapi/design-system/Stack';
@@ -37,23 +35,26 @@ import { getDateOfExpiration, schema, getActionsState } from './utils';
 import LoadingView from './components/LoadingView';
 import HeaderContentBox from './components/ContentBox';
 import Permissions from './components/Permissions';
+import Regenerate from './components/Regenerate';
 import adminPermissions from '../../../../../permissions';
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
 import { data as permissions } from './utils/tests/dataMock';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const ButtonWithRightMargin = styled(Button)`
-  margin-right: ${({ theme }) => theme.spaces[2]}; ;
-`;
-
 const ApiTokenCreateView = () => {
-  let apiToken;
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const history = useHistory();
+  const [apiToken, setApiToken] = useState(
+    history.location.state?.apiToken.accessKey
+      ? {
+          ...history.location.state.apiToken,
+        }
+      : null
+  );
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
@@ -73,16 +74,16 @@ const ApiTokenCreateView = () => {
     trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList');
   }, [isCreating]);
 
-  if (history.location.state?.apiToken.accessKey) {
-    apiToken = history.location.state.apiToken;
-  }
-
-  const { status, data } = useQuery(
+  const { status } = useQuery(
     ['api-token', id],
     async () => {
       const {
         data: { data },
       } = await axiosInstance.get(`/admin/api-tokens/${id}`);
+
+      setApiToken({
+        ...data,
+      });
 
       return data;
     },
@@ -96,10 +97,6 @@ const ApiTokenCreateView = () => {
       },
     }
   );
-
-  if (data) {
-    apiToken = data;
-  }
 
   const handleSubmit = async (body, actions) => {
     trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
@@ -115,8 +112,10 @@ const ApiTokenCreateView = () => {
             description: body.description,
             type: body.type,
           });
-
-      apiToken = response;
+      unlockApp();
+      setApiToken({
+        ...response,
+      });
 
       toggleNotification({
         type: 'success',
@@ -139,9 +138,8 @@ const ApiTokenCreateView = () => {
         type: 'warning',
         message: get(err, 'response.data.message', 'notification.error'),
       });
+      unlockApp();
     }
-
-    unlockApp();
   };
 
   const hasAllActionsSelected = useMemo(() => {
@@ -234,6 +232,13 @@ const ApiTokenCreateView = () => {
     }
   };
 
+  const handleRegenerate = (newKey) => {
+    setApiToken({
+      ...apiToken,
+      accessKey: newKey,
+    });
+  };
+
   const providerValue = {
     ...state,
     onChange: handleChangeCheckbox,
@@ -277,19 +282,10 @@ const ApiTokenCreateView = () => {
                     canEditInputs && (
                       <Flex justifyContent="center">
                         {apiToken?.name && (
-                          <ButtonWithRightMargin
-                            disabled={isSubmitting}
-                            loading={isSubmitting}
-                            startIcon={<Refresh />}
-                            type="button"
-                            size="S"
-                            variant="tertiary"
-                          >
-                            {formatMessage({
-                              id: 'Settings.apiTokens.regenerate',
-                              defaultMessage: 'Regenerate',
-                            })}
-                          </ButtonWithRightMargin>
+                          <Regenerate
+                            onRegenerate={handleRegenerate}
+                            idToRegenerate={apiToken?.id}
+                          />
                         )}
                         <Button
                           disabled={isSubmitting}
