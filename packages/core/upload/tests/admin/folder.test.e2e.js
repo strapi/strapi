@@ -11,12 +11,12 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
 let rq;
-let data = {
+const data = {
   folders: [],
 };
 
 const rootPathRegex = /^\/[0-9]*$/i;
-const getFolderPathRegex = pathId => new RegExp('^/' + pathId + '/[0-9]*$', 'i');
+const getFolderPathRegex = (pathId) => new RegExp(`^/${pathId}/[0-9]*$`, 'i');
 
 const createFolder = async (name, parent = null) => {
   const res = await rq({
@@ -52,7 +52,7 @@ describe('Folder', () => {
       method: 'POST',
       url: '/upload/actions/bulk-delete',
       body: {
-        folderIds: data.folders.map(f => f.id),
+        folderIds: data.folders.map((f) => f.id),
       },
     });
 
@@ -166,7 +166,7 @@ describe('Folder', () => {
 
     test.each([[' abc'], [' abc '], ['abc '], ['   abc    '], ['   abc    ']])(
       'Cannot create a folder with name starting or ending with a whitespace (%p)',
-      async name => {
+      async (name) => {
         const res = await rq({
           method: 'POST',
           url: '/upload/folders',

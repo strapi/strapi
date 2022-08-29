@@ -23,11 +23,11 @@ const allowedOperations = [
 
 const operations = pick(allowedOperations, sift);
 
-const conditionsMatcher = conditions => {
+const conditionsMatcher = (conditions) => {
   return sift.createQueryTester(conditions, { operations });
 };
 
-const defineAbility = register => {
+const defineAbility = (register) => {
   const { can, build } = new AbilityBuilder(Ability);
 
   register(can);
@@ -75,7 +75,7 @@ describe('Permissions Manager - Sanitize', () => {
       createSanitizeHelpers({
         action: 'read',
         model: fooModel,
-        ability: defineAbility(can => can('read', 'api::foo.foo')),
+        ability: defineAbility((can) => can('read', 'api::foo.foo')),
       })
     );
   });

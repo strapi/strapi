@@ -9,10 +9,10 @@ import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import LanguageProvider from '../../../../../../admin/admin/src/components/LanguageProvider';
-import Theme from '../../../../../../admin/admin/src/components/Theme';
-import ThemeToggleProvider from '../../../../../../admin/admin/src/components/ThemeToggleProvider';
-import en from '../../../../../../admin/admin/src/translations/en.json';
+import LanguageProvider from '@strapi/admin/admin/src/components/LanguageProvider';
+import Theme from '@strapi/admin/admin/src/components/Theme';
+import ThemeToggleProvider from '@strapi/admin/admin/src/components/ThemeToggleProvider';
+import en from '@strapi/admin/admin/src/translations/en.json';
 import ContentTypeBuilderNav from '../index';
 import mockData from './mockData';
 
@@ -20,7 +20,7 @@ jest.mock('../useContentTypeBuilderMenu.js', () => {
   return jest.fn(() => ({
     menu: mockData,
     searchValue: '',
-    onSearchChange: () => {},
+    onSearchChange() {},
   }));
 });
 

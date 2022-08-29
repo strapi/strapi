@@ -6,13 +6,14 @@ const fse = require('fs-extra');
 const _ = require('lodash');
 const uploadService = require('../../upload')({});
 
-const testFilePath = path.join(__dirname, './image.png');
+const imageFilePath = path.join(__dirname, './image.png');
+
 const tmpWorkingDirectory = path.join(__dirname, './tmp');
 
 function mockUploadProvider(uploadFunc, props) {
   const { responsiveDimensions = false } = props || {};
 
-  const default_config = {
+  const defaultConfig = {
     plugin: {
       upload: {
         breakpoints: {
@@ -25,7 +26,7 @@ function mockUploadProvider(uploadFunc, props) {
 
   global.strapi = {
     config: {
-      get: (path, defaultValue) => _.get(default_config, path, defaultValue),
+      get: (path, defaultValue) => _.get(defaultConfig, path, defaultValue),
     },
     plugins: {
       upload: {
@@ -43,13 +44,13 @@ function mockUploadProvider(uploadFunc, props) {
   };
 }
 
-const getFileData = () => ({
+const getFileData = (filePath) => ({
   alternativeText: 'image.png',
   caption: 'image.png',
   ext: '.png',
   folder: null,
   folderPath: '/',
-  getStream: () => fs.createReadStream(testFilePath),
+  getStream: () => fs.createReadStream(filePath),
   hash: 'image_d9b4f84424',
   height: 1000,
   size: 4,
@@ -69,7 +70,7 @@ describe('Upload image', () => {
   });
 
   test('Upload with thubmnail', async () => {
-    let fileData = getFileData();
+    const fileData = getFileData(imageFilePath);
     const upload = jest.fn();
     mockUploadProvider(upload);
 
@@ -78,7 +79,7 @@ describe('Upload image', () => {
   });
 
   test('Upload with responsive formats', async () => {
-    let fileData = getFileData();
+    const fileData = getFileData(imageFilePath);
     const upload = jest.fn();
     mockUploadProvider(upload, { responsiveDimensions: true });
 

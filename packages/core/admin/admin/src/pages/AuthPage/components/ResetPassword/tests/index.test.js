@@ -9,7 +9,7 @@ import { IntlProvider } from 'react-intl';
 import ResetPassword from '..';
 
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
-  changeLocale: () => {},
+  changeLocale() {},
   localeNames: { en: 'English' },
   messages: ['test'],
 }));
@@ -441,8 +441,8 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c41 {
         color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c40 {

@@ -160,7 +160,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
 
 TriggerContainer.defaultProps = {
   isPending: false,
-  onCancel: () => {},
+  onCancel() {},
   response: {},
 };
 

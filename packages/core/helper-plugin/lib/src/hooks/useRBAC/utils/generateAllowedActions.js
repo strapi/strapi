@@ -1,6 +1,6 @@
 import upperFirst from 'lodash/upperFirst';
 
-const generateAllowedActions = permissionsNames =>
+const generateAllowedActions = (permissionsNames) =>
   permissionsNames.reduce((acc, current) => {
     acc[`can${upperFirst(current)}`] = false;
 

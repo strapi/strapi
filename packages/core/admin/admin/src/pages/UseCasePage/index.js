@@ -76,7 +76,7 @@ const UseCasePage = () => {
   const { hasAdmin } = parse(location?.search, { ignoreQueryPrefix: true });
   const isOther = role === 'other';
 
-  const handleSubmit = skipPersona => {
+  const handleSubmit = (skipPersona) => {
     try {
       axios({
         method: 'POST',
@@ -145,7 +145,7 @@ const UseCasePage = () => {
                   name="other"
                   label={formatMessage({ id: 'Usecase.other', defaultMessage: 'Other' })}
                   value={otherRole}
-                  onChange={e => setOtherRole(e.target.value)}
+                  onChange={(e) => setOtherRole(e.target.value)}
                   data-testid="other"
                 />
               )}

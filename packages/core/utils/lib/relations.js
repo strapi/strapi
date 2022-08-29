@@ -2,8 +2,8 @@
 
 const MANY_RELATIONS = ['oneToMany', 'manyToMany'];
 
-const getRelationalFields = contentType => {
-  return Object.keys(contentType.attributes).filter(attributeName => {
+const getRelationalFields = (contentType) => {
+  return Object.keys(contentType.attributes).filter((attributeName) => {
     return contentType.attributes[attributeName].type === 'relation';
   });
 };

@@ -8,8 +8,8 @@ const { createTestBuilder } = require('../../../../test/helpers/builder');
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let uid = 'single-type';
-let data = {};
+const uid = 'single-type';
+const data = {};
 
 const model = {
   kind: 'singleType',

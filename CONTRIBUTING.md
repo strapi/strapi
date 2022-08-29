@@ -1,6 +1,6 @@
 # Contribute to Strapi
 
-Strapi is an open-source project administered by [the Strapi team](https://strapi.io/about-us). We appreciate your interest and efforts to contribute to Strapi. See the [LICENSE](https://github.com/strapi/strapi/blob/master/LICENSE) licensing information. All work done is available on GitHub.
+Strapi is an open-source project administered by [the Strapi team](https://strapi.io/about-us). We appreciate your interest and efforts to contribute to Strapi. See the [LICENSE](https://github.com/strapi/strapi/blob/main/LICENSE) licensing information. All work done is available on GitHub.
 
 We highly appreciate your effort to contribute, but we recommend you talk to a maintainer before spending a lot of time making a pull request that may not align with the project roadmap. Whether it is from Strapi or contributors, every pull request goes through the same process.
 
@@ -51,7 +51,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
 
-- Fork the repository and create your new branch from `master`.
+- Fork the repository and create your new branch from `main`.
 - Run `yarn setup` in the root of the repository.
 - If you've fixed a bug or added code that should be tested, please make sure to add tests
 - Ensure the following test suites are passing:
@@ -132,9 +132,11 @@ $ yarn test:generate-app mysql
 
 A new app is required every time you run the end-to-end tests otherwise, the test suite will fail. A script is available to make this process easier: `node test/e2e.js`. It will delete the current test app, generate a new one and run the test suite.
 
+The script takes a path as optional argument (e.g. `node test/e2e.js path/to/test`). Options for jest can be passed using the double-dash notion: e.g. to update snapshots `node test/e2e.js -- -u`.
+
 ### Changing the database
 
-By default the script `test/e2e,js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
+By default the script `test/e2e.js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
 
 ```bash
 $ node test/e2e.js --db=sqlite

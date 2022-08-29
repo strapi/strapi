@@ -4,9 +4,9 @@ const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 const { getService } = require('../utils');
 
-const isReadScope = scope => scope.endsWith('find') || scope.endsWith('findOne');
+const isReadScope = (scope) => scope.endsWith('find') || scope.endsWith('findOne');
 
-const extractToken = ctx => {
+const extractToken = (ctx) => {
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     const parts = ctx.request.header.authorization.split(/\s+/);
 
@@ -21,7 +21,7 @@ const extractToken = ctx => {
 };
 
 /** @type {import('.').AuthenticateFunction} */
-const authenticate = async ctx => {
+const authenticate = async (ctx) => {
   const apiTokenService = getService('api-token');
   const token = extractToken(ctx);
 

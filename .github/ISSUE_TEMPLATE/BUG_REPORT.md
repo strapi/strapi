@@ -13,7 +13,7 @@ https://guides.github.com/features/mastering-markdown/
 
 Please ensure you have also read and understand the contributing guide.
 
-https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue
+https://github.com/strapi/strapi/blob/main/CONTRIBUTING.md#reporting-an-issue
 -->
 
 ## Bug report

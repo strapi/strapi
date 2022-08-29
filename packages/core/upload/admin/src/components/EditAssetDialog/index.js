@@ -64,7 +64,7 @@ export const EditAssetDialog = ({
     enabled: true,
   });
 
-  const handleSubmit = async values => {
+  const handleSubmit = async (values) => {
     const nextAsset = { ...asset, ...values, folder: values.parent.value };
 
     if (asset.isLocal) {
@@ -131,7 +131,7 @@ export const EditAssetDialog = ({
     },
   };
 
-  const handleClose = values => {
+  const handleClose = (values) => {
     if (!isEqual(initialFormData, values)) {
       handleConfirmClose();
     } else {
@@ -146,7 +146,7 @@ export const EditAssetDialog = ({
         <LoadingBody minHeight="60vh" justifyContent="center" paddingTop={4} paddingBottom={4}>
           <Loader>
             {formatMessage({
-              id: getTrad('list.asset.load'),
+              id: getTrad('content.isLoading'),
               defaultMessage: 'Content is loading.',
             })}
           </Loader>
@@ -280,7 +280,7 @@ export const EditAssetDialog = ({
                         name="parent"
                         defaultValue={values.parent}
                         options={folderStructure}
-                        onChange={value => {
+                        onChange={(value) => {
                           setFieldValue('parent', value);
                         }}
                         menuPortalTarget={document.querySelector('body')}

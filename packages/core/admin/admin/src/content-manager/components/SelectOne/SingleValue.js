@@ -22,7 +22,7 @@ const StyledBullet = styled.div`
   cursor: pointer;
 `;
 
-const SingleValue = props => {
+const SingleValue = (props) => {
   const { formatMessage } = useIntl();
   const Component = components.SingleValue;
   const hasDraftAndPublish = has(get(props, 'data.value'), 'publishedAt');
@@ -43,13 +43,13 @@ const SingleValue = props => {
       <Component {...props}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
-          <Typography ellipsis>{props.data.label || '-'}</Typography>
+          <Typography ellipsis>{props.data.label ?? '-'}</Typography>
         </Flex>
       </Component>
     );
   }
 
-  return <Component {...props}>{props.data.label || '-'}</Component>;
+  return <Component {...props}>{props.data.label ?? '-'}</Component>;
 };
 
 SingleValue.propTypes = {

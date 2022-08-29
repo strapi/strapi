@@ -1,7 +1,7 @@
 import { Typography } from '@strapi/design-system/Typography';
 import CarretIcon from '../CollapsePropertyMatrix/CarretIcon';
 
-const activeStyle = theme => `
+const activeStyle = (theme) => `
   ${Typography} {
     color: ${theme.colors.primary600};
     font-weight: ${theme.fontWeights.bold}

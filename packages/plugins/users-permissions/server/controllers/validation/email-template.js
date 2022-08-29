@@ -19,6 +19,7 @@ const matchAll = (pattern, src) => {
   let match;
 
   const regexPatternWithGlobal = RegExp(pattern, 'g');
+  // eslint-disable-next-line no-cond-assign
   while ((match = regexPatternWithGlobal.exec(src))) {
     const [, group] = match;
 
@@ -27,8 +28,8 @@ const matchAll = (pattern, src) => {
   return matches;
 };
 
-const isValidEmailTemplate = template => {
-  for (let reg of invalidPatternsRegexes) {
+const isValidEmailTemplate = (template) => {
+  for (const reg of invalidPatternsRegexes) {
     if (reg.test(template)) {
       return false;
     }

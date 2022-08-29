@@ -5,8 +5,6 @@ const os = require('os');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const sentry = require('@sentry/node');
-// FIXME
-/* eslint-disable import/extensions */
 const hasYarn = require('./utils/has-yarn');
 const checkRequirements = require('./utils/check-requirements');
 const { trackError, captureException } = require('./utils/usage');
@@ -32,7 +30,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
     rootPath,
     name: basename(rootPath),
     // disable quickstart run app after creation
-    runQuickstartApp: cliArguments.run === false ? false : true,
+    runQuickstartApp: cliArguments.run !== false,
     // use pacakge version as strapiVersion (all packages have the same version);
     strapiVersion: require('../package.json').version,
     debug: cliArguments.debug !== undefined,
@@ -58,8 +56,9 @@ const generateNewApp = (projectDirectory, cliArguments) => {
     useTypescript: Boolean(cliArguments.typescript),
   };
 
-  sentry.configureScope(function(sentryScope) {
+  sentry.configureScope(function scope(sentryScope) {
     const tags = {
+      os_arch: os.arch(),
       os_type: os.type(),
       os_platform: os.platform(),
       os_release: os.release(),
@@ -68,7 +67,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
       docker: scope.docker,
     };
 
-    Object.keys(tags).forEach(tag => {
+    Object.keys(tags).forEach((tag) => {
       sentryScope.setTag(tag, tags[tag]);
     });
   });
@@ -76,7 +75,7 @@ const generateNewApp = (projectDirectory, cliArguments) => {
   parseDatabaseArguments({ scope, args: cliArguments });
   initCancelCatcher(scope);
 
-  return generateNew(scope).catch(error => {
+  return generateNew(scope).catch((error) => {
     console.error(error);
     return captureException(error).then(() => {
       return trackError({ scope, error }).then(() => {
@@ -94,7 +93,7 @@ function initCancelCatcher() {
       output: process.stdout,
     });
 
-    rl.on('SIGINT', function() {
+    rl.on('SIGINT', function sigint() {
       process.emit('SIGINT');
     });
   }

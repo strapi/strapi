@@ -34,7 +34,7 @@ module.exports = () => ({
   toDto: pick(dtoFields),
 });
 
-const formatAttributes = contentType => {
+const formatAttributes = (contentType) => {
   const { getVisibleAttributes, getTimestamps } = contentTypesUtils;
 
   // only get attributes that can be seen in the auto generated Edit view or List view
@@ -63,7 +63,7 @@ const formatAttribute = (key, attribute) => {
 };
 
 // FIXME: not needed
-const toRelation = attribute => {
+const toRelation = (attribute) => {
   return {
     ...attribute,
     type: 'relation',
@@ -72,4 +72,4 @@ const toRelation = attribute => {
   };
 };
 
-const isVisible = model => getOr(true, 'pluginOptions.content-manager.visible', model) === true;
+const isVisible = (model) => getOr(true, 'pluginOptions.content-manager.visible', model) === true;

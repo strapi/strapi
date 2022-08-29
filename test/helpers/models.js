@@ -3,7 +3,7 @@
 const { isFunction, isNil, prop } = require('lodash/fp');
 const { createStrapiInstance } = require('./strapi');
 
-const toUID = name => {
+const toUID = (name) => {
   return name.includes('::') ? name : `api::${name}.${name}`;
 };
 
@@ -44,7 +44,7 @@ const createContentTypes = async (models, { strapi } = {}) => {
   const { contentTypeService, cleanup } = await createHelpers({ strapi });
 
   const contentTypes = await contentTypeService.createContentTypes(
-    models.map(model => ({
+    models.map((model) => ({
       contentType: {
         ...model,
       },
@@ -122,18 +122,18 @@ const deleteContentTypes = async (modelsUIDs, { strapi } = {}) => {
   return contentTypes;
 };
 
-async function cleanupModels(models, { strapi } = {}) {
-  for (const model of models) {
-    await cleanupModel(model, { strapi });
-  }
-}
-
 async function cleanupModel(uid, { strapi: strapiIst } = {}) {
   const { strapi, cleanup } = await createHelpers({ strapi: strapiIst });
 
   await strapi.query(uid).deleteMany();
 
   await cleanup();
+}
+
+async function cleanupModels(models, { strapi } = {}) {
+  for (const model of models) {
+    await cleanupModel(model, { strapi });
+  }
 }
 
 async function createFixtures(dataMap, { strapi: strapiIst } = {}) {

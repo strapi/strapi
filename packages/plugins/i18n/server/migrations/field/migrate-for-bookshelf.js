@@ -8,7 +8,7 @@ const TMP_TABLE_NAME = '__tmp__i18n_field_migration';
 const batchInsertInTmpTable = async ({ updatesInfo }, { transacting: trx }) => {
   const tmpEntries = [];
   updatesInfo.forEach(({ entriesIdsToUpdate, attributesValues }) => {
-    entriesIdsToUpdate.forEach(id => {
+    entriesIdsToUpdate.forEach((id) => {
       tmpEntries.push({ id, ...attributesValues });
     });
   });
@@ -16,18 +16,20 @@ const batchInsertInTmpTable = async ({ updatesInfo }, { transacting: trx }) => {
 };
 
 const updateFromTmpTable = async ({ model, attributesToMigrate }, { transacting: trx }) => {
-  const collectionName = model.collectionName;
+  const { collectionName } = model;
   if (model.client === 'pg') {
     const substitutes = attributesToMigrate.map(() => '?? = ??.??').join(',');
     const bindings = [collectionName];
-    attributesToMigrate.forEach(attr => bindings.push(attr, TMP_TABLE_NAME, attr));
+    attributesToMigrate.forEach((attr) => bindings.push(attr, TMP_TABLE_NAME, attr));
     bindings.push(TMP_TABLE_NAME, collectionName, TMP_TABLE_NAME);
 
     await trx.raw(`UPDATE ?? SET ${substitutes} FROM ?? WHERE ??.id = ??.id;`, bindings);
   } else if (model.client === 'mysql') {
     const substitutes = attributesToMigrate.map(() => '??.?? = ??.??').join(',');
     const bindings = [collectionName, TMP_TABLE_NAME, collectionName, TMP_TABLE_NAME];
-    attributesToMigrate.forEach(attr => bindings.push(collectionName, attr, TMP_TABLE_NAME, attr));
+    attributesToMigrate.forEach((attr) =>
+      bindings.push(collectionName, attr, TMP_TABLE_NAME, attr)
+    );
 
     await trx.raw(`UPDATE ?? JOIN ?? ON ??.id = ??.id SET ${substitutes};`, bindings);
   }
@@ -38,10 +40,7 @@ const createTmpTable = async ({ ORM, attributesToMigrate, model }) => {
   await deleteTmpTable({ ORM });
   await ORM.knex.raw(`CREATE TABLE ?? AS ??`, [
     TMP_TABLE_NAME,
-    ORM.knex
-      .select(columnsToCopy)
-      .from(model.collectionName)
-      .whereRaw('?', 0),
+    ORM.knex.select(columnsToCopy).from(model.collectionName).whereRaw('?', 0),
   ]);
 };
 
@@ -54,7 +53,7 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate }) => {
   if (onlyScalarAttrs && ['pg', 'mysql'].includes(model.client)) {
     // create table outside of the transaction because mysql doesn't accept the creation inside
     await createTmpTable({ ORM, attributesToMigrate, model });
-    await ORM.knex.transaction(async transacting => {
+    await ORM.knex.transaction(async (transacting) => {
       await migrate(
         { model, attributesToMigrate },
         { migrateFn: batchInsertInTmpTable, transacting }
@@ -63,7 +62,7 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate }) => {
     });
     await deleteTmpTable({ ORM });
   } else {
-    await ORM.knex.transaction(async transacting => {
+    await ORM.knex.transaction(async (transacting) => {
       await migrate({ model, attributesToMigrate }, { transacting });
     });
   }

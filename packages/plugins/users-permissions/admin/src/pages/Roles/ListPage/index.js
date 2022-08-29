@@ -97,8 +97,8 @@ const RoleListPage = () => {
     defaultMessage: 'Roles',
   });
 
-  const deleteMutation = useMutation(id => deleteData(id, toggleNotification), {
-    onSuccess: async () => {
+  const deleteMutation = useMutation((id) => deleteData(id, toggleNotification), {
+    async onSuccess() {
       await queryClient.invalidateQueries('get-roles');
     },
   });

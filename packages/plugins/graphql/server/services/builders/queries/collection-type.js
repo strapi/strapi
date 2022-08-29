@@ -16,7 +16,7 @@ module.exports = ({ strapi }) => {
     getEntityResponseCollectionName,
   } = naming;
 
-  const buildCollectionTypeQueries = contentType => {
+  const buildCollectionTypeQueries = (contentType) => {
     const findOneQueryName = `Query.${getFindOneQueryName(contentType)}`;
     const findQueryName = `Query.${getFindQueryName(contentType)}`;
 
@@ -26,7 +26,7 @@ module.exports = ({ strapi }) => {
       return extension.use({ resolversConfig: { [action]: { auth } } });
     };
 
-    const isActionEnabled = action => {
+    const isActionEnabled = (action) => {
       return extension.shadowCRUD(contentType.uid).isActionEnabled(action);
     };
 

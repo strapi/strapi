@@ -85,7 +85,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, val
 
         {status === 'success' && (
           <>
-            {data?.results.map(entry => (
+            {data?.results.map((entry) => (
               <MenuItem key={entry.id} aria-disabled>
                 <TypographyMaxWidth ellipsis>
                   <CellValue

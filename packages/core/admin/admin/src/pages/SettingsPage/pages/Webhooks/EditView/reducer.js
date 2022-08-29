@@ -22,7 +22,7 @@ const initialState = {
 
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'ADD_NEW_HEADER': {
         draftState.modifiedData.headers.push(header);
@@ -33,7 +33,7 @@ const reducer = (state, action) =>
         let formattedHeaders = [header];
 
         if (Object.keys(headers).length > 0) {
-          formattedHeaders = Object.keys(headers).map(key => {
+          formattedHeaders = Object.keys(headers).map((key) => {
             return { key, value: headers[key] };
           });
         }

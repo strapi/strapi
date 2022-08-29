@@ -114,12 +114,12 @@ const createContentType = (uid, definition) => {
 };
 
 const getGlobalId = (model, modelName, prefix) => {
-  let globalId = prefix ? `${prefix}-${modelName}` : modelName;
+  const globalId = prefix ? `${prefix}-${modelName}` : modelName;
 
   return model.globalId || _.upperFirst(_.camelCase(globalId));
 };
 
-const pickSchema = model => {
+const pickSchema = (model) => {
   const schema = _.cloneDeep(
     _.pick(model, [
       'connection',

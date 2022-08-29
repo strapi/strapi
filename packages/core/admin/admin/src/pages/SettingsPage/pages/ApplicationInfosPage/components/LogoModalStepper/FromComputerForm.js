@@ -33,7 +33,7 @@ const FromComputerForm = ({ setLocalImage, goTo, next, onClose }) => {
   const handleDragEnter = () => setDragOver(true);
   const handleDragLeave = () => setDragOver(false);
 
-  const handleClick = e => {
+  const handleClick = (e) => {
     e.preventDefault();
     inputRef.current.click();
   };
