@@ -422,8 +422,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       .c10 {
         font-weight: 600;
         color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c8 {
@@ -489,7 +489,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       }
 
       .c6 {
-        padding: 10px 16px;
+        padding: 8px 16px;
         background: #4945ff;
         border: 1px solid #4945ff;
         border-radius: 4px;
