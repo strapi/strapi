@@ -305,11 +305,6 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     });
   });
 
-  /**
-   * TODO: Discuss: Which behaviour do we want? Should an empty array be treated the same as omitted/undefined?
-   * Easy to change in assertCustomTokenPermissionsValidity by checking isEmpty (to allow empty) vs !attributes.permissions
-   */
-
   test('Creates a non-custom api token with empty permissions attribute', async () => {
     const body = {
       name: 'api-token_tests-fullAccessFailWithEmptyPermissions',
@@ -375,7 +370,6 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       name: 'api-token_tests-customFail',
       description: 'api-token_tests-description',
       type: 'custom',
-      permissions: [],
     };
 
     const res = await rq({

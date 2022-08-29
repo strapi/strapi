@@ -55,7 +55,7 @@ module.exports = {
     },
     permissions: {
       type: 'relation',
-      target: 'admin::token-permission',
+      target: 'admin::api-token-permission',
       relation: 'oneToMany',
       mappedBy: 'token',
       configurable: false,

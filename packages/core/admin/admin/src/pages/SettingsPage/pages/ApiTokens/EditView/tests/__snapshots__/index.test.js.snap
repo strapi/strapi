@@ -1394,7 +1394,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-labelledby="select-1-label select-1-content"
                             class="c48"
                             id="select-1"
-                            name="duration"
+                            name="lifespan"
                             type="button"
                           />
                           <div
@@ -2083,7 +2083,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 }
 
 .c60 {
-  color: #32324d;
+  color: #666687;
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -2093,7 +2093,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 }
 
 .c66 {
-  color: #666687;
+  color: #32324d;
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -3354,7 +3354,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-labelledby="select-3-label select-3-content"
                             class="c56"
                             id="select-3"
-                            name="duration"
+                            name="lifespan"
                             type="button"
                           />
                           <div
@@ -3370,7 +3370,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                   class="c60"
                                   id="select-3-content"
                                 >
-                                  7 days
+                                  Select
                                 </span>
                               </div>
                             </div>
@@ -3407,7 +3407,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                     <span
                       class="c64"
                     >
-                      Expiration date: November 22nd, 2021
+                      Expiration date: Unlimited
                     </span>
                   </div>
                 </div>
@@ -3465,7 +3465,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                   class="c66"
                                   id="select-4-content"
                                 >
-                                  Select
+                                  Read-only
                                 </span>
                               </div>
                             </div>
