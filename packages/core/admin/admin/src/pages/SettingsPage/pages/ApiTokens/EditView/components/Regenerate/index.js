@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import Refresh from '@strapi/icons/Refresh';
-import { ConfirmDialog } from '@strapi/helper-plugin';
+import { useNotification, ConfirmDialog } from '@strapi/helper-plugin';
 import { axiosInstance } from '../../../../../../../core/utils';
 
 const ButtonWithRightMargin = styled(Button)`
@@ -12,6 +13,7 @@ const ButtonWithRightMargin = styled(Button)`
 `;
 
 export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
+  const toggleNotification = useNotification();
   let isLoadingConfirmation = false;
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -28,7 +30,10 @@ export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
       setShowConfirmDialog(false);
     } catch (error) {
       isLoadingConfirmation = false;
-      console.log('error', error);
+      toggleNotification({
+        type: 'warning',
+        message: get(error, 'response.data.message', 'notification.error'),
+      });
     }
   };
 
