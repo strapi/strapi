@@ -209,7 +209,7 @@ describe('Wysiwyg render and actions buttons', () => {
         background: #ffffff;
       }
 
-      .c30 .sc-crHmcD {
+      .c30 .sc-pVTFL {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
