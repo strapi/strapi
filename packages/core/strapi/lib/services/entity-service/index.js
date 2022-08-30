@@ -10,7 +10,7 @@ const {
   sanitize,
 } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
-const { transformParamsToQuery } = require('@strapi/utils/lib/convert-query-params');
+const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 const uploadFiles = require('../utils/upload-files');
 
 const {

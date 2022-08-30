@@ -25,7 +25,8 @@ const compo = {
   },
 };
 
-const productModel = {
+const productModel = (draftAndPublish = false) => ({
+  draftAndPublish,
   attributes: {
     name: {
       type: 'string',
@@ -36,9 +37,10 @@ const productModel = {
   pluralName: 'products',
   description: '',
   collectionName: '',
-};
+});
 
-const shopModel = {
+const shopModel = (draftAndPublish = false) => ({
+  draftAndPublish,
   attributes: {
     name: {
       type: 'string',
@@ -59,7 +61,7 @@ const shopModel = {
   displayName: 'Shop',
   singularName: 'shop',
   pluralName: 'shops',
-};
+});
 
 const createEntry = async (uid, data) => {
   const { body } = await rq({
@@ -70,14 +72,15 @@ const createEntry = async (uid, data) => {
   return body;
 };
 
-describe('Relations', () => {
+describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) => {
   const builder = createTestBuilder();
+  const addPublishedAtCheck = (value) => (withDraftAndPublish ? { publishedAt: value } : undefined);
 
   beforeAll(async () => {
     await builder
-      .addContentTypes([productModel])
+      .addContentTypes([productModel(withDraftAndPublish)])
       .addComponent(compo)
-      .addContentTypes([shopModel])
+      .addContentTypes([shopModel(withDraftAndPublish)])
       .build();
 
     strapi = await createStrapiInstance();
@@ -85,6 +88,13 @@ describe('Relations', () => {
 
     const createdProduct1 = await createEntry('api::product.product', { name: 'Skate' });
     const createdProduct2 = await createEntry('api::product.product', { name: 'Candle' });
+
+    if (withDraftAndPublish) {
+      await rq({
+        url: `/content-manager/collection-types/api::product.product/${createdProduct1.id}/actions/publish`,
+        method: 'POST',
+      });
+    }
 
     data.products.push(createdProduct1);
     data.products.push(createdProduct2);
@@ -115,10 +125,12 @@ describe('Relations', () => {
         {
           id: expect.any(Number),
           name: 'Candle',
+          ...addPublishedAtCheck(null),
         },
         {
           id: expect.any(Number),
           name: 'Skate',
+          ...addPublishedAtCheck(expect.any(String)),
         },
       ]);
 
@@ -135,6 +147,7 @@ describe('Relations', () => {
         {
           id: expect.any(Number),
           name: 'Candle',
+          ...addPublishedAtCheck(null),
         },
       ]);
     });
@@ -153,6 +166,7 @@ describe('Relations', () => {
         {
           id: expect.any(Number),
           name: 'Candle',
+          ...addPublishedAtCheck(null),
         },
       ]);
 
@@ -183,10 +197,12 @@ describe('Relations', () => {
         {
           id: expect.any(Number),
           name: 'Candle',
+          ...addPublishedAtCheck(null),
         },
         {
           id: expect.any(Number),
           name: 'Skate',
+          ...addPublishedAtCheck(expect.any(String)),
         },
       ]);
 
@@ -204,6 +220,7 @@ describe('Relations', () => {
         {
           id: expect.any(Number),
           name: 'Candle',
+          ...addPublishedAtCheck(null),
         },
       ]);
     });
@@ -223,6 +240,7 @@ describe('Relations', () => {
         {
           id: expect.any(Number),
           name: 'Skate',
+          ...addPublishedAtCheck(expect.any(String)),
         },
       ]);
 
@@ -254,6 +272,7 @@ describe('Relations', () => {
         {
           id: expect.any(Number),
           name: 'Candle',
+          ...addPublishedAtCheck(null),
         },
       ]);
     });

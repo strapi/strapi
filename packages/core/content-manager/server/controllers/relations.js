@@ -1,9 +1,9 @@
 'use strict';
 
-const { prop, isEmpty, defaultsDeep } = require('lodash/fp');
+const { prop, isEmpty } = require('lodash/fp');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
-const { transformParamsToQuery } = require('@strapi/utils/lib/convert-query-params');
+const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 
 const { getService } = require('../utils');
 const { validateFindAvailable } = require('./validation/relations');
@@ -75,15 +75,11 @@ module.exports = {
 
     // TODO: for RBAC reasons, find a way to exclude filters that should not be there
     // i.e. all filters except locale for i18n
-    const queryParams = defaultsDeep(
-      {
-        orderBy: mainField,
-      },
-      {
-        ...transformParamsToQuery(targetedModel.uid, query),
-        select: fieldsToSelect, // cannot select other fields as the user may not have the permissions
-      }
-    );
+    const queryParams = {
+      orderBy: mainField,
+      ...transformParamsToQuery(targetedModel.uid, query),
+      select: fieldsToSelect, // cannot select other fields as the user may not have the permissions
+    };
 
     if (!isEmpty(idsToOmit)) {
       addWhereClause(queryParams, { id: { $notIn: idsToOmit } });
@@ -108,15 +104,6 @@ module.exports = {
       addWhereClause(queryParams, { id: { $notIn: knexSubQuery } });
     }
 
-    const results = await strapi.query(targetedModel.uid).findPage(queryParams);
-
-    ctx.body = {
-      results: results.results,
-      pagination: {
-        page: results.pagination.page,
-        pageSize: results.pagination.pageSize,
-        total: results.pagination.total,
-      },
-    };
+    ctx.body = await strapi.query(targetedModel.uid).findPage(queryParams);
   },
 };
