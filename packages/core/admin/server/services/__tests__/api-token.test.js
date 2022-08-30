@@ -283,7 +283,7 @@ describe('API Token', () => {
         },
       };
 
-      expect(() => apiTokenService.create(attributes)).rejects.toThrowError(
+      await expect(() => apiTokenService.create(attributes)).rejects.toThrowError(
         new ApplicationError(
           `Unknown permissions provided: unknown-permission-A, unknown-permission-B`
         )
