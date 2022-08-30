@@ -145,7 +145,7 @@
     "glob": "8.0.3",
     "react-test-renderer": "^17.0.2",
     "speed-measure-webpack-plugin": "1.5.0",
-    "webpack-bundle-analyzer": "^4.5.0"
+    "webpack-bundle-analyzer": "^4.6.1"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.3.4"
