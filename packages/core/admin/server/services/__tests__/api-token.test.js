@@ -2,8 +2,9 @@
 
 const { NotFoundError } = require('@strapi/utils/lib/errors');
 const crypto = require('crypto');
-const { omit } = require('lodash/fp');
+const { omit, uniq } = require('lodash/fp');
 const apiTokenService = require('../api-token');
+const constants = require('../constants');
 
 describe('API Token', () => {
   const mockedApiToken = {
@@ -70,7 +71,7 @@ describe('API Token', () => {
         name: 'api-token_tests-name',
         description: 'api-token_tests-description',
         type: 'read-only',
-        lifespan: 123456,
+        lifespan: constants.API_TOKEN_LIFESPANS.DAYS_90,
       };
 
       const expectedExpires = Date.now() + attributes.lifespan;
@@ -104,6 +105,31 @@ describe('API Token', () => {
         lifespan: attributes.lifespan,
       });
       expect(res.expiresAt).toBe(expectedExpires);
+    });
+
+    test('It throws when creating a token with invalid lifespan', async () => {
+      const attributes = {
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+        lifespan: 12345,
+      };
+
+      const create = jest.fn(({ data }) => Promise.resolve(data));
+      global.strapi = {
+        query() {
+          return { create };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      expect(async () => {
+        await apiTokenService.create(attributes);
+      }).rejects.toThrow(/lifespan/);
+
+      expect(create).not.toHaveBeenCalled();
     });
 
     test('Creates a custom token', async () => {
@@ -186,6 +212,125 @@ describe('API Token', () => {
         expiresAt: null,
         lifespan: null,
       });
+    });
+
+    test('Creates a custom token with no permissions', async () => {
+      const attributes = {
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'custom',
+        permissions: [],
+      };
+      const createTokenResult = {
+        ...attributes,
+        lifespan: null,
+        expiresAt: null,
+        id: 1,
+      };
+
+      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
+      const create = jest.fn().mockResolvedValue(createTokenResult);
+      const load = jest.fn().mockResolvedValueOnce(
+        Promise.resolve(
+          attributes.permissions.map((p) => {
+            return {
+              action: p,
+            };
+          })
+        )
+      );
+
+      global.strapi = {
+        query() {
+          return {
+            findOne,
+            create,
+          };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+        entityService: {
+          load,
+        },
+      };
+
+      const res = await apiTokenService.create(attributes);
+
+      expect(load).toHaveBeenCalledWith(
+        'admin::api-token',
+        {
+          ...createTokenResult,
+        },
+        'permissions'
+      );
+
+      // call to create token
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(create).toHaveBeenNthCalledWith(1, {
+        select: expect.arrayContaining([expect.any(String)]),
+        data: {
+          ...omit('permissions', attributes),
+          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
+          expiresAt: null,
+          lifespan: null,
+        },
+        populate: ['permissions'],
+      });
+
+      expect(res).toEqual({
+        ...createTokenResult,
+        accessKey: mockedApiToken.hexedString,
+        expiresAt: null,
+        lifespan: null,
+      });
+    });
+
+    test('Creates a custom token with duplicate permissions should ignore duplicates', async () => {
+      const attributes = {
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'custom',
+        permissions: ['api::foo.foo.find', 'api::foo.foo.find', 'api::foo.foo.create'],
+      };
+      const createTokenResult = {
+        ...attributes,
+        lifespan: null,
+        expiresAt: null,
+        id: 1,
+      };
+
+      const findOne = jest.fn().mockResolvedValue(omit('permissions', createTokenResult));
+      const create = jest.fn().mockResolvedValue(createTokenResult);
+      const load = jest.fn().mockResolvedValueOnce(
+        Promise.resolve(
+          uniq(attributes.permissions).map((p) => {
+            return {
+              action: p,
+            };
+          })
+        )
+      );
+
+      global.strapi = {
+        query() {
+          return {
+            findOne,
+            create,
+          };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+        entityService: {
+          load,
+        },
+      };
+
+      const res = await apiTokenService.create(attributes);
+
+      expect(res.permissions).toHaveLength(2);
+      expect(res.permissions).toEqual(['api::foo.foo.find', 'api::foo.foo.create']);
     });
   });
 
@@ -496,7 +641,10 @@ describe('API Token', () => {
       description: 'api-token_tests-description',
       type: 'custom',
       permissions: [
+        // It should not recreate this action
         'admin::subject.keepThisAction',
+        'admin::subject.newAction',
+        // It should ignore the duplicate and not call create on the second occurence
         'admin::subject.newAction',
         'admin::subject.otherAction',
       ],
@@ -562,7 +710,7 @@ describe('API Token', () => {
       },
     });
 
-    expect(create).toHaveBeenCalledTimes(3);
+    expect(create).toHaveBeenCalledTimes(2);
     expect(create).not.toHaveBeenCalledWith({
       data: {
         action: 'admin::subject.keepAction',

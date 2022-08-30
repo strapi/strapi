@@ -3,6 +3,7 @@
 const { omit } = require('lodash');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
+const constants = require('../services/constants');
 
 describe('Admin API Token v2 CRUD (e2e)', () => {
   let rq;
@@ -265,11 +266,11 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       error: {
         status: 400,
         name: 'ValidationError',
-        message: 'lifespan must be greater than or equal to 1',
+        message: expect.stringContaining('lifespan must be one of the following values'),
         details: {
           errors: expect.arrayContaining([
             expect.objectContaining({
-              message: 'lifespan must be greater than or equal to 1',
+              message: expect.stringContaining('lifespan must be one of the following values'),
               name: 'ValidationError',
             }),
           ]),
@@ -303,11 +304,6 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       },
     });
   });
-
-  /**
-   * TODO: Discuss: Which behaviour do we want? Should an empty array be treated the same as omitted/undefined?
-   * Easy to change in assertCustomTokenPermissionsValidity by checking isEmpty (to allow empty) vs !attributes.permissions
-   */
 
   test('Creates a non-custom api token with empty permissions attribute', async () => {
     const body = {
@@ -374,7 +370,6 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
       name: 'api-token_tests-customFail',
       description: 'api-token_tests-description',
       type: 'custom',
-      permissions: [],
     };
 
     const res = await rq({
@@ -465,7 +460,7 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
     );
     tokens.push(await createValidToken({ type: 'full-access' }));
     tokens.push(await createValidToken({ type: 'read-only' }));
-    tokens.push(await createValidToken({ lifespan: 12345 }));
+    tokens.push(await createValidToken({ lifespan: constants.API_TOKEN_LIFESPANS.DAYS_7 }));
     tokens.push(await createValidToken());
 
     const res = await rq({

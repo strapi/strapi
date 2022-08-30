@@ -2,7 +2,7 @@
 
 const crypto = require('crypto');
 const { isNil } = require('lodash/fp');
-const { omit, difference, isEmpty, map, isArray } = require('lodash/fp');
+const { omit, difference, isEmpty, map, isArray, uniq } = require('lodash/fp');
 const { ValidationError, NotFoundError } = require('@strapi/utils').errors;
 const constants = require('./constants');
 
@@ -62,8 +62,26 @@ const assertCustomTokenPermissionsValidity = (attributes) => {
   }
 
   // Custom type tokens should always have permissions attached to them
-  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM && isEmpty(attributes.permissions)) {
+  if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM && !isArray(attributes.permissions)) {
     throw new ValidationError('Missing permissions attribute for custom token');
+  }
+};
+
+/**
+ * Assert that a token's permissions attribute is valid for its type
+ *
+ * @param {ApiToken} token
+ */
+const assertValidLifespan = ({ lifespan }) => {
+  if (isNil(lifespan)) {
+    return;
+  }
+
+  if (!Object.values(constants.API_TOKEN_LIFESPANS).includes(lifespan)) {
+    throw new ValidationError(
+      `lifespan must be one of the following values: 
+      ${Object.values(constants.API_TOKEN_LIFESPANS).join(', ')}`
+    );
   }
 };
 
@@ -173,6 +191,7 @@ const create = async (attributes) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
   assertCustomTokenPermissionsValidity(attributes);
+  assertValidLifespan(attributes);
 
   // Create the token
   const apiToken = await strapi.query('admin::api-token').create({
@@ -190,13 +209,13 @@ const create = async (attributes) => {
   // If this is a custom type token, create and the related permissions
   if (attributes.type === constants.API_TOKEN_TYPE.CUSTOM) {
     // TODO: createMany doesn't seem to create relation properly, implement a better way rather than a ton of queries
-    // const permissionsCount = await strapi.query('admin::token-permission').createMany({
+    // const permissionsCount = await strapi.query('admin::api-token-permission').createMany({
     //   populate: POPULATE_FIELDS,
     //   data: attributes.permissions.map(action => ({ action, token: apiToken })),
     // });
     await Promise.all(
-      attributes.permissions.map((action) =>
-        strapi.query('admin::token-permission').create({
+      uniq(attributes.permissions).map((action) =>
+        strapi.query('admin::api-token-permission').create({
           data: { action, token: apiToken },
         })
       )
@@ -348,6 +367,8 @@ const update = async (id, attributes) => {
     });
   }
 
+  assertValidLifespan(attributes);
+
   const updatedToken = await strapi.query('admin::api-token').update({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
@@ -357,20 +378,23 @@ const update = async (id, attributes) => {
 
   // custom tokens need to have their permissions updated as well
   if (updatedToken.type === constants.API_TOKEN_TYPE.CUSTOM && attributes.permissions) {
-    const currentPermissionsResult =
-      (await strapi.entityService.load('admin::api-token', updatedToken, 'permissions')) || [];
-
-    const actionsToDelete = difference(
-      map('action', currentPermissionsResult),
-      attributes.permissions
+    const currentPermissionsResult = await strapi.entityService.load(
+      'admin::api-token',
+      updatedToken,
+      'permissions'
     );
-    const actionsToAdd = difference(attributes.permissions, originalToken.permissions);
+
+    const currentPermissions = map('action', currentPermissionsResult || []);
+    const newPermissions = uniq(attributes.permissions);
+
+    const actionsToDelete = difference(currentPermissions, newPermissions);
+    const actionsToAdd = difference(newPermissions, currentPermissions);
 
     // TODO: improve efficiency here
     // method using a loop -- works but very inefficient
     await Promise.all(
       actionsToDelete.map((action) =>
-        strapi.query('admin::token-permission').delete({
+        strapi.query('admin::api-token-permission').delete({
           where: { action, token: id },
         })
       )
@@ -380,7 +404,7 @@ const update = async (id, attributes) => {
     // using a loop -- works but very inefficient
     await Promise.all(
       actionsToAdd.map((action) =>
-        strapi.query('admin::token-permission').create({
+        strapi.query('admin::api-token-permission').create({
           data: { action, token: id },
         })
       )
@@ -388,7 +412,7 @@ const update = async (id, attributes) => {
   }
   // if type is not custom, make sure any old permissions get removed
   else if (updatedToken.type !== constants.API_TOKEN_TYPE.CUSTOM) {
-    await strapi.query('admin::token-permission').delete({
+    await strapi.query('admin::api-token-permission').delete({
       where: { token: id },
     });
   }

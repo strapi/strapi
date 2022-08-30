@@ -451,10 +451,9 @@ class Strapi {
     await this.server.initMiddlewares();
     await this.server.initRouting();
 
-    await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
-
-    // TODO: is this the best place for this?
     await this.contentAPI.permissions.registerActions();
+
+    await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
     this.cron.start();
 
