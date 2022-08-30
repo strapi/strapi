@@ -28,6 +28,7 @@ const RelationItemCenterChildren = styled(RelationItem)`
 `;
 
 export const RelationInput = ({
+  count,
   description,
   disabled,
   error,
@@ -54,7 +55,7 @@ export const RelationInput = ({
       <Relation
         search={
           <>
-            <FieldLabel>{label}</FieldLabel>
+            <FieldLabel>{`${label} (${count})`}</FieldLabel>
             <ReactSelect
               components={{ Option }}
               options={searchResults.data.pages.flat()}
@@ -188,6 +189,7 @@ RelationInput.defaultProps = {
 };
 
 RelationInput.propTypes = {
+  count: PropTypes.number.isRequired,
   error: PropTypes.string,
   description: PropTypes.string,
   disabled: PropTypes.bool,
