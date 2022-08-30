@@ -31,6 +31,10 @@ module.exports = {
     const createdUser = await strapi.admin.services.user.create(attributes);
     const userInfo = strapi.admin.services.user.sanitizeUser(createdUser);
 
+    // Note: We need to assign manually the registrationToken to the
+    // final user payload so that it's not removed in the sanitation process.
+    Object.assign(userInfo, { registrationToken: createdUser.registrationToken });
+    
     ctx.created({ data: userInfo });
   },
 };
