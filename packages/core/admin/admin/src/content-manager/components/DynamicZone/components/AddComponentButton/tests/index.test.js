@@ -17,6 +17,7 @@ describe('<AddComponentButton />', () => {
         <IntlProvider locale="en" messages={{}} defaultLocale="en">
           <AddComponentButton
             label="test"
+            isDisabled={false}
             isOpen={false}
             name="name"
             onClick={jest.fn()}
@@ -38,6 +39,7 @@ describe('<AddComponentButton />', () => {
           <AddComponentButton
             label="test"
             isOpen
+            isDisabled={false}
             name="name"
             onClick={jest.fn()}
             hasError={false}
@@ -58,6 +60,7 @@ describe('<AddComponentButton />', () => {
           <AddComponentButton
             label=""
             isOpen={false}
+            isDisabled={false}
             name="name"
             onClick={jest.fn()}
             hasError={false}

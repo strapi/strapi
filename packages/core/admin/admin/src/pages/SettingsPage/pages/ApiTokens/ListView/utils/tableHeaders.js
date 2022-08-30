@@ -3,7 +3,10 @@ const tableHeaders = [
     name: 'name',
     key: 'name',
     metadatas: {
-      label: 'Name',
+      label: {
+        id: 'Settings.apiTokens.ListView.headers.name',
+        defaultMessage: 'Name',
+      },
       sortable: true,
     },
   },
@@ -11,7 +14,10 @@ const tableHeaders = [
     name: 'description',
     key: 'description',
     metadatas: {
-      label: 'Description',
+      label: {
+        id: 'Settings.apiTokens.ListView.headers.description',
+        defaultMessage: 'Description',
+      },
       sortable: false,
     },
   },
@@ -19,7 +25,10 @@ const tableHeaders = [
     name: 'type',
     key: 'type',
     metadatas: {
-      label: 'Token type',
+      label: {
+        id: 'Settings.apiTokens.ListView.headers.type',
+        defaultMessage: 'Token type',
+      },
       sortable: false,
     },
   },
@@ -27,7 +36,10 @@ const tableHeaders = [
     name: 'createdAt',
     key: 'createdAt',
     metadatas: {
-      label: 'Created at',
+      label: {
+        id: 'Settings.apiTokens.ListView.headers.createdAt',
+        defaultMessage: 'Created at',
+      },
       sortable: false,
     },
   },
