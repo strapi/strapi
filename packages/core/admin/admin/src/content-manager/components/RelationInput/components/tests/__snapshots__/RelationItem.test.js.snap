@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RelationList should render and match snapshot 1`] = `
-.c6 {
+exports[`Content-Manager || RelationInput || RelationItem should render and match snapshot 1`] = `
+.c3 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -13,7 +13,7 @@ exports[`RelationList should render and match snapshot 1`] = `
   width: 1px;
 }
 
-.c3 {
+.c0 {
   background: #ffffff;
   padding-top: 12px;
   padding-right: 16px;
@@ -24,7 +24,7 @@ exports[`RelationList should render and match snapshot 1`] = `
   border: 1px solid #dcdce4;
 }
 
-.c4 {
+.c1 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -42,79 +42,23 @@ exports[`RelationList should render and match snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c5 {
+.c2 {
   width: 100%;
   min-width: 0;
 }
 
-.c1 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c2 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c2 > * + * {
-  margin-top: 4px;
-}
-
-.c0 {
-  position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.c0:before,
-.c0:after {
-  position: absolute;
-  width: 100%;
-  height: 4px;
-  z-index: 1;
-}
-
-.c0:before {
-  background: linear-gradient(rgba(33,33,52,0.1) 0%,rgba(0,0,0,0) 100%);
-  top: 0;
-}
-
-.c0:after {
-  background: linear-gradient(rgba(0,0,0,0) 0%,rgba(33,33,52,0.1) 100%);
-  bottom: 0;
-}
-
 <div>
-  <div
-    class="c0"
+  <li
+    class="c0 c1"
   >
-    <ol
+    <div
       class="c1 c2"
-      spacing="1"
     >
-      <li
-        class="c3 c4"
-      >
-        <div
-          class="c4 c5"
-        >
-          First relation
-        </div>
-      </li>
-    </ol>
-  </div>
+      First relation
+    </div>
+  </li>
   <div
-    class="c6"
+    class="c3"
   >
     <p
       aria-live="polite"

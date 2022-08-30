@@ -11,7 +11,7 @@ const setup = ({ endAction }) =>
     </ThemeProvider>
   );
 
-describe('RelationItem', () => {
+describe('Content-Manager || RelationInput || RelationItem', () => {
   it('should render and match snapshot', () => {
     const { container } = setup({});
 

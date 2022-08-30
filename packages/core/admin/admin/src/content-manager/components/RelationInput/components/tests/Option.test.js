@@ -1,9 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+
+import { ReactSelect } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
-import ReactSelect from '../../../ReactSelect';
 import { Option } from '../Option';
 
 const setup = (props) =>
@@ -15,7 +16,7 @@ const setup = (props) =>
     </ThemeProvider>
   );
 
-describe('RelationInput || Option', () => {
+describe('Content-Manager || RelationInput || Option', () => {
   it('should render custom Option with published state title', () => {
     setup({ options: [{ mainField: 'relation 1', publicationState: 'published' }] });
 
