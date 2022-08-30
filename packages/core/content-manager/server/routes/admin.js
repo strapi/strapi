@@ -185,7 +185,7 @@ module.exports = {
     {
       method: 'GET',
       path: '/collection-types/:model/:id/:targetField',
-      handler: 'collection-types.previewManyRelations',
+      handler: 'relations.findExisting',
       config: {
         middlewares: [routing],
         policies: [

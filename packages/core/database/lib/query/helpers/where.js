@@ -206,12 +206,12 @@ const applyOperator = (qb, column, operator, value) => {
     }
 
     case '$in': {
-      qb.whereIn(column, _.castArray(value));
+      qb.whereIn(column, _.isObject(value) ? value : [value]);
       break;
     }
 
     case '$notIn': {
-      qb.whereNotIn(column, _.castArray(value));
+      qb.whereNotIn(column, _.isObject(value) ? value : [value]);
       break;
     }
 
