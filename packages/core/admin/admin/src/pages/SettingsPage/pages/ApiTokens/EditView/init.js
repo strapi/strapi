@@ -1,6 +1,6 @@
 import { transformPermissionsData } from './utils';
 
-const init = (state, permissions) => {
+const init = (state, permissions = []) => {
   return {
     ...state,
     selectedActions: [],

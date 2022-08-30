@@ -53,7 +53,7 @@ const ApiTokenCreateView = () => {
     allowedActions: { canCreate, canUpdate },
   } = useRBAC(adminPermissions.settings['api-tokens']);
   const [lang] = usePersistentState('strapi-admin-language', 'en');
-  const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, []));
+  const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, {}));
   const {
     params: { id },
   } = useRouteMatch('/settings/api-tokens/:id');
