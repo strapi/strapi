@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
 
+import { ReactSelect } from '@strapi/helper-plugin';
 import { Badge } from '@strapi/design-system/Badge';
 import { Box } from '@strapi/design-system/Box';
 import { BaseLink } from '@strapi/design-system/BaseLink';
@@ -19,15 +20,13 @@ import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
 
-import ReactSelect from '../ReactSelect';
-
 const RelationItemCenterChildren = styled(RelationItem)`
   div {
     justify-content: center;
   }
 `;
 
-export const RelationInput = ({
+const RelationInput = ({
   description,
   disabled,
   error,
@@ -212,3 +211,5 @@ RelationInput.propTypes = {
   searchResults: ReactQuerySearchResult,
   relations: ReactQueryRelationResult,
 };
+
+export default RelationInput;

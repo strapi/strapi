@@ -161,7 +161,7 @@ describe('GuidedTour Homepage', () => {
         background: #ffffff;
       }
 
-      .c25 .sc-iCfMLu {
+      .c25 .sc-hKwDye {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
