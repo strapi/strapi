@@ -14,22 +14,22 @@ const ButtonWithRightMargin = styled(Button)`
 
 export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
   const toggleNotification = useNotification();
-  let isLoadingConfirmation = false;
+  const [isLoadingConfirmation, setIsLoadingConfirmation] = useState(false);
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const handleConfirmRegeneration = async () => {
-    isLoadingConfirmation = true;
+    setIsLoadingConfirmation(true);
     try {
       const {
         data: {
           data: { accessKey },
         },
       } = await axiosInstance.post(`/admin/api-tokens/${idToRegenerate}/regenerate`);
-      isLoadingConfirmation = false;
+      setIsLoadingConfirmation(false);
       onRegenerate(accessKey);
       setShowConfirmDialog(false);
     } catch (error) {
-      isLoadingConfirmation = false;
+      setIsLoadingConfirmation(false);
       toggleNotification({
         type: 'warning',
         message: get(error, 'response.data.message', 'notification.error'),
