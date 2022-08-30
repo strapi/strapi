@@ -50,7 +50,7 @@ const getDeepPopulate = (
   }
 
   if (level > maxLevel) {
-    return true;
+    return {};
   }
 
   const model = strapi.getModel(uid);
