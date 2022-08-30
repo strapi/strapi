@@ -15,11 +15,10 @@ import {
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
-import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
 import Check from '@strapi/icons/Check';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { Formik } from 'formik';
-import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -288,7 +287,7 @@ const ApiTokenCreateView = () => {
                   }
                   primaryAction={
                     canEditInputs && (
-                      <Flex justifyContent="center">
+                      <Stack horizontal spacing={2}>
                         {apiToken?.name && (
                           <Regenerate
                             onRegenerate={handleRegenerate}
@@ -307,7 +306,7 @@ const ApiTokenCreateView = () => {
                             defaultMessage: 'Save',
                           })}
                         </Button>
-                      </Flex>
+                      </Stack>
                     )
                   }
                   navigationAction={

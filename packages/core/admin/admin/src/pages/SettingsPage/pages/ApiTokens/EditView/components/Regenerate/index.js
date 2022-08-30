@@ -1,15 +1,10 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import Refresh from '@strapi/icons/Refresh';
 import { ConfirmDialog } from '@strapi/helper-plugin';
 import { useRegenerate } from '../../../../../../../hooks';
-
-const ButtonWithRightMargin = styled(Button)`
-  margin-right: ${({ theme }) => theme.spaces[2]};
-`;
 
 export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
   const { formatMessage } = useIntl();
@@ -22,7 +17,7 @@ export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
 
   return (
     <>
-      <ButtonWithRightMargin
+      <Button
         startIcon={<Refresh />}
         type="button"
         size="S"
@@ -33,7 +28,7 @@ export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
           id: 'Settings.apiTokens.regenerate',
           defaultMessage: 'Regenerate',
         })}
-      </ButtonWithRightMargin>
+      </Button>
 
       <ConfirmDialog
         bodyText={{
