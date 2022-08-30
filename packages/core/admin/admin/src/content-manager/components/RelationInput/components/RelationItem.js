@@ -6,7 +6,7 @@ import { Flex } from '@strapi/design-system/Flex';
 
 const ChildrenWrapper = styled(Flex)`
   width: 100%;
-  // Used to prevent endAction to be pushed out of container
+  /* Used to prevent endAction to be pushed out of container */
   min-width: 0;
 `;
 

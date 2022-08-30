@@ -18,7 +18,7 @@ const ShadowBox = styled(Box)`
   }
 
   &:before {
-    // TODO: as for DS Table component we would need this to be handled by the DS theme
+    /* TODO: as for DS Table component we would need this to be handled by the DS theme */
     content: ${({ overflow }) =>
       overflow === 'top-bottom' || overflow === 'top' ? "''" : undefined};
     background: linear-gradient(rgba(33, 33, 52, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
@@ -26,7 +26,7 @@ const ShadowBox = styled(Box)`
   }
 
   &:after {
-    // TODO: as for DS Table component we would need this to be handled by the DS theme
+    /* TODO: as for DS Table component we would need this to be handled by the DS theme */
     content: ${({ overflow }) =>
       overflow === 'top-bottom' || overflow === 'bottom' ? "''" : undefined};
     background: linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(33, 33, 52, 0.1) 100%);
