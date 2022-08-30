@@ -3,7 +3,9 @@ import * as locales from 'date-fns/locale';
 
 const getDateOfExpiration = (createdAt, duration, language = 'en') => {
   if (duration) {
-    return format(addDays(new Date(createdAt), duration), 'PPP', {
+    const durationInDays = duration / 24 / 60 / 60 / 1000;
+
+    return format(addDays(new Date(createdAt), durationInDays), 'PPP', {
       locale: locales[language],
     });
   }
