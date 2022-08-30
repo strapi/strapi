@@ -11,11 +11,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c57 {
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c69 {
+.c63 {
   background: #ffffff;
   padding: 16px;
 }
@@ -357,6 +353,15 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   margin-top: 16px;
 }
 
+.c61 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c61 > * + * {
+  margin-top: 8px;
+}
+
 .c25 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
@@ -640,6 +645,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   line-height: 1.33;
 }
 
+.c62 {
+  color: #666687;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
 .c6 {
   color: #4945ff;
   font-size: 0.75rem;
@@ -710,7 +721,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   display: flex;
 }
 
-.c91 {
+.c87 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -782,10 +793,37 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   outline: none;
 }
 
+.c57 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c60 {
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+}
+
+.c86 {
+  background: #eaeaef;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+}
+
 .c23 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 20px;
+}
+
+.c58 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
 }
 
 .c24 {
@@ -793,98 +831,23 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   max-width: 100%;
 }
 
-.c65 {
-  font-weight: 600;
-  color: #271fe0;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c59 {
+  grid-column: span 7;
+  max-width: 100%;
 }
 
-.c68 {
-  font-weight: 600;
-  color: #666687;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c85 {
+  grid-column: span 5;
+  max-width: 100%;
 }
 
-.c63 {
-  background: #ffffff;
-  padding: 16px;
-}
-
-.c66 {
-  background: #f6f6f9;
-  padding: 12px;
-}
-
-.c58 {
-  -webkit-align-items: flex-end;
-  -webkit-box-align: flex-end;
-  -ms-flex-align: flex-end;
-  align-items: flex-end;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c64 {
-  border-bottom: 1px solid #ffffff;
-}
-
-.c67 {
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c61 {
-  border: none;
-  background: transparent;
-  padding: 0;
-  outline-offset: -2px;
-}
-
-.c60 + .c60 > .c62 {
-  border-left: 1px solid #eaeaef;
-}
-
-.c61 .c62 {
-  border-right: none;
-}
-
-.c61[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c59 > * {
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
-.c59 .c60:first-of-type .c62 {
-  border-radius: 4px 0 0 0;
-}
-
-.c59 .c60:last-of-type .c62 {
-  border-radius: 0 4px 0 0;
-}
-
-.c59 .c60[aria-selected="true"] .c62 {
-  border-radius: 4px 4px 0 0;
-  border-left: none;
-  border-right: none;
-}
-
-.c83 {
+.c77 {
   color: #4945ff;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c84 {
+.c78 {
   color: #4a4a6a;
   display: block;
   white-space: nowrap;
@@ -895,11 +858,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   line-height: 1.25;
 }
 
-.c70 {
+.c64 {
   border-radius: 4px;
 }
 
-.c73 {
+.c67 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 24px;
@@ -907,21 +870,21 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c76 {
+.c70 {
   max-width: 100%;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c79 {
+.c73 {
   min-width: 0px;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c85 {
+.c79 {
   background: #dcdce4;
   border-radius: 50%;
   cursor: pointer;
@@ -933,12 +896,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   cursor: pointer;
 }
 
-.c87 {
+.c81 {
   color: #666687;
   width: 0.6875rem;
 }
 
-.c90 {
+.c84 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 24px;
@@ -946,7 +909,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c74 {
+.c68 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -964,7 +927,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: space-between;
 }
 
-.c77 {
+.c71 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -978,7 +941,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: row;
 }
 
-.c86 {
+.c80 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -999,70 +962,70 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: center;
 }
 
-.c71 {
+.c65 {
   border: 1px solid #f6f6f9;
 }
 
-.c71:hover:not([aria-disabled='true']) {
+.c65:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c71:hover:not([aria-disabled='true']) .sc-wAsCI {
+.c65:hover:not([aria-disabled='true']) .sc-OVzLa {
   color: #271fe0;
 }
 
-.c71:hover:not([aria-disabled='true']) .c82 {
+.c65:hover:not([aria-disabled='true']) .c76 {
   color: #4945ff;
 }
 
-.c71:hover:not([aria-disabled='true']) > .c72 {
+.c65:hover:not([aria-disabled='true']) > .c66 {
   background: #f0f0ff;
 }
 
-.c71:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c65:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c89 {
+.c83 {
   border: 1px solid #ffffff;
 }
 
-.c89:hover:not([aria-disabled='true']) {
+.c83:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c89:hover:not([aria-disabled='true']) .sc-wAsCI {
+.c83:hover:not([aria-disabled='true']) .sc-OVzLa {
   color: #271fe0;
 }
 
-.c89:hover:not([aria-disabled='true']) .c82 {
+.c83:hover:not([aria-disabled='true']) .c76 {
   color: #4945ff;
 }
 
-.c89:hover:not([aria-disabled='true']) > .c72 {
+.c83:hover:not([aria-disabled='true']) > .c66 {
   background: #f0f0ff;
 }
 
-.c89:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c83:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c80 {
+.c74 {
   background: transparent;
   border: none;
   position: relative;
   outline: none;
 }
 
-.c80[aria-disabled='true'] {
+.c74[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c80[aria-disabled='true'] svg path {
+.c74[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c80 svg {
+.c74 svg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1070,11 +1033,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   font-size: 0.625rem;
 }
 
-.c80 svg path {
+.c74 svg path {
   fill: #4945ff;
 }
 
-.c80:after {
+.c74:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -1089,11 +1052,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid transparent;
 }
 
-.c80:focus-visible {
+.c74:focus-visible {
   outline: none;
 }
 
-.c80:focus-visible:after {
+.c74:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -1104,42 +1067,42 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c78 > * {
+.c72 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c78 > * + * {
+.c72 > * + * {
   margin-left: 12px;
 }
 
-.c88 path {
+.c82 path {
   fill: #666687;
 }
 
-.c81 {
+.c75 {
   text-align: left;
 }
 
-.c81 > span {
+.c75 > span {
   max-width: 100%;
 }
 
-.c81 svg {
+.c75 svg {
   width: 0.875rem;
   height: 0.875rem;
 }
 
-.c81 svg path {
+.c75 svg path {
   fill: #8e8ea9;
 }
 
-.c75 {
+.c69 {
   min-height: 5.5rem;
   border-radius: 4px;
 }
 
-.c75:hover svg path {
+.c69:hover svg path {
   fill: #4945ff;
 }
 
@@ -1155,6 +1118,30 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   }
 }
 
+@media (max-width:68.75rem) {
+  .c59 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c59 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:68.75rem) {
+  .c85 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c85 {
+    grid-column: span;
+  }
+}
+
 <div>
   <main
     aria-labelledby="main-content-title"
@@ -1166,7 +1153,9 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
       action="#"
       novalidate=""
     >
-      <div>
+      <div
+        style="height: 0px;"
+      >
         <div
           class="c1"
           data-strapi-header="true"
@@ -1541,216 +1530,186 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
             </div>
           </div>
           <div
-            class="c57"
+            class="c57 c58"
           >
-            <div>
+            <div
+              class="c59"
+            >
               <div
-                aria-label="Tabs Permissions"
-                class="c58 c59"
-                role="tablist"
-              >
-                <button
-                  aria-controls="tabs-0-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c60 c61"
-                  id="tabs-0-tab"
-                  role="tab"
-                  tabindex="0"
-                  type="button"
-                >
-                  <div
-                    class="c62 c63 c64"
-                  >
-                    <span
-                      class="c65"
-                    >
-                      Collection Types
-                    </span>
-                  </div>
-                </button>
-                <button
-                  aria-disabled="false"
-                  aria-selected="false"
-                  class="c60 c61"
-                  id="tabs-1-tab"
-                  role="tab"
-                  tabindex="-1"
-                  type="button"
-                >
-                  <div
-                    class="c62 c66 c67"
-                  >
-                    <span
-                      class="c68"
-                    >
-                      Single Types
-                    </span>
-                  </div>
-                </button>
-                <button
-                  aria-disabled="false"
-                  aria-selected="false"
-                  class="c60 c61"
-                  id="tabs-2-tab"
-                  role="tab"
-                  tabindex="-1"
-                  type="button"
-                >
-                  <div
-                    class="c62 c66 c67"
-                  >
-                    <span
-                      class="c68"
-                    >
-                      Custom
-                    </span>
-                  </div>
-                </button>
-              </div>
-              <div
-                style="position: relative;"
+                class="c60"
               >
                 <div
-                  aria-labelledby="tabs-0-tab"
-                  id="tabs-0-tabpanel"
-                  role="tabpanel"
-                  tabindex="0"
+                  class="c18 c61"
+                  spacing="2"
+                >
+                  <h2
+                    class="c22"
+                  >
+                    Permissions
+                  </h2>
+                  <p
+                    class="c62"
+                  >
+                    Only actions bound by a route are listed below.
+                  </p>
+                </div>
+                <div
+                  class="c63"
                 >
                   <div
-                    class="c69"
+                    aria-disabled="false"
+                    class="c64 c65"
+                    data-strapi-expanded="false"
                   >
                     <div
-                      aria-disabled="false"
-                      class="c70 c71"
-                      data-strapi-expanded="false"
+                      class="c66 c67 c68 c69"
+                      cursor=""
                     >
                       <div
-                        class="c72 c73 c74 c75"
-                        cursor=""
+                        class="c66 c70 c71 c72"
+                        spacing="3"
                       >
+                        <button
+                          aria-controls="accordion-content-accordion-1"
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-labelledby="accordion-label-accordion-1"
+                          class="c66 c73 c71 c74 c75"
+                          data-strapi-accordion-toggle="true"
+                          type="button"
+                        >
+                          <span
+                            class="c76 c77"
+                          >
+                            <span
+                              class="c76 sc-OVzLa c78"
+                              id="accordion-label-accordion-1"
+                            >
+                              Address
+                            </span>
+                          </span>
+                        </button>
                         <div
-                          class="c72 c76 c77 c78"
+                          class="c66 c71 c72"
                           spacing="3"
                         >
-                          <button
-                            aria-controls="accordion-content-accordion-1"
-                            aria-disabled="false"
-                            aria-expanded="false"
-                            aria-labelledby="accordion-label-accordion-1"
-                            class="c72 c79 c77 c80 c81"
-                            data-strapi-accordion-toggle="true"
-                            type="button"
+                          <span
+                            aria-hidden="true"
+                            class="c66 c79 c80"
+                            cursor="pointer"
+                            data-strapi-dropdown="true"
+                            height="2rem"
+                            width="2rem"
                           >
-                            <span
-                              class="c82 c83"
+                            <svg
+                              class="c81 c82"
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 14 8"
+                              width="0.6875rem"
+                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <span
-                                class="c82 sc-wAsCI c84"
-                                id="accordion-label-accordion-1"
-                              >
-                                Category
-                              </span>
-                            </span>
-                          </button>
-                          <div
-                            class="c72 c77 c78"
-                            spacing="3"
-                          >
-                            <span
-                              aria-hidden="true"
-                              class="c72 c85 c86"
-                              cursor="pointer"
-                              data-strapi-dropdown="true"
-                              height="2rem"
-                              width="2rem"
-                            >
-                              <svg
-                                class="c87 c88"
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 14 8"
-                                width="0.6875rem"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      aria-disabled="false"
-                      class="c70 c89"
-                      data-strapi-expanded="false"
-                    >
-                      <div
-                        class="c72 c90 c74 c75"
-                        cursor=""
-                      >
-                        <div
-                          class="c72 c76 c77 c78"
-                          spacing="3"
-                        >
-                          <button
-                            aria-controls="accordion-content-accordion-2"
-                            aria-disabled="false"
-                            aria-expanded="false"
-                            aria-labelledby="accordion-label-accordion-2"
-                            class="c72 c79 c77 c80 c81"
-                            data-strapi-accordion-toggle="true"
-                            type="button"
-                          >
-                            <span
-                              class="c82 c83"
-                            >
-                              <span
-                                class="c82 sc-wAsCI c84"
-                                id="accordion-label-accordion-2"
-                              >
-                                Country
-                              </span>
-                            </span>
-                          </button>
-                          <div
-                            class="c72 c77 c78"
-                            spacing="3"
-                          >
-                            <span
-                              aria-hidden="true"
-                              class="c72 c85 c86"
-                              cursor="pointer"
-                              data-strapi-dropdown="true"
-                              height="2rem"
-                              width="2rem"
-                            >
-                              <svg
-                                class="c87 c88"
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 14 8"
-                                width="0.6875rem"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </span>
-                          </div>
+                              <path
+                                clip-rule="evenodd"
+                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                fill="#32324D"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
+                  <div
+                    aria-disabled="false"
+                    class="c64 c83"
+                    data-strapi-expanded="false"
+                  >
+                    <div
+                      class="c66 c84 c68 c69"
+                      cursor=""
+                    >
+                      <div
+                        class="c66 c70 c71 c72"
+                        spacing="3"
+                      >
+                        <button
+                          aria-controls="accordion-content-accordion-2"
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-labelledby="accordion-label-accordion-2"
+                          class="c66 c73 c71 c74 c75"
+                          data-strapi-accordion-toggle="true"
+                          type="button"
+                        >
+                          <span
+                            class="c76 c77"
+                          >
+                            <span
+                              class="c76 sc-OVzLa c78"
+                              id="accordion-label-accordion-2"
+                            >
+                              Category
+                            </span>
+                          </span>
+                        </button>
+                        <div
+                          class="c66 c71 c72"
+                          spacing="3"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="c66 c79 c80"
+                            cursor="pointer"
+                            data-strapi-dropdown="true"
+                            height="2rem"
+                            width="2rem"
+                          >
+                            <svg
+                              class="c81 c82"
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 14 8"
+                              width="0.6875rem"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                fill="#32324D"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="c85"
+            >
+              <div
+                class="c86"
+                style="min-height: 100%;"
+              >
+                <div
+                  class="c18 c61"
+                  spacing="2"
+                >
+                  <h3
+                    class="c22"
+                  >
+                    Advanced settings
+                  </h3>
+                  <p
+                    class="c62"
+                  >
+                    Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
+                  </p>
                 </div>
               </div>
             </div>
@@ -1760,7 +1719,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
     </form>
   </main>
   <div
-    class="c91"
+    class="c87"
   >
     <p
       aria-live="polite"
@@ -1795,11 +1754,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c68 {
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c80 {
+.c72 {
   background: #ffffff;
   padding: 16px;
 }
@@ -1877,7 +1832,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   height: 100%;
 }
 
-.c103 .c12 {
+.c97 .c12 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1888,15 +1843,15 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   align-items: center;
 }
 
-.c103 .c15 {
+.c97 .c15 {
   color: #ffffff;
 }
 
-.c103[aria-disabled='true'] .c15 {
+.c97[aria-disabled='true'] .c15 {
   color: #666687;
 }
 
-.c103[aria-disabled='true']:active .c15 {
+.c97[aria-disabled='true']:active .c15 {
   color: #666687;
 }
 
@@ -2092,16 +2047,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   line-height: 1.43;
 }
 
-.c66 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
 .c54 {
   line-height: 0;
 }
@@ -2189,7 +2134,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   width: 0.375rem;
 }
 
-.c67 {
+.c66 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2198,7 +2143,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: none;
 }
 
-.c67 svg {
+.c66 svg {
   width: 0.375rem;
 }
 
@@ -2245,6 +2190,15 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 
 .c29 > * + * {
   margin-top: 16px;
+}
+
+.c71 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c71 > * + * {
+  margin-top: 8px;
 }
 
 .c33 {
@@ -2626,7 +2580,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   word-break: break-all;
 }
 
-.c102 {
+.c96 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -2698,10 +2652,37 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   outline: none;
 }
 
+.c67 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c70 {
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+}
+
+.c95 {
+  background: #eaeaef;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+}
+
 .c31 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 20px;
+}
+
+.c68 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 0px;
 }
 
 .c32 {
@@ -2709,98 +2690,23 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   max-width: 100%;
 }
 
-.c76 {
-  font-weight: 600;
-  color: #271fe0;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c79 {
-  font-weight: 600;
-  color: #666687;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c74 {
-  background: #ffffff;
-  padding: 16px;
-}
-
-.c77 {
-  background: #f6f6f9;
-  padding: 12px;
-}
-
 .c69 {
-  -webkit-align-items: flex-end;
-  -webkit-box-align: flex-end;
-  -ms-flex-align: flex-end;
-  align-items: flex-end;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c75 {
-  border-bottom: 1px solid #ffffff;
-}
-
-.c78 {
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c72 {
-  border: none;
-  background: transparent;
-  padding: 0;
-  outline-offset: -2px;
-}
-
-.c71 + .c71 > .c73 {
-  border-left: 1px solid #eaeaef;
-}
-
-.c72 .c73 {
-  border-right: none;
-}
-
-.c72[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c70 > * {
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
-.c70 .c71:first-of-type .c73 {
-  border-radius: 4px 0 0 0;
-}
-
-.c70 .c71:last-of-type .c73 {
-  border-radius: 0 4px 0 0;
-}
-
-.c70 .c71[aria-selected="true"] .c73 {
-  border-radius: 4px 4px 0 0;
-  border-left: none;
-  border-right: none;
+  grid-column: span 7;
+  max-width: 100%;
 }
 
 .c94 {
+  grid-column: span 5;
+  max-width: 100%;
+}
+
+.c86 {
   color: #4945ff;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c95 {
+.c87 {
   color: #4a4a6a;
   display: block;
   white-space: nowrap;
@@ -2811,11 +2717,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   line-height: 1.25;
 }
 
-.c81 {
+.c73 {
   border-radius: 4px;
 }
 
-.c84 {
+.c76 {
   background: #f6f6f9;
   padding-top: 24px;
   padding-right: 24px;
@@ -2823,21 +2729,21 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c87 {
+.c79 {
   max-width: 100%;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c90 {
+.c82 {
   min-width: 0px;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
 }
 
-.c96 {
+.c88 {
   background: #dcdce4;
   border-radius: 50%;
   cursor: pointer;
@@ -2849,12 +2755,12 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   cursor: pointer;
 }
 
-.c98 {
+.c90 {
   color: #666687;
   width: 0.6875rem;
 }
 
-.c101 {
+.c93 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 24px;
@@ -2862,7 +2768,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   padding-left: 24px;
 }
 
-.c85 {
+.c77 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2880,7 +2786,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: space-between;
 }
 
-.c88 {
+.c80 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2894,7 +2800,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   flex-direction: row;
 }
 
-.c97 {
+.c89 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2915,70 +2821,70 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   justify-content: center;
 }
 
-.c82 {
+.c74 {
   border: 1px solid #f6f6f9;
 }
 
-.c82:hover:not([aria-disabled='true']) {
+.c74:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c82:hover:not([aria-disabled='true']) .sc-wAsCI {
+.c74:hover:not([aria-disabled='true']) .sc-OVzLa {
   color: #271fe0;
 }
 
-.c82:hover:not([aria-disabled='true']) .c93 {
+.c74:hover:not([aria-disabled='true']) .c85 {
   color: #4945ff;
 }
 
-.c82:hover:not([aria-disabled='true']) > .c83 {
+.c74:hover:not([aria-disabled='true']) > .c75 {
   background: #f0f0ff;
 }
 
-.c82:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c74:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c100 {
+.c92 {
   border: 1px solid #ffffff;
 }
 
-.c100:hover:not([aria-disabled='true']) {
+.c92:hover:not([aria-disabled='true']) {
   border: 1px solid #4945ff;
 }
 
-.c100:hover:not([aria-disabled='true']) .sc-wAsCI {
+.c92:hover:not([aria-disabled='true']) .sc-OVzLa {
   color: #271fe0;
 }
 
-.c100:hover:not([aria-disabled='true']) .c93 {
+.c92:hover:not([aria-disabled='true']) .c85 {
   color: #4945ff;
 }
 
-.c100:hover:not([aria-disabled='true']) > .c83 {
+.c92:hover:not([aria-disabled='true']) > .c75 {
   background: #f0f0ff;
 }
 
-.c100:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+.c92:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
   background: #d9d8ff;
 }
 
-.c91 {
+.c83 {
   background: transparent;
   border: none;
   position: relative;
   outline: none;
 }
 
-.c91[aria-disabled='true'] {
+.c83[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c91[aria-disabled='true'] svg path {
+.c83[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c91 svg {
+.c83 svg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2986,11 +2892,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   font-size: 0.625rem;
 }
 
-.c91 svg path {
+.c83 svg path {
   fill: #4945ff;
 }
 
-.c91:after {
+.c83:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -3005,11 +2911,11 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid transparent;
 }
 
-.c91:focus-visible {
+.c83:focus-visible {
   outline: none;
 }
 
-.c91:focus-visible:after {
+.c83:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -3020,42 +2926,42 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 2px solid #4945ff;
 }
 
-.c89 > * {
+.c81 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c89 > * + * {
+.c81 > * + * {
   margin-left: 12px;
 }
 
-.c99 path {
+.c91 path {
   fill: #666687;
 }
 
-.c92 {
+.c84 {
   text-align: left;
 }
 
-.c92 > span {
+.c84 > span {
   max-width: 100%;
 }
 
-.c92 svg {
+.c84 svg {
   width: 0.875rem;
   height: 0.875rem;
 }
 
-.c92 svg path {
+.c84 svg path {
   fill: #8e8ea9;
 }
 
-.c86 {
+.c78 {
   min-height: 5.5rem;
   border-radius: 4px;
 }
 
-.c86:hover svg path {
+.c78:hover svg path {
   fill: #4945ff;
 }
 
@@ -3068,6 +2974,30 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
 @media (max-width:34.375rem) {
   .c32 {
     grid-column: span 12;
+  }
+}
+
+@media (max-width:68.75rem) {
+  .c69 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c69 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:68.75rem) {
+  .c94 {
+    grid-column: span;
+  }
+}
+
+@media (max-width:34.375rem) {
+  .c94 {
+    grid-column: span;
   }
 }
 
@@ -3239,7 +3169,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                         >
                           <label
                             class="c35"
-                            for="textinput-2"
+                            for="textinput-4"
                             required=""
                           >
                             <div
@@ -3260,7 +3190,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               aria-disabled="false"
                               aria-invalid="false"
                               class="c41"
-                              id="textinput-2"
+                              id="textinput-4"
                               name="name"
                               value="My super token"
                             />
@@ -3289,7 +3219,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                           >
                             <label
                               class="c46"
-                              for="textarea-2"
+                              for="textarea-4"
                             >
                               <div
                                 class="c45"
@@ -3304,7 +3234,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             <textarea
                               aria-invalid="false"
                               class="c48"
-                              id="textarea-2"
+                              id="textarea-4"
                               name="description"
                             >
                               This describe my super token
@@ -3328,8 +3258,8 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       >
                         <span
                           class="c51"
-                          for="select-3"
-                          id="select-3-label"
+                          for="select-7"
+                          id="select-7-label"
                           required=""
                         >
                           <div
@@ -3351,9 +3281,9 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-disabled="true"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-3-label select-3-content"
+                            aria-labelledby="select-7-label select-7-content"
                             class="c56"
-                            id="select-3"
+                            id="select-7"
                             name="lifespan"
                             type="button"
                           />
@@ -3368,7 +3298,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                               >
                                 <span
                                   class="c60"
-                                  id="select-3-content"
+                                  id="select-7-content"
                                 >
                                   Select
                                 </span>
@@ -3424,8 +3354,8 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                       >
                         <span
                           class="c51"
-                          for="select-4"
-                          id="select-4-label"
+                          for="select-8"
+                          id="select-8-label"
                           required=""
                         >
                           <div
@@ -3446,9 +3376,9 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             aria-disabled="false"
                             aria-expanded="false"
                             aria-haspopup="listbox"
-                            aria-labelledby="select-4-label select-4-content"
+                            aria-labelledby="select-8-label select-8-content"
                             class="c56"
-                            id="select-4"
+                            id="select-8"
                             name="type"
                             type="button"
                           />
@@ -3462,10 +3392,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                                 class="c59"
                               >
                                 <span
-                                  class="c66"
-                                  id="select-4-content"
+                                  class="c60"
+                                  id="select-8-content"
                                 >
-                                  Read-only
+                                  Select
                                 </span>
                               </div>
                             </div>
@@ -3474,7 +3404,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             >
                               <button
                                 aria-hidden="true"
-                                class="c61 c62 c67"
+                                class="c61 c62 c66"
                                 tabindex="-1"
                                 type="button"
                               >
@@ -3504,216 +3434,186 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
             </div>
           </div>
           <div
-            class="c68"
+            class="c67 c68"
           >
-            <div>
+            <div
+              class="c69"
+            >
               <div
-                aria-label="Tabs Permissions"
-                class="c69 c70"
-                role="tablist"
-              >
-                <button
-                  aria-controls="tabs-0-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c71 c72"
-                  id="tabs-0-tab"
-                  role="tab"
-                  tabindex="0"
-                  type="button"
-                >
-                  <div
-                    class="c73 c74 c75"
-                  >
-                    <span
-                      class="c76"
-                    >
-                      Collection Types
-                    </span>
-                  </div>
-                </button>
-                <button
-                  aria-disabled="false"
-                  aria-selected="false"
-                  class="c71 c72"
-                  id="tabs-1-tab"
-                  role="tab"
-                  tabindex="-1"
-                  type="button"
-                >
-                  <div
-                    class="c73 c77 c78"
-                  >
-                    <span
-                      class="c79"
-                    >
-                      Single Types
-                    </span>
-                  </div>
-                </button>
-                <button
-                  aria-disabled="false"
-                  aria-selected="false"
-                  class="c71 c72"
-                  id="tabs-2-tab"
-                  role="tab"
-                  tabindex="-1"
-                  type="button"
-                >
-                  <div
-                    class="c73 c77 c78"
-                  >
-                    <span
-                      class="c79"
-                    >
-                      Custom
-                    </span>
-                  </div>
-                </button>
-              </div>
-              <div
-                style="position: relative;"
+                class="c70"
               >
                 <div
-                  aria-labelledby="tabs-0-tab"
-                  id="tabs-0-tabpanel"
-                  role="tabpanel"
-                  tabindex="0"
+                  class="c18 c71"
+                  spacing="2"
+                >
+                  <h2
+                    class="c30"
+                  >
+                    Permissions
+                  </h2>
+                  <p
+                    class="c27"
+                  >
+                    Only actions bound by a route are listed below.
+                  </p>
+                </div>
+                <div
+                  class="c72"
                 >
                   <div
-                    class="c80"
+                    aria-disabled="false"
+                    class="c73 c74"
+                    data-strapi-expanded="false"
                   >
                     <div
-                      aria-disabled="false"
-                      class="c81 c82"
-                      data-strapi-expanded="false"
+                      class="c75 c76 c77 c78"
+                      cursor=""
                     >
                       <div
-                        class="c83 c84 c85 c86"
-                        cursor=""
+                        class="c75 c79 c80 c81"
+                        spacing="3"
                       >
+                        <button
+                          aria-controls="accordion-content-accordion-5"
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-labelledby="accordion-label-accordion-5"
+                          class="c75 c82 c80 c83 c84"
+                          data-strapi-accordion-toggle="true"
+                          type="button"
+                        >
+                          <span
+                            class="c85 c86"
+                          >
+                            <span
+                              class="c85 sc-OVzLa c87"
+                              id="accordion-label-accordion-5"
+                            >
+                              Address
+                            </span>
+                          </span>
+                        </button>
                         <div
-                          class="c83 c87 c88 c89"
+                          class="c75 c80 c81"
                           spacing="3"
                         >
-                          <button
-                            aria-controls="accordion-content-accordion-3"
-                            aria-disabled="false"
-                            aria-expanded="false"
-                            aria-labelledby="accordion-label-accordion-3"
-                            class="c83 c90 c88 c91 c92"
-                            data-strapi-accordion-toggle="true"
-                            type="button"
+                          <span
+                            aria-hidden="true"
+                            class="c75 c88 c89"
+                            cursor="pointer"
+                            data-strapi-dropdown="true"
+                            height="2rem"
+                            width="2rem"
                           >
-                            <span
-                              class="c93 c94"
+                            <svg
+                              class="c90 c91"
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 14 8"
+                              width="0.6875rem"
+                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <span
-                                class="c93 sc-wAsCI c95"
-                                id="accordion-label-accordion-3"
-                              >
-                                Category
-                              </span>
-                            </span>
-                          </button>
-                          <div
-                            class="c83 c88 c89"
-                            spacing="3"
-                          >
-                            <span
-                              aria-hidden="true"
-                              class="c83 c96 c97"
-                              cursor="pointer"
-                              data-strapi-dropdown="true"
-                              height="2rem"
-                              width="2rem"
-                            >
-                              <svg
-                                class="c98 c99"
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 14 8"
-                                width="0.6875rem"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      aria-disabled="false"
-                      class="c81 c100"
-                      data-strapi-expanded="false"
-                    >
-                      <div
-                        class="c83 c101 c85 c86"
-                        cursor=""
-                      >
-                        <div
-                          class="c83 c87 c88 c89"
-                          spacing="3"
-                        >
-                          <button
-                            aria-controls="accordion-content-accordion-4"
-                            aria-disabled="false"
-                            aria-expanded="false"
-                            aria-labelledby="accordion-label-accordion-4"
-                            class="c83 c90 c88 c91 c92"
-                            data-strapi-accordion-toggle="true"
-                            type="button"
-                          >
-                            <span
-                              class="c93 c94"
-                            >
-                              <span
-                                class="c93 sc-wAsCI c95"
-                                id="accordion-label-accordion-4"
-                              >
-                                Country
-                              </span>
-                            </span>
-                          </button>
-                          <div
-                            class="c83 c88 c89"
-                            spacing="3"
-                          >
-                            <span
-                              aria-hidden="true"
-                              class="c83 c96 c97"
-                              cursor="pointer"
-                              data-strapi-dropdown="true"
-                              height="2rem"
-                              width="2rem"
-                            >
-                              <svg
-                                class="c98 c99"
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 14 8"
-                                width="0.6875rem"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </span>
-                          </div>
+                              <path
+                                clip-rule="evenodd"
+                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                fill="#32324D"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
+                  <div
+                    aria-disabled="false"
+                    class="c73 c92"
+                    data-strapi-expanded="false"
+                  >
+                    <div
+                      class="c75 c93 c77 c78"
+                      cursor=""
+                    >
+                      <div
+                        class="c75 c79 c80 c81"
+                        spacing="3"
+                      >
+                        <button
+                          aria-controls="accordion-content-accordion-6"
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-labelledby="accordion-label-accordion-6"
+                          class="c75 c82 c80 c83 c84"
+                          data-strapi-accordion-toggle="true"
+                          type="button"
+                        >
+                          <span
+                            class="c85 c86"
+                          >
+                            <span
+                              class="c85 sc-OVzLa c87"
+                              id="accordion-label-accordion-6"
+                            >
+                              Category
+                            </span>
+                          </span>
+                        </button>
+                        <div
+                          class="c75 c80 c81"
+                          spacing="3"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="c75 c88 c89"
+                            cursor="pointer"
+                            data-strapi-dropdown="true"
+                            height="2rem"
+                            width="2rem"
+                          >
+                            <svg
+                              class="c90 c91"
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 14 8"
+                              width="0.6875rem"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                fill="#32324D"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="c94"
+            >
+              <div
+                class="c95"
+                style="min-height: 100%;"
+              >
+                <div
+                  class="c18 c71"
+                  spacing="2"
+                >
+                  <h3
+                    class="c30"
+                  >
+                    Advanced settings
+                  </h3>
+                  <p
+                    class="c27"
+                  >
+                    Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
+                  </p>
                 </div>
               </div>
             </div>
@@ -3723,7 +3623,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
     </form>
   </main>
   <div
-    class="c102"
+    class="c96"
   >
     <p
       aria-live="polite"

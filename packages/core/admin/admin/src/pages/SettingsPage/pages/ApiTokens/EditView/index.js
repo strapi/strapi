@@ -100,7 +100,7 @@ const ApiTokenCreateView = () => {
 
       dispatch({
         type: 'UPDATE_PERMISSIONS',
-        value: data.permissions,
+        value: data?.permissions,
       });
 
       return data;
@@ -247,10 +247,18 @@ const ApiTokenCreateView = () => {
     }
   };
 
+  const setSelectedAction = ({ target: { value } }) => {
+    dispatch({
+      type: 'SET_SELECTED_ACTION',
+      value,
+    });
+  };
+
   const providerValue = {
     ...state,
     onChange: handleChangeCheckbox,
     onChangeSelectAll: handleChangeSelectAllCheckbox,
+    setSelectedAction,
   };
 
   const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
@@ -272,7 +280,6 @@ const ApiTokenCreateView = () => {
             description: apiToken?.description || '',
             type: apiToken?.type,
             lifespan: apiToken?.lifespan,
-            permissions: apiToken?.permissions,
           }}
           onSubmit={handleSubmit}
         >

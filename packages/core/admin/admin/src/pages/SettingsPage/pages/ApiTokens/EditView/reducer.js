@@ -39,6 +39,10 @@ const reducer = (state, action) =>
         draftState.selectedActions = [...action.value];
         break;
       }
+      case 'SET_SELECTED_ACTION': {
+        draftState.selectedAction = action.value;
+        break;
+      }
       default:
         return draftState;
     }

@@ -6,9 +6,11 @@ import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
+import CogIcon from '@strapi/icons/Cog';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
+import CheckboxWrapper from './CheckBoxWrapper';
 
 const Border = styled.div`
   flex: 1;
@@ -25,7 +27,7 @@ const CollapsableContentType = ({
   indexExpandendCollapsedContent,
 }) => {
   const {
-    value: { onChangeSelectAll, onChange, selectedActions },
+    value: { onChangeSelectAll, onChange, selectedActions, setSelectedAction, selectedAction },
   } = useApiTokenPermissionsContext();
   const [expanded, setExpanded] = useState(false);
 
@@ -43,6 +45,8 @@ const CollapsableContentType = ({
       setExpanded(false);
     }
   }, [indexExpandendCollapsedContent, orderNumber, expanded]);
+
+  const isActionSelected = (actionId) => actionId === selectedAction;
 
   return (
     <Accordion
@@ -87,17 +91,33 @@ const CollapsableContentType = ({
                 {controller?.actions &&
                   controller?.actions.map((action) => {
                     return (
-                      <GridItem col={4} key={action.actionId}>
-                        <Checkbox
-                          value={selectedActions.includes(action.actionId)}
-                          name={action.actionId}
-                          onValueChange={() => {
-                            onChange({ target: { value: action.actionId } });
-                          }}
-                          disabled={disabled}
+                      <GridItem col={6} key={action.actionId}>
+                        <CheckboxWrapper
+                          isActive={isActionSelected(action.actionId)}
+                          padding={2}
+                          hasRadius
                         >
-                          {action.action}
-                        </Checkbox>
+                          <Checkbox
+                            value={selectedActions.includes(action.actionId)}
+                            name={action.actionId}
+                            onValueChange={() => {
+                              onChange({ target: { value: action.actionId } });
+                            }}
+                            disabled={disabled}
+                          >
+                            {action.action}
+                          </Checkbox>
+                          <button
+                            type="button"
+                            data-testid="action-cog"
+                            onClick={() =>
+                              setSelectedAction({ target: { value: action.actionId } })
+                            }
+                            style={{ display: 'inline-flex', alignItems: 'center' }}
+                          >
+                            <CogIcon />
+                          </button>
+                        </CheckboxWrapper>
                       </GridItem>
                     );
                   })}

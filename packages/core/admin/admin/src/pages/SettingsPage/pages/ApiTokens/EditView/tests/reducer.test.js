@@ -59,4 +59,13 @@ describe('ADMIN | Pages | API TOKENS | EditView | reducer', () => {
       'api::category.category.findOne',
     ]);
   });
+
+  it('should add a selectedAction', () => {
+    const action = {
+      type: 'SET_SELECTED_ACTION',
+      value: 'api::address.address.find',
+    };
+
+    expect(reducer(initialState, action).selectedAction).toBe('api::address.address.find');
+  });
 });
