@@ -1,40 +1,23 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import Refresh from '@strapi/icons/Refresh';
-import { useNotification, ConfirmDialog } from '@strapi/helper-plugin';
-import { axiosInstance } from '../../../../../../../core/utils';
+import { ConfirmDialog } from '@strapi/helper-plugin';
+import { useRegenerate } from '../../../../../../../hooks';
 
 const ButtonWithRightMargin = styled(Button)`
   margin-right: ${({ theme }) => theme.spaces[2]};
 `;
 
 export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
-  const toggleNotification = useNotification();
-  const [isLoadingConfirmation, setIsLoadingConfirmation] = useState(false);
   const { formatMessage } = useIntl();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const { regenerateData, isLoadingConfirmation } = useRegenerate(idToRegenerate, onRegenerate);
   const handleConfirmRegeneration = async () => {
-    setIsLoadingConfirmation(true);
-    try {
-      const {
-        data: {
-          data: { accessKey },
-        },
-      } = await axiosInstance.post(`/admin/api-tokens/${idToRegenerate}/regenerate`);
-      setIsLoadingConfirmation(false);
-      onRegenerate(accessKey);
-      setShowConfirmDialog(false);
-    } catch (error) {
-      setIsLoadingConfirmation(false);
-      toggleNotification({
-        type: 'warning',
-        message: get(error, 'response.data.message', 'notification.error'),
-      });
-    }
+    regenerateData();
+    setShowConfirmDialog(false);
   };
 
   return (
