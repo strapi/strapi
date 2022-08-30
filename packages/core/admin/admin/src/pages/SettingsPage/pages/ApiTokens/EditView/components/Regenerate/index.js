@@ -79,9 +79,7 @@ export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
   );
 };
 
-Regenerate.defaultProps = {
-  onRegenerate() {},
-};
+Regenerate.defaultProps = { onRegenerate() {} };
 
 Regenerate.propTypes = {
   onRegenerate: PropTypes.func,
