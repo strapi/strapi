@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import styled from 'styled-components';
 
 import { Badge } from '@strapi/design-system/Badge';
 import { Box } from '@strapi/design-system/Box';
@@ -7,6 +8,8 @@ import { BaseLink } from '@strapi/design-system/BaseLink';
 import { Icon } from '@strapi/design-system/Icon';
 import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/Field';
 import { TextButton } from '@strapi/design-system/TextButton';
+import { Typography } from '@strapi/design-system/Typography';
+import { Loader } from '@strapi/design-system/Loader';
 
 import Cross from '@strapi/icons/Cross';
 import Refresh from '@strapi/icons/Refresh';
@@ -18,6 +21,12 @@ import { Option } from './components/Option';
 
 import ReactSelect from '../ReactSelect';
 
+const RelationItemCenterChildren = styled(RelationItem)`
+  div {
+    justify-content: center;
+  }
+`;
+
 export const RelationInput = ({
   description,
   disabled,
@@ -27,6 +36,7 @@ export const RelationInput = ({
   label,
   labelLoadMore,
   listHeight,
+  loadingMessage,
   relations,
   onRelationClose,
   onRelationAdd,
@@ -49,10 +59,12 @@ export const RelationInput = ({
               components={{ Option }}
               options={searchResults.data.pages.flat()}
               isDisabled={disabled}
+              isLoading={searchResults.isLoading}
               error={error}
               inputId={id}
               isSearchable
               isClear
+              loadingMessage={() => loadingMessage}
               onChange={onRelationAdd}
               onInputChange={onSearch}
               onMenuClose={onRelationOpen}
@@ -90,13 +102,17 @@ export const RelationInput = ({
                     </button>
                   }
                 >
-                  <Box paddingTop={1} paddingBottom={1}>
+                  <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                     {href ? (
                       <BaseLink disabled={disabled} href={href}>
-                        {mainField}
+                        <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
+                          {mainField}
+                        </Typography>
                       </BaseLink>
                     ) : (
-                      mainField
+                      <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
+                        {mainField}
+                      </Typography>
                     )}
                   </Box>
 
@@ -106,6 +122,7 @@ export const RelationInput = ({
                       borderColor={`${badgeColor}200`}
                       backgroundColor={`${badgeColor}100`}
                       textColor={`${badgeColor}700`}
+                      shrink={0}
                     >
                       {publicationStateTranslations[publicationState]}
                     </Badge>
@@ -113,6 +130,11 @@ export const RelationInput = ({
                 </RelationItem>
               );
             })}
+          {relations.isLoading && (
+            <RelationItemCenterChildren>
+              <Loader small>{loadingMessage}</Loader>
+            </RelationItemCenterChildren>
+          )}
         </RelationList>
         <Box paddingTop={2}>
           <FieldHint />
@@ -173,6 +195,7 @@ RelationInput.propTypes = {
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string.isRequired,
   listHeight: PropTypes.string,
+  loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onRelationAdd: PropTypes.func.isRequired,
   onRelationOpen: PropTypes.func.isRequired,
