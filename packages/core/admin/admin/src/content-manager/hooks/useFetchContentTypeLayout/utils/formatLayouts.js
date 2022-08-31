@@ -122,7 +122,9 @@ const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
 
     if (type === 'relation') {
       const queryInfos = {
-        endPoint: `collection-types/${contentTypeConfiguration.uid}`,
+        endpoints: {
+          search: `collection-types/${contentTypeConfiguration.uid}`,
+        },
         defaultParams: {},
       };
 
@@ -161,24 +163,17 @@ const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
 };
 
 const generateRelationQueryInfos = (contentTypeConfiguration, fieldName, models) => {
-  const uid = contentTypeConfiguration.uid;
-  const endPoint = getRequestUrl(`relations/${uid}/${fieldName}`);
-  const mainField = get(
-    contentTypeConfiguration,
-    ['metadatas', fieldName, 'edit', 'mainField', 'name'],
-    ''
-  );
+  const { uid } = contentTypeConfiguration;
   const targetModel = get(contentTypeConfiguration, ['attributes', fieldName, 'targetModel'], '');
-  const shouldDisplayRelationLink = getDisplayedModels(models).indexOf(targetModel) !== -1;
+  const shouldDisplayRelationLink = getDisplayedModels(models).includes(targetModel);
 
-  const queryInfos = {
-    endPoint,
-    containsKey: `${mainField}`,
+  return {
+    endpoints: {
+      search: getRequestUrl(`${uid}/${fieldName}`),
+    },
     defaultParams: {},
     shouldDisplayRelationLink,
   };
-
-  return queryInfos;
 };
 
 const generateRelationQueryInfosForComponents = (
@@ -187,25 +182,18 @@ const generateRelationQueryInfosForComponents = (
   ctUid,
   models
 ) => {
-  const endPoint = getRequestUrl(`relations/${ctUid}/${fieldName}`);
-  const mainField = get(
-    contentTypeConfiguration,
-    ['metadatas', fieldName, 'edit', 'mainField', 'name'],
-    ''
-  );
   const targetModel = get(contentTypeConfiguration, ['attributes', fieldName, 'targetModel'], '');
-  const shouldDisplayRelationLink = getDisplayedModels(models).indexOf(targetModel) !== -1;
+  const shouldDisplayRelationLink = getDisplayedModels(models).includes(targetModel);
 
-  const queryInfos = {
-    endPoint,
-    containsKey: `${mainField}`,
+  return {
+    endpoints: {
+      search: getRequestUrl(`${ctUid}/${fieldName}`),
+    },
     defaultParams: {
       _component: contentTypeConfiguration.uid,
     },
     shouldDisplayRelationLink,
   };
-
-  return queryInfos;
 };
 
 const getDisplayedModels = (models) =>

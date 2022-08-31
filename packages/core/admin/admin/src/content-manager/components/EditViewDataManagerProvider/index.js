@@ -164,6 +164,14 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
+  const loadRelation = useCallback(({ target: { name, value } }) => {
+    dispatch({
+      type: 'LOAD_RELATION',
+      keys: name.split('.'),
+      value,
+    });
+  }, []);
+
   const addRepeatableComponentToField = useCallback(
     (keys, componentUid, shouldCheckErrors = false) => {
       dispatch({
@@ -475,6 +483,7 @@ const EditViewDataManagerProvider = ({
         shouldNotRunValidations,
         status,
         layout: currentContentTypeLayout,
+        loadRelation,
         modifiedData,
         moveComponentDown,
         moveComponentField,

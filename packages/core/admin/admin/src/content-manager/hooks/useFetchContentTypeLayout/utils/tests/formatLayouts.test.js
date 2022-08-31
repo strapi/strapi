@@ -531,7 +531,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
             },
           },
           fieldSchema: { type: 'relation', targetModel: 'category' },
-          queryInfos: { defaultParams: {}, endPoint: 'collection-types/address' },
+          queryInfos: { defaultParams: {}, endpoints: { search: 'collection-types/address' } },
         },
         {
           name: 'component',
@@ -556,8 +556,9 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
   describe('generateRelationQueryInfos', () => {
     it('should return an object with the correct keys', () => {
       expect(generateRelationQueryInfos(addressSchema, 'categories', simpleModels)).toEqual({
-        endPoint: '/content-manager/relations/api::address.address/categories',
-        containsKey: 'name',
+        endpoints: {
+          search: '/content-manager/api::address.address/categories',
+        },
         defaultParams: {},
         shouldDisplayRelationLink: true,
       });
@@ -574,8 +575,9 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           simpleModels
         )
       ).toEqual({
-        endPoint: '/content-manager/relations/api::address.address/categories',
-        containsKey: 'name',
+        endpoints: {
+          search: '/content-manager/api::address.address/categories',
+        },
         defaultParams: {
           _component: 'api::address.address',
         },
