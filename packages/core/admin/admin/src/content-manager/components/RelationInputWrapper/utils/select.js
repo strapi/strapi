@@ -52,7 +52,7 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, q
       ...queryInfos,
       endpoints: {
         ...queryInfos.endpoints,
-        fetch: relationFetchEndpoint,
+        relation: relationFetchEndpoint,
       },
     },
     isCreatingEntry,

@@ -4,17 +4,23 @@ import { PUBLICATION_STATES } from '../constants';
 
 export const normalizeRelations = (
   relations,
-  { deletions = [], shouldAddLink = false, mainFieldName, targetModel }
+  { modifiedData = {}, shouldAddLink = false, mainFieldName, targetModel }
 ) => {
+  // TODO
+  if (!relations?.data?.pages) {
+    return relations;
+  }
+
   return {
+    ...relations,
     data: {
       pages: relations.data.pages
-        .map((page) =>
-          page
+        .map((page) => [
+          ...page.values
             .map((relation) => {
               const nextRelation = { ...relation };
 
-              if (deletions.find((deletion) => deletion.id === nextRelation.id)) {
+              if (modifiedData?.remove?.find((deletion) => deletion.id === nextRelation.id)) {
                 return null;
               }
 
@@ -34,8 +40,9 @@ export const normalizeRelations = (
 
               return nextRelation;
             })
-            .filter(Boolean)
-        )
+            .filter(Boolean),
+          ...(modifiedData?.add ?? []),
+        ])
         .filter((page) => page.length > 0),
     },
   };

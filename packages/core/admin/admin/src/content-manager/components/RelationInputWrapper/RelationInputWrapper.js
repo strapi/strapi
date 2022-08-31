@@ -2,8 +2,9 @@ import PropTypes from 'prop-types';
 import React, { memo, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 
-import { RelationInput, useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
+import { RelationInput } from '../RelationInput';
 import { useRelation } from '../../hooks/useRelation';
 import { connect, select, normalizeRelations } from './utils';
 import { PUBLICATION_STATES } from './constants';
@@ -23,9 +24,10 @@ export const RelationInputWrapper = ({
   targetModel,
 }) => {
   const { formatMessage } = useIntl();
-  const { addRelation, removeRelation, loadRelation, modifiedData } = useCMEditViewDataManager();
+  const { addRelation, removeRelation, loadRelation, modifiedData, slug, initialData } =
+    useCMEditViewDataManager();
 
-  const { relations, search, searchFor } = useRelation(name, {
+  const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
       endpoint: endpoints.relation,
       onload(data) {
@@ -105,35 +107,56 @@ export const RelationInputWrapper = ({
       disabled={isDisabled}
       id={name}
       label={formatMessage(intlLabel)}
-      labelLoadMore={formatMessage({
+      labelLoadMore={
+        // TODO: only display if there are more; derive from count
+        !isCreatingEntry &&
+        formatMessage({
+          // TODO
+          id: 'tbd',
+          defaultMessage: 'Load More',
+        })
+      }
+      loadingMessage={formatMessage({
+        // TODO
         id: 'tbd',
-        defaultMessage: 'Load More',
+        defaultMessage: 'Relations are loading',
       })}
       name={name}
-      onRelationAdd={() => handleRelationAdd()}
-      onRelationRemove={() => handleRelationRemove()}
+      onRelationAdd={(relation) => handleRelationAdd(relation)}
+      onRelationRemove={(relation) => handleRelationRemove(relation)}
       onRelationLoadMore={() => handleRelationLoadMore()}
-      onSearch={() => handleSearch()}
+      onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
+      onSearchClose={() => {}}
+      onSearchOpen={() => {}}
+      placeholder={formatMessage({
+        // TODO
+        id: 'tbd',
+        defaultMessage: 'Add relation',
+      })}
       publicationStateTranslations={{
         [PUBLICATION_STATES.DRAFT]: formatMessage({
+          // TODO
           id: 'tbd',
           defaultMessage: 'Draft',
         }),
 
         [PUBLICATION_STATES.PUBLISHED]: formatMessage({
+          // TODO
           id: 'tbd',
           defaultMessage: 'Published',
         }),
       }}
       relations={normalizeRelations(relations, {
-        deletions: modifiedData?.[name],
-        mainFieldName: mainField.name,
+        modifiedData: modifiedData?.[name],
+        // TODO: Remove mock title
+        mainFieldName: 'title' || mainField.name,
         shouldAddLink: shouldDisplayRelationLink,
         targetModel,
       })}
       searchResults={normalizeRelations(search, {
-        mainFieldName: mainField.name,
+        // TODO: Remove mock title
+        mainFieldName: 'title' || mainField.name,
       })}
     />
   );
