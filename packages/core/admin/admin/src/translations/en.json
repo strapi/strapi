@@ -416,6 +416,7 @@
   "app.utils.defaultMessage": " ",
   "app.utils.duplicate": "Duplicate",
   "app.utils.edit": "Edit",
+  "app.utils.delete": "Delete",
   "app.utils.errors.file-too-big.message": "The file is too big",
   "app.utils.filter-value": "Filter value",
   "app.utils.filters": "Filters",
