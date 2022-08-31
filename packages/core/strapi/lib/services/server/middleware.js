@@ -119,7 +119,9 @@ const resolveCustomMiddleware = (resolve, strapi) => {
   }
 
   try {
-    return require(modulePath);
+    const module = require(modulePath);
+    if (module.default) return module.default;
+    return module;
   } catch (err) {
     throw new Error(`Could not load middleware "${modulePath}".`);
   }
