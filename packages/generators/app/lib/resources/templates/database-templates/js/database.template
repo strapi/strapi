@@ -5,7 +5,7 @@ module.exports = ({ env }) => {
 
 	const connections = {
 		mysql: {
-			connection: {
+			connection: env('DATABASE_URL') || {
 		    host: env('DATABASE_HOST', 'localhost'),
 		    port: env.int('DATABASE_PORT', 3306),
 		    database: env('DATABASE_NAME', 'strapi'),
@@ -22,7 +22,7 @@ module.exports = ({ env }) => {
 			},
 		},
 		postgres: {
-			connection: {
+			connection: env('DATABASE_URL') || {
 		    host: env('DATABASE_HOST', 'localhost'),
 		    port: env.int('DATABASE_PORT', 5431),
 		    database: env('DATABASE_NAME', 'strapi'),
@@ -40,18 +40,16 @@ module.exports = ({ env }) => {
 	  },
 		sqlite: {
 			connection: {
-	      filename: path.join(__dirname, '..', env('DATABASE_FILENAME', 'data.db')),
+	      filename: env('DATABASE_URL') || path.join(__dirname, '..', env('DATABASE_FILENAME', 'data.db')),
 	    },
 	    useNullAsDefault: true,
 		}
 	}
 
-	const connection = env('DATABASE_URL') ? { connection: env('DATABASE_URL') } : connections[client]
-
 	return {
     connection: {
       client,
-      ...connection,
+      ...connections[client],
     },
 	};
 }
