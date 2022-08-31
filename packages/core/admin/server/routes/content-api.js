@@ -9,4 +9,12 @@ module.exports = [
       policies: ['admin::isAuthenticatedAdmin'],
     },
   },
+  {
+    method: 'GET',
+    path: '/content-api/routes',
+    handler: 'content-api.getRoutes',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
 ];
