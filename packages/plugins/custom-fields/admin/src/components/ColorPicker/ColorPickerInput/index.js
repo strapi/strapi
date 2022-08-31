@@ -63,7 +63,7 @@ const ColorPickerToggle = styled(BaseButton)`
 `;
 
 const ColorPickerPopover = styled(Popover)`
-  padding: 4px;
+  padding: ${({ theme }) => theme.spaces[1]};
 `;
 
 const ColorPickerInput = ({
@@ -133,7 +133,7 @@ const ColorPickerInput = ({
             onBlur={handleBlur}
             role="dialog"
             source={colorPickerButtonRef}
-            spacing={2}
+            spacing={4}
           >
             <FocusTrap onEscape={() => setShowColorPicker(false)}>
               <ColorPicker
