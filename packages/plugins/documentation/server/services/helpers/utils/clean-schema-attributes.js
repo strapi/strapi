@@ -115,6 +115,25 @@ const cleanSchemaAttributes = (
         if (attribute.repeatable) {
           attributesCopy[prop] = {
             type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                ...(isRequest ? {} : { id: { type: 'number' } }),
+                ...cleanSchemaAttributes(componentAttributes, { typeMap, isRequest }),
+              },
+            },
+          };
+        } else {
+          attributesCopy[prop] = {
+            type: 'object',
+            properties: {
+              ...(isRequest ? {} : { id: { type: 'number' } }),
+              ...cleanSchemaAttributes(componentAttributes, {
+                typeMap,
+                isRequest,
+              }),
+            },
+          };
             items: finalComponentSchema,
           };
         } else {
@@ -128,7 +147,7 @@ const cleanSchemaAttributes = (
           const rawComponentSchema = {
             type: 'object',
             properties: {
-              ...(isRequest ? {} : { id: { type: 'string' } }),
+              ...(isRequest ? {} : { id: { type: 'number' } }),
               __component: { type: 'string' },
               ...cleanSchemaAttributes(componentAttributes, {
                 typeMap,

@@ -102,8 +102,8 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       [`${pascalCase(uniqueName)}LocalizationResponse`]: {
         type: 'object',
         properties: {
-          id: { type: 'string' },
-          ...cleanSchemaAttributes(attributes, { addComponentSchema }),
+          id: { type: 'number' },
+          ...cleanSchemaAttributes(attributes),
         },
       },
     };
@@ -145,6 +145,11 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
           data: {
             type: 'array',
             items: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                attributes: { type: 'object', properties: cleanSchemaAttributes(attributes) },
+              },
               $ref: `#/components/schemas/${pascalCase(uniqueName)}ListResponseDataItem`,
             },
           },
@@ -175,6 +180,10 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         id: { type: 'string' },
         attributes: {
           type: 'object',
+          properties: {
+            id: { type: 'number' },
+            attributes: { type: 'object', properties: cleanSchemaAttributes(attributes) },
+          },
           properties: cleanSchemaAttributes(attributes, {
             addComponentSchema,
             componentSchemaRefName: `#/components/schemas/${pascalCase(
