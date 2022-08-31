@@ -16,7 +16,6 @@ const getSelectStyles = (theme, error) => {
         boxShadowColor = theme.colors.primary600;
       } else if (error) {
         borderColor = theme.colors.danger600;
-        boxShadowColor = theme.colors.danger600;
       }
 
       if (state.isDisabled) {

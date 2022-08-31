@@ -3,20 +3,14 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
-import { Typography } from '@strapi/design-system/Typography';
-
-const TypographyWrapper = styled(Typography)`
-  width: 100%;
-`;
 
 const ChildrenWrapper = styled(Flex)`
-  > a {
-    color: currentColor;
-    text-decoration: none;
-  }
+  width: 100%;
+  /* Used to prevent endAction to be pushed out of container */
+  min-width: 0;
 `;
 
-export const RelationItem = ({ children, endAction, ...props }) => {
+export const RelationItem = ({ children, disabled, endAction, ...props }) => {
   return (
     <Flex
       paddingTop={3}
@@ -25,26 +19,25 @@ export const RelationItem = ({ children, endAction, ...props }) => {
       paddingRight={4}
       hasRadius
       borderSize={1}
+      background={disabled ? 'neutral150' : 'neutral0'}
       borderColor="neutral200"
       justifyContent="space-between"
       as="li"
       {...props}
     >
-      <TypographyWrapper textColor="primary600" as="div">
-        <ChildrenWrapper width="100%" justifyContent="space-between" color="currentColor">
-          {children}
-        </ChildrenWrapper>
-      </TypographyWrapper>
+      <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
       {endAction && <Box paddingLeft={4}>{endAction}</Box>}
     </Flex>
   );
 };
 
 RelationItem.defaultProps = {
+  disabled: false,
   endAction: undefined,
 };
 
 RelationItem.propTypes = {
   children: PropTypes.node.isRequired,
+  disabled: PropTypes.bool,
   endAction: PropTypes.node,
 };
