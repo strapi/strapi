@@ -21,6 +21,7 @@ const ReactSelect = ({ components, styles, error, ariaErrorMessage, ...props }) 
         ClearIndicator,
         DropdownIndicator,
         IndicatorSeparator,
+        LoadingIndicator: () => null,
         ...components,
       }}
       aria-errormessage={error && ariaErrorMessage}

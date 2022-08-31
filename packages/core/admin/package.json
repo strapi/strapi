@@ -63,7 +63,7 @@
     "bcryptjs": "2.4.3",
     "chalk": "^4.1.1",
     "chokidar": "^3.5.1",
-    "codemirror": "^5.65.6",
+    "codemirror": "^5.65.8",
     "cross-env": "^7.0.3",
     "css-loader": "6.7.1",
     "date-fns": "2.29.2",
@@ -145,7 +145,7 @@
     "glob": "8.0.3",
     "react-test-renderer": "^17.0.2",
     "speed-measure-webpack-plugin": "1.5.0",
-    "webpack-bundle-analyzer": "^4.5.0"
+    "webpack-bundle-analyzer": "^4.6.1"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.3.4"

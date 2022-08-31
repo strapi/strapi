@@ -314,6 +314,7 @@
   "app.utils.defaultMessage": " ",
   "app.utils.duplicate": "Dupliquer",
   "app.utils.edit": "Modifier",
+  "app.utils.delete": "Supprimer",
   "app.utils.errors.file-too-big.message": "Le fichier est trop lourd",
   "app.utils.filter-value": "Valeur du filtre",
   "app.utils.filters": "Filtres",

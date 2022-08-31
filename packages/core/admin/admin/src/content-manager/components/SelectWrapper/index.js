@@ -284,6 +284,12 @@ function SelectWrapper({
         isDisabled={isDisabled}
         isLoading={isLoading}
         isClearable
+        loadingMessage={() =>
+          formatMessage({
+            id: getTrad('DynamicTable.relation-loading'),
+            defaultMessage: 'Relations are loading',
+          })
+        }
         mainField={mainField}
         name={name}
         options={filteredOptions}
