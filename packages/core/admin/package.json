@@ -52,9 +52,9 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.7",
     "@strapi/babel-plugin-switch-ee-ce": "4.3.6",
-    "@strapi/design-system": "1.2.1",
+    "@strapi/design-system": "1.2.2",
     "@strapi/helper-plugin": "4.3.6",
-    "@strapi/icons": "1.2.1",
+    "@strapi/icons": "1.2.2",
     "@strapi/typescript-utils": "4.3.6",
     "@strapi/utils": "4.3.6",
     "@strapi/permissions": "4.3.6",
@@ -118,7 +118,7 @@
     "react-is": "^17.0.2",
     "react-query": "3.24.3",
     "react-redux": "7.2.8",
-    "react-refresh": "0.11.0",
+    "react-refresh": "0.14.0",
     "react-router": "5.2.0",
     "react-router-dom": "5.2.0",
     "react-window": "1.8.7",
@@ -146,7 +146,7 @@
     "glob": "8.0.3",
     "react-test-renderer": "^17.0.2",
     "speed-measure-webpack-plugin": "1.5.0",
-    "webpack-bundle-analyzer": "^4.5.0"
+    "webpack-bundle-analyzer": "^4.6.1"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.3.4"

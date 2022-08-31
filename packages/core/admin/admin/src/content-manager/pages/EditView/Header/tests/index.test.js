@@ -208,8 +208,8 @@ describe('CONTENT MANAGER | EditView | Header', () => {
 
       .c5 {
         color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c3 {

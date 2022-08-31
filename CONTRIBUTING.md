@@ -132,9 +132,11 @@ $ yarn test:generate-app mysql
 
 A new app is required every time you run the end-to-end tests otherwise, the test suite will fail. A script is available to make this process easier: `node test/e2e.js`. It will delete the current test app, generate a new one and run the test suite.
 
+The script takes a path as optional argument (e.g. `node test/e2e.js path/to/test`). Options for jest can be passed using the double-dash notion: e.g. to update snapshots `node test/e2e.js -- -u`.
+
 ### Changing the database
 
-By default the script `test/e2e,js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
+By default the script `test/e2e.js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
 
 ```bash
 $ node test/e2e.js --db=sqlite
