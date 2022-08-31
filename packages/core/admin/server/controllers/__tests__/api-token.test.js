@@ -19,6 +19,17 @@ describe('API Token Controller', () => {
       const ctx = createContext({ body });
 
       global.strapi = {
+        contentAPI: {
+          permissions: {
+            providers: {
+              action: {
+                keys() {
+                  return ['foo', 'bar'];
+                },
+              },
+            },
+          },
+        },
         admin: {
           services: {
             'api-token': {
