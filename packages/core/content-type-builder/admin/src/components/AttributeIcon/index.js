@@ -75,7 +75,7 @@ const AttributeIcon = ({ type, customField, ...rest }) => {
     return null;
   }
 
-  return <IconBox as={Compo} {...rest} />;
+  return <IconBox as={Compo} {...rest} aria-hidden />;
 };
 
 AttributeIcon.defaultProps = {

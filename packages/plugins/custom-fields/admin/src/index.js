@@ -24,6 +24,42 @@ export default {
             /* webpackChunkName: "color-picker-input-component" */ './components/ColorPicker/ColorPickerInput'
           ),
       },
+      options: {
+        advanced: [
+          {
+            intlLabel: {
+              id: getTrad('color-picker.options.advanced.regex'),
+              defaultMessage: 'RegExp pattern',
+            },
+            name: 'regex',
+            type: 'text',
+            description: {
+              id: getTrad('color-picker.options.advanced.regex.description'),
+              defaultMessage: 'The text of the regular expression',
+            },
+          },
+          {
+            sectionTitle: {
+              id: 'global.settings',
+              defaultMessage: 'Settings',
+            },
+            items: [
+              {
+                name: 'required',
+                type: 'checkbox',
+                intlLabel: {
+                  id: getTrad('color-picker.options.advanced.requiredField'),
+                  defaultMessage: 'Required field',
+                },
+                description: {
+                  id: getTrad('color-picker.options.advanced.requiredField.description'),
+                  defaultMessage: "You won't be able to create an entry if this field is empty",
+                },
+              },
+            ],
+          },
+        ],
+      },
     });
   },
   async registerTrads({ locales }) {

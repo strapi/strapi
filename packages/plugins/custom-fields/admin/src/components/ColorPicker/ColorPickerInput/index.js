@@ -6,11 +6,13 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
 import { BaseButton } from '@strapi/design-system/BaseButton';
+import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Field, FieldHint, FieldError, FieldLabel, FieldInput } from '@strapi/design-system/Field';
+import { Popover } from '@strapi/design-system/Popover';
 import CarretDown from '@strapi/icons/CarretDown';
 import { useIntl } from 'react-intl';
 import { HexColorPicker } from 'react-colorful';
-import useOnClickOutside from '../../../hooks/useOnClickOutside';
+
 import getTrad from '../../../utils/getTrad';
 
 const ColorPreview = styled.div`
@@ -35,12 +37,12 @@ const ColorPicker = styled(HexColorPicker)`
 
   .react-colorful__saturation {
     border-radius: ${({ theme }) => theme.spaces[1]};
-    margin-bottom: ${({ theme }) => theme.spaces[2]};
   }
 
   .react-colorful__hue {
     border-radius: 10px;
     height: ${({ theme }) => theme.spaces[3]};
+    margin-top: ${({ theme }) => theme.spaces[2]};
   }
 `;
 
@@ -60,6 +62,10 @@ const ColorPickerToggle = styled(BaseButton)`
   }
 `;
 
+const ColorPickerPopover = styled(Popover)`
+  padding: 4px;
+`;
+
 const ColorPickerInput = ({
   attribute,
   description,
@@ -73,26 +79,18 @@ const ColorPickerInput = ({
   value,
 }) => {
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const colorPickerRef = useRef();
   const colorPickerButtonRef = useRef();
   const { formatMessage } = useIntl();
   const color = value || '#ffffff';
-  const styleUpcase = { textTransform: 'uppercase' };
+  const styleUppercase = { textTransform: 'uppercase' };
 
-  const listener = (event) => {
-    if (
-      !colorPickerRef.current ||
-      colorPickerRef.current.contains(event.target) ||
-      colorPickerButtonRef.current.contains(event.target)
-    ) {
-      // Do nothing if the click involves color picker refs
-      return;
+  const handleBlur = (e) => {
+    e.preventDefault();
+
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setShowColorPicker(false);
     }
-
-    setShowColorPicker(false);
   };
-
-  useOnClickOutside(colorPickerRef, listener);
 
   return (
     <Field
@@ -104,47 +102,67 @@ const ColorPickerInput = ({
     >
       <Stack spacing={1}>
         <Flex>
-          <FieldLabel required={required}>{formatMessage(intlLabel)}</FieldLabel>
-          {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
+          <FieldLabel action={labelAction} required={required}>
+            {formatMessage(intlLabel)}
+          </FieldLabel>
         </Flex>
         <ColorPickerToggle
           ref={colorPickerButtonRef}
+          aria-label="Color picker toggle"
+          aria-controls="color-picker-value"
+          aria-haspopup="dialog"
+          aria-expanded={showColorPicker}
+          aria-disabled={disabled}
           disabled={disabled}
           onClick={() => setShowColorPicker(!showColorPicker)}
         >
           <Flex>
             <ColorPreview color={color} />
-            <Typography style={styleUpcase} variant="omega">
+            <Typography
+              style={styleUppercase}
+              textColor={value ? null : 'neutral600'}
+              variant="omega"
+            >
               {color}
             </Typography>
           </Flex>
-          <CarretDown />
+          <CarretDown aria-hidden />
         </ColorPickerToggle>
         {showColorPicker && (
-          <Box
-            ref={colorPickerRef}
-            width="240px"
-            padding={2}
-            background="neutral0"
-            borderColor="neutral200"
-            shadow="filterShadow"
-            hasRadius
+          <ColorPickerPopover
+            onBlur={handleBlur}
+            role="dialog"
+            source={colorPickerButtonRef}
+            spacing={2}
           >
-            <ColorPicker
-              color={color}
-              onChange={(hexValue) =>
-                onChange({ target: { name, value: hexValue, type: attribute.type } })
-              }
-            />
-            <Flex paddingTop={2} paddingLeft={4} justifyContent="flex-end">
-              <Box paddingRight={2}>
-                <Typography variant="omega">
-                  {formatMessage({ id: getTrad('input.format'), defaultMessage: 'HEX' })}
-                </Typography>
-              </Box>
-              <FieldInput style={styleUpcase} value={color} onChange={onChange} />
-            </Flex>
-          </Box>
+            <FocusTrap onEscape={() => setShowColorPicker(false)}>
+              <ColorPicker
+                color={color}
+                onChange={(hexValue) =>
+                  onChange({ target: { name, value: hexValue, type: attribute.type } })
+                }
+              />
+
+              <Flex paddingTop={3} paddingLeft={4} justifyContent="flex-end">
+                <Box paddingRight={2}>
+                  <Typography variant="omega" as="label">
+                    {formatMessage({
+                      id: getTrad('color-picker.input.format'),
+                      defaultMessage: 'HEX',
+                    })}
+                  </Typography>
+                </Box>
+                <FieldInput
+                  id="color-picker-value"
+                  aria-label="Color picker input"
+                  style={styleUppercase}
+                  value={value}
+                  placeholder="#FFFFFF"
+                  onChange={onChange}
+                />
+              </Flex>
+            </FocusTrap>
+          </ColorPickerPopover>
         )}
         <FieldHint />
         <FieldError />
