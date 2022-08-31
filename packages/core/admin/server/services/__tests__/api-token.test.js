@@ -248,6 +248,7 @@ describe('API Token', () => {
       );
 
       global.strapi = {
+        ...getActionProvider(['admin::content.content.read']),
         query() {
           return {
             findOne,
