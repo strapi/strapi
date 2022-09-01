@@ -61,7 +61,8 @@ module.exports = ({ strapi }) => ({
           // locale arg transformation for localized createEntity mutations
           ...getLocalizedCreateMutationsResolversConfigs({ typeRegistry }),
 
-          // Modify the default scope associated to find and findOne locale queries to match the actual action name
+          // NOTE: Modify the default scope associated to find and findOne locale queries to match the actual action name
+          // This imitate the REST behavior which works for U&P strategy and full access token but fail with read-only ones.
           'Query.i18NLocale': { auth: { scope: 'plugin::i18n.locales.listLocales' } },
           'Query.i18NLocales': { auth: { scope: 'plugin::i18n.locales.listLocales' } },
         },
