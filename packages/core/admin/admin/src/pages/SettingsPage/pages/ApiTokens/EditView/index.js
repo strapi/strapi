@@ -83,7 +83,13 @@ const ApiTokenCreateView = () => {
           dispatch({
             type: 'ON_CHANGE_READ_ONLY',
           });
-        } else {
+        }
+        if (apiToken?.type === 'full-access') {
+          dispatch({
+            type: 'SELECT_ALL_ACTIONS',
+          });
+        }
+        if (apiToken?.type === 'custom') {
           dispatch({
             type: 'UPDATE_PERMISSIONS',
             value: apiToken?.permissions,
@@ -122,7 +128,13 @@ const ApiTokenCreateView = () => {
         dispatch({
           type: 'ON_CHANGE_READ_ONLY',
         });
-      } else {
+      }
+      if (data?.type === 'full-access') {
+        dispatch({
+          type: 'SELECT_ALL_ACTIONS',
+        });
+      }
+      if (data?.type === 'custom') {
         dispatch({
           type: 'UPDATE_PERMISSIONS',
           value: data?.permissions,
@@ -142,7 +154,7 @@ const ApiTokenCreateView = () => {
     }
   );
 
-  const handleSubmit = async (body, actions) => {
+  const handleSubmit = async (body, actions, tokenType) => {
     trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
     lockApp();
 
@@ -152,13 +164,13 @@ const ApiTokenCreateView = () => {
       } = isCreating
         ? await axiosInstance.post(`/admin/api-tokens`, {
             ...body,
-            permissions: body.type === 'custom' ? state.data.selectedActions : null,
+            permissions: tokenType === 'custom' ? state.selectedActions : null,
           })
         : await axiosInstance.put(`/admin/api-tokens/${id}`, {
             name: body.name,
             description: body.description,
             type: body.type,
-            permissions: body.type === 'custom' ? state.data.selectedActions : null,
+            permissions: tokenType === 'custom' ? state.selectedActions : null,
           });
 
       if (isCreating) {
@@ -311,7 +323,7 @@ const ApiTokenCreateView = () => {
             lifespan: apiToken?.lifespan,
           }}
           enableReinitialize
-          onSubmit={handleSubmit}
+          onSubmit={(body, actions) => handleSubmit(body, actions, tokenTypeValue)}
         >
           {({ errors, handleChange, isSubmitting, values }) => {
             return (
