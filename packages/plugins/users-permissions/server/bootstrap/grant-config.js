@@ -42,6 +42,7 @@ module.exports = (baseURL) => ({
     icon: 'windows',
     key: '',
     secret: '',
+    response: ['tokens'],
     callback: `${baseURL}/microsoft/callback`,
     scope: ['user.read'],
   },
