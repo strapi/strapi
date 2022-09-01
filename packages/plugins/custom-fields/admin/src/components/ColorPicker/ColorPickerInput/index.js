@@ -83,7 +83,7 @@ const ColorPickerInput = ({
   const [showColorPicker, setShowColorPicker] = useState(false);
   const colorPickerButtonRef = useRef();
   const { formatMessage } = useIntl();
-  const color = value || '#ffffff';
+  const color = value || '#000000';
   const styleUppercase = { textTransform: 'uppercase' };
 
   const handleBlur = (e) => {
@@ -103,14 +103,15 @@ const ColorPickerInput = ({
       hint={description && formatMessage(description)}
     >
       <Stack spacing={1}>
-        <Flex>
-          <FieldLabel action={labelAction} required={required}>
-            {formatMessage(intlLabel)}
-          </FieldLabel>
-        </Flex>
+        <FieldLabel action={labelAction} required={required}>
+          {formatMessage(intlLabel)}
+        </FieldLabel>
         <ColorPickerToggle
           ref={colorPickerButtonRef}
-          aria-label="Color picker toggle"
+          aria-label={formatMessage({
+            id: getTrad('color-picker.toggle.aria-label'),
+            defaultMessage: 'Color picker toggle',
+          })}
           aria-controls="color-picker-value"
           aria-haspopup="dialog"
           aria-expanded={showColorPicker}
@@ -144,7 +145,6 @@ const ColorPickerInput = ({
                   onChange({ target: { name, value: hexValue, type: attribute.type } })
                 }
               />
-
               <Flex paddingTop={3} paddingLeft={4} justifyContent="flex-end">
                 <Box paddingRight={2}>
                   <Typography variant="omega" as="label" textColor="neutral600">
@@ -156,10 +156,13 @@ const ColorPickerInput = ({
                 </Box>
                 <FieldInput
                   id="color-picker-value"
-                  aria-label="Color picker input"
+                  aria-label={formatMessage({
+                    id: getTrad('color-picker.input.aria-label'),
+                    defaultMessage: 'Color picker input',
+                  })}
                   style={styleUppercase}
                   value={value}
-                  placeholder="#FFFFFF"
+                  placeholder="#000000"
                   onChange={onChange}
                 />
               </Flex>
