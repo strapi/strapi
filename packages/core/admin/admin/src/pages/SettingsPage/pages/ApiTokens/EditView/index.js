@@ -310,6 +310,7 @@ const ApiTokenCreateView = () => {
             type: apiToken?.type,
             lifespan: apiToken?.lifespan,
           }}
+          enableReinitialize
           onSubmit={handleSubmit}
         >
           {({ errors, handleChange, isSubmitting, values }) => {
