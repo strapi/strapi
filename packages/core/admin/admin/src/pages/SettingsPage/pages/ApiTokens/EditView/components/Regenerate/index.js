@@ -23,6 +23,7 @@ export const Regenerate = ({ onRegenerate, idToRegenerate }) => {
         size="S"
         variant="tertiary"
         onClick={() => setShowConfirmDialog(true)}
+        name="regenerate"
       >
         {formatMessage({
           id: 'Settings.apiTokens.regenerate',

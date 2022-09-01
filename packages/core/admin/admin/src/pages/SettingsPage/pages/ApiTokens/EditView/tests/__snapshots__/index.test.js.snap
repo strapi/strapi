@@ -3263,6 +3263,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
               <button
                 aria-disabled="false"
                 class="c12 c13"
+                name="regenerate"
                 type="button"
               >
                 <div
