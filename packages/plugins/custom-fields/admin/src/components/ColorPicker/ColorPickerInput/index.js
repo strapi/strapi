@@ -64,8 +64,8 @@ const ColorPickerToggle = styled(BaseButton)`
 `;
 
 const ColorPickerPopover = styled(Popover)`
-  padding: ${({ theme }) => theme.spaces[1]};
-  min-height: 260px;
+  padding: ${({ theme }) => theme.spaces[2]};
+  min-height: 270px;
 `;
 
 const ColorPickerInput = ({
