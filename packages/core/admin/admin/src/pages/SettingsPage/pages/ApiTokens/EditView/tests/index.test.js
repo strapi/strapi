@@ -30,11 +30,19 @@ jest.mock('@strapi/helper-plugin', () => ({
 jest.spyOn(axiosInstance, 'get').mockResolvedValue({
   data: {
     data: {
-      id: 1,
+      id: '1',
       name: 'My super token',
       description: 'This describe my super token',
       type: 'read-only',
       createdAt: '2021-11-15T00:00:00.000Z',
+    },
+  },
+});
+
+jest.spyOn(axiosInstance, 'post').mockResolvedValue({
+  data: {
+    data: {
+      accessKey: 'newKey',
     },
   },
 });
@@ -95,5 +103,17 @@ describe('ADMIN | Pages | API TOKENS | EditView', () => {
     });
 
     expect(container).toMatchSnapshot();
+  });
+
+  it('renders the regenerate button when editing existing token', async () => {
+    const history = createMemoryHistory();
+    const App = makeApp(history);
+    const { getByText } = render(App);
+
+    history.push('/settings/api-tokens/1');
+
+    await waitFor(() => {
+      expect(getByText('Regenerate')).toBeInTheDocument();
+    });
   });
 });
