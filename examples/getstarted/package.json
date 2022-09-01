@@ -1,7 +1,7 @@
 {
   "name": "getstarted",
   "private": true,
-  "version": "4.3.4",
+  "version": "4.3.6",
   "description": "A Strapi application.",
   "scripts": {
     "develop": "strapi develop",

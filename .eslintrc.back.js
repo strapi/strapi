@@ -2,6 +2,9 @@
 
 module.exports = {
   extends: '@strapi/eslint-config/back',
+  parserOptions: {
+    ecmaVersion: 2020,
+  },
   globals: {
     strapi: false,
   },
