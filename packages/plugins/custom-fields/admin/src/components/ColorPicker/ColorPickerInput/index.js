@@ -27,7 +27,7 @@ const ColorPreview = styled.div`
 const ColorPicker = styled(HexColorPicker)`
   && {
     width: 100%;
-    height: 152px;
+    aspect-ratio: 1.5;
   }
 
   .react-colorful__pointer {
@@ -37,6 +37,7 @@ const ColorPicker = styled(HexColorPicker)`
 
   .react-colorful__saturation {
     border-radius: ${({ theme }) => theme.spaces[1]};
+    border-bottom: none;
   }
 
   .react-colorful__hue {
@@ -64,6 +65,7 @@ const ColorPickerToggle = styled(BaseButton)`
 
 const ColorPickerPopover = styled(Popover)`
   padding: ${({ theme }) => theme.spaces[1]};
+  min-height: 260px;
 `;
 
 const ColorPickerInput = ({
@@ -145,7 +147,7 @@ const ColorPickerInput = ({
 
               <Flex paddingTop={3} paddingLeft={4} justifyContent="flex-end">
                 <Box paddingRight={2}>
-                  <Typography variant="omega" as="label">
+                  <Typography variant="omega" as="label" textColor="neutral600">
                     {formatMessage({
                       id: getTrad('color-picker.input.format'),
                       defaultMessage: 'HEX',
