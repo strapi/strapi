@@ -130,7 +130,6 @@ const ApiTokenCreateView = () => {
       } = isCreating
         ? await axiosInstance.post(`/admin/api-tokens`, {
             ...body,
-            lifespan: null,
             permissions: body.type === 'custom' ? state.data.selectedActions : null,
           })
         : await axiosInstance.put(`/admin/api-tokens/${id}`, {
