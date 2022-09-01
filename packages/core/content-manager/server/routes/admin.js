@@ -184,6 +184,21 @@ module.exports = {
     },
     {
       method: 'GET',
+      path: '/single-types/:model/:id/:targetField',
+      handler: 'relations.findExisting',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.read'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
       path: '/collection-types/:model/:id/:targetField',
       handler: 'relations.findExisting',
       config: {

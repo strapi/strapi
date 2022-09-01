@@ -143,7 +143,7 @@ describe('x-to-many RF Preview', () => {
         error: {
           status: 400,
           name: 'BadRequestError',
-          message: 'Invalid target field',
+          message: "This relational field doesn't exist",
           details: {},
         },
       });
@@ -159,26 +159,6 @@ describe('x-to-many RF Preview', () => {
           status: 404,
           name: 'NotFoundError',
           message: 'Not Found',
-          details: {},
-        },
-      });
-    });
-  });
-
-  describe('Relation Nature', () => {
-    test(`Throws if the relation's nature is not a x-to-many`, async () => {
-      const url = getCMPrefixUrl(categoryModel.singularName);
-      const { id } = data.category[0];
-
-      const { body, statusCode } = await rq.get(`${url}/${id}/product`);
-
-      expect(statusCode).toBe(400);
-      expect(body).toMatchObject({
-        data: null,
-        error: {
-          status: 400,
-          name: 'BadRequestError',
-          message: 'Invalid target field',
           details: {},
         },
       });
