@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { ReactSelect } from '@strapi/helper-plugin';
 import { Badge } from '@strapi/design-system/Badge';
 import { Box } from '@strapi/design-system/Box';
-import { BaseLink } from '@strapi/design-system/BaseLink';
+import { Link } from '@strapi/design-system/Link';
 import { Icon } from '@strapi/design-system/Icon';
 import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/Field';
 import { TextButton } from '@strapi/design-system/TextButton';
@@ -36,16 +36,16 @@ const RelationInput = ({
   labelLoadMore,
   listHeight,
   loadingMessage,
-  relations,
   onRelationAdd,
   onRelationLoadMore,
-  onSearchClose,
-  onSearchOpen,
   onRelationRemove,
+  onSearchClose,
   onSearchNextPage,
+  onSearchOpen,
   onSearch,
   placeholder,
   publicationStateTranslations,
+  relations,
   searchResults,
 }) => {
   return (
@@ -74,6 +74,7 @@ const RelationInput = ({
               onMenuOpen={onSearchOpen}
               onMenuScrollToBottom={onSearchNextPage}
               placeholder={placeholder}
+              name={name}
             />
           </>
         }
@@ -98,6 +99,7 @@ const RelationInput = ({
                   key={`relation-${name}-${id}`}
                   endAction={
                     <button
+                      data-testid={`remove-relation-${id}`}
                       disabled={disabled}
                       type="button"
                       onClick={() => onRelationRemove(relation)}
@@ -108,11 +110,9 @@ const RelationInput = ({
                 >
                   <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                     {href ? (
-                      <BaseLink disabled={disabled} href={href}>
-                        <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
-                          {mainField}
-                        </Typography>
-                      </BaseLink>
+                      <Link to={href} disabled={disabled}>
+                        {mainField}
+                      </Link>
                     ) : (
                       <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
                         {mainField}
