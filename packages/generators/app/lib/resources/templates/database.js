@@ -19,7 +19,7 @@ const generateDbEnvariables = ({ connection, client }) => {
   const compile = _.template(tmpl);
 
   return compile({
-    client: connection.client,
+    client,
     connection: {
       ...connection.connection,
       ssl: connection.connection.ssl || false,
