@@ -36,7 +36,7 @@ jest.spyOn(axiosInstance, 'get').mockImplementation((path) => {
   return {
     data: {
       data: {
-        id: 1,
+        id: '1',
         name: 'My super token',
         description: 'This describe my super token',
         type: 'read-only',
@@ -46,9 +46,6 @@ jest.spyOn(axiosInstance, 'get').mockImplementation((path) => {
     },
   };
 });
-
-// jest.spyOn(axiosInstance, 'get').mockResolvedValue({ data });
-
 jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
 
 const client = new QueryClient({
@@ -106,6 +103,7 @@ describe('ADMIN | Pages | API TOKENS | EditView', () => {
     await waitFor(() => {
       expect(getByText('My super token')).toBeInTheDocument();
       expect(getByText('This describe my super token')).toBeInTheDocument();
+      expect(getByText('Regenerate')).toBeInTheDocument();
       expect(getByText('Address')).toBeInTheDocument();
     });
 

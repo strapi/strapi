@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useReducer, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useReducer, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
@@ -34,18 +34,25 @@ import { getDateOfExpiration, schema } from './utils';
 import LoadingView from './components/LoadingView';
 import HeaderContentBox from './components/ContentBox';
 import Permissions from './components/Permissions';
+import Regenerate from './components/Regenerate';
 import adminPermissions from '../../../../../permissions';
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const ApiTokenCreateView = () => {
-  let apiToken;
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const history = useHistory();
+  const [apiToken, setApiToken] = useState(
+    history.location.state?.apiToken.accessKey
+      ? {
+          ...history.location.state.apiToken,
+        }
+      : null
+  );
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
@@ -68,8 +75,21 @@ const ApiTokenCreateView = () => {
       } = await axiosInstance.get(`/admin/content-api/permissions`);
       dispatch({
         type: 'UPDATE_PERMISSIONS_LAYOUT',
-        value: data || [],
+        value: data,
       });
+
+      if (apiToken) {
+        if (apiToken?.type === 'read-only') {
+          dispatch({
+            type: 'ON_CHANGE_READ_ONLY',
+          });
+        } else {
+          dispatch({
+            type: 'UPDATE_PERMISSIONS',
+            value: apiToken?.permissions,
+          });
+        }
+      }
 
       return data;
     },
@@ -87,21 +107,27 @@ const ApiTokenCreateView = () => {
     trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList');
   }, [isCreating]);
 
-  if (history.location.state?.apiToken.accessKey) {
-    apiToken = history.location.state.apiToken;
-  }
-
-  const { status, data } = useQuery(
+  const { status } = useQuery(
     ['api-token', id],
     async () => {
       const {
         data: { data },
       } = await axiosInstance.get(`/admin/api-tokens/${id}`);
 
-      dispatch({
-        type: 'UPDATE_PERMISSIONS',
-        value: data?.permissions,
+      setApiToken({
+        ...data,
       });
+
+      if (data?.type === 'read-only') {
+        dispatch({
+          type: 'ON_CHANGE_READ_ONLY',
+        });
+      } else {
+        dispatch({
+          type: 'UPDATE_PERMISSIONS',
+          value: data?.permissions,
+        });
+      }
 
       return data;
     },
@@ -115,10 +141,6 @@ const ApiTokenCreateView = () => {
       },
     }
   );
-
-  if (data) {
-    apiToken = data;
-  }
 
   const handleSubmit = async (body, actions) => {
     trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
@@ -139,7 +161,14 @@ const ApiTokenCreateView = () => {
             permissions: body.type === 'custom' ? state.data.selectedActions : null,
           });
 
-      apiToken = response;
+      if (isCreating) {
+        history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
+        setCurrentStep('apiTokens.success');
+      }
+      unlockApp();
+      setApiToken({
+        ...response,
+      });
 
       toggleNotification({
         type: 'success',
@@ -157,11 +186,6 @@ const ApiTokenCreateView = () => {
       trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
         type: apiToken.type,
       });
-
-      if (isCreating) {
-        history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
-        setCurrentStep('apiTokens.success');
-      }
     } catch (err) {
       const errors = formatAPIErrors(err.response.data);
       actions.setErrors(errors);
@@ -170,9 +194,8 @@ const ApiTokenCreateView = () => {
         type: 'warning',
         message: get(err, 'response.data.message', 'notification.error'),
       });
+      unlockApp();
     }
-
-    unlockApp();
   };
 
   const hasAllActionsSelected = useMemo(() => {
@@ -253,6 +276,13 @@ const ApiTokenCreateView = () => {
     });
   };
 
+  const handleRegenerate = (newKey) => {
+    setApiToken({
+      ...apiToken,
+      accessKey: newKey,
+    });
+  };
+
   const providerValue = {
     ...state,
     onChange: handleChangeCheckbox,
@@ -295,18 +325,26 @@ const ApiTokenCreateView = () => {
                   }
                   primaryAction={
                     canEditInputs && (
-                      <Button
-                        disabled={isSubmitting}
-                        loading={isSubmitting}
-                        startIcon={<Check />}
-                        type="submit"
-                        size="S"
-                      >
-                        {formatMessage({
-                          id: 'global.save',
-                          defaultMessage: 'Save',
-                        })}
-                      </Button>
+                      <Stack horizontal spacing={2}>
+                        {apiToken?.name && (
+                          <Regenerate
+                            onRegenerate={handleRegenerate}
+                            idToRegenerate={apiToken?.id}
+                          />
+                        )}
+                        <Button
+                          disabled={isSubmitting}
+                          loading={isSubmitting}
+                          startIcon={<Check />}
+                          type="submit"
+                          size="S"
+                        >
+                          {formatMessage({
+                            id: 'global.save',
+                            defaultMessage: 'Save',
+                          })}
+                        </Button>
+                      </Stack>
                     )
                   }
                   navigationAction={
@@ -409,19 +447,19 @@ const ApiTokenCreateView = () => {
                               disabled={!isCreating}
                               placeholder="Select"
                             >
-                              <Option value={7}>
+                              <Option value={604800000}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.7-days',
                                   defaultMessage: '7 days',
                                 })}
                               </Option>
-                              <Option value={30}>
+                              <Option value={2592000000}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.30-days',
                                   defaultMessage: '30 days',
                                 })}
                               </Option>
-                              <Option value={90}>
+                              <Option value={2592000000}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.90-days',
                                   defaultMessage: '90 days',
