@@ -38,6 +38,7 @@ const pagination = require('./pagination');
 const sanitize = require('./sanitize');
 const traverseEntity = require('./traverse-entity');
 const pipeAsync = require('./pipe-async');
+const convertQueryParams = require('./convert-query-params');
 
 module.exports = {
   yup,
@@ -79,4 +80,5 @@ module.exports = {
   errors,
   validateYupSchema,
   validateYupSchemaSync,
+  convertQueryParams,
 };
