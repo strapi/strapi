@@ -1,6 +1,6 @@
 'use strict';
 
-const domain = require('../');
+const domain = require('..');
 
 describe('Action Domain', () => {
   describe('appliesToProperty', () => {
@@ -194,12 +194,12 @@ describe('Action Domain', () => {
       const defaultAction = domain.getDefaultActionAttributes();
       const attributes = Object.keys(defaultAction);
 
-      attributes.forEach(attribute => expect(domain.actionFields).toContain(attribute));
+      attributes.forEach((attribute) => expect(domain.actionFields).toContain(attribute));
     });
   });
 
   describe('sanitizeActionAttributes', () => {
-    const getSortedAttributes = object => Object.keys(object).sort();
+    const getSortedAttributes = (object) => Object.keys(object).sort();
 
     test(`It shouldn't remove attributes contained in domain.actionFields`, () => {
       const action = domain.actionFields.reduce(
@@ -222,7 +222,9 @@ describe('Action Domain', () => {
       const sanitizedAction = domain.sanitizeActionAttributes(action);
 
       expect(getSortedAttributes(sanitizedAction)).not.toEqual(getSortedAttributes(action));
-      invalidAttributes.forEach(attribute => expect(sanitizedAction).not.toHaveProperty(attribute));
+      invalidAttributes.forEach((attribute) =>
+        expect(sanitizedAction).not.toHaveProperty(attribute)
+      );
     });
   });
 });

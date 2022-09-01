@@ -9,6 +9,7 @@ import { useModels } from '../../../hooks';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useGuidedTour: jest.fn(() => ({
     isGuidedTourVisible: false,
     guidedTourState: {
@@ -338,8 +339,8 @@ describe('Homepage', () => {
 
       .c41 {
         color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c42 {

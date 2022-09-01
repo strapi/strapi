@@ -1,7 +1,7 @@
 import createArrayOfValues from './createArrayOfValues';
 import removeConditionKeyFromData from './removeConditionKeyFromData';
 
-const getCheckboxState = dataObj => {
+const getCheckboxState = (dataObj) => {
   const dataWithoutCondition = removeConditionKeyFromData(dataObj);
 
   const arrayOfValues = createArrayOfValues(dataWithoutCondition);
@@ -10,8 +10,8 @@ const getCheckboxState = dataObj => {
     return { hasAllActionsSelected: false, hasSomeActionsSelected: false };
   }
 
-  const hasAllActionsSelected = arrayOfValues.every(val => val);
-  const hasSomeActionsSelected = arrayOfValues.some(val => val) && !hasAllActionsSelected;
+  const hasAllActionsSelected = arrayOfValues.every((val) => val);
+  const hasSomeActionsSelected = arrayOfValues.some((val) => val) && !hasAllActionsSelected;
 
   return { hasAllActionsSelected, hasSomeActionsSelected };
 };

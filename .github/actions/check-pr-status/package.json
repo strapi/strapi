@@ -1,6 +1,6 @@
 {
   "name": "check-pr-status",
-  "version": "4.2.2",
+  "version": "4.3.6",
   "main": "dist/index.js",
   "license": "MIT",
   "private": true,
@@ -9,7 +9,7 @@
     "watch": "NODE_ENV=production ncc build index.js -w -o dist --minify"
   },
   "devDependencies": {
-    "@actions/core": "1.9.0",
+    "@actions/core": "1.9.1",
     "@actions/github": "5.0.0",
     "@vercel/ncc": "0.34.0"
   }

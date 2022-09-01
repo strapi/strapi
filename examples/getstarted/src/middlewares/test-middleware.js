@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * `test-middleware` middleware.
+ * `test-middleware` middleware
  */
 
 module.exports = (config, { strapi }) => {

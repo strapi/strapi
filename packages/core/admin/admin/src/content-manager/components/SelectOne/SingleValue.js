@@ -12,15 +12,17 @@ import isEmpty from 'lodash/isEmpty';
 import { getTrad } from '../../utils';
 
 const StyledBullet = styled.div`
+  flex-shrink: 0;
   width: ${pxToRem(6)};
   height: ${pxToRem(6)};
   margin-right: ${({ theme }) => theme.spaces[2]};
-  background: ${({ theme, isDraft }) => theme.colors[isDraft ? 'secondary700' : 'success200']};
+  background-color: ${({ theme, isDraft }) =>
+    theme.colors[isDraft ? 'secondary600' : 'success600']};
   border-radius: 50%;
   cursor: pointer;
 `;
 
-const SingleValue = props => {
+const SingleValue = (props) => {
   const { formatMessage } = useIntl();
   const Component = components.SingleValue;
   const hasDraftAndPublish = has(get(props, 'data.value'), 'publishedAt');
@@ -41,13 +43,13 @@ const SingleValue = props => {
       <Component {...props}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
-          <Typography ellipsis>{props.data.label || '-'}</Typography>
+          <Typography ellipsis>{props.data.label ?? '-'}</Typography>
         </Flex>
       </Component>
     );
   }
 
-  return <Component {...props}>{props.data.label || '-'}</Component>;
+  return <Component {...props}>{props.data.label ?? '-'}</Component>;
 };
 
 SingleValue.propTypes = {

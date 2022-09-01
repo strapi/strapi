@@ -73,7 +73,7 @@ const RelationNaturePicker = ({
         <Flex paddingLeft={9} paddingRight={9} paddingTop={1} justifyContent="center">
           <KeyboardNavigable tagName="button">
             <Stack spacing={3} horizontal>
-              {relationsType.map(relation => {
+              {relationsType.map((relation) => {
                 const Asset = relations[relation];
                 const isEnabled =
                   restrictedRelations === null || restrictedRelations.includes(relation);

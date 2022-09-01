@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
-import { useRBAC } from '@strapi/helper-plugin';
+import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import { useRolesList } from '../../../../../../hooks';
 
@@ -31,15 +31,17 @@ jest.mock('../../../../../../hooks', () => ({
   useRolesList: jest.fn(),
 }));
 
-const makeApp = history => (
+const makeApp = (history) => (
   <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-    <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-      <Theme>
-        <Router history={history}>
-          <ListPage />
-        </Router>
-      </Theme>
-    </ThemeToggleProvider>
+    <TrackingProvider>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+        <Theme>
+          <Router history={history}>
+            <ListPage />
+          </Router>
+        </Theme>
+      </ThemeToggleProvider>
+    </TrackingProvider>
   </IntlProvider>
 );
 
@@ -62,8 +64,8 @@ describe('<ListPage />', () => {
       .c11 {
         font-weight: 600;
         color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c8 {
@@ -137,7 +139,7 @@ describe('<ListPage />', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        padding: 10px 16px;
+        padding: 8px 16px;
         background: #4945ff;
         border: 1px solid #4945ff;
       }

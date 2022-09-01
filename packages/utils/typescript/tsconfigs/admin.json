@@ -1,0 +1,20 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    
+    "compilerOptions": {
+        "module": "ES2020",
+        "moduleResolution": "node",
+        "lib": ["ES2020", "DOM"],
+        "target": "ES5",
+
+        "jsx": "react",
+        "sourceMap": true,
+        "incremental": true,
+
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
+        "noEmit": true,
+        "skipLibCheck": true
+    }
+}

@@ -58,6 +58,10 @@ class Database {
     return schema ? trx.schema.withSchema(schema) : trx.schema;
   }
 
+  transaction() {
+    return this.connection.transaction();
+  }
+
   queryBuilder(uid) {
     return this.entityManager.createQueryBuilder(uid);
   }
@@ -70,7 +74,7 @@ class Database {
 
 // TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
-Database.init = async config => new Database(config);
+Database.init = async (config) => new Database(config);
 
 module.exports = {
   Database,

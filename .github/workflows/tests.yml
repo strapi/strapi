@@ -3,8 +3,15 @@ name: 'Tests'
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.mdx?'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   lint:

@@ -107,7 +107,7 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
   };
 
   const onRoleDuplicate = useCallback(
-    id => {
+    (id) => {
       push(`/settings/roles/duplicate/${id}`);
     },
     [push]
@@ -115,7 +115,7 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
 
   const handleNewRoleClick = () => push('/settings/roles/new');
 
-  const onRoleRemove = useCallback(roleId => {
+  const onRoleRemove = useCallback((roleId) => {
     dispatch({
       type: 'SET_ROLE_TO_DELETE',
       id: roleId,
@@ -124,10 +124,10 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
     handleToggleModal();
   }, []);
 
-  const handleToggleModal = () => setIsWarningDeleteAllOpenend(prev => !prev);
+  const handleToggleModal = () => setIsWarningDeleteAllOpenend((prev) => !prev);
 
   const handleGoTo = useCallback(
-    id => {
+    (id) => {
       push(`/settings/roles/${id}`);
     },
     [push]
@@ -160,11 +160,11 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
   );
 
   const getIcons = useCallback(
-    role => [
+    (role) => [
       ...(canCreate
         ? [
             {
-              onClick: e => handleClickDuplicate(e, role),
+              onClick: (e) => handleClickDuplicate(e, role),
               label: formatMessage({ id: 'app.utils.duplicate', defaultMessage: 'Duplicate' }),
               icon: <Duplicate />,
             },
@@ -182,7 +182,7 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
       ...(canDelete
         ? [
             {
-              onClick: e => handleClickDelete(e, role),
+              onClick: (e) => handleClickDelete(e, role),
               label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
               icon: <Trash />,
             },
@@ -259,7 +259,7 @@ const RoleListPage = () => {
       <HeaderLayout
         primaryAction={
           canCreate ? (
-            <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="L">
+            <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S">
               {formatMessage({
                 id: 'Settings.roles.list.button.add',
                 defaultMessage: 'Add new role',
@@ -339,7 +339,7 @@ const RoleListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {sortedRoles?.map(role => (
+              {sortedRoles?.map((role) => (
                 <BaseRoleRow
                   key={role.id}
                   id={role.id}

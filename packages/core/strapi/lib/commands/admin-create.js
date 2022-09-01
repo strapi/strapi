@@ -5,10 +5,7 @@ const _ = require('lodash');
 const inquirer = require('inquirer');
 const strapi = require('../index');
 
-const emailValidator = yup
-  .string()
-  .email('Invalid email address')
-  .lowercase();
+const emailValidator = yup.string().email('Invalid email address').lowercase();
 
 const passwordValidator = yup
   .string()
@@ -60,7 +57,7 @@ const promptQuestions = [
  * @param {string} cmdOptions.firstname - new admin's first name
  * @param {string} [cmdOptions.lastname] - new admin's last name
  */
-module.exports = async function(cmdOptions = {}) {
+module.exports = async function (cmdOptions = {}) {
   let { email, password, firstname, lastname } = cmdOptions;
 
   if (
@@ -90,7 +87,8 @@ module.exports = async function(cmdOptions = {}) {
 };
 
 async function createAdmin({ email, password, firstname, lastname }) {
-  const app = await strapi().load();
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   const user = await app.admin.services.user.exists({ email });
 

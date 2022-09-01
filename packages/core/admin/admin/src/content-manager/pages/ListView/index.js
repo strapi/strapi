@@ -151,7 +151,7 @@ function ListView({
   );
 
   const handleConfirmDeleteAllData = useCallback(
-    async ids => {
+    async (ids) => {
       try {
         await axiosInstance.post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
           ids,
@@ -171,7 +171,7 @@ function ListView({
   );
 
   const handleConfirmDeleteData = useCallback(
-    async idToDelete => {
+    async (idToDelete) => {
       try {
         await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
 
@@ -236,7 +236,7 @@ function ListView({
       )
     : null;
 
-  const getCreateAction = props =>
+  const getCreateAction = (props) =>
     canCreate ? (
       <Button
         {...props}
@@ -309,8 +309,8 @@ function ListView({
                     { target: headerLayoutTitle }
                   )}
                   placeholder={formatMessage({
-                    id: 'app.component.search.placeholder',
-                    defaultMessage: 'Search...',
+                    id: 'global.search',
+                    defaultMessage: 'Search',
                   })}
                   trackedEvent="didSearch"
                 />

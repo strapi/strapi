@@ -12,6 +12,7 @@ const createQueryBuilder = (uid, db) => {
     type: 'select',
     select: [],
     count: null,
+    max: null,
     first: false,
     data: null,
     where: [],
@@ -19,6 +20,8 @@ const createQueryBuilder = (uid, db) => {
     populate: null,
     limit: null,
     offset: null,
+    transaction: null,
+    forUpdate: false,
     orderBy: [],
     groupBy: [],
   };
@@ -68,9 +71,16 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
-    count(count = '*') {
+    count(count = 'id') {
       state.type = 'count';
       state.count = count;
+
+      return this;
+    },
+
+    max(column) {
+      state.type = 'max';
+      state.max = column;
 
       return this;
     },
@@ -112,6 +122,16 @@ const createQueryBuilder = (uid, db) => {
 
     search(query) {
       state.search = query;
+      return this;
+    },
+
+    transacting(transaction) {
+      state.transaction = transaction;
+      return this;
+    },
+
+    forUpdate() {
+      state.forUpdate = true;
       return this;
     },
 
@@ -205,15 +225,9 @@ const createQueryBuilder = (uid, db) => {
       this.select('id');
       const subQB = this.getKnexQuery();
 
-      const nestedSubQuery = db
-        .getConnection()
-        .select('id')
-        .from(subQB.as('subQuery'));
+      const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
 
-      return db
-        .getConnection(tableName)
-        [state.type]()
-        .whereIn('id', nestedSubQuery);
+      return db.getConnection(tableName)[state.type]().whereIn('id', nestedSubQuery);
     },
 
     processState() {
@@ -243,11 +257,11 @@ const createQueryBuilder = (uid, db) => {
     },
 
     processSelect() {
-      state.select = state.select.map(field => helpers.toColumnName(meta, field));
+      state.select = state.select.map((field) => helpers.toColumnName(meta, field));
 
       if (this.shouldUseDistinct()) {
-        const joinsOrderByColumns = state.joins.flatMap(join => {
-          return _.keys(join.orderBy).map(key => this.aliasColumn(key, join.alias));
+        const joinsOrderByColumns = state.joins.flatMap((join) => {
+          return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
         });
         const orderByColumns = state.orderBy.map(({ column }) => column);
 
@@ -272,7 +286,7 @@ const createQueryBuilder = (uid, db) => {
 
       switch (state.type) {
         case 'select': {
-          qb.select(state.select.map(column => this.aliasColumn(column)));
+          qb.select(state.select.map((column) => this.aliasColumn(column)));
 
           if (this.shouldUseDistinct()) {
             qb.distinct();
@@ -281,7 +295,18 @@ const createQueryBuilder = (uid, db) => {
           break;
         }
         case 'count': {
-          qb.count({ count: state.count });
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.count));
+
+          if (this.shouldUseDistinct()) {
+            qb.countDistinct({ count: dbColumnName });
+          } else {
+            qb.count({ count: dbColumnName });
+          }
+          break;
+        }
+        case 'max': {
+          const dbColumnName = this.aliasColumn(helpers.toColumnName(meta, state.max));
+          qb.max({ max: dbColumnName });
           break;
         }
         case 'insert': {
@@ -306,6 +331,17 @@ const createQueryBuilder = (uid, db) => {
           db.truncate();
           break;
         }
+        default: {
+          throw new Error('Unknown query type');
+        }
+      }
+
+      if (state.transaction) {
+        qb.transacting(state.transaction);
+      }
+
+      if (state.forUpdate) {
+        qb.forUpdate();
       }
 
       if (state.limit) {
@@ -335,7 +371,7 @@ const createQueryBuilder = (uid, db) => {
 
       // if there are joins and it is a delete or update use a sub query
       if (state.search) {
-        qb.where(subQb => {
+        qb.where((subQb) => {
           helpers.applySearch(subQb, state.search, { qb: this, db, uid });
         });
       }

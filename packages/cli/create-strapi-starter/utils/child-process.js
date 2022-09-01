@@ -27,12 +27,11 @@ function runApp(rootPath, { useYarn } = {}) {
       stdio: 'inherit',
       cwd: rootPath,
     });
-  } else {
-    return execa('npm', ['run', 'develop'], {
-      stdio: 'inherit',
-      cwd: rootPath,
-    });
   }
+  return execa('npm', ['run', 'develop'], {
+    stdio: 'inherit',
+    cwd: rootPath,
+  });
 }
 
 async function initGit(rootPath) {

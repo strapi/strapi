@@ -134,7 +134,7 @@ describe('Content Type Builder - Components', () => {
         data: expect.any(Array),
       });
 
-      res.body.data.forEach(el => {
+      res.body.data.forEach((el) => {
         expect(el).toMatchObject({
           uid: expect.any(String),
           schema: expect.objectContaining({

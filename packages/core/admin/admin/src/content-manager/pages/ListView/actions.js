@@ -32,4 +32,4 @@ export const setLayout = ({ components, contentType }) => {
   };
 };
 
-export const onChangeListHeaders = target => ({ type: ON_CHANGE_LIST_HEADERS, target });
+export const onChangeListHeaders = (target) => ({ type: ON_CHANGE_LIST_HEADERS, target });

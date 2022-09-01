@@ -3,7 +3,7 @@ import { render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { useRBAC } from '@strapi/helper-plugin';
+import { useRBAC, TrackingProvider } from '@strapi/helper-plugin';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { lightTheme, darkTheme } from '@strapi/design-system';
 import { axiosInstance } from '../../../../../../core/utils';
@@ -47,20 +47,22 @@ const client = new QueryClient({
   },
 });
 
-const makeApp = history => {
+const makeApp = (history) => {
   return (
     <QueryClientProvider client={client}>
-      <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-          <Theme>
-            <Router history={history}>
-              <Route path="/settings/api-tokens">
-                <ListView />
-              </Route>
-            </Router>
-          </Theme>
-        </ThemeToggleProvider>
-      </IntlProvider>
+      <TrackingProvider>
+        <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
+          <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+            <Theme>
+              <Router history={history}>
+                <Route path="/settings/api-tokens">
+                  <ListView />
+                </Route>
+              </Router>
+            </Theme>
+          </ThemeToggleProvider>
+        </IntlProvider>
+      </TrackingProvider>
     </QueryClientProvider>
   );
 };
@@ -360,8 +362,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
       .c37 {
         color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c35 {
@@ -420,8 +422,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       .c10 {
         font-weight: 600;
         color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c8 {
@@ -487,7 +489,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       }
 
       .c6 {
-        padding: 10px 16px;
+        padding: 8px 16px;
         background: #4945ff;
         border: 1px solid #4945ff;
         border-radius: 4px;

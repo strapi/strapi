@@ -1,6 +1,6 @@
 import { checkIfAttributeIsDisplayable } from '../../../../utils';
 
-const getAllAllowedHeaders = attributes => {
+const getAllAllowedHeaders = (attributes) => {
   const allowedAttributes = Object.keys(attributes).reduce((acc, current) => {
     const attribute = attributes[current];
 

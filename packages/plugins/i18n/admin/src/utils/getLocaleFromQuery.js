@@ -1,6 +1,6 @@
 import get from 'lodash/get';
 
-const getLocaleFromQuery = query => {
+const getLocaleFromQuery = (query) => {
   return get(query, 'plugins.i18n.locale', undefined);
 };
 

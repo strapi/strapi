@@ -49,10 +49,7 @@ const productWithDz = {
 
 describe('Core API - Basic + dz', () => {
   beforeAll(async () => {
-    await builder
-      .addComponent(compo)
-      .addContentType(productWithDz)
-      .build();
+    await builder.addComponent(compo).addContentType(productWithDz).build();
 
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
@@ -111,7 +108,7 @@ describe('Core API - Basic + dz', () => {
     expect(statusCode).toBe(200);
     expect(body.data).toHaveLength(1);
     expect(body.data[0]).toMatchObject(data.productWithDz[0]);
-    body.data.forEach(p => {
+    body.data.forEach((p) => {
       expect(p.attributes.publishedAt).toBeUndefined();
     });
   });

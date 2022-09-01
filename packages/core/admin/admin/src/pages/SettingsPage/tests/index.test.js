@@ -1,6 +1,6 @@
 import React from 'react';
 import { Router, Route } from 'react-router-dom';
-import { StrapiAppProvider, AppInfosContext } from '@strapi/helper-plugin';
+import { StrapiAppProvider, AppInfosContext, TrackingProvider } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
@@ -24,28 +24,34 @@ jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
 }));
-jest.mock('../pages/ApplicationInfosPage', () => () => <h1>App infos</h1>);
+jest.mock('../pages/ApplicationInfosPage', () => () => {
+  return <h1>App infos</h1>;
+});
+
+const appInfos = { shouldUpdateStrapi: false };
 
 const makeApp = (history, settings) => (
   <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-    <Theme>
-      <AppInfosContext.Provider value={{ shouldUpdateStrapi: false }}>
-        <StrapiAppProvider
-          settings={settings}
-          plugins={{}}
-          getPlugin={jest.fn()}
-          runHookParallel={jest.fn()}
-          runHookWaterfall={jest.fn()}
-          runHookSeries={jest.fn()}
-          menu={[]}
-        >
-          <Router history={history}>
-            <Route path="/settings/:settingId" component={SettingsPage} />
-            <Route path="/settings" component={SettingsPage} />
-          </Router>
-        </StrapiAppProvider>
-      </AppInfosContext.Provider>
-    </Theme>
+    <TrackingProvider>
+      <Theme>
+        <AppInfosContext.Provider value={appInfos}>
+          <StrapiAppProvider
+            settings={settings}
+            plugins={{}}
+            getPlugin={jest.fn()}
+            runHookParallel={jest.fn()}
+            runHookWaterfall={jest.fn()}
+            runHookSeries={jest.fn()}
+            menu={[]}
+          >
+            <Router history={history}>
+              <Route path="/settings/:settingId" component={SettingsPage} />
+              <Route path="/settings" component={SettingsPage} />
+            </Router>
+          </StrapiAppProvider>
+        </AppInfosContext.Provider>
+      </Theme>
+    </TrackingProvider>
   </ThemeToggleProvider>
 );
 
@@ -202,7 +208,7 @@ describe('ADMIN | pages | SettingsPage', () => {
           <div
             class="c9"
           >
-            <ul
+            <ol
               class="c10 c11"
               spacing="2"
             />

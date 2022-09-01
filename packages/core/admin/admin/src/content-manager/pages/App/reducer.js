@@ -15,7 +15,7 @@ const initialState = {
 };
 
 const mainReducer = (state = initialState, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case GET_DATA: {
         draftState.status = 'loading';

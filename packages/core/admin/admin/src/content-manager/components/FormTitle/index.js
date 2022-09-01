@@ -5,7 +5,7 @@ import { FormattedMessage } from 'react-intl';
 const FormTitle = ({ description, title }) => (
   <>
     {!!title && <FormattedMessage id={title} />}
-    {!!description && <FormattedMessage id={description}>{msg => <p>{msg}</p>}</FormattedMessage>}
+    {!!description && <FormattedMessage id={description}>{(msg) => <p>{msg}</p>}</FormattedMessage>}
   </>
 );
 

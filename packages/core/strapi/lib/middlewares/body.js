@@ -23,12 +23,19 @@ function getFiles(ctx) {
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = config => {
+
+module.exports = (config, { strapi }) => {
   const bodyConfig = defaultsDeep(defaults, config);
+
+  let gqlEndpoint;
+  if (strapi.plugin('graphql')) {
+    const { config: gqlConfig } = strapi.plugin('graphql');
+    gqlEndpoint = gqlConfig('endpoint');
+  }
 
   return async (ctx, next) => {
     // TODO: find a better way later
-    if (ctx.url === '/graphql') {
+    if (gqlEndpoint && ctx.url === gqlEndpoint) {
       await next();
     } else {
       try {
@@ -64,7 +71,7 @@ module.exports = config => {
     if (files) {
       if (Array.isArray(files)) {
         // not awaiting to not slow the request
-        Promise.all(files.map(file => fse.remove(file.path)));
+        Promise.all(files.map((file) => fse.remove(file.path)));
       } else if (files && files.path) {
         // not awaiting to not slow the request
         fse.remove(files.path);

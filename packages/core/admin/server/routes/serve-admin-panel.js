@@ -5,7 +5,7 @@ const fse = require('fs-extra');
 const koaStatic = require('koa-static');
 
 const registerAdminPanelRoute = ({ strapi }) => {
-  let buildDir = resolve(strapi.dirs.root, 'build');
+  let buildDir = resolve(strapi.dirs.dist.root, 'build');
 
   if (!fse.pathExistsSync(buildDir)) {
     buildDir = resolve(__dirname, '../../build');
@@ -23,7 +23,7 @@ const registerAdminPanelRoute = ({ strapi }) => {
     }
 
     ctx.type = 'html';
-    ctx.body = fse.createReadStream(join(buildDir + '/index.html'));
+    ctx.body = fse.createReadStream(join(buildDir, 'index.html'));
   };
 
   strapi.server.routes([

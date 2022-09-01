@@ -6,12 +6,12 @@ const useFetchMarketplaceProviders = (notifyLoad) => {
   const toggleNotification = useNotification();
 
   return useQuery('list-marketplace-providers', () => fetchMarketplacePlugins(), {
-    onSuccess: () => {
+    onSuccess() {
       if (notifyLoad) {
         notifyLoad();
       }
     },
-    onError: () => {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error', defaultMessage: 'An error occured' },

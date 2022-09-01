@@ -9,7 +9,7 @@ module.exports = (config = {}) => {
   return async (ctx, next) => {
     await next();
 
-    const status = ctx.status;
+    const { status } = ctx;
     const handler = prop(`handlers.${status}`, config);
 
     if (isFunction(handler)) {

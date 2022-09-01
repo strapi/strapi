@@ -33,7 +33,7 @@ const LocalePicker = () => {
     return null;
   }
 
-  const displayedLocales = locales.filter(locale => {
+  const displayedLocales = locales.filter((locale) => {
     const canCreate = createPermissions.find(({ properties }) => {
       return get(properties, 'locales', []).includes(locale.code);
     });
@@ -44,17 +44,28 @@ const LocalePicker = () => {
     return canCreate || canRead;
   });
 
-  const handleClick = code => {
+  const handleClick = (code) => {
     if (code === selected) {
       return;
     }
 
-    dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
-
     setSelected(code);
 
-    setQuery({
-      plugins: { ...query.plugins, i18n: { locale: code } },
+    /**
+     * if the selected value is set at the same time as the dispatcher
+     * is run, react might not have enough time to re-render the Select
+     * component, which leads to the `source` ref, which is passed to
+     * Popout, not being defined.
+     *
+     * By pushing the dispatcher to the end of the current execution
+     * context, we can guarantee the rendering can finish before.
+     */
+    setTimeout(() => {
+      dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
+      setQuery({
+        page: 1,
+        plugins: { ...query.plugins, i18n: { locale: code } },
+      });
     });
   };
 
@@ -65,7 +76,7 @@ const LocalePicker = () => {
       value={selected}
       onChange={handleClick}
     >
-      {displayedLocales.map(locale => (
+      {displayedLocales.map((locale) => (
         <Option key={locale.id} id={`menu-item${locale.name || locale.code}`} value={locale.code}>
           {locale.name}
         </Option>

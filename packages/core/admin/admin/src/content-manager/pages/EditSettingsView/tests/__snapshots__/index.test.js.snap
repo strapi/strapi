@@ -1,6 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditSettingsView renders and matches the snapshot 1`] = `
+.c76 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c19 {
   background: #ffffff;
   padding-top: 24px;
@@ -649,8 +661,8 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
 
 .c6 {
   color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c4 {
@@ -1085,236 +1097,607 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
   }
 }
 
-<main
-  aria-labelledby="main-content-title"
-  class="c0"
-  id="main-content"
-  tabindex="-1"
->
-  <form>
-    <div
-      style="height: 0px;"
-    >
+<div>
+  <main
+    aria-labelledby="main-content-title"
+    class="c0"
+    id="main-content"
+    tabindex="-1"
+  >
+    <form>
       <div
-        class="c1"
-        data-strapi-header="true"
+        style="height: 0px;"
       >
         <div
-          class="c2"
-        >
-          <a
-            aria-current="page"
-            class="c3 active"
-            href="/"
-          >
-            <span
-              aria-hidden="true"
-              class="c4 c5"
-            >
-              <svg
-                fill="none"
-                height="1em"
-                viewBox="0 0 24 24"
-                width="1em"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
-                  fill="#212134"
-                />
-              </svg>
-            </span>
-            <span
-              class="c6"
-            >
-              Back
-            </span>
-          </a>
-        </div>
-        <div
-          class="c7"
+          class="c1"
+          data-strapi-header="true"
         >
           <div
-            class="c8"
+            class="c2"
           >
-            <h1
-              class="c9"
+            <a
+              aria-current="page"
+              class="c3 active"
+              href="/"
             >
-              Configure the view - Address
-            </h1>
+              <span
+                aria-hidden="true"
+                class="c4 c5"
+              >
+                <svg
+                  fill="none"
+                  height="1em"
+                  viewBox="0 0 24 24"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M24 13.3a.2.2 0 01-.2.2H5.74l8.239 8.239a.2.2 0 010 .282L12.14 23.86a.2.2 0 01-.282 0L.14 12.14a.2.2 0 010-.282L11.86.14a.2.2 0 01.282 0L13.98 1.98a.2.2 0 010 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6z"
+                    fill="#212134"
+                  />
+                </svg>
+              </span>
+              <span
+                class="c6"
+              >
+                Back
+              </span>
+            </a>
           </div>
-          <button
-            aria-disabled="true"
-            class="c10 c11"
-            disabled=""
-            type="submit"
-          >
-            <div
-              aria-hidden="true"
-              class="c12 c13 c14"
-            >
-              <svg
-                fill="none"
-                height="1em"
-                viewBox="0 0 24 24"
-                width="1em"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
-                  fill="#212134"
-                />
-              </svg>
-            </div>
-            <span
-              class="c15 c16"
-            >
-              Save
-            </span>
-          </button>
-        </div>
-        <p
-          class="c17"
-        >
-          Customize how the edit view will look like.
-        </p>
-      </div>
-    </div>
-    <div
-      class="c18"
-    >
-      <div
-        class="c19"
-      >
-        <div
-          class="c20 c21"
-          spacing="4"
-        >
-          <h2
-            class="c22"
-          >
-            Settings
-          </h2>
           <div
-            class="c23"
+            class="c7"
           >
             <div
-              class="c24"
+              class="c8"
+            >
+              <h1
+                class="c9"
+              >
+                Configure the view - Address
+              </h1>
+            </div>
+            <button
+              aria-disabled="true"
+              class="c10 c11"
+              disabled=""
+              type="submit"
             >
               <div
-                class=""
+                aria-hidden="true"
+                class="c12 c13 c14"
               >
-                <div>
-                  <div
-                    class="c25 c26"
-                    spacing="1"
-                  >
-                    <span
-                      class="c27"
-                      for="select-1"
-                      id="select-1-label"
-                    >
-                      <div
-                        class="c28"
-                      >
-                        Entry title
-                      </div>
-                    </span>
+                <svg
+                  fill="none"
+                  height="1em"
+                  viewBox="0 0 24 24"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M20.727 2.97a.2.2 0 01.286 0l2.85 2.89a.2.2 0 010 .28L9.554 20.854a.2.2 0 01-.285 0l-9.13-9.243a.2.2 0 010-.281l2.85-2.892a.2.2 0 01.284 0l6.14 6.209L20.726 2.97z"
+                    fill="#212134"
+                  />
+                </svg>
+              </div>
+              <span
+                class="c15 c16"
+              >
+                Save
+              </span>
+            </button>
+          </div>
+          <p
+            class="c17"
+          >
+            Customize how the edit view will look like.
+          </p>
+        </div>
+      </div>
+      <div
+        class="c18"
+      >
+        <div
+          class="c19"
+        >
+          <div
+            class="c20 c21"
+            spacing="4"
+          >
+            <h2
+              class="c22"
+            >
+              Settings
+            </h2>
+            <div
+              class="c23"
+            >
+              <div
+                class="c24"
+              >
+                <div
+                  class=""
+                >
+                  <div>
                     <div
-                      class="c28 c29"
+                      class="c25 c26"
+                      spacing="1"
                     >
-                      <button
-                        aria-describedby="select-1-hint"
-                        aria-disabled="false"
-                        aria-expanded="false"
-                        aria-haspopup="listbox"
-                        aria-labelledby="select-1-label select-1-content"
-                        class="c30"
-                        id="select-1"
-                        type="button"
-                      />
-                      <div
-                        class="c31 c32"
+                      <span
+                        class="c27"
+                        for="select-1"
+                        id="select-1-label"
                       >
                         <div
                           class="c28"
+                        >
+                          Entry title
+                        </div>
+                      </span>
+                      <div
+                        class="c28 c29"
+                      >
+                        <button
+                          aria-describedby="select-1-hint"
+                          aria-disabled="false"
+                          aria-expanded="false"
+                          aria-haspopup="listbox"
+                          aria-labelledby="select-1-label select-1-content"
+                          class="c30"
+                          id="select-1"
+                          type="button"
+                        />
+                        <div
+                          class="c31 c32"
                         >
                           <div
-                            class="c33"
+                            class="c28"
                           >
-                            <span
-                              class="c34"
-                              id="select-1-content"
+                            <div
+                              class="c33"
                             >
-                              postal_code
-                            </span>
+                              <span
+                                class="c34"
+                                id="select-1-content"
+                              >
+                                postal_code
+                              </span>
+                            </div>
+                          </div>
+                          <div
+                            class="c28"
+                          >
+                            <button
+                              aria-hidden="true"
+                              class="c35 c36 c37"
+                              tabindex="-1"
+                              type="button"
+                            >
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 14 8"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                  fill="#32324D"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </button>
                           </div>
                         </div>
+                      </div>
+                      <p
+                        class="c38"
+                        id="select-1-hint"
+                      >
+                        Set the display field of your entry
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="c39"
+            >
+              <hr
+                class="c40 c41"
+              />
+            </div>
+            <h3
+              class="c22"
+            >
+              View
+            </h3>
+            <div
+              class="c42"
+            >
+              <div
+                class="c43"
+              >
+                <div
+                  class=""
+                >
+                  <div
+                    class="c20 c21"
+                    spacing="4"
+                  >
+                    <div
+                      class="c44"
+                    >
+                      <div>
                         <div
-                          class="c28"
+                          class=""
                         >
-                          <button
+                          <span
+                            class="c45"
+                          >
+                            Displayed fields
+                          </span>
+                        </div>
+                        <div
+                          class=""
+                        >
+                          <span
+                            class="c46"
+                          >
+                            Drag & drop the fields to build the layout
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <a
+                          aria-disabled="false"
+                          class="c47 c48"
+                          href="/plugins/content-type-builder/content-types/api::address.address"
+                          variant="secondary"
+                        >
+                          <div
                             aria-hidden="true"
-                            class="c35 c36 c37"
-                            tabindex="-1"
-                            type="button"
+                            class="c49 c50"
                           >
                             <svg
                               fill="none"
                               height="1em"
-                              viewBox="0 0 14 8"
+                              viewBox="0 0 24 24"
                               width="1em"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
                                 clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                fill="#32324D"
+                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                fill="#212134"
                                 fill-rule="evenodd"
                               />
                             </svg>
+                          </div>
+                          <span
+                            class="c51 c52"
+                          >
+                            Edit the content type
+                          </span>
+                        </a>
+                      </div>
+                    </div>
+                    <div
+                      class="c53"
+                    >
+                      <div
+                        class="c20 c54"
+                        spacing="2"
+                      >
+                        <div
+                          class="c23"
+                        >
+                          <div
+                            class="c55"
+                          >
+                            <div
+                              class=""
+                            >
+                              <div
+                                class="c56 c57"
+                              >
+                                <div
+                                  class="c58 c59 c60"
+                                  width="100%"
+                                >
+                                  <span
+                                    class="c61 c56 c62"
+                                    draggable="true"
+                                    tabindex="-1"
+                                    type="button"
+                                  >
+                                    <svg
+                                      class="c63"
+                                      fill="none"
+                                      height="1em"
+                                      viewBox="0 0 24 24"
+                                      width="1em"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                        fill="#212134"
+                                      />
+                                    </svg>
+                                  </span>
+                                  <div
+                                    class="c64"
+                                    overflow="hidden"
+                                    width="100%"
+                                  >
+                                    <div
+                                      class="c65 c44"
+                                    >
+                                      <span
+                                        class="c66"
+                                      >
+                                        postal_code
+                                      </span>
+                                      <div
+                                        class="c56"
+                                      >
+                                        <span>
+                                          <button
+                                            aria-disabled="false"
+                                            aria-labelledby="tooltip-1"
+                                            class="c67 c68 c69"
+                                            tabindex="0"
+                                            type="button"
+                                          >
+                                            <svg
+                                              fill="none"
+                                              height="1em"
+                                              viewBox="0 0 24 24"
+                                              width="1em"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path
+                                                clip-rule="evenodd"
+                                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                                fill="#212134"
+                                                fill-rule="evenodd"
+                                              />
+                                            </svg>
+                                          </button>
+                                        </span>
+                                        <span>
+                                          <button
+                                            aria-disabled="false"
+                                            aria-labelledby="tooltip-3"
+                                            class="c67 c68 c69"
+                                            data-testid="delete-field"
+                                            tabindex="0"
+                                            type="button"
+                                          >
+                                            <svg
+                                              fill="none"
+                                              height="1em"
+                                              viewBox="0 0 24 24"
+                                              width="1em"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path
+                                                d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                                                fill="#32324D"
+                                              />
+                                            </svg>
+                                          </button>
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="c55"
+                          >
+                            <div
+                              class=""
+                            >
+                              <div
+                                class="c56 c70"
+                              >
+                                <div
+                                  class="c58 c59 c60"
+                                  width="100%"
+                                >
+                                  <span
+                                    class="c61 c56 c62"
+                                    draggable="true"
+                                    tabindex="-1"
+                                    type="button"
+                                  >
+                                    <svg
+                                      class="c63"
+                                      fill="none"
+                                      height="1em"
+                                      viewBox="0 0 24 24"
+                                      width="1em"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                        fill="#212134"
+                                      />
+                                      <path
+                                        d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
+                                        fill="#212134"
+                                      />
+                                    </svg>
+                                  </span>
+                                  <div
+                                    class="c64"
+                                    overflow="hidden"
+                                    width="100%"
+                                  >
+                                    <div
+                                      class="c65 c44"
+                                    >
+                                      <span
+                                        class="c66"
+                                      >
+                                        city
+                                      </span>
+                                      <div
+                                        class="c56"
+                                      >
+                                        <span>
+                                          <button
+                                            aria-disabled="false"
+                                            aria-labelledby="tooltip-5"
+                                            class="c67 c68 c69"
+                                            tabindex="0"
+                                            type="button"
+                                          >
+                                            <svg
+                                              fill="none"
+                                              height="1em"
+                                              viewBox="0 0 24 24"
+                                              width="1em"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path
+                                                clip-rule="evenodd"
+                                                d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                                fill="#212134"
+                                                fill-rule="evenodd"
+                                              />
+                                            </svg>
+                                          </button>
+                                        </span>
+                                        <span>
+                                          <button
+                                            aria-disabled="false"
+                                            aria-labelledby="tooltip-7"
+                                            class="c67 c68 c69"
+                                            data-testid="delete-field"
+                                            tabindex="0"
+                                            type="button"
+                                          >
+                                            <svg
+                                              fill="none"
+                                              height="1em"
+                                              viewBox="0 0 24 24"
+                                              width="1em"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path
+                                                d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                                                fill="#32324D"
+                                              />
+                                            </svg>
+                                          </button>
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <button
+                            aria-controls="label"
+                            aria-disabled="true"
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            class="c10 c71"
+                            data-testid="add-field"
+                            disabled=""
+                            label="Insert another field"
+                            type="button"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c12 c13 c14"
+                            >
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 24 24"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </div>
+                            <span
+                              class="c15 c16"
+                            >
+                              Insert another field
+                            </span>
                           </button>
                         </div>
                       </div>
                     </div>
-                    <p
-                      class="c38"
-                      id="select-1-hint"
-                    >
-                      Set the display field of your entry
-                    </p>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-          <div
-            class="c39"
-          >
-            <hr
-              class="c40 c41"
-            />
-          </div>
-          <h3
-            class="c22"
-          >
-            View
-          </h3>
-          <div
-            class="c42"
-          >
-            <div
-              class="c43"
-            >
               <div
-                class=""
+                class="c72"
               >
                 <div
-                  class="c20 c21"
-                  spacing="4"
+                  class=""
                 >
                   <div
-                    class="c44"
+                    class="c20 c21"
+                    spacing="4"
                   >
                     <div>
                       <div
@@ -1323,7 +1706,7 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                         <span
                           class="c45"
                         >
-                          Displayed fields
+                          Relational fields
                         </span>
                       </div>
                       <div
@@ -1336,515 +1719,25 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                         </span>
                       </div>
                     </div>
-                    <div>
-                      <a
-                        aria-disabled="false"
-                        class="c47 c48"
-                        href="/plugins/content-type-builder/content-types/api::address.address"
-                        variant="secondary"
-                      >
-                        <div
-                          aria-hidden="true"
-                          class="c49 c50"
-                        >
-                          <svg
-                            fill="none"
-                            height="1em"
-                            viewBox="0 0 24 24"
-                            width="1em"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              clip-rule="evenodd"
-                              d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                              fill="#212134"
-                              fill-rule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                        <span
-                          class="c51 c52"
-                        >
-                          Edit the content type
-                        </span>
-                      </a>
-                    </div>
-                  </div>
-                  <div
-                    class="c53"
-                  >
                     <div
-                      class="c20 c54"
-                      spacing="2"
+                      class="c53"
                     >
                       <div
-                        class="c23"
+                        class="c20 c54"
+                        spacing="2"
                       >
                         <div
-                          class="c55"
-                        >
-                          <div
-                            class=""
-                          >
-                            <div
-                              class="c56 c57"
-                            >
-                              <div
-                                class="c58 c59 c60"
-                                width="100%"
-                              >
-                                <span
-                                  class="c61 c56 c62"
-                                  draggable="true"
-                                  tabindex="-1"
-                                  type="button"
-                                >
-                                  <svg
-                                    class="c63"
-                                    fill="none"
-                                    height="1em"
-                                    viewBox="0 0 24 24"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
-                                      fill="#212134"
-                                    />
-                                  </svg>
-                                </span>
-                                <div
-                                  class="c64"
-                                  overflow="hidden"
-                                  width="100%"
-                                >
-                                  <div
-                                    class="c65 c44"
-                                  >
-                                    <span
-                                      class="c66"
-                                    >
-                                      postal_code
-                                    </span>
-                                    <div
-                                      class="c56"
-                                    >
-                                      <span>
-                                        <button
-                                          aria-disabled="false"
-                                          aria-labelledby="tooltip-1"
-                                          class="c67 c68 c69"
-                                          tabindex="0"
-                                          type="button"
-                                        >
-                                          <svg
-                                            fill="none"
-                                            height="1em"
-                                            viewBox="0 0 24 24"
-                                            width="1em"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          >
-                                            <path
-                                              clip-rule="evenodd"
-                                              d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                                              fill="#212134"
-                                              fill-rule="evenodd"
-                                            />
-                                          </svg>
-                                        </button>
-                                      </span>
-                                      <span>
-                                        <button
-                                          aria-disabled="false"
-                                          aria-labelledby="tooltip-3"
-                                          class="c67 c68 c69"
-                                          data-testid="delete-field"
-                                          tabindex="0"
-                                          type="button"
-                                        >
-                                          <svg
-                                            fill="none"
-                                            height="1em"
-                                            viewBox="0 0 24 24"
-                                            width="1em"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          >
-                                            <path
-                                              d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
-                                              fill="#32324D"
-                                            />
-                                          </svg>
-                                        </button>
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          class="c55"
-                        >
-                          <div
-                            class=""
-                          >
-                            <div
-                              class="c56 c70"
-                            >
-                              <div
-                                class="c58 c59 c60"
-                                width="100%"
-                              >
-                                <span
-                                  class="c61 c56 c62"
-                                  draggable="true"
-                                  tabindex="-1"
-                                  type="button"
-                                >
-                                  <svg
-                                    class="c63"
-                                    fill="none"
-                                    height="1em"
-                                    viewBox="0 0 24 24"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                                      fill="#212134"
-                                    />
-                                    <path
-                                      d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
-                                      fill="#212134"
-                                    />
-                                  </svg>
-                                </span>
-                                <div
-                                  class="c64"
-                                  overflow="hidden"
-                                  width="100%"
-                                >
-                                  <div
-                                    class="c65 c44"
-                                  >
-                                    <span
-                                      class="c66"
-                                    >
-                                      city
-                                    </span>
-                                    <div
-                                      class="c56"
-                                    >
-                                      <span>
-                                        <button
-                                          aria-disabled="false"
-                                          aria-labelledby="tooltip-5"
-                                          class="c67 c68 c69"
-                                          tabindex="0"
-                                          type="button"
-                                        >
-                                          <svg
-                                            fill="none"
-                                            height="1em"
-                                            viewBox="0 0 24 24"
-                                            width="1em"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          >
-                                            <path
-                                              clip-rule="evenodd"
-                                              d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                                              fill="#212134"
-                                              fill-rule="evenodd"
-                                            />
-                                          </svg>
-                                        </button>
-                                      </span>
-                                      <span>
-                                        <button
-                                          aria-disabled="false"
-                                          aria-labelledby="tooltip-7"
-                                          class="c67 c68 c69"
-                                          data-testid="delete-field"
-                                          tabindex="0"
-                                          type="button"
-                                        >
-                                          <svg
-                                            fill="none"
-                                            height="1em"
-                                            viewBox="0 0 24 24"
-                                            width="1em"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          >
-                                            <path
-                                              d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
-                                              fill="#32324D"
-                                            />
-                                          </svg>
-                                        </button>
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <button
-                          aria-controls="label"
-                          aria-disabled="true"
-                          aria-expanded="false"
-                          aria-haspopup="true"
-                          class="c10 c71"
-                          data-testid="add-field"
-                          disabled=""
-                          label="Insert another field"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c12 c13 c14"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c15 c16"
-                          >
-                            Insert another field
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              class="c72"
-            >
-              <div
-                class=""
-              >
-                <div
-                  class="c20 c21"
-                  spacing="4"
-                >
-                  <div>
-                    <div
-                      class=""
-                    >
-                      <span
-                        class="c45"
-                      >
-                        Relational fields
-                      </span>
-                    </div>
-                    <div
-                      class=""
-                    >
-                      <span
-                        class="c46"
-                      >
-                        Drag & drop the fields to build the layout
-                      </span>
-                    </div>
-                  </div>
-                  <div
-                    class="c53"
-                  >
-                    <div
-                      class="c20 c54"
-                      spacing="2"
-                    >
-                      <div
-                        class="c58 c59 c73"
-                        width="100%"
-                      >
-                        <span
-                          class="c61 c56 c74"
-                          draggable="true"
-                          tabindex="-1"
-                          type="button"
-                        >
-                          <svg
-                            class="c75"
-                            fill="none"
-                            height="1em"
-                            viewBox="0 0 24 24"
-                            width="1em"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                              fill="#212134"
-                            />
-                            <path
-                              d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                              fill="#212134"
-                            />
-                            <path
-                              d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
-                              fill="#212134"
-                            />
-                            <path
-                              d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                              fill="#212134"
-                            />
-                            <path
-                              d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
-                              fill="#212134"
-                            />
-                            <path
-                              d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
-                              fill="#212134"
-                            />
-                            <path
-                              d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
-                              fill="#212134"
-                            />
-                          </svg>
-                        </span>
-                        <div
-                          class="c64"
-                          overflow="hidden"
+                          class="c58 c59 c73"
                           width="100%"
                         >
-                          <div
-                            class="c65 c44"
-                          >
-                            <span
-                              class="c66"
-                            >
-                              categories
-                            </span>
-                            <div
-                              class="c56"
-                            >
-                              <span>
-                                <button
-                                  aria-disabled="false"
-                                  aria-labelledby="tooltip-9"
-                                  class="c67 c68 c69"
-                                  tabindex="0"
-                                  type="button"
-                                >
-                                  <svg
-                                    fill="none"
-                                    height="1em"
-                                    viewBox="0 0 24 24"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                                      fill="#212134"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </button>
-                              </span>
-                              <span>
-                                <button
-                                  aria-disabled="false"
-                                  aria-labelledby="tooltip-11"
-                                  class="c67 c68 c69"
-                                  data-testid="delete-field"
-                                  tabindex="0"
-                                  type="button"
-                                >
-                                  <svg
-                                    fill="none"
-                                    height="1em"
-                                    viewBox="0 0 24 24"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
-                                      fill="#32324D"
-                                    />
-                                  </svg>
-                                </button>
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <button
-                          aria-controls="label"
-                          aria-disabled="true"
-                          aria-expanded="false"
-                          aria-haspopup="true"
-                          class="c10 c71"
-                          data-testid="add-relation"
-                          disabled=""
-                          label="Insert another relational field"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c12 c13 c14"
+                          <span
+                            class="c61 c56 c74"
+                            draggable="true"
+                            tabindex="-1"
+                            type="button"
                           >
                             <svg
+                              class="c75"
                               fill="none"
                               height="1em"
                               viewBox="0 0 24 24"
@@ -1852,17 +1745,138 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                                d="M16.563 5.587a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 3.083c-.012.788-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574A1.943 1.943 0 0114.9 2.11c.4-.684 1.2-1.066 1.981-.927a1.954 1.954 0 011.606 1.9c.011.748 1.17.748 1.158 0A3.138 3.138 0 0017.565.17c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM16.563 14.372a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 11.867c-.012.789-.487 1.513-1.229 1.797a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.968 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.675 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.005zM16.563 23.392a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M18.487 20.89c-.012.787-.487 1.512-1.229 1.796a1.954 1.954 0 01-2.184-.574 1.943 1.943 0 01-.174-2.196c.4-.684 1.2-1.066 1.981-.927.928.156 1.588.967 1.606 1.9.011.748 1.17.748 1.158 0a3.138 3.138 0 00-2.08-2.914c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.284 3.575.678 1.124 1.993 1.674 3.273 1.431 1.432-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.158-.006zM7.378 5.622a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 3.119c-.011.788-.486 1.512-1.228 1.796a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38.205c-1.176-.423-2.567-.029-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.005zM7.378 14.406a2.503 2.503 0 100-5.006 2.503 2.503 0 000 5.006z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 11.902c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927a1.943 1.943 0 011.605 1.9c.012.748 1.17.748 1.16 0A3.138 3.138 0 008.38 8.988c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.575.678 1.124 1.994 1.674 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.753-1.147-.753-1.159-.006zM7.378 23.427a2.503 2.503 0 100-5.007 2.503 2.503 0 000 5.007z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M9.302 20.924c-.011.788-.486 1.513-1.228 1.797a1.954 1.954 0 01-2.185-.574 1.943 1.943 0 01-.173-2.196c.4-.684 1.199-1.066 1.981-.927.933.156 1.594.967 1.605 1.9.012.748 1.17.748 1.16 0A3.139 3.139 0 008.38 18.01c-1.176-.423-2.567-.03-3.36.933-.83 1.002-.968 2.45-.285 3.569.678 1.124 1.994 1.675 3.274 1.431 1.431-.272 2.428-1.593 2.451-3.019.012-.747-1.147-.747-1.159 0z"
                                 fill="#212134"
                               />
                             </svg>
-                          </div>
-                          <span
-                            class="c15 c16"
-                          >
-                            Insert another relational field
                           </span>
-                        </button>
+                          <div
+                            class="c64"
+                            overflow="hidden"
+                            width="100%"
+                          >
+                            <div
+                              class="c65 c44"
+                            >
+                              <span
+                                class="c66"
+                              >
+                                categories
+                              </span>
+                              <div
+                                class="c56"
+                              >
+                                <span>
+                                  <button
+                                    aria-disabled="false"
+                                    aria-labelledby="tooltip-9"
+                                    class="c67 c68 c69"
+                                    tabindex="0"
+                                    type="button"
+                                  >
+                                    <svg
+                                      fill="none"
+                                      height="1em"
+                                      viewBox="0 0 24 24"
+                                      width="1em"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        clip-rule="evenodd"
+                                        d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
+                                        fill="#212134"
+                                        fill-rule="evenodd"
+                                      />
+                                    </svg>
+                                  </button>
+                                </span>
+                                <span>
+                                  <button
+                                    aria-disabled="false"
+                                    aria-labelledby="tooltip-11"
+                                    class="c67 c68 c69"
+                                    data-testid="delete-field"
+                                    tabindex="0"
+                                    type="button"
+                                  >
+                                    <svg
+                                      fill="none"
+                                      height="1em"
+                                      viewBox="0 0 24 24"
+                                      width="1em"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                                        fill="#32324D"
+                                      />
+                                    </svg>
+                                  </button>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <button
+                            aria-controls="label"
+                            aria-disabled="true"
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            class="c10 c71"
+                            data-testid="add-relation"
+                            disabled=""
+                            label="Insert another relational field"
+                            type="button"
+                          >
+                            <div
+                              aria-hidden="true"
+                              class="c12 c13 c14"
+                            >
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 24 24"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </div>
+                            <span
+                              class="c15 c16"
+                            >
+                              Insert another relational field
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1872,14 +1886,47 @@ exports[`EditSettingsView renders and matches the snapshot 1`] = `
           </div>
         </div>
       </div>
-    </div>
-  </form>
-</main>
+    </form>
+  </main>
+  <div
+    class="c76"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
 `;
 
 exports[`EditSettingsView should add field 1`] = `
-<body>
-  .c19 {
+.c76 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c19 {
   background: #ffffff;
   padding-top: 24px;
   padding-right: 32px;
@@ -2527,8 +2574,8 @@ exports[`EditSettingsView should add field 1`] = `
 
 .c6 {
   color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c4 {
@@ -2963,7 +3010,8 @@ exports[`EditSettingsView should add field 1`] = `
   }
 }
 
-<main
+<div>
+  <main
     aria-labelledby="main-content-title"
     class="c0"
     id="main-content"
@@ -3753,52 +3801,8 @@ exports[`EditSettingsView should add field 1`] = `
       </div>
     </form>
   </main>
-  .c0 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-<div
-    class="c0"
+  <div
+    class="c76"
   >
     <p
       aria-live="polite"
@@ -3819,403 +3823,7 @@ exports[`EditSettingsView should add field 1`] = `
       role="alert"
     />
   </div>
-  .c0 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c1 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-<div
-    data-react-portal="true"
-  >
-    <div
-      class="c0 c1"
-      id="tooltip-25"
-      role="tooltip"
-    >
-      <p
-        class="c2"
-      >
-        Edit postal_code
-      </p>
-    </div>
-  </div>
-  .c0 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c1 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-<div
-    data-react-portal="true"
-  >
-    <div
-      class="c0 c1"
-      id="tooltip-27"
-      role="tooltip"
-    >
-      <p
-        class="c2"
-      >
-        Delete postal_code
-      </p>
-    </div>
-  </div>
-  .c0 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c1 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-<div
-    data-react-portal="true"
-  >
-    <div
-      class="c0 c1"
-      id="tooltip-29"
-      role="tooltip"
-    >
-      <p
-        class="c2"
-      >
-        Edit city
-      </p>
-    </div>
-  </div>
-  .c0 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c1 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-<div
-    data-react-portal="true"
-  >
-    <div
-      class="c0 c1"
-      id="tooltip-31"
-      role="tooltip"
-    >
-      <p
-        class="c2"
-      >
-        Delete city
-      </p>
-    </div>
-  </div>
-  .c0 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c1 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-<div
-    data-react-portal="true"
-  >
-    <div
-      class="c0 c1"
-      id="tooltip-33"
-      role="tooltip"
-    >
-      <p
-        class="c2"
-      >
-        Edit categories
-      </p>
-    </div>
-  </div>
-  .c0 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c2 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c1 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-@media (max-width:68.75rem) {
-
-}
-
-@media (max-width:34.375rem) {
-
-}
-
-<div
-    data-react-portal="true"
-  >
-    <div
-      class="c0 c1"
-      id="tooltip-35"
-      role="tooltip"
-    >
-      <p
-        class="c2"
-      >
-        Delete categories
-      </p>
-    </div>
-  </div>
-</body>
+</div>
 `;
 
 exports[`EditSettingsView should add relation 1`] = `
@@ -4555,25 +4163,6 @@ exports[`EditSettingsView should add relation 1`] = `
   flex-direction: row;
 }
 
-.c77 {
-  background: #212134;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.c79 {
-  font-weight: 600;
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c78 {
-  position: absolute;
-  z-index: 4;
-  display: none;
-}
-
 .c67 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -4898,8 +4487,8 @@ exports[`EditSettingsView should add relation 1`] = `
 
 .c6 {
   color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c4 {
@@ -5334,7 +4923,7 @@ exports[`EditSettingsView should add relation 1`] = `
   }
 }
 
-<body>
+<div>
   <main
     aria-labelledby="main-content-title"
     class="c0"
@@ -6147,95 +5736,5 @@ exports[`EditSettingsView should add relation 1`] = `
       role="alert"
     />
   </div>
-  <div
-    data-react-portal="true"
-  >
-    <div
-      class="c77 c78"
-      id="tooltip-13"
-      role="tooltip"
-    >
-      <p
-        class="c79"
-      >
-        Edit postal_code
-      </p>
-    </div>
-  </div>
-  <div
-    data-react-portal="true"
-  >
-    <div
-      class="c77 c78"
-      id="tooltip-15"
-      role="tooltip"
-    >
-      <p
-        class="c79"
-      >
-        Delete postal_code
-      </p>
-    </div>
-  </div>
-  <div
-    data-react-portal="true"
-  >
-    <div
-      class="c77 c78"
-      id="tooltip-17"
-      role="tooltip"
-    >
-      <p
-        class="c79"
-      >
-        Edit city
-      </p>
-    </div>
-  </div>
-  <div
-    data-react-portal="true"
-  >
-    <div
-      class="c77 c78"
-      id="tooltip-19"
-      role="tooltip"
-    >
-      <p
-        class="c79"
-      >
-        Delete city
-      </p>
-    </div>
-  </div>
-  <div
-    data-react-portal="true"
-  >
-    <div
-      class="c77 c78"
-      id="tooltip-21"
-      role="tooltip"
-    >
-      <p
-        class="c79"
-      >
-        Edit categories
-      </p>
-    </div>
-  </div>
-  <div
-    data-react-portal="true"
-  >
-    <div
-      class="c77 c78"
-      id="tooltip-23"
-      role="tooltip"
-    >
-      <p
-        class="c79"
-      >
-        Delete categories
-      </p>
-    </div>
-  </div>
-</body>
+</div>
 `;

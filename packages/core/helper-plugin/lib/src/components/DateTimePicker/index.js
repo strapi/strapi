@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Stack } from '@strapi/design-system/Stack';
@@ -50,7 +50,7 @@ const DateTimePicker = ({
       : null
   );
 
-  const handleDateChange = e => {
+  const handleDateChange = (e) => {
     setDateValue(e);
 
     if (timeValue) {
@@ -71,7 +71,7 @@ const DateTimePicker = ({
     }
   };
 
-  const handleTimeChange = e => {
+  const handleTimeChange = (e) => {
     setTimeValue(e);
 
     const dateToSet = new Date(dateValue);
@@ -109,6 +109,21 @@ const DateTimePicker = ({
     }
   };
 
+  useEffect(() => {
+    if (value) {
+      const parsedData = parseDate(value);
+      setDateValue(parsedData);
+      setTimeValue(
+        parsedData
+          ? `${parsedData.getHours()}:${parsedData.getMinutes()}:${parsedData.getSeconds()}`
+          : null
+      );
+    } else {
+      setDateValue(undefined);
+      setTimeValue(undefined);
+    }
+  }, [value]);
+
   return (
     <CustomField
       name={name}
@@ -133,7 +148,7 @@ const DateTimePicker = ({
             ariaLabel={label || ariaLabel}
             error={error}
             selectedDate={dateValue}
-            selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
+            selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
             onChange={handleDateChange}
             size={size}
             onClear={onClear && handleDateClear}

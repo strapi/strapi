@@ -39,7 +39,7 @@ module.exports = function createComponentBuilder() {
       }
 
       const handler = createSchemaHandler({
-        dir: path.join(strapi.dirs.components, nameToSlug(infos.category)),
+        dir: path.join(strapi.dirs.app.components, nameToSlug(infos.category)),
         filename: `${nameToSlug(infos.displayName)}.json`,
       });
 
@@ -89,7 +89,7 @@ module.exports = function createComponentBuilder() {
         throw new ApplicationError('component.edit.alreadyExists');
       }
 
-      const newDir = path.join(strapi.dirs.components, newCategory);
+      const newDir = path.join(strapi.dirs.app.components, newCategory);
 
       const oldAttributes = component.schema.attributes;
 
@@ -107,11 +107,11 @@ module.exports = function createComponentBuilder() {
         .setAttributes(this.convertAttributes(newAttributes));
 
       if (newUID !== uid) {
-        this.components.forEach(compo => {
+        this.components.forEach((compo) => {
           compo.updateComponent(uid, newUID);
         });
 
-        this.contentTypes.forEach(ct => {
+        this.contentTypes.forEach((ct) => {
           ct.updateComponent(uid, newUID);
         });
       }
@@ -124,11 +124,11 @@ module.exports = function createComponentBuilder() {
         throw new ApplicationError('component.notFound');
       }
 
-      this.components.forEach(compo => {
+      this.components.forEach((compo) => {
         compo.removeComponent(uid);
       });
 
-      this.contentTypes.forEach(ct => {
+      this.contentTypes.forEach((ct) => {
         ct.removeComponent(uid);
       });
 

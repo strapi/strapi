@@ -1,33 +1,34 @@
 import { useMutation, useQueryClient } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
-import { removeAssetRequest } from '../utils/removeAssetQuery';
 
-export const useRemoveAsset = onSuccess => {
+import { deleteRequest } from '../utils/deleteRequest';
+import pluginId from '../pluginId';
+
+export const useRemoveAsset = (onSuccess) => {
   const toggleNotification = useNotification();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(assetId => removeAssetRequest(assetId), {
-    onSuccess: () => {
-      // Coupled with the cache of useAssets
-      queryClient.refetchQueries(['assets'], { active: true });
-      queryClient.refetchQueries(['asset-count'], { active: true });
+  const mutation = useMutation((assetId) => deleteRequest('files', assetId), {
+    onSuccess() {
+      queryClient.refetchQueries([pluginId, 'assets'], { active: true });
+      queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
 
       toggleNotification({
         type: 'success',
         message: {
           id: 'modal.remove.success-label',
-          defaultMessage: 'The asset has been successfully removed.',
+          defaultMessage: 'Elements have been successfully deleted.',
         },
       });
 
       onSuccess();
     },
-    onError: error => {
+    onError(error) {
       toggleNotification({ type: 'warning', message: error.message });
     },
   });
 
-  const removeAsset = assetId => mutation.mutate(assetId);
+  const removeAsset = (assetId) => mutation.mutate(assetId);
 
   return { ...mutation, removeAsset };
 };
