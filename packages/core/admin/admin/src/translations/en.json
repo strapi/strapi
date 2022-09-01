@@ -103,6 +103,8 @@
   "Settings.apiTokens.form.duration":"Token duration",
   "Settings.apiTokens.form.type":"Token type",
   "Settings.apiTokens.duration.expiration-date":"Expiration date",
+  "Settings.apiTokens.createPage.permissions.title":"Permissions",
+  "Settings.apiTokens.createPage.permissions.description":"Only actions bound by a route are listed below.",
   "Settings.apiTokens.RegenerateDialog.title": "Regenerate token",
   "Settings.apiTokens.popUpWarning.message": "Are you sure you want to regenerate this token?",
   "Settings.apiTokens.Button.cancel": "Cancel",

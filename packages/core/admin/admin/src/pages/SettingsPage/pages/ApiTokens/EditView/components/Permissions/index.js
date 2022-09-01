@@ -1,60 +1,39 @@
 import React, { memo } from 'react';
-import { Tab, TabGroup, TabPanel, TabPanels, Tabs } from '@strapi/design-system/Tabs';
-import { Box } from '@strapi/design-system/Box';
 import { useIntl } from 'react-intl';
+import { Typography } from '@strapi/design-system/Typography';
+import { Stack } from '@strapi/design-system/Stack';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
 import ContentTypesSection from '../ContenTypesSection';
+import ActionBoundRoutes from '../ActionBoundRoutes';
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
-import TAB_LABELS from './utils/tabLabels';
 
 const Permissions = ({ ...props }) => {
   const {
-    value: { modifiedData },
+    value: { data },
   } = useApiTokenPermissionsContext();
   const { formatMessage } = useIntl();
 
   return (
-    <Box shadow="filterShadow">
-      <TabGroup
-        id="tabs"
-        label={formatMessage({
-          id: 'Settings.permissions.users.tabs.label',
-          defaultMessage: 'Tabs Permissions',
-        })}
-      >
-        <Tabs>
-          {TAB_LABELS.map((tabLabel) => (
-            <Tab key={tabLabel.id}>
-              {formatMessage({ id: tabLabel.labelId, defaultMessage: tabLabel.defaultMessage })}
-            </Tab>
-          ))}
-        </Tabs>
-        <TabPanels style={{ position: 'relative' }}>
-          <TabPanel>
-            {modifiedData?.singleTypes && (
-              <ContentTypesSection
-                section={modifiedData?.collectionTypes}
-                name="collectionTypes"
-                {...props}
-              />
-            )}
-          </TabPanel>
-          <TabPanel>
-            {modifiedData?.singleTypes && (
-              <ContentTypesSection
-                section={modifiedData?.singleTypes}
-                name="singleTypes"
-                {...props}
-              />
-            )}
-          </TabPanel>
-          <TabPanel>
-            {modifiedData?.custom && (
-              <ContentTypesSection section={modifiedData?.custom} name="custom" {...props} />
-            )}
-          </TabPanel>
-        </TabPanels>
-      </TabGroup>
-    </Box>
+    <Grid gap={0} shadow="filterShadow" hasRadius background="neutral0">
+      <GridItem col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
+        <Stack spacing={2}>
+          <Typography variant="delta" as="h2">
+            {formatMessage({
+              id: 'Settings.apiTokens.createPage.permissions.title',
+              defaultMessage: 'Permissions',
+            })}
+          </Typography>
+          <Typography as="p" textColor="neutral600">
+            {formatMessage({
+              id: 'Settings.apiTokens.createPage.permissions.description',
+              defaultMessage: 'Only actions bound by a route are listed below.',
+            })}
+          </Typography>
+        </Stack>
+        {data?.permissions && <ContentTypesSection section={data?.permissions} {...props} />}
+      </GridItem>
+      <ActionBoundRoutes />
+    </Grid>
   );
 };
 
