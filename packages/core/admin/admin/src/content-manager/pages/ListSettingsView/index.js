@@ -195,7 +195,7 @@ const ListSettingsView = ({ layout, slug }) => {
             }
             primaryAction={
               <Button
-                size="L"
+                size="S"
                 startIcon={<Check />}
                 disabled={isEqual(modifiedData, initialData)}
                 type="submit"

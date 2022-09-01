@@ -1,10 +1,16 @@
 'use strict';
 
-const { NotFoundError } = require('@strapi/utils/lib/errors');
+const { NotFoundError, ApplicationError } = require('@strapi/utils/lib/errors');
 const crypto = require('crypto');
 const { omit, uniq } = require('lodash/fp');
 const apiTokenService = require('../api-token');
 const constants = require('../constants');
+
+const getActionProvider = (actions = []) => {
+  return {
+    contentAPI: { permissions: { providers: { action: { keys: jest.fn(() => actions) } } } },
+  };
+};
 
 describe('API Token', () => {
   const mockedApiToken = {
@@ -159,6 +165,7 @@ describe('API Token', () => {
       );
 
       global.strapi = {
+        ...getActionProvider(['admin::content.content.read']),
         query() {
           return {
             findOne,
@@ -241,6 +248,7 @@ describe('API Token', () => {
       );
 
       global.strapi = {
+        ...getActionProvider(['admin::content.content.read']),
         query() {
           return {
             findOne,
@@ -313,6 +321,7 @@ describe('API Token', () => {
       );
 
       global.strapi = {
+        ...getActionProvider(['api::foo.foo.find', 'api::foo.foo.create']),
         query() {
           return {
             findOne,
@@ -331,6 +340,56 @@ describe('API Token', () => {
 
       expect(res.permissions).toHaveLength(2);
       expect(res.permissions).toEqual(['api::foo.foo.find', 'api::foo.foo.create']);
+    });
+
+    test('Creates a custom token with invalid permissions should throw', async () => {
+      const attributes = {
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'custom',
+        permissions: ['valid-permission', 'unknown-permission-A', 'unknown-permission-B'],
+      };
+      const createTokenResult = {
+        ...attributes,
+        lifespan: null,
+        expiresAt: null,
+        id: 1,
+      };
+
+      const create = jest.fn().mockResolvedValue(createTokenResult);
+      const load = jest.fn().mockResolvedValueOnce(
+        Promise.resolve(
+          uniq(attributes.permissions).map((p) => {
+            return {
+              action: p,
+            };
+          })
+        )
+      );
+
+      global.strapi = {
+        ...getActionProvider(['valid-permission']),
+        query() {
+          return {
+            create,
+          };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+        entityService: {
+          load,
+        },
+      };
+
+      await expect(() => apiTokenService.create(attributes)).rejects.toThrowError(
+        new ApplicationError(
+          `Unknown permissions provided: unknown-permission-A, unknown-permission-B`
+        )
+      );
+
+      expect(load).not.toHaveBeenCalled();
+      expect(create).not.toHaveBeenCalled();
     });
   });
 
@@ -678,6 +737,12 @@ describe('API Token', () => {
       );
 
     global.strapi = {
+      ...getActionProvider([
+        'admin::subject.keepThisAction',
+        'admin::subject.newAction',
+        'admin::subject.newAction',
+        'admin::subject.otherAction',
+      ]),
       query() {
         return {
           update,
@@ -813,6 +878,55 @@ describe('API Token', () => {
       permissions: originalToken.permissions,
       ...updatedAttributes,
     });
+  });
+
+  test('Updates permissions field of a custom token with unknown permissions', async () => {
+    const id = 1;
+
+    const originalToken = {
+      id,
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'custom',
+      permissions: ['valid-permission-A'],
+    };
+
+    const updatedAttributes = {
+      permissions: ['valid-permission-A', 'unknown-permission'],
+    };
+
+    const findOne = jest.fn().mockResolvedValue(omit('permissions', originalToken));
+    const update = jest.fn(({ data }) => Promise.resolve(data));
+    const deleteFn = jest.fn();
+    const create = jest.fn();
+    const load = jest.fn();
+
+    global.strapi = {
+      ...getActionProvider(['valid-permission-A']),
+      query() {
+        return {
+          update,
+          findOne,
+          delete: deleteFn,
+          create,
+        };
+      },
+      config: {
+        get: jest.fn(() => ''),
+      },
+      entityService: {
+        load,
+      },
+    };
+
+    expect(() => apiTokenService.update(id, updatedAttributes)).rejects.toThrowError(
+      new ApplicationError(`Unknown permissions provided: unknown-permission`)
+    );
+
+    expect(update).not.toHaveBeenCalled();
+    expect(deleteFn).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+    expect(load).not.toHaveBeenCalled();
   });
 
   describe('getByName', () => {
