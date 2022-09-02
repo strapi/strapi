@@ -174,7 +174,13 @@ const convertPopulateObject = (populate, schema) => {
     if (attribute.type === 'dynamiczone') {
       const populates = attribute.components
         .map((uid) => strapi.getModel(uid))
-        .map((schema) => convertNestedPopulate(subPopulate, schema));
+        .map((schema) => convertNestedPopulate(subPopulate, schema))
+        .map((populate) => (populate === true ? {} : populate)) // cast boolean to empty object to avoid merging issues
+        .filter((populate) => populate !== false);
+
+      if (isEmpty(populates)) {
+        return acc;
+      }
 
       return {
         ...acc,
@@ -203,16 +209,22 @@ const convertPopulateObject = (populate, schema) => {
       return acc;
     }
 
+    const populateObject = convertNestedPopulate(subPopulate, targetSchema);
+
+    if (!populateObject) {
+      return acc;
+    }
+
     return {
       ...acc,
-      [key]: convertNestedPopulate(subPopulate, targetSchema),
+      [key]: populateObject,
     };
   }, {});
 };
 
 const convertNestedPopulate = (subPopulate, schema) => {
-  if (subPopulate === '*') {
-    return true;
+  if (_.isString(subPopulate)) {
+    return parseType({ type: 'boolean', value: subPopulate, forceCast: true });
   }
 
   if (_.isBoolean(subPopulate)) {
