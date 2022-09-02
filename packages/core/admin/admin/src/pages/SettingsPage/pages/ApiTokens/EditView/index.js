@@ -70,12 +70,22 @@ const ApiTokenCreateView = () => {
   useQuery(
     'content-api-permissions',
     async () => {
-      const {
-        data: { data },
-      } = await axiosInstance.get(`/admin/content-api/permissions`);
+      const [permissions, routes] = await Promise.all(
+        ['/admin/content-api/permissions', '/admin/content-api/routes'].map(async (url) => {
+          const { data } = await axiosInstance.get(url);
+
+          return data.data;
+        })
+      );
+
       dispatch({
         type: 'UPDATE_PERMISSIONS_LAYOUT',
-        value: data,
+        value: permissions,
+      });
+
+      dispatch({
+        type: 'UPDATE_ROUTES',
+        value: routes,
       });
 
       if (apiToken) {
@@ -96,8 +106,6 @@ const ApiTokenCreateView = () => {
           });
         }
       }
-
-      return data;
     },
     {
       onError() {

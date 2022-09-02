@@ -11,6 +11,7 @@ const ActionBoundRoutes = () => {
     value: { selectedAction, routes },
   } = useApiTokenPermissionsContext();
   const { formatMessage } = useIntl();
+  const actionSection = selectedAction?.split('.')[0];
 
   return (
     <GridItem
@@ -24,10 +25,12 @@ const ActionBoundRoutes = () => {
     >
       {selectedAction ? (
         <Stack spacing={2}>
-          {routes.map((route, key) => (
-            // eslint-disable-next-line react/no-array-index-key
-            <BoundRoute key={key} route={route} />
-          ))}
+          {routes[actionSection]?.map((route) => {
+            if (route.config.auth.scope.includes(selectedAction))
+              return <BoundRoute key={route.handler} route={route} />;
+
+            return null;
+          })}
         </Stack>
       ) : (
         <Stack spacing={2}>

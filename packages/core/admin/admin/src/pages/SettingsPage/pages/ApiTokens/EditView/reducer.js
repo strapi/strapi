@@ -35,6 +35,10 @@ const reducer = (state, action) =>
         draftState.data = transformPermissionsData(action.value);
         break;
       }
+      case 'UPDATE_ROUTES': {
+        draftState.routes = { ...action.value };
+        break;
+      }
       case 'UPDATE_PERMISSIONS': {
         draftState.selectedActions = [...action.value];
         break;
