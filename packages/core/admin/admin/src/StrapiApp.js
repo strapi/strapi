@@ -426,8 +426,6 @@ class StrapiApp {
       fields: { fields },
     } = this.library;
 
-    console.log({ settings: this.settings });
-
     return (
       <Providers
         authLogo={this.configurations.authLogo}
