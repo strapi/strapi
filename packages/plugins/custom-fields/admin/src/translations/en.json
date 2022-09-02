@@ -1,0 +1,12 @@
+{
+  "color-picker.label": "Color Picker",
+  "color-picker.description": "Select any color",
+  "color-picker.settings": "Settings",
+  "color-picket.input.format": "HEX",
+  "color-picker.options.advanced.regex": "RegExp pattern",
+  "color-picker.options.advanced.regex.description": "Provide a regular expression to validate the HEX value",
+  "color-picker.options.advanced.requiredField": "Required field",
+  "color-picker.options.advanced.requiredField.description": "You won't be able to create an entry if this field is empty",
+  "color-picker.toggle.aria-label": "Color picker toggle",
+  "color-picker.input.aria-label": "Color picker input"
+}
