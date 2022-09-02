@@ -57,12 +57,6 @@ module.exports = function createComponentBuilder() {
         .set('config', infos.config)
         .setAttributes(this.convertAttributes(infos.attributes));
 
-      if (this.components.size === 0) {
-        strapi.telemetry.send('didCreateFirstComponent');
-      } else {
-        strapi.telemetry.send('didCreateComponent');
-      }
-
       this.components.set(uid, handler);
 
       return handler;

@@ -66,19 +66,20 @@ describe('metrics', () => {
       global.strapi = { telemetry: { send } };
       metricsService = metricsServiceLoader({ strapi });
       const [containsRelationalFields, displayedFields, displayedRelationalFields] = expectedResult;
-      const adminUserId = 'testhash';
+      const adminUser = {
+        email: 'someTestEmail',
+      };
 
-      await metricsService.sendDidConfigureListView(
-        contentType,
-        { layouts: { list } },
-        adminUserId
-      );
+      await metricsService.sendDidConfigureListView(contentType, { layouts: { list } }, adminUser);
 
       expect(send).toHaveBeenCalledTimes(1);
-      expect(send).toHaveBeenCalledWith(adminUserId, 'didConfigureListView', {
-        displayedFields,
-        containsRelationalFields,
-        displayedRelationalFields,
+      expect(send).toHaveBeenCalledWith('didConfigureListView', {
+        adminUser,
+        eventProperties: {
+          containsRelationalFields,
+          displayedFields,
+          displayedRelationalFields,
+        },
       });
     });
   });

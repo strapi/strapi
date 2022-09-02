@@ -43,8 +43,10 @@ describe('Metrics', () => {
 
     await sendDidInitializeEvent();
 
-    expect(strapi.telemetry.send).toHaveBeenCalledWith('', 'didInitializeI18n', {
-      numberOfContentTypes: 1,
+    expect(strapi.telemetry.send).toHaveBeenCalledWith('didInitializeI18n', {
+      groupProperties: {
+        numberOfContentTypes: 1,
+      },
     });
   });
 
@@ -83,12 +85,17 @@ describe('Metrics', () => {
       },
     };
 
+    const adminUser = { id: 1 };
+
     const { sendDidUpdateI18nLocalesEvent } = metricsLoader({ strapi });
 
-    await sendDidUpdateI18nLocalesEvent();
+    await sendDidUpdateI18nLocalesEvent(adminUser);
 
-    expect(strapi.telemetry.send).toHaveBeenCalledWith('', 'didUpdateI18nLocales', {
-      numberOfLocales: 3,
+    expect(strapi.telemetry.send).toHaveBeenCalledWith('didUpdateI18nLocales', {
+      adminUser,
+      groupProperties: {
+        numberOfLocales: 3,
+      },
     });
   });
 });

@@ -75,6 +75,7 @@
     "fork-ts-checker-webpack-plugin": "7.2.1",
     "formik": "^2.2.6",
     "fs-extra": "10.0.0",
+    "hash.js": "1.1.7",
     "highlight.js": "^10.4.1",
     "history": "^4.9.0",
     "hoist-non-react-statics": "^3.3.0",

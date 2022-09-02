@@ -43,6 +43,8 @@ module.exports = {
 
     const locale = await localesService.create(localeToPersist);
 
+    getService('metrics').sendDidUpdateI18nLocalesEvent(user);
+
     if (isDefault) {
       await localesService.setDefaultLocale(locale);
     }
@@ -72,6 +74,8 @@ module.exports = {
 
     const updatedLocale = await localesService.update({ id }, cleanUpdates);
 
+    getService('metrics').sendDidUpdateI18nLocalesEvent(user);
+
     if (isDefault) {
       await localesService.setDefaultLocale(updatedLocale);
     }
@@ -97,6 +101,8 @@ module.exports = {
     }
 
     await localesService.delete({ id });
+
+    getService('metrics').sendDidUpdateI18nLocalesEvent(ctx.state?.user);
 
     const sanitizedLocale = await sanitizeLocale(existingLocale);
 

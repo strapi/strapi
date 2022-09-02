@@ -65,7 +65,6 @@ module.exports = {
     const { userAbility, user } = ctx.state;
     const { model } = ctx.params;
     const { body } = ctx.request;
-    const adminUserId = strapi.service('admin::user').generateAdminHashFromContext(ctx);
 
     const totalEntries = await strapi.query(model).count();
 
@@ -88,7 +87,10 @@ module.exports = {
     ctx.body = await permissionChecker.sanitizeOutput(entity);
 
     if (totalEntries === 0) {
-      strapi.telemetry.send(adminUserId, 'didCreateFirstContentTypeEntry', { model });
+      strapi.telemetry.send('didCreateFirstContentTypeEntry', {
+        adminUser: user,
+        eventProperties: { model },
+      });
     }
   },
 

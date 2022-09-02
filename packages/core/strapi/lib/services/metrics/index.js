@@ -53,13 +53,14 @@ const createTelemetryInstance = (strapi) => {
 
         const sendLicenseCheck = () => {
           return sendEvent(
-            '',
             'didCheckLicense',
             {
-              licenseInfo: {
-                ...ee.licenseInfo,
-                projectHash: hashProject(strapi),
-                dependencyHash: hashDep(strapi),
+              groupProperties: {
+                licenseInfo: {
+                  ...ee.licenseInfo,
+                  projectHash: hashProject(strapi),
+                  dependencyHash: hashDep(strapi),
+                },
               },
             },
             {
@@ -80,9 +81,9 @@ const createTelemetryInstance = (strapi) => {
       // clear open handles
       crons.forEach((cron) => cron.cancel());
     },
-    async send(adminUserId, event, payload) {
+    async send(event, payload) {
       if (isDisabled) return true;
-      return sendEvent(adminUserId, event, payload);
+      return sendEvent(event, payload);
     },
   };
 };

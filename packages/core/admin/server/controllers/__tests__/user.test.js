@@ -51,10 +51,10 @@ describe('User Controller', () => {
       const exists = jest.fn(() => Promise.resolve(false));
       const sanitizeUser = jest.fn((user) => Promise.resolve(user));
       const created = jest.fn();
-      const generateAdminHashFromContext = jest.fn(() => 'testhash');
       const state = {
         user: {
           id: 1,
+          email: 'someTestEmailString',
         },
       };
       const ctx = createContext({ body }, { state, created });
@@ -66,19 +66,15 @@ describe('User Controller', () => {
               exists,
               create,
               sanitizeUser,
-              generateAdminHashFromContext,
             },
           },
         },
       };
 
-      const adminUserId = generateAdminHashFromContext();
-
       await userController.create(ctx);
 
-      expect(generateAdminHashFromContext).toHaveBeenCalledWith(ctx);
       expect(exists).toHaveBeenCalledWith({ email: body.email });
-      expect(create).toHaveBeenCalledWith(body, adminUserId);
+      expect(create).toHaveBeenCalledWith(body, ctx.state.user);
       expect(sanitizeUser).toHaveBeenCalled();
       expect(created).toHaveBeenCalled();
     });

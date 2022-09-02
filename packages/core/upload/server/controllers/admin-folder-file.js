@@ -40,10 +40,13 @@ module.exports = {
 
     if (deletedFiles.length + deletedFolders.length > 1) {
       strapi.telemetry.send('didBulkDeleteMediaLibraryElements', {
-        rootFolderNumber: deletedFolders.length,
-        rootAssetNumber: deletedFiles.length,
-        totalFolderNumber,
-        totalAssetNumber: totalFileNumber + deletedFiles.length,
+        adminUser: ctx.state?.user,
+        groupProperties: {
+          rootFolderNumber: deletedFolders.length,
+          rootAssetNumber: deletedFiles.length,
+          totalFolderNumber,
+          totalAssetNumber: totalFileNumber + deletedFiles.length,
+        },
       });
     }
 
@@ -229,10 +232,13 @@ module.exports = {
     });
 
     strapi.telemetry.send('didBulkMoveMediaLibraryElements', {
-      rootFolderNumber: updatedFolders.length,
-      rootAssetNumber: updatedFiles.length,
-      totalFolderNumber,
-      totalAssetNumber: totalFileNumber + updatedFiles.length,
+      adminUser: ctx.state?.user,
+      groupProperties: {
+        rootFolderNumber: updatedFolders.length,
+        rootAssetNumber: updatedFiles.length,
+        totalFolderNumber,
+        totalAssetNumber: totalFileNumber + updatedFiles.length,
+      },
     });
 
     ctx.body = {

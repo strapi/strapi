@@ -11,13 +11,17 @@ const sendDidInitializeEvent = async () => {
     0
   )(strapi.contentTypes);
 
-  await strapi.telemetry.send('', 'didInitializeI18n', { numberOfContentTypes });
+  // This event is anonymous
+  await strapi.telemetry.send('didInitializeI18n', { groupProperties: { numberOfContentTypes } });
 };
 
-const sendDidUpdateI18nLocalesEvent = async () => {
+const sendDidUpdateI18nLocalesEvent = async (adminUser) => {
   const numberOfLocales = await getService('locales').count();
 
-  await strapi.telemetry.send('', 'didUpdateI18nLocales', { numberOfLocales });
+  await strapi.telemetry.send('didUpdateI18nLocales', {
+    adminUser,
+    groupProperties: { numberOfLocales },
+  });
 };
 
 module.exports = () => ({

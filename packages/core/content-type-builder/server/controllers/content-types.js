@@ -47,7 +47,6 @@ module.exports = {
 
   async createContentType(ctx) {
     const { body } = ctx.request;
-    const adminUserId = strapi.service('admin::user').generateAdminHashFromContext(ctx);
 
     try {
       await validateContentTypeInput(body);
@@ -65,15 +64,18 @@ module.exports = {
         components: body.components,
       });
 
-      const metricsProperties = {
-        kind: contentType.kind,
-        hasDraftAndPublish: hasDraftAndPublish(contentType.schema),
+      const metricsPayload = {
+        adminUser: ctx.state?.user,
+        eventProperties: {
+          kind: contentType.kind,
+          hasDraftAndPublish: hasDraftAndPublish(contentType.schema),
+        },
       };
 
       if (_.isEmpty(strapi.api)) {
-        await strapi.telemetry.send(adminUserId, 'didCreateFirstContentType', metricsProperties);
+        await strapi.telemetry.send('didCreateFirstContentType', metricsPayload);
       } else {
-        await strapi.telemetry.send(adminUserId, 'didCreateContentType', metricsProperties);
+        await strapi.telemetry.send('didCreateContentType', metricsPayload);
       }
 
       setImmediate(() => strapi.reload());
@@ -81,7 +83,10 @@ module.exports = {
       ctx.send({ data: { uid: contentType.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
-      await strapi.telemetry.send(adminUserId, 'didNotCreateContentType', { error: error.message });
+      await strapi.telemetry.send('didNotCreateContentType', {
+        adminUser: ctx.state?.user,
+        eventProperties: { error: error.message },
+      });
       ctx.send({ error: error.message }, 400);
     }
   },

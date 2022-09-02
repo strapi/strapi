@@ -53,22 +53,35 @@ function captureStderr(name, error) {
   return captureError(name);
 }
 
-const getProperties = (scope, error) => ({
-  error: typeof error === 'string' ? error : error && error.message,
-  os: os.type(),
-  osPlatform: os.platform(),
-  osArch: os.arch(),
-  osRelease: os.release(),
-  version: scope.strapiVersion,
-  nodeVersion: process.versions.node,
-  docker: scope.docker,
-  useYarn: scope.useYarn,
-  useTypescriptOnServer: scope.useTypescript,
-  useTypescriptOnAdmin: scope.useTypescript,
-  noRun: (scope.runQuickstartApp !== true).toString(),
-});
+const getProperties = (scope, error) => {
+  const eventProperties = {
+    error: typeof error === 'string' ? error : error && error.message,
+  };
+  const userProperties = {
+    os: os.type(),
+    osPlatform: os.platform(),
+    osArch: os.arch(),
+    osRelease: os.release(),
+    nodeVersion: process.versions.node,
+  };
+  const groupProperties = {
+    version: scope.strapiVersion,
+    docker: scope.docker,
+    useYarn: scope.useYarn,
+    useTypescriptOnServer: scope.useTypescript,
+    useTypescriptOnAdmin: scope.useTypescript,
+    noRun: (scope.runQuickstartApp !== true).toString(),
+    projectId: scope.uuid,
+  };
 
-function trackEvent(event, body) {
+  return {
+    eventProperties,
+    userProperties,
+    groupProperties: addPackageJsonStrapiMetadata(groupProperties, scope),
+  };
+};
+
+function trackEvent(event, payload) {
   if (process.env.NODE_ENV === 'test') {
     return;
   }
@@ -78,7 +91,7 @@ function trackEvent(event, body) {
       method: 'POST',
       body: JSON.stringify({
         event,
-        ...body,
+        ...payload,
       }),
       timeout: 1000,
       headers: { 'Content-Type': 'application/json' },
@@ -95,7 +108,7 @@ function trackError({ scope, error }) {
   try {
     return trackEvent('didNotCreateProject', {
       deviceId: scope.deviceId,
-      properties: addPackageJsonStrapiMetadata(properties, scope),
+      properties,
     });
   } catch (err) {
     /** ignore errors */
@@ -109,7 +122,7 @@ function trackUsage({ event, scope, error }) {
   try {
     return trackEvent(event, {
       deviceId: scope.deviceId,
-      properties: addPackageJsonStrapiMetadata(properties, scope),
+      properties,
     });
   } catch (err) {
     /** ignore errors */

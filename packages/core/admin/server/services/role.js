@@ -309,7 +309,7 @@ const displayWarningIfNoSuperAdmin = async () => {
  * @param {string|int} roleId - role ID
  * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
  */
-const assignPermissions = async (roleId, permissions = [], adminUserId) => {
+const assignPermissions = async (roleId, permissions = [], adminUser) => {
   await validatePermissionsExist(permissions);
 
   const superAdmin = await getService('role').getSuperAdmin();
@@ -351,7 +351,7 @@ const assignPermissions = async (roleId, permissions = [], adminUserId) => {
   }
 
   if (!isSuperAdmin && (permissionsToAdd.length || permissionsToDelete.length)) {
-    await getService('metrics').sendDidUpdateRolePermissions(adminUserId);
+    await getService('metrics').sendDidUpdateRolePermissions(adminUser);
   }
 
   return permissionsToReturn;

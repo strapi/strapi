@@ -16,9 +16,14 @@ module.exports = {
     }
 
     const data = await validateSettings(body);
-    const adminUserId = strapi.service('admin::user').generateAdminHashFromContext(ctx);
 
-    await getService('upload').setSettings(data, adminUserId);
+    await getService('upload').setSettings(data);
+
+    if (data.responsiveDimensions === true) {
+      strapi.telemetry.send('didEnableResponsiveDimensions', { adminUser: ctx.state?.user });
+    } else {
+      strapi.telemetry.send('didDisableResponsiveDimensions', { adminUser: ctx.state?.user });
+    }
 
     ctx.body = { data };
   },

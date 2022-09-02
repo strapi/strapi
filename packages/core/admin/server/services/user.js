@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 const { defaults } = require('lodash/fp');
-const crypto = require('crypto');
 const { stringIncludes } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
 const { createUser, hasSuperAdminRole } = require('../domain/user');
@@ -28,7 +27,7 @@ const sanitizeUser = (user) => {
  * @param attributes A partial user object
  * @returns {Promise<user>}
  */
-const create = async (attributes, adminUserId) => {
+const create = async (attributes, adminUser) => {
   const userInfo = {
     registrationToken: getService('token').createToken(),
     ...attributes,
@@ -42,7 +41,7 @@ const create = async (attributes, adminUserId) => {
 
   const createdUser = await strapi.query('admin::user').create({ data: user, populate: ['roles'] });
 
-  getService('metrics').sendDidInviteUser(adminUserId);
+  getService('metrics').sendDidInviteUser(adminUser);
 
   return createdUser;
 };
@@ -324,19 +323,6 @@ const getLanguagesInUse = async () => {
   return users.map((user) => user.preferedLanguage || 'en');
 };
 
-const generateAdminHashFromContext = (ctx) => {
-  try {
-    const { uuid } = strapi.config;
-    const adminUserEmailHash = crypto
-      .createHash('sha256')
-      .update(`${ctx.state.user.email}${uuid}`)
-      .digest('hex');
-    return adminUserEmailHash;
-  } catch (error) {
-    return '';
-  }
-};
-
 module.exports = {
   create,
   updateById,
@@ -355,5 +341,4 @@ module.exports = {
   displayWarningIfUsersDontHaveRole,
   resetPasswordByEmail,
   getLanguagesInUse,
-  generateAdminHashFromContext,
 };

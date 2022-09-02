@@ -57,8 +57,10 @@ const sendEvent = async (uuid) => {
       method: 'POST',
       body: JSON.stringify({
         event: 'didOptInTelemetry',
-        uuid,
         deviceId: machineID(),
+        properties: {
+          groupProperties: { projectId: uuid },
+        },
       }),
       headers: { 'Content-Type': 'application/json' },
     });

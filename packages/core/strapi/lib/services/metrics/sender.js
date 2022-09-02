@@ -9,6 +9,7 @@ const ciEnv = require('ci-info');
 const { isUsingTypeScriptSync } = require('@strapi/typescript-utils');
 const ee = require('../../utils/ee');
 const machineID = require('../../utils/machine-id');
+const { generateAdminUserHash } = require('./admin-user-hash');
 const stringifyDeep = require('./stringify-deep');
 
 const defaultQueryOpts = {
@@ -41,13 +42,16 @@ module.exports = (strapi) => {
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
 
-  const anonymousMetadata = {
+  const anonymousUserProperties = {
     environment: strapi.config.environment,
     os: os.type(),
     osPlatform: os.platform(),
     osArch: os.arch(),
     osRelease: os.release(),
     nodeVersion: process.versions.node,
+  };
+
+  const anonymousGroupProperties = {
     docker: process.env.DOCKER || isDocker(),
     isCI: ciEnv.isCI,
     version: strapi.config.get('info.strapi'),
@@ -57,19 +61,25 @@ module.exports = (strapi) => {
     projectId: uuid,
   };
 
-  addPackageJsonStrapiMetadata(anonymousMetadata, strapi);
+  addPackageJsonStrapiMetadata(anonymousGroupProperties, strapi);
 
-  return async (adminUserId, event, payload = {}, opts = {}) => {
+  return async (event, payload = {}, opts = {}) => {
+    const adminUserId = generateAdminUserHash(payload);
+
     const reqParams = {
       method: 'POST',
       body: JSON.stringify({
         event,
         adminUserId,
         deviceId,
-        properties: stringifyDeep({
-          ...payload,
-          ...anonymousMetadata,
-        }),
+        properties: {
+          eventProperties: stringifyDeep({ ...payload?.eventProperties }),
+          userProperties: stringifyDeep({ ...payload?.userProperties, ...anonymousUserProperties }),
+          groupProperties: stringifyDeep({
+            ...payload?.groupProperties,
+            ...anonymousGroupProperties,
+          }),
+        },
       }),
       ..._.merge({}, defaultQueryOpts, opts),
     };

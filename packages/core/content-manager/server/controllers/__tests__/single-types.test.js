@@ -85,6 +85,7 @@ describe('Single Types', () => {
       },
       user: {
         id: 1,
+        email: 'someTestEmailString',
       },
     };
 
@@ -104,16 +105,12 @@ describe('Single Types', () => {
 
     const createFn = jest.fn(() => ({}));
     const sendTelemetry = jest.fn(() => ({}));
-    const generateAdminHashFromContext = jest.fn(() => 'testhash');
 
     global.strapi = {
       admin: {
         services: {
           permission: {
             createPermissionsManager,
-          },
-          user: {
-            generateAdminHashFromContext,
           },
         },
       },
@@ -169,11 +166,7 @@ describe('Single Types', () => {
       { state }
     );
 
-    const adminUserId = generateAdminHashFromContext();
-
     await singleTypes.createOrUpdate(ctx);
-
-    expect(generateAdminHashFromContext).toHaveBeenCalledWith(ctx);
 
     expect(permissionChecker.cannot.create).toHaveBeenCalled();
 
@@ -187,8 +180,11 @@ describe('Single Types', () => {
       { params: {} }
     );
 
-    expect(sendTelemetry).toHaveBeenCalledWith(adminUserId, 'didCreateFirstContentTypeEntry', {
-      model: modelUid,
+    expect(sendTelemetry).toHaveBeenCalledWith('didCreateFirstContentTypeEntry', {
+      adminUser: ctx.state.user,
+      eventProperties: {
+        model: modelUid,
+      },
     });
   });
 

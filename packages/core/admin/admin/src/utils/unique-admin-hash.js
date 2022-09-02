@@ -1,7 +1,13 @@
-const crypto = require('crypto');
+const hash = require('hash.js');
 
-const hashAdminUser = (payload) => {
-  return crypto.createHash('sha256').update(payload).digest('hex');
+const hashAdminUserEmail = (payload) => {
+  try {
+    const adminUserEmailHash = hash.sha256().update(payload.email).digest('hex');
+
+    return adminUserEmailHash;
+  } catch (error) {
+    return '';
+  }
 };
 
-module.exports = hashAdminUser;
+module.exports = hashAdminUserEmail;

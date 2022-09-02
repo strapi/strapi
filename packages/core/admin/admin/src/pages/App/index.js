@@ -96,13 +96,14 @@ function App() {
             fetch('https://analytics.strapi.io/track', {
               method: 'POST',
               body: JSON.stringify({
-                adminUserId: '',
+                // This event is anonymous
                 event: 'didInitializeAdministration',
+                adminUserId: '',
                 deviceId,
                 properties: {
-                  ...properties,
-                  environment: appInfo.currentEnvironment,
-                  projectId: uuid,
+                  eventPropeties: {},
+                  userProperties: { environment: appInfo.currentEnvironment },
+                  groupProperties: { ...properties, projectId: uuid },
                 },
               }),
               headers: {

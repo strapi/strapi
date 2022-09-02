@@ -176,7 +176,6 @@ describe('Role controller', () => {
       const roleID = 1;
       const findOneRole = jest.fn(() => Promise.resolve({ id: roleID }));
       const assignPermissions = jest.fn((roleID, permissions) => Promise.resolve(permissions));
-      const generateAdminHashFromContext = jest.fn(() => 'testhash');
       const inputPermissions = [
         {
           action: 'test',
@@ -189,6 +188,7 @@ describe('Role controller', () => {
       const state = {
         user: {
           id: 1,
+          email: 'someTestEmailString',
         },
       };
 
@@ -226,20 +226,14 @@ describe('Role controller', () => {
                 })),
               },
             },
-            user: {
-              generateAdminHashFromContext,
-            },
           },
         },
       };
 
-      const adminUserId = generateAdminHashFromContext();
-
       await roleController.updatePermissions(ctx);
 
-      expect(generateAdminHashFromContext).toHaveBeenCalledWith(ctx);
       expect(findOneRole).toHaveBeenCalledWith({ id: roleID });
-      expect(assignPermissions).toHaveBeenCalledWith(roleID, inputPermissions, adminUserId);
+      expect(assignPermissions).toHaveBeenCalledWith(roleID, inputPermissions, ctx.state.user);
 
       expect(ctx.body).toEqual({
         data: inputPermissions,

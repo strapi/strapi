@@ -17,11 +17,9 @@ const useTracking = () => {
           adminUserId,
           deviceId,
           properties: {
-            ...telemetryProperties,
-            ...properties,
-            projectType: strapi.projectType,
-            environment: appInfo.currentEnvironment,
-            projectId: uuid,
+            eventProperties: { ...properties },
+            userProperties: {},
+            groupProperties: { ...telemetryProperties },
           },
         });
       } catch (err) {

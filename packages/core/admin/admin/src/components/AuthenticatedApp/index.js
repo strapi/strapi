@@ -20,7 +20,7 @@ import {
   fetchUserRoles,
 } from './utils/api';
 import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
-import { getFullName, hashAdminUser } from '../../utils';
+import { getFullName, hashAdminUserEmail } from '../../utils';
 
 const strapiVersion = packageJSON.version;
 
@@ -78,8 +78,7 @@ const AuthenticatedApp = () => {
 
   const shouldShowLoader = isLoading || shouldShowNotDependentQueriesLoader;
 
-  const adminUserId =
-    userInfo && appInfos ? hashAdminUser(`${userInfo.email}${appInfos.projectId}`) : '';
+  const adminUserId = userInfo ? hashAdminUserEmail(userInfo) : '';
   const appInfosValue = useMemo(() => {
     return {
       ...appInfos,

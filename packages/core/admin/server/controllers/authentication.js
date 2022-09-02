@@ -122,9 +122,7 @@ module.exports = {
       roles: superAdminRole ? [superAdminRole.id] : [],
     });
 
-    const adminUserId = await getService('user').generateAdminHashFromContext(ctx);
-
-    strapi.telemetry.send(adminUserId, 'didCreateFirstAdmin');
+    strapi.telemetry.send('didCreateFirstAdmin', { adminUser: ctx.state?.user });
 
     ctx.body = {
       data: {

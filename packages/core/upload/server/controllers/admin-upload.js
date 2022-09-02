@@ -23,8 +23,6 @@ module.exports = {
       id
     );
 
-    user.adminUserId = strapi.service('admin::user').generateAdminHashFromContext(ctx);
-
     const data = await validateUploadBody(body);
     const file = await uploadService.updateFileInfo(id, data.fileInfo, { user });
 
@@ -50,8 +48,6 @@ module.exports = {
       throw new ApplicationError('Cannot replace a file with multiple ones');
     }
 
-    user.adminUserId = strapi.service('admin::user').generateAdminHashFromContext(ctx);
-
     const data = await validateUploadBody(body);
     const replacedFiles = await uploadService.replace(id, { data, file: files }, { user });
 
@@ -74,8 +70,6 @@ module.exports = {
     if (!pm.isAllowed) {
       return ctx.forbidden();
     }
-
-    user.adminUserId = strapi.service('admin::user').generateAdminHashFromContext(ctx);
 
     const data = await validateUploadBody(body);
     const uploadedFiles = await uploadService.upload({ data, files }, { user });

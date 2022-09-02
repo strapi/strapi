@@ -98,7 +98,6 @@ module.exports = {
   async updatePermissions(ctx) {
     const { id } = ctx.params;
     const { body: input } = ctx.request;
-    const adminUserId = await getService('user').generateAdminHashFromContext(ctx);
 
     const { findOne, assignPermissions } = getService('role');
     const { sanitizePermission, actionProvider } = getService('permission');
@@ -133,7 +132,7 @@ module.exports = {
       permissionsToAssign = input.permissions;
     }
 
-    const permissions = await assignPermissions(role.id, permissionsToAssign, adminUserId);
+    const permissions = await assignPermissions(role.id, permissionsToAssign, ctx.state?.user);
 
     ctx.body = {
       data: permissions.map(sanitizePermission),
