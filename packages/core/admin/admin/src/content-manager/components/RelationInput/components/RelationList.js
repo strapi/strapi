@@ -6,8 +6,6 @@ import { Stack } from '@strapi/design-system/Stack';
 
 const ShadowBox = styled(Box)`
   position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
 
   &:before,
   &:after {
@@ -34,21 +32,33 @@ const ShadowBox = styled(Box)`
   }
 `;
 
-export const RelationList = ({ children, ...props }) => {
+const CustomStack = styled(Stack)`
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: ${({ height }) => `${height}px`};
+`;
+
+export const RelationList = ({ children, onScroll, listHeight, ...props }) => {
   return (
     <ShadowBox {...props}>
-      <Stack spacing={1} as="ol">
+      {/* To fix: breaks spacing when adding as="ol" */}
+      <CustomStack spacing={1} height={listHeight} onScroll={onScroll}>
         {children}
-      </Stack>
+      </CustomStack>
     </ShadowBox>
   );
 };
 
 RelationList.defaultProps = {
+  listHeight: 200,
+  onScroll: undefined,
   overflow: undefined,
 };
 
 RelationList.propTypes = {
   children: PropTypes.node.isRequired,
+  listHeight: PropTypes.number,
+  onScroll: PropTypes.func,
   overflow: PropTypes.oneOf(['top-bottom', 'bottom', 'top']),
 };

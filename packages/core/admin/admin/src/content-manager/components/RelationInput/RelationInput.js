@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { ReactSelect } from '@strapi/helper-plugin';
@@ -26,6 +26,13 @@ const RelationItemCenterChildren = styled(RelationItem)`
   }
 `;
 
+const LinkEllipsis = styled(Link)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inherit;
+`;
+
 const RelationInput = ({
   description,
   disabled,
@@ -48,6 +55,25 @@ const RelationInput = ({
   relations,
   searchResults,
 }) => {
+  const [overflow, setOverflow] = useState('bottom');
+
+  // eslint-disable-next-line consistent-return
+  const handleScroll = (e) => {
+    const maxScrollBottom = e.target.scrollHeight - e.target.scrollTop;
+
+    if (e.target.scrollTop === 0) {
+      return setOverflow('bottom');
+    }
+
+    if (e.target.clientHeight === maxScrollBottom) {
+      return setOverflow('top');
+    }
+
+    if (e.target.scrollTop > 0) {
+      return setOverflow('top-bottom');
+    }
+  };
+
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
@@ -87,7 +113,7 @@ const RelationInput = ({
           )
         }
       >
-        <RelationList height={listHeight}>
+        <RelationList listHeight={listHeight} onScroll={handleScroll} overflow={overflow}>
           {relations.isSuccess &&
             relations.data.pages.flat().map((relation) => {
               const { publicationState, href, mainField, id } = relation;
@@ -110,9 +136,9 @@ const RelationInput = ({
                 >
                   <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                     {href ? (
-                      <Link to={href} disabled={disabled}>
+                      <LinkEllipsis to={href} disabled={disabled}>
                         {mainField}
-                      </Link>
+                      </LinkEllipsis>
                     ) : (
                       <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
                         {mainField}
@@ -199,7 +225,7 @@ RelationInput.propTypes = {
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string,
-  listHeight: PropTypes.string,
+  listHeight: PropTypes.number,
   loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onRelationAdd: PropTypes.func.isRequired,
