@@ -22,6 +22,7 @@ import {
 } from './exposedHooks';
 import injectionZones from './injectionZones';
 import favicon from './favicon.ico';
+import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
 
 class StrapiApp {
   constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
@@ -425,6 +426,8 @@ class StrapiApp {
       fields: { fields },
     } = this.library;
 
+    console.log({ settings: this.settings });
+
     return (
       <Providers
         authLogo={this.configurations.authLogo}
@@ -457,6 +460,7 @@ class StrapiApp {
                 href: this.configurations.head.favicon,
               },
             ]}
+            htmlAttributes={{ lang: localStorage.getItem(localStorageKey) || 'en' }}
           />
           <BrowserRouter basename={basename}>
             <App store={store} />
