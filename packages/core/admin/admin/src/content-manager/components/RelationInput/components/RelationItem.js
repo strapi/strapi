@@ -10,34 +10,44 @@ const ChildrenWrapper = styled(Flex)`
   min-width: 0;
 `;
 
-export const RelationItem = ({ children, disabled, endAction, ...props }) => {
+export const RelationItem = ({ children, disabled, endAction, style, ...props }) => {
   return (
-    <Flex
-      paddingTop={3}
-      paddingBottom={3}
-      paddingLeft={4}
-      paddingRight={4}
-      hasRadius
-      borderSize={1}
-      background={disabled ? 'neutral150' : 'neutral0'}
-      borderColor="neutral200"
-      justifyContent="space-between"
-      as="li"
-      {...props}
-    >
-      <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
-      {endAction && <Box paddingLeft={4}>{endAction}</Box>}
-    </Flex>
+    <Box style={style}>
+      <Flex
+        paddingTop={3}
+        paddingBottom={3}
+        paddingLeft={4}
+        paddingRight={4}
+        hasRadius
+        borderSize={1}
+        background={disabled ? 'neutral150' : 'neutral0'}
+        borderColor="neutral200"
+        justifyContent="space-between"
+        as="li"
+        {...props}
+      >
+        <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
+        {endAction && <Box paddingLeft={4}>{endAction}</Box>}
+      </Flex>
+    </Box>
   );
 };
 
 RelationItem.defaultProps = {
   disabled: false,
   endAction: undefined,
+  style: undefined,
 };
 
 RelationItem.propTypes = {
   children: PropTypes.node.isRequired,
   disabled: PropTypes.bool,
   endAction: PropTypes.node,
+  style: PropTypes.shape({
+    height: PropTypes.number,
+    left: PropTypes.number,
+    position: PropTypes.string,
+    right: PropTypes.number,
+    width: PropTypes.string,
+  }),
 };

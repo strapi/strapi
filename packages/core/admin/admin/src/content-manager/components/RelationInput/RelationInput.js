@@ -1,6 +1,7 @@
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import React from 'react';
 import styled from 'styled-components';
+import { FixedSizeList as List } from 'react-window';
 
 import { ReactSelect } from '@strapi/helper-plugin';
 import { Badge } from '@strapi/design-system/Badge';
@@ -10,7 +11,7 @@ import { Icon } from '@strapi/design-system/Icon';
 import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/Field';
 import { TextButton } from '@strapi/design-system/TextButton';
 import { Typography } from '@strapi/design-system/Typography';
-import { Loader } from '@strapi/design-system/Loader';
+// import { Loader } from '@strapi/design-system/Loader';
 
 import Cross from '@strapi/icons/Cross';
 import Refresh from '@strapi/icons/Refresh';
@@ -20,10 +21,17 @@ import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
 
-const RelationItemCenterChildren = styled(RelationItem)`
-  div {
-    justify-content: center;
-  }
+// const RelationItemCenterChildren = styled(RelationItem)`
+//   div {
+//     justify-content: center;
+//   }
+// `;
+
+const LinkEllipsis = styled(Link)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inherit;
 `;
 
 const RelationInput = ({
@@ -48,6 +56,30 @@ const RelationInput = ({
   relations,
   searchResults,
 }) => {
+  const listRef = useRef();
+  const currentListCount = relations.data?.pages[0].length;
+  const [overflow, setOverflow] = useState('bottom');
+
+  const handleOverflow = ({
+    overscanStartIndex,
+    overscanStopIndex,
+    visibleStartIndex,
+    visibleStopIndex,
+  }) => {
+    // Issue: overflow will work only when item is not visible
+    // normally overflow should start after we started scrolling even if item is still visible
+    const overflowTop = overscanStartIndex !== visibleStartIndex;
+    const overflowBottom = overscanStopIndex !== visibleStopIndex;
+
+    if (overflowTop && overflowBottom) {
+      setOverflow('top-bottom');
+    } else if (overflowBottom && !overflowTop) {
+      setOverflow('bottom');
+    } else {
+      setOverflow('top');
+    }
+  };
+
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
@@ -87,59 +119,77 @@ const RelationInput = ({
           )
         }
       >
-        <RelationList height={listHeight}>
-          {relations.isSuccess &&
-            relations.data.pages.flat().map((relation) => {
-              const { publicationState, href, mainField, id } = relation;
+        <RelationList overflow={overflow}>
+          <List
+            height={listHeight}
+            ref={listRef}
+            itemCount={currentListCount}
+            itemSize={58}
+            itemData={relations.data?.pages[0]}
+            onItemsRendered={handleOverflow}
+          >
+            {({ data, index, style }) => {
+              const { publicationState, href, mainField, id } = data[index];
               const badgeColor = publicationState === 'draft' ? 'secondary' : 'success';
 
               return (
-                <RelationItem
-                  disabled={disabled}
-                  key={`relation-${name}-${id}`}
-                  endAction={
-                    <button
-                      data-testid={`remove-relation-${id}`}
-                      disabled={disabled}
-                      type="button"
-                      onClick={() => onRelationRemove(relation)}
-                    >
-                      <Icon width="12px" as={Cross} />
-                    </button>
-                  }
-                >
-                  <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                    {href ? (
-                      <Link to={href} disabled={disabled}>
-                        {mainField}
-                      </Link>
-                    ) : (
-                      <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
-                        {mainField}
-                      </Typography>
-                    )}
-                  </Box>
+                <>
+                  <RelationItem
+                    disabled={disabled}
+                    key={`relation-${name}-${id}`}
+                    endAction={
+                      <button
+                        data-testid={`remove-relation-${id}`}
+                        disabled={disabled}
+                        type="button"
+                        onClick={() => onRelationRemove(data[index])}
+                      >
+                        <Icon width="12px" as={Cross} />
+                      </button>
+                    }
+                    style={style}
+                  >
+                    <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+                      {href ? (
+                        <LinkEllipsis to={href} disabled={disabled}>
+                          {mainField}
+                        </LinkEllipsis>
+                      ) : (
+                        <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
+                          {mainField}
+                        </Typography>
+                      )}
+                    </Box>
 
-                  {publicationState && (
-                    <Badge
-                      borderSize={1}
-                      borderColor={`${badgeColor}200`}
-                      backgroundColor={`${badgeColor}100`}
-                      textColor={`${badgeColor}700`}
-                      shrink={0}
-                    >
-                      {publicationStateTranslations[publicationState]}
-                    </Badge>
-                  )}
-                </RelationItem>
+                    {publicationState && (
+                      <Badge
+                        borderSize={1}
+                        borderColor={`${badgeColor}200`}
+                        backgroundColor={`${badgeColor}100`}
+                        textColor={`${badgeColor}700`}
+                        shrink={0}
+                      >
+                        {publicationStateTranslations[publicationState]}
+                      </Badge>
+                    )}
+                  </RelationItem>
+
+                  {/* no right place for the loader with react-window */}
+                  {/* loading item should be an item of the data array? */}
+                  {/* <RelationItemCenterChildren>
+                  <Loader small>{loadingMessage}</Loader>
+                </RelationItemCenterChildren> */}
+                </>
               );
-            })}
-          {relations.isLoading && (
-            <RelationItemCenterChildren>
-              <Loader small>{loadingMessage}</Loader>
-            </RelationItemCenterChildren>
-          )}
+            }}
+          </List>
         </RelationList>
+        {/* out of react-window list */}
+        {/* {relation.isLoading && (
+          <RelationItemCenterChildren>
+            <Loader small>{loadingMessage}</Loader>
+          </RelationItemCenterChildren>
+        )} */}
         <Box paddingTop={2}>
           <FieldHint />
           <FieldError />
@@ -199,7 +249,7 @@ RelationInput.propTypes = {
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string,
-  listHeight: PropTypes.string,
+  listHeight: PropTypes.number,
   loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onRelationAdd: PropTypes.func.isRequired,

@@ -116,6 +116,7 @@ export const RelationInputWrapper = ({
           defaultMessage: 'Load More',
         })
       }
+      listHeight={320}
       loadingMessage={formatMessage({
         // TODO
         id: 'tbd',
