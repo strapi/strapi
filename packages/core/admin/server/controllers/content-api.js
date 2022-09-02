@@ -6,4 +6,10 @@ module.exports = {
 
     ctx.send({ data: actionsMap });
   },
+
+  async getRoutes(ctx) {
+    const routesMap = await strapi.contentAPI.getRoutesMap();
+
+    ctx.send({ data: routesMap });
+  },
 };
