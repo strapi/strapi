@@ -16,7 +16,7 @@ describe('ADMIN | Container | SettingsPage | ApiTokens | EditView | utils | tran
       ],
       permissions: [
         {
-          subjectId: 'api::address',
+          apiId: 'api::address',
           label: 'address',
           controllers: [
             {
@@ -35,7 +35,7 @@ describe('ADMIN | Container | SettingsPage | ApiTokens | EditView | utils | tran
           ],
         },
         {
-          subjectId: 'api::category',
+          apiId: 'api::category',
           label: 'category',
           controllers: [
             {

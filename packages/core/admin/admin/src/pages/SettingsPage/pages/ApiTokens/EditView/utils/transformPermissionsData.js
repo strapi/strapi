@@ -6,17 +6,17 @@ const transformPermissionsData = (data) => {
     permissions: [],
   };
 
-  layout.permissions = Object.keys(data).map((subjectId) => ({
-    subjectId,
-    label: subjectId.split('::')[1],
+  layout.permissions = Object.keys(data).map((apiId) => ({
+    apiId,
+    label: apiId.split('::')[1],
     controllers: flatten(
-      Object.keys(data[subjectId].controllers).map((controller) => ({
+      Object.keys(data[apiId].controllers).map((controller) => ({
         controller,
         actions: flatten(
-          data[subjectId].controllers[controller].map((action) => {
-            const actionId = `${subjectId}.${controller}.${action}`;
+          data[apiId].controllers[controller].map((action) => {
+            const actionId = `${apiId}.${controller}.${action}`;
 
-            if (subjectId.includes('api::')) {
+            if (apiId.includes('api::')) {
               layout.allActionsIds.push(actionId);
             }
 

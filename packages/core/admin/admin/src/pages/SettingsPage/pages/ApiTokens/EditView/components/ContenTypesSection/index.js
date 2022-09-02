@@ -3,22 +3,22 @@ import PropTypes from 'prop-types';
 import { Box } from '@strapi/design-system/Box';
 import CollapsableContentType from '../CollapsableContentType';
 
-const ContentTypesSection = ({ section, name, ...props }) => {
+const ContentTypesSection = ({ section, ...props }) => {
   const [indexExpandedCollpsedContent, setIndexExpandedCollpsedContent] = useState(null);
   const handleExpandedCollpsedContentIndex = (index) => setIndexExpandedCollpsedContent(index);
 
   return (
     <Box padding={4} background="neutral0">
       {section &&
-        section.map((subject, index) => (
+        section.map((api, index) => (
           <CollapsableContentType
-            key={subject.subjectId}
-            label={subject.label}
-            controllers={subject.controllers}
+            key={api.apiId}
+            label={api.label}
+            controllers={api.controllers}
             orderNumber={index}
             indexExpandendCollapsedContent={indexExpandedCollpsedContent}
             onExpanded={handleExpandedCollpsedContentIndex}
-            name={subject.subjectId}
+            name={api.apiId}
             {...props}
           />
         ))}
@@ -31,8 +31,7 @@ ContentTypesSection.defaultProps = {
 };
 
 ContentTypesSection.propTypes = {
-  section: PropTypes.objectOf(PropTypes.objectOf(PropTypes.bool)),
-  name: PropTypes.string.isRequired,
+  section: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default ContentTypesSection;
