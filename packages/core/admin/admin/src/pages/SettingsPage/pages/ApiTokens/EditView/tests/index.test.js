@@ -9,6 +9,7 @@ import { axiosInstance } from '../../../../../../core/utils';
 import Theme from '../../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../../components/ThemeToggleProvider';
 import EditView from '../index';
+import { data } from '../utils/tests/dataMock';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -27,18 +28,24 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-jest.spyOn(axiosInstance, 'get').mockResolvedValue({
-  data: {
-    data: {
-      id: 1,
-      name: 'My super token',
-      description: 'This describe my super token',
-      type: 'read-only',
-      createdAt: '2021-11-15T00:00:00.000Z',
-    },
-  },
-});
+jest.spyOn(axiosInstance, 'get').mockImplementation((path) => {
+  if (path === '/admin/content-api/permissions') {
+    return { data };
+  }
 
+  return {
+    data: {
+      data: {
+        id: '1',
+        name: 'My super token',
+        description: 'This describe my super token',
+        type: 'read-only',
+        createdAt: '2021-11-15T00:00:00.000Z',
+        permissions: [],
+      },
+    },
+  };
+});
 jest.spyOn(Date, 'now').mockImplementation(() => new Date('2015-10-01T08:00:00.000Z'));
 
 const client = new QueryClient({
@@ -72,12 +79,16 @@ describe('ADMIN | Pages | API TOKENS | EditView', () => {
     jest.resetAllMocks();
   });
 
-  it('renders and matches the snapshot when creating token', () => {
+  it('renders and matches the snapshot when creating token', async () => {
     const history = createMemoryHistory();
     const App = makeApp(history);
-    const { container } = render(App);
+    const { container, getByText } = render(App);
 
     history.push('/settings/api-tokens/create');
+
+    await waitFor(() => {
+      expect(getByText('Address')).toBeInTheDocument();
+    });
 
     expect(container).toMatchSnapshot();
   });
@@ -92,6 +103,8 @@ describe('ADMIN | Pages | API TOKENS | EditView', () => {
     await waitFor(() => {
       expect(getByText('My super token')).toBeInTheDocument();
       expect(getByText('This describe my super token')).toBeInTheDocument();
+      expect(getByText('Regenerate')).toBeInTheDocument();
+      expect(getByText('Address')).toBeInTheDocument();
     });
 
     expect(container).toMatchSnapshot();

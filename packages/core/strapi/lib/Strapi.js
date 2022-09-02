@@ -75,7 +75,7 @@ class Strapi {
     // Load the app configuration from the dist directory
     const appConfig = loadConfiguration({ appDir: rootDirs.app, distDir: rootDirs.dist }, opts);
 
-    // Instanciate the Strapi container
+    // Instantiate the Strapi container
     this.container = createContainer(this);
 
     // Register every Strapi registry in the container
@@ -100,7 +100,7 @@ class Strapi {
     this.isLoaded = false;
     this.reload = this.reload();
 
-    // Instanciate the Koa app & the HTTP server
+    // Instantiate the Koa app & the HTTP server
     this.server = createServer(this);
 
     // Strapi utils instanciation

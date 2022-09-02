@@ -1,21 +1,38 @@
-const trimId = (id, part) => id.split('.')[part];
+import { flatten } from 'lodash';
 
 const transformPermissionsData = (data) => {
-  const permissions = { collectionTypes: {}, singleTypes: {}, custom: {} };
+  const layout = {
+    allActionsIds: [],
+    permissions: [],
+  };
 
-  Object.keys(data.sections).forEach((section) => {
-    const currentSection = {};
-    data.sections[section].subjects.forEach((subject) => {
-      const currentActions = {};
-      subject.actions.forEach((action) => {
-        currentActions[trimId(action.actionId, 1)] = action.value || false;
-      });
-      currentSection[trimId(subject.subjectId, 0)] = currentActions;
-    });
-    permissions[section] = currentSection;
-  });
+  layout.permissions = Object.keys(data)
+    .map((subjectId) => ({
+      subjectId,
+      label: subjectId.split('::')[1],
+      controllers: flatten(
+        Object.keys(data[subjectId].controllers).map((controller) => ({
+          controller,
+          actions: flatten(
+            data[subjectId].controllers[controller].map((action) => {
+              const actionId = `${subjectId}.${controller}.${action}`;
 
-  return permissions;
+              if (subjectId.includes('api::')) {
+                layout.allActionsIds.push(actionId);
+              }
+
+              return {
+                action,
+                actionId,
+              };
+            })
+          ),
+        }))
+      ),
+    }))
+    .filter((subject) => subject.subjectId.includes('api::'));
+
+  return layout;
 };
 
 export default transformPermissionsData;

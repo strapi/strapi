@@ -44,6 +44,10 @@ class Dialect {
 
     throw new Error(error.message);
   }
+
+  canAddIncrements() {
+    return true;
+  }
 }
 
 module.exports = {

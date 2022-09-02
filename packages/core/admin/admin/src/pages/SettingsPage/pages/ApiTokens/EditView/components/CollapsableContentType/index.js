@@ -1,15 +1,16 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { get, capitalize } from 'lodash';
+import React, { useState, useEffect } from 'react';
+import { capitalize } from 'lodash';
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Typography } from '@strapi/design-system/Typography';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
+import CogIcon from '@strapi/icons/Cog';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useApiTokenPermissionsContext } from '../../../../../../../contexts/ApiTokenPermissions';
-// import { useIntl } from 'react-intl';
+import CheckboxWrapper from './CheckBoxWrapper';
 
 const Border = styled.div`
   flex: 1;
@@ -18,34 +19,17 @@ const Border = styled.div`
 `;
 
 const CollapsableContentType = ({
-  actions,
+  controllers,
   label,
   orderNumber,
-  name,
   disabled,
   onExpanded,
   indexExpandendCollapsedContent,
 }) => {
-  //   const { formatMessage } = useIntl();
   const {
-    value: { onChange, onChangeSelectAll, modifiedData },
+    value: { onChangeSelectAll, onChange, selectedActions, setSelectedAction, selectedAction },
   } = useApiTokenPermissionsContext();
   const [expanded, setExpanded] = useState(false);
-
-  const currentScopedModifiedData = useMemo(() => {
-    return get(modifiedData, name, {});
-  }, [modifiedData, name]);
-
-  const hasAllActionsSelected = useMemo(() => {
-    return Object.values(currentScopedModifiedData).every((action) => action === true);
-  }, [currentScopedModifiedData]);
-
-  const hasSomeActionsSelected = useMemo(() => {
-    return (
-      Object.values(currentScopedModifiedData).some((action) => action === true) &&
-      !hasAllActionsSelected
-    );
-  }, [currentScopedModifiedData, hasAllActionsSelected]);
 
   const handleExpandedAccordion = () => {
     setExpanded((s) => !s);
@@ -62,6 +46,8 @@ const CollapsableContentType = ({
     }
   }, [indexExpandendCollapsedContent, orderNumber, expanded]);
 
+  const isActionSelected = (actionId) => actionId === selectedAction;
+
   return (
     <Accordion
       expanded={expanded}
@@ -70,53 +56,82 @@ const CollapsableContentType = ({
     >
       <AccordionToggle title={capitalize(label)} />
       <AccordionContent>
-        <Flex justifyContent="space-between" alignItems="center" padding={4}>
-          <Box paddingRight={4}>
-            <Typography variant="sigma" textColor="neutral600">
-              permissions
-            </Typography>
-          </Box>
-          <Border />
-          <Box paddingLeft={4}>
-            <Checkbox
-              value={hasAllActionsSelected}
-              indeterminate={hasSomeActionsSelected}
-              onValueChange={(value) => {
-                onChangeSelectAll({ target: { name, value } });
-              }}
-              disabled={disabled}
-            >
-              Select all
-            </Checkbox>
-          </Box>
-        </Flex>
-        <Grid gap={4} padding={4}>
-          {Object.keys(actions).map((action) => {
-            const currentName = `${name}.${action}`;
+        {controllers?.map((controller) => {
+          const allActionsSelected = controller.actions.every((action) =>
+            selectedActions.includes(action.actionId)
+          );
 
-            return (
-              <GridItem col={4} key={action}>
-                <Checkbox
-                  value={actions[action]}
-                  name={currentName}
-                  onValueChange={(value) => {
-                    onChange({ target: { name: currentName, value } });
-                  }}
-                  disabled={disabled}
-                >
-                  {action}
-                </Checkbox>
-              </GridItem>
-            );
-          })}
-        </Grid>
+          const someActionsSelected = controller.actions.some((action) =>
+            selectedActions.includes(action.actionId)
+          );
+
+          return (
+            <Box>
+              <Flex justifyContent="space-between" alignItems="center" padding={4}>
+                <Box paddingRight={4}>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {controller?.controller}
+                  </Typography>
+                </Box>
+                <Border />
+                <Box paddingLeft={4}>
+                  <Checkbox
+                    value={allActionsSelected}
+                    indeterminate={!allActionsSelected && someActionsSelected}
+                    onValueChange={() => {
+                      onChangeSelectAll({ target: { value: [...controller.actions] } });
+                    }}
+                    disabled={disabled}
+                  >
+                    Select all
+                  </Checkbox>
+                </Box>
+              </Flex>
+              <Grid gap={4} padding={4}>
+                {controller?.actions &&
+                  controller?.actions.map((action) => {
+                    return (
+                      <GridItem col={6} key={action.actionId}>
+                        <CheckboxWrapper
+                          isActive={isActionSelected(action.actionId)}
+                          padding={2}
+                          hasRadius
+                        >
+                          <Checkbox
+                            value={selectedActions.includes(action.actionId)}
+                            name={action.actionId}
+                            onValueChange={() => {
+                              onChange({ target: { value: action.actionId } });
+                            }}
+                            disabled={disabled}
+                          >
+                            {action.action}
+                          </Checkbox>
+                          <button
+                            type="button"
+                            data-testid="action-cog"
+                            onClick={() =>
+                              setSelectedAction({ target: { value: action.actionId } })
+                            }
+                            style={{ display: 'inline-flex', alignItems: 'center' }}
+                          >
+                            <CogIcon />
+                          </button>
+                        </CheckboxWrapper>
+                      </GridItem>
+                    );
+                  })}
+              </Grid>
+            </Box>
+          );
+        })}
       </AccordionContent>
     </Accordion>
   );
 };
 
 CollapsableContentType.defaultProps = {
-  actions: null,
+  controllers: [],
   orderNumber: 0,
   disabled: false,
   onExpanded: () => null,
@@ -124,10 +139,9 @@ CollapsableContentType.defaultProps = {
 };
 
 CollapsableContentType.propTypes = {
-  actions: PropTypes.objectOf(PropTypes.bool),
+  controllers: PropTypes.array,
   orderNumber: PropTypes.number,
   label: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
   disabled: PropTypes.bool,
   onExpanded: PropTypes.func,
   indexExpandendCollapsedContent: PropTypes.number,

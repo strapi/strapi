@@ -336,6 +336,11 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
   });
 
   test('Creates a custom api token', async () => {
+    strapi.contentAPI.permissions.providers.action.keys = jest.fn(() => [
+      'admin::subject.action',
+      'plugin::foo.bar.action',
+    ]);
+
     const body = {
       name: 'api-token_tests-customSuccess',
       description: 'api-token_tests-description',
@@ -385,6 +390,34 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
         status: 400,
         name: 'ValidationError',
         message: 'Missing permissions attribute for custom token',
+        details: {},
+      },
+    });
+  });
+
+  test('Fails to create a custom api token with unknown permissions', async () => {
+    strapi.contentAPI.permissions.providers.action.keys = jest.fn(() => ['action-A', 'action-B']);
+
+    const body = {
+      name: 'api-token_tests-customFail',
+      description: 'api-token_tests-description',
+      type: 'custom',
+      permissions: ['action-A', 'action-C'],
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toMatchObject({
+      data: null,
+      error: {
+        status: 400,
+        name: 'ValidationError',
+        message: 'Unknown permissions provided: action-C',
         details: {},
       },
     });
@@ -449,6 +482,11 @@ describe('Admin API Token v2 CRUD (e2e)', () => {
 
   test('List all tokens (successfully)', async () => {
     await deleteAllTokens();
+
+    strapi.contentAPI.permissions.providers.action.keys = jest.fn(() => [
+      'admin::model.model.read',
+      'admin::model.model.create',
+    ]);
 
     // create 4 tokens
     const tokens = [];

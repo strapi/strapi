@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useReducer, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useReducer, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
@@ -30,52 +30,116 @@ import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
 import { axiosInstance } from '../../../../../core/utils';
-import { getDateOfExpiration, schema, getActionsState } from './utils';
+import { getDateOfExpiration, schema } from './utils';
 import LoadingView from './components/LoadingView';
 import HeaderContentBox from './components/ContentBox';
 import Permissions from './components/Permissions';
+import Regenerate from './components/Regenerate';
 import adminPermissions from '../../../../../permissions';
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
-import { data as permissions } from './utils/tests/dataMock';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const ApiTokenCreateView = () => {
-  let apiToken;
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
   const history = useHistory();
+  const [apiToken, setApiToken] = useState(
+    history.location.state?.apiToken.accessKey
+      ? {
+          ...history.location.state.apiToken,
+        }
+      : null
+  );
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
   const {
     allowedActions: { canCreate, canUpdate },
   } = useRBAC(adminPermissions.settings['api-tokens']);
-  const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, permissions));
   const [lang] = usePersistentState('strapi-admin-language', 'en');
-
+  const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, {}));
   const {
     params: { id },
   } = useRouteMatch('/settings/api-tokens/:id');
 
   const isCreating = id === 'create';
 
+  useQuery(
+    'content-api-permissions',
+    async () => {
+      const {
+        data: { data },
+      } = await axiosInstance.get(`/admin/content-api/permissions`);
+      dispatch({
+        type: 'UPDATE_PERMISSIONS_LAYOUT',
+        value: data,
+      });
+
+      if (apiToken) {
+        if (apiToken?.type === 'read-only') {
+          dispatch({
+            type: 'ON_CHANGE_READ_ONLY',
+          });
+        }
+        if (apiToken?.type === 'full-access') {
+          dispatch({
+            type: 'SELECT_ALL_ACTIONS',
+          });
+        }
+        if (apiToken?.type === 'custom') {
+          dispatch({
+            type: 'UPDATE_PERMISSIONS',
+            value: apiToken?.permissions,
+          });
+        }
+      }
+
+      return data;
+    },
+    {
+      onError() {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        });
+      },
+    }
+  );
+
   useEffect(() => {
     trackUsageRef.current(isCreating ? 'didAddTokenFromList' : 'didEditTokenFromList');
   }, [isCreating]);
 
-  if (history.location.state?.apiToken.accessKey) {
-    apiToken = history.location.state.apiToken;
-  }
-
-  const { status, data } = useQuery(
+  const { status } = useQuery(
     ['api-token', id],
     async () => {
       const {
         data: { data },
       } = await axiosInstance.get(`/admin/api-tokens/${id}`);
+
+      setApiToken({
+        ...data,
+      });
+
+      if (data?.type === 'read-only') {
+        dispatch({
+          type: 'ON_CHANGE_READ_ONLY',
+        });
+      }
+      if (data?.type === 'full-access') {
+        dispatch({
+          type: 'SELECT_ALL_ACTIONS',
+        });
+      }
+      if (data?.type === 'custom') {
+        dispatch({
+          type: 'UPDATE_PERMISSIONS',
+          value: data?.permissions,
+        });
+      }
 
       return data;
     },
@@ -90,11 +154,7 @@ const ApiTokenCreateView = () => {
     }
   );
 
-  if (data) {
-    apiToken = data;
-  }
-
-  const handleSubmit = async (body, actions) => {
+  const handleSubmit = async (body, actions, tokenType) => {
     trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
     lockApp();
 
@@ -102,14 +162,25 @@ const ApiTokenCreateView = () => {
       const {
         data: { data: response },
       } = isCreating
-        ? await axiosInstance.post(`/admin/api-tokens`, body)
+        ? await axiosInstance.post(`/admin/api-tokens`, {
+            ...body,
+            permissions: tokenType === 'custom' ? state.selectedActions : null,
+          })
         : await axiosInstance.put(`/admin/api-tokens/${id}`, {
             name: body.name,
             description: body.description,
             type: body.type,
+            permissions: tokenType === 'custom' ? state.selectedActions : null,
           });
 
-      apiToken = response;
+      if (isCreating) {
+        history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
+        setCurrentStep('apiTokens.success');
+      }
+      unlockApp();
+      setApiToken({
+        ...response,
+      });
 
       toggleNotification({
         type: 'success',
@@ -127,11 +198,6 @@ const ApiTokenCreateView = () => {
       trackUsageRef.current(isCreating ? 'didCreateToken' : 'didEditToken', {
         type: apiToken.type,
       });
-
-      if (isCreating) {
-        history.replace(`/settings/api-tokens/${response.id}`, { apiToken: response });
-        setCurrentStep('apiTokens.success');
-      }
     } catch (err) {
       const errors = formatAPIErrors(err.response.data);
       actions.setErrors(errors);
@@ -140,43 +206,38 @@ const ApiTokenCreateView = () => {
         type: 'warning',
         message: get(err, 'response.data.message', 'notification.error'),
       });
+      unlockApp();
     }
-
-    unlockApp();
   };
 
   const hasAllActionsSelected = useMemo(() => {
-    const {
-      modifiedData: { collectionTypes, singleTypes, custom },
-    } = state;
+    const { data, selectedActions } = state;
 
-    const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
-
-    const areAllActionsSelected = getActionsState(dataToCheck, true);
+    const areAllActionsSelected = data.allActionsIds.every((actionId) =>
+      selectedActions.includes(actionId)
+    );
 
     return areAllActionsSelected;
   }, [state]);
 
   const hasAllActionsNotSelected = useMemo(() => {
-    const {
-      modifiedData: { collectionTypes, singleTypes, custom },
-    } = state;
+    const { selectedActions } = state;
 
-    const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
-
-    const areAllActionsNotSelected = getActionsState(dataToCheck, false);
+    const areAllActionsNotSelected = selectedActions.length === 0;
 
     return areAllActionsNotSelected;
   }, [state]);
 
   const hasReadOnlyActionsSelected = useMemo(() => {
-    const {
-      modifiedData: { collectionTypes, singleTypes, custom },
-    } = state;
+    const { data, selectedActions } = state;
 
-    const dataToCheck = { ...collectionTypes, ...singleTypes, ...custom };
+    const areAllActionsReadOnly = data.allActionsIds.every((actionId) => {
+      if (actionId.includes('find') || actionId.includes('findOne')) {
+        return selectedActions.includes(actionId);
+      }
 
-    const areAllActionsReadOnly = getActionsState(dataToCheck, false, ['find', 'findOne']);
+      return !selectedActions.includes(actionId);
+    });
 
     return areAllActionsReadOnly;
   }, [state]);
@@ -191,54 +252,54 @@ const ApiTokenCreateView = () => {
     return 'custom';
   }, [hasAllActionsSelected, hasReadOnlyActionsSelected, hasAllActionsNotSelected]);
 
-  console.log('tokenType', tokenTypeValue);
-
-  const handleChangeCheckbox = ({ target: { name, value } }) => {
+  const handleChangeCheckbox = ({ target: { value } }) => {
     dispatch({
       type: 'ON_CHANGE',
-      name,
       value,
     });
   };
 
-  const handleChangeSelectAllCheckbox = ({ target: { name, value } }) =>
-    dispatch({
-      type: 'ON_CHANGE_SELECT_ALL',
-      keys: name.split('.'),
-      value,
+  const handleChangeSelectAllCheckbox = ({ target: { value } }) => {
+    value.forEach((action) => {
+      dispatch({
+        type: 'ON_CHANGE',
+        value: action.actionId,
+      });
     });
+  };
 
   const handleChangeSelectApiTokenType = ({ target: { value } }) => {
-    const { modifiedData } = state;
-
     if (value === 'full-access') {
-      Object.keys(modifiedData).forEach((contentTypes) => {
-        Object.keys(modifiedData[contentTypes]).forEach((contentType) => {
-          dispatch({
-            type: 'ON_CHANGE_SELECT_ALL',
-            keys: [contentTypes, contentType],
-            value: true,
-          });
-        });
+      dispatch({
+        type: 'SELECT_ALL_ACTIONS',
       });
     }
     if (value === 'read-only') {
-      Object.keys(modifiedData).forEach((contentTypes) => {
-        Object.keys(modifiedData[contentTypes]).forEach((contentType) => {
-          dispatch({
-            type: 'ON_CHANGE_READ_ONLY',
-            keys: [contentTypes, contentType],
-            value: false,
-          });
-        });
+      dispatch({
+        type: 'ON_CHANGE_READ_ONLY',
       });
     }
+  };
+
+  const setSelectedAction = ({ target: { value } }) => {
+    dispatch({
+      type: 'SET_SELECTED_ACTION',
+      value,
+    });
+  };
+
+  const handleRegenerate = (newKey) => {
+    setApiToken({
+      ...apiToken,
+      accessKey: newKey,
+    });
   };
 
   const providerValue = {
     ...state,
     onChange: handleChangeCheckbox,
     onChangeSelectAll: handleChangeSelectAllCheckbox,
+    setSelectedAction,
   };
 
   const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
@@ -261,7 +322,8 @@ const ApiTokenCreateView = () => {
             type: apiToken?.type,
             lifespan: apiToken?.lifespan,
           }}
-          onSubmit={handleSubmit}
+          enableReinitialize
+          onSubmit={(body, actions) => handleSubmit(body, actions, tokenTypeValue)}
         >
           {({ errors, handleChange, isSubmitting, values }) => {
             return (
@@ -276,18 +338,26 @@ const ApiTokenCreateView = () => {
                   }
                   primaryAction={
                     canEditInputs && (
-                      <Button
-                        disabled={isSubmitting}
-                        loading={isSubmitting}
-                        startIcon={<Check />}
-                        type="submit"
-                        size="S"
-                      >
-                        {formatMessage({
-                          id: 'global.save',
-                          defaultMessage: 'Save',
-                        })}
-                      </Button>
+                      <Stack horizontal spacing={2}>
+                        {apiToken?.name && (
+                          <Regenerate
+                            onRegenerate={handleRegenerate}
+                            idToRegenerate={apiToken?.id}
+                          />
+                        )}
+                        <Button
+                          disabled={isSubmitting}
+                          loading={isSubmitting}
+                          startIcon={<Check />}
+                          type="submit"
+                          size="S"
+                        >
+                          {formatMessage({
+                            id: 'global.save',
+                            defaultMessage: 'Save',
+                          })}
+                        </Button>
+                      </Stack>
                     )
                   }
                   navigationAction={
@@ -390,19 +460,19 @@ const ApiTokenCreateView = () => {
                               disabled={!isCreating}
                               placeholder="Select"
                             >
-                              <Option value={7}>
+                              <Option value={604800000}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.7-days',
                                   defaultMessage: '7 days',
                                 })}
                               </Option>
-                              <Option value={30}>
+                              <Option value={2592000000}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.30-days',
                                   defaultMessage: '30 days',
                                 })}
                               </Option>
-                              <Option value={90}>
+                              <Option value={2592000000}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.90-days',
                                   defaultMessage: '90 days',
@@ -435,7 +505,7 @@ const ApiTokenCreateView = () => {
                                 id: 'Settings.apiTokens.form.type',
                                 defaultMessage: 'Token type',
                               })}
-                              value={values.type}
+                              value={tokenTypeValue}
                               error={
                                 errors.type
                                   ? formatMessage(

@@ -1,35 +1,46 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { set } from 'lodash';
-import togglePermissions from './utils/togglePermissions';
+import { pull } from 'lodash';
+import { transformPermissionsData } from './utils';
 
 export const initialState = {
-  initialData: {},
-  modifiedData: {},
+  data: {},
+  selectedActions: [],
 };
 
 const reducer = (state, action) =>
   produce(state, (draftState) => {
     switch (action.type) {
       case 'ON_CHANGE': {
-        set(draftState, ['modifiedData', ...action.name.split('.')], action.value);
+        if (draftState.selectedActions.includes(action.value)) {
+          pull(draftState.selectedActions, action.value);
+        } else {
+          draftState.selectedActions.push(action.value);
+        }
         break;
       }
-      case 'ON_CHANGE_SELECT_ALL': {
-        const { pathToValue, updatedValues } = togglePermissions(action, state);
-
-        set(draftState, pathToValue, { ...updatedValues });
+      case 'SELECT_ALL_ACTIONS': {
+        draftState.selectedActions = [...draftState.data.allActionsIds];
 
         break;
       }
       case 'ON_CHANGE_READ_ONLY': {
-        const { pathToValue, updatedValues } = togglePermissions(action, state, [
-          'find',
-          'findOne',
-        ]);
-
-        set(draftState, pathToValue, { ...updatedValues });
-
+        const onlyReadOnlyActions = draftState.data.allActionsIds.filter(
+          (actionId) => actionId.includes('find') || actionId.includes('findOne')
+        );
+        draftState.selectedActions = [...onlyReadOnlyActions];
+        break;
+      }
+      case 'UPDATE_PERMISSIONS_LAYOUT': {
+        draftState.data = transformPermissionsData(action.value);
+        break;
+      }
+      case 'UPDATE_PERMISSIONS': {
+        draftState.selectedActions = [...action.value];
+        break;
+      }
+      case 'SET_SELECTED_ACTION': {
+        draftState.selectedAction = action.value;
         break;
       }
       default:
