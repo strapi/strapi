@@ -26,10 +26,12 @@ const ActionBoundRoutes = () => {
       {selectedAction ? (
         <Stack spacing={2}>
           {routes[actionSection]?.map((route) => {
-            if (route.config.auth.scope.includes(selectedAction))
-              return <BoundRoute key={route.handler} route={route} />;
+            console.log(route);
 
-            return null;
+            return route.config.auth?.scope?.includes(selectedAction) ||
+              route.handler === selectedAction ? (
+              <BoundRoute key={route.handler} route={route} />
+            ) : null;
           })}
         </Stack>
       ) : (
