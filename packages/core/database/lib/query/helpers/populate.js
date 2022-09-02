@@ -119,7 +119,7 @@ const applyPopulate = async (results, populate, ctx) => {
     return results;
   }
 
-  for (const key in populate) {
+  for (const key of Object.keys(populate)) {
     const attribute = meta.attributes[key];
     const targetMeta = db.metadata.get(attribute.target);
 

@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const {
   isUndefined,
   castArray,
@@ -13,6 +12,10 @@ const {
   isEmpty,
   isArray,
   isNull,
+  groupBy,
+  pipe,
+  mapValues,
+  map,
 } = require('lodash/fp');
 const types = require('./types');
 const { createField } = require('./fields');
@@ -416,24 +419,36 @@ const createEntityManager = (db) => {
           }
 
           // delete previous relations
-          const typeAndFieldIdsMap = {};
+          const morphOneRows = rows.filter((row) => {
+            const relatedType = row[typeColumn.name];
+            const field = row.field;
 
-          for (const { field, related_type: relatedType, related_id: relatedId } of rows) {
-            if (!relatedType) continue; // if !relatedType then it's a component. No need to handle that case
+            const targetAttribute = db.metadata.get(relatedType).attributes[field];
 
-            const isMorphOne =
-              db.metadata.get(relatedType).attributes[field].relation === 'morphOne';
-            if (isMorphOne) {
-              const key = `${relatedType}+${field}`;
-              typeAndFieldIdsMap[key] = typeAndFieldIdsMap[key] || [];
-              typeAndFieldIdsMap[key].push(relatedId);
+            // ensure targeted field is the right one + check if it is a morphOne
+            return (
+              targetAttribute?.target === uid &&
+              targetAttribute?.morphBy === attributeName &&
+              targetAttribute?.relation === 'morphOne'
+            );
+          });
+
+          const groupByType = groupBy(typeColumn.name);
+          const groupByField = groupBy('field');
+
+          const typeAndFieldIdsGrouped = pipe(groupByType, mapValues(groupByField))(morphOneRows);
+
+          const orWhere = [];
+
+          for (const [type, v] of Object.entries(typeAndFieldIdsGrouped)) {
+            for (const [field, arr] of Object.entries(v)) {
+              orWhere.push({
+                [typeColumn.name]: type,
+                field,
+                [idColumn.name]: { $in: map(idColumn.name, arr) },
+              });
             }
           }
-
-          const orWhere = _.map(typeAndFieldIdsMap, (ids, typeAndField) => {
-            const [type, field] = typeAndField.split('+');
-            return { related_type: type, field, related_id: { $in: ids } };
-          });
 
           if (!isEmpty(orWhere)) {
             await this.createQueryBuilder(joinTable.name)
@@ -624,20 +639,42 @@ const createEntityManager = (db) => {
           }
 
           // delete previous relations
-          const where = { $or: [] };
+          const morphOneRows = rows.filter((row) => {
+            const relatedType = row[typeColumn.name];
+            const field = row.field;
 
-          for (const { field, related_type: relatedType, related_id: relatedId } of rows) {
-            if (!relatedType) continue; // if !relatedType then it's a component. No need to handle that case
+            const targetAttribute = db.metadata.get(relatedType).attributes[field];
 
-            const isMorphOne =
-              db.metadata.get(relatedType).attributes[field].relation === 'morphOne';
-            if (isMorphOne) {
-              where.$or.push({ related_type: relatedType, field, related_id: relatedId });
+            // ensure targeted field is the right one + check if it is a morphOne
+            return (
+              targetAttribute?.target === uid &&
+              targetAttribute?.morphBy === attributeName &&
+              targetAttribute?.relation === 'morphOne'
+            );
+          });
+
+          const groupByType = groupBy(typeColumn.name);
+          const groupByField = groupBy('field');
+
+          const typeAndFieldIdsGrouped = pipe(groupByType, mapValues(groupByField))(morphOneRows);
+
+          const orWhere = [];
+
+          for (const [type, v] of Object.entries(typeAndFieldIdsGrouped)) {
+            for (const [field, arr] of Object.entries(v)) {
+              orWhere.push({
+                [typeColumn.name]: type,
+                field,
+                [idColumn.name]: { $in: map(idColumn.name, arr) },
+              });
             }
           }
 
-          if (!isEmpty(where.$or)) {
-            await this.createQueryBuilder(joinTable.name).delete().where(where).execute();
+          if (!isEmpty(orWhere)) {
+            await this.createQueryBuilder(joinTable.name)
+              .delete()
+              .where({ $or: orWhere })
+              .execute();
           }
 
           await this.createQueryBuilder(joinTable.name).insert(rows).execute();
