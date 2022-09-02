@@ -66,7 +66,7 @@ const CollapsableContentType = ({
           );
 
           return (
-            <Box>
+            <Box key={`${label}.${controller?.controller}`}>
               <Flex justifyContent="space-between" alignItems="center" padding={4}>
                 <Box paddingRight={4}>
                   <Typography variant="sigma" textColor="neutral600">

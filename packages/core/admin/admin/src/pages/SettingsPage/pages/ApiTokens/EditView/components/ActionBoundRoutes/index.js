@@ -26,8 +26,6 @@ const ActionBoundRoutes = () => {
       {selectedAction ? (
         <Stack spacing={2}>
           {routes[actionSection]?.map((route) => {
-            console.log(route);
-
             return route.config.auth?.scope?.includes(selectedAction) ||
               route.handler === selectedAction ? (
               <BoundRoute key={route.handler} route={route} />
