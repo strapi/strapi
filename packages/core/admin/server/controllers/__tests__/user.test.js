@@ -51,6 +51,7 @@ describe('User Controller', () => {
       const exists = jest.fn(() => Promise.resolve(false));
       const sanitizeUser = jest.fn((user) => Promise.resolve(user));
       const created = jest.fn();
+      const sendDidInviteUser = jest.fn();
       const state = {
         user: {
           id: 1,
@@ -67,6 +68,9 @@ describe('User Controller', () => {
               create,
               sanitizeUser,
             },
+            metrics: {
+              sendDidInviteUser,
+            },
           },
         },
       };
@@ -74,9 +78,10 @@ describe('User Controller', () => {
       await userController.create(ctx);
 
       expect(exists).toHaveBeenCalledWith({ email: body.email });
-      expect(create).toHaveBeenCalledWith(body, ctx.state.user);
+      expect(create).toHaveBeenCalledWith(body);
       expect(sanitizeUser).toHaveBeenCalled();
       expect(created).toHaveBeenCalled();
+      expect(sendDidInviteUser).toHaveBeenCalled();
     });
   });
 

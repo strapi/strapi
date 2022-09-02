@@ -226,7 +226,6 @@ class Strapi {
   }
 
   sendStartupTelemetry() {
-    console.log(this);
     // Emit started event.
     // do not await to avoid slower startup
     // This event is anonymous

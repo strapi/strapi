@@ -32,7 +32,9 @@ module.exports = {
       throw new ApplicationError('Email already taken');
     }
 
-    const createdUser = await getService('user').create(attributes, ctx.state?.user);
+    const createdUser = await getService('user').create(attributes);
+
+    getService('metrics').sendDidInviteUser(ctx.state?.user);
 
     const userInfo = getService('user').sanitizeUser(createdUser);
 

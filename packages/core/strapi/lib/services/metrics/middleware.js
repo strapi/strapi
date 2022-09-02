@@ -19,7 +19,7 @@ const createMiddleware = ({ sendEvent }) => {
 
       // Send max. 1000 events per day.
       if (_state.counter < 1000) {
-        sendEvent('', 'didReceiveRequest', { url: ctx.request.url });
+        sendEvent('didReceiveRequest', { eventProperties: { url: ctx.request.url } });
 
         // Increase counter.
         _state.counter++;
