@@ -155,23 +155,19 @@ describe('Content API permissions', () => {
   };
 
   test('return content api routes successfully', async () => {
-    const getRoutes = jest.fn().mockResolvedValue(routesMap);
+    const getRoutesMap = jest.fn().mockResolvedValue(routesMap);
     const send = jest.fn();
     const ctx = createContext({}, { send });
 
     global.strapi = {
-      admin: {
-        services: {
-          'content-api': {
-            getRoutes,
-          },
-        },
+      contentAPI: {
+        getRoutesMap,
       },
     };
 
     await contentApiController.getRoutes(ctx);
 
-    expect(getRoutes).toHaveBeenCalled();
+    expect(getRoutesMap).toHaveBeenCalled();
     expect(send).toHaveBeenCalledWith({ data: routesMap });
   });
 });

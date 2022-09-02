@@ -1,7 +1,5 @@
 'use strict';
 
-const { getService } = require('../utils');
-
 module.exports = {
   async getPermissions(ctx) {
     const actionsMap = await strapi.contentAPI.permissions.getActionsMap();
@@ -10,9 +8,7 @@ module.exports = {
   },
 
   async getRoutes(ctx) {
-    const contentApiService = getService('content-api');
-
-    const routesMap = await contentApiService.getRoutes();
+    const routesMap = await strapi.contentAPI.getRoutesMap();
 
     ctx.send({ data: routesMap });
   },
