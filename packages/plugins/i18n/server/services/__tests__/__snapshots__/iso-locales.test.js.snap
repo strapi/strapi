@@ -47,6 +47,10 @@ Array [
     "name": "Amharic (Ethiopia) (am-ET)",
   },
   Object {
+    "code": "aig",
+    "name": "Antigua and Barbuda Creole English",
+  },
+  Object {
     "code": "ar",
     "name": "Arabic (ar)",
   },
@@ -173,6 +177,10 @@ Array [
   Object {
     "code": "ksf-CM",
     "name": "Bafia (Cameroon) (ksf-CM)",
+  },
+  Object {
+    "code": "bah",
+    "name": "Bahamas Creole English",
   },
   Object {
     "code": "bm",
@@ -451,10 +459,6 @@ Array [
     "name": "English (en)",
   },
   Object {
-    "code": "en-AS",
-    "name": "English (American Samoa) (en-AS)",
-  },
-  Object {
     "code": "en-AI",
     "name": "English (Anguilla) (en-AI)",
   },
@@ -469,10 +473,6 @@ Array [
   Object {
     "code": "en-AT",
     "name": "English (Austria) (en-AT)",
-  },
-  Object {
-    "code": "en-BS",
-    "name": "English (Bahamas) (en-BS)",
   },
   Object {
     "code": "en-BB",
@@ -497,10 +497,6 @@ Array [
   Object {
     "code": "en-IO",
     "name": "English (British Indian Ocean Territory) (en-IO)",
-  },
-  Object {
-    "code": "en-VG",
-    "name": "English (British Virgin Islands) (en-VG)",
   },
   Object {
     "code": "en-BI",
@@ -643,12 +639,8 @@ Array [
     "name": "English (Lesotho) (en-LS)",
   },
   Object {
-    "code": "en-LR",
-    "name": "English (Liberia) (en-LR)",
-  },
-  Object {
     "code": "en-MO",
-    "name": "English (Macau SAR China) (en-MO)",
+    "name": "English (Macao SAR China) (en-MO)",
   },
   Object {
     "code": "en-MG",
@@ -795,8 +787,12 @@ Array [
     "name": "English (St Lucia) (en-LC)",
   },
   Object {
-    "code": "en-VC",
-    "name": "English (St Vincent & Grenadines) (en-VC)",
+    "code": "svc",
+    "name": "Vincentian Creole English",
+  },
+  Object {
+    "code": "vic",
+    "name": "Virgin Islands Creole English",
   },
   Object {
     "code": "en-SD",
@@ -829,10 +825,6 @@ Array [
   Object {
     "code": "en-TT",
     "name": "English (Trinidad and Tobago) (en-TT)",
-  },
-  Object {
-    "code": "en-TC",
-    "name": "English (Turks & Caicos Islands) (en-TC)",
   },
   Object {
     "code": "en-TV",
@@ -1425,6 +1417,10 @@ Array [
   Object {
     "code": "lv-LV",
     "name": "Latvian (Latvia) (lv-LV)",
+  },
+  Object {
+    "code": "lir",
+    "name": "Liberian English",
   },
   Object {
     "code": "ln",
@@ -2229,6 +2225,10 @@ Array [
   Object {
     "code": "tr-TR",
     "name": "Turkish (Turkey) (tr-TR)",
+  },
+  Object {
+    "code": "tch",
+    "name": "Turks And Caicos Creole English",
   },
   Object {
     "code": "uk",

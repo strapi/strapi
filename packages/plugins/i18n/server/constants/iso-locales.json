@@ -44,6 +44,10 @@
     "name":"Amharic (Ethiopia) (am-ET)"
   },
   {
+    "code":"aig",
+    "name":"Antigua and Barbuda Creole English"
+  },
+  {
     "code":"ar",
     "name":"Arabic (ar)"
   },
@@ -170,6 +174,10 @@
   {
     "code":"ksf-CM",
     "name":"Bafia (Cameroon) (ksf-CM)"
+  },
+  {
+    "code":"bah",
+    "name":"Bahamas Creole English"
   },
   {
     "code":"bm",
@@ -448,10 +456,6 @@
     "name":"English (en)"
   },
   {
-    "code":"en-AS",
-    "name":"English (American Samoa) (en-AS)"
-  },
-  {
     "code":"en-AI",
     "name":"English (Anguilla) (en-AI)"
   },
@@ -466,10 +470,6 @@
   {
     "code":"en-AT",
     "name":"English (Austria) (en-AT)"
-  },
-  {
-    "code":"en-BS",
-    "name":"English (Bahamas) (en-BS)"
   },
   {
     "code":"en-BB",
@@ -494,10 +494,6 @@
   {
     "code":"en-IO",
     "name":"English (British Indian Ocean Territory) (en-IO)"
-  },
-  {
-    "code":"en-VG",
-    "name":"English (British Virgin Islands) (en-VG)"
   },
   {
     "code":"en-BI",
@@ -640,12 +636,8 @@
     "name":"English (Lesotho) (en-LS)"
   },
   {
-    "code":"en-LR",
-    "name":"English (Liberia) (en-LR)"
-  },
-  {
     "code":"en-MO",
-    "name":"English (Macau SAR China) (en-MO)"
+    "name":"English (Macao SAR China) (en-MO)"
   },
   {
     "code":"en-MG",
@@ -792,8 +784,12 @@
     "name":"English (St Lucia) (en-LC)"
   },
   {
-    "code":"en-VC",
-    "name":"English (St Vincent & Grenadines) (en-VC)"
+    "code":"svc",
+    "name":"Vincentian Creole English"
+  },
+  {
+    "code":"vic",
+    "name":"Virgin Islands Creole English"
   },
   {
     "code":"en-SD",
@@ -826,10 +822,6 @@
   {
     "code":"en-TT",
     "name":"English (Trinidad and Tobago) (en-TT)"
-  },
-  {
-    "code":"en-TC",
-    "name":"English (Turks & Caicos Islands) (en-TC)"
   },
   {
     "code":"en-TV",
@@ -1422,6 +1414,10 @@
   {
     "code":"lv-LV",
     "name":"Latvian (Latvia) (lv-LV)"
+  },
+  {
+    "code":"lir",
+    "name":"Liberian English"
   },
   {
     "code":"ln",
@@ -2226,6 +2222,10 @@
   {
     "code":"tr-TR",
     "name":"Turkish (Turkey) (tr-TR)"
+  },
+  {
+    "code":"tch",
+    "name":"Turks And Caicos Creole English"
   },
   {
     "code":"uk",
