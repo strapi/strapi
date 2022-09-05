@@ -31,5 +31,11 @@ module.exports = {
     'no-continue': 'warn',
     'no-process-exit': 'off',
     'no-loop-func': 'off',
+    'no-param-reassign': [
+      'error',
+      {
+        props: false,
+      },
+    ],
   },
 };
