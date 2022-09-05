@@ -822,7 +822,7 @@ const createEntityManager = (db) => {
     async load(uid, entity, fields, params) {
       const { attributes } = db.metadata.get(uid);
 
-      const fieldsArr = _.castArray(fields);
+      const fieldsArr = castArray(fields);
       fieldsArr.forEach((field) => {
         const attribute = attributes[field];
 
@@ -845,7 +845,7 @@ const createEntityManager = (db) => {
       }
 
       if (Array.isArray(fields)) {
-        return _.pick(fields, entry);
+        return pick(fields, entry);
       }
 
       return entry[fields];
