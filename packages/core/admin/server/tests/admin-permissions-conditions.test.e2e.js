@@ -84,7 +84,7 @@ if (edition === 'EE') {
       // Create users with the new role & create associated auth requests
       const users = [];
 
-      for (let i = 0; i < localTestData.users.length; ++i) {
+      for (let i = 1; i < localTestData.users.length; i += 1) {
         const userFixture = localTestData.users[i];
         const userAttributes = {
           ...userFixture,
