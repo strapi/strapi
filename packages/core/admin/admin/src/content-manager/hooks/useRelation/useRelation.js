@@ -37,18 +37,18 @@ const FIXTURE_RELATIONS = {
       title: 'Are we going to play this game really?',
     },
 
-    {
-      id: 7,
-      title: 'Indeed ...',
-    },
-    {
-      id: 8,
-      title: 'Just a little more',
-    },
-    {
-      id: 8,
-      title: 'One last?',
-    },
+    // {
+    //   id: 7,
+    //   title: 'Indeed ...',
+    // },
+    // {
+    //   id: 8,
+    //   title: 'Just a little more',
+    // },
+    // {
+    //   id: 8,
+    //   title: 'One last?',
+    // },
   ],
 
   pagination: {

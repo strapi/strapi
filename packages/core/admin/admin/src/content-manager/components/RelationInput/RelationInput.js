@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
 
 import { ReactSelect } from '@strapi/helper-plugin';
@@ -15,23 +15,32 @@ import { Typography } from '@strapi/design-system/Typography';
 
 import Cross from '@strapi/icons/Cross';
 import Refresh from '@strapi/icons/Refresh';
+import Loader from '@strapi/icons/Loader';
 
 import { Relation } from './components/Relation';
 import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
 
-// const RelationItemCenterChildren = styled(RelationItem)`
-//   div {
-//     justify-content: center;
-//   }
-// `;
-
 const LinkEllipsis = styled(Link)`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: inherit;
+`;
+
+const rotation = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+`;
+
+// Temporary component - to replace with loading prop on TextButton after DS release
+const LoaderWrapper = styled(Box)`
+  animation: ${rotation} 2s infinite linear;
 `;
 
 const RelationInput = ({
@@ -42,7 +51,6 @@ const RelationInput = ({
   name,
   label,
   labelLoadMore,
-  listHeight,
   loadingMessage,
   onRelationAdd,
   onRelationLoadMore,
@@ -57,8 +65,18 @@ const RelationInput = ({
   searchResults,
 }) => {
   const listRef = useRef();
-  const currentListCount = relations.data?.pages[0].length;
   const [overflow, setOverflow] = useState('bottom');
+
+  // To clean (number relations + numberOfRelationsToDisplay as prop?)
+  const totalNumberOfRelations = relations.data?.pages[0].length;
+  const relationItemHeight = 58;
+  const numberOfRelationsToDisplay = 5;
+
+  const dynamicListHeight =
+    totalNumberOfRelations > numberOfRelationsToDisplay
+      ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * relationItemHeight +
+        relationItemHeight / 2
+      : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * relationItemHeight;
 
   const handleOverflow = ({
     overscanStartIndex,
@@ -66,8 +84,9 @@ const RelationInput = ({
     visibleStartIndex,
     visibleStopIndex,
   }) => {
-    // Issue: overflow will work only when item is not visible
+    // To fix: overflow will work only when item is not visible (index change)
     // normally overflow should start after we started scrolling even if item is still visible
+    // + with 6 items onItemsRendered doesn't fire because it fires only when first or last item can leave visibility space
     const overflowTop = overscanStartIndex !== visibleStartIndex;
     const overflowBottom = overscanStopIndex !== visibleStopIndex;
 
@@ -76,7 +95,7 @@ const RelationInput = ({
     } else if (overflowBottom && !overflowTop) {
       setOverflow('bottom');
     } else {
-      setOverflow('top');
+      setOverflow('bottom');
     }
   };
 
@@ -113,18 +132,31 @@ const RelationInput = ({
         loadMore={
           !disabled &&
           labelLoadMore && (
-            <TextButton onClick={() => onRelationLoadMore()} startIcon={<Refresh />}>
+            <TextButton
+              disabled={relations.isLoading}
+              onClick={() => onRelationLoadMore()}
+              startIcon={
+                relations.isLoading ? (
+                  // To replace with loading prop on TextButton after DS release
+                  <LoaderWrapper>
+                    <Loader />
+                  </LoaderWrapper>
+                ) : (
+                  <Refresh />
+                )
+              }
+            >
               {labelLoadMore}
             </TextButton>
           )
         }
       >
-        <RelationList overflow={overflow}>
+        <RelationList overflow={totalNumberOfRelations > numberOfRelationsToDisplay && overflow}>
           <List
-            height={listHeight}
+            height={dynamicListHeight}
             ref={listRef}
-            itemCount={currentListCount}
-            itemSize={58}
+            itemCount={totalNumberOfRelations}
+            itemSize={relationItemHeight}
             itemData={relations.data?.pages[0]}
             onItemsRendered={handleOverflow}
           >
@@ -133,63 +165,49 @@ const RelationInput = ({
               const badgeColor = publicationState === 'draft' ? 'secondary' : 'success';
 
               return (
-                <>
-                  <RelationItem
-                    disabled={disabled}
-                    key={`relation-${name}-${id}`}
-                    endAction={
-                      <button
-                        data-testid={`remove-relation-${id}`}
-                        disabled={disabled}
-                        type="button"
-                        onClick={() => onRelationRemove(data[index])}
-                      >
-                        <Icon width="12px" as={Cross} />
-                      </button>
-                    }
-                    style={style}
-                  >
-                    <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                      {href ? (
-                        <LinkEllipsis to={href} disabled={disabled}>
-                          {mainField}
-                        </LinkEllipsis>
-                      ) : (
-                        <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
-                          {mainField}
-                        </Typography>
-                      )}
-                    </Box>
-
-                    {publicationState && (
-                      <Badge
-                        borderSize={1}
-                        borderColor={`${badgeColor}200`}
-                        backgroundColor={`${badgeColor}100`}
-                        textColor={`${badgeColor}700`}
-                        shrink={0}
-                      >
-                        {publicationStateTranslations[publicationState]}
-                      </Badge>
+                <RelationItem
+                  disabled={disabled}
+                  key={`relation-${name}-${id}`}
+                  endAction={
+                    <button
+                      data-testid={`remove-relation-${id}`}
+                      disabled={disabled}
+                      type="button"
+                      onClick={() => onRelationRemove(data[index])}
+                    >
+                      <Icon width="12px" as={Cross} />
+                    </button>
+                  }
+                  style={style}
+                >
+                  <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+                    {href ? (
+                      <LinkEllipsis to={href} disabled={disabled}>
+                        {mainField}
+                      </LinkEllipsis>
+                    ) : (
+                      <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
+                        {mainField}
+                      </Typography>
                     )}
-                  </RelationItem>
+                  </Box>
 
-                  {/* no right place for the loader with react-window */}
-                  {/* loading item should be an item of the data array? */}
-                  {/* <RelationItemCenterChildren>
-                  <Loader small>{loadingMessage}</Loader>
-                </RelationItemCenterChildren> */}
-                </>
+                  {publicationState && (
+                    <Badge
+                      borderSize={1}
+                      borderColor={`${badgeColor}200`}
+                      backgroundColor={`${badgeColor}100`}
+                      textColor={`${badgeColor}700`}
+                      shrink={0}
+                    >
+                      {publicationStateTranslations[publicationState]}
+                    </Badge>
+                  )}
+                </RelationItem>
               );
             }}
           </List>
         </RelationList>
-        {/* out of react-window list */}
-        {/* {relation.isLoading && (
-          <RelationItemCenterChildren>
-            <Loader small>{loadingMessage}</Loader>
-          </RelationItemCenterChildren>
-        )} */}
         <Box paddingTop={2}>
           <FieldHint />
           <FieldError />
@@ -237,7 +255,6 @@ RelationInput.defaultProps = {
   disabled: false,
   error: undefined,
   labelLoadMore: null,
-  listHeight: undefined,
   relations: [],
   searchResults: [],
 };
@@ -249,7 +266,6 @@ RelationInput.propTypes = {
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string,
-  listHeight: PropTypes.number,
   loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onRelationAdd: PropTypes.func.isRequired,
