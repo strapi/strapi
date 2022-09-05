@@ -480,7 +480,7 @@ const ApiTokenCreateView = () => {
                                   defaultMessage: '30 days',
                                 })}
                               </Option>
-                              <Option value={2592000000}>
+                              <Option value={7776000000}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.90-days',
                                   defaultMessage: '90 days',
