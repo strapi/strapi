@@ -22,7 +22,7 @@ const createComponents = async (uid, data) => {
 
   const componentBody = {};
 
-  for (const attributeName in attributes) {
+  for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
     if (!has(attributeName, data) || !contentTypesUtils.isComponentAttribute(attribute)) {
@@ -122,7 +122,7 @@ const updateComponents = async (uid, entityToUpdate, data) => {
 
   const componentBody = {};
 
-  for (const attributeName in attributes) {
+  for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
     if (!has(attributeName, data)) {
@@ -277,7 +277,7 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
 const deleteComponents = async (uid, entityToDelete) => {
   const { attributes } = strapi.getModel(uid);
 
-  for (const attributeName in attributes) {
+  for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
     if (attribute.type === 'component') {

@@ -55,7 +55,7 @@ const middlewaresRegistry = () => {
      * @returns
      */
     add(namespace, rawMiddlewares) {
-      for (const middlewareName in rawMiddlewares) {
+      for (const middlewareName of Object.keys(rawMiddlewares)) {
         const middleware = rawMiddlewares[middlewareName];
         const uid = addNamespace(middlewareName, namespace);
 

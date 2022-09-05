@@ -50,7 +50,7 @@ const registerAdminRoutes = (strapi) => {
  * @param {import('../../').Strapi} strapi
  */
 const registerPluginRoutes = (strapi) => {
-  for (const pluginName in strapi.plugins) {
+  for (const pluginName of Object.keys(strapi.plugins)) {
     const plugin = strapi.plugins[pluginName];
 
     const generateRouteScope = createRouteScopeGenerator(`plugin::${pluginName}`);
@@ -86,7 +86,7 @@ const registerPluginRoutes = (strapi) => {
  * @param {import('../../').Strapi} strapi
  */
 const registerAPIRoutes = (strapi) => {
-  for (const apiName in strapi.api) {
+  for (const apiName of Object.keys(strapi.api)) {
     const api = strapi.api[apiName];
 
     const generateRouteScope = createRouteScopeGenerator(`api::${apiName}`);
