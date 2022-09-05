@@ -15,7 +15,6 @@ describe('User Controller', () => {
 
     test('Fails if user already exist', async () => {
       const exists = jest.fn(() => Promise.resolve(true));
-      const generateAdminHashFromContext = jest.fn(() => 'testhash');
       const state = {
         user: {
           id: 1,
@@ -28,7 +27,6 @@ describe('User Controller', () => {
           services: {
             user: {
               exists,
-              generateAdminHashFromContext,
             },
           },
         },

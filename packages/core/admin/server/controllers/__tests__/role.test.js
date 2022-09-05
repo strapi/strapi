@@ -81,7 +81,6 @@ describe('Role controller', () => {
   describe('updatePermissions', () => {
     test('Fails on missing permissions input', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const generateAdminHashFromContext = jest.fn(() => 'testhash');
 
       const state = {
         user: {
@@ -108,9 +107,6 @@ describe('Role controller', () => {
             role: {
               findOne,
             },
-            user: {
-              generateAdminHashFromContext,
-            },
           },
         },
       };
@@ -127,7 +123,6 @@ describe('Role controller', () => {
 
     test('Fails on missing action permission', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const generateAdminHashFromContext = jest.fn(() => 'testhash');
 
       const state = {
         user: {
@@ -155,9 +150,6 @@ describe('Role controller', () => {
               actionProvider: { get: jest.fn() },
               conditionProvider: { values: jest.fn(() => []) },
             },
-            user: {
-              generateAdminHashFromContext,
-            },
           },
         },
       };
@@ -175,7 +167,10 @@ describe('Role controller', () => {
     test('Assign permissions if input is valid', async () => {
       const roleID = 1;
       const findOneRole = jest.fn(() => Promise.resolve({ id: roleID }));
-      const assignPermissions = jest.fn((roleID, permissions) => Promise.resolve(permissions));
+      const assignPermissions = jest.fn((roleID, permissions) =>
+        Promise.resolve({ permissions, shouldSendUpdate: true })
+      );
+      const sendDidUpdateRolePermissions = jest.fn();
       const inputPermissions = [
         {
           action: 'test',
@@ -226,6 +221,9 @@ describe('Role controller', () => {
                 })),
               },
             },
+            metrics: {
+              sendDidUpdateRolePermissions,
+            },
           },
         },
       };
@@ -233,7 +231,7 @@ describe('Role controller', () => {
       await roleController.updatePermissions(ctx);
 
       expect(findOneRole).toHaveBeenCalledWith({ id: roleID });
-      expect(assignPermissions).toHaveBeenCalledWith(roleID, inputPermissions, ctx.state.user);
+      expect(assignPermissions).toHaveBeenCalledWith(roleID, inputPermissions);
 
       expect(ctx.body).toEqual({
         data: inputPermissions,
