@@ -14,6 +14,7 @@ const uploadFiles = require('../utils/upload-files');
 
 const {
   omitComponentData,
+  getComponents,
   createComponents,
   updateComponents,
   deleteComponents,
@@ -213,8 +214,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       return null;
     }
 
+    const componentsToDelete = await getComponents(uid, entityToDelete);
+
     await db.query(uid).delete({ where: { id: entityToDelete.id } });
-    await deleteComponents(uid, entityToDelete);
+    await deleteComponents(uid, { ...entityToDelete, ...componentsToDelete });
 
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
@@ -234,8 +237,12 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       return null;
     }
 
+    const componentsToDelete = await Promise.all(
+      entitiesToDelete.map((entityToDelete) => getComponents(uid, entityToDelete))
+    );
+
     const deletedEntities = await db.query(uid).deleteMany(query);
-    await Promise.all(entitiesToDelete.map((entity) => deleteComponents(uid, entity)));
+    await Promise.all(componentsToDelete.map((compos) => deleteComponents(uid, compos)));
 
     // Trigger webhooks. One for each entity
     await Promise.all(entitiesToDelete.map((entity) => this.emitEvent(uid, ENTRY_DELETE, entity)));
