@@ -1,22 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`flattenTree flattens the passed tree structure properly 1`] = `
-[
-  {
+Array [
+  Object {
     "depth": 0,
     "label": "Folder 1",
     "parent": undefined,
     "value": "f-1",
   },
-  {
-    "children": [
-      {
+  Object {
+    "children": Array [
+      Object {
         "label": "Folder 2-1",
         "value": "f-2-1",
       },
-      {
-        "children": [
-          {
+      Object {
+        "children": Array [
+          Object {
             "label": "Folder 2-2-1",
             "value": "f-2-2-1",
           },
@@ -30,15 +30,15 @@ exports[`flattenTree flattens the passed tree structure properly 1`] = `
     "parent": undefined,
     "value": "f-2",
   },
-  {
+  Object {
     "depth": 1,
     "label": "Folder 2-1",
     "parent": "f-2",
     "value": "f-2-1",
   },
-  {
-    "children": [
-      {
+  Object {
+    "children": Array [
+      Object {
         "label": "Folder 2-2-1",
         "value": "f-2-2-1",
       },
@@ -48,7 +48,7 @@ exports[`flattenTree flattens the passed tree structure properly 1`] = `
     "parent": "f-2",
     "value": "f-2-2",
   },
-  {
+  Object {
     "depth": 2,
     "label": "Folder 2-2-1",
     "parent": "f-2-2",

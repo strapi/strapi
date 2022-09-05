@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useReducer, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useReducer } from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
@@ -162,7 +162,7 @@ const ApiTokenCreateView = () => {
     }
   );
 
-  const handleSubmit = async (body, actions, tokenType) => {
+  const handleSubmit = async (body, actions) => {
     trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
     lockApp();
 
@@ -172,13 +172,13 @@ const ApiTokenCreateView = () => {
       } = isCreating
         ? await axiosInstance.post(`/admin/api-tokens`, {
             ...body,
-            permissions: tokenType === 'custom' ? state.selectedActions : null,
+            permissions: body.type === 'custom' ? state.selectedActions : null,
           })
         : await axiosInstance.put(`/admin/api-tokens/${id}`, {
             name: body.name,
             description: body.description,
             type: body.type,
-            permissions: tokenType === 'custom' ? state.selectedActions : null,
+            permissions: body.type === 'custom' ? state.selectedActions : null,
           });
 
       if (isCreating) {
@@ -218,47 +218,47 @@ const ApiTokenCreateView = () => {
     }
   };
 
-  const hasAllActionsSelected = useMemo(() => {
-    const { data, selectedActions } = state;
+  // const hasAllActionsSelected = useMemo(() => {
+  //   const { data, selectedActions } = state;
 
-    const areAllActionsSelected = data.allActionsIds.every((actionId) =>
-      selectedActions.includes(actionId)
-    );
+  //   const areAllActionsSelected = data.allActionsIds.every((actionId) =>
+  //     selectedActions.includes(actionId)
+  //   );
 
-    return areAllActionsSelected;
-  }, [state]);
+  //   return areAllActionsSelected;
+  // }, [state]);
 
-  const hasAllActionsNotSelected = useMemo(() => {
-    const { selectedActions } = state;
+  // const hasAllActionsNotSelected = useMemo(() => {
+  //   const { selectedActions } = state;
 
-    const areAllActionsNotSelected = selectedActions.length === 0;
+  //   const areAllActionsNotSelected = selectedActions.length === 0;
 
-    return areAllActionsNotSelected;
-  }, [state]);
+  //   return areAllActionsNotSelected;
+  // }, [state]);
 
-  const hasReadOnlyActionsSelected = useMemo(() => {
-    const { data, selectedActions } = state;
+  // const hasReadOnlyActionsSelected = useMemo(() => {
+  //   const { data, selectedActions } = state;
 
-    const areAllActionsReadOnly = data.allActionsIds.every((actionId) => {
-      if (actionId.includes('find') || actionId.includes('findOne')) {
-        return selectedActions.includes(actionId);
-      }
+  //   const areAllActionsReadOnly = data.allActionsIds.every((actionId) => {
+  //     if (actionId.includes('find') || actionId.includes('findOne')) {
+  //       return selectedActions.includes(actionId);
+  //     }
 
-      return !selectedActions.includes(actionId);
-    });
+  //     return !selectedActions.includes(actionId);
+  //   });
 
-    return areAllActionsReadOnly;
-  }, [state]);
+  //   return areAllActionsReadOnly;
+  // }, [state]);
 
-  const tokenTypeValue = useMemo(() => {
-    if (hasAllActionsSelected && !hasReadOnlyActionsSelected) return 'full-access';
+  // const tokenTypeValue = useMemo(() => {
+  //   if (hasAllActionsSelected && !hasReadOnlyActionsSelected) return 'full-access';
 
-    if (hasReadOnlyActionsSelected) return 'read-only';
+  //   if (hasReadOnlyActionsSelected) return 'read-only';
 
-    if (hasAllActionsNotSelected) return null;
+  //   if (hasAllActionsNotSelected) return null;
 
-    return 'custom';
-  }, [hasAllActionsSelected, hasReadOnlyActionsSelected, hasAllActionsNotSelected]);
+  //   return 'custom';
+  // }, [hasAllActionsSelected, hasReadOnlyActionsSelected, hasAllActionsNotSelected]);
 
   const handleChangeCheckbox = ({ target: { value } }) => {
     dispatch({
@@ -331,9 +331,13 @@ const ApiTokenCreateView = () => {
             lifespan: apiToken?.lifespan,
           }}
           enableReinitialize
-          onSubmit={(body, actions) => handleSubmit(body, actions, tokenTypeValue)}
+          onSubmit={(body, actions) => handleSubmit(body, actions)}
         >
           {({ errors, handleChange, isSubmitting, values }) => {
+            if (state.selectedActions.length > 0 && !values?.type) {
+              values.type = 'custom';
+            }
+
             return (
               <Form>
                 <HeaderLayout
@@ -513,7 +517,7 @@ const ApiTokenCreateView = () => {
                                 id: 'Settings.apiTokens.form.type',
                                 defaultMessage: 'Token type',
                               })}
-                              value={tokenTypeValue}
+                              value={values?.type}
                               error={
                                 errors.type
                                   ? formatMessage(
@@ -554,7 +558,13 @@ const ApiTokenCreateView = () => {
                         </Grid>
                       </Stack>
                     </Box>
-                    <Permissions disabled={!canEditInputs} />
+                    <Permissions
+                      disabled={
+                        !canEditInputs ||
+                        values?.type === 'read-only' ||
+                        values?.type === 'full-access'
+                      }
+                    />
                   </Stack>
                 </ContentLayout>
               </Form>
