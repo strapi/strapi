@@ -10,7 +10,6 @@ const { isUsingTypeScriptSync } = require('@strapi/typescript-utils');
 const ee = require('../../utils/ee');
 const machineID = require('../../utils/machine-id');
 const { generateAdminUserHash } = require('./admin-user-hash');
-const stringifyDeep = require('./stringify-deep');
 
 const defaultQueryOpts = {
   timeout: 1000,
@@ -72,13 +71,11 @@ module.exports = (strapi) => {
         event,
         adminUserId,
         deviceId,
-        properties: {
-          eventProperties: stringifyDeep({ ...payload?.eventProperties }),
-          userProperties: stringifyDeep({ ...payload?.userProperties, ...anonymousUserProperties }),
-          groupProperties: stringifyDeep({
-            ...payload?.groupProperties,
-            ...anonymousGroupProperties,
-          }),
+        eventProperties: payload.eventProperties,
+        userProperties: { ...anonymousUserProperties, ...payload.userProperties },
+        groupProperties: {
+          ...anonymousGroupProperties,
+          ...payload.groupProperties,
         },
       }),
       ..._.merge({}, defaultQueryOpts, opts),
