@@ -99,11 +99,9 @@ describe('metrics', () => {
     expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
       event: 'someEvent',
       adminUserId: '',
-      properties: {
-        groupProperties: {
-          projectType: 'Community',
-          projectId: 'test',
-        },
+      groupProperties: {
+        projectType: 'Community',
+        projectId: 'test',
       },
     });
 
