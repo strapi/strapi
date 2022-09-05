@@ -12,16 +12,13 @@ const {
   isEmpty,
   isArray,
   isNull,
-  groupBy,
-  pipe,
-  mapValues,
-  map,
 } = require('lodash/fp');
-const types = require('./types');
-const { createField } = require('./fields');
-const { createQueryBuilder } = require('./query');
+const types = require('../types');
+const { createField } = require('../fields');
+const { createQueryBuilder } = require('../query');
 const { createRepository } = require('./entity-repository');
-const { isBidirectional, isOneToAny } = require('./metadata/relations');
+const { isBidirectional, isOneToAny } = require('../metadata/relations');
+const { deleteRelatedMorphOneRelationsAfterMorphToManyUpdate } = require('./morph-relations');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -419,43 +416,12 @@ const createEntityManager = (db) => {
           }
 
           // delete previous relations
-          const morphOneRows = rows.filter((row) => {
-            const relatedType = row[typeColumn.name];
-            const field = row.field;
-
-            const targetAttribute = db.metadata.get(relatedType).attributes[field];
-
-            // ensure targeted field is the right one + check if it is a morphOne
-            return (
-              targetAttribute?.target === uid &&
-              targetAttribute?.morphBy === attributeName &&
-              targetAttribute?.relation === 'morphOne'
-            );
+          await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
+            uid,
+            attributeName,
+            joinTable,
+            db,
           });
-
-          const groupByType = groupBy(typeColumn.name);
-          const groupByField = groupBy('field');
-
-          const typeAndFieldIdsGrouped = pipe(groupByType, mapValues(groupByField))(morphOneRows);
-
-          const orWhere = [];
-
-          for (const [type, v] of Object.entries(typeAndFieldIdsGrouped)) {
-            for (const [field, arr] of Object.entries(v)) {
-              orWhere.push({
-                [typeColumn.name]: type,
-                field,
-                [idColumn.name]: { $in: map(idColumn.name, arr) },
-              });
-            }
-          }
-
-          if (!isEmpty(orWhere)) {
-            await this.createQueryBuilder(joinTable.name)
-              .delete()
-              .where({ $or: orWhere })
-              .execute();
-          }
 
           await this.createQueryBuilder(joinTable.name).insert(rows).execute();
 
@@ -639,43 +605,12 @@ const createEntityManager = (db) => {
           }
 
           // delete previous relations
-          const morphOneRows = rows.filter((row) => {
-            const relatedType = row[typeColumn.name];
-            const field = row.field;
-
-            const targetAttribute = db.metadata.get(relatedType).attributes[field];
-
-            // ensure targeted field is the right one + check if it is a morphOne
-            return (
-              targetAttribute?.target === uid &&
-              targetAttribute?.morphBy === attributeName &&
-              targetAttribute?.relation === 'morphOne'
-            );
+          await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
+            uid,
+            attributeName,
+            joinTable,
+            db,
           });
-
-          const groupByType = groupBy(typeColumn.name);
-          const groupByField = groupBy('field');
-
-          const typeAndFieldIdsGrouped = pipe(groupByType, mapValues(groupByField))(morphOneRows);
-
-          const orWhere = [];
-
-          for (const [type, v] of Object.entries(typeAndFieldIdsGrouped)) {
-            for (const [field, arr] of Object.entries(v)) {
-              orWhere.push({
-                [typeColumn.name]: type,
-                field,
-                [idColumn.name]: { $in: map(idColumn.name, arr) },
-              });
-            }
-          }
-
-          if (!isEmpty(orWhere)) {
-            await this.createQueryBuilder(joinTable.name)
-              .delete()
-              .where({ $or: orWhere })
-              .execute();
-          }
 
           await this.createQueryBuilder(joinTable.name).insert(rows).execute();
 
