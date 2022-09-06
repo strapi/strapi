@@ -18,7 +18,7 @@ const omitComponentData = (contentType, data) => {
 
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async (uid, data) => {
-  const { attributes } = strapi.getModel(uid);
+  const { attributes = {} } = strapi.getModel(uid);
 
   const componentBody = {};
 
@@ -118,7 +118,7 @@ const getComponents = async (uid, entity) => {
   create or update
 */
 const updateComponents = async (uid, entityToUpdate, data) => {
-  const { attributes } = strapi.getModel(uid);
+  const { attributes = {} } = strapi.getModel(uid);
 
   const componentBody = {};
 
@@ -275,7 +275,7 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
 };
 
 const deleteComponents = async (uid, entityToDelete) => {
-  const { attributes } = strapi.getModel(uid);
+  const { attributes = {} } = strapi.getModel(uid);
 
   for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
