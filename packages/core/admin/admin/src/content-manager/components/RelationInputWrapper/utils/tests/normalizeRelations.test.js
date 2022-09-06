@@ -3,24 +3,26 @@ import { normalizeRelations } from '../normalizeRelations';
 const FIXTURE_RELATIONS = {
   data: {
     pages: [
-      [
-        {
-          id: 1,
-          name: 'Relation 1',
-          publishedAt: '2022-08-24T09:29:11.38',
-        },
+      {
+        values: [
+          {
+            id: 1,
+            name: 'Relation 1',
+            publishedAt: '2022-08-24T09:29:11.38',
+          },
 
-        {
-          id: 2,
-          name: 'Relation 2',
-          publishedAt: '',
-        },
+          {
+            id: 2,
+            name: 'Relation 2',
+            publishedAt: '',
+          },
 
-        {
-          id: 3,
-          name: 'Relation 3',
-        },
-      ],
+          {
+            id: 3,
+            name: 'Relation 3',
+          },
+        ],
+      },
     ],
   },
 };
@@ -29,14 +31,14 @@ describe('normalizeRelations', () => {
   test('filters out deleted releations', () => {
     expect(
       normalizeRelations(FIXTURE_RELATIONS, {
-        deletions: [{ id: 1 }],
+        modifiedData: { remove: [{ id: 1 }] },
       })
     ).toStrictEqual({
       data: {
         pages: [
           [
-            expect.objectContaining(FIXTURE_RELATIONS.data.pages[0][1]),
-            expect.objectContaining(FIXTURE_RELATIONS.data.pages[0][2]),
+            expect.objectContaining(FIXTURE_RELATIONS.data.pages[0].values[1]),
+            expect.objectContaining(FIXTURE_RELATIONS.data.pages[0].values[2]),
           ],
         ],
       },
@@ -46,7 +48,7 @@ describe('normalizeRelations', () => {
   test('returns empty array if all relations are deleted', () => {
     expect(
       normalizeRelations(FIXTURE_RELATIONS, {
-        deletions: [{ id: 1 }, { id: 2 }, { id: 3 }],
+        modifiedData: { remove: [{ id: 1 }, { id: 2 }, { id: 3 }] },
       })
     ).toStrictEqual({
       data: {
@@ -58,7 +60,7 @@ describe('normalizeRelations', () => {
   test('add link to each relation', () => {
     expect(
       normalizeRelations(FIXTURE_RELATIONS, {
-        deletions: [],
+        modifiedData: { remove: [] },
         shouldAddLink: true,
         targetModel: 'something',
       })
@@ -66,9 +68,9 @@ describe('normalizeRelations', () => {
       data: {
         pages: [
           [
-            expect.objectContaining({ href: '/content-manager/collectionType/something/1' }),
-            expect.objectContaining({ href: '/content-manager/collectionType/something/2' }),
-            expect.objectContaining({ href: '/content-manager/collectionType/something/3' }),
+            expect.objectContaining({ href: '/admin/content-manager/collectionType/something/1' }),
+            expect.objectContaining({ href: '/admin/content-manager/collectionType/something/2' }),
+            expect.objectContaining({ href: '/admin/content-manager/collectionType/something/3' }),
           ],
         ],
       },
@@ -103,9 +105,15 @@ describe('normalizeRelations', () => {
       data: {
         pages: [
           [
-            expect.objectContaining({ mainField: FIXTURE_RELATIONS.data.pages[0][0].name }),
-            expect.objectContaining({ mainField: FIXTURE_RELATIONS.data.pages[0][1].name }),
-            expect.objectContaining({ mainField: FIXTURE_RELATIONS.data.pages[0][2].name }),
+            expect.objectContaining({
+              mainField: FIXTURE_RELATIONS.data.pages[0].values[0].name,
+            }),
+            expect.objectContaining({
+              mainField: FIXTURE_RELATIONS.data.pages[0].values[1].name,
+            }),
+            expect.objectContaining({
+              mainField: FIXTURE_RELATIONS.data.pages[0].values[2].name,
+            }),
           ],
         ],
       },
