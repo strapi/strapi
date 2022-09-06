@@ -68,7 +68,7 @@ const RelationInput = ({
   const [overflow, setOverflow] = useState('bottom');
 
   // To clean (number relations + numberOfRelationsToDisplay as prop?)
-  const totalNumberOfRelations = relations.data?.pages[0].length;
+  const totalNumberOfRelations = relations.data?.pages[0]?.length;
   const relationItemHeight = 58;
   const numberOfRelationsToDisplay = 5;
 
@@ -134,7 +134,8 @@ const RelationInput = ({
           labelLoadMore && (
             <TextButton
               disabled={relations.isLoading}
-              onClick={() => onRelationLoadMore()}
+              // Manual condition to remove once DS updated
+              onClick={() => !relations.isLoading && onRelationLoadMore()}
               startIcon={
                 relations.isLoading ? (
                   // To replace with loading prop on TextButton after DS release

@@ -167,7 +167,10 @@ describe('Content-Manager || RelationInput', () => {
     test('should display RelationList loading state', () => {
       setup({ relations: { data: { pages: [] }, isLoading: true, isSuccess: true } });
 
-      expect(screen.getByText('Relations are loading')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /load more/i })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
     });
 
     test('should display search loading state', () => {
