@@ -102,15 +102,19 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
       class="c1 c2"
       spacing="1"
     >
-      <li
-        class="c3 c4"
+      <div
+        class=""
       >
-        <div
-          class="c4 c5"
+        <li
+          class="c3 c4"
         >
-          First relation
-        </div>
-      </li>
+          <div
+            class="c4 c5"
+          >
+            First relation
+          </div>
+        </li>
+      </div>
     </ol>
   </div>
   <div

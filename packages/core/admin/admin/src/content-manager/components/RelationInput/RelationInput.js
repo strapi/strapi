@@ -1,29 +1,47 @@
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import React from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+import { FixedSizeList as List } from 'react-window';
 
 import { ReactSelect } from '@strapi/helper-plugin';
 import { Badge } from '@strapi/design-system/Badge';
 import { Box } from '@strapi/design-system/Box';
-import { BaseLink } from '@strapi/design-system/BaseLink';
+import { Link } from '@strapi/design-system/Link';
 import { Icon } from '@strapi/design-system/Icon';
 import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/Field';
 import { TextButton } from '@strapi/design-system/TextButton';
 import { Typography } from '@strapi/design-system/Typography';
-import { Loader } from '@strapi/design-system/Loader';
 
 import Cross from '@strapi/icons/Cross';
 import Refresh from '@strapi/icons/Refresh';
+import Loader from '@strapi/icons/Loader';
 
 import { Relation } from './components/Relation';
 import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
+import { RELATION_ITEM_HEIGHT } from './constants';
 
-const RelationItemCenterChildren = styled(RelationItem)`
-  div {
-    justify-content: center;
+const LinkEllipsis = styled(Link)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inherit;
+`;
+
+const rotation = keyframes`
+  from {
+    transform: rotate(0deg);
   }
+  to {
+    transform: rotate(359deg);
+  }
+`;
+
+// TODO - to replace with loading prop on TextButton after DS release
+const LoaderWrapper = styled(Box)`
+  animation: ${rotation} 2s infinite linear;
+  will-change: transform;
 `;
 
 const RelationInput = ({
@@ -32,22 +50,61 @@ const RelationInput = ({
   error,
   id,
   name,
+  numberOfRelationsToDisplay,
   label,
   labelLoadMore,
-  listHeight,
   loadingMessage,
-  relations,
   onRelationAdd,
   onRelationLoadMore,
-  onSearchClose,
-  onSearchOpen,
   onRelationRemove,
+  onSearchClose,
   onSearchNextPage,
+  onSearchOpen,
   onSearch,
   placeholder,
   publicationStateTranslations,
+  relations,
   searchResults,
 }) => {
+  const listRef = useRef();
+  const [overflow, setOverflow] = useState('');
+
+  const flattenRelations = relations.data?.pages.flat();
+  const totalNumberOfRelations = flattenRelations?.length || 0;
+
+  const dynamicListHeight =
+    totalNumberOfRelations > numberOfRelationsToDisplay
+      ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT +
+        RELATION_ITEM_HEIGHT / 2
+      : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT;
+
+  // TODO: improve load more conditions
+  // const nextPage = (!relations.hasNextPage() && relations.isLoading) || relations.hasNextPage();
+  const isLoadMoreButton = labelLoadMore && !disabled;
+
+  const handleOverflow = ({
+    overscanStartIndex,
+    overscanStopIndex,
+    visibleStartIndex,
+    visibleStopIndex,
+  }) => {
+    if (totalNumberOfRelations <= numberOfRelationsToDisplay) return;
+
+    // TODO: needs a fix, overflow will work only when item is not visible (index change)
+    // normally overflow should start after we started scrolling even if item is still visible
+    // + with 6 items onItemsRendered doesn't fire because it fires only when first or last item can leave visibility space
+    const overflowTop = overscanStartIndex !== visibleStartIndex;
+    const overflowBottom = overscanStopIndex !== visibleStopIndex;
+
+    if (overflowTop && overflowBottom) {
+      setOverflow('top-bottom');
+    } else if (overflowBottom && !overflowTop) {
+      setOverflow('bottom');
+    } else if (!overflowBottom && overflowTop) {
+      setOverflow('top');
+    }
+  };
+
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
@@ -74,22 +131,42 @@ const RelationInput = ({
               onMenuOpen={onSearchOpen}
               onMenuScrollToBottom={onSearchNextPage}
               placeholder={placeholder}
+              name={name}
             />
           </>
         }
         loadMore={
-          !disabled &&
-          labelLoadMore && (
-            <TextButton onClick={() => onRelationLoadMore()} startIcon={<Refresh />}>
+          isLoadMoreButton && (
+            <TextButton
+              disabled={relations.isLoading}
+              onClick={() => onRelationLoadMore()}
+              startIcon={
+                relations.isLoading ? (
+                  // TODO: To replace with loading prop on TextButton after DS release
+                  <LoaderWrapper>
+                    <Loader />
+                  </LoaderWrapper>
+                ) : (
+                  <Refresh />
+                )
+              }
+            >
               {labelLoadMore}
             </TextButton>
           )
         }
       >
-        <RelationList height={listHeight}>
-          {relations.isSuccess &&
-            relations.data.pages.flat().map((relation) => {
-              const { publicationState, href, mainField, id } = relation;
+        <RelationList overflow={overflow}>
+          <List
+            height={dynamicListHeight}
+            ref={listRef}
+            itemCount={totalNumberOfRelations}
+            itemSize={RELATION_ITEM_HEIGHT}
+            itemData={flattenRelations}
+            onItemsRendered={handleOverflow}
+          >
+            {({ data, index, style }) => {
+              const { publicationState, href, mainField, id } = data[index];
               const badgeColor = publicationState === 'draft' ? 'secondary' : 'success';
 
               return (
@@ -98,21 +175,21 @@ const RelationInput = ({
                   key={`relation-${name}-${id}`}
                   endAction={
                     <button
+                      data-testid={`remove-relation-${id}`}
                       disabled={disabled}
                       type="button"
-                      onClick={() => onRelationRemove(relation)}
+                      onClick={() => onRelationRemove(data[index])}
                     >
                       <Icon width="12px" as={Cross} />
                     </button>
                   }
+                  style={style}
                 >
                   <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                     {href ? (
-                      <BaseLink disabled={disabled} href={href}>
-                        <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
-                          {mainField}
-                        </Typography>
-                      </BaseLink>
+                      <LinkEllipsis to={href} disabled={disabled}>
+                        {mainField}
+                      </LinkEllipsis>
                     ) : (
                       <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
                         {mainField}
@@ -133,12 +210,8 @@ const RelationInput = ({
                   )}
                 </RelationItem>
               );
-            })}
-          {relations.isLoading && (
-            <RelationItemCenterChildren>
-              <Loader small>{loadingMessage}</Loader>
-            </RelationItemCenterChildren>
-          )}
+            }}
+          </List>
         </RelationList>
         <Box paddingTop={2}>
           <FieldHint />
@@ -162,6 +235,7 @@ const ReactQueryRelationResult = PropTypes.shape({
       )
     ),
   }),
+  hasNextPage: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
 });
@@ -187,7 +261,6 @@ RelationInput.defaultProps = {
   disabled: false,
   error: undefined,
   labelLoadMore: null,
-  listHeight: undefined,
   relations: [],
   searchResults: [],
 };
@@ -199,9 +272,9 @@ RelationInput.propTypes = {
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string,
-  listHeight: PropTypes.string,
   loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  numberOfRelationsToDisplay: PropTypes.number.isRequired,
   onRelationAdd: PropTypes.func.isRequired,
   onRelationRemove: PropTypes.func.isRequired,
   onRelationLoadMore: PropTypes.func.isRequired,

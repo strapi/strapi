@@ -116,12 +116,14 @@ export const RelationInputWrapper = ({
           defaultMessage: 'Load More',
         })
       }
+      listHeight={320}
       loadingMessage={formatMessage({
         // TODO
         id: 'tbd',
         defaultMessage: 'Relations are loading',
       })}
       name={name}
+      numberOfRelationsToDisplay={5}
       onRelationAdd={(relation) => handleRelationAdd(relation)}
       onRelationRemove={(relation) => handleRelationRemove(relation)}
       onRelationLoadMore={() => handleRelationLoadMore()}
