@@ -13,6 +13,7 @@ const {
   isArray,
   isNull,
   map,
+  uniqBy,
 } = require('lodash/fp');
 const types = require('../types');
 const { createField } = require('../fields');
@@ -26,6 +27,13 @@ const toIds = (value) => castArray(value || []).map(toId);
 
 const isValidId = (value) => isString(value) || isInteger(value);
 const toAssocs = (data) => {
+  if (data?.connect || data?.disconnect) {
+    return {
+      connect: toAssocs(data.connect),
+      disconnect: toAssocs(data.disconnect),
+    };
+  }
+
   return castArray(data)
     .filter((datum) => !isNil(datum))
     .map((datum) => {
@@ -651,68 +659,82 @@ const createEntityManager = (db) => {
           const onlyDeleteRelation = isNull(data[attributeName]);
           let insert;
 
-          if (!onlyDeleteRelation) {
+          if (onlyDeleteRelation) {
+            // clear previous associations in the joinTable
+            await this.createQueryBuilder(joinTable.name)
+              .delete()
+              .where({ [joinColumn.name]: id })
+              .where(joinTable.on || {})
+              .execute();
+          } else {
             const cleanRelationData = toAssocs(data[attributeName]);
-            const isPartialUpdate = cleanRelationData.connect || cleanRelationData.disconnect;
+            const connect = cleanRelationData.connect || [];
+            const disconnect = cleanRelationData.disconnect || [];
+            const isPartialUpdate = connect.length || disconnect.length;
 
             if (isPartialUpdate) {
-              // partial update case
-              insert = await this.createQueryBuilder(joinTable.name).select().orderBy('order');
+              const idsToRemove = map('id', connect.concat(disconnect));
+              const existingRelsToDelete = await this.createQueryBuilder(joinTable.name)
+                .select([inverseJoinColumn.name, 'order'])
+                .where({
+                  [joinColumn.name]: id,
+                  [inverseJoinColumn.name]: { $in: idsToRemove },
+                })
+                .where(joinTable.on || {})
+                .execute();
 
-              if (isArray(cleanRelationData.connect)) {
-                for (const connectItem of cleanRelationData.connect) {
-                  const { start, end, after, before } = connectItem;
-                  let wasInserted = false;
-                  const relationToInsert = {
+              await this.createQueryBuilder(joinTable.name)
+                .delete()
+                .where({
+                  [joinColumn.name]: id,
+                  [inverseJoinColumn.name]: { $in: idsToRemove },
+                })
+                .where(joinTable.on || {})
+                .execute();
+
+              for (const relToDelete of existingRelsToDelete) {
+                await this.createQueryBuilder(joinTable.name)
+                  .update({ order: db.getConnection().raw('?? - 1', 'order') })
+                  .where({
                     [joinColumn.name]: id,
-                    [inverseJoinColumn.name]: connectItem.id,
-                  };
-
-                  insert = insert.reduce((acc, rel, i, arr) => {
-                    const currRelId = String(rel[inverseJoinColumn.name]);
-                    const nextRelId = String(arr[i + 1]?.[inverseJoinColumn.name]);
-                    if (currRelId === String(connectItem.id)) {
-                      return acc;
-                    }
-
-                    if (wasInserted) {
-                      return acc.push(rel);
-                    }
-
-                    if (i === 0 && start) {
-                      wasInserted = true;
-                      return acc.push(relationToInsert);
-                    }
-
-                    if (i === arr.length - 1 && (end || !wasInserted)) {
-                      wasInserted = true;
-                      return acc.push(relationToInsert);
-                    }
-
-                    if (after && currRelId === String(after)) {
-                      wasInserted = true;
-                      return acc.push(relationToInsert);
-                    }
-
-                    if (before && nextRelId === String(before)) {
-                      wasInserted = true;
-                      return acc.push(relationToInsert);
-                    }
-
-                    return acc.push(rel);
-                  }, []);
-                }
+                    order: { $gt: relToDelete.order },
+                  })
+                  .where(joinTable.on || {})
+                  .execute();
               }
 
-              if (isArray(cleanRelationData.disconnect)) {
-                const idsToRemove = map('id', cleanRelationData.disconnect);
-                insert = insert.filter((rel) => !idsToRemove.includes(rel[inverseJoinColumn.name]));
+              if (connect.length) {
+                const { max } = await this.createQueryBuilder(joinTable.name)
+                  .max('order')
+                  .where({ [joinColumn.name]: id })
+                  .where(joinTable.on || {})
+                  .first()
+                  .execute();
+
+                insert = uniqBy('id', connect).map((rel, idx) => ({
+                  [joinColumn.name]: id,
+                  [inverseJoinColumn.name]: rel.id,
+                  order: max + idx + 1,
+                }));
               }
 
-              insert.forEach((rel, i) => {
-                rel.order = i;
-              });
+              if (
+                isBidirectional(attribute) &&
+                ['oneToOne', 'oneToMany'].includes(attribute.relation)
+              ) {
+                // TODO: reordering the relations when oneToMany
+                await this.createQueryBuilder(joinTable.name)
+                  .delete()
+                  .where({ [inverseJoinColumn.name]: toIds(data[attributeName]) })
+                  .where(joinTable.on || {})
+                  .execute();
+              }
+
+              if (!isEmpty(insert)) {
+                await this.createQueryBuilder(joinTable.name).insert(insert).execute();
+              }
             } else {
+              // overwrite
               insert = toAssocs(data[attributeName]).map((data, idx) => {
                 return {
                   [joinColumn.name]: id,
@@ -722,30 +744,28 @@ const createEntityManager = (db) => {
                   order: idx + 1,
                 };
               });
-            }
 
-            if (
-              isBidirectional(attribute) &&
-              ['oneToOne', 'oneToMany'].includes(attribute.relation)
-            ) {
+              if (
+                isBidirectional(attribute) &&
+                ['oneToOne', 'oneToMany'].includes(attribute.relation)
+              ) {
+                // TODO: reordering the relations when oneToMany
+                await this.createQueryBuilder(joinTable.name)
+                  .delete()
+                  .where({ [inverseJoinColumn.name]: toIds(data[attributeName]) })
+                  .where(joinTable.on || {})
+                  .execute();
+              }
+
               await this.createQueryBuilder(joinTable.name)
                 .delete()
-                .where({ [inverseJoinColumn.name]: toIds(data[attributeName]) })
+                .where({ [joinColumn.name]: id })
                 .where(joinTable.on || {})
                 .execute();
-            }
-          }
 
-          // clear previous associations in the joinTable
-          await this.createQueryBuilder(joinTable.name)
-            .delete()
-            .where({ [joinColumn.name]: id })
-            .where(joinTable.on || {})
-            .execute();
-
-          if (!onlyDeleteRelation) {
-            if (!isEmpty(insert)) {
-              await this.createQueryBuilder(joinTable.name).insert(insert).execute();
+              if (!isEmpty(insert)) {
+                await this.createQueryBuilder(joinTable.name).insert(insert).execute();
+              }
             }
           }
         }
