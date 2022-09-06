@@ -333,7 +333,9 @@ const createEntityManager = (db) => {
     async attachRelations(uid, id, data) {
       const { attributes } = db.metadata.get(uid);
 
-      for (const attributeName in attributes) {
+      const attributeNames = Object.keys(attributes);
+      for (let i = 0; i < attributeNames.length; i += 1) {
+        const attributeName = attributeNames[i];
         const attribute = attributes[attributeName];
 
         const isValidLink = _.has(attributeName, data) && !_.isNil(data[attributeName]);
@@ -455,12 +457,13 @@ const createEntityManager = (db) => {
               .execute();
           }
 
-          const insert = toAssocs(data[attributeName]).map((data) => {
+          const insert = toAssocs(data[attributeName]).map((data, idx) => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
               ...(joinTable.on || {}),
               ...(data.__pivot || {}),
+              order: idx + 1,
             };
           });
 
@@ -487,7 +490,9 @@ const createEntityManager = (db) => {
     async updateRelations(uid, id, data) {
       const { attributes } = db.metadata.get(uid);
 
-      for (const attributeName in attributes) {
+      const attributeNames = Object.keys(attributes);
+      for (let i = 0; i < attributeNames.length; i += 1) {
+        const attributeName = attributeNames[i];
         const attribute = attributes[attributeName];
 
         if (attribute.type !== 'relation' || !_.has(attributeName, data)) {
@@ -615,6 +620,94 @@ const createEntityManager = (db) => {
           const { joinTable } = attribute;
           const { joinColumn, inverseJoinColumn } = joinTable;
 
+          const onlyDeleteRelation = _.isNull(data[attributeName]);
+          let insert;
+
+          if (!onlyDeleteRelation) {
+            const cleanRelationData = toAssocs(data[attributeName]);
+            const isPartialUpdate = cleanRelationData.connect || cleanRelationData.disconnect;
+
+            if (isPartialUpdate) {
+              // partial update case
+              insert = await this.createQueryBuilder(joinTable.name).select().orderBy('order');
+
+              if (_.isArray(cleanRelationData.connect)) {
+                for (const connectItem of cleanRelationData.connect) {
+                  const { start, end, after, before } = connectItem;
+                  let wasInserted = false;
+                  const relationToInsert = {
+                    [joinColumn.name]: id,
+                    [inverseJoinColumn.name]: connectItem.id,
+                  };
+
+                  insert = insert.reduce((acc, rel, i, arr) => {
+                    const currRelId = String(rel[inverseJoinColumn.name]);
+                    const nextRelId = String(arr[i + 1]?.[inverseJoinColumn.name]);
+                    if (currRelId === String(connectItem.id)) {
+                      return acc;
+                    }
+
+                    if (wasInserted) {
+                      return acc.push(rel);
+                    }
+
+                    if (i === 0 && start) {
+                      wasInserted = true;
+                      return acc.push(relationToInsert);
+                    }
+
+                    if (i === arr.length - 1 && (end || !wasInserted)) {
+                      wasInserted = true;
+                      return acc.push(relationToInsert);
+                    }
+
+                    if (after && currRelId === String(after)) {
+                      wasInserted = true;
+                      return acc.push(relationToInsert);
+                    }
+
+                    if (before && nextRelId === String(before)) {
+                      wasInserted = true;
+                      return acc.push(relationToInsert);
+                    }
+
+                    return acc.push(rel);
+                  }, []);
+                }
+              }
+
+              if (_.isArray(cleanRelationData.disconnect)) {
+                const idsToRemove = _.map('id', cleanRelationData.disconnect);
+                insert = insert.filter((rel) => !idsToRemove.includes(rel[inverseJoinColumn.name]));
+              }
+
+              insert.forEach((rel, i) => {
+                rel.order = i;
+              });
+            } else {
+              insert = toAssocs(data[attributeName]).map((data, idx) => {
+                return {
+                  [joinColumn.name]: id,
+                  [inverseJoinColumn.name]: data.id,
+                  ...(joinTable.on || {}),
+                  ...(data.__pivot || {}),
+                  order: idx + 1,
+                };
+              });
+            }
+
+            if (
+              isBidirectional(attribute) &&
+              ['oneToOne', 'oneToMany'].includes(attribute.relation)
+            ) {
+              await this.createQueryBuilder(joinTable.name)
+                .delete()
+                .where({ [inverseJoinColumn.name]: toIds(data[attributeName]) })
+                .where(joinTable.on || {})
+                .execute();
+            }
+          }
+
           // clear previous associations in the joinTable
           await this.createQueryBuilder(joinTable.name)
             .delete()
@@ -622,33 +715,10 @@ const createEntityManager = (db) => {
             .where(joinTable.on || {})
             .execute();
 
-          if (
-            isBidirectional(attribute) &&
-            ['oneToOne', 'oneToMany'].includes(attribute.relation)
-          ) {
-            await this.createQueryBuilder(joinTable.name)
-              .delete()
-              .where({ [inverseJoinColumn.name]: toIds(data[attributeName]) })
-              .where(joinTable.on || {})
-              .execute();
-          }
-
-          if (!_.isNull(data[attributeName])) {
-            const insert = toAssocs(data[attributeName]).map((data) => {
-              return {
-                [joinColumn.name]: id,
-                [inverseJoinColumn.name]: data.id,
-                ...(joinTable.on || {}),
-                ...(data.__pivot || {}),
-              };
-            });
-
-            // if there is nothing to insert
-            if (insert.length === 0) {
-              continue;
+          if (!onlyDeleteRelation) {
+            if (!_.isEmpty(insert)) {
+              await this.createQueryBuilder(joinTable.name).insert(insert).execute();
             }
-
-            await this.createQueryBuilder(joinTable.name).insert(insert).execute();
           }
         }
       }

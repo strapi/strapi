@@ -422,6 +422,13 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
           unsigned: true,
         },
       },
+      order: {
+        type: 'integer',
+        column: {
+          unsigned: true,
+          defaultTo: 0,
+        },
+      },
       // TODO: add extra pivot attributes -> user should use an intermediate entity
     },
     indexes: [
