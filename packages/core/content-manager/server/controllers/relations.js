@@ -38,11 +38,17 @@ module.exports = {
       model,
     });
 
-    if (!component && permissionChecker.cannot.read(null, targetField)) {
+    if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
     }
+
+    const attribute = sourceModel.attributes[targetField];
+    if (!attribute || attribute.type !== 'relation') {
+      return ctx.badRequest("This relational field doesn't exist");
+    }
+
     // TODO: find a way to check field permission for component
-    if (component && permissionChecker.cannot.read()) {
+    if (!component && permissionChecker.cannot.read(null, targetField)) {
       return ctx.forbidden();
     }
 
@@ -62,11 +68,6 @@ module.exports = {
       if (component && permissionChecker.cannot.read(entity)) {
         return ctx.forbidden();
       }
-    }
-
-    const attribute = sourceModel.attributes[targetField];
-    if (!attribute || attribute.type !== 'relation') {
-      return ctx.badRequest("This relational field doesn't exist");
     }
 
     const targetedModel = strapi.getModel(attribute.target);
@@ -135,11 +136,17 @@ module.exports = {
       model,
     });
 
-    if (!component && permissionChecker.cannot.read(null, targetField)) {
+    if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
     }
+
+    const attribute = sourceModel.attributes[targetField];
+    if (!attribute || attribute.type !== 'relation') {
+      return ctx.badRequest("This relational field doesn't exist");
+    }
+
     // TODO: find a way to check field permission for component
-    if (component && permissionChecker.cannot.read(null)) {
+    if (!component && permissionChecker.cannot.read(null, targetField)) {
       return ctx.forbidden();
     }
 
@@ -155,11 +162,6 @@ module.exports = {
     // TODO: find a way to check field permission for component
     if (component && permissionChecker.cannot.read(entity)) {
       return ctx.forbidden();
-    }
-
-    const attribute = sourceModel.attributes[targetField];
-    if (!attribute || attribute.type !== 'relation') {
-      return ctx.badRequest("This relational field doesn't exist");
     }
 
     const targetedModel = strapi.getModel(attribute.target);
