@@ -57,7 +57,7 @@ const ApiTokenCreateView = () => {
   const trackUsageRef = useRef(trackUsage);
   const { setCurrentStep } = useGuidedTour();
   const {
-    allowedActions: { canCreate, canUpdate },
+    allowedActions: { canCreate, canUpdate, canRegenerate },
   } = useRBAC(adminPermissions.settings['api-tokens']);
   const [lang] = usePersistentState('strapi-admin-language', 'en');
   const [state, dispatch] = useReducer(reducer, initialState, (state) => init(state, {}));
@@ -347,7 +347,7 @@ const ApiTokenCreateView = () => {
                   primaryAction={
                     canEditInputs && (
                       <Stack horizontal spacing={2}>
-                        {apiToken?.name && (
+                        {canRegenerate && apiToken?.name && (
                           <Regenerate
                             onRegenerate={handleRegenerate}
                             idToRegenerate={apiToken?.id}

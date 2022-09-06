@@ -324,6 +324,12 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "general",
               },
               {
+                "action": "admin::api-tokens.regenerate",
+                "category": "api tokens",
+                "displayName": "Regenerate",
+                "subCategory": "general",
+              },
+              {
                 "action": "admin::marketplace.plugins.install",
                 "category": "plugins and marketplace",
                 "displayName": "Install (only for dev env)",
@@ -821,6 +827,12 @@ describe('Role CRUD End to End', () => {
                   "subCategory": "general",
                 },
                 {
+                  "action": "admin::api-tokens.regenerate",
+                  "category": "api tokens",
+                  "displayName": "Regenerate",
+                  "subCategory": "general",
+                },
+                {
                   "action": "admin::marketplace.plugins.install",
                   "category": "plugins and marketplace",
                   "displayName": "Install (only for dev env)",
@@ -1250,6 +1262,12 @@ describe('Role CRUD End to End', () => {
                   "action": "admin::api-tokens.update",
                   "category": "api tokens",
                   "displayName": "Update",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.regenerate",
+                  "category": "api tokens",
+                  "displayName": "Regenerate",
                   "subCategory": "general",
                 },
                 Object {
