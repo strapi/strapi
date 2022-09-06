@@ -134,8 +134,7 @@ const RelationInput = ({
           labelLoadMore && (
             <TextButton
               disabled={relations.isLoading}
-              // Manual condition to remove once DS updated
-              onClick={() => !relations.isLoading && onRelationLoadMore()}
+              onClick={() => onRelationLoadMore()}
               startIcon={
                 relations.isLoading ? (
                   // To replace with loading prop on TextButton after DS release
