@@ -1,64 +1,109 @@
 'use strict';
 
-const { prop, pick } = require('lodash/fp');
+const { prop, isEmpty } = require('lodash/fp');
+const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
+const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 
 const { getService } = require('../utils');
+const { validateFindAvailable } = require('./validation/relations');
+
+const addWhereClause = (params, whereClause) => {
+  params.where = params.where || {};
+  if (params.where.$and) {
+    params.where.$and.push(whereClause);
+  } else {
+    params.where.$and = [whereClause];
+  }
+};
 
 module.exports = {
-  async find(ctx) {
+  async findAvailable(ctx) {
+    const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;
-    const { _component, ...query } = ctx.request.query;
-    const { idsToOmit } = ctx.request.body;
 
-    if (!targetField) {
-      return ctx.badRequest();
+    await validateFindAvailable(ctx.request.query);
+
+    const { component, entityId, idsToOmit, _q, ...query } = ctx.request.query;
+
+    const sourceModelUid = component || model;
+
+    const sourceModel = strapi.getModel(sourceModelUid);
+    if (!sourceModel) {
+      return ctx.badRequest("The model doesn't exist");
     }
 
-    const modelDef = _component ? strapi.getModel(_component) : strapi.getModel(model);
+    // permission check
+    if (entityId) {
+      const entityManager = getService('entity-manager');
+      const permissionChecker = getService('permission-checker').create({
+        userAbility,
+        model,
+      });
 
-    if (!modelDef) {
-      return ctx.notFound('model.notFound');
+      if (permissionChecker.cannot.read()) {
+        return ctx.forbidden();
+      }
+
+      const entity = await entityManager.findOneWithCreatorRoles(entityId, model);
+
+      if (!entity) {
+        return ctx.notFound();
+      }
+
+      if (permissionChecker.cannot.read(entity)) {
+        return ctx.forbidden();
+      }
     }
 
-    const attribute = modelDef.attributes[targetField];
+    const attribute = sourceModel.attributes[targetField];
     if (!attribute || attribute.type !== 'relation') {
-      return ctx.badRequest('targetField.invalid');
+      return ctx.badRequest("This relational field doesn't exist");
     }
 
-    const target = strapi.getModel(attribute.target);
+    const targetedModel = strapi.getModel(attribute.target);
 
-    if (!target) {
-      return ctx.notFound('target.notFound');
+    const modelConfig = component
+      ? await getService('components').findConfiguration(sourceModel)
+      : await getService('content-types').findConfiguration(sourceModel);
+    const mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
+
+    const fieldsToSelect = ['id', mainField];
+    if (hasDraftAndPublish(targetedModel)) {
+      fieldsToSelect.push(PUBLISHED_AT_ATTRIBUTE);
     }
 
-    if (idsToOmit && Array.isArray(idsToOmit)) {
-      query.filters = {
-        $and: [
-          {
-            id: {
-              $notIn: idsToOmit,
-            },
-          },
-        ].concat(query.filters || []),
-      };
+    // TODO: for RBAC reasons, find a way to exclude filters that should not be there
+    // i.e. all filters except locale for i18n
+    const queryParams = {
+      orderBy: mainField,
+      ...transformParamsToQuery(targetedModel.uid, query),
+      select: fieldsToSelect, // cannot select other fields as the user may not have the permissions
+    };
+
+    if (!isEmpty(idsToOmit)) {
+      addWhereClause(queryParams, { id: { $notIn: idsToOmit } });
     }
 
-    const entityManager = getService('entity-manager');
-
-    const entities = await entityManager.find(query, target.uid, []);
-
-    if (!entities) {
-      return ctx.notFound();
+    // searching should be allowed only on mainField for permission reasons
+    if (_q) {
+      addWhereClause(queryParams, { [mainField]: { $containsi: _q } });
     }
 
-    const modelConfig = _component
-      ? await getService('components').findConfiguration(modelDef)
-      : await getService('content-types').findConfiguration(modelDef);
+    if (entityId) {
+      const subQuery = strapi.db.queryBuilder(sourceModel.uid);
 
-    const field = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
-    const pickFields = [field, 'id', target.primaryKey, PUBLISHED_AT_ATTRIBUTE];
+      const alias = subQuery.getAlias();
 
-    ctx.body = entities.map(pick(pickFields));
+      const knexSubQuery = subQuery
+        .where({ id: entityId })
+        .join({ alias, targetField })
+        .select(`${alias}.id`)
+        .getKnexQuery();
+
+      addWhereClause(queryParams, { id: { $notIn: knexSubQuery } });
+    }
+
+    ctx.body = await strapi.query(targetedModel.uid).findPage(queryParams);
   },
 };

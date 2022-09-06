@@ -9,9 +9,49 @@ const enableContentType = require('./migrations/content-type/enable');
 const disableContentType = require('./migrations/content-type/disable');
 
 module.exports = ({ strapi }) => {
+  decorateRelations();
   extendLocalizedContentTypes(strapi);
   addContentManagerLocaleMiddleware(strapi);
   addContentTypeSyncHooks(strapi);
+};
+
+/**
+ * Wraps the /relations controller to handle locale parameter
+ */
+const decorateRelations = () => {
+  const { wrapParams } = getService('entity-service-decorator');
+
+  strapi.container.get('controllers').extend('plugin::content-manager.relations', (controller) => {
+    const oldFindAvailable = controller.findAvailable;
+    return Object.assign(controller, {
+      async findAvailable(ctx, next) {
+        const { model, targetField } = ctx.params;
+        const { component } = ctx.request.query;
+
+        const sourceModelUid = component || model;
+
+        const sourceModel = strapi.getModel(sourceModelUid);
+        if (!sourceModel) {
+          return ctx.badRequest("The model doesn't exist");
+        }
+
+        const attribute = sourceModel.attributes[targetField];
+        if (!attribute || attribute.type !== 'relation') {
+          return ctx.badRequest("This relational field doesn't exist");
+        }
+
+        const targetedModel = strapi.getModel(attribute.target);
+
+        const { isLocalizedContentType } = getService('content-types');
+
+        if (isLocalizedContentType(targetedModel)) {
+          ctx.request.query = await wrapParams(ctx.request.query);
+        }
+
+        return oldFindAvailable(ctx, next);
+      },
+    });
+  });
 };
 
 /**

@@ -80,9 +80,9 @@ module.exports = {
       },
     },
     {
-      method: 'POST',
+      method: 'GET',
       path: '/relations/:model/:targetField',
-      handler: 'relations.find',
+      handler: 'relations.findAvailable',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',

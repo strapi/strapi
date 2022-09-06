@@ -10,6 +10,7 @@ const {
   sanitize,
 } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
+const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 const uploadFiles = require('../utils/upload-files');
 
 const {
@@ -18,7 +19,7 @@ const {
   updateComponents,
   deleteComponents,
 } = require('./components');
-const { transformParamsToQuery, pickSelectionParams } = require('./params');
+const { pickSelectionParams } = require('./params');
 const { applyTransforms } = require('./attributes');
 
 // TODO: those should be strapi events used by the webhooks not the other way arround
