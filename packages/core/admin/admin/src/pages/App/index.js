@@ -93,18 +93,16 @@ function App() {
           setTelemetryProperties(properties);
 
           try {
-            fetch('https://analytics.strapi.io/track', {
+            fetch('https://analytics.strapi.io/api/v2/track', {
               method: 'POST',
               body: JSON.stringify({
                 // This event is anonymous
                 event: 'didInitializeAdministration',
                 adminUserId: '',
                 deviceId,
-                properties: {
-                  eventPropeties: {},
-                  userProperties: { environment: appInfo.currentEnvironment },
-                  groupProperties: { ...properties, projectId: uuid },
-                },
+                eventPropeties: {},
+                userProperties: { environment: appInfo.currentEnvironment },
+                groupProperties: { ...properties, projectId: uuid },
               }),
               headers: {
                 'Content-Type': 'application/json',

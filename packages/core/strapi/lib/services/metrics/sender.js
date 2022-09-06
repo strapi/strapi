@@ -82,7 +82,7 @@ module.exports = (strapi) => {
     };
 
     try {
-      const res = await fetch(`${ANALYTICS_URI}/track`, reqParams);
+      const res = await fetch(`${ANALYTICS_URI}/api/v2/track`, reqParams);
       return res.ok;
     } catch (err) {
       return false;

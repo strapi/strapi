@@ -17,7 +17,7 @@ try {
     process.env.npm_config_global === 'true' ||
     JSON.parse(process.env.npm_config_argv).original.includes('global')
   ) {
-    fetch('https://analytics.strapi.io/track', {
+    fetch('https://analytics.strapi.io/api/v2/track', {
       method: 'POST',
       body: JSON.stringify({
         event: 'didInstallStrapi',

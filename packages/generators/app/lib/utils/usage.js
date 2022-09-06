@@ -87,7 +87,7 @@ function trackEvent(event, payload) {
   }
 
   try {
-    return fetch('https://analytics.strapi.io/track', {
+    return fetch('https://analytics.strapi.io/api/v2/track', {
       method: 'POST',
       body: JSON.stringify({
         event,
@@ -108,7 +108,7 @@ function trackError({ scope, error }) {
   try {
     return trackEvent('didNotCreateProject', {
       deviceId: scope.deviceId,
-      properties,
+      ...properties,
     });
   } catch (err) {
     /** ignore errors */
@@ -122,7 +122,7 @@ function trackUsage({ event, scope, error }) {
   try {
     return trackEvent(event, {
       deviceId: scope.deviceId,
-      properties,
+      ...properties,
     });
   } catch (err) {
     /** ignore errors */

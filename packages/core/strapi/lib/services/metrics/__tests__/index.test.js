@@ -94,7 +94,7 @@ describe('metrics', () => {
     send('someEvent');
 
     expect(fetch).toHaveBeenCalled();
-    expect(fetch.mock.calls[0][0]).toBe('https://analytics.strapi.io/track');
+    expect(fetch.mock.calls[0][0]).toBe('https://analytics.strapi.io/api/v2/track');
     expect(fetch.mock.calls[0][1].method).toBe('POST');
     expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
       event: 'someEvent',
