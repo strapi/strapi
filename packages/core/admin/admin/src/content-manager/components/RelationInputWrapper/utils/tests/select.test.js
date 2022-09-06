@@ -126,7 +126,7 @@ describe('RelationInputWrapper | select', () => {
   test('returns empty fetch endpoint if the user is creating an entity', async () => {
     const { result } = await setup(SELECT_ATTR_FIXTURE);
 
-    expect(result.current.queryInfos.endpoints.fetch).toBe(null);
+    expect(result.current.queryInfos.endpoints.relation).toBe(null);
   });
 
   test('returns fetch endpoint if the user is editing an entity', async () => {
@@ -137,7 +137,7 @@ describe('RelationInputWrapper | select', () => {
 
     const { result } = await setup(SELECT_ATTR_FIXTURE);
 
-    expect(result.current.queryInfos.endpoints.fetch).toBe('/content-manager/slug/2/test');
+    expect(result.current.queryInfos.endpoints.relation).toBe('/content-manager/slug/2/test');
   });
 
   test('returns the original queryInfos and queryInfos.endpoints', async () => {
@@ -157,7 +157,7 @@ describe('RelationInputWrapper | select', () => {
       ...FIXTURE_QUERY_INFOS,
       endpoints: {
         ...FIXTURE_QUERY_INFOS.endpoints,
-        fetch: null,
+        relation: null,
       },
     });
   });
