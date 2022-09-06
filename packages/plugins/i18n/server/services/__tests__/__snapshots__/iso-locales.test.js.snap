@@ -463,10 +463,6 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "English (Anguilla) (en-AI)",
   },
   {
-    "code": "en-AG",
-    "name": "English (Antigua & Barbuda) (en-AG)",
-  },
-  {
     "code": "en-AS",
     "name": "English (American Samoa) (en-AS)",
   },
