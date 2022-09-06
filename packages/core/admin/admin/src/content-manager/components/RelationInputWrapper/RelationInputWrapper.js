@@ -123,6 +123,7 @@ export const RelationInputWrapper = ({
         defaultMessage: 'Relations are loading',
       })}
       name={name}
+      numberOfRelationsToDisplay={5}
       onRelationAdd={(relation) => handleRelationAdd(relation)}
       onRelationRemove={(relation) => handleRelationRemove(relation)}
       onRelationLoadMore={() => handleRelationLoadMore()}

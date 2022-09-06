@@ -11,7 +11,6 @@ import { Icon } from '@strapi/design-system/Icon';
 import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/Field';
 import { TextButton } from '@strapi/design-system/TextButton';
 import { Typography } from '@strapi/design-system/Typography';
-// import { Loader } from '@strapi/design-system/Loader';
 
 import Cross from '@strapi/icons/Cross';
 import Refresh from '@strapi/icons/Refresh';
@@ -21,6 +20,7 @@ import { Relation } from './components/Relation';
 import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
+import { RELATION_ITEM_HEIGHT } from './constants';
 
 const LinkEllipsis = styled(Link)`
   white-space: nowrap;
@@ -41,6 +41,7 @@ const rotation = keyframes`
 // Temporary component - to replace with loading prop on TextButton after DS release
 const LoaderWrapper = styled(Box)`
   animation: ${rotation} 2s infinite linear;
+  will-change: transform;
 `;
 
 const RelationInput = ({
@@ -49,6 +50,7 @@ const RelationInput = ({
   error,
   id,
   name,
+  numberOfRelationsToDisplay,
   label,
   labelLoadMore,
   loadingMessage,
@@ -65,18 +67,20 @@ const RelationInput = ({
   searchResults,
 }) => {
   const listRef = useRef();
-  const [overflow, setOverflow] = useState('bottom');
+  const [overflow, setOverflow] = useState('');
 
-  // To clean (number relations + numberOfRelationsToDisplay as prop?)
-  const totalNumberOfRelations = relations.data?.pages[0]?.length;
-  const relationItemHeight = 58;
-  const numberOfRelationsToDisplay = 5;
+  const flattenRelations = relations.data?.pages.flat();
+  const totalNumberOfRelations = flattenRelations?.length || 0;
 
   const dynamicListHeight =
     totalNumberOfRelations > numberOfRelationsToDisplay
-      ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * relationItemHeight +
-        relationItemHeight / 2
-      : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * relationItemHeight;
+      ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT +
+        RELATION_ITEM_HEIGHT / 2
+      : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT;
+
+  // TODO: improve load more conditions
+  const nextPage = (!relations.hasNextPage() && relations.isLoading) || relations.hasNextPage();
+  const isLoadMoreButton = labelLoadMore && !disabled && nextPage;
 
   const handleOverflow = ({
     overscanStartIndex,
@@ -84,7 +88,9 @@ const RelationInput = ({
     visibleStartIndex,
     visibleStopIndex,
   }) => {
-    // To fix: overflow will work only when item is not visible (index change)
+    if (totalNumberOfRelations <= numberOfRelationsToDisplay) return;
+
+    // TODO: needs a fix, overflow will work only when item is not visible (index change)
     // normally overflow should start after we started scrolling even if item is still visible
     // + with 6 items onItemsRendered doesn't fire because it fires only when first or last item can leave visibility space
     const overflowTop = overscanStartIndex !== visibleStartIndex;
@@ -94,8 +100,8 @@ const RelationInput = ({
       setOverflow('top-bottom');
     } else if (overflowBottom && !overflowTop) {
       setOverflow('bottom');
-    } else {
-      setOverflow('bottom');
+    } else if (!overflowBottom && overflowTop) {
+      setOverflow('top');
     }
   };
 
@@ -130,14 +136,13 @@ const RelationInput = ({
           </>
         }
         loadMore={
-          !disabled &&
-          labelLoadMore && (
+          isLoadMoreButton && (
             <TextButton
               disabled={relations.isLoading}
               onClick={() => onRelationLoadMore()}
               startIcon={
                 relations.isLoading ? (
-                  // To replace with loading prop on TextButton after DS release
+                  // TODO: To replace with loading prop on TextButton after DS release
                   <LoaderWrapper>
                     <Loader />
                   </LoaderWrapper>
@@ -151,13 +156,13 @@ const RelationInput = ({
           )
         }
       >
-        <RelationList overflow={totalNumberOfRelations > numberOfRelationsToDisplay && overflow}>
+        <RelationList overflow={overflow}>
           <List
             height={dynamicListHeight}
             ref={listRef}
             itemCount={totalNumberOfRelations}
-            itemSize={relationItemHeight}
-            itemData={relations.data?.pages[0]}
+            itemSize={RELATION_ITEM_HEIGHT}
+            itemData={flattenRelations}
             onItemsRendered={handleOverflow}
           >
             {({ data, index, style }) => {
@@ -230,6 +235,7 @@ const ReactQueryRelationResult = PropTypes.shape({
       )
     ),
   }),
+  hasNextPage: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
 });
@@ -268,6 +274,7 @@ RelationInput.propTypes = {
   labelLoadMore: PropTypes.string,
   loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  numberOfRelationsToDisplay: PropTypes.number.isRequired,
   onRelationAdd: PropTypes.func.isRequired,
   onRelationRemove: PropTypes.func.isRequired,
   onRelationLoadMore: PropTypes.func.isRequired,
