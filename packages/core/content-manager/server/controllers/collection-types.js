@@ -1,11 +1,9 @@
 'use strict';
 
-const { prop, pick } = require('lodash/fp');
-const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
 const { setCreatorFields, pipeAsync } = require('@strapi/utils');
 
 const { getService, pickWritableAttributes } = require('../utils');
-const { validateBulkDeleteInput, validatePagination } = require('./validation');
+const { validateBulkDeleteInput } = require('./validation');
 
 module.exports = {
   async find(ctx) {
@@ -240,75 +238,5 @@ module.exports = {
     const { count } = await entityManager.deleteMany(params, model);
 
     ctx.body = { count };
-  },
-
-  async previewManyRelations(ctx) {
-    const { userAbility } = ctx.state;
-    const { model, id, targetField } = ctx.params;
-    const { pageSize = 10, page = 1 } = ctx.request.query;
-
-    validatePagination({ page, pageSize });
-
-    const contentTypeService = getService('content-types');
-    const entityManager = getService('entity-manager');
-    const permissionChecker = getService('permission-checker').create({ userAbility, model });
-
-    if (permissionChecker.cannot.read()) {
-      return ctx.forbidden();
-    }
-
-    const modelDef = strapi.getModel(model);
-    const assoc = modelDef.attributes[targetField];
-
-    if (!assoc || !MANY_RELATIONS.includes(assoc.relation)) {
-      return ctx.badRequest('Invalid target field');
-    }
-
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
-
-    if (!entity) {
-      return ctx.notFound();
-    }
-
-    if (permissionChecker.cannot.read(entity, targetField)) {
-      return ctx.forbidden();
-    }
-
-    let relationList;
-    // FIXME: load relations using query.load
-    if (!assoc.inversedBy && !assoc.mappedBy) {
-      const populatedEntity = await entityManager.findOne(id, model, [targetField]);
-      const relationsListIds = populatedEntity[targetField].map(prop('id'));
-
-      relationList = await entityManager.findPage(
-        {
-          page,
-          pageSize,
-          filters: {
-            id: relationsListIds,
-          },
-        },
-        assoc.target
-      );
-    } else {
-      relationList = await entityManager.findPage(
-        {
-          page,
-          pageSize,
-          filters: {
-            [assoc.inversedBy || assoc.mappedBy]: entity.id,
-          },
-        },
-        assoc.target
-      );
-    }
-
-    const config = await contentTypeService.findConfiguration({ uid: model });
-    const mainField = prop(['metadatas', targetField, 'edit', 'mainField'], config);
-
-    ctx.body = {
-      pagination: relationList.pagination,
-      results: relationList.results.map(pick(['id', mainField])),
-    };
   },
 };

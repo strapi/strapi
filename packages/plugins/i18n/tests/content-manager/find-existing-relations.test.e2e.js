@@ -79,7 +79,7 @@ const products = ({ shop }) => {
   return entries;
 };
 
-describe('i18n - Relation-list route', () => {
+describe('i18n - Find existing relations', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -99,6 +99,7 @@ describe('i18n - Relation-list route', () => {
     rq = await createAuthRequest({ strapi });
 
     data.shops = await builder.sanitizedFixturesFor(shopModel.singularName, strapi);
+    console.log('data.shops', data.shops);
     data.products = await builder.sanitizedFixturesFor(productModel.singularName, strapi);
   });
 
@@ -110,7 +111,7 @@ describe('i18n - Relation-list route', () => {
   test('Can filter on default locale', async () => {
     const res = await rq({
       method: 'GET',
-      url: '/content-manager/relations/api::shop.shop/products',
+      url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].id}/products`,
     });
 
     expect(res.body.results).toHaveLength(1);
@@ -120,7 +121,7 @@ describe('i18n - Relation-list route', () => {
   test('Can filter on any locale', async () => {
     const res = await rq({
       method: 'GET',
-      url: '/content-manager/relations/api::shop.shop/products',
+      url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].id}/products`,
       qs: { locale: 'it' },
     });
 
