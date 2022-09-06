@@ -182,4 +182,30 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
     expect(result).toEqual(expected);
   });
+
+  test('should cleanup relations properly and only send the ID attribute', () => {
+    const result = cleanData(
+      {
+        relation: {
+          add: [{ id: 1, something: true }],
+          remove: [{ id: 2, something: true }],
+        },
+      },
+      {
+        attributes: {
+          relation: {
+            type: 'relation',
+          },
+        },
+      },
+      {}
+    );
+
+    expect(result).toStrictEqual({
+      relation: {
+        add: [{ id: 1 }],
+        remove: [{ id: 2 }],
+      },
+    });
+  });
 });
