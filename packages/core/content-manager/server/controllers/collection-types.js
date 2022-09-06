@@ -46,7 +46,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    const entity = await entityManager.findOneWithCreatorRolesAndCount(id, model);
 
     if (!entity) {
       return ctx.notFound();

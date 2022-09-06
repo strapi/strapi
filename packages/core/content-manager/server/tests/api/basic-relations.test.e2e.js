@@ -133,61 +133,95 @@ describe('CM API', () => {
     await builder.cleanup();
   });
 
-  describe('Count relations', () => {
+  describe('Automatic count and populate relations', () => {
     test('many-way', async () => {
       const res = await rq({
         method: 'GET',
         url: '/content-manager/collection-types/api::collector.collector',
+        qs: {
+          sort: 'name:ASC',
+        },
       });
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body.results)).toBe(true);
-      expect(res.body.results).toHaveLength(3);
-      expect(getCollectorByName(res.body.results, 'Bernard').stamps.count).toBe(2);
-      expect(getCollectorByName(res.body.results, 'Isabelle').stamps.count).toBe(1);
-      expect(getCollectorByName(res.body.results, 'Emma').stamps.count).toBe(0);
+      // all relations are populated and xToMany relations are counted
+      expect(res.body.results).toMatchObject([
+        {
+          age: 25,
+          createdBy: null,
+          id: 1,
+          name: 'Bernard',
+          stamps: { count: 2 },
+          stamps_m2m: { count: 1 },
+          stamps_one_many: { count: 0 },
+          stamps_one_one: {
+            id: 1,
+            name: '1946',
+          },
+          stamps_one_way: {
+            id: 1,
+            name: '1946',
+          },
+          updatedBy: null,
+        },
+        {
+          age: 23,
+          createdBy: null,
+          id: 3,
+          name: 'Emma',
+          stamps: { count: 0 },
+          stamps_m2m: { count: 2 },
+          stamps_one_many: { count: 1 },
+          stamps_one_one: {
+            id: 3,
+            name: '1948',
+          },
+          stamps_one_way: {
+            id: 3,
+            name: '1948',
+          },
+          updatedBy: null,
+        },
+        {
+          age: 55,
+          createdBy: null,
+          id: 2,
+          name: 'Isabelle',
+          stamps: { count: 1 },
+          stamps_m2m: { count: 0 },
+          stamps_one_many: { count: 2 },
+          stamps_one_one: {
+            id: 2,
+            name: '1947',
+          },
+          stamps_one_way: {
+            id: 2,
+            name: '1947',
+          },
+          updatedBy: null,
+        },
+      ]);
     });
 
-    test('many-to-many (collector -> stamps)', async () => {
+    test('findOne', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/api::collector.collector',
+        url: `/content-manager/collection-types/api::collector.collector/${data.collectors[0].id}`,
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.results)).toBe(true);
-      expect(res.body.results).toHaveLength(3);
-      expect(getCollectorByName(res.body.results, 'Bernard').stamps_m2m.count).toBe(1);
-      expect(getCollectorByName(res.body.results, 'Isabelle').stamps_m2m.count).toBe(0);
-      expect(getCollectorByName(res.body.results, 'Emma').stamps_m2m.count).toBe(2);
-    });
-
-    test('many-to-many (stamp -> collectors)', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/content-manager/collection-types/api::stamp.stamp',
+      // only xToMany relations are populated and counted
+      expect(res.body).toMatchObject({
+        age: 25,
+        id: 1,
+        name: 'Bernard',
+        stamps: { count: 2 },
+        stamps_m2m: { count: 1 },
+        stamps_one_many: { count: 0 },
+        createdBy: null,
+        updatedBy: null,
       });
-
-      expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.results)).toBe(true);
-      expect(res.body.results).toHaveLength(3);
-      expect(getStampByName(res.body.results, '1946').collectors.count).toBe(2);
-      expect(getStampByName(res.body.results, '1947').collectors.count).toBe(1);
-      expect(getStampByName(res.body.results, '1948').collectors.count).toBe(0);
-    });
-
-    test('one-to-many', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/content-manager/collection-types/api::collector.collector',
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.results)).toBe(true);
-      expect(res.body.results).toHaveLength(3);
-      expect(getCollectorByName(res.body.results, 'Bernard').stamps_one_many.count).toBe(0);
-      expect(getCollectorByName(res.body.results, 'Isabelle').stamps_one_many.count).toBe(2);
-      expect(getCollectorByName(res.body.results, 'Emma').stamps_one_many.count).toBe(1);
     });
   });
 

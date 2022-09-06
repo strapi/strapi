@@ -39,24 +39,44 @@ const findCreatorRoles = (entity) => {
   return [];
 };
 
-// TODO: define when we use this one vs basic populate
-const getDeepPopulate = (uid, populate) => {
+const getDeepPopulate = (
+  uid,
+  populate,
+  { onlyMany = false, countMany = false, maxLevel = Infinity } = {},
+  level = 1
+) => {
   if (populate) {
     return populate;
   }
 
-  const { attributes } = strapi.getModel(uid);
+  if (level > maxLevel) {
+    return {};
+  }
 
-  return Object.keys(attributes).reduce((populateAcc, attributeName) => {
-    const attribute = attributes[attributeName];
+  const model = strapi.getModel(uid);
+
+  return Object.keys(model.attributes).reduce((populateAcc, attributeName) => {
+    const attribute = model.attributes[attributeName];
 
     if (attribute.type === 'relation') {
-      populateAcc[attributeName] = true; // Only populate first level of relations
+      const isManyRelation = MANY_RELATIONS.includes(attribute.relation);
+      // always populate createdBy, updatedBy, localizations etc.
+      if (!isVisibleAttribute(model, attributeName)) {
+        populateAcc[attributeName] = true;
+      } else if (!onlyMany || isManyRelation) {
+        // Only populate one level of relations
+        populateAcc[attributeName] = countMany && isManyRelation ? { count: true } : true;
+      }
     }
 
     if (attribute.type === 'component') {
       populateAcc[attributeName] = {
-        populate: getDeepPopulate(attribute.component, null),
+        populate: getDeepPopulate(
+          attribute.component,
+          null,
+          { onlyMany, countMany, maxLevel },
+          level + 1
+        ),
       };
     }
 
@@ -67,45 +87,15 @@ const getDeepPopulate = (uid, populate) => {
     if (attribute.type === 'dynamiczone') {
       populateAcc[attributeName] = {
         populate: (attribute.components || []).reduce((acc, componentUID) => {
-          return merge(acc, getDeepPopulate(componentUID, null));
+          return merge(
+            acc,
+            getDeepPopulate(componentUID, null, { onlyMany, countMany, maxLevel }, level + 1)
+          );
         }, {}),
       };
     }
 
     return populateAcc;
-  }, {});
-};
-
-// TODO: define when we use this one vs deep populate
-const getBasePopulate = (uid, populate) => {
-  if (populate) {
-    return populate;
-  }
-
-  const { attributes } = strapi.getModel(uid);
-
-  return Object.keys(attributes).filter((attributeName) => {
-    return ['relation', 'component', 'dynamiczone', 'media'].includes(
-      attributes[attributeName].type
-    );
-  });
-};
-
-const getCounterPopulate = (uid, populate) => {
-  const basePopulate = getBasePopulate(uid, populate);
-
-  const model = strapi.getModel(uid);
-
-  return basePopulate.reduce((populate, attributeName) => {
-    const attribute = model.attributes[attributeName];
-
-    if (MANY_RELATIONS.includes(attribute.relation) && isVisibleAttribute(model, attributeName)) {
-      populate[attributeName] = { count: true };
-    } else {
-      populate[attributeName] = true;
-    }
-
-    return populate;
   }, {});
 };
 
@@ -138,16 +128,23 @@ module.exports = ({ strapi }) => ({
   },
 
   findPage(opts, uid, populate) {
-    const params = { ...opts, populate: getBasePopulate(uid, populate) };
+    const params = { ...opts, populate: getDeepPopulate(uid, populate, { maxLevel: 1 }) };
 
     return strapi.entityService.findPage(uid, params);
   },
 
   findWithRelationCountsPage(opts, uid, populate) {
-    const counterPopulate = addCreatedByRolesPopulate(getCounterPopulate(uid, populate));
-    const params = { ...opts, populate: counterPopulate };
+    const counterPopulate = getDeepPopulate(uid, populate, { countMany: true, maxLevel: 1 });
+    const params = { ...opts, populate: addCreatedByRolesPopulate(counterPopulate) };
 
     return strapi.entityService.findWithRelationCountsPage(uid, params);
+  },
+
+  findOneWithCreatorRolesAndCount(id, uid, populate) {
+    const counterPopulate = getDeepPopulate(uid, populate, { onlyMany: true, countMany: true });
+    const params = { populate: addCreatedByRolesPopulate(counterPopulate) };
+
+    return strapi.entityService.findOne(uid, id, params);
   },
 
   async findOne(id, uid, populate) {
