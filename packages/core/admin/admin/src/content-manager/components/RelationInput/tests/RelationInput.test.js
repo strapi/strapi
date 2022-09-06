@@ -33,6 +33,7 @@ const FIXTURES_RELATIONS = {
   },
   isLoading: false,
   isSuccess: true,
+  hasNextPage: () => true,
 };
 
 const FIXTURES_SEARCH = {
@@ -63,6 +64,7 @@ const setup = (props) =>
             label="Some Relation"
             labelLoadMore="Load more"
             loadingMessage="Relations are loading"
+            numberOfRelationsToDisplay={5}
             onRelationAdd={() => jest.fn()}
             onSearchOpen={() => jest.fn()}
             onSearchClose={() => jest.fn()}

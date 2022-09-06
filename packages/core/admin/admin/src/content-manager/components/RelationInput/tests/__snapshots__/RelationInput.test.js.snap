@@ -566,6 +566,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
       >
         <div
           class="c15"
+          overflow=""
         >
           <ol
             class="c1 c5"

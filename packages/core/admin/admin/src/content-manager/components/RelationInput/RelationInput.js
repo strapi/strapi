@@ -38,7 +38,7 @@ const rotation = keyframes`
   }
 `;
 
-// Temporary component - to replace with loading prop on TextButton after DS release
+// TODO - to replace with loading prop on TextButton after DS release
 const LoaderWrapper = styled(Box)`
   animation: ${rotation} 2s infinite linear;
   will-change: transform;
@@ -79,8 +79,8 @@ const RelationInput = ({
       : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT;
 
   // TODO: improve load more conditions
-  const nextPage = (!relations.hasNextPage() && relations.isLoading) || relations.hasNextPage();
-  const isLoadMoreButton = labelLoadMore && !disabled && nextPage;
+  // const nextPage = (!relations.hasNextPage() && relations.isLoading) || relations.hasNextPage();
+  const isLoadMoreButton = labelLoadMore && !disabled;
 
   const handleOverflow = ({
     overscanStartIndex,
