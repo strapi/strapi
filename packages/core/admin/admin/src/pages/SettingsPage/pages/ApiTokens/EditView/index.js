@@ -218,48 +218,6 @@ const ApiTokenCreateView = () => {
     }
   };
 
-  // const hasAllActionsSelected = useMemo(() => {
-  //   const { data, selectedActions } = state;
-
-  //   const areAllActionsSelected = data.allActionsIds.every((actionId) =>
-  //     selectedActions.includes(actionId)
-  //   );
-
-  //   return areAllActionsSelected;
-  // }, [state]);
-
-  // const hasAllActionsNotSelected = useMemo(() => {
-  //   const { selectedActions } = state;
-
-  //   const areAllActionsNotSelected = selectedActions.length === 0;
-
-  //   return areAllActionsNotSelected;
-  // }, [state]);
-
-  // const hasReadOnlyActionsSelected = useMemo(() => {
-  //   const { data, selectedActions } = state;
-
-  //   const areAllActionsReadOnly = data.allActionsIds.every((actionId) => {
-  //     if (actionId.includes('find') || actionId.includes('findOne')) {
-  //       return selectedActions.includes(actionId);
-  //     }
-
-  //     return !selectedActions.includes(actionId);
-  //   });
-
-  //   return areAllActionsReadOnly;
-  // }, [state]);
-
-  // const tokenTypeValue = useMemo(() => {
-  //   if (hasAllActionsSelected && !hasReadOnlyActionsSelected) return 'full-access';
-
-  //   if (hasReadOnlyActionsSelected) return 'read-only';
-
-  //   if (hasAllActionsNotSelected) return null;
-
-  //   return 'custom';
-  // }, [hasAllActionsSelected, hasReadOnlyActionsSelected, hasAllActionsNotSelected]);
-
   const handleChangeCheckbox = ({ target: { value } }) => {
     dispatch({
       type: 'ON_CHANGE',
