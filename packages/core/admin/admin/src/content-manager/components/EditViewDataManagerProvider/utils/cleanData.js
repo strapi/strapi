@@ -51,6 +51,17 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
           }
 
           break;
+
+        case 'relation':
+          // Instead of the full relation object, we only want to send its ID
+          // and need to clean-up the add|remove arrays
+          cleanedData = Object.entries(value).reduce((acc, [key, value]) => {
+            acc[key] = value.map((currentValue) => ({ id: currentValue.id }));
+
+            return acc;
+          }, {});
+          break;
+
         case 'dynamiczone':
           cleanedData = value.map((componentData) => {
             const subCleanedData = recursiveCleanData(
@@ -62,7 +73,6 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
           });
           break;
         default:
-          // The helper is mainly used for the relations in order to just send the id
           cleanedData = helperCleanData(value, 'id');
       }
 
@@ -75,6 +85,10 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
   return recursiveCleanData(retrievedData, currentSchema);
 };
 
+// TODO: check which parts are still needed: I suspect the
+// isArray part can go away, but I'm not sure what could send
+// an object; in case both can go away we might be able to get
+// rid of the whole helper
 export const helperCleanData = (value, key) => {
   if (isArray(value)) {
     return value.map((obj) => (obj[key] ? obj[key] : obj));
