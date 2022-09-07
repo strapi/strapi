@@ -295,7 +295,11 @@ const createHelpers = (db) => {
 
         const { object } = updatedColumn;
 
-        createColumn(tableBuilder, object).alter();
+        if (object.type === 'increments') {
+          createColumn(tableBuilder, { ...object, type: 'integer' }).alter();
+        } else {
+          createColumn(tableBuilder, object).alter();
+        }
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
@@ -312,7 +316,7 @@ const createHelpers = (db) => {
         debug(`Creating column ${addedColumn.name}`);
 
         if (addedColumn.type === 'increments' && !db.dialect.canAddIncrements()) {
-          tableBuilder.integer(addedColumn.name).unsigned();
+          tableBuilder.integer(addedColumn.name).unsigned().notNullable();
           tableBuilder.primary(addedColumn.name);
         } else {
           createColumn(tableBuilder, addedColumn);
