@@ -87,33 +87,6 @@ const RelationInput = ({
     (!!labelLoadMore && !disabled && paginatedRelations.hasNextPage) ||
     paginatedRelations.isLoading;
 
-  const handleNativeScroll = () => {
-    // user has started scrolling
-  };
-
-  const handleOverflow = ({
-    overscanStartIndex,
-    overscanStopIndex,
-    visibleStartIndex,
-    visibleStopIndex,
-  }) => {
-    if (totalNumberOfRelations <= numberOfRelationsToDisplay) return;
-
-    // TODO: needs a fix, overflow will work only when item is not visible (index change)
-    // normally overflow should start after we started scrolling even if item is still visible
-    // + with 6 items onItemsRendered doesn't fire because it fires only when first or last item can leave visibility space
-    const overflowTop = overscanStartIndex !== visibleStartIndex;
-    const overflowBottom = overscanStopIndex !== visibleStopIndex;
-
-    if (overflowTop && overflowBottom) {
-      setOverflow('top-bottom');
-    } else if (overflowBottom && !overflowTop) {
-      setOverflow('bottom');
-    } else if (!overflowBottom && overflowTop) {
-      setOverflow('top');
-    }
-  };
-
   const options = useMemo(
     () =>
       searchResults?.data?.pages?.flat().map((result) => ({
@@ -129,6 +102,26 @@ const RelationInput = ({
       listRef.current.scrollToItem(relations.length, 'end');
     }
 
+    // TODO: should we use useCallback instead?
+    const handleNativeScroll = (e) => {
+      if (totalNumberOfRelations <= numberOfRelationsToDisplay) {
+        return setOverflow('');
+      }
+
+      const parentScrollContainerHeight = e.target.parentNode.scrollHeight;
+      const maxScrollBottom = e.target.scrollHeight - e.target.scrollTop;
+
+      if (e.target.scrollTop === 0) {
+        return setOverflow('bottom');
+      }
+
+      if (maxScrollBottom === parentScrollContainerHeight) {
+        return setOverflow('top');
+      }
+
+      return setOverflow('top-bottom');
+    };
+
     const outerListRefCurrent = outerListRef?.current;
 
     if (!paginatedRelations.isLoading && relations?.length > 0 && outerListRefCurrent) {
@@ -140,7 +133,7 @@ const RelationInput = ({
         outerListRefCurrent.removeEventListener('scroll', handleNativeScroll);
       }
     };
-  }, [paginatedRelations, relations]);
+  }, [paginatedRelations, relations, numberOfRelationsToDisplay, totalNumberOfRelations]);
 
   return (
     <Field error={error} name={name} hint={description} id={id}>
@@ -215,7 +208,7 @@ const RelationInput = ({
             itemCount={totalNumberOfRelations}
             itemSize={RELATION_ITEM_HEIGHT}
             itemData={relations}
-            onItemsRendered={handleOverflow}
+            innerElementType="ol"
           >
             {({ data, index, style }) => {
               const { publicationState, href, mainField, id } = data[index];

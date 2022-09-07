@@ -7,7 +7,7 @@ import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin
 import { RelationInput } from '../RelationInput';
 import { useRelation } from '../../hooks/useRelation';
 import { connect, select, normalizeRelations } from './utils';
-import { PUBLICATION_STATES } from './constants';
+import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
 import { getTrad } from '../../utils';
 
 export const RelationInputWrapper = ({
@@ -37,7 +37,7 @@ export const RelationInputWrapper = ({
       },
       pageParams: {
         ...defaultParams,
-        pageSize: 10,
+        pageSize: RELATIONS_TO_DISPLAY,
       },
     },
 
@@ -45,8 +45,8 @@ export const RelationInputWrapper = ({
       endpoint: endpoints.search,
       pageParams: {
         ...defaultParams,
-        // entityId: isCreatingEntry ? undefined : initialData.id,
-        pageSize: 10,
+        entityId: isCreatingEntry ? undefined : initialData.id,
+        pageSize: SEARCH_RESULTS_TO_DISPLAY,
       },
     },
   });
@@ -108,7 +108,13 @@ export const RelationInputWrapper = ({
       description={description}
       disabled={isDisabled}
       id={name}
-      label={formatMessage(intlLabel)}
+      label={formatMessage(
+        {
+          id: intlLabel.id,
+          defaultMessage: `${intlLabel.defaultMessage} ({numberOfEntries})`,
+        },
+        { numberOfEntries: initialData[name]?.count ?? 0 }
+      )}
       labelLoadMore={
         // TODO: only display if there are more; derive from count
         !isCreatingEntry &&
@@ -125,7 +131,7 @@ export const RelationInputWrapper = ({
         })
       }
       name={name}
-      numberOfRelationsToDisplay={5}
+      numberOfRelationsToDisplay={RELATIONS_TO_DISPLAY}
       onRelationAdd={(relation) => handleRelationAdd(relation)}
       onRelationRemove={(relation) => handleRelationRemove(relation)}
       onRelationLoadMore={() => handleRelationLoadMore()}
