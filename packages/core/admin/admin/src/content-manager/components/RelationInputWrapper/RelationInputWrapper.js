@@ -45,7 +45,7 @@ export const RelationInputWrapper = ({
       endpoint: endpoints.search,
       pageParams: {
         ...defaultParams,
-        // entityId: isCreatingEntry ? undefined : initialData.id,
+        entityId: isCreatingEntry ? undefined : initialData.id,
         pageSize: 10,
       },
     },
@@ -113,7 +113,7 @@ export const RelationInputWrapper = ({
           id: intlLabel.id,
           defaultMessage: `${intlLabel.defaultMessage} ({numberOfEntries})`,
         },
-        { numberOfEntries: initialData[name].count }
+        { numberOfEntries: initialData[name]?.count ?? 0 }
       )}
       labelLoadMore={
         // TODO: only display if there are more; derive from count
