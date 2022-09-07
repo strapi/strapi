@@ -156,11 +156,12 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const connectRelation = useCallback(({ target: { name, value } }) => {
+  const connectRelation = useCallback(({ target: { name, value, replace } }) => {
     dispatch({
       type: 'CONNECT_RELATION',
       keys: name.split('.'),
       value,
+      replace,
     });
   }, []);
 

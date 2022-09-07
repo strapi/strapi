@@ -84,10 +84,14 @@ const reducer = (state, action) =>
       }
       case 'CONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
-        const { value } = action;
+        const { value, replace = false } = action;
 
-        const nextValue = get(draftState, [...path, 'connect']);
-        nextValue.push(value);
+        if (replace) {
+          set(draftState, [...path, 'connect'], [value]);
+        } else {
+          const nextValue = get(draftState, [...path, 'connect']);
+          nextValue.push(value);
+        }
 
         break;
       }
