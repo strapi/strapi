@@ -1367,18 +1367,6 @@ describe('Role CRUD End to End', () => {
                   "subCategory": "general",
                 },
                 {
-                  "action": "admin::provider-login.read",
-                  "category": "single sign on",
-                  "displayName": "Read",
-                  "subCategory": "options",
-                },
-                {
-                  "action": "admin::provider-login.update",
-                  "category": "single sign on",
-                  "displayName": "Update",
-                  "subCategory": "options",
-                },
-                {
                   "action": "admin::roles.create",
                   "category": "users and roles",
                   "displayName": "Create",
