@@ -42,7 +42,8 @@ export const normalizeRelations = (
             })
             .filter(Boolean),
         ])
-        .filter((page) => page.length > 0),
+        .filter((page) => page.length > 0)
+        .reverse(),
     },
   };
 };
