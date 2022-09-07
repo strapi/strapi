@@ -187,8 +187,8 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
     const result = cleanData(
       {
         relation: {
-          add: [{ id: 1, something: true }],
-          remove: [{ id: 2, something: true }],
+          connect: [{ id: 1, something: true }],
+          disconnect: [{ id: 2, something: true }],
         },
       },
       {
@@ -203,8 +203,8 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
     expect(result).toStrictEqual({
       relation: {
-        add: [{ id: 1 }],
-        remove: [{ id: 2 }],
+        connect: [{ id: 1 }],
+        disconnect: [{ id: 2 }],
       },
     });
   });

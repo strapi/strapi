@@ -24,7 +24,7 @@ export const RelationInputWrapper = ({
   targetModel,
 }) => {
   const { formatMessage } = useIntl();
-  const { addRelation, removeRelation, loadRelation, modifiedData, slug, initialData } =
+  const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
 
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
@@ -75,11 +75,11 @@ export const RelationInputWrapper = ({
       // TODO remove all relations from relations before
     }
 
-    addRelation({ target: { name, value: relation } });
+    connectRelation({ target: { name, value: relation } });
   };
 
   const handleRelationRemove = (relation) => {
-    removeRelation({ target: { name, value: relation } });
+    disconnectRelation({ target: { name, value: relation } });
   };
 
   const handleRelationLoadMore = () => {
