@@ -108,7 +108,13 @@ export const RelationInputWrapper = ({
       description={description}
       disabled={isDisabled}
       id={name}
-      label={formatMessage(intlLabel)}
+      label={formatMessage(
+        {
+          id: intlLabel.id,
+          defaultMessage: `${intlLabel.defaultMessage} ({numberOfEntries})`,
+        },
+        { numberOfEntries: initialData[name].count }
+      )}
       labelLoadMore={
         // TODO: only display if there are more; derive from count
         !isCreatingEntry &&
