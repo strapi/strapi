@@ -18,6 +18,7 @@ import { getFullName } from '../../../../utils';
 const TableRows = ({
   canCreate,
   canDelete,
+  contentType,
   headers,
   entriesToDelete,
   onClickDelete,
@@ -88,6 +89,7 @@ const TableRows = ({
                     <CellContent
                       content={data[name.split('.')[0]]}
                       name={name}
+                      contentType={contentType}
                       {...rest}
                       rowId={data.id}
                     />
@@ -180,6 +182,9 @@ TableRows.defaultProps = {
 TableRows.propTypes = {
   canCreate: PropTypes.bool,
   canDelete: PropTypes.bool,
+  contentType: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+  }).isRequired,
   entriesToDelete: PropTypes.array,
   headers: PropTypes.array.isRequired,
   onClickDelete: PropTypes.func,

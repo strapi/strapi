@@ -112,6 +112,7 @@ const DynamicTable = ({
       <TableRows
         canCreate={canCreate}
         canDelete={canDelete}
+        contentType={layout.contentType}
         headers={tableHeaders}
         rows={rows}
         withBulkActions

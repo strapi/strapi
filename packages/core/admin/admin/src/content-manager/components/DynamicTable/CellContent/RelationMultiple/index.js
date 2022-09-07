@@ -28,14 +28,12 @@ const fetchRelation = async (endPoint, notifyStatus) => {
   return { results, pagination };
 };
 
-const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value }) => {
+const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, contentType }) => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
   const relationFetchEndpoint = useMemo(() => {
-    return getRequestUrl(
-      `collection-types/${fieldSchema.targetModel}/${entityId}/${name.split('.')[0]}`
-    );
-  }, [entityId, name, fieldSchema]);
+    return getRequestUrl(`collection-types/${contentType.uid}/${entityId}/${name.split('.')[0]}`);
+  }, [entityId, name, contentType]);
   const [isOpen, setIsOpen] = useState(false);
 
   const Label = (
@@ -119,6 +117,9 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value }) => 
 };
 
 RelationMultiple.propTypes = {
+  contentType: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+  }).isRequired,
   fieldSchema: PropTypes.shape({
     relation: PropTypes.string,
     targetModel: PropTypes.string,
