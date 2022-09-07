@@ -16,11 +16,11 @@ export const normalizeRelations = (
     data: {
       pages: relations.data.pages
         .map((page) => [
-          ...page.values
+          ...[...page.results, ...(modifiedData?.connect ?? [])]
             .map((relation) => {
               const nextRelation = { ...relation };
 
-              if (modifiedData?.remove?.find((deletion) => deletion.id === nextRelation.id)) {
+              if (modifiedData?.disconnect?.find((relation) => relation.id === nextRelation.id)) {
                 return null;
               }
 
@@ -41,7 +41,6 @@ export const normalizeRelations = (
               return nextRelation;
             })
             .filter(Boolean),
-          ...(modifiedData?.add ?? []),
         ])
         .filter((page) => page.length > 0),
     },
