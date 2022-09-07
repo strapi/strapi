@@ -398,12 +398,14 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
   const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
   let inverseJoinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
 
+  const orderColumnName = _.snakeCase(`${meta.singularName}_order`);
+
   // if relation is slef referencing
   if (joinColumnName === inverseJoinColumnName) {
     inverseJoinColumnName = `inv_${inverseJoinColumnName}`;
   }
 
-  metadata.add({
+  const metadataSchema = {
     uid: joinTableName,
     tableName: joinTableName,
     attributes: {
@@ -422,7 +424,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
           unsigned: true,
         },
       },
-      order: {
+      [orderColumnName]: {
         type: 'integer',
         column: {
           unsigned: true,
@@ -439,6 +441,10 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       {
         name: `${joinTableName}_inv_fk`,
         columns: [inverseJoinColumnName],
+      },
+      {
+        name: `${joinTableName}_order_fk`,
+        columns: [orderColumnName],
       },
     ],
     foreignKeys: [
@@ -457,7 +463,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
         onDelete: 'CASCADE',
       },
     ],
-  });
+  };
 
   const joinTable = {
     name: joinTableName,
@@ -469,7 +475,34 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       name: inverseJoinColumnName,
       referencedColumn: 'id',
     },
+    orderColumnName,
   };
+
+  if (isBidirectional(attribute)) {
+    let inverseOrderColumnName = _.snakeCase(`${targetMeta.singularName}_order`);
+
+    // if relation is slef referencing
+    if (joinColumnName === inverseJoinColumnName) {
+      inverseOrderColumnName = `inv_${inverseOrderColumnName}`;
+    }
+
+    metadataSchema.attributes[inverseOrderColumnName] = {
+      type: 'integer',
+      column: {
+        unsigned: true,
+        defaultTo: 0,
+      },
+    };
+
+    metadataSchema.indexes.push({
+      name: `${joinTableName}_order_inv_fk`,
+      columns: [inverseOrderColumnName],
+    });
+
+    joinTable.inverseOrderColumnName = inverseOrderColumnName;
+  }
+
+  metadata.add(metadataSchema);
 
   attribute.joinTable = joinTable;
 
@@ -486,6 +519,8 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       name: joinTableName,
       joinColumn: joinTable.inverseJoinColumn,
       inverseJoinColumn: joinTable.joinColumn,
+      orderColumnName: joinTable.inverseOrderColumnName,
+      inverseOrderColumnName: joinTable.orderColumnName,
     };
   }
 };

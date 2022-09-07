@@ -475,26 +475,45 @@ const createEntityManager = (db) => {
           // need to set the column on the target
 
           const { joinTable } = attribute;
-          const { joinColumn, inverseJoinColumn } = joinTable;
+          const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } =
+            joinTable;
 
           if (isOneToAny(attribute) && isBidirectional(attribute)) {
             await this.createQueryBuilder(joinTable.name)
               .delete()
-              .where({ [inverseJoinColumn.name]: castArray(data[attributeName]) })
+              .where({ [inverseJoinColumn.name]: castArray(data[attributeName]) }) // TODO: would break with connect
               .where(joinTable.on || {})
               .execute();
           }
 
           const assocs = toAssocs(data[attributeName]);
 
-          const relationsToAdd = assocs.connect || assocs;
+          const relationsToAdd = uniqBy('id', assocs.connect || assocs);
+
+          const maxMap = {};
+          if (inverseOrderColumnName) {
+            await Promise.all(
+              relationsToAdd.map(async (rel) => {
+                const { max } = await this.createQueryBuilder(joinTable.name)
+                  .max(inverseOrderColumnName)
+                  .where({ [inverseJoinColumn.name]: rel.id })
+                  .where(joinTable.on || {})
+                  .first()
+                  .execute();
+
+                maxMap[rel.id] = max;
+              })
+            );
+          }
+
           const insert = relationsToAdd.map((data, idx) => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
               ...(joinTable.on || {}),
               ...(data.__pivot || {}),
-              order: idx + 1,
+              [orderColumnName]: idx + 1,
+              ...(inverseOrderColumnName ? { [inverseOrderColumnName]: maxMap[data.id] + 1 } : {}),
             };
           });
 
