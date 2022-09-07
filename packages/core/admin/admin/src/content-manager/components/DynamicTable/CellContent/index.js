@@ -16,7 +16,7 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
 
-const CellContent = ({ content, fieldSchema, metadatas, name, rowId }) => {
+const CellContent = ({ content, fieldSchema, metadatas, name, rowId, contentType }) => {
   const { type } = fieldSchema;
 
   if (!hasContent(type, content, metadatas, fieldSchema)) {
@@ -43,6 +43,7 @@ const CellContent = ({ content, fieldSchema, metadatas, name, rowId }) => {
           value={content}
           name={name}
           entityId={rowId}
+          contentType={contentType}
         />
       );
     }
@@ -69,6 +70,9 @@ CellContent.defaultProps = {
 
 CellContent.propTypes = {
   content: PropTypes.any,
+  contentType: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+  }).isRequired,
   fieldSchema: PropTypes.shape({
     component: PropTypes.string,
     multiple: PropTypes.bool,
