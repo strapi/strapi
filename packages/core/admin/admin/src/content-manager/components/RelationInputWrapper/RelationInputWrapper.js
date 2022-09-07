@@ -8,6 +8,7 @@ import { RelationInput } from '../RelationInput';
 import { useRelation } from '../../hooks/useRelation';
 import { connect, select, normalizeRelations } from './utils';
 import { PUBLICATION_STATES } from './constants';
+import { getTrad } from '../../utils';
 
 export const RelationInputWrapper = ({
   editable,
@@ -20,6 +21,7 @@ export const RelationInputWrapper = ({
   mainField,
   name,
   queryInfos: { endpoints, defaultParams, shouldDisplayRelationLink },
+  placeholder,
   relationType,
   targetModel,
 }) => {
@@ -111,17 +113,17 @@ export const RelationInputWrapper = ({
         // TODO: only display if there are more; derive from count
         !isCreatingEntry &&
         formatMessage({
-          // TODO
-          id: 'tbd',
+          id: getTrad('relation.loadMore'),
           defaultMessage: 'Load More',
         })
       }
       listHeight={320}
-      loadingMessage={formatMessage({
-        // TODO
-        id: 'tbd',
-        defaultMessage: 'Relations are loading',
-      })}
+      loadingMessage={() =>
+        formatMessage({
+          id: getTrad('relation.isLoading'),
+          defaultMessage: 'Relations are loading',
+        })
+      }
       name={name}
       numberOfRelationsToDisplay={5}
       onRelationAdd={(relation) => handleRelationAdd(relation)}
@@ -131,21 +133,20 @@ export const RelationInputWrapper = ({
       onSearchNextPage={() => handleSearchMore()}
       onSearchClose={() => {}}
       onSearchOpen={() => {}}
-      placeholder={formatMessage({
-        // TODO
-        id: 'tbd',
-        defaultMessage: 'Add relation',
-      })}
+      placeholder={formatMessage(
+        placeholder || {
+          id: getTrad('relation.add'),
+          defaultMessage: 'Add relation',
+        }
+      )}
       publicationStateTranslations={{
         [PUBLICATION_STATES.DRAFT]: formatMessage({
-          // TODO
-          id: 'tbd',
+          id: getTrad('relation.publicationState.draft'),
           defaultMessage: 'Draft',
         }),
 
         [PUBLICATION_STATES.PUBLISHED]: formatMessage({
-          // TODO
-          id: 'tbd',
+          id: getTrad('relation.publicationState.published'),
           defaultMessage: 'Published',
         }),
       }}
