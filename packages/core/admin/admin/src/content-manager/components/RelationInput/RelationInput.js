@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled, { keyframes } from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
@@ -63,24 +63,33 @@ const RelationInput = ({
   onSearch,
   placeholder,
   publicationStateTranslations,
-  relations,
+  relations: paginatedRelations,
   searchResults,
 }) => {
+  const [value, setValue] = useState(null);
   const listRef = useRef();
+  const outerListRef = useRef();
   const [overflow, setOverflow] = useState('');
 
-  const flattenRelations = relations.data?.pages.flat();
-  const totalNumberOfRelations = flattenRelations?.length || 0;
+  const relations = useMemo(() => paginatedRelations.data?.pages.flat(), [paginatedRelations]);
+  const totalNumberOfRelations = relations?.length ?? 0;
 
-  const dynamicListHeight =
-    totalNumberOfRelations > numberOfRelationsToDisplay
-      ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT +
-        RELATION_ITEM_HEIGHT / 2
-      : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT;
+  const dynamicListHeight = useMemo(
+    () =>
+      totalNumberOfRelations > numberOfRelationsToDisplay
+        ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT +
+          RELATION_ITEM_HEIGHT / 2
+        : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT,
+    [totalNumberOfRelations, numberOfRelationsToDisplay]
+  );
 
-  // TODO: improve load more conditions
-  // const nextPage = (!relations.hasNextPage() && relations.isLoading) || relations.hasNextPage();
-  const isLoadMoreButton = labelLoadMore && !disabled;
+  const shouldDisplayLoadMoreButton =
+    (!!labelLoadMore && !disabled && paginatedRelations.hasNextPage) ||
+    paginatedRelations.isLoading;
+
+  const handleNativeScroll = () => {
+    // user has started scrolling
+  };
 
   const handleOverflow = ({
     overscanStartIndex,
@@ -105,6 +114,34 @@ const RelationInput = ({
     }
   };
 
+  const options = useMemo(
+    () =>
+      searchResults?.data?.pages?.flat().map((result) => ({
+        ...result,
+        value: result.id,
+        label: result.mainField,
+      })),
+    [searchResults]
+  );
+
+  useEffect(() => {
+    if (!paginatedRelations.isLoading && relations.length > 0) {
+      listRef.current.scrollToItem(relations.length, 'end');
+    }
+
+    const outerListRefCurrent = outerListRef?.current;
+
+    if (!paginatedRelations.isLoading && relations.length > 0 && outerListRefCurrent) {
+      outerListRef.current.addEventListener('scroll', handleNativeScroll);
+    }
+
+    return () => {
+      if (outerListRefCurrent) {
+        outerListRefCurrent.removeEventListener('scroll', handleNativeScroll);
+      }
+    };
+  }, [paginatedRelations, relations]);
+
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
@@ -113,11 +150,7 @@ const RelationInput = ({
             <FieldLabel>{label}</FieldLabel>
             <ReactSelect
               components={{ Option }}
-              options={searchResults?.data?.pages?.flat().map((result) => ({
-                ...result,
-                value: result.id,
-                label: result.mainField,
-              }))}
+              options={options}
               isDisabled={disabled}
               isLoading={searchResults.isLoading}
               error={error}
@@ -125,23 +158,39 @@ const RelationInput = ({
               isSearchable
               isClear
               loadingMessage={() => loadingMessage}
-              onChange={onRelationAdd}
-              onInputChange={onSearch}
+              onChange={(relation) => {
+                setValue(null);
+                onRelationAdd(relation);
+
+                // scroll to the end of the list
+                setTimeout(() => {
+                  listRef.current.scrollToItem(relations.length, 'end');
+                });
+              }}
+              onInputChange={(value) => {
+                setValue(value);
+                onSearch(value);
+              }}
               onMenuClose={onSearchClose}
               onMenuOpen={onSearchOpen}
-              onMenuScrollToBottom={onSearchNextPage}
+              onMenuScrollToBottom={() => {
+                if (searchResults.hasNextPage) {
+                  onSearchNextPage();
+                }
+              }}
               placeholder={placeholder}
               name={name}
+              value={value}
             />
           </>
         }
         loadMore={
-          isLoadMoreButton && (
+          shouldDisplayLoadMoreButton && (
             <TextButton
-              disabled={relations.isLoading}
+              disabled={paginatedRelations.isLoading}
               onClick={() => onRelationLoadMore()}
               startIcon={
-                relations.isLoading ? (
+                paginatedRelations.isLoading ? (
                   // TODO: To replace with loading prop on TextButton after DS release
                   <LoaderWrapper>
                     <Loader />
@@ -160,9 +209,10 @@ const RelationInput = ({
           <List
             height={dynamicListHeight}
             ref={listRef}
+            outerRef={outerListRef}
             itemCount={totalNumberOfRelations}
             itemSize={RELATION_ITEM_HEIGHT}
-            itemData={flattenRelations}
+            itemData={relations}
             onItemsRendered={handleOverflow}
           >
             {({ data, index, style }) => {
@@ -235,7 +285,7 @@ const ReactQueryRelationResult = PropTypes.shape({
       )
     ),
   }),
-  hasNextPage: PropTypes.func.isRequired,
+  hasNextPage: PropTypes.bool,
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
 });
@@ -252,6 +302,7 @@ const ReactQuerySearchResult = PropTypes.shape({
       )
     ),
   }),
+  hasNextPage: PropTypes.bool,
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
 });
@@ -272,7 +323,7 @@ RelationInput.propTypes = {
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   labelLoadMore: PropTypes.string,
-  loadingMessage: PropTypes.string.isRequired,
+  loadingMessage: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   numberOfRelationsToDisplay: PropTypes.number.isRequired,
   onRelationAdd: PropTypes.func.isRequired,
