@@ -73,7 +73,7 @@ const reducer = (state, action) =>
         break;
       }
       case 'LOAD_RELATION': {
-        const initialDataPath = ['initialData', ...action.keys];
+        const initialDataPath = ['initialData', ...action.keys, 'results'];
         const modifiedDataPath = ['modifiedData', ...action.keys];
         const { value } = action;
 
