@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import get from 'lodash/get';
@@ -34,6 +35,7 @@ import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
+  const queryClient = useQueryClient();
   const toggleNotification = useNotification();
   const { setCurrentStep } = useGuidedTour();
   const { trackUsage } = useTracking();
@@ -260,7 +262,11 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         setCurrentStep('contentManager.success');
 
+        // TODO: need to find a better place, or a better abstraction
+        queryClient.invalidateQueries(['relation']);
+
         dispatch(submitSucceeded(cleanReceivedData(data)));
+
         // Enable navigation and remove loaders
         dispatch(setStatus('resolved'));
 
@@ -284,6 +290,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       rawQuery,
       toggleNotification,
       setCurrentStep,
+      queryClient,
     ]
   );
 
@@ -332,6 +339,9 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
           message: { id: getTrad('success.record.save') },
         });
 
+        // TODO: need to find a better place, or a better abstraction
+        queryClient.invalidateQueries(['relation']);
+
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
         dispatch(setStatus('resolved'));
@@ -346,7 +356,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         return Promise.reject(err);
       }
     },
-    [cleanReceivedData, displayErrors, slug, id, dispatch, toggleNotification]
+    [cleanReceivedData, displayErrors, slug, id, dispatch, toggleNotification, queryClient]
   );
 
   const onUnpublish = useCallback(async () => {
