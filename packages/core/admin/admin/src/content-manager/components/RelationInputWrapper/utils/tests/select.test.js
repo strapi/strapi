@@ -137,14 +137,16 @@ describe('RelationInputWrapper | select', () => {
 
     const { result } = await setup(SELECT_ATTR_FIXTURE);
 
-    expect(result.current.queryInfos.endpoints.relation).toBe('/content-manager/slug/2/test');
+    expect(result.current.queryInfos.endpoints.relation).toBe(
+      '/content-manager/collection-types/slug/2/test'
+    );
   });
 
   test('returns the original queryInfos and queryInfos.endpoints', async () => {
     const FIXTURE_QUERY_INFOS = {
       test: true,
       endpoints: {
-        search: '/',
+        search: '/content-manager/relations/slug/test',
       },
     };
 
