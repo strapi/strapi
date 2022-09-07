@@ -125,13 +125,13 @@ const RelationInput = ({
   );
 
   useEffect(() => {
-    if (!paginatedRelations.isLoading && relations.length > 0) {
+    if (!paginatedRelations.isLoading && relations?.length > 0) {
       listRef.current.scrollToItem(relations.length, 'end');
     }
 
     const outerListRefCurrent = outerListRef?.current;
 
-    if (!paginatedRelations.isLoading && relations.length > 0 && outerListRefCurrent) {
+    if (!paginatedRelations.isLoading && relations?.length > 0 && outerListRefCurrent) {
       outerListRef.current.addEventListener('scroll', handleNativeScroll);
     }
 
@@ -163,9 +163,11 @@ const RelationInput = ({
                 onRelationAdd(relation);
 
                 // scroll to the end of the list
-                setTimeout(() => {
-                  listRef.current.scrollToItem(relations.length, 'end');
-                });
+                if (relations?.length > 0) {
+                  setTimeout(() => {
+                    listRef.current.scrollToItem(relations.length, 'end');
+                  });
+                }
               }}
               onInputChange={(value) => {
                 setValue(value);
