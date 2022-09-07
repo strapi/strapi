@@ -30,10 +30,11 @@ export const RelationInputWrapper = ({
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
       endpoint: endpoints.relation,
-      onload(data) {
-        loadRelation({ target: { name, value: data } });
+      onLoad(data) {
+        loadRelation({ target: { name, value: data.results } });
       },
       pageParams: {
+        ...defaultParams,
         pageSize: 10,
       },
     },
