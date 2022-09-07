@@ -171,7 +171,10 @@ module.exports = ({ strapi }) => ({
       publishData[PUBLISHED_AT_ATTRIBUTE] = null;
     }
 
-    const params = { data: publishData, populate: getDeepPopulate(uid) };
+    const params = {
+      data: publishData,
+      populate: getDeepPopulate(uid, null, { onlyMany: true, countMany: true }),
+    };
 
     return strapi.entityService.create(uid, params);
   },
@@ -179,13 +182,16 @@ module.exports = ({ strapi }) => ({
   update(entity, body, uid) {
     const publishData = omitPublishedAtField(body);
 
-    const params = { data: publishData, populate: getDeepPopulate(uid) };
+    const params = {
+      data: publishData,
+      populate: getDeepPopulate(uid, null, { onlyMany: true, countMany: true }),
+    };
 
     return strapi.entityService.update(uid, entity.id, params);
   },
 
   delete(entity, uid) {
-    const params = { populate: getDeepPopulate(uid) };
+    const params = { populate: getDeepPopulate(uid, null, { onlyMany: true, countMany: true }) };
 
     return strapi.entityService.delete(uid, entity.id, params);
   },
@@ -212,7 +218,10 @@ module.exports = ({ strapi }) => ({
 
     const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: new Date() };
 
-    const params = { data, populate: getDeepPopulate(uid) };
+    const params = {
+      data,
+      populate: getDeepPopulate(uid, null, { onlyMany: true, countMany: true }),
+    };
 
     return strapi.entityService.update(uid, entity.id, params);
   }),
@@ -224,7 +233,10 @@ module.exports = ({ strapi }) => ({
 
     const data = { ...body, [PUBLISHED_AT_ATTRIBUTE]: null };
 
-    const params = { data, populate: getDeepPopulate(uid) };
+    const params = {
+      data,
+      populate: getDeepPopulate(uid, null, { onlyMany: true, countMany: true }),
+    };
 
     return strapi.entityService.update(uid, entity.id, params);
   }),
