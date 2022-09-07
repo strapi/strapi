@@ -43,8 +43,7 @@ export const RelationInputWrapper = ({
       endpoint: endpoints.search,
       pageParams: {
         ...defaultParams,
-        entityId: isCreatingEntry ? undefined : 'id',
-        omitIds: isCreatingEntry ? [] : undefined,
+        // entityId: isCreatingEntry ? undefined : initialData.id,
         pageSize: 10,
       },
     },
