@@ -1,10 +1,6 @@
-# Strapi plugin Custom Fields
+# Strapi plugin Color Picker
 
-A custom field plugin to house Strapi maintained custom fields
-
-## Custom Fields
-
-- [Color Picker](#color-picker)
+A Strapi-maintainted color picker custom field
 
 ## Installation
 
@@ -12,10 +8,10 @@ To install this plugin, you need to add an NPM dependency to your Strapi applica
 
 ```sh
 # Using Yarn
-yarn add @strapi/custom-fields
+yarn add @strapi/plugin-color-picker
 
 # Or using NPM
-npm install @strapi/custom-fields
+npm install @strapi/plugin-color-picker
 ```
 
 Then, you'll need to build your admin panel:
@@ -28,7 +24,7 @@ yarn build
 npm run build
 ```
 
-## Color Picker
+## Usage
 
 Use saturation and hue sliders to select a color and save the value as a HEX string
 

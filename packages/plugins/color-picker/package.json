@@ -1,12 +1,12 @@
 {
-  "name": "@strapi/custom-fields",
+  "name": "@strapi/plugin-color-picker",
   "version": "4.3.4",
-  "description": "Strapi maintained Custom Fields",
+  "description": "Color picker custom field",
   "strapi": {
-    "name": "custom-fields",
-    "description": "Strapi maintained Custom Fields",
+    "name": "color-picker",
+    "description": "Color picker custom field",
     "kind": "plugin",
-    "displayName": "Custom Fields"
+    "displayName": "Color Picker"
   },
   "dependencies": {},
   "peerDependencies": {
@@ -15,7 +15,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/strapi/strapi.git",
-    "directory": "packages/plugins/custom-fields"
+    "directory": "packages/plugins/color-picker"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {

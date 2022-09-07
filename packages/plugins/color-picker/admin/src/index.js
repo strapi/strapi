@@ -6,13 +6,13 @@ import getTrad from './utils/getTrad';
 export default {
   register(app) {
     app.customFields.register({
-      name: 'color-picker',
-      pluginId: 'custom-fields',
+      name: 'color',
+      pluginId: 'color-picker',
       type: 'string',
       icon: ColorPickerIcon,
       intlLabel: {
         id: getTrad('color-picker.label'),
-        defaultMessage: 'Color Picker',
+        defaultMessage: 'Color',
       },
       intlDescription: {
         id: getTrad('color-picker.description'),
