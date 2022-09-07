@@ -4,13 +4,15 @@ import { useInfiniteQuery } from 'react-query';
 import { axiosInstance } from '../../../core/utils';
 
 export const useRelation = (cacheKey, { relation, search }) => {
-  const [searchTerm, setSearchTerm] = useState(null);
+  const [searchParams, setSearchParams] = useState({});
 
   const fetchRelations = async ({ pageParam = 1 }) => {
     try {
       const { data } = await axiosInstance.get(relation?.endpoint, {
-        ...(relation.pageParams ?? {}),
-        page: pageParam,
+        params: {
+          ...(relation.pageParams ?? {}),
+          page: pageParam,
+        },
       });
 
       if (relation?.onLoad) {
@@ -25,8 +27,11 @@ export const useRelation = (cacheKey, { relation, search }) => {
 
   const fetchSearch = async ({ pageParam = 1 }) => {
     const { data } = await axiosInstance.get(search.endpoint, {
-      ...(search.pageParams ?? {}),
-      page: pageParam,
+      params: {
+        ...(search.pageParams ?? {}),
+        ...searchParams,
+        page: pageParam,
+      },
     });
 
     return data;
@@ -35,7 +40,7 @@ export const useRelation = (cacheKey, { relation, search }) => {
   const relationsRes = useInfiniteQuery(['relation', cacheKey], fetchRelations, {
     enabled: !!relation?.endpoint,
     getNextPageParam(lastPage) {
-      if (lastPage.pagination.page + 1 === lastPage.pagination.total) {
+      if (lastPage.pagination.page >= lastPage.pagination.pageCount) {
         return undefined;
       }
 
@@ -44,21 +49,28 @@ export const useRelation = (cacheKey, { relation, search }) => {
     },
   });
 
-  const searchRes = useInfiniteQuery(['relation', cacheKey, 'search', searchTerm], fetchSearch, {
-    enabled: !!searchTerm,
-    getNextPageParam(lastPage) {
-      if (lastPage.pagination.page + 1 === lastPage.pagination.total) {
-        return undefined;
-      }
+  const searchRes = useInfiniteQuery(
+    ['relation', cacheKey, 'search', JSON.stringify(searchParams)],
+    fetchSearch,
+    {
+      enabled: Object.keys(searchParams).length > 0,
+      getNextPageParam(lastPage) {
+        if (lastPage.pagination.page >= lastPage.pagination.pageCount) {
+          return undefined;
+        }
 
-      // eslint-disable-next-line consistent-return
-      return lastPage.pagination.page + 1;
-    },
-  });
+        // eslint-disable-next-line consistent-return
+        return lastPage.pagination.page + 1;
+      },
+    }
+  );
 
-  const searchFor = (term) => {
+  const searchFor = (term, options = {}) => {
     searchRes.remove();
-    setSearchTerm(term);
+    setSearchParams({
+      ...options,
+      q: encodeURIComponent(term),
+    });
   };
 
   return { relations: relationsRes, search: searchRes, searchFor };

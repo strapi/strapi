@@ -87,7 +87,7 @@ export const RelationInputWrapper = ({
   };
 
   const handleSearch = (term) => {
-    searchFor(term);
+    searchFor(term, { omitIds: modifiedData?.add?.map((relation) => relation.id) });
   };
 
   const handleSearchMore = () => {
