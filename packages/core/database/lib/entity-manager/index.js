@@ -485,7 +485,10 @@ const createEntityManager = (db) => {
               .execute();
           }
 
-          const insert = toAssocs(data[attributeName]).map((data, idx) => {
+          const assocs = toAssocs(data[attributeName]);
+
+          const relationsToAdd = assocs.connect || assocs;
+          const insert = relationsToAdd.map((data, idx) => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
