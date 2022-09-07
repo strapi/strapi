@@ -12,10 +12,10 @@
     "strapi": "strapi"
   },
   "dependencies": {
+    "@strapi/plugin-color-picker": "4.3.4",
     "@strapi/plugin-documentation": "4.3.4",
     "@strapi/plugin-graphql": "4.3.4",
     "@strapi/plugin-i18n": "4.3.4",
-    "@strapi/custom-fields": "4.3.4",
     "@strapi/plugin-sentry": "4.3.4",
     "@strapi/plugin-users-permissions": "4.3.4",
     "@strapi/provider-email-mailgun": "4.3.4",
