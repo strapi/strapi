@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useQuery } from 'react-query';
 import { useIntl } from 'react-intl';
@@ -28,10 +28,14 @@ const fetchRelation = async (endPoint, notifyStatus) => {
   return { results, pagination };
 };
 
-const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) => {
+const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value }) => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
-  const requestURL = getRequestUrl(`${queryInfos.endPoint}/${rowId}/${name.split('.')[0]}`);
+  const relationFetchEndpoint = useMemo(() => {
+    return getRequestUrl(
+      `collection-types/${fieldSchema.targetModel}/${entityId}/${name.split('.')[0]}`
+    );
+  }, [entityId, name, fieldSchema]);
   const [isOpen, setIsOpen] = useState(false);
 
   const Label = (
@@ -56,8 +60,8 @@ const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, val
   };
 
   const { data, status } = useQuery(
-    [fieldSchema.targetModel, rowId],
-    () => fetchRelation(requestURL, notify),
+    [fieldSchema.targetModel, entityId],
+    () => fetchRelation(relationFetchEndpoint, notify),
     {
       enabled: isOpen,
       staleTime: 0,
@@ -127,8 +131,7 @@ RelationMultiple.propTypes = {
     }),
   }).isRequired,
   name: PropTypes.string.isRequired,
-  rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  queryInfos: PropTypes.shape({ endPoint: PropTypes.string.isRequired }).isRequired,
+  entityId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   value: PropTypes.object.isRequired,
 };
 

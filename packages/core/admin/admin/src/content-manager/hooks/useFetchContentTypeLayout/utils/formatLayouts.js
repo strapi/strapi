@@ -1,5 +1,5 @@
 import { cloneDeep, get, set } from 'lodash';
-import { getRequestUrl, mergeMetasWithSchema } from '../../../utils';
+import { mergeMetasWithSchema } from '../../../utils';
 
 const getRelationModel = (targetModel, models) => models.find((model) => model.uid === targetModel);
 
@@ -93,7 +93,6 @@ const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
           ? generateRelationQueryInfosForComponents(
               contentTypeConfiguration,
               attribute.name,
-              ctUid,
               models
             )
           : generateRelationQueryInfos(contentTypeConfiguration, attribute.name, models);
@@ -122,9 +121,6 @@ const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
 
     if (type === 'relation') {
       const queryInfos = {
-        endpoints: {
-          search: `collection-types/${contentTypeConfiguration.uid}`,
-        },
         defaultParams: {},
       };
 
@@ -163,32 +159,20 @@ const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
 };
 
 const generateRelationQueryInfos = (contentTypeConfiguration, fieldName, models) => {
-  const { uid } = contentTypeConfiguration;
   const targetModel = get(contentTypeConfiguration, ['attributes', fieldName, 'targetModel'], '');
   const shouldDisplayRelationLink = getDisplayedModels(models).includes(targetModel);
 
   return {
-    endpoints: {
-      search: getRequestUrl(`${uid}/${fieldName}`),
-    },
     defaultParams: {},
     shouldDisplayRelationLink,
   };
 };
 
-const generateRelationQueryInfosForComponents = (
-  contentTypeConfiguration,
-  fieldName,
-  ctUid,
-  models
-) => {
+const generateRelationQueryInfosForComponents = (contentTypeConfiguration, fieldName, models) => {
   const targetModel = get(contentTypeConfiguration, ['attributes', fieldName, 'targetModel'], '');
   const shouldDisplayRelationLink = getDisplayedModels(models).includes(targetModel);
 
   return {
-    endpoints: {
-      search: getRequestUrl(`${ctUid}/${fieldName}`),
-    },
     defaultParams: {
       _component: contentTypeConfiguration.uid,
     },

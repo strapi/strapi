@@ -16,7 +16,7 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
 
-const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId }) => {
+const CellContent = ({ content, fieldSchema, metadatas, name, rowId }) => {
   const { type } = fieldSchema;
 
   if (!hasContent(type, content, metadatas, fieldSchema)) {
@@ -39,11 +39,10 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
       return (
         <RelationMultiple
           fieldSchema={fieldSchema}
-          queryInfos={queryInfos}
           metadatas={metadatas}
           value={content}
           name={name}
-          rowId={rowId}
+          entityId={rowId}
         />
       );
     }
@@ -66,7 +65,6 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
 
 CellContent.defaultProps = {
   content: undefined,
-  queryInfos: undefined,
 };
 
 CellContent.propTypes = {
@@ -81,7 +79,6 @@ CellContent.propTypes = {
   metadatas: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  queryInfos: PropTypes.shape({ endPoint: PropTypes.string.isRequired }),
 };
 
 export default CellContent;
