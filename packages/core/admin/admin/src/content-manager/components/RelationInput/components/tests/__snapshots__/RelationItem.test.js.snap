@@ -48,10 +48,10 @@ exports[`Content-Manager || RelationInput || RelationItem should render and matc
 }
 
 <div>
-  <div
+  <li
     class=""
   >
-    <li
+    <div
       class="c0 c1"
     >
       <div
@@ -59,8 +59,8 @@ exports[`Content-Manager || RelationInput || RelationItem should render and matc
       >
         First relation
       </div>
-    </li>
-  </div>
+    </div>
+  </li>
   <div
     class="c3"
   >

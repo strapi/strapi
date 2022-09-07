@@ -33,7 +33,7 @@ const FIXTURES_RELATIONS = {
   },
   isLoading: false,
   isSuccess: true,
-  hasNextPage: () => true,
+  hasNextPage: true,
 };
 
 const FIXTURES_SEARCH = {
@@ -150,7 +150,7 @@ describe('Content-Manager || RelationInput', () => {
       expect(spy).toHaveBeenCalled();
     });
 
-    // TO FIX: not able to find the right element to fire scroll event
+    // TODO: check if it is possible to fire scroll event here
     // test.only('should call onSearchNextPage', () => {
     //   const spy = jest.fn();
     //   const { container } = setup({ onSearchNextPage: spy });
@@ -166,8 +166,18 @@ describe('Content-Manager || RelationInput', () => {
   });
 
   describe('States', () => {
-    test('should display RelationList loading state', () => {
-      setup({ relations: { data: { pages: [] }, isLoading: true, isSuccess: true } });
+    test('should display search loading state', () => {
+      setup({ searchResults: { data: { pages: [] }, isLoading: true, isSuccess: true } });
+
+      fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
+
+      expect(screen.getByText('Relations are loading')).toBeInTheDocument();
+    });
+
+    test('should display load more button loading if loading is true', () => {
+      setup({
+        relations: { data: { pages: [] }, isLoading: true, isSuccess: true, hasNextPage: true },
+      });
 
       expect(screen.getByRole('button', { name: /load more/i })).toHaveAttribute(
         'aria-disabled',
@@ -175,12 +185,23 @@ describe('Content-Manager || RelationInput', () => {
       );
     });
 
-    test('should display search loading state', () => {
-      setup({ searchResults: { data: { pages: [] }, isLoading: true, isSuccess: true } });
+    test('should not display load more button loading if there is no next page', () => {
+      setup({
+        relations: { data: { pages: [] }, isLoading: false, isSuccess: true, hasNextPage: false },
+      });
 
-      fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
+      expect(screen.queryByText('Load more')).not.toBeInTheDocument();
+    });
 
-      expect(screen.getByText('Relations are loading')).toBeInTheDocument();
+    test('should display load more button loading if there is no next page but loading is true', () => {
+      setup({
+        relations: { data: { pages: [] }, isLoading: true, isSuccess: true, hasNextPage: false },
+      });
+
+      expect(screen.getByRole('button', { name: /load more/i })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
     });
 
     test('should display error state', () => {
