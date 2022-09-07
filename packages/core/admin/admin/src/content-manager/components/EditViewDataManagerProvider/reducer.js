@@ -73,28 +73,21 @@ const reducer = (state, action) =>
         break;
       }
       case 'LOAD_RELATION': {
-        const path = ['initialData', ...action.keys];
-        const currentValue = get(state, path);
+        const initialDataPath = ['initialData', ...action.keys];
+        const modifiedDataPath = ['modifiedData', ...action.keys];
         const { value } = action;
 
-        if (Array.isArray(currentValue)) {
-          set(draftState, path, [...value, ...currentValue]);
-        } else {
-          set(draftState, path, value);
-        }
+        set(draftState, initialDataPath, value);
+        set(draftState, modifiedDataPath, { connect: [], disconnect: [] });
 
         break;
       }
-      case 'ADD_RELATION': {
-        const path = ['modifiedData', ...action.keys, 'add'];
-        const currentValue = get(state, path);
+      case 'CONNECT_RELATION': {
+        const path = ['modifiedData', ...action.keys];
         const { value } = action;
 
-        if (Array.isArray(currentValue)) {
-          set(draftState, path, [...currentValue, value]);
-        } else {
-          set(draftState, path, [value]);
-        }
+        const nextValue = get(draftState, [...path, 'connect']);
+        nextValue.push(value);
 
         break;
       }
@@ -220,16 +213,12 @@ const reducer = (state, action) =>
 
         break;
       }
-      case 'REMOVE_RELATION': {
-        const path = ['modifiedData', ...action.keys, 'remove'];
-        const currentValue = get(state, path);
+      case 'DISCONNECT_RELATION': {
+        const path = ['modifiedData', ...action.keys];
         const { value } = action;
 
-        if (Array.isArray(currentValue)) {
-          set(draftState, path, [...currentValue, value]);
-        } else {
-          set(draftState, path, [value]);
-        }
+        const nextValue = get(draftState, [...path, 'disconnect']);
+        nextValue.push(value);
 
         break;
       }

@@ -8,6 +8,7 @@ import { RelationInput } from '../RelationInput';
 import { useRelation } from '../../hooks/useRelation';
 import { connect, select, normalizeRelations } from './utils';
 import { PUBLICATION_STATES } from './constants';
+import { getTrad } from '../../utils';
 
 export const RelationInputWrapper = ({
   editable,
@@ -20,20 +21,22 @@ export const RelationInputWrapper = ({
   mainField,
   name,
   queryInfos: { endpoints, defaultParams, shouldDisplayRelationLink },
+  placeholder,
   relationType,
   targetModel,
 }) => {
   const { formatMessage } = useIntl();
-  const { addRelation, removeRelation, loadRelation, modifiedData, slug, initialData } =
+  const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
 
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
       endpoint: endpoints.relation,
-      onload(data) {
-        loadRelation({ target: { name, value: data } });
+      onLoad(data) {
+        loadRelation({ target: { name, value: data.results } });
       },
       pageParams: {
+        ...defaultParams,
         pageSize: 10,
       },
     },
@@ -42,8 +45,7 @@ export const RelationInputWrapper = ({
       endpoint: endpoints.search,
       pageParams: {
         ...defaultParams,
-        entityId: isCreatingEntry ? undefined : 'id',
-        omitIds: isCreatingEntry ? [] : undefined,
+        // entityId: isCreatingEntry ? undefined : initialData.id,
         pageSize: 10,
       },
     },
@@ -75,11 +77,11 @@ export const RelationInputWrapper = ({
       // TODO remove all relations from relations before
     }
 
-    addRelation({ target: { name, value: relation } });
+    connectRelation({ target: { name, value: relation } });
   };
 
   const handleRelationRemove = (relation) => {
-    removeRelation({ target: { name, value: relation } });
+    disconnectRelation({ target: { name, value: relation } });
   };
 
   const handleRelationLoadMore = () => {
@@ -87,7 +89,7 @@ export const RelationInputWrapper = ({
   };
 
   const handleSearch = (term) => {
-    searchFor(term);
+    searchFor(term, { idsToOmit: modifiedData?.[name]?.connect?.map((relation) => relation.id) });
   };
 
   const handleSearchMore = () => {
@@ -111,17 +113,17 @@ export const RelationInputWrapper = ({
         // TODO: only display if there are more; derive from count
         !isCreatingEntry &&
         formatMessage({
-          // TODO
-          id: 'tbd',
+          id: getTrad('relation.loadMore'),
           defaultMessage: 'Load More',
         })
       }
       listHeight={320}
-      loadingMessage={formatMessage({
-        // TODO
-        id: 'tbd',
-        defaultMessage: 'Relations are loading',
-      })}
+      loadingMessage={() =>
+        formatMessage({
+          id: getTrad('relation.isLoading'),
+          defaultMessage: 'Relations are loading',
+        })
+      }
       name={name}
       numberOfRelationsToDisplay={5}
       onRelationAdd={(relation) => handleRelationAdd(relation)}
@@ -131,34 +133,31 @@ export const RelationInputWrapper = ({
       onSearchNextPage={() => handleSearchMore()}
       onSearchClose={() => {}}
       onSearchOpen={() => {}}
-      placeholder={formatMessage({
-        // TODO
-        id: 'tbd',
-        defaultMessage: 'Add relation',
-      })}
+      placeholder={formatMessage(
+        placeholder || {
+          id: getTrad('relation.add'),
+          defaultMessage: 'Add relation',
+        }
+      )}
       publicationStateTranslations={{
         [PUBLICATION_STATES.DRAFT]: formatMessage({
-          // TODO
-          id: 'tbd',
+          id: getTrad('relation.publicationState.draft'),
           defaultMessage: 'Draft',
         }),
 
         [PUBLICATION_STATES.PUBLISHED]: formatMessage({
-          // TODO
-          id: 'tbd',
+          id: getTrad('relation.publicationState.published'),
           defaultMessage: 'Published',
         }),
       }}
       relations={normalizeRelations(relations, {
         modifiedData: modifiedData?.[name],
-        // TODO: Remove mock title
-        mainFieldName: 'title' || mainField.name,
+        mainFieldName: mainField.name,
         shouldAddLink: shouldDisplayRelationLink,
         targetModel,
       })}
       searchResults={normalizeRelations(search, {
-        // TODO: Remove mock title
-        mainFieldName: 'title' || mainField.name,
+        mainFieldName: mainField.name,
       })}
     />
   );

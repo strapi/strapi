@@ -8,7 +8,9 @@ import { useRelation } from '../useRelation';
 jest.mock('../../../../core/utils', () => ({
   ...jest.requireActual('../../../../core/utils'),
   axiosInstance: {
-    get: jest.fn().mockResolvedValue({ data: { values: [], pagination: { page: 1, total: 10 } } }),
+    get: jest
+      .fn()
+      .mockResolvedValue({ data: { values: [], pagination: { page: 1, pageCount: 10 } } }),
   },
 }));
 
@@ -70,8 +72,10 @@ describe('useRelation', () => {
     expect(result.current.relations.isSuccess).toBe(true);
     expect(axiosInstance.get).toBeCalledTimes(1);
     expect(axiosInstance.get).toBeCalledWith('/', {
-      limit: 10,
-      page: 1,
+      params: {
+        limit: 10,
+        page: 1,
+      },
     });
   });
 
@@ -81,7 +85,7 @@ describe('useRelation', () => {
       values: [1, 2],
       pagination: {
         page: 1,
-        total: 3,
+        pageCount: 3,
       },
     };
     axiosInstance.get = jest.fn().mockResolvedValue({
@@ -107,8 +111,10 @@ describe('useRelation', () => {
     await waitForNextUpdate();
 
     expect(axiosInstance.get).toBeCalledWith(expect.any(String), {
-      limit: 5,
-      page: expect.any(Number),
+      params: {
+        limit: 5,
+        page: expect.any(Number),
+      },
     });
   });
 
@@ -126,8 +132,10 @@ describe('useRelation', () => {
     expect(result.current.relations.isSuccess).toBe(true);
     expect(axiosInstance.get).toBeCalledTimes(1);
     expect(axiosInstance.get).toBeCalledWith('/', {
-      limit: 10,
-      page: 1,
+      params: {
+        limit: 10,
+        page: 1,
+      },
     });
   });
 
@@ -137,7 +145,7 @@ describe('useRelation', () => {
         values: [],
         pagination: {
           page: 1,
-          total: 3,
+          pageCount: 3,
         },
       },
     });
@@ -154,12 +162,16 @@ describe('useRelation', () => {
 
     expect(axiosInstance.get).toBeCalledTimes(2);
     expect(axiosInstance.get).toHaveBeenNthCalledWith(1, expect.any(String), {
-      limit: expect.any(Number),
-      page: 1,
+      params: {
+        limit: expect.any(Number),
+        page: 1,
+      },
     });
     expect(axiosInstance.get).toHaveBeenNthCalledWith(2, expect.any(String), {
-      limit: expect.any(Number),
-      page: 2,
+      params: {
+        limit: expect.any(Number),
+        page: 2,
+      },
     });
   });
 
@@ -169,7 +181,7 @@ describe('useRelation', () => {
         values: [],
         pagination: {
           page: 1,
-          total: 2,
+          pageCount: 1,
         },
       },
     });
@@ -202,7 +214,7 @@ describe('useRelation', () => {
 
     const spy = jest
       .fn()
-      .mockResolvedValue({ data: { values: [], pagination: { page: 1, total: 2 } } });
+      .mockResolvedValue({ data: { values: [], pagination: { page: 1, pageCount: 2 } } });
     axiosInstance.get = spy;
 
     act(() => {
@@ -212,7 +224,7 @@ describe('useRelation', () => {
     await waitForNextUpdate();
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith('/', { limit: 10, page: 1 });
+    expect(spy).toBeCalledWith('/', { params: { q: 'something', limit: 10, page: 1 } });
   });
 
   test('does fetch search results with a different limit', async () => {
@@ -224,7 +236,7 @@ describe('useRelation', () => {
 
     const spy = jest
       .fn()
-      .mockResolvedValue({ data: { values: [], pagination: { page: 1, total: 2 } } });
+      .mockResolvedValue({ data: { values: [], pagination: { page: 1, pageCount: 2 } } });
     axiosInstance.get = spy;
 
     act(() => {
@@ -234,7 +246,13 @@ describe('useRelation', () => {
     await waitForNextUpdate();
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(expect.any(String), { limit: 5, page: expect.any(Number) });
+    expect(spy).toBeCalledWith(expect.any(String), {
+      params: {
+        q: 'something',
+        limit: 5,
+        page: expect.any(Number),
+      },
+    });
   });
 
   test('fetch search next page, if there is one', async () => {
@@ -242,7 +260,7 @@ describe('useRelation', () => {
 
     const spy = jest
       .fn()
-      .mockResolvedValue({ data: { values: [], pagination: { page: 1, total: 3 } } });
+      .mockResolvedValue({ data: { values: [], pagination: { page: 1, pageCount: 2 } } });
     axiosInstance.get = spy;
 
     act(() => {
@@ -259,12 +277,18 @@ describe('useRelation', () => {
 
     expect(spy).toBeCalledTimes(2);
     expect(spy).toHaveBeenNthCalledWith(1, expect.any(String), {
-      limit: expect.any(Number),
-      page: 1,
+      params: {
+        q: 'something',
+        limit: expect.any(Number),
+        page: 1,
+      },
     });
     expect(spy).toHaveBeenNthCalledWith(2, expect.any(String), {
-      limit: expect.any(Number),
-      page: 2,
+      params: {
+        q: 'something',
+        limit: expect.any(Number),
+        page: 2,
+      },
     });
   });
 
@@ -273,7 +297,7 @@ describe('useRelation', () => {
 
     const spy = jest
       .fn()
-      .mockResolvedValue({ data: { values: [], pagination: { page: 1, total: 2 } } });
+      .mockResolvedValue({ data: { values: [], pagination: { page: 1, pageCount: 1 } } });
     axiosInstance.get = spy;
 
     act(() => {

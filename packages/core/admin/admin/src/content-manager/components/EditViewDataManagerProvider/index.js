@@ -156,9 +156,9 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const addRelation = useCallback(({ target: { name, value } }) => {
+  const connectRelation = useCallback(({ target: { name, value } }) => {
     dispatch({
-      type: 'ADD_RELATION',
+      type: 'CONNECT_RELATION',
       keys: name.split('.'),
       value,
     });
@@ -412,9 +412,9 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const removeRelation = useCallback(({ target: { name, value } }) => {
+  const disconnectRelation = useCallback(({ target: { name, value } }) => {
     dispatch({
-      type: 'REMOVE_RELATION',
+      type: 'DISCONNECT_RELATION',
       keys: name.split('.'),
       value,
     });
@@ -470,7 +470,7 @@ const EditViewDataManagerProvider = ({
       value={{
         addComponentToDynamicZone,
         addNonRepeatableComponentToField,
-        addRelation,
+        connectRelation,
         addRepeatableComponentToField,
         allLayoutData,
         checkFormErrors,
@@ -491,7 +491,7 @@ const EditViewDataManagerProvider = ({
         onChange: handleChange,
         onPublish: handlePublish,
         onUnpublish,
-        removeRelation,
+        disconnectRelation,
         readActionAllowedFields,
         redirectToPreviousPage,
         removeComponentFromDynamicZone,
