@@ -12,7 +12,7 @@ const ChildrenWrapper = styled(Flex)`
 
 export const RelationItem = ({ children, disabled, endAction, style, ...props }) => {
   return (
-    <Box style={style}>
+    <Box style={style} as="li">
       <Flex
         paddingTop={3}
         paddingBottom={3}
@@ -23,7 +23,6 @@ export const RelationItem = ({ children, disabled, endAction, style, ...props })
         background={disabled ? 'neutral150' : 'neutral0'}
         borderColor="neutral200"
         justifyContent="space-between"
-        as="li"
         {...props}
       >
         <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>

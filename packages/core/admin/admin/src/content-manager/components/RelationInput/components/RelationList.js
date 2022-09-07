@@ -37,9 +37,7 @@ const ShadowBox = styled(Box)`
 export const RelationList = ({ children, ...props }) => {
   return (
     <ShadowBox {...props}>
-      <Stack spacing={1} as="ol">
-        {children}
-      </Stack>
+      <Stack spacing={1}>{children}</Stack>
     </ShadowBox>
   );
 };

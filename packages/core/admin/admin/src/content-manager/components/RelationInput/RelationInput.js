@@ -206,6 +206,7 @@ const RelationInput = ({
             itemCount={totalNumberOfRelations}
             itemSize={RELATION_ITEM_HEIGHT}
             itemData={relations}
+            innerElementType="ol"
           >
             {({ data, index, style }) => {
               const { publicationState, href, mainField, id } = data[index];
