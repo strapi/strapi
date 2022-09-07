@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 
 import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
@@ -50,6 +50,15 @@ export const RelationInputWrapper = ({
       },
     },
   });
+
+  // TODO: we should initialize the empty connect/ disconnect
+  // arrays before adding the first relation to it instead of
+  // calling loadRelation()
+  useEffect(() => {
+    if (!endpoints.relation) {
+      loadRelation({ target: { name, value: [] } });
+    }
+  }, [loadRelation, name, endpoints.relation]);
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const isSingleRelation = [
