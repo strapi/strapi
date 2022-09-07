@@ -82,11 +82,7 @@ export const RelationInputWrapper = ({
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
   const handleRelationAdd = (relation) => {
-    if (isSingleRelation) {
-      // TODO remove all relations from relations before
-    }
-
-    connectRelation({ target: { name, value: relation } });
+    connectRelation({ target: { name, value: relation, replace: isSingleRelation } });
   };
 
   const handleRelationRemove = (relation) => {
