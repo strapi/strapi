@@ -568,21 +568,21 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
           class="c15"
           overflow=""
         >
-          <ol
+          <div
             class="c1 c5"
             spacing="1"
           >
             <div
               style="position: relative; height: 174px; overflow: auto; will-change: transform; direction: ltr;"
             >
-              <div
+              <ol
                 style="height: 174px; width: 100%;"
               >
-                <div
+                <li
                   class=""
                   style="position: absolute; left: 0px; top: 0px; height: 58px; width: 100%;"
                 >
-                  <li
+                  <div
                     class="c16 c17"
                   >
                     <div
@@ -635,13 +635,13 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                         </svg>
                       </button>
                     </div>
-                  </li>
-                </div>
-                <div
+                  </div>
+                </li>
+                <li
                   class=""
                   style="position: absolute; left: 0px; top: 58px; height: 58px; width: 100%;"
                 >
-                  <li
+                  <div
                     class="c16 c17"
                   >
                     <div
@@ -688,13 +688,13 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                         </svg>
                       </button>
                     </div>
-                  </li>
-                </div>
-                <div
+                  </div>
+                </li>
+                <li
                   class=""
                   style="position: absolute; left: 0px; top: 116px; height: 58px; width: 100%;"
                 >
-                  <li
+                  <div
                     class="c16 c17"
                   >
                     <div
@@ -732,11 +732,11 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                         </svg>
                       </button>
                     </div>
-                  </li>
-                </div>
-              </div>
+                  </div>
+                </li>
+              </ol>
             </div>
-          </ol>
+          </div>
         </div>
         <div
           class="c32"

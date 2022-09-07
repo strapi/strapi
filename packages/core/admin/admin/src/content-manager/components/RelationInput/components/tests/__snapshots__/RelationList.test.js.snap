@@ -98,14 +98,14 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
   <div
     class="c0"
   >
-    <ol
+    <div
       class="c1 c2"
       spacing="1"
     >
-      <div
+      <li
         class=""
       >
-        <li
+        <div
           class="c3 c4"
         >
           <div
@@ -113,9 +113,9 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
           >
             First relation
           </div>
-        </li>
-      </div>
-    </ol>
+        </div>
+      </li>
+    </div>
   </div>
   <div
     class="c6"
