@@ -151,14 +151,12 @@ export const RelationInputWrapper = ({
       }}
       relations={normalizeRelations(relations, {
         modifiedData: modifiedData?.[name],
-        // TODO: Remove mock title
-        mainFieldName: 'title' || mainField.name,
+        mainFieldName: mainField.name,
         shouldAddLink: shouldDisplayRelationLink,
         targetModel,
       })}
       searchResults={normalizeRelations(search, {
-        // TODO: Remove mock title
-        mainFieldName: 'title' || mainField.name,
+        mainFieldName: mainField.name,
       })}
     />
   );
