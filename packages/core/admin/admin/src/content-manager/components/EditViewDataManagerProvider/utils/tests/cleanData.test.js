@@ -208,4 +208,31 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       },
     });
   });
+
+  test('should remove key that are not array from relations', () => {
+    const result = cleanData(
+      {
+        relation: {
+          connect: [{ id: 1, something: true }],
+          disconnect: [{ id: 2, something: true }],
+          count: 9,
+        },
+      },
+      {
+        attributes: {
+          relation: {
+            type: 'relation',
+          },
+        },
+      },
+      {}
+    );
+
+    expect(result).toStrictEqual({
+      relation: {
+        connect: [{ id: 1 }],
+        disconnect: [{ id: 2 }],
+      },
+    });
+  });
 });
