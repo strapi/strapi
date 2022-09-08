@@ -25,7 +25,7 @@ const createTable = (meta) => {
     columns: [],
   };
 
-  for (const key in meta.attributes) {
+  for (const key of Object.keys(meta.attributes)) {
     const attribute = meta.attributes[key];
 
     if (types.isRelation(attribute.type)) {
