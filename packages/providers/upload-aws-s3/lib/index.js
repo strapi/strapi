@@ -10,7 +10,7 @@ const _ = require('lodash');
 const AWS = require('aws-sdk');
 
 module.exports = {
-  init({baseUrl, rootPath = "", s3Options,  ...legacyS3Options}) {
+  init({baseUrl = null, rootPath = null, s3Options, ...legacyS3Options}) {
     if(legacyS3Options && process.env.NODE_ENV !== 'production')
       console.log("S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. You wrap them inside the 's3Options:{}' property.")
 
