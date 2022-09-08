@@ -6,7 +6,7 @@ import en from '../../../translations/en.json';
 
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
-  getTrad: x => x,
+  getTrad: (x) => x,
 }));
 
 jest.mock('react-intl', () => ({

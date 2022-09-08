@@ -30,10 +30,12 @@ const ensureMinValues = ({ start, limit }) => ({
   limit: limit === -1 ? limit : Math.max(limit, 1),
 });
 
-const ensureMaxValues = (maxLimit = -1) => ({ start, limit }) => ({
-  start,
-  limit: withMaxLimit(limit, maxLimit),
-});
+const ensureMaxValues =
+  (maxLimit = -1) =>
+  ({ start, limit }) => ({
+    start,
+    limit: withMaxLimit(limit, maxLimit),
+  });
 
 // Apply maxLimit as the limit when limit is -1
 const withNoLimit = (pagination, maxLimit = -1) => ({

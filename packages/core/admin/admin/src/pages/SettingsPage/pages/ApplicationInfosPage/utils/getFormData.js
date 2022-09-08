@@ -1,4 +1,4 @@
-const getFormData = data => {
+const getFormData = (data) => {
   const formData = new FormData();
 
   Object.entries(data).forEach(([key, value]) => {

@@ -29,12 +29,12 @@ const GuidedTourHomepage = () => {
     ),
   }));
 
-  const enrichedSections = sections.map(section => ({
+  const enrichedSections = sections.map((section) => ({
     isDone: Object.entries(guidedTourState[section.key]).every(([, value]) => value),
     ...section,
   }));
 
-  const activeSection = enrichedSections.find(section => !section.isDone)?.key;
+  const activeSection = enrichedSections.find((section) => !section.isDone)?.key;
 
   const handleSkip = () => {
     setSkipped(true);

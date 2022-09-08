@@ -28,7 +28,7 @@ export const initialState = {
 
 const listViewReducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case GET_DATA: {
         return {
@@ -105,7 +105,7 @@ const listViewReducer = (state = initialState, action) =>
           }
         } else {
           draftState.displayedHeaders = state.displayedHeaders.filter(
-            header => header.name !== name
+            (header) => header.name !== name
           );
         }
 

@@ -20,7 +20,7 @@ const messages = {
   'components.PageFooter.select': 'Entries per page',
 };
 
-const makeApp = history => (
+const makeApp = (history) => (
   <Router history={history}>
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={messages} textComponent="span">

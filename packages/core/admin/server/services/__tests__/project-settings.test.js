@@ -31,7 +31,7 @@ global.strapi = {
       },
       services: {
         upload: {
-          formatFileInfo: () => ({
+          formatFileInfo: async () => ({
             name: 'filename.png',
             alternativeText: null,
             caption: null,

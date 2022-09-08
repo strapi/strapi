@@ -2,11 +2,8 @@
 
 const _ = require('lodash');
 const delegate = require('delegates');
-const {
-  InvalidTimeError,
-  InvalidDateError,
-  InvalidDateTimeError,
-} = require('@strapi/database').errors;
+const { InvalidTimeError, InvalidDateError, InvalidDateTimeError } =
+  require('@strapi/database').errors;
 const {
   webhook: webhookUtils,
   contentTypes: contentTypesUtils,
@@ -17,6 +14,7 @@ const uploadFiles = require('../utils/upload-files');
 
 const {
   omitComponentData,
+  getComponents,
   createComponents,
   updateComponents,
   deleteComponents,
@@ -35,51 +33,6 @@ const creationPipeline = (data, context) => {
 
 const updatePipeline = (data, context) => {
   return applyTransforms(data, context);
-};
-
-module.exports = ctx => {
-  const implementation = createDefaultImplementation(ctx);
-
-  const service = {
-    implementation,
-    decorate(decorator) {
-      if (typeof decorator !== 'function') {
-        throw new Error(`Decorator must be a function, received ${typeof decorator}`);
-      }
-
-      this.implementation = Object.assign({}, this.implementation, decorator(this.implementation));
-      return this;
-    },
-  };
-
-  const delegator = delegate(service, 'implementation');
-
-  // delegate every method in implementation
-  Object.keys(service.implementation).forEach(key => delegator.method(key));
-
-  // wrap methods to handle Database Errors
-  service.decorate(oldService => {
-    const newService = _.mapValues(
-      oldService,
-      (method, methodName) =>
-        async function(...args) {
-          try {
-            return await oldService[methodName].call(this, ...args);
-          } catch (error) {
-            if (
-              databaseErrorsToTransform.some(errorToTransform => error instanceof errorToTransform)
-            ) {
-              throw new ValidationError(error.message);
-            }
-            throw error;
-          }
-        }
-    );
-
-    return newService;
-  });
-
-  return service;
 };
 
 /**
@@ -261,8 +214,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       return null;
     }
 
+    const componentsToDelete = await getComponents(uid, entityToDelete);
+
     await db.query(uid).delete({ where: { id: entityToDelete.id } });
-    await deleteComponents(uid, entityToDelete);
+    await deleteComponents(uid, { ...entityToDelete, ...componentsToDelete });
 
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
@@ -276,7 +231,23 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // select / populate
     const query = transformParamsToQuery(uid, wrappedParams);
 
-    return db.query(uid).deleteMany(query);
+    const entitiesToDelete = await db.query(uid).findMany(query);
+
+    if (!entitiesToDelete.length) {
+      return null;
+    }
+
+    const componentsToDelete = await Promise.all(
+      entitiesToDelete.map((entityToDelete) => getComponents(uid, entityToDelete))
+    );
+
+    const deletedEntities = await db.query(uid).deleteMany(query);
+    await Promise.all(componentsToDelete.map((compos) => deleteComponents(uid, compos)));
+
+    // Trigger webhooks. One for each entity
+    await Promise.all(entitiesToDelete.map((entity) => this.emitEvent(uid, ENTRY_DELETE, entity)));
+
+    return deletedEntities;
   },
 
   load(uid, entity, field, params = {}) {
@@ -303,8 +274,58 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
         Object.assign(loadParams, transformParamsToQuery('plugin::upload.file', params));
         break;
       }
+      default: {
+        break;
+      }
     }
 
     return db.query(uid).load(entity, field, loadParams);
   },
 });
+
+module.exports = (ctx) => {
+  const implementation = createDefaultImplementation(ctx);
+
+  const service = {
+    implementation,
+    decorate(decorator) {
+      if (typeof decorator !== 'function') {
+        throw new Error(`Decorator must be a function, received ${typeof decorator}`);
+      }
+
+      this.implementation = { ...this.implementation, ...decorator(this.implementation) };
+      return this;
+    },
+  };
+
+  const delegator = delegate(service, 'implementation');
+
+  // delegate every method in implementation
+  Object.keys(service.implementation).forEach((key) => delegator.method(key));
+
+  // wrap methods to handle Database Errors
+  service.decorate((oldService) => {
+    const newService = _.mapValues(
+      oldService,
+      (method, methodName) =>
+        async function (...args) {
+          try {
+            return await oldService[methodName].call(this, ...args);
+          } catch (error) {
+            if (
+              databaseErrorsToTransform.some(
+                (errorToTransform) => error instanceof errorToTransform
+              )
+            ) {
+              throw new ValidationError(error.message);
+            }
+            throw error;
+          }
+        }
+    );
+
+    return newService;
+  });
+
+  return service;
+};

@@ -1,9 +1,11 @@
+/* eslint-disable react/jsx-no-constructed-context-values */
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { TrackingContext, useRBAC } from '@strapi/helper-plugin';
+import { TrackingProvider, useRBAC } from '@strapi/helper-plugin';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
@@ -25,9 +27,9 @@ const client = new QueryClient({
   },
 });
 
-const makeApp = history => (
+const makeApp = (history) => (
   <Router history={history}>
-    <TrackingContext.Provider value={{ uuid: null, telemetryProperties: undefined }}>
+    <TrackingProvider>
       <ThemeProvider theme={lightTheme}>
         <QueryClientProvider client={client}>
           <IntlProvider locale="en" messages={{}} textComponent="span">
@@ -35,7 +37,7 @@ const makeApp = history => (
           </IntlProvider>
         </QueryClientProvider>
       </ThemeProvider>
-    </TrackingContext.Provider>
+    </TrackingProvider>
   </Router>
 );
 
@@ -62,8 +64,8 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
       .c14 {
         font-weight: 600;
         color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c11 {
@@ -137,7 +139,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        padding: 10px 16px;
+        padding: 8px 16px;
         background: #4945ff;
         border: 1px solid #4945ff;
       }

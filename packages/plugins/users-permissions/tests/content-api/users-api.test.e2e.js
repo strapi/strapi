@@ -50,7 +50,10 @@ describe('Users API', () => {
     );
 
     // eslint-disable-next-line no-unused-vars
-    const { nb_users, ...role } = findRes.body.roles.find(r => r.name === internals.role.name);
+    const { nb_users: nbUsers, ...role } = findRes.body.roles.find(
+      (r) => r.name === internals.role.name
+    );
+
     expect(role).toMatchObject(internals.role);
 
     data.role = role;

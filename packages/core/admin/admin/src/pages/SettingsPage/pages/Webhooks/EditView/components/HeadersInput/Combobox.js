@@ -6,12 +6,12 @@ import keys from './keys';
 const Combobox = ({ name, onChange, value, ...props }) => {
   const [options, setOptions] = useState(value ? [...keys, value] : keys);
 
-  const handleChange = value => {
+  const handleChange = (value) => {
     onChange({ target: { name, value } });
   };
 
-  const handleCreateOption = value => {
-    setOptions(prev => [...prev, value]);
+  const handleCreateOption = (value) => {
+    setOptions((prev) => [...prev, value]);
 
     onChange({ target: { name, value } });
   };
@@ -24,7 +24,7 @@ const Combobox = ({ name, onChange, value, ...props }) => {
       placeholder=""
       value={value}
     >
-      {options.map(key => (
+      {options.map((key) => (
         <ComboboxOption value={key} key={key}>
           {key}
         </ComboboxOption>

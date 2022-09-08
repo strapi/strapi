@@ -14,7 +14,7 @@ const getDraftRelations = (data, ctSchema, components) => {
       }
 
       if (type === 'dynamiczone') {
-        currentData.forEach(curr => {
+        currentData.forEach((curr) => {
           const compoSchema = get(components, curr.__component, {});
 
           acc += getDraftRelationsCount(curr, compoSchema);
@@ -27,7 +27,7 @@ const getDraftRelations = (data, ctSchema, components) => {
         const compoSchema = get(components, compoUID, {});
 
         if (isRepeatable) {
-          currentData.forEach(curr => {
+          currentData.forEach((curr) => {
             acc += getDraftRelationsCount(curr, compoSchema);
           });
         } else {
@@ -43,7 +43,7 @@ const getDraftRelations = (data, ctSchema, components) => {
             acc += 1;
           }
         } else {
-          currentData.forEach(value => {
+          currentData.forEach((value) => {
             if (has(value, 'publishedAt') && isEmpty(value.publishedAt)) {
               acc += 1;
             }

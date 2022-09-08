@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { fixtures } from '../../../../../admin-test-utils';
+import { fixtures } from '@strapi/admin-test-utils/lib';
 import { Components, Fields } from '../core/apis';
 import StrapiApp from '../StrapiApp';
 import appReducers from '../reducers';
@@ -106,9 +106,9 @@ describe('ADMIN | StrapiApp', () => {
       app.createHook('moto');
 
       app.registerHook('hello', () => 5);
-      app.registerHook('moto', n => n + 1);
-      app.registerHook('moto', n => n + 2);
-      app.registerHook('moto', n => n + 3);
+      app.registerHook('moto', (n) => n + 1);
+      app.registerHook('moto', (n) => n + 2);
+      app.registerHook('moto', (n) => n + 3);
 
       const res = app.runHookWaterfall('moto', 1);
 
@@ -122,9 +122,9 @@ describe('ADMIN | StrapiApp', () => {
       app.createHook('moto');
 
       app.registerHook('hello', () => 5);
-      app.registerHook('moto', n => n + 1);
-      app.registerHook('moto', n => Promise.resolve(n + 2));
-      app.registerHook('moto', n => n + 3);
+      app.registerHook('moto', (n) => n + 1);
+      app.registerHook('moto', (n) => Promise.resolve(n + 2));
+      app.registerHook('moto', (n) => n + 3);
 
       const res = await app.runHookWaterfall('moto', 1, true);
 

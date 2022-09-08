@@ -20,7 +20,7 @@ const getDefaultTheme = () => {
 const ThemeToggleProvider = ({ children, themes }) => {
   const [currentTheme, setCurrentTheme] = useState(getDefaultTheme());
 
-  const handleChangeTheme = nextTheme => {
+  const handleChangeTheme = (nextTheme) => {
     setCurrentTheme(nextTheme);
     localStorage.setItem(THEME_KEY, nextTheme);
   };

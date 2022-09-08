@@ -36,7 +36,7 @@ const SettingsPage = () => {
   const { submitMutation, data, isLoading } = useReactQuery();
   const [passwordShown, setPasswordShown] = useState(false);
 
-  const handleUpdateSettingsSubmit = body => {
+  const handleUpdateSettingsSubmit = (body) => {
     submitMutation.mutate({
       prefix: data?.prefix,
       body,
@@ -143,9 +143,9 @@ const SettingsPage = () => {
                               }
                               endAction={
                                 <FieldActionWrapper
-                                  onClick={e => {
+                                  onClick={(e) => {
                                     e.stopPropagation();
-                                    setPasswordShown(prev => !prev);
+                                    setPasswordShown((prev) => !prev);
                                   }}
                                   label={formatMessage(
                                     passwordShown

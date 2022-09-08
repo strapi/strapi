@@ -42,7 +42,7 @@ function BoundRoute({ route }) {
           </Typography>
         </MethodBox>
         <Box paddingLeft={2} paddingRight={2}>
-          {map(formattedRoute, value => (
+          {map(formattedRoute, (value) => (
             <Typography key={value} textColor={value.includes(':') ? 'neutral600' : 'neutral900'}>
               /{value}
             </Typography>

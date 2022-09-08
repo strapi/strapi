@@ -9,7 +9,7 @@ const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes'
 const createBuilder = require('./schema-builder');
 const { coreUids, pluginsUids } = require('./constants');
 
-const isContentTypeVisible = model =>
+const isContentTypeVisible = (model) =>
   getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
 
 const getRestrictRelationsTo = (contentType = {}) => {
@@ -34,7 +34,7 @@ const getRestrictRelationsTo = (contentType = {}) => {
  * Format a contentType info to be used by the front-end
  * @param {Object} contentType
  */
-const formatContentType = contentType => {
+const formatContentType = (contentType) => {
   const { uid, kind, modelName, plugin, collectionName, info, options } = contentType;
 
   return {
@@ -57,7 +57,7 @@ const formatContentType = contentType => {
   };
 };
 
-const createContentTypes = async contentTypes => {
+const createContentTypes = async (contentTypes) => {
   const builder = createBuilder();
   const createdContentTypes = [];
 
@@ -87,8 +87,8 @@ const createContentType = async ({ contentType, components = [] }, options = {})
   const newContentType = builder.createContentType(replaceTmpUIDs(contentType));
 
   // allow components to target the new contentType
-  const targetContentType = infos => {
-    Object.keys(infos.attributes).forEach(key => {
+  const targetContentType = (infos) => {
+    Object.keys(infos.attributes).forEach((key) => {
       const { target } = infos.attributes[key];
       if (target === '__contentType__') {
         infos.attributes[key].target = newContentType.uid;
@@ -98,7 +98,7 @@ const createContentType = async ({ contentType, components = [] }, options = {})
     return infos;
   };
 
-  components.forEach(component => {
+  components.forEach((component) => {
     const options = replaceTmpUIDs(targetContentType(component));
 
     if (!_.has(component, 'uid')) {
@@ -175,7 +175,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
     ...replaceTmpUIDs(contentType),
   });
 
-  components.forEach(component => {
+  components.forEach((component) => {
     if (!_.has(component, 'uid')) {
       return builder.createComponent(replaceTmpUIDs(component));
     }
@@ -211,7 +211,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   return updatedContentType;
 };
 
-const deleteContentTypes = async uids => {
+const deleteContentTypes = async (uids) => {
   const builder = createBuilder();
   const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
 

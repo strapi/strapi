@@ -17,7 +17,7 @@ const Policies = () => {
 
   const displayedRoutes = isEmpty(controllerRoutes)
     ? []
-    : controllerRoutes.filter(o => o.handler.endsWith(pathResolved));
+    : controllerRoutes.filter((o) => o.handler.endsWith(pathResolved));
 
   return (
     <GridItem

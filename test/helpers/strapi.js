@@ -36,9 +36,7 @@ const createStrapiInstance = async ({
       authenticate() {
         return { authenticated: true };
       },
-      verify() {
-        return;
-      },
+      verify() {},
     });
   }
   await instance.load();

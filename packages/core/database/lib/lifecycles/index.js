@@ -5,7 +5,7 @@ const assert = require('assert').strict;
 const timestampsLifecyclesSubscriber = require('./subscribers/timestamps');
 const modelLifecyclesSubscriber = require('./subscribers/models-lifecycles');
 
-const isValidSubscriber = subscriber => {
+const isValidSubscriber = (subscriber) => {
   return (
     typeof subscriber === 'function' || (typeof subscriber === 'object' && subscriber !== null)
   );
@@ -14,7 +14,7 @@ const isValidSubscriber = subscriber => {
 /**
  * @type {import('.').createLifecyclesProvider}
  */
-const createLifecyclesProvider = db => {
+const createLifecyclesProvider = (db) => {
   let subscribers = [timestampsLifecyclesSubscriber, modelLifecyclesSubscriber];
 
   return {

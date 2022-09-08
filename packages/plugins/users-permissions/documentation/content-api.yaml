@@ -44,7 +44,7 @@ paths:
                 password:
                   type: string
             example:
-              identier: foobar
+              identifier: foobar
               password: Test1234
         required: true
       responses:
@@ -102,6 +102,13 @@ paths:
       tags:
         - Users-Permissions - Auth
       summary: Default Callback from provider auth
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          description: Provider name
+          schema:
+            type: string
       responses:
         200:
           description: Returns a jwt token and user info
@@ -185,6 +192,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /auth/change-password:
+    post:
+      tags:
+        - Users-Permissions - Auth
+      summary: Update user's own password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+                - currentPassword
+                - passwordConfirmation
+              properties:
+                password:
+                  type: string
+                currentPassword:
+                  type: string
+                passwordConfirmation:
+                  type: string
+      responses:
+        200:
+          description: Returns a jwt token and user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users-Permissions-UserRegistration'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /auth/email-confirmation:
     get:
       tags:
@@ -193,7 +235,8 @@ paths:
       parameters:
         - in: query
           name: confirmation
-          type: string
+          schema:
+            type: string
           description: confirmation token received by email
       responses:
         301:
@@ -284,7 +327,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
   /users-permissions/roles:
     get:
       tags:
@@ -329,7 +371,7 @@ paths:
         - Users-Permissions - Users & Roles
       summary: Create a role
       requestBody:
-        $ref: '#/components/schemas/Users-Permissions-RoleRequest'
+        $ref: '#/components/requestBodies/Users-Permissions-RoleRequest'
       responses:
         200:
           description: Returns ok if the role was create
@@ -356,10 +398,13 @@ paths:
       parameters:
         - in: path
           name: id
-          type: string
+          required: true
+          schema:
+            type: string
           description: role Id
       responses:
         200:
+          description: Returns the role
           content:
             application/json:
               schema:
@@ -396,10 +441,12 @@ paths:
       parameters:
         - in: path
           name: role
-          type: string
+          required: true
+          schema:
+            type: string
           description: role Id
       requestBody:
-        $ref: '#/components/schemas/Users-Permissions-RoleRequest'
+        $ref: '#/components/requestBodies/Users-Permissions-RoleRequest'
       responses:
         200:
           description: Returns ok if the role was udpated
@@ -425,7 +472,9 @@ paths:
       parameters:
         - in: path
           name: role
-          type: string
+          required: true
+          schema:
+            type: string
           description: role Id
       responses:
         200:
@@ -452,7 +501,7 @@ paths:
       summary: Get list of users
       responses:
         200:
-          summary: Returns an array of users
+          description: Returns an array of users
           content:
             application/json:
               schema:
@@ -485,17 +534,17 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - username
+                - email
+                - password
               properties:
                 email:
                   type: string
-                  required: true
                 username:
                   type: string
-                  required: true
                 password:
                   type: string
-                  required: true
-
             example:
               username: foo
               email: foo@strapi.io
@@ -534,7 +583,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
   /users/{id}:
     get:
       tags:
@@ -543,10 +591,13 @@ paths:
       parameters:
         - in: path
           name: id
-          type: string
+          required: true
+          schema:
+            type: string
           description: user Id
       responses:
         200:
+          description: Returns a user
           content:
             application/json:
               schema:
@@ -566,7 +617,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
     put:
       tags:
         - Users-Permissions - Users & Roles
@@ -574,7 +624,9 @@ paths:
       parameters:
         - in: path
           name: id
-          type: string
+          required: true
+          schema:
+            type: string
           description: user Id
       requestBody:
         required: true
@@ -582,17 +634,17 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - username
+                - email
+                - password
               properties:
                 email:
                   type: string
-                  required: true
                 username:
                   type: string
-                  required: true
                 password:
                   type: string
-                  required: true
-
             example:
               username: foo
               email: foo@strapi.io
@@ -631,13 +683,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
     delete:
       tags:
         - Users-Permissions - Users & Roles
       summary: Delete a user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: user Id
       responses:
-        200:
+        "200":
           description: Returns deleted user info
           content:
             application/json:
@@ -782,6 +840,10 @@ components:
                   policy:
                     type: string
 
+  parameters:
+  responses:
+  examples:
+  requestBodies:
     Users-Permissions-RoleRequest:
       required: true
       content:
@@ -807,7 +869,3 @@ components:
                     find:
                       enabled: true
 
-  parameters:
-  responses:
-  examples:
-  requestBodies:

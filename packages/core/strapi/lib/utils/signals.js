@@ -1,6 +1,6 @@
 'use strict';
 
-const destroyOnSignal = strapi => {
+const destroyOnSignal = (strapi) => {
   let signalReceived = false;
 
   // For unknown reasons, we receive signals 2 times.
@@ -14,7 +14,7 @@ const destroyOnSignal = strapi => {
     }
   };
 
-  ['SIGTERM', 'SIGINT'].forEach(signal => {
+  ['SIGTERM', 'SIGINT'].forEach((signal) => {
     process.on(signal, terminateStrapi);
   });
 };

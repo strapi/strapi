@@ -8,7 +8,7 @@ const init = (initialState, { settings, shouldUpdateStrapi }) => {
   // Retrieve the links that will be injected into the global section
   const pluginsGlobalLinks = settings.global.links;
   // Sort the links by name
-  const sortedGlobalLinks = sortLinks([...pluginsGlobalLinks, ...globalLinks]).map(link => ({
+  const sortedGlobalLinks = sortLinks([...pluginsGlobalLinks, ...globalLinks]).map((link) => ({
     ...link,
     hasNotification: link.id === '000-application-infos' && shouldUpdateStrapi,
   }));

@@ -96,7 +96,7 @@ const providerFactory = (options = {}) => {
         return items;
       }
 
-      return items.filter(item => {
+      return items.filter((item) => {
         return filtersEntries.every(([key, value]) => item[key] === value);
       });
     },

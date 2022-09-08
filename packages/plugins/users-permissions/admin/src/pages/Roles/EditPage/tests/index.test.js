@@ -542,8 +542,8 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c6 {
         color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c4 {
@@ -1370,18 +1370,13 @@ describe('Admin | containers | RoleEditPage', () => {
     await userEvent.click(saveButton);
     await waitFor(() => expect(saveButton).not.toBeDisabled());
     const errorMessages = await getAllByText(/invalid value/i);
-    errorMessages.forEach(errorMessage => expect(errorMessage).toBeInTheDocument());
+    errorMessages.forEach((errorMessage) => expect(errorMessage).toBeInTheDocument());
   });
 
   it('can toggle the permissions accordions and actions', async () => {
     // Create app and wait for loading
-    const {
-      getByLabelText,
-      queryByText,
-      getByTestId,
-      getByText,
-      getAllByRole,
-    } = makeAndRenderApp();
+    const { getByLabelText, queryByText, getByTestId, getByText, getAllByRole } =
+      makeAndRenderApp();
     const loader = getByTestId('loader');
     await waitForElementToBeRemoved(loader);
 
@@ -1401,7 +1396,7 @@ describe('Admin | containers | RoleEditPage', () => {
     const [selectAllCheckbox, ...actionCheckboxes] = getAllByRole('checkbox');
     expect(selectAllCheckbox.checked).toBe(false);
     await userEvent.click(selectAllCheckbox);
-    actionCheckboxes.forEach(actionCheckbox => {
+    actionCheckboxes.forEach((actionCheckbox) => {
       expect(actionCheckbox.checked).toBe(true);
     });
 
