@@ -290,13 +290,16 @@ const createHelpers = (db) => {
       }
 
       // Update existing columns / foreign keys / indexes
-
       for (const updatedColumn of table.columns.updated) {
         debug(`Updating column ${updatedColumn.name}`);
 
         const { object } = updatedColumn;
 
-        createColumn(tableBuilder, object).alter();
+        if (object.type === 'increments') {
+          createColumn(tableBuilder, { ...object, type: 'integer' }).alter();
+        } else {
+          createColumn(tableBuilder, object).alter();
+        }
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
@@ -311,7 +314,13 @@ const createHelpers = (db) => {
 
       for (const addedColumn of table.columns.added) {
         debug(`Creating column ${addedColumn.name}`);
-        createColumn(tableBuilder, addedColumn);
+
+        if (addedColumn.type === 'increments' && !db.dialect.canAddIncrements()) {
+          tableBuilder.integer(addedColumn.name).unsigned();
+          tableBuilder.primary(addedColumn.name);
+        } else {
+          createColumn(tableBuilder, addedColumn);
+        }
       }
 
       for (const addedForeignKey of table.foreignKeys.added) {

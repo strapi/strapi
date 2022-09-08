@@ -1,7 +1,7 @@
 {
   "name": "getstarted",
   "private": true,
-  "version": "4.3.4",
+  "version": "4.3.8",
   "description": "A Strapi application.",
   "scripts": {
     "develop": "strapi develop",
@@ -12,22 +12,22 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/plugin-documentation": "4.3.4",
-    "@strapi/plugin-graphql": "4.3.4",
-    "@strapi/plugin-i18n": "4.3.4",
-    "@strapi/plugin-sentry": "4.3.4",
-    "@strapi/plugin-users-permissions": "4.3.4",
-    "@strapi/provider-email-mailgun": "4.3.4",
-    "@strapi/provider-upload-aws-s3": "4.3.4",
-    "@strapi/provider-upload-cloudinary": "4.3.4",
-    "@strapi/strapi": "4.3.4",
+    "@strapi/plugin-documentation": "4.3.8",
+    "@strapi/plugin-graphql": "4.3.8",
+    "@strapi/plugin-i18n": "4.3.8",
+    "@strapi/plugin-sentry": "4.3.8",
+    "@strapi/plugin-users-permissions": "4.3.8",
+    "@strapi/provider-email-mailgun": "4.3.8",
+    "@strapi/provider-upload-aws-s3": "4.3.8",
+    "@strapi/provider-upload-cloudinary": "4.3.8",
+    "@strapi/strapi": "4.3.8",
     "@vscode/sqlite3": "5.0.8",
     "better-sqlite3": "7.4.6",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.6.0",
-    "sqlite3": "5.0.2"
+    "sqlite3": "5.0.11"
   },
   "strapi": {
     "uuid": "getstarted"

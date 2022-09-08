@@ -2,6 +2,9 @@
 
 module.exports = {
   extends: '@strapi/eslint-config/back',
+  parserOptions: {
+    ecmaVersion: 2020,
+  },
   globals: {
     strapi: false,
   },
@@ -28,7 +31,7 @@ module.exports = {
     'no-use-before-define': 'warn',
     'no-param-reassign': 'warn',
     'no-continue': 'warn',
-    'no-process-exit': 'warn',
+    'no-process-exit': 'off',
     'no-plusplus': 'warn',
     'no-loop-func': 'warn',
     'guard-for-in': 'warn',

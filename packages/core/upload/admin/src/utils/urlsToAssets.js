@@ -2,6 +2,10 @@ import axios from 'axios';
 import { AssetSource } from '../constants';
 import { typeFromMime } from './typeFromMime';
 
+function getFilenameFromURL(url) {
+  return new URL(url).pathname.split('/').pop();
+}
+
 export const urlsToAssets = async (urls) => {
   const assetPromises = urls.map((url) =>
     axios
@@ -10,7 +14,7 @@ export const urlsToAssets = async (urls) => {
         timeout: 60000,
       })
       .then((res) => {
-        const loadedFile = new File([res.data], res.config.url, {
+        const loadedFile = new File([res.data], getFilenameFromURL(res.config.url), {
           type: res.headers['content-type'],
         });
 

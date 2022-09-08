@@ -248,6 +248,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 
 <div>
   <nav
+    aria-label="Navigation"
     class="c0 "
   >
     <ol
