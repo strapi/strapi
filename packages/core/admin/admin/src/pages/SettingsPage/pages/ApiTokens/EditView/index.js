@@ -175,7 +175,9 @@ const ApiTokenCreateView = () => {
         ? await axiosInstance.post(`/admin/api-tokens`, {
             ...body,
             lifespan:
-              body.lifespan && Number(body.lifespan) ? Number(body.lifespan) : body.lifespan,
+              body.lifespan && parseInt(body.lifespan, 10)
+                ? parseInt(body.lifespan, 10)
+                : body.lifespan,
             permissions: tokenType === 'custom' ? state.selectedActions : null,
           })
         : await axiosInstance.put(`/admin/api-tokens/${id}`, {
@@ -511,7 +513,7 @@ const ApiTokenCreateView = () => {
                                   defaultMessage: 'Expiration date',
                                 })}: ${getDateOfExpiration(
                                   apiToken?.createdAt,
-                                  Number(values.lifespan),
+                                  parseInt(values.lifespan, 10),
                                   lang
                                 )}`}
                             </Typography>
