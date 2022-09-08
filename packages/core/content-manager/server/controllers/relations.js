@@ -104,7 +104,7 @@ module.exports = {
       const alias = subQuery.getAlias();
 
       const knexSubQuery = subQuery
-        .where({ id: entityId })
+        .where({ id: entityId, [`${alias}.id`]: { $notNull: true } })
         .join({ alias, targetField })
         .select(`${alias}.id`)
         .getKnexQuery();
@@ -197,7 +197,7 @@ module.exports = {
     const alias = subQuery.getAlias();
 
     const knexSubQuery = subQuery
-      .where({ id })
+      .where({ id, [`${alias}.id`]: { $notNull: true } })
       .join({ alias, targetField })
       .select(`${alias}.id`)
       .getKnexQuery();

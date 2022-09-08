@@ -1,5 +1,6 @@
 'use strict';
 
+const { isEmpty } = require('lodash/fp');
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
@@ -143,7 +144,7 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
     const id1 = createdProduct1.id;
     const id2 = createdProduct2.id;
 
-    const createdShop = await createEntry('api::shop.shop', {
+    const createdShop1 = await createEntry('api::shop.shop', {
       name: 'Cazotte Shop',
       products_ow: id1,
       products_oo: id1,
@@ -156,8 +157,16 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
         compo_products_mw: [id1, id2],
       },
     });
+    const createdShop2 = await createEntry('api::shop.shop', {
+      name: 'Empty Shop',
+      myCompo: {
+        compo_products_ow: null,
+        compo_products_mw: [],
+      },
+    });
 
-    data.shops.push(createdShop);
+    data.shops.push(createdShop1);
+    data.shops.push(createdShop2);
   });
 
   afterAll(async () => {
@@ -173,7 +182,7 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
       ['products_mm', true],
       ['products_mw', true],
     ])('Relation not in a component (%s)', (fieldName, isManyRelation) => {
-      test('Can retrieve the relation(s)', async () => {
+      test('Can retrieve the relation(s) for an entity that have some relations', async () => {
         let res = await rq({
           method: 'GET',
           url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].id}/${fieldName}`,
@@ -219,6 +228,21 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
               ...addPublishedAtCheck(null),
             },
           ]);
+        }
+      });
+
+      test("Can retrieve the relation(s) for an entity that don't have relations yet", async () => {
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/collection-types/api::shop.shop/${data.shops[1].id}/${fieldName}`,
+        });
+
+        if (isManyRelation) {
+          expect(res.status).toBe(200);
+          expect(res.body.results).toHaveLength(0);
+        } else {
+          expect(res.status).toBe(204);
+          expect(isEmpty(res.body)).toBe(true);
         }
       });
 
