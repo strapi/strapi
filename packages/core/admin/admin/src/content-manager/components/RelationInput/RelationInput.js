@@ -233,11 +233,11 @@ const RelationInput = ({
                   <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                     {href ? (
                       <LinkEllipsis to={href} disabled={disabled}>
-                        {mainField}
+                        {mainField ?? id}
                       </LinkEllipsis>
                     ) : (
                       <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
-                        {mainField}
+                        {mainField ?? id}
                       </Typography>
                     )}
                   </Box>

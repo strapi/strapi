@@ -23,7 +23,7 @@ const StyledBullet = styled.div`
 export const Option = (props) => {
   const { formatMessage } = useIntl();
   const Component = components.Option;
-  const { publicationState, mainField } = props.data;
+  const { publicationState, mainField, id } = props.data;
 
   if (publicationState) {
     const isDraft = publicationState === 'draft';
@@ -41,18 +41,19 @@ export const Option = (props) => {
       <Component {...props}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
-          <Typography ellipsis>{mainField ?? '-'}</Typography>
+          <Typography ellipsis>{mainField ?? id}</Typography>
         </Flex>
       </Component>
     );
   }
 
-  return <Component {...props}>{mainField ?? '-'}</Component>;
+  return <Component {...props}>{mainField ?? id}</Component>;
 };
 
 Option.propTypes = {
   isFocused: PropTypes.bool.isRequired,
   data: PropTypes.shape({
+    id: PropTypes.number.isRequired,
     isDraft: PropTypes.bool,
     mainField: PropTypes.string,
     publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
