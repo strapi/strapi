@@ -55,8 +55,11 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
         case 'relation':
           // Instead of the full relation object, we only want to send its ID
           // and need to clean-up the add|remove arrays
+
           cleanedData = Object.entries(value).reduce((acc, [key, value]) => {
-            acc[key] = value.map((currentValue) => ({ id: currentValue.id }));
+            if (Array.isArray(value)) {
+              acc[key] = value.map((currentValue) => ({ id: currentValue.id }));
+            }
 
             return acc;
           }, {});
