@@ -40,6 +40,8 @@ import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiT
 import init from './init';
 import reducer, { initialState } from './reducer';
 
+const MSG_ERROR_NAME_TAKEN = 'Name already taken';
+
 const ApiTokenCreateView = () => {
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
@@ -210,10 +212,17 @@ const ApiTokenCreateView = () => {
       const errors = formatAPIErrors(err.response.data);
       actions.setErrors(errors);
 
-      toggleNotification({
-        type: 'warning',
-        message: get(err, 'response.data.message', 'notification.error'),
-      });
+      if (err?.response?.data?.error?.message === MSG_ERROR_NAME_TAKEN) {
+        toggleNotification({
+          type: 'warning',
+          message: get(err, 'response.data.message', 'notification.error.tokennamenotunique'),
+        });
+      } else {
+        toggleNotification({
+          type: 'warning',
+          message: get(err, 'response.data.message', 'notification.error'),
+        });
+      }
       unlockApp();
     }
   };
