@@ -147,7 +147,7 @@ module.exports = {
         .query('plugin::users-permissions.user')
         .findOne({ where: { username } });
 
-      if (userWithSameUsername && userWithSameUsername.id != id) {
+      if (userWithSameUsername && _.toString(userWithSameUsername.id) !== _.toString(id)) {
         throw new ApplicationError('Username already taken');
       }
     }
@@ -157,7 +157,7 @@ module.exports = {
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: _.toLower(email) } });
 
-      if (userWithSameEmail && userWithSameEmail.id != id) {
+      if (userWithSameEmail && _.toString(userWithSameEmail.id) !== _.toString(id)) {
         throw new ApplicationError('Email already taken');
       }
       body.email = _.toLower(body.email);

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/permissions",
-  "version": "4.3.6",
+  "version": "4.3.8",
   "description": "Strapi's permission layer.",
   "repository": {
     "type": "git",
@@ -24,13 +24,13 @@
     "test:unit": "jest --verbose"
   },
   "dependencies": {
-    "@strapi/utils": "4.3.6",
+    "@strapi/utils": "4.3.8",
     "lodash": "4.17.21",
     "@casl/ability": "5.4.4",
     "sift": "16.0.0"
   },
   "engines": {
-    "node": ">=14.19.1 <=16.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   }
 }
