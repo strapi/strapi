@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "4.1.8",
+  "version": "4.3.8",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -35,7 +35,7 @@
     "winston": "3.3.3"
   },
   "engines": {
-    "node": ">=12.22.0 <=16.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   }
 }

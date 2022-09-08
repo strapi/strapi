@@ -22,6 +22,7 @@ const {
   toRegressedEnumValue,
   startsWithANumber,
   joinBy,
+  toKebabCase,
 } = require('./string-formatting');
 const { removeUndefined } = require('./object-formatting');
 const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
@@ -65,6 +66,7 @@ module.exports = {
   stringEquals,
   isKebabCase,
   isCamelCase,
+  toKebabCase,
   contentTypes,
   webhook,
   env,

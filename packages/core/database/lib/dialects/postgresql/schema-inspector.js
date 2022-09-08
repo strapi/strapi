@@ -40,32 +40,44 @@ const SQL_QUERIES = {
   `,
   FOREIGN_KEY_LIST: /* sql */ `
     SELECT
-      tco."constraint_name" as constraint_name,
-      kcu."column_name" as column_name,
-      rel_kcu."table_name" as foreign_table,
-      rel_kcu."column_name" as fk_column_name,
-      rco.update_rule as on_update,
-      rco.delete_rule as on_delete
+      tco."constraint_name" as constraint_name
     FROM information_schema.table_constraints tco
-    JOIN information_schema.key_column_usage kcu
-      ON tco.constraint_schema = kcu.constraint_schema
-      AND tco.constraint_name = kcu.constraint_name
-    JOIN information_schema.referential_constraints rco
-      ON tco.constraint_schema = rco.constraint_schema
-      AND tco.constraint_name = rco.constraint_name
-    JOIN information_schema.key_column_usage rel_kcu
-      ON rco.unique_constraint_schema = rel_kcu.constraint_schema
-      AND rco.unique_constraint_name = rel_kcu.constraint_name
-      AND kcu.ordinal_position = rel_kcu.ordinal_position
     WHERE
       tco.constraint_type = 'FOREIGN KEY'
       AND tco.constraint_schema = ?
       AND tco.table_name = ?
-    ORDER BY kcu.table_schema, kcu.table_name, kcu.ordinal_position, kcu.constraint_name;
   `,
+  FOREIGN_KEY_REFERENCES: /* sql */ `
+    SELECT
+      kcu."constraint_name" as constraint_name,
+      kcu."column_name" as column_name
+
+    FROM information_schema.key_column_usage kcu
+    WHERE kcu.constraint_name=ANY(?)
+    AND kcu.table_schema = ?
+    AND kcu.table_name = ?;
+  `,
+
+  FOREIGN_KEY_REFERENCES_CONSTRAIN: /* sql */ `
+  SELECT
+  rco.update_rule as on_update,
+  rco.delete_rule as on_delete,
+  rco."unique_constraint_name" as unique_constraint_name
+  FROM information_schema.referential_constraints rco
+  WHERE rco.constraint_name=ANY(?)
+  AND rco.constraint_schema = ?
+`,
+  FOREIGN_KEY_REFERENCES_CONSTRAIN_RFERENCE: /* sql */ `
+  SELECT
+  rel_kcu."table_name" as foreign_table,
+  rel_kcu."column_name" as fk_column_name
+    FROM information_schema.key_column_usage rel_kcu
+    WHERE rel_kcu.constraint_name=?
+    AND rel_kcu.table_schema = ?
+`,
 };
 
-const toStrapiType = column => {
+const toStrapiType = (column) => {
   const rootType = column.data_type.toLowerCase().match(/[^(), ]+/)[0];
 
   switch (rootType) {
@@ -110,6 +122,18 @@ const toStrapiType = column => {
   }
 };
 
+const getIndexType = (index) => {
+  if (index.is_primary) {
+    return 'primary';
+  }
+
+  if (index.is_unique) {
+    return 'unique';
+  }
+
+  return null;
+};
+
 class PostgresqlSchemaInspector {
   constructor(db) {
     this.db = db;
@@ -121,7 +145,7 @@ class PostgresqlSchemaInspector {
     const tables = await this.getTables();
 
     schema.tables = await Promise.all(
-      tables.map(async tableName => {
+      tables.map(async (tableName) => {
         const columns = await this.getColumns(tableName);
         const indexes = await this.getIndexes(tableName);
         const foreignKeys = await this.getForeignKeys(tableName);
@@ -147,7 +171,7 @@ class PostgresqlSchemaInspector {
       this.getDatabaseSchema(),
     ]);
 
-    return rows.map(row => row.table_name);
+    return rows.map((row) => row.table_name);
   }
 
   async getColumns(tableName) {
@@ -156,7 +180,7 @@ class PostgresqlSchemaInspector {
       tableName,
     ]);
 
-    return rows.map(row => {
+    return rows.map((row) => {
       const { type, args = [], ...rest } = toStrapiType(row);
 
       const defaultTo =
@@ -191,7 +215,7 @@ class PostgresqlSchemaInspector {
         ret[index.indexrelid] = {
           columns: [index.column_name],
           name: index.index_name,
-          type: index.is_primary ? 'primary' : index.is_unique ? 'unique' : null,
+          type: getIndexType(index),
         };
       } else {
         ret[index.indexrelid].columns.push(index.column_name);
@@ -210,18 +234,45 @@ class PostgresqlSchemaInspector {
     const ret = {};
 
     for (const fk of rows) {
-      if (!ret[fk.constraint_name]) {
-        ret[fk.constraint_name] = {
-          name: fk.constraint_name,
-          columns: [fk.column_name],
-          referencedColumns: [fk.fk_column_name],
-          referencedTable: fk.foreign_table,
-          onUpdate: fk.on_update.toUpperCase(),
-          onDelete: fk.on_delete.toUpperCase(),
-        };
-      } else {
-        ret[fk.constraint_name].columns.push(fk.column_name);
-        ret[fk.constraint_name].referencedColumns.push(fk.fk_column_name);
+      ret[fk.constraint_name] = {
+        name: fk.constraint_name,
+        columns: [],
+        referencedColumns: [],
+        referencedTable: null,
+        onUpdate: null,
+        onDelete: null,
+      };
+    }
+    const constraintNames = Object.keys(ret);
+    const dbSchema = this.getDatabaseSchema();
+    if (constraintNames.length > 0) {
+      const { rows: fkReferences } = await this.db.connection.raw(
+        SQL_QUERIES.FOREIGN_KEY_REFERENCES,
+        [[constraintNames], dbSchema, tableName]
+      );
+
+      for (const fkReference of fkReferences) {
+        ret[fkReference.constraint_name].columns.push(fkReference.column_name);
+
+        const { rows: fkReferencesConstraint } = await this.db.connection.raw(
+          SQL_QUERIES.FOREIGN_KEY_REFERENCES_CONSTRAIN,
+          [[fkReference.constraint_name], dbSchema]
+        );
+
+        for (const fkReferenceC of fkReferencesConstraint) {
+          const { rows: fkReferencesConstraintReferece } = await this.db.connection.raw(
+            SQL_QUERIES.FOREIGN_KEY_REFERENCES_CONSTRAIN_RFERENCE,
+            [fkReferenceC.unique_constraint_name, dbSchema]
+          );
+          for (const fkReferenceConst of fkReferencesConstraintReferece) {
+            ret[fkReference.constraint_name].referencedTable = fkReferenceConst.foreign_table;
+            ret[fkReference.constraint_name].referencedColumns.push(
+              fkReferenceConst.fk_column_name
+            );
+          }
+          ret[fkReference.constraint_name].onUpdate = fkReferenceC.on_update.toUpperCase();
+          ret[fkReference.constraint_name].onDelete = fkReferenceC.on_delete.toUpperCase();
+        }
       }
     }
 

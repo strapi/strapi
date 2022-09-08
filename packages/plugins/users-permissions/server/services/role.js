@@ -41,7 +41,7 @@ module.exports = ({ strapi }) => ({
     await Promise.all(createPromises);
   },
 
-  async getRole(roleID) {
+  async findOne(roleID) {
     const role = await strapi
       .query('plugin::users-permissions.role')
       .findOne({ where: { id: roleID }, populate: ['permissions'] });
@@ -53,7 +53,7 @@ module.exports = ({ strapi }) => ({
     const allActions = getService('users-permissions').getActions();
 
     // Group by `type`.
-    role.permissions.forEach(permission => {
+    role.permissions.forEach((permission) => {
       const [type, controller, action] = permission.action.split('.');
 
       _.set(allActions, `${type}.controllers.${controller}.${action}`, {
@@ -68,7 +68,7 @@ module.exports = ({ strapi }) => ({
     };
   },
 
-  async getRoles() {
+  async find() {
     const roles = await strapi.query('plugin::users-permissions.role').findMany({ sort: ['name'] });
 
     for (const role of roles) {
@@ -124,11 +124,11 @@ module.exports = ({ strapi }) => ({
     }, []);
 
     const toCreate = newActions
-      .filter(action => !oldActions.includes(action))
-      .map(action => ({ action, role: role.id }));
+      .filter((action) => !oldActions.includes(action))
+      .map((action) => ({ action, role: role.id }));
 
     await Promise.all(
-      toDelete.map(permission =>
+      toDelete.map((permission) =>
         strapi
           .query('plugin::users-permissions.permission')
           .delete({ where: { id: permission.id } })
@@ -136,7 +136,7 @@ module.exports = ({ strapi }) => ({
     );
 
     await Promise.all(
-      toCreate.map(permissionInfo =>
+      toCreate.map((permissionInfo) =>
         strapi.query('plugin::users-permissions.permission').create({ data: permissionInfo })
       )
     );
@@ -153,7 +153,7 @@ module.exports = ({ strapi }) => ({
 
     // Move users to guest role.
     await Promise.all(
-      role.users.map(user => {
+      role.users.map((user) => {
         return strapi.query('plugin::users-permissions.user').update({
           where: { id: user.id },
           data: { role: publicRoleID },
@@ -164,7 +164,7 @@ module.exports = ({ strapi }) => ({
     // Remove permissions related to this role.
     // TODO: use delete many
     await Promise.all(
-      role.permissions.map(permission => {
+      role.permissions.map((permission) => {
         return strapi.query('plugin::users-permissions.permission').delete({
           where: { id: permission.id },
         });

@@ -8,7 +8,7 @@ describe('Hooks Module', () => {
       test(`It's possible to create a hook that has all the needed methods`, () => {
         const hook = hooks.internals.createHook();
 
-        expect(hook).toHaveProperty('handlers', expect.any(Array));
+        expect(hook).toHaveProperty('getHandlers', expect.any(Function));
         expect(hook).toHaveProperty('register', expect.any(Function));
         expect(hook).toHaveProperty('delete', expect.any(Function));
         expect(hook).toHaveProperty('call', expect.any(Function));
@@ -43,7 +43,7 @@ describe('Hooks Module', () => {
 
       test('Running a hook with an handler can mutate the context', async () => {
         const ctx = { foo: 'bar' };
-        const handler = jest.fn(context => {
+        const handler = jest.fn((context) => {
           context.foo = 'foo';
         });
 
@@ -60,16 +60,16 @@ describe('Hooks Module', () => {
       test('Running a hook with multiple handlers can mutate the hook in order', async () => {
         const ctx = { foo: [] };
         const handlers = [
-          jest.fn(context => context.foo.push('foo')),
-          jest.fn(context => context.foo.push('bar')),
+          jest.fn((context) => context.foo.push('foo')),
+          jest.fn((context) => context.foo.push('bar')),
         ];
         const hook = hooks.createAsyncSeriesHook();
 
-        handlers.forEach(handler => hook.register(handler));
+        handlers.forEach((handler) => hook.register(handler));
 
         await hook.call(ctx);
 
-        handlers.forEach(handler => expect(handler).toHaveBeenCalled());
+        handlers.forEach((handler) => expect(handler).toHaveBeenCalled());
         expect(ctx).toHaveProperty('foo', ['foo', 'bar']);
       });
     });
@@ -93,7 +93,7 @@ describe('Hooks Module', () => {
 
       test('Running a hook with an handler can update the final value', async () => {
         const param = 'foo';
-        const handler = jest.fn(param => [param, 'bar']);
+        const handler = jest.fn((param) => [param, 'bar']);
 
         const hook = hooks.createAsyncSeriesWaterfallHook();
 
@@ -107,14 +107,17 @@ describe('Hooks Module', () => {
 
       test(`Running a hook with multiple handlers means every handler will receive the previous one's result`, async () => {
         const param = 'foo';
-        const handlers = [jest.fn(param => `${param}.bar`), jest.fn(param => `${param}.foobar`)];
+        const handlers = [
+          jest.fn((param) => `${param}.bar`),
+          jest.fn((param) => `${param}.foobar`),
+        ];
         const hook = hooks.createAsyncSeriesWaterfallHook();
 
-        handlers.forEach(handler => hook.register(handler));
+        handlers.forEach((handler) => hook.register(handler));
 
         const result = await hook.call(param);
 
-        handlers.forEach(handler => expect(handler).toHaveBeenCalled());
+        handlers.forEach((handler) => expect(handler).toHaveBeenCalled());
         expect(result).toEqual('foo.bar.foobar');
       });
     });
@@ -138,7 +141,7 @@ describe('Hooks Module', () => {
 
       test('Running a hook with an handler returns its value', async () => {
         const param = 'test';
-        const handler = jest.fn(param => `${param}.bar`);
+        const handler = jest.fn((param) => `${param}.bar`);
 
         const hook = hooks.createAsyncParallelHook();
 
@@ -152,14 +155,14 @@ describe('Hooks Module', () => {
 
       test(`Running a hook with multiple handlers return every result as an array`, async () => {
         const param = 'test';
-        const handlers = [jest.fn(param => `${param}.foo`), jest.fn(param => `${param}.bar`)];
+        const handlers = [jest.fn((param) => `${param}.foo`), jest.fn((param) => `${param}.bar`)];
         const hook = hooks.createAsyncParallelHook();
 
-        handlers.forEach(handler => hook.register(handler));
+        handlers.forEach((handler) => hook.register(handler));
 
         const result = await hook.call(param);
 
-        handlers.forEach(handler => expect(handler).toHaveBeenCalled());
+        handlers.forEach((handler) => expect(handler).toHaveBeenCalled());
         expect(result).toEqual(['test.foo', 'test.bar']);
       });
     });

@@ -2,13 +2,14 @@ import React, { useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Alert } from '@strapi/design-system/Alert';
-import { Link } from '@strapi/design-system/Link';
+import { Link } from '@strapi/design-system/v2/Link';
 
 const Notification = ({ dispatch, notification }) => {
   const { formatMessage } = useIntl();
   const { message, link, type, id, onClose, timeout, blockTransition } = notification;
 
-  const formattedMessage = msg => (typeof msg === 'string' ? msg : formatMessage(msg, msg.values));
+  const formattedMessage = (msg) =>
+    typeof msg === 'string' ? msg : formatMessage(msg, msg.values);
   const handleClose = useCallback(() => {
     if (onClose) {
       onClose();
@@ -60,15 +61,13 @@ const Notification = ({ dispatch, notification }) => {
     <Alert
       action={
         link ? (
-          <Link href={link.url} target="_blank">
+          <Link href={link.url} isExternal>
             {formatMessage({
               id: link.label?.id || link.label,
               defaultMessage: link.label?.defaultMessage || link.label?.id || link.label,
             })}
           </Link>
-        ) : (
-          undefined
-        )
+        ) : undefined
       }
       onClose={handleClose}
       closeLabel="Close"

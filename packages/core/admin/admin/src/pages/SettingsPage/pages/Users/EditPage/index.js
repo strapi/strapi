@@ -15,6 +15,7 @@ import {
   useNotification,
   useOverlayBlocker,
   LoadingIndicatorPage,
+  Link,
 } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 import { Formik } from 'formik';
@@ -22,7 +23,6 @@ import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Link } from '@strapi/design-system/Link';
 import { Typography } from '@strapi/design-system/Typography';
 import { Main } from '@strapi/design-system/Main';
 import { Stack } from '@strapi/design-system/Stack';
@@ -53,7 +53,7 @@ const EditPage = ({ canUpdate }) => {
     retry: false,
     keepPreviousData: false,
     staleTime: 1000 * 20,
-    onError: err => {
+    onError(err) {
       const status = err.response.status;
 
       // Redirect the use to the homepage if is not allowed to read
@@ -223,8 +223,8 @@ const EditPage = ({ canUpdate }) => {
                         })}
                       </Typography>
                       <Grid gap={5}>
-                        {layout.map(row => {
-                          return row.map(input => {
+                        {layout.map((row) => {
+                          return row.map((input) => {
                             return (
                               <GridItem key={input.name} {...input.size}>
                                 <GenericInput

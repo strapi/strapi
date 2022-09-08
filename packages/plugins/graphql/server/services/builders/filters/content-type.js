@@ -9,58 +9,6 @@ module.exports = ({ strapi }) => {
     return [operators.and, operators.or, operators.not];
   };
 
-  const buildContentTypeFilters = contentType => {
-    const utils = strapi.plugin('graphql').service('utils');
-    const extension = strapi.plugin('graphql').service('extension');
-
-    const { getFiltersInputTypeName, getScalarFilterInputTypeName } = utils.naming;
-    const { isStrapiScalar, isRelation } = utils.attributes;
-
-    const { attributes } = contentType;
-
-    const filtersTypeName = getFiltersInputTypeName(contentType);
-
-    return inputObjectType({
-      name: filtersTypeName,
-
-      definition(t) {
-        const validAttributes = Object.entries(attributes).filter(([attributeName]) =>
-          extension
-            .shadowCRUD(contentType.uid)
-            .field(attributeName)
-            .hasFiltersEnabeld()
-        );
-
-        const isIDFilterEnabled = extension
-          .shadowCRUD(contentType.uid)
-          .field('id')
-          .hasFiltersEnabeld();
-        // Add an ID filter to the collection types
-        if (contentType.kind === 'collectionType' && isIDFilterEnabled) {
-          t.field('id', { type: getScalarFilterInputTypeName('ID') });
-        }
-
-        // Add every defined attribute
-        for (const [attributeName, attribute] of validAttributes) {
-          // Handle scalars
-          if (isStrapiScalar(attribute)) {
-            addScalarAttribute(t, attributeName, attribute);
-          }
-
-          // Handle relations
-          else if (isRelation(attribute)) {
-            addRelationalAttribute(t, attributeName, attribute);
-          }
-        }
-
-        // Conditional clauses
-        for (const operator of rootLevelOperators()) {
-          operator.add(t, filtersTypeName);
-        }
-      },
-    });
-  };
-
   const addScalarAttribute = (builder, attributeName, attribute) => {
     const { naming, mappers } = strapi.plugin('graphql').service('utils');
 
@@ -85,6 +33,76 @@ module.exports = ({ strapi }) => {
     if (extension.shadowCRUD(model.uid).isDisabled()) return;
 
     builder.field(attributeName, { type: getFiltersInputTypeName(model) });
+  };
+
+  const addComponentAttribute = (builder, attributeName, attribute) => {
+    const utils = strapi.plugin('graphql').service('utils');
+    const extension = strapi.plugin('graphql').service('extension');
+    const { getFiltersInputTypeName } = utils.naming;
+
+    const component = strapi.getModel(attribute.component);
+
+    // If there is no component corresponding to the attribute configuration, then ignore it
+    if (!component) return;
+
+    // If the component is disabled, then ignore it too
+    if (extension.shadowCRUD(component.uid).isDisabled()) return;
+
+    builder.field(attributeName, { type: getFiltersInputTypeName(component) });
+  };
+
+  const buildContentTypeFilters = (contentType) => {
+    const utils = strapi.plugin('graphql').service('utils');
+    const extension = strapi.plugin('graphql').service('extension');
+
+    const { getFiltersInputTypeName, getScalarFilterInputTypeName } = utils.naming;
+    const { isStrapiScalar, isRelation, isComponent } = utils.attributes;
+
+    const { attributes } = contentType;
+
+    const filtersTypeName = getFiltersInputTypeName(contentType);
+
+    return inputObjectType({
+      name: filtersTypeName,
+
+      definition(t) {
+        const validAttributes = Object.entries(attributes).filter(([attributeName]) =>
+          extension.shadowCRUD(contentType.uid).field(attributeName).hasFiltersEnabeld()
+        );
+
+        const isIDFilterEnabled = extension
+          .shadowCRUD(contentType.uid)
+          .field('id')
+          .hasFiltersEnabeld();
+        // Add an ID filter to the collection types
+        if (contentType.kind === 'collectionType' && isIDFilterEnabled) {
+          t.field('id', { type: getScalarFilterInputTypeName('ID') });
+        }
+
+        // Add every defined attribute
+        for (const [attributeName, attribute] of validAttributes) {
+          // Handle scalars
+          if (isStrapiScalar(attribute)) {
+            addScalarAttribute(t, attributeName, attribute);
+          }
+
+          // Handle relations
+          else if (isRelation(attribute)) {
+            addRelationalAttribute(t, attributeName, attribute);
+          }
+
+          // Handle components
+          else if (isComponent(attribute)) {
+            addComponentAttribute(t, attributeName, attribute);
+          }
+        }
+
+        // Conditional clauses
+        for (const operator of rootLevelOperators()) {
+          operator.add(t, filtersTypeName);
+        }
+      },
+    });
   };
 
   return {

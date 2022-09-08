@@ -10,7 +10,7 @@ describe('metrics', () => {
   test('Initializes a middleware', () => {
     const use = jest.fn();
 
-    metrics({
+    const metricsInstance = metrics({
       config: {
         get(path) {
           return get(path, this);
@@ -24,15 +24,24 @@ describe('metrics', () => {
       server: {
         use,
       },
-    }).register();
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
+    });
+
+    metricsInstance.register();
 
     expect(use).toHaveBeenCalled();
+
+    metricsInstance.destroy();
   });
 
   test('Does not init middleware if disabled', () => {
     const use = jest.fn();
 
-    metrics({
+    const metricsInstance = metrics({
       config: {
         get(path) {
           return get(path, this);
@@ -46,9 +55,18 @@ describe('metrics', () => {
       server: {
         use,
       },
-    }).register();
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
+      },
+    });
+
+    metricsInstance.register();
 
     expect(use).not.toHaveBeenCalled();
+
+    metricsInstance.destroy();
   });
 
   test('Send payload with meta', () => {
@@ -65,6 +83,11 @@ describe('metrics', () => {
       },
       server: {
         use() {},
+      },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
       },
     });
 
@@ -99,6 +122,11 @@ describe('metrics', () => {
       },
       server: {
         use() {},
+      },
+      dirs: {
+        app: {
+          root: process.cwd(),
+        },
       },
     });
 

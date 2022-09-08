@@ -8,13 +8,13 @@ import {
   useNotification,
   useTracking,
   useGuidedTour,
+  Link,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
 import Check from '@strapi/icons/Check';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
-import { Link } from '@strapi/design-system/Link';
 import { Formik } from 'formik';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
@@ -68,7 +68,7 @@ const ApiTokenCreateView = () => {
     },
     {
       enabled: !isCreating && !apiToken,
-      onError: () => {
+      onError() {
         toggleNotification({
           type: 'warning',
           message: { id: 'notification.error', defaultMessage: 'An error occured' },
@@ -255,7 +255,7 @@ const ApiTokenCreateView = () => {
                                   )
                                 : null
                             }
-                            onChange={value => {
+                            onChange={(value) => {
                               handleChange({ target: { name: 'type', value } });
                             }}
                           >

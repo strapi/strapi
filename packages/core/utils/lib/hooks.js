@@ -20,17 +20,19 @@ const createHook = () => {
   };
 
   return {
-    get handlers() {
+    getHandlers() {
       return state.handlers;
     },
 
     register(handler) {
       state.handlers.push(handler);
+
       return this;
     },
 
     delete(handler) {
       state.handlers = remove(eq(handler), state.handlers);
+
       return this;
     },
 
@@ -49,7 +51,7 @@ const createAsyncSeriesHook = () => ({
   ...createHook(),
 
   async call(context) {
-    for (const handler of this.handlers) {
+    for (const handler of this.getHandlers()) {
       await handler(context);
     }
   },
@@ -66,7 +68,7 @@ const createAsyncSeriesWaterfallHook = () => ({
   async call(param) {
     let res = param;
 
-    for (const handler of this.handlers) {
+    for (const handler of this.getHandlers()) {
       res = await handler(res);
     }
 
@@ -83,7 +85,7 @@ const createAsyncParallelHook = () => ({
   ...createHook(),
 
   async call(context) {
-    const promises = this.handlers.map(handler => handler(cloneDeep(context)));
+    const promises = this.getHandlers().map((handler) => handler(cloneDeep(context)));
 
     return Promise.all(promises);
   },

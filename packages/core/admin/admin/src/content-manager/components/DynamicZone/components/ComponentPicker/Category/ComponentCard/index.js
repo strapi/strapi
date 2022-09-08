@@ -74,8 +74,8 @@ function ComponentCard({ componentUid, intlLabel, icon, onClick }) {
 }
 
 ComponentCard.defaultProps = {
-  icon: 'smile',
-  onClick: () => {},
+  icon: 'dice-d6',
+  onClick() {},
 };
 
 ComponentCard.propTypes = {

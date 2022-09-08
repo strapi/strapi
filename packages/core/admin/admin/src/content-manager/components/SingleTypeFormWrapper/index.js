@@ -38,16 +38,11 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const toggleNotification = useNotification();
   const dispatch = useDispatch();
 
-  const {
-    componentsDataStructure,
-    contentTypeDataStructure,
-    data,
-    isLoading,
-    status,
-  } = useSelector(selectCrudReducer);
+  const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
+    useSelector(selectCrudReducer);
 
   const cleanReceivedData = useCallback(
-    data => {
+    (data) => {
       const cleaned = removePasswordFieldsFromData(
         data,
         allLayoutData.contentType,
@@ -100,7 +95,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
 
-    const fetchData = async source => {
+    const fetchData = async (source) => {
       dispatch(getData());
 
       setIsCreatingEntry(true);
@@ -142,9 +137,9 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   }, [cleanReceivedData, push, slug, dispatch, searchToSend, rawQuery, toggleNotification]);
 
   const displayErrors = useCallback(
-    err => {
-      const errorPayload = err.response.payload;
-      let errorMessage = get(errorPayload, ['message'], 'Bad Request');
+    (err) => {
+      const errorPayload = err.response.data;
+      let errorMessage = get(errorPayload, ['error', 'message'], 'Bad Request');
 
       // TODO handle errors correctly when back-end ready
       if (Array.isArray(errorMessage)) {
@@ -159,7 +154,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   );
 
   const onDelete = useCallback(
-    async trackerProperty => {
+    async (trackerProperty) => {
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 

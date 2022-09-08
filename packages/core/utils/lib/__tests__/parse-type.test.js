@@ -60,17 +60,25 @@ describe('parseType', () => {
     });
 
     it('Throws on invalid formator dates', () => {
-      expect(() => parseType({ type: 'date', value: '-1029-11-02' })).toThrow();
-      expect(() => parseType({ type: 'date', value: '2019-13-02' })).toThrow();
-      expect(() => parseType({ type: 'date', value: '2019-12-32' })).toThrow();
-      expect(() => parseType({ type: 'date', value: '2019-02-31' })).toThrow();
+      expect(() => parseType({ type: 'date', value: '-1029-11-02' })).toThrow(
+        'Invalid format, expected an ISO compatible date'
+      );
+      expect(() => parseType({ type: 'date', value: '2019-13-02' })).toThrow(
+        'Invalid format, expected an ISO compatible date'
+      );
+      expect(() => parseType({ type: 'date', value: '2019-12-32' })).toThrow(
+        'Invalid format, expected an ISO compatible date'
+      );
+      expect(() => parseType({ type: 'date', value: '2019-02-31' })).toThrow(
+        'Invalid format, expected an ISO compatible date'
+      );
     });
   });
 
   describe('Datetime', () => {
     it.each(['2019-01-01', '2019-01-01 10:11:12', '1234567890111', '2019-01-01T10:11:12.123Z'])(
       'Supports ISO formats and always returns a date %s',
-      value => {
+      (value) => {
         const r = parseType({ type: 'datetime', value });
         expect(r instanceof Date).toBe(true);
       }

@@ -3,40 +3,75 @@
 const fse = require('fs-extra');
 const { defaultsDeep, get } = require('lodash/fp');
 const body = require('koa-body');
+const mime = require('mime-types');
 
 const defaults = {
   multipart: true,
   patchKoa: true,
 };
 
+function ensureFileMimeType(file) {
+  if (!file.type) {
+    file.type = mime.lookup(file.name) || 'application/octet-stream';
+  }
+}
+
+function getFiles(ctx) {
+  return get('request.files.files', ctx);
+}
+
 /**
  * @type {import('./').MiddlewareFactory}
  */
-module.exports = config => {
+
+module.exports = (config, { strapi }) => {
   const bodyConfig = defaultsDeep(defaults, config);
+
+  let gqlEndpoint;
+  if (strapi.plugin('graphql')) {
+    const { config: gqlConfig } = strapi.plugin('graphql');
+    gqlEndpoint = gqlConfig('endpoint');
+  }
 
   return async (ctx, next) => {
     // TODO: find a better way later
-    if (ctx.url === '/graphql') {
-      return next();
-    }
+    if (gqlEndpoint && ctx.url === gqlEndpoint) {
+      await next();
+    } else {
+      try {
+        await body({ patchKoa: true, ...bodyConfig })(ctx, () => {});
 
-    try {
-      await body({ patchKoa: true, ...bodyConfig })(ctx, next);
-    } catch (e) {
-      if ((e || {}).message && e.message.includes('maxFileSize exceeded')) {
-        return ctx.payloadTooLarge('FileTooBig');
+        const files = getFiles(ctx);
+
+        /**
+         * in case the mime-type wasn't sent, Strapi tries to guess it
+         * from the file extension, to avoid a corrupt database state
+         */
+        if (files) {
+          if (Array.isArray(files)) {
+            files.forEach(ensureFileMimeType);
+          } else {
+            ensureFileMimeType(files);
+          }
+        }
+
+        await next();
+      } catch (e) {
+        if ((e || {}).message && e.message.includes('maxFileSize exceeded')) {
+          return ctx.payloadTooLarge('FileTooBig');
+        }
+
+        throw e;
       }
-
-      throw e;
     }
+
+    const files = getFiles(ctx);
 
     // clean any file that was uploaded
-    const files = get('request.files.files', ctx);
     if (files) {
       if (Array.isArray(files)) {
         // not awaiting to not slow the request
-        Promise.all(files.map(file => fse.remove(file.path)));
+        Promise.all(files.map((file) => fse.remove(file.path)));
       } else if (files && files.path) {
         // not awaiting to not slow the request
         fse.remove(files.path);

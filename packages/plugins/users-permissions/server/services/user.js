@@ -58,8 +58,8 @@ module.exports = ({ strapi }) => ({
    * Promise to fetch a/an user.
    * @return {Promise}
    */
-  fetch(params, populate) {
-    return strapi.query('plugin::users-permissions.user').findOne({ where: params, populate });
+  fetch(id, params) {
+    return strapi.entityService.findOne('plugin::users-permissions.user', id, params);
   },
 
   /**
@@ -76,8 +76,8 @@ module.exports = ({ strapi }) => ({
    * Promise to fetch all users.
    * @return {Promise}
    */
-  fetchAll(params, populate) {
-    return strapi.query('plugin::users-permissions.user').findMany({ where: params, populate });
+  fetchAll(params) {
+    return strapi.entityService.findMany('plugin::users-permissions.user', params);
   },
 
   /**
@@ -86,13 +86,6 @@ module.exports = ({ strapi }) => ({
    */
   async remove(params) {
     return strapi.query('plugin::users-permissions.user').delete({ where: params });
-  },
-  isHashed(password) {
-    if (typeof password !== 'string' || !password) {
-      return false;
-    }
-
-    return password.split('$').length === 4;
   },
 
   validatePassword(password, hash) {
@@ -106,7 +99,7 @@ module.exports = ({ strapi }) => ({
 
     const settings = await pluginStore
       .get({ key: 'email' })
-      .then(storeEmail => storeEmail['email_confirmation'].options);
+      .then((storeEmail) => storeEmail.email_confirmation.options);
 
     // Sanitize the template's user information
     const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(userSchema, user);

@@ -5,10 +5,11 @@ const { has, prop, omit, toString } = require('lodash/fp');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { getComponentAttributes } = require('@strapi/utils').contentTypes;
 
 const omitComponentData = (contentType, data) => {
   const { attributes } = contentType;
-  const componentAttributes = Object.keys(attributes).filter(attributeName =>
+  const componentAttributes = Object.keys(attributes).filter((attributeName) =>
     contentTypesUtils.isComponentAttribute(attributes[attributeName])
   );
 
@@ -17,11 +18,11 @@ const omitComponentData = (contentType, data) => {
 
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async (uid, data) => {
-  const { attributes } = strapi.getModel(uid);
+  const { attributes = {} } = strapi.getModel(uid);
 
   const componentBody = {};
 
-  for (const attributeName in attributes) {
+  for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
     if (!has(attributeName, data) || !contentTypesUtils.isComponentAttribute(attribute)) {
@@ -43,7 +44,7 @@ const createComponents = async (uid, data) => {
         }
 
         const components = await Promise.all(
-          componentValue.map(value => createComponent(componentUID, value))
+          componentValue.map((value) => createComponent(componentUID, value))
         );
 
         // TODO: add order
@@ -100,16 +101,28 @@ const createComponents = async (uid, data) => {
   return componentBody;
 };
 
+/**
+ * @param {str} uid
+ * @param {object} entity
+ * @return {Promise<{uid: string, entity: object}>}
+ */
+const getComponents = async (uid, entity) => {
+  const componentAttributes = getComponentAttributes(strapi.getModel(uid));
+
+  if (_.isEmpty(componentAttributes)) return {};
+  return strapi.query(uid).load(entity, componentAttributes);
+};
+
 /*
   delete old components
   create or update
 */
 const updateComponents = async (uid, entityToUpdate, data) => {
-  const { attributes } = strapi.getModel(uid);
+  const { attributes = {} } = strapi.getModel(uid);
 
   const componentBody = {};
 
-  for (const attributeName in attributes) {
+  for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
     if (!has(attributeName, data)) {
@@ -129,7 +142,7 @@ const updateComponents = async (uid, entityToUpdate, data) => {
         }
 
         const components = await Promise.all(
-          componentValue.map(value => updateOrCreateComponent(componentUID, value))
+          componentValue.map((value) => updateOrCreateComponent(componentUID, value))
         );
 
         componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }, idx) => {
@@ -197,17 +210,11 @@ const deleteOldComponents = async (
 ) => {
   const previousValue = await strapi.query(uid).load(entityToUpdate, attributeName);
 
-  const idsToKeep = _.castArray(componentValue)
-    .filter(has('id'))
-    .map(prop('id'))
-    .map(toString);
+  const idsToKeep = _.castArray(componentValue).filter(has('id')).map(prop('id')).map(toString);
 
-  const allIds = _.castArray(previousValue)
-    .filter(has('id'))
-    .map(prop('id'))
-    .map(toString);
+  const allIds = _.castArray(previousValue).filter(has('id')).map(prop('id')).map(toString);
 
-  idsToKeep.forEach(id => {
+  idsToKeep.forEach((id) => {
     if (!allIds.includes(id)) {
       throw new ApplicationError(
         `Some of the provided components in ${attributeName} are not related to the entity`
@@ -242,7 +249,7 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
     }));
 
   idsToKeep.forEach(({ id, __component }) => {
-    if (!allIds.find(el => el.id === id && el.__component === __component)) {
+    if (!allIds.find((el) => el.id === id && el.__component === __component)) {
       const err = new Error(
         `Some of the provided components in ${attributeName} are not related to the entity`
       );
@@ -252,7 +259,7 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
   });
 
   const idsToDelete = allIds.reduce((acc, { id, __component }) => {
-    if (!idsToKeep.find(el => el.id === id && el.__component === __component)) {
+    if (!idsToKeep.find((el) => el.id === id && el.__component === __component)) {
       acc.push({ id, __component });
     }
 
@@ -268,22 +275,25 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
 };
 
 const deleteComponents = async (uid, entityToDelete) => {
-  const { attributes } = strapi.getModel(uid);
+  const { attributes = {} } = strapi.getModel(uid);
 
-  for (const attributeName in attributes) {
+  for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
     if (attribute.type === 'component') {
       const { component: componentUID } = attribute;
 
-      const value = await strapi.query(uid).load(entityToDelete, attributeName);
+      // Load attribute value if it's not already loaded
+      const value =
+        entityToDelete[attributeName] ||
+        (await strapi.query(uid).load(entityToDelete, attributeName));
 
       if (!value) {
         continue;
       }
 
       if (Array.isArray(value)) {
-        await Promise.all(value.map(subValue => deleteComponent(componentUID, subValue)));
+        await Promise.all(value.map((subValue) => deleteComponent(componentUID, subValue)));
       } else {
         await deleteComponent(componentUID, value);
       }
@@ -292,14 +302,16 @@ const deleteComponents = async (uid, entityToDelete) => {
     }
 
     if (attribute.type === 'dynamiczone') {
-      const value = await strapi.query(uid).load(entityToDelete, attributeName);
+      const value =
+        entityToDelete[attributeName] ||
+        (await strapi.query(uid).load(entityToDelete, attributeName));
 
       if (!value) {
         continue;
       }
 
       if (Array.isArray(value)) {
-        await Promise.all(value.map(subValue => deleteComponent(subValue.__component, subValue)));
+        await Promise.all(value.map((subValue) => deleteComponent(subValue.__component, subValue)));
       }
 
       continue;
@@ -307,9 +319,9 @@ const deleteComponents = async (uid, entityToDelete) => {
   }
 };
 
-/***************************
+/** *************************
     Component queries
-***************************/
+************************** */
 
 // components can have nested compos so this must be recursive
 const createComponent = async (uid, data) => {
@@ -358,7 +370,9 @@ const deleteComponent = async (uid, componentToDelete) => {
 
 module.exports = {
   omitComponentData,
+  getComponents,
   createComponents,
   updateComponents,
   deleteComponents,
+  deleteComponent,
 };

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`GenericInput number renders and matches the snapshot 1`] = `
-.c13 {
+.c14 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -13,16 +13,34 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c8 {
+.c9 {
   padding-right: 12px;
   padding-left: 8px;
 }
 
-.c10 {
+.c11 {
   color: #8e8ea9;
 }
 
-.c2 {
+.c0 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -30,13 +48,13 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.c6 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -48,34 +66,32 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
-.c1 {
+.c2 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c3 {
+.c4 {
   color: #d02b20;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c4 {
+.c5 {
   line-height: 0;
 }
 
-.c7 {
+.c8 {
   border: none;
   border-radius: 4px;
+  padding-bottom: 0.65625rem;
   padding-left: 16px;
   padding-right: 0;
+  padding-top: 0.65625rem;
   color: #32324d;
   font-weight: 400;
   font-size: 0.875rem;
@@ -84,40 +100,39 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   background: inherit;
 }
 
-.c7::-webkit-input-placeholder {
+.c8::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c7::-moz-placeholder {
+.c8::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c7:-ms-input-placeholder {
+.c8:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c7::placeholder {
+.c8::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c7[aria-disabled='true'] {
+.c8[aria-disabled='true'] {
   color: inherit;
 }
 
-.c7:focus {
+.c8:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c6 {
+.c7 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
-  height: 2.5rem;
   outline: none;
   box-shadow: 0;
   -webkit-transition-property: border-color,box-shadow,fill;
@@ -126,35 +141,25 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c6:focus-within {
+.c7:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c0 > * {
+.c1 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c0 > * + * {
+.c1 > * + * {
   margin-top: 4px;
 }
 
-.c11 path {
+.c12 path {
   fill: #8e8ea9;
 }
 
-.c9 {
+.c10 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -169,7 +174,7 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   transform: translateY(-2px);
 }
 
-.c9 svg {
+.c10 svg {
   display: block;
   height: 0.25rem;
   -webkit-transform: rotateX(180deg);
@@ -177,7 +182,7 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   transform: rotateX(180deg);
 }
 
-.c12 {
+.c13 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -192,7 +197,7 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
   transform: translateY(2px);
 }
 
-.c12 svg {
+.c13 svg {
   display: block;
   height: 0.25rem;
 }
@@ -200,32 +205,32 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
 <div>
   <div>
     <div
-      class="c0"
+      class="c0 c1"
       spacing="1"
     >
       <label
-        class="c1"
+        class="c2"
         for="number"
         required=""
       >
         <div
-          class="c2"
+          class="c3"
         >
           Default label
           <span
-            class="c3 c4"
+            class="c4 c5"
           >
             *
           </span>
         </div>
       </label>
       <div
-        class="c5 c6"
+        class="c6 c7"
       >
         <input
           aria-disabled="false"
           aria-invalid="false"
-          class="c7"
+          class="c8"
           id="number"
           name="number"
           placeholder="Default placeholder"
@@ -233,17 +238,17 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
           value=""
         />
         <div
-          class="c8"
+          class="c9"
         >
           <button
             aria-hidden="true"
-            class="c9"
+            class="c10"
             data-testid="ArrowUp"
             tabindex="-1"
             type="button"
           >
             <svg
-              class="c10 c11"
+              class="c11 c12"
               fill="none"
               height="1em"
               viewBox="0 0 14 8"
@@ -260,13 +265,13 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
           </button>
           <button
             aria-hidden="true"
-            class="c12"
+            class="c13"
             data-testid="ArrowDown"
             tabindex="-1"
             type="button"
           >
             <svg
-              class="c10 c11"
+              class="c11 c12"
               fill="none"
               height="1em"
               viewBox="0 0 14 8"
@@ -286,7 +291,7 @@ exports[`GenericInput number renders and matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    class="c13"
+    class="c14"
   >
     <p
       aria-live="polite"

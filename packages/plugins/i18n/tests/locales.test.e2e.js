@@ -56,7 +56,7 @@ describe('CRUD locales', () => {
 
   describe('Default locale', () => {
     test('Default locale is already created', async () => {
-      let res = await rq({
+      const res = await rq({
         url: '/i18n/locales',
         method: 'GET',
       });
@@ -76,7 +76,7 @@ describe('CRUD locales', () => {
         isDefault: false,
       };
 
-      let res = await rq({
+      const res = await rq({
         url: '/i18n/locales',
         method: 'POST',
         body: locale,
@@ -95,7 +95,7 @@ describe('CRUD locales', () => {
         name: 'Italian',
       };
 
-      let res = await rq({
+      const res = await rq({
         url: '/i18n/locales',
         method: 'POST',
         body: locale,
@@ -133,7 +133,7 @@ describe('CRUD locales', () => {
         isDefault: false,
       };
 
-      let res = await rq({
+      const res = await rq({
         url: '/i18n/locales',
         method: 'POST',
         body: locale,
@@ -158,7 +158,7 @@ describe('CRUD locales', () => {
         isDefault: false,
       };
 
-      let res = await rq({
+      const res = await rq({
         url: '/i18n/locales',
         method: 'POST',
         body: locale,
@@ -197,8 +197,8 @@ describe('CRUD locales', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      const enLocale = res.body.find(locale => locale.code === 'bas');
-      const enUsLocale = res.body.find(locale => locale.code === 'en-US');
+      const enLocale = res.body.find((locale) => locale.code === 'bas');
+      const enUsLocale = res.body.find((locale) => locale.code === 'en-US');
       expect(enLocale.isDefault).toBe(false);
       expect(enUsLocale.isDefault).toBe(true);
 
@@ -209,7 +209,7 @@ describe('CRUD locales', () => {
 
   describe('Read', () => {
     test('Can list the locales', async () => {
-      let res = await rq({
+      const res = await rq({
         url: '/i18n/locales',
         method: 'GET',
       });
@@ -229,7 +229,7 @@ describe('CRUD locales', () => {
         isDefault: false,
       };
 
-      let res = await rq({
+      const res = await rq({
         url: `/i18n/locales/${data.locales[1].id}`,
         method: 'PUT',
         body: localeUpdate,
@@ -248,7 +248,7 @@ describe('CRUD locales', () => {
         code: 'ak',
       };
 
-      let res = await rq({
+      const res = await rq({
         url: `/i18n/locales/${data.locales[0].id}`,
         method: 'PUT',
         body: localeUpdate,
@@ -280,7 +280,7 @@ describe('CRUD locales', () => {
         code: 'ak',
       };
 
-      let res = await rq({
+      const res = await rq({
         url: `/i18n/locales/${data.locales[0].id}`,
         method: 'PUT',
         body: localeUpdate,
@@ -330,8 +330,8 @@ describe('CRUD locales', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.find(locale => locale.code === data.locales[0].code).isDefault).toBe(false);
-      expect(res.body.find(locale => locale.code === data.locales[1].code).isDefault).toBe(true);
+      expect(res.body.find((locale) => locale.code === data.locales[0].code).isDefault).toBe(false);
+      expect(res.body.find((locale) => locale.code === data.locales[1].code).isDefault).toBe(true);
     });
 
     test('Cannot unselect isDefault', async () => {
@@ -450,7 +450,7 @@ describe('CRUD locales', () => {
     });
 
     test('Cannot delete not found locale', async () => {
-      let res = await rq({
+      const res = await rq({
         url: `/i18n/locales/${data.deletedLocales[0].id}`,
         method: 'DELETE',
       });

@@ -5,10 +5,10 @@ const _ = require('lodash/fp');
 const types = require('../../types');
 const { fromRow } = require('./transform');
 
-const getRootLevelPopulate = meta => {
+const getRootLevelPopulate = (meta) => {
   const populate = {};
 
-  for (const attributeName in meta.attributes) {
+  for (const attributeName of Object.keys(meta.attributes)) {
     const attribute = meta.attributes[attributeName];
     if (attribute.type === 'relation') {
       populate[attributeName] = true;
@@ -72,7 +72,7 @@ const processPopulate = (populate, ctx) => {
   }
 
   const finalPopulate = {};
-  for (const key in populateMap) {
+  for (const key of Object.keys(populateMap)) {
     const attribute = meta.attributes[key];
 
     if (!attribute) {
@@ -80,7 +80,7 @@ const processPopulate = (populate, ctx) => {
     }
 
     if (!types.isRelation(attribute.type)) {
-      throw new Error(`Invalid populate field. Expected a relation, got ${attribute.type}`);
+      continue;
     }
 
     // make sure id is present for future populate queries
@@ -119,7 +119,7 @@ const applyPopulate = async (results, populate, ctx) => {
     return results;
   }
 
-  for (const key in populate) {
+  for (const key of Object.keys(populate)) {
     const attribute = meta.attributes[key];
     const targetMeta = db.metadata.get(attribute.target);
 
@@ -130,21 +130,19 @@ const applyPopulate = async (results, populate, ctx) => {
 
     const isCount = populateValue.count === true;
 
-    const fromTargetRow = rowOrRows => fromRow(targetMeta, rowOrRows);
+    const fromTargetRow = (rowOrRows) => fromRow(targetMeta, rowOrRows);
 
     if (attribute.relation === 'oneToOne' || attribute.relation === 'manyToOne') {
       if (attribute.joinColumn) {
-        const {
-          name: joinColumnName,
-          referencedColumn: referencedColumnName,
-        } = attribute.joinColumn;
+        const { name: joinColumnName, referencedColumn: referencedColumnName } =
+          attribute.joinColumn;
 
         const referencedValues = _.uniq(
-          results.map(r => r[joinColumnName]).filter(value => !_.isNil(value))
+          results.map((r) => r[joinColumnName]).filter((value) => !_.isNil(value))
         );
 
         if (_.isEmpty(referencedValues)) {
-          results.forEach(result => {
+          results.forEach((result) => {
             result[key] = null;
           });
 
@@ -160,7 +158,7 @@ const applyPopulate = async (results, populate, ctx) => {
 
         const map = _.groupBy(referencedColumnName, rows);
 
-        results.forEach(result => {
+        results.forEach((result) => {
           result[key] = fromTargetRow(_.first(map[result[joinColumnName]]));
         });
 
@@ -172,20 +170,18 @@ const applyPopulate = async (results, populate, ctx) => {
 
         const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
 
-        const {
-          name: joinColumnName,
-          referencedColumn: referencedColumnName,
-        } = joinTable.joinColumn;
+        const { name: joinColumnName, referencedColumn: referencedColumnName } =
+          joinTable.joinColumn;
 
         const alias = qb.getAlias();
         const joinColAlias = `${alias}.${joinColumnName}`;
 
         const referencedValues = _.uniq(
-          results.map(r => r[referencedColumnName]).filter(value => !_.isNil(value))
+          results.map((r) => r[referencedColumnName]).filter((value) => !_.isNil(value))
         );
 
         if (_.isEmpty(referencedValues)) {
-          results.forEach(result => {
+          results.forEach((result) => {
             result[key] = null;
           });
           continue;
@@ -208,7 +204,7 @@ const applyPopulate = async (results, populate, ctx) => {
 
         const map = _.groupBy(joinColumnName, rows);
 
-        results.forEach(result => {
+        results.forEach((result) => {
           result[key] = fromTargetRow(_.first(map[result[referencedColumnName]]));
         });
 
@@ -218,17 +214,15 @@ const applyPopulate = async (results, populate, ctx) => {
       continue;
     } else if (attribute.relation === 'oneToMany') {
       if (attribute.joinColumn) {
-        const {
-          name: joinColumnName,
-          referencedColumn: referencedColumnName,
-        } = attribute.joinColumn;
+        const { name: joinColumnName, referencedColumn: referencedColumnName } =
+          attribute.joinColumn;
 
         const referencedValues = _.uniq(
-          results.map(r => r[joinColumnName]).filter(value => !_.isNil(value))
+          results.map((r) => r[joinColumnName]).filter((value) => !_.isNil(value))
         );
 
         if (_.isEmpty(referencedValues)) {
-          results.forEach(result => {
+          results.forEach((result) => {
             result[key] = null;
           });
           continue;
@@ -243,7 +237,7 @@ const applyPopulate = async (results, populate, ctx) => {
 
         const map = _.groupBy(referencedColumnName, rows);
 
-        results.forEach(result => {
+        results.forEach((result) => {
           result[key] = fromTargetRow(map[result[joinColumnName]] || []);
         });
 
@@ -255,21 +249,19 @@ const applyPopulate = async (results, populate, ctx) => {
 
         const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
 
-        const {
-          name: joinColumnName,
-          referencedColumn: referencedColumnName,
-        } = joinTable.joinColumn;
+        const { name: joinColumnName, referencedColumn: referencedColumnName } =
+          joinTable.joinColumn;
 
         const alias = qb.getAlias();
         const joinColAlias = `${alias}.${joinColumnName}`;
 
         const referencedValues = _.uniq(
-          results.map(r => r[referencedColumnName]).filter(value => !_.isNil(value))
+          results.map((r) => r[referencedColumnName]).filter((value) => !_.isNil(value))
         );
 
         if (isCount) {
           if (_.isEmpty(referencedValues)) {
-            results.forEach(result => {
+            results.forEach((result) => {
               result[key] = { count: 0 };
             });
             continue;
@@ -295,7 +287,7 @@ const applyPopulate = async (results, populate, ctx) => {
             return map;
           }, {});
 
-          results.forEach(result => {
+          results.forEach((result) => {
             result[key] = map[result[referencedColumnName]] || { count: 0 };
           });
 
@@ -303,7 +295,7 @@ const applyPopulate = async (results, populate, ctx) => {
         }
 
         if (_.isEmpty(referencedValues)) {
-          results.forEach(result => {
+          results.forEach((result) => {
             result[key] = [];
           });
           continue;
@@ -326,7 +318,7 @@ const applyPopulate = async (results, populate, ctx) => {
 
         const map = _.groupBy(joinColumnName, rows);
 
-        results.forEach(r => {
+        results.forEach((r) => {
           r[key] = fromTargetRow(map[r[referencedColumnName]] || []);
         });
         continue;
@@ -343,12 +335,12 @@ const applyPopulate = async (results, populate, ctx) => {
       const alias = qb.getAlias();
       const joinColAlias = `${alias}.${joinColumnName}`;
       const referencedValues = _.uniq(
-        results.map(r => r[referencedColumnName]).filter(value => !_.isNil(value))
+        results.map((r) => r[referencedColumnName]).filter((value) => !_.isNil(value))
       );
 
       if (isCount) {
         if (_.isEmpty(referencedValues)) {
-          results.forEach(result => {
+          results.forEach((result) => {
             result[key] = { count: 0 };
           });
           continue;
@@ -374,7 +366,7 @@ const applyPopulate = async (results, populate, ctx) => {
           return map;
         }, {});
 
-        results.forEach(result => {
+        results.forEach((result) => {
           result[key] = map[result[referencedColumnName]] || { count: 0 };
         });
 
@@ -382,7 +374,7 @@ const applyPopulate = async (results, populate, ctx) => {
       }
 
       if (_.isEmpty(referencedValues)) {
-        results.forEach(result => {
+        results.forEach((result) => {
           result[key] = [];
         });
         continue;
@@ -405,7 +397,7 @@ const applyPopulate = async (results, populate, ctx) => {
 
       const map = _.groupBy(joinColumnName, rows);
 
-      results.forEach(result => {
+      results.forEach((result) => {
         result[key] = fromTargetRow(map[result[referencedColumnName]] || []);
       });
 
@@ -419,11 +411,11 @@ const applyPopulate = async (results, populate, ctx) => {
         const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
         const referencedValues = _.uniq(
-          results.map(r => r[idColumn.referencedColumn]).filter(value => !_.isNil(value))
+          results.map((r) => r[idColumn.referencedColumn]).filter((value) => !_.isNil(value))
         );
 
         if (_.isEmpty(referencedValues)) {
-          results.forEach(result => {
+          results.forEach((result) => {
             result[key] = null;
           });
 
@@ -439,7 +431,7 @@ const applyPopulate = async (results, populate, ctx) => {
 
         const map = _.groupBy(idColumn.name, rows);
 
-        results.forEach(result => {
+        results.forEach((result) => {
           const matchingRows = map[result[idColumn.referencedColumn]];
 
           const matchingValue =
@@ -455,11 +447,11 @@ const applyPopulate = async (results, populate, ctx) => {
         const { idColumn, typeColumn } = morphColumn;
 
         const referencedValues = _.uniq(
-          results.map(r => r[idColumn.referencedColumn]).filter(value => !_.isNil(value))
+          results.map((r) => r[idColumn.referencedColumn]).filter((value) => !_.isNil(value))
         );
 
         if (_.isEmpty(referencedValues)) {
-          results.forEach(result => {
+          results.forEach((result) => {
             result[key] = attribute.relation === 'morphOne' ? null : [];
           });
 
@@ -494,7 +486,7 @@ const applyPopulate = async (results, populate, ctx) => {
 
         const map = _.groupBy(idColumn.name, rows);
 
-        results.forEach(result => {
+        results.forEach((result) => {
           const matchingRows = map[result[idColumn.referencedColumn]];
 
           const matchingValue =
@@ -515,7 +507,7 @@ const applyPopulate = async (results, populate, ctx) => {
       // fetch join table to create the ids map then do the same as morphToOne without the first
 
       const referencedValues = _.uniq(
-        results.map(r => r[joinColumn.referencedColumn]).filter(value => !_.isNil(value))
+        results.map((r) => r[joinColumn.referencedColumn]).filter((value) => !_.isNil(value))
       );
 
       const qb = db.entityManager.createQueryBuilder(joinTable.name);
@@ -548,7 +540,7 @@ const applyPopulate = async (results, populate, ctx) => {
       }, {});
 
       const map = {};
-      for (const type in idsByType) {
+      for (const type of Object.keys(idsByType)) {
         const ids = idsByType[type];
 
         // type was removed but still in morph relation
@@ -568,16 +560,16 @@ const applyPopulate = async (results, populate, ctx) => {
         map[type] = _.groupBy(idColumn.referencedColumn, rows);
       }
 
-      results.forEach(result => {
+      results.forEach((result) => {
         const joinResults = joinMap[result[joinColumn.referencedColumn]] || [];
 
-        const matchingRows = joinResults.flatMap(joinResult => {
+        const matchingRows = joinResults.flatMap((joinResult) => {
           const id = joinResult[idColumn.name];
           const type = joinResult[typeColumn.name];
 
-          const fromTargetRow = rowOrRows => fromRow(db.metadata.get(type), rowOrRows);
+          const fromTargetRow = (rowOrRows) => fromRow(db.metadata.get(type), rowOrRows);
 
-          return (map[type][id] || []).map(row => {
+          return (map[type][id] || []).map((row) => {
             return {
               [typeField]: type,
               ...fromTargetRow(row),
@@ -612,7 +604,7 @@ const applyPopulate = async (results, populate, ctx) => {
       }, {});
 
       const map = {};
-      for (const type in idsByType) {
+      for (const type of Object.keys(idsByType)) {
         const ids = idsByType[type];
 
         // type was removed but still in morph relation
@@ -632,7 +624,7 @@ const applyPopulate = async (results, populate, ctx) => {
         map[type] = _.groupBy(idColumn.referencedColumn, rows);
       }
 
-      results.forEach(result => {
+      results.forEach((result) => {
         const id = result[idColumn.name];
         const type = result[typeColumn.name];
 
@@ -643,7 +635,7 @@ const applyPopulate = async (results, populate, ctx) => {
 
         const matchingRows = map[type][id];
 
-        const fromTargetRow = rowOrRows => fromRow(db.metadata.get(type), rowOrRows);
+        const fromTargetRow = (rowOrRows) => fromRow(db.metadata.get(type), rowOrRows);
 
         result[key] = fromTargetRow(_.first(matchingRows));
       });

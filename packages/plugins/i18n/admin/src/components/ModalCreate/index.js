@@ -38,7 +38,7 @@ const ModalCreate = ({ onClose }) => {
    * since the all tree (from the root of the page) is destroyed and re-mounted
    * because of the RBAC refreshing and the potential move of the default locale
    */
-  const handleLocaleAdd = async values => {
+  const handleLocaleAdd = async (values) => {
     await addLocale({
       code: values.code,
       name: values.displayName,
@@ -85,7 +85,7 @@ const ModalCreate = ({ onClose }) => {
                   <Tab>
                     {formatMessage({
                       id: getTrad('Settings.locales.modal.base'),
-                      defaultMessage: 'Base settings',
+                      defaultMessage: 'Basic settings',
                     })}
                   </Tab>
                   <Tab>

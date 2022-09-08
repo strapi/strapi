@@ -12,7 +12,7 @@ describe('Email validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.email(
           {
-            attr: { type: 'string' },
+            attr: { type: 'email' },
           },
           { isDraft: false }
         )
@@ -29,13 +29,26 @@ describe('Email validator', () => {
       const validator = strapiUtils.validateYupSchema(
         validators.email(
           {
-            attr: { type: 'string' },
+            attr: { type: 'email' },
           },
           { isDraft: false }
         )
       );
 
       expect(await validator('valid@email.com')).toBe('valid@email.com');
+    });
+
+    test('it validates non-empty email required field', async () => {
+      const validator = strapiUtils.validateYupSchema(
+        validators.email({ attr: { type: 'email' } }, { isDraft: false })
+      );
+
+      try {
+        await validator('');
+      } catch (err) {
+        expect(err).toBeInstanceOf(YupValidationError);
+        expect(err.message).toBe('this cannot be empty');
+      }
     });
   });
 });

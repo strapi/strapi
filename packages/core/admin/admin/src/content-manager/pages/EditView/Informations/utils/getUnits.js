@@ -4,7 +4,7 @@ const msPerDay = msPerHour * 24;
 const msPerMonth = msPerDay * 30;
 const msPerYear = msPerDay * 365;
 
-const getUnits = value => {
+const getUnits = (value) => {
   if (value < msPerMinute) {
     return { unit: 'second', value: -Math.round(value / 1000) };
   }

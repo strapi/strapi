@@ -109,7 +109,7 @@ const components = {
 };
 
 const filterBy = (name, { mode = 'live' } = {}) => {
-  return fixtures[name].filter(item => {
+  return fixtures[name].filter((item) => {
     if (['live', 'default'].includes(mode)) {
       return item.publishedAt instanceof Date;
     }
@@ -121,7 +121,7 @@ const lengthFor = (name, { mode = 'live' } = {}) => {
   return filterBy(name, { mode }).length;
 };
 
-const getQueryFromMode = mode => {
+const getQueryFromMode = (mode) => {
   if (['live', 'preview'].includes(mode)) {
     return `?publicationState=${mode}`;
   }
@@ -137,13 +137,15 @@ describe('Publication State', () => {
       .addContentTypes([contentTypes.category, contentTypes.product])
       .addFixtures(contentTypes.country.singularName, fixtures.country)
       .addFixtures(contentTypes.category.singularName, fixtures.category)
-      .addFixtures(contentTypes.product.singularName, f =>
-        fixtures.product.map(product => ({
+      .addFixtures(contentTypes.product.singularName, (f) =>
+        fixtures.product.map((product) => ({
           name: product.name,
-          categories: product.categories.map(name => f.category.find(cat => cat.name === name).id),
+          categories: product.categories.map(
+            (name) => f.category.find((cat) => cat.name === name).id
+          ),
           comp: {
             countries: product.comp.countries.map(
-              name => f.country.find(country => country.name === name).id
+              (name) => f.country.find((country) => country.name === name).id
             ),
           },
           publishedAt: product.publishedAt,
@@ -162,8 +164,8 @@ describe('Publication State', () => {
     await builder.cleanup();
   });
 
-  describe.each(['default', 'live', 'preview'])('Mode: "%s"', mode => {
-    describe.each(['country', 'category', 'product'])('For %s', modelName => {
+  describe.each(['default', 'live', 'preview'])('Mode: "%s"', (mode) => {
+    describe.each(['country', 'category', 'product'])('For %s', (modelName) => {
       const baseUrl = `/${contentTypes[modelName].pluralName}`;
       const query = getQueryFromMode(mode);
 
@@ -198,7 +200,7 @@ describe('Publication State', () => {
       });
 
       test('Root level', () => {
-        products.forEach(product => {
+        products.forEach((product) => {
           expect(product.attributes.publishedAt).toBeISODate();
         });
       });
@@ -207,7 +209,7 @@ describe('Publication State', () => {
         products.forEach(({ attributes }) => {
           const categories = attributes.categories.data;
 
-          categories.forEach(category => {
+          categories.forEach((category) => {
             expect(category.attributes.publishedAt).toBeISODate();
           });
         });
@@ -217,7 +219,7 @@ describe('Publication State', () => {
         products.forEach(({ attributes }) => {
           const countries = attributes.comp.countries.data;
 
-          countries.forEach(country => {
+          countries.forEach((country) => {
             expect(country.attributes.publishedAt).toBeISODate();
           });
         });

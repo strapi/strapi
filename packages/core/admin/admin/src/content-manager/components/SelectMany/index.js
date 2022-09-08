@@ -2,7 +2,8 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import isEmpty from 'lodash/isEmpty';
-import Select, { createFilter } from 'react-select';
+import { createFilter } from 'react-select';
+import { ReactSelect as Select } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
@@ -16,6 +17,7 @@ function SelectMany({
   name,
   isDisabled,
   isLoading,
+  loadingMessage,
   onInputChange,
   onMenuClose,
   onMenuOpen,
@@ -24,7 +26,6 @@ function SelectMany({
   options,
   placeholder,
   searchToPersist,
-  styles,
   targetModel,
   value,
   description,
@@ -46,7 +47,7 @@ function SelectMany({
         id={name}
         filterOption={(candidate, input) => {
           if (!isEmpty(value)) {
-            const isSelected = value.findIndex(item => item.id === candidate.value.id) !== -1;
+            const isSelected = value.findIndex((item) => item.id === candidate.value.id) !== -1;
 
             if (isSelected) {
               return false;
@@ -61,6 +62,7 @@ function SelectMany({
         }}
         mainField={mainField}
         isLoading={isLoading}
+        loadingMessage={loadingMessage}
         isMulti
         isSearchable
         options={options}
@@ -72,7 +74,6 @@ function SelectMany({
         placeholder={formatMessage(
           placeholder || { id: 'global.select', defaultMessage: 'Select...' }
         )}
-        styles={styles}
         value={[]}
       />
       <Box paddingTop={3} style={{ overflow: 'auto' }}>
@@ -120,6 +121,7 @@ SelectMany.propTypes = {
   displayNavigationLink: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  loadingMessage: PropTypes.func.isRequired,
   mainField: PropTypes.shape({
     name: PropTypes.string.isRequired,
     schema: PropTypes.shape({
@@ -138,7 +140,6 @@ SelectMany.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
   }),
   searchToPersist: PropTypes.string,
-  styles: PropTypes.object.isRequired,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.array,
   description: PropTypes.string,

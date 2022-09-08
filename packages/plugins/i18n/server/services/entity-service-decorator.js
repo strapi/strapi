@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, omit, isArray } = require('lodash/fp');
+const { has, get, omit, isArray } = require('lodash/fp');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { getService } = require('../utils');
 
@@ -11,7 +11,8 @@ const BULK_ACTIONS = ['delete'];
 const paramsContain = (key, params) => {
   return (
     has(key, params.filters) ||
-    (isArray(params.filters) && params.filters.some(clause => has(key, clause)))
+    (isArray(params.filters) && params.filters.some((clause) => has(key, clause))) ||
+    (isArray(get('$and', params.filters)) && params.filters.$and.some((clause) => has(key, clause)))
   );
 };
 
@@ -57,7 +58,7 @@ const wrapParams = async (params = {}, ctx = {}) => {
  * Assigns a valid locale or the default one if not define
  * @param {object} data
  */
-const assignValidLocale = async data => {
+const assignValidLocale = async (data) => {
   const { getValidLocale } = getService('content-types');
 
   if (!data) {
@@ -75,7 +76,7 @@ const assignValidLocale = async data => {
  * Decorates the entity service with I18N business logic
  * @param {object} service - entity service
  */
-const decorator = service => ({
+const decorator = (service) => ({
   /**
    * Wraps query options. In particular will add default locale to query params
    * @param {object} opts - Query options object (params, data, files, populate)

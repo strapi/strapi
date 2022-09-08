@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 'use strict';
 
 // FIXME
@@ -12,8 +13,8 @@ const program = new Command();
 
 const packageJSON = require('../package.json');
 
-const checkCwdIsStrapiApp = name => {
-  let logErrorAndExit = () => {
+const checkCwdIsStrapiApp = (name) => {
+  const logErrorAndExit = () => {
     console.log(
       `You need to run ${yellow(
         `strapi ${name}`
@@ -23,7 +24,7 @@ const checkCwdIsStrapiApp = name => {
   };
 
   try {
-    const pkgJSON = require(process.cwd() + '/package.json');
+    const pkgJSON = require(`${process.cwd()}/package.json`);
     if (!_.has(pkgJSON, 'dependencies.@strapi/strapi')) {
       logErrorAndExit(name);
     }
@@ -32,30 +33,32 @@ const checkCwdIsStrapiApp = name => {
   }
 };
 
-const getLocalScript = name => (...args) => {
-  checkCwdIsStrapiApp(name);
+const getLocalScript =
+  (name) =>
+  (...args) => {
+    checkCwdIsStrapiApp(name);
 
-  const cmdPath = resolveCwd.silent(`@strapi/strapi/lib/commands/${name}`);
-  if (!cmdPath) {
-    console.log(
-      `Error loading the local ${yellow(
-        name
-      )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
-    );
-    process.exit(1);
-  }
-
-  const script = require(cmdPath);
-
-  Promise.resolve()
-    .then(() => {
-      return script(...args);
-    })
-    .catch(error => {
-      console.error(error);
+    const cmdPath = resolveCwd.silent(`@strapi/strapi/lib/commands/${name}`);
+    if (!cmdPath) {
+      console.log(
+        `Error loading the local ${yellow(
+          name
+        )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
+      );
       process.exit(1);
-    });
-};
+    }
+
+    const script = require(cmdPath);
+
+    Promise.resolve()
+      .then(() => {
+        return script(...args);
+      })
+      .catch((error) => {
+        console.error(error);
+        process.exit(1);
+      });
+  };
 
 // Initial program setup
 program.storeOptionsAsProperties(false).allowUnknownOption(true);
@@ -69,7 +72,7 @@ program
   .command('version')
   .description('Output the version of Strapi')
   .action(() => {
-    process.stdout.write(packageJSON.version + '\n');
+    process.stdout.write(`${packageJSON.version}\n`);
     process.exit(0);
   });
 
@@ -95,6 +98,7 @@ program
   .option('--dbssl <dbssl>', 'Database SSL')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Allow overwriting existing database content')
+  .option('-ts, --typescript', 'Create a typescript project')
   .description('Create a new application')
   .action(require('../lib/commands/new'));
 
@@ -230,7 +234,25 @@ program
 //    `$ strapi opt-out-telemetry`
 program
   .command('telemetry:disable')
-  .description('Stop Strapi from sending anonymous telemetry and metadata')
+  .description('Disable anonymous telemetry and metadata sending to Strapi analytics')
   .action(getLocalScript('opt-out-telemetry'));
+
+//    `$ strapi opt-in-telemetry`
+program
+  .command('telemetry:enable')
+  .description('Enable anonymous telemetry and metadata sending to Strapi analytics')
+  .action(getLocalScript('opt-in-telemetry'));
+
+program
+  .command('ts:generate-types')
+  .description(`Generate TypeScript typings for your schemas`)
+  .option(
+    '-o, --out-dir <outDir>',
+    'Specify a relative directory in which the schemas definitions will be generated'
+  )
+  .option('-f, --file <file>', 'Specify a filename to store the schemas definitions')
+  .option('--verbose', `Display more information about the types generation`, false)
+  .option('-s, --silent', `Run the generation silently, without any output`, false)
+  .action(getLocalScript('ts/generate-types'));
 
 program.parseAsync(process.argv);

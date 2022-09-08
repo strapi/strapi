@@ -1,11 +1,10 @@
 import React from 'react';
-import { useGuidedTour, useTracking } from '@strapi/helper-plugin';
+import { useGuidedTour, useTracking, LinkButton } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
-import { LinkButton } from '@strapi/design-system/LinkButton';
 import { Button } from '@strapi/design-system/Button';
 import ArrowRight from '@strapi/icons/ArrowRight';
 import StepperHomepage from './components/Stepper';
@@ -30,12 +29,12 @@ const GuidedTourHomepage = () => {
     ),
   }));
 
-  const enrichedSections = sections.map(section => ({
+  const enrichedSections = sections.map((section) => ({
     isDone: Object.entries(guidedTourState[section.key]).every(([, value]) => value),
     ...section,
   }));
 
-  const activeSection = enrichedSections.find(section => !section.isDone)?.key;
+  const activeSection = enrichedSections.find((section) => !section.isDone)?.key;
 
   const handleSkip = () => {
     setSkipped(true);

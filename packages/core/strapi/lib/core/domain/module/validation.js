@@ -9,12 +9,11 @@ const strapiServerSchema = yup
     destroy: yup.mixed().isFunction(),
     register: yup.mixed().isFunction(),
     config: yup.object(),
-    routes: yup.lazy(value => {
+    routes: yup.lazy((value) => {
       if (Array.isArray(value)) {
         return yup.array();
-      } else {
-        return yup.object();
       }
+      return yup.object();
     }),
     controllers: yup.object(),
     services: yup.object(),
@@ -24,7 +23,7 @@ const strapiServerSchema = yup
   })
   .noUnknown();
 
-const validateModule = data => {
+const validateModule = (data) => {
   return strapiServerSchema.validateSync(data, { strict: true, abortEarly: false });
 };
 

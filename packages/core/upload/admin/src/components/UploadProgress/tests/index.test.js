@@ -26,8 +26,11 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderCompo = props =>
-  render(
+const renderCompo = (props) => {
+  const target = document.createElement('div');
+  document.body.appendChild(target);
+
+  return render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
@@ -35,8 +38,9 @@ const renderCompo = props =>
         </IntlProvider>
       </ThemeProvider>
     </QueryClientProvider>,
-    { container: document.body }
+    { container: target }
   );
+};
 
 describe('<UploadProgress />', () => {
   it('renders with no error', () => {
@@ -65,6 +69,10 @@ describe('<UploadProgress />', () => {
       }
 
       .c1 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -76,10 +84,6 @@ describe('<UploadProgress />', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c4 {
@@ -189,6 +193,10 @@ describe('<UploadProgress />', () => {
       }
 
       .c1 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -200,10 +208,6 @@ describe('<UploadProgress />', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c2 {

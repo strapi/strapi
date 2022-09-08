@@ -8,7 +8,7 @@ const modelsUtils = require('../../../../../test/helpers/models');
 const builder = createTestBuilder();
 let strapi;
 let rq;
-let data = {
+const data = {
   dogs: [],
 };
 
@@ -45,10 +45,7 @@ const restart = async () => {
 
 describe('Migration - unique attribute', () => {
   beforeAll(async () => {
-    await builder
-      .addContentType(dogModel)
-      .addFixtures(dogModel.singularName, dogs)
-      .build();
+    await builder.addContentType(dogModel).addFixtures(dogModel.singularName, dogs).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -63,7 +60,7 @@ describe('Migration - unique attribute', () => {
 
   describe('Unique: false -> true', () => {
     test('Can have duplicates before migration', async () => {
-      let { body } = await rq({
+      const { body } = await rq({
         url: '/content-manager/collection-types/api::dog.dog',
         method: 'GET',
       });

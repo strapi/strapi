@@ -1,19 +1,19 @@
 import React, { useCallback, useState, useEffect, useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
-import {
-  // FormattedMessage,
-  useIntl,
-} from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
-import { Link } from '@strapi/design-system/Link';
 import { Stack } from '@strapi/design-system/Stack';
-import { useTheme } from 'styled-components';
 import findIndex from 'lodash/findIndex';
 import get from 'lodash/get';
 import isArray from 'lodash/isArray';
 import isEmpty from 'lodash/isEmpty';
 import set from 'lodash/set';
-import { NotAllowedInput, useCMEditViewDataManager, useQueryParams } from '@strapi/helper-plugin';
+import {
+  NotAllowedInput,
+  useCMEditViewDataManager,
+  useQueryParams,
+  Link,
+} from '@strapi/helper-plugin';
 import { stringify } from 'qs';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
@@ -21,12 +21,8 @@ import { getTrad } from '../../utils';
 import Label from './Label';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
-import ClearIndicator from './ClearIndicator';
-import DropdownIndicator from './DropdownIndicator';
-import IndicatorSeparator from './IndicatorSeparator';
 import Option from './Option';
 import { connect, select } from './utils';
-import getSelectStyles from './utils/getSelectStyles';
 
 const initialPaginationState = {
   contains: '',
@@ -68,15 +64,9 @@ function SelectWrapper({
   const [{ query }] = useQueryParams();
   // Disable the input in case of a polymorphic relation
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
-  const {
-    addRelation,
-    modifiedData,
-    moveRelation,
-    onChange,
-    onRemoveRelation,
-  } = useCMEditViewDataManager();
+  const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } =
+    useCMEditViewDataManager();
   const { pathname } = useLocation();
-  const theme = useTheme();
 
   const value = get(modifiedData, name, null);
   const [state, setState] = useState(initialPaginationState);
@@ -85,11 +75,11 @@ function SelectWrapper({
   const [isOpen, setIsOpen] = useState(false);
 
   const filteredOptions = useMemo(() => {
-    return options.filter(option => {
+    return options.filter((option) => {
       if (!isEmpty(value)) {
         // SelectMany
         if (Array.isArray(value)) {
-          return findIndex(value, o => o.id === option.value.id) === -1;
+          return findIndex(value, (o) => o.id === option.value.id) === -1;
         }
 
         // SelectOne
@@ -100,13 +90,8 @@ function SelectWrapper({
     });
   }, [options, value]);
 
-  const {
-    endPoint,
-    containsKey,
-    defaultParams,
-    shouldDisplayRelationLink,
-    paramsToKeep,
-  } = queryInfos;
+  const { endPoint, containsKey, defaultParams, shouldDisplayRelationLink, paramsToKeep } =
+    queryInfos;
 
   const isSingle = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(
     relationType
@@ -121,11 +106,11 @@ function SelectWrapper({
       return [value.id];
     }
 
-    return value.map(val => val.id);
+    return value.map((val) => val.id);
   }, [isSingle, value]);
 
   const getData = useCallback(
-    async source => {
+    async (source) => {
       // Currently polymorphic relations are not handled
       if (isMorph) {
         setIsLoading(false);
@@ -154,19 +139,19 @@ function SelectWrapper({
           { params, cancelToken: source.token }
         );
 
-        const formattedData = data.map(obj => {
+        const formattedData = data.map((obj) => {
           return { value: obj, label: obj[mainField.name] };
         });
 
-        setOptions(prevState =>
+        setOptions((prevState) =>
           prevState.concat(formattedData).filter((obj, index) => {
-            const objIndex = prevState.findIndex(el => el.value.id === obj.value.id);
+            const objIndex = prevState.findIndex((el) => el.value.id === obj.value.id);
 
             if (objIndex === -1) {
               return true;
             }
 
-            return prevState.findIndex(el => el.value.id === obj.value.id) === index;
+            return prevState.findIndex((el) => el.value.id === obj.value.id) === index;
           })
         );
         setIsLoading(false);
@@ -202,7 +187,7 @@ function SelectWrapper({
 
   const handleInputChange = (inputValue, { action }) => {
     if (action === 'input-change') {
-      setState(prevState => {
+      setState((prevState) => {
         if (prevState.contains === inputValue) {
           return prevState;
         }
@@ -215,7 +200,7 @@ function SelectWrapper({
   };
 
   const handleMenuScrollToBottom = () => {
-    setState(prevState => ({
+    setState((prevState) => ({
       ...prevState,
       start: prevState.start + 20,
     }));
@@ -226,11 +211,11 @@ function SelectWrapper({
     setIsOpen(false);
   };
 
-  const handleChange = value => {
+  const handleChange = (value) => {
     onChange({ target: { name, value: value ? value.value : value } });
   };
 
-  const handleAddRelation = value => {
+  const handleAddRelation = (value) => {
     if (!isEmpty(value)) {
       addRelation({ target: { name, value } });
     }
@@ -277,8 +262,6 @@ function SelectWrapper({
     return <NotAllowedInput intlLabel={intlLabel} labelAction={labelAction} />;
   }
 
-  const styles = getSelectStyles(theme);
-
   return (
     <Stack spacing={1}>
       <Label
@@ -292,9 +275,6 @@ function SelectWrapper({
       <Component
         addRelation={handleAddRelation}
         components={{
-          ClearIndicator,
-          DropdownIndicator,
-          IndicatorSeparator,
           Option,
         }}
         displayNavigationLink={shouldDisplayRelationLink}
@@ -302,6 +282,12 @@ function SelectWrapper({
         isDisabled={isDisabled}
         isLoading={isLoading}
         isClearable
+        loadingMessage={() =>
+          formatMessage({
+            id: getTrad('DynamicTable.relation-loading'),
+            defaultMessage: 'Relations are loading',
+          })
+        }
         mainField={mainField}
         move={moveRelation}
         name={name}
@@ -314,7 +300,6 @@ function SelectWrapper({
         onRemove={onRemoveRelation}
         placeholder={placeholder}
         searchToPersist={searchToPersist}
-        styles={styles}
         targetModel={targetModel}
         value={value}
         description={description}

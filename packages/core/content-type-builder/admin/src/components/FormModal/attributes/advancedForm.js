@@ -6,7 +6,7 @@ import { componentForm } from '../component';
 import options from './attributeOptions';
 
 const advancedForm = {
-  boolean: () => {
+  boolean() {
     return {
       sections: [
         {
@@ -51,7 +51,7 @@ const advancedForm = {
       ],
     };
   },
-  component: ({ repeatable }, step) => {
+  component({ repeatable }, step) {
     if (step === '1') {
       return { sections: componentForm.advanced('componentToCreate') };
     }
@@ -82,7 +82,7 @@ const advancedForm = {
       ],
     };
   },
-  date: ({ type }) => {
+  date({ type }) {
     return {
       sections: [
         {
@@ -108,7 +108,7 @@ const advancedForm = {
       ],
     };
   },
-  dynamiczone: () => {
+  dynamiczone() {
     return {
       sections: [
         {
@@ -121,7 +121,7 @@ const advancedForm = {
       ],
     };
   },
-  email: () => {
+  email() {
     return {
       sections: [
         {
@@ -150,7 +150,7 @@ const advancedForm = {
       ],
     };
   },
-  enumeration: data => {
+  enumeration(data) {
     return {
       sections: [
         {
@@ -177,7 +177,7 @@ const advancedForm = {
                 },
                 ...(data.enum || [])
                   .filter((value, index) => data.enum.indexOf(value) === index && value)
-                  .map(value => {
+                  .map((value) => {
                     return {
                       key: value,
                       value,
@@ -214,7 +214,7 @@ const advancedForm = {
       ],
     };
   },
-  json: () => {
+  json() {
     return {
       sections: [
         {
@@ -227,7 +227,7 @@ const advancedForm = {
       ],
     };
   },
-  media: () => {
+  media() {
     return {
       sections: [
         {
@@ -251,12 +251,12 @@ const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.private, options.required],
+          items: [options.required, options.private],
         },
       ],
     };
   },
-  number: data => {
+  number(data) {
     const inputStep = data.type === 'decimal' || data.type === 'float' ? 'any' : 1;
 
     return {
@@ -287,7 +287,7 @@ const advancedForm = {
       ],
     };
   },
-  password: () => {
+  password() {
     return {
       sections: [
         { sectionTitle: null, items: [options.default] },
@@ -302,7 +302,7 @@ const advancedForm = {
       ],
     };
   },
-  relation: () => {
+  relation() {
     return {
       sections: [
         {
@@ -315,7 +315,7 @@ const advancedForm = {
       ],
     };
   },
-  richtext: () => {
+  richtext() {
     return {
       sections: [
         { sectionTitle: null, items: [options.default] },
@@ -329,7 +329,7 @@ const advancedForm = {
       ],
     };
   },
-  text: () => {
+  text() {
     return {
       sections: [
         { sectionTitle: null, items: [options.default, options.regex] },
@@ -350,7 +350,7 @@ const advancedForm = {
       ],
     };
   },
-  uid: data => {
+  uid(data) {
     return {
       sections: [
         {

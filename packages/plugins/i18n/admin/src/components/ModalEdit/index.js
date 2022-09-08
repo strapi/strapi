@@ -72,7 +72,7 @@ const ModalEdit = ({ locale, onClose }) => {
                   <Tab>
                     {formatMessage({
                       id: getTrad('Settings.locales.modal.base'),
-                      defaultMessage: 'Base settings',
+                      defaultMessage: 'Basic settings',
                     })}
                   </Tab>
                   <Tab>

@@ -5,7 +5,7 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
 import get from 'lodash/get';
 import isNull from 'lodash/isNull';
-import Select from 'react-select';
+import { ReactSelect as Select } from '@strapi/helper-plugin';
 import SingleValue from './SingleValue';
 
 function SelectOne({
@@ -14,6 +14,7 @@ function SelectOne({
   name,
   isDisabled,
   isLoading,
+  loadingMessage,
   onChange,
   onInputChange,
   onMenuClose,
@@ -21,7 +22,6 @@ function SelectOne({
   onMenuScrollToBottom,
   options,
   placeholder,
-  styles,
   value,
   description,
 }) {
@@ -38,6 +38,7 @@ function SelectOne({
         isClearable
         isDisabled={isDisabled}
         isLoading={isLoading}
+        loadingMessage={loadingMessage}
         mainField={mainField}
         options={options}
         onChange={onChange}
@@ -48,7 +49,6 @@ function SelectOne({
         placeholder={formatMessage(
           placeholder || { id: 'global.select', defaultMessage: 'Select...' }
         )}
-        styles={styles}
         value={isNull(value) ? null : { label: get(value, [mainField.name], ''), value }}
       />
 
@@ -72,6 +72,7 @@ SelectOne.propTypes = {
   components: PropTypes.object,
   isDisabled: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  loadingMessage: PropTypes.func.isRequired,
   mainField: PropTypes.shape({
     name: PropTypes.string.isRequired,
     schema: PropTypes.shape({
@@ -89,7 +90,6 @@ SelectOne.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
   }),
-  styles: PropTypes.object.isRequired,
   value: PropTypes.object,
   description: PropTypes.string,
 };

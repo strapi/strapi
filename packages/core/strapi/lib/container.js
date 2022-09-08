@@ -1,6 +1,6 @@
 'use strict';
 
-const createContainer = strapi => {
+const createContainer = (strapi) => {
   const registered = new Map();
   const resolved = new Map();
 

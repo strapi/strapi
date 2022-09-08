@@ -47,7 +47,7 @@ export const AudioAssetCard = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Card>
+    <Card height="100%">
       <CardHeader>
         <CardAsset size={size}>
           <AudioPreviewWrapper size={size}>

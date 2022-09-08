@@ -1,13 +1,14 @@
 'use strict';
 
-const _ = require('lodash');
+const { omit } = require('lodash/fp');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 const { createUtils } = require('../../../../../test/helpers/utils');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
-const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt']);
+const omitTimestamps = omit(['updatedAt', 'createdAt']);
+const omitRegistrationToken = omit(['registrationToken']);
 
 /**
  * == Test Suite Overview ==
@@ -38,7 +39,7 @@ describe('Admin User CRUD (e2e)', () => {
   let strapi;
 
   // Local test data used across the test suite
-  let testData = {
+  const testData = {
     firstSuperAdminUser: undefined,
     otherSuperAdminUsers: [],
     user: undefined,
@@ -128,13 +129,14 @@ describe('Admin User CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(201);
     expect(res.body.data).not.toBeNull();
+    expect(res.body.data).toHaveProperty('registrationToken');
 
     // Using the created user as an example for the rest of the tests
-    testData.user = res.body.data;
+    testData.user = omitRegistrationToken(res.body.data);
   });
 
   test('3. Creates users with superAdmin role (success)', async () => {
-    const getBody = index => {
+    const getBody = (index) => {
       return {
         email: `user-tests${index}@strapi-e2e.com`,
         firstname: 'user_tests-firstname',
@@ -143,7 +145,7 @@ describe('Admin User CRUD (e2e)', () => {
       };
     };
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i += 1) {
       const res = await rq({
         url: '/admin/users',
         method: 'POST',
@@ -153,7 +155,7 @@ describe('Admin User CRUD (e2e)', () => {
       expect(res.statusCode).toBe(201);
       expect(res.body.data).not.toBeNull();
 
-      testData.otherSuperAdminUsers.push(res.body.data);
+      testData.otherSuperAdminUsers.push(omitRegistrationToken(res.body.data));
     }
   });
 
@@ -281,7 +283,7 @@ describe('Admin User CRUD (e2e)', () => {
       url: `/admin/users/batch-delete`,
       method: 'POST',
       body: {
-        ids: users.map(u => u.id),
+        ids: users.map((u) => u.id),
       },
     });
 

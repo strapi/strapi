@@ -8,7 +8,7 @@ const hasEditMainField = has('edit.mainField');
 const getEditMainField = prop('edit.mainField');
 const assocListMainField = assoc('list.mainField');
 
-const assocMainField = metadata =>
+const assocMainField = (metadata) =>
   hasEditMainField(metadata) ? assocListMainField(getEditMainField(metadata), metadata) : metadata;
 
 module.exports = {
@@ -32,7 +32,7 @@ module.exports = {
 
     const contentTypes = await findAllContentTypes();
     const configurations = await Promise.all(
-      contentTypes.map(async contentType => {
+      contentTypes.map(async (contentType) => {
         const { uid, settings } = await findConfiguration(contentType);
         return { uid, settings };
       })
@@ -107,6 +107,18 @@ module.exports = {
 
     await metricsService.sendDidConfigureListView(contentType, newConfiguration);
 
-    ctx.body = { data: newConfiguration };
+    const confWithUpdatedMetadata = {
+      ...newConfiguration,
+      metadatas: mapValues(assocMainField, newConfiguration.metadatas),
+    };
+
+    const components = await contentTypeService.findComponentsConfigurations(contentType);
+
+    ctx.body = {
+      data: {
+        contentType: confWithUpdatedMetadata,
+        components,
+      },
+    };
   },
 };

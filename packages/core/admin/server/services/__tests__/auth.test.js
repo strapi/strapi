@@ -53,7 +53,7 @@ describe('Auth', () => {
       expect(res).toEqual([null, false, { message: 'Invalid credentials' }]);
     });
 
-    test.each([false, null, 1, 0])('Fails when user is not active (%s)', async isActive => {
+    test.each([false, null, 1, 0])('Fails when user is not active (%s)', async (isActive) => {
       const user = {
         id: 1,
         firstname: '',
@@ -105,12 +105,21 @@ describe('Auth', () => {
   });
 
   describe('validatePassword', () => {
-    test('Compares password with hash', async () => {
+    test('Compares password with hash (matching passwords)', async () => {
       const password = 'pcw123';
       const hash = await hashPassword(password);
 
       const isValid = await validatePassword(password, hash);
       expect(isValid).toBe(true);
+    });
+
+    test('Compares password with hash (not matching passwords)', async () => {
+      const password = 'pcw123';
+      const password2 = 'pcs1234';
+      const hash = await hashPassword(password2);
+
+      const isValid = await validatePassword(password, hash);
+      expect(isValid).toBe(false);
     });
   });
 

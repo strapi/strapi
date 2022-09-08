@@ -70,4 +70,13 @@ module.exports = [
       prefix: '',
     },
   },
+  {
+    method: 'POST',
+    path: '/auth/change-password',
+    handler: 'auth.changePassword',
+    config: {
+      middlewares: ['plugin::users-permissions.rateLimit'],
+      prefix: '',
+    },
+  },
 ];

@@ -7,10 +7,10 @@ import reducer, { initialState } from './reducer';
 import { makeSelectModelAndComponentSchemas } from '../../pages/App/selectors';
 import { getRequestUrl } from '../../utils';
 
-const useFetchContentTypeLayout = contentTypeUID => {
+const useFetchContentTypeLayout = (contentTypeUID) => {
   const [{ error, isLoading, layout, layouts }, dispatch] = useReducer(reducer, initialState);
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const { schemas } = useSelector(state => schemasSelector(state), shallowEqual);
+  const { schemas } = useSelector((state) => schemasSelector(state), shallowEqual);
   const isMounted = useRef(true);
 
   const getData = useCallback(
@@ -68,10 +68,10 @@ const useFetchContentTypeLayout = contentTypeUID => {
   }, [contentTypeUID, getData]);
 
   const updateLayout = useCallback(
-    newLayout => {
+    (data) => {
       dispatch({
         type: 'UPDATE_LAYOUT',
-        newLayout: formatLayouts({ contentType: newLayout, components: {} }, schemas),
+        newLayout: formatLayouts(data, schemas),
       });
     },
     [schemas]

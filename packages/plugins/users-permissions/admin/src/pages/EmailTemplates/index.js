@@ -49,7 +49,7 @@ const EmailTemplatesPage = () => {
   } = useRBAC(updatePermissions);
 
   const { status: isLoadingData, data } = useQuery('email-templates', () => fetchData(), {
-    onSuccess: () => {
+    onSuccess() {
       notifyStatus(
         formatMessage({
           id: getTrad('Email.template.data.loaded'),
@@ -57,7 +57,7 @@ const EmailTemplatesPage = () => {
         })
       );
     },
-    onError: () => {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error', defaultMessage: 'An error occured' },
@@ -68,16 +68,16 @@ const EmailTemplatesPage = () => {
   const isLoading = isLoadingForPermissions || isLoadingData !== 'success';
 
   const handleToggle = () => {
-    setIsModalOpen(prev => !prev);
+    setIsModalOpen((prev) => !prev);
   };
 
-  const handleEditClick = template => {
+  const handleEditClick = (template) => {
     setTemplateToEdit(template);
     handleToggle();
   };
 
-  const submitMutation = useMutation(body => putEmailTemplate({ 'email-templates': body }), {
-    onSuccess: async () => {
+  const submitMutation = useMutation((body) => putEmailTemplate({ 'email-templates': body }), {
+    async onSuccess() {
       await queryClient.invalidateQueries('email-templates');
 
       toggleNotification({
@@ -90,7 +90,7 @@ const EmailTemplatesPage = () => {
       unlockApp();
       handleToggle();
     },
-    onError: () => {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error', defaultMessage: 'An error occured' },
@@ -101,7 +101,7 @@ const EmailTemplatesPage = () => {
   });
   const { isLoading: isSubmittingForm } = submitMutation;
 
-  const handleSubmit = body => {
+  const handleSubmit = (body) => {
     lockApp();
     trackUsageRef.current('willEditEmailTemplates');
 

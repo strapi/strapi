@@ -5,35 +5,36 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { useSelector, shallowEqual } from 'react-redux';
+import { useIntl } from 'react-intl';
+import matchSorter from 'match-sorter';
+import sortBy from 'lodash/sortBy';
+import toLower from 'lodash/toLower';
+import { NavLink } from 'react-router-dom';
 import {
   SubNav,
   SubNavHeader,
   SubNavSection,
   SubNavSections,
   SubNavLink,
-} from '@strapi/design-system/SubNav';
-import { useSelector, shallowEqual } from 'react-redux';
-import { useIntl } from 'react-intl';
-import matchSorter from 'match-sorter';
-import sortBy from 'lodash/sortBy';
-import toLower from 'lodash/toLower';
+} from '@strapi/design-system/v2/SubNav';
 import getTrad from '../../../utils/getTrad';
 import { makeSelectModelLinks } from '../selectors';
 
 const matchByTitle = (links, search) =>
-  matchSorter(links, toLower(search), { keys: [item => toLower(item.title)] });
+  matchSorter(links, toLower(search), { keys: [(item) => toLower(item.title)] });
 
 const LeftMenu = () => {
   const [search, setSearch] = useState('');
   const { formatMessage } = useIntl();
   const modelLinksSelector = useMemo(makeSelectModelLinks, []);
   const { collectionTypeLinks, singleTypeLinks } = useSelector(
-    state => modelLinksSelector(state),
+    (state) => modelLinksSelector(state),
     shallowEqual
   );
 
-  const toIntl = links =>
-    links.map(link => {
+  const toIntl = (links) =>
+    links.map((link) => {
       return {
         ...link,
         title: formatMessage({ id: link.title, defaultMessage: link.title }),
@@ -51,7 +52,7 @@ const LeftMenu = () => {
         defaultMessage: 'Collection Types',
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlCollectionTypeLinks, search), object =>
+      links: sortBy(matchByTitle(intlCollectionTypeLinks, search), (object) =>
         object.title.toLowerCase()
       ),
     },
@@ -62,7 +63,7 @@ const LeftMenu = () => {
         defaultMessage: 'Single Types',
       },
       searchable: true,
-      links: sortBy(matchByTitle(intlSingleTypeLinks, search), object =>
+      links: sortBy(matchByTitle(intlSingleTypeLinks, search), (object) =>
         object.title.toLowerCase()
       ),
     },
@@ -95,7 +96,7 @@ const LeftMenu = () => {
         })}
       />
       <SubNavSections>
-        {menu.map(section => {
+        {menu.map((section) => {
           const label = formatMessage(
             { id: section.title.id, defaultMessage: section.title.defaultMessage },
             section.title.values
@@ -107,11 +108,11 @@ const LeftMenu = () => {
               label={label}
               badgeLabel={section.links.length.toString()}
             >
-              {section.links.map(link => {
+              {section.links.map((link) => {
                 const search = link.search ? `?${link.search}` : '';
 
                 return (
-                  <SubNavLink key={link.uid} to={`${link.to}${search}`}>
+                  <SubNavLink as={NavLink} key={link.uid} to={`${link.to}${search}`}>
                     {link.title}
                   </SubNavLink>
                 );

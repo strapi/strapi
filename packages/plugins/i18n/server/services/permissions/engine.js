@@ -14,7 +14,7 @@ const { getService } = require('../../utils');
  * Add the has-locale-access condition if the locales property is defined
  * @param {WillRegisterPermissionContext} context
  */
-const willRegisterPermission = context => {
+const willRegisterPermission = (context) => {
   const { permission, condition, user } = context;
   const { subject, properties } = permission;
 

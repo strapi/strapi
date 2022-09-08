@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import { fixtures } from '../../../../../admin-test-utils';
+import { fixtures } from '@strapi/admin-test-utils/lib';
 import { Components, Fields } from '../core/apis';
 import StrapiApp from '../StrapiApp';
 import appReducers from '../reducers';
@@ -24,6 +24,10 @@ describe('ADMIN | StrapiApp', () => {
       }
 
       .c1 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -33,17 +37,17 @@ describe('ADMIN | StrapiApp', () => {
         flex-direction: column;
       }
 
-      .c1 > * {
+      .c2 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c1 > * + * {
+      .c2 > * + * {
         margin-top: 8px;
       }
 
       <div
-        class="c0 c1"
+        class="c0 c1 c2"
         spacing="2"
         width="31.25rem"
       />
@@ -102,9 +106,9 @@ describe('ADMIN | StrapiApp', () => {
       app.createHook('moto');
 
       app.registerHook('hello', () => 5);
-      app.registerHook('moto', n => n + 1);
-      app.registerHook('moto', n => n + 2);
-      app.registerHook('moto', n => n + 3);
+      app.registerHook('moto', (n) => n + 1);
+      app.registerHook('moto', (n) => n + 2);
+      app.registerHook('moto', (n) => n + 3);
 
       const res = app.runHookWaterfall('moto', 1);
 
@@ -118,9 +122,9 @@ describe('ADMIN | StrapiApp', () => {
       app.createHook('moto');
 
       app.registerHook('hello', () => 5);
-      app.registerHook('moto', n => n + 1);
-      app.registerHook('moto', n => Promise.resolve(n + 2));
-      app.registerHook('moto', n => n + 3);
+      app.registerHook('moto', (n) => n + 1);
+      app.registerHook('moto', (n) => Promise.resolve(n + 2));
+      app.registerHook('moto', (n) => n + 3);
 
       const res = await app.runHookWaterfall('moto', 1, true);
 

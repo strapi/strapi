@@ -8,7 +8,7 @@ const virtualScalarAttributes = ['id'];
 module.exports = ({ strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
 
-  const recursivelyReplaceScalarOperators = data => {
+  const recursivelyReplaceScalarOperators = (data) => {
     const { operators } = getService('builders').filters;
 
     if (Array.isArray(data)) {
@@ -42,7 +42,7 @@ module.exports = ({ strapi }) => {
      * @return {object | object[]}
      */
     graphQLFiltersToStrapiQuery(filters, contentType = {}) {
-      const { isStrapiScalar, isMedia, isRelation } = getService('utils').attributes;
+      const { isStrapiScalar, isMedia, isRelation, isComponent } = getService('utils').attributes;
       const { operators } = getService('builders').filters;
 
       const ROOT_LEVEL_OPERATORS = [operators.and, operators.or, operators.not];
@@ -54,7 +54,7 @@ module.exports = ({ strapi }) => {
 
       // If filters is a collection, then apply the transformation to every item of the list
       if (Array.isArray(filters)) {
-        return filters.map(filtersItem =>
+        return filters.map((filtersItem) =>
           this.graphQLFiltersToStrapiQuery(filtersItem, contentType)
         );
       }
@@ -62,7 +62,7 @@ module.exports = ({ strapi }) => {
       const resultMap = {};
       const { attributes } = contentType;
 
-      const isAttribute = attributeName => {
+      const isAttribute = (attributeName) => {
         return virtualScalarAttributes.includes(attributeName) || has(attributeName, attributes);
       };
 
@@ -85,6 +85,16 @@ module.exports = ({ strapi }) => {
             // Recursively apply the mapping to the value using the fetched model,
             // and update the value within `resultMap`
             resultMap[key] = this.graphQLFiltersToStrapiQuery(value, relModel);
+          }
+
+          // If it's a deep filter on a component
+          else if (isComponent(attribute)) {
+            // Fetch the model from the component attribute
+            const componentModel = strapi.getModel(attribute.component);
+
+            // Recursively apply the mapping to the value using the fetched model,
+            // and update the value within `resultMap`
+            resultMap[key] = this.graphQLFiltersToStrapiQuery(value, componentModel);
           }
         }
 
