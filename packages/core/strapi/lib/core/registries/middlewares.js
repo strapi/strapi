@@ -54,8 +54,8 @@ const middlewaresRegistry = () => {
      * @param {{ [key: string]: Middleware }} newMiddlewares
      * @returns
      */
-    add(namespace, rawMiddlewares = {}) {
-      for (const middlewareName of Object.keys(rawMiddlewares)) {
+    add(namespace, rawMiddlewares) {
+      for (const middlewareName in rawMiddlewares) {
         const middleware = rawMiddlewares[middlewareName];
         const uid = addNamespace(middlewareName, namespace);
 

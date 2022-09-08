@@ -14,56 +14,51 @@ const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUti
 const { ValidationError } = strapiUtils.errors;
 
 const addMinMax = (validator, { attr, updatedAttribute }) => {
-  let nextValidator = validator;
-
   if (
     Number.isInteger(attr.min) &&
     (attr.required || (Array.isArray(updatedAttribute.value) && updatedAttribute.value.length > 0))
   ) {
-    nextValidator = nextValidator.min(attr.min);
+    validator = validator.min(attr.min);
   }
   if (Number.isInteger(attr.max)) {
-    nextValidator = nextValidator.max(attr.max);
+    validator = validator.max(attr.max);
   }
-  return nextValidator;
+  return validator;
 };
 
-const addRequiredValidation = (createOrUpdate) => {
-  return (validator, { attr: { required } }) => {
-    let nextValidator = validator;
+const addRequiredValidation =
+  (createOrUpdate) =>
+  (validator, { attr: { required } }) => {
     if (required) {
       if (createOrUpdate === 'creation') {
-        nextValidator = nextValidator.notNil();
+        validator = validator.notNil();
       } else if (createOrUpdate === 'update') {
-        nextValidator = nextValidator.notNull();
+        validator = validator.notNull();
       }
     } else {
-      nextValidator = nextValidator.nullable();
+      validator = validator.nullable();
     }
-    return nextValidator;
+    return validator;
   };
-};
 
-const addDefault = (createOrUpdate) => {
-  return (validator, { attr }) => {
-    let nextValidator = validator;
-
+const addDefault =
+  (createOrUpdate) =>
+  (validator, { attr }) => {
     if (createOrUpdate === 'creation') {
       if (
         ((attr.type === 'component' && attr.repeatable) || attr.type === 'dynamiczone') &&
         !attr.required
       ) {
-        nextValidator = nextValidator.default([]);
+        validator = validator.default([]);
       } else {
-        nextValidator = nextValidator.default(attr.default);
+        validator = validator.default(attr.default);
       }
     } else {
-      nextValidator = nextValidator.default(undefined);
+      validator = validator.default(undefined);
     }
 
-    return nextValidator;
+    return validator;
   };
-};
 
 const preventCast = (validator) => validator.transform((val, originalVal) => originalVal);
 

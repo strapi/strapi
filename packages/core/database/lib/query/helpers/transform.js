@@ -53,7 +53,7 @@ const toRow = (meta, data = {}) => {
 
   const { attributes } = meta;
 
-  for (const key of Object.keys(data)) {
+  for (const key in data) {
     const attribute = attributes[key];
 
     if (!attribute || attribute.columnName === key) {

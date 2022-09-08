@@ -20,7 +20,7 @@ https://github.com/strapi/strapi/blob/main/CONTRIBUTING.md#reporting-an-issue
 
 ### Required System information
 
-<!-- Please ensure you are using the Node LTS version (v14 or v16 or v18) -->
+<!-- Please ensure you are using the Node LTS version (v14 or v16) -->
 <!-- Strapi v3 is not supported unless it is a critical/high security issue -->
 
 - Node.js version:

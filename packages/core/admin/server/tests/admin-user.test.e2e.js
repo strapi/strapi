@@ -145,7 +145,7 @@ describe('Admin User CRUD (e2e)', () => {
       };
     };
 
-    for (let i = 0; i < 3; i += 1) {
+    for (let i = 0; i < 3; i++) {
       const res = await rq({
         url: '/admin/users',
         method: 'POST',

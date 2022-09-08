@@ -34,10 +34,10 @@ const applyUserExtension = async (plugins) => {
   const extendedSchemas = await loadFiles(extensionsDir, '**/content-types/**/schema.json');
   const strapiServers = await loadFiles(extensionsDir, '**/strapi-server.js');
 
-  for (const pluginName of Object.keys(plugins)) {
+  for (const pluginName in plugins) {
     const plugin = plugins[pluginName];
     // first: load json schema
-    for (const ctName of Object.keys(plugin.contentTypes)) {
+    for (const ctName in plugin.contentTypes) {
       const extendedSchema = get([pluginName, 'content-types', ctName, 'schema'], extendedSchemas);
       if (extendedSchema) {
         plugin.contentTypes[ctName].schema = {
@@ -57,7 +57,7 @@ const applyUserExtension = async (plugins) => {
 const applyUserConfig = async (plugins) => {
   const userPluginsConfig = await getUserPluginsConfig();
 
-  for (const pluginName of Object.keys(plugins)) {
+  for (const pluginName in plugins) {
     const plugin = plugins[pluginName];
     const userPluginConfig = getOr({}, `${pluginName}.config`, userPluginsConfig);
     const defaultConfig =
@@ -82,7 +82,7 @@ const loadPlugins = async (strapi) => {
 
   strapi.config.set('enabledPlugins', enabledPlugins);
 
-  for (const pluginName of Object.keys(enabledPlugins)) {
+  for (const pluginName in enabledPlugins) {
     const enabledPlugin = enabledPlugins[pluginName];
 
     const serverEntrypointPath = join(enabledPlugin.pathToPlugin, 'strapi-server.js');
@@ -100,7 +100,7 @@ const loadPlugins = async (strapi) => {
   await applyUserConfig(plugins);
   await applyUserExtension(plugins);
 
-  for (const pluginName of Object.keys(plugins)) {
+  for (const pluginName in plugins) {
     strapi.container.get('plugins').add(pluginName, plugins[pluginName]);
   }
 };

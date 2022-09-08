@@ -34,7 +34,7 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
 
   const obj = {};
 
-  for (const attributeName of Object.keys(attributes)) {
+  for (const attributeName in attributes) {
     const attribute = attributes[attributeName];
 
     if (types.isScalar(attribute.type)) {
@@ -333,7 +333,7 @@ const createEntityManager = (db) => {
     async attachRelations(uid, id, data) {
       const { attributes } = db.metadata.get(uid);
 
-      for (const attributeName of Object.keys(attributes)) {
+      for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
 
         const isValidLink = _.has(attributeName, data) && !_.isNil(data[attributeName]);
@@ -487,7 +487,7 @@ const createEntityManager = (db) => {
     async updateRelations(uid, id, data) {
       const { attributes } = db.metadata.get(uid);
 
-      for (const attributeName of Object.keys(attributes)) {
+      for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
 
         if (attribute.type !== 'relation' || !_.has(attributeName, data)) {
@@ -667,7 +667,7 @@ const createEntityManager = (db) => {
     async deleteRelations(uid, id) {
       const { attributes } = db.metadata.get(uid);
 
-      for (const attributeName of Object.keys(attributes)) {
+      for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
 
         if (attribute.type !== 'relation') {

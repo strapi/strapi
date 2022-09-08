@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-local",
-  "version": "4.3.8",
+  "version": "4.3.6",
   "description": "Local provider for strapi upload",
   "keywords": [
     "upload",
@@ -35,11 +35,11 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@strapi/utils": "4.3.8",
+    "@strapi/utils": "4.3.6",
     "fs-extra": "10.0.0"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=14.19.1 <=16.x.x",
     "npm": ">=6.0.0"
   }
 }

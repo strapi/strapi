@@ -157,7 +157,7 @@ describe('Content Type Builder - Content types', () => {
       const { uid } = createRes.body.data;
 
       // create data
-      for (let i = 0; i < 2; i += 1) {
+      for (let i = 0; i < 2; i++) {
         await strapi.query(uid).create({ data: { title: 'Test' } });
       }
 

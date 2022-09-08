@@ -26,16 +26,14 @@ module.exports = {
       },
     ],
     'prefer-destructuring': ['error', { AssignmentExpression: { array: false } }],
-    'no-underscore-dangle': 'off',
-    'no-use-before-define': 'off',
+    eqeqeq: 'warn',
+    'no-underscore-dangle': 'warn',
+    'no-use-before-define': 'warn',
+    'no-param-reassign': 'warn',
     'no-continue': 'warn',
     'no-process-exit': 'off',
-    'no-loop-func': 'off',
-    'no-param-reassign': [
-      'error',
-      {
-        props: false,
-      },
-    ],
+    'no-plusplus': 'warn',
+    'no-loop-func': 'warn',
+    'guard-for-in': 'warn',
   },
 };

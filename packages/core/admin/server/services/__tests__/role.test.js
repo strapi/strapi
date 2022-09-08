@@ -426,11 +426,7 @@ describe('Role', () => {
 
       const count = jest.fn(() => Promise.resolve(0));
       let id = 1;
-      const create = jest.fn(({ data }) => {
-        const res = { ...data, id };
-        id += 1;
-        return res;
-      });
+      const create = jest.fn(({ data }) => ({ ...data, id: id++ }));
       const values = jest.fn(() => actions);
       const createMany = jest.fn();
       const assignARoleToAll = jest.fn();

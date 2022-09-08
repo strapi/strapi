@@ -40,7 +40,7 @@ module.exports = async (strapi) => {
 
   validateContentTypesUnicity(apis);
 
-  for (const apiName of Object.keys(apis)) {
+  for (const apiName in apis) {
     strapi.container.get('apis').add(apiName, apis[apiName]);
   }
 };

@@ -49,10 +49,9 @@ const unwrapDeep = (obj) => {
 
       if (_.isPlainObject(v)) {
         if ('$elemMatch' in v) {
-          _.setWith(acc, key, unwrapDeep(v.$elemMatch));
-        } else {
-          _.setWith(acc, key, unwrapDeep(v));
+          v = v.$elemMatch; // removing this key
         }
+        _.setWith(acc, key, unwrapDeep(v));
       } else if (_.isArray(v)) {
         // prettier-ignore
         _.setWith(acc, key, v.map(v => unwrapDeep(v)));

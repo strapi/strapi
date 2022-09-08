@@ -69,7 +69,7 @@ module.exports = ({ strapi }) => ({
       });
     };
 
-    for (const key of Object.keys(model.attributes)) {
+    for (const key in model.attributes) {
       const attribute = model.attributes[key];
 
       if (attribute.type === 'component') {

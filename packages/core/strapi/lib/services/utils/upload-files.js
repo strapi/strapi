@@ -27,7 +27,7 @@ module.exports = async (uid, entity, files) => {
     let tmpModel = modelDef;
     let modelUID = uid;
 
-    for (let i = 0; i < path.length; i += 1) {
+    for (let i = 0; i < path.length; i++) {
       if (!tmpModel) return {};
       const part = path[i];
       const attr = tmpModel.attributes[part];

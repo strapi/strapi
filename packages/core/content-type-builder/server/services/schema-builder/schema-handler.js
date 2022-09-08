@@ -130,7 +130,7 @@ module.exports = function createSchemaHandler(infos) {
       }
 
       // set new Attributes
-      for (const key of Object.keys(newAttributes)) {
+      for (const key in newAttributes) {
         this.setAttribute(key, newAttributes[key]);
       }
 

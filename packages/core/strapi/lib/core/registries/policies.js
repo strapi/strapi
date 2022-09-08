@@ -55,7 +55,7 @@ const policiesRegistry = () => {
      * @returns
      */
     add(namespace, newPolicies) {
-      for (const policyName of Object.keys(newPolicies)) {
+      for (const policyName in newPolicies) {
         const policy = newPolicies[policyName];
         const uid = addNamespace(policyName, namespace);
 

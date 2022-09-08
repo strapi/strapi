@@ -174,10 +174,6 @@ const ApiTokenCreateView = () => {
       } = isCreating
         ? await axiosInstance.post(`/admin/api-tokens`, {
             ...body,
-            lifespan:
-              body.lifespan && parseInt(body.lifespan, 10)
-                ? parseInt(body.lifespan, 10)
-                : body.lifespan,
             permissions: tokenType === 'custom' ? state.selectedActions : null,
           })
         : await axiosInstance.put(`/admin/api-tokens/${id}`, {
@@ -341,7 +337,7 @@ const ApiTokenCreateView = () => {
             name: apiToken?.name || '',
             description: apiToken?.description || '',
             type: apiToken?.type,
-            lifespan: apiToken?.lifespan ? apiToken.lifespan.toString() : apiToken?.lifespan,
+            lifespan: apiToken?.lifespan,
           }}
           enableReinitialize
           onSubmit={(body, actions) => handleSubmit(body, actions, tokenTypeValue)}
@@ -486,19 +482,19 @@ const ApiTokenCreateView = () => {
                               disabled={!isCreating}
                               placeholder="Select"
                             >
-                              <Option value="604800000">
+                              <Option value={604800000}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.7-days',
                                   defaultMessage: '7 days',
                                 })}
                               </Option>
-                              <Option value="2592000000">
+                              <Option value={2592000000}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.30-days',
                                   defaultMessage: '30 days',
                                 })}
                               </Option>
-                              <Option value="7776000000">
+                              <Option value={2592000000}>
                                 {formatMessage({
                                   id: 'Settings.apiTokens.duration.90-days',
                                   defaultMessage: '90 days',
@@ -518,7 +514,7 @@ const ApiTokenCreateView = () => {
                                   defaultMessage: 'Expiration date',
                                 })}: ${getDateOfExpiration(
                                   apiToken?.createdAt,
-                                  parseInt(values.lifespan, 10),
+                                  values.lifespan,
                                   lang
                                 )}`}
                             </Typography>

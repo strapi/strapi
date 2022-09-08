@@ -295,11 +295,7 @@ const createHelpers = (db) => {
 
         const { object } = updatedColumn;
 
-        if (object.type === 'increments') {
-          createColumn(tableBuilder, { ...object, type: 'integer' }).alter();
-        } else {
-          createColumn(tableBuilder, object).alter();
-        }
+        createColumn(tableBuilder, object).alter();
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {

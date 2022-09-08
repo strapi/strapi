@@ -21,7 +21,7 @@ const getAssociationFromFieldKey = ({ model, field }) => {
   let association;
   let attribute;
 
-  for (let i = 0; i < fieldParts.length; i += 1) {
+  for (let i = 0; i < fieldParts.length; i++) {
     const part = fieldParts[i];
     attribute = part;
 

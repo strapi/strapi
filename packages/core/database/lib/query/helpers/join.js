@@ -71,7 +71,7 @@ const applyJoin = (qb, join) => {
     inner.on(`${rootTable}.${rootColumn}`, `${alias}.${referencedColumn}`);
 
     if (on) {
-      for (const key of Object.keys(on)) {
+      for (const key in on) {
         inner.onVal(`${alias}.${key}`, on[key]);
       }
     }

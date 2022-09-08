@@ -13,10 +13,10 @@ const printResults = (results) => {
     Object.entries(pkgs).forEach(([packageName, keys]) => {
       keys.forEach((key) => {
         console.log(`"${chalk.yellow(value)}" ${packageName} ${chalk.blue(key)}`);
-        keysCount += 1;
+        keysCount++;
       });
     });
-    valuesCount += 1;
+    valuesCount++;
     console.log();
   });
 

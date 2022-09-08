@@ -15,13 +15,12 @@ module.exports = ({ strapi }) => {
 
   return {
     registerDoc(doc) {
-      let registeredDoc = doc;
       // parseYaml
       if (typeof doc === 'string') {
-        registeredDoc = require('yaml').parse(registeredDoc);
+        doc = require('yaml').parse(doc);
       }
       // receive an object we can register it directly
-      registeredDocs.push(registeredDoc);
+      registeredDocs.push(doc);
     },
     getDocumentationVersion() {
       return _.get(config, 'info.version');

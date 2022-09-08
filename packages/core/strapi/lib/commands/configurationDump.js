@@ -9,7 +9,7 @@ const CHUNK_SIZE = 100;
  * Will dump configurations to a file or stdout
  * @param {string} file filepath to use as output
  */
-module.exports = async ({ file: filePath, pretty }) => {
+module.exports = async function ({ file: filePath, pretty }) {
   const output = filePath ? fs.createWriteStream(filePath) : process.stdout;
 
   const appContext = await strapi.compile();
@@ -21,7 +21,7 @@ module.exports = async ({ file: filePath, pretty }) => {
 
   const pageCount = Math.ceil(count / CHUNK_SIZE);
 
-  for (let page = 0; page < pageCount; page += 1) {
+  for (let page = 0; page < pageCount; page++) {
     const results = await app
       .query('strapi::core-store')
       .findMany({ limit: CHUNK_SIZE, offset: page * CHUNK_SIZE, orderBy: 'key' });

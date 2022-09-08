@@ -54,7 +54,7 @@ const hooksRegistry = () => {
      * @returns
      */
     add(namespace, hooks) {
-      for (const hookName of Object.keys(hooks)) {
+      for (const hookName in hooks) {
         const hook = hooks[hookName];
         const uid = addNamespace(hookName, namespace);
 

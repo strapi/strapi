@@ -9,7 +9,7 @@ const createCronService = () => {
 
   return {
     add(tasks = {}) {
-      for (const taskExpression of Object.keys(tasks)) {
+      for (const taskExpression in tasks) {
         const taskValue = tasks[taskExpression];
 
         let fn;
