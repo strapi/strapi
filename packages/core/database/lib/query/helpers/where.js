@@ -77,7 +77,7 @@ const processAttributeWhere = (attribute, where, operator = '$eq') => {
 
   const filters = {};
 
-  for (const key in where) {
+  for (const key of Object.keys(where)) {
     const value = where[key];
 
     if (!isOperator(key)) {
@@ -120,7 +120,7 @@ const processWhere = (where, ctx) => {
   const filters = {};
 
   // for each key in where
-  for (const key in where) {
+  for (const key of Object.keys(where)) {
     const value = where[key];
 
     // if operator $and $or then loop over them

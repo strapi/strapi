@@ -30,7 +30,13 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
     initialState
   );
 
-  const getAlias = () => `t${state.aliasCounter++}`;
+  const getAlias = () => {
+    const alias = `t${state.aliasCounter}`;
+
+    state.aliasCounter += 1;
+
+    return alias;
+  };
 
   return {
     alias: getAlias(),
