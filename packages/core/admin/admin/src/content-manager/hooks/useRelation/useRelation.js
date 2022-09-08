@@ -40,7 +40,8 @@ export const useRelation = (cacheKey, { relation, search }) => {
   const relationsRes = useInfiniteQuery(['relation', cacheKey], fetchRelations, {
     enabled: !!relation?.endpoint,
     getNextPageParam(lastPage) {
-      if (lastPage.pagination.page >= lastPage.pagination.pageCount) {
+      // the API may send an empty 204 response
+      if (!lastPage || lastPage.pagination.page >= lastPage.pagination.pageCount) {
         return undefined;
       }
 

@@ -12,7 +12,7 @@ export const normalizeRelations = (
       pages:
         relations?.data?.pages
           ?.map((page) => [
-            ...[...page.results, ...(modifiedData?.connect ?? [])]
+            ...[...(page?.results ?? []), ...(modifiedData?.connect ?? [])]
               .map((relation) => {
                 const nextRelation = { ...relation };
 
