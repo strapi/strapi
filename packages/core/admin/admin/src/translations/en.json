@@ -774,6 +774,7 @@
   "notification.success.title": "Success:",
   "notification.success.tokencreated": "API Token successfully created",
   "notification.success.tokenedited": "API Token successfully edited",
+  "notification.error.tokennamenotunique": "Name already assigned to another token",
   "notification.version.update.message": "A new version of Strapi is available!",
   "notification.warning.title": "Warning:",
   "notification.warning.404": "404 - Not found",
