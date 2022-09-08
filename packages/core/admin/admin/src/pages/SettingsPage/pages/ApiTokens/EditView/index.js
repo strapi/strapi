@@ -57,7 +57,6 @@ const ApiTokenCreateView = () => {
   );
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
-  const typeApiToken = useRef(undefined);
   const { setCurrentStep } = useGuidedTour();
   const {
     allowedActions: { canCreate, canUpdate },
@@ -232,7 +231,10 @@ const ApiTokenCreateView = () => {
     }
   };
 
+  const [hasChangedPermissions, setHasChangedPermissions] = useState(false);
+
   const handleChangeCheckbox = ({ target: { value } }) => {
+    setHasChangedPermissions(true);
     dispatch({
       type: 'ON_CHANGE',
       value,
@@ -240,6 +242,7 @@ const ApiTokenCreateView = () => {
   };
 
   const handleChangeSelectAllCheckbox = ({ target: { value } }) => {
+    setHasChangedPermissions(true);
     value.forEach((action) => {
       dispatch({
         type: 'ON_CHANGE',
@@ -249,7 +252,7 @@ const ApiTokenCreateView = () => {
   };
 
   const handleChangeSelectApiTokenType = ({ target: { value } }) => {
-    typeApiToken.current = value;
+    setHasChangedPermissions(false);
 
     if (value === 'full-access') {
       dispatch({
@@ -307,12 +310,9 @@ const ApiTokenCreateView = () => {
           enableReinitialize
           onSubmit={(body, actions) => handleSubmit(body, actions)}
         >
-          {({ errors, handleChange, isSubmitting, values }) => {
-            if (state.selectedActions.length > 0 && !values?.type) {
-              typeApiToken.current = typeApiToken.current ? typeApiToken.current : 'custom';
-              values.type = typeApiToken.current;
-            } else if (state.selectedActions.length === 0 && typeApiToken.current !== undefined) {
-              values.type = typeApiToken.current;
+          {({ errors, handleChange, isSubmitting, values, setFieldValue }) => {
+            if (hasChangedPermissions && values?.type !== 'custom') {
+              setFieldValue('type', 'custom');
             }
 
             return (
