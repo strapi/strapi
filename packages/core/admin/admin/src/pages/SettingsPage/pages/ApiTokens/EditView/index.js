@@ -57,7 +57,7 @@ const ApiTokenCreateView = () => {
   );
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
-  const typeApiToken = useRef('custom');
+  const typeApiToken = useRef(undefined);
   const { setCurrentStep } = useGuidedTour();
   const {
     allowedActions: { canCreate, canUpdate },
@@ -307,6 +307,8 @@ const ApiTokenCreateView = () => {
             if (state.selectedActions.length > 0 && !values?.type) {
               typeApiToken.current = typeApiToken.current ? typeApiToken.current : 'custom';
               values.type = typeApiToken.current;
+            } else if (state.selectedActions.length === 0 && typeApiToken.current !== undefined) {
+              values.type = typeApiToken.current;
             }
 
             return (
@@ -500,7 +502,6 @@ const ApiTokenCreateView = () => {
                               }
                               onChange={(value) => {
                                 handleChangeSelectApiTokenType({ target: { value } });
-                                console.log('value', value);
                                 handleChange({ target: { name: 'type', value } });
                               }}
                               placeholder="Select"
