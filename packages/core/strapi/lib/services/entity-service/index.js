@@ -105,8 +105,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findOne' });
 
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
+    query.where = query.where || {};
+    query.where.id = entityId;
 
-    return db.query(uid).findOne({ ...query, where: { id: entityId } });
+    return db.query(uid).findOne(query);
   },
 
   async count(uid, opts) {
@@ -132,12 +134,14 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // TODO: wrap into transaction
     const componentData = await createComponents(uid, validData);
 
-    let entity = await db.query(uid).create({
-      ...query,
-      data: creationPipeline(Object.assign(omitComponentData(model, validData), componentData), {
+    query.data = creationPipeline(
+      Object.assign(omitComponentData(model, validData), componentData),
+      {
         contentType: model,
-      }),
-    });
+      }
+    );
+
+    let entity = await db.query(uid).create(query);
 
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
     // FIXME: upload in components
@@ -179,13 +183,13 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // TODO: wrap in transaction
     const componentData = await updateComponents(uid, entityToUpdate, validData);
 
-    let entity = await db.query(uid).update({
-      ...query,
-      where: { id: entityId },
-      data: updatePipeline(Object.assign(omitComponentData(model, validData), componentData), {
-        contentType: model,
-      }),
+    query.where = query.where || {};
+    query.where.id = entityId;
+    query.data = updatePipeline(Object.assign(omitComponentData(model, validData), componentData), {
+      contentType: model,
     });
+
+    let entity = await db.query(uid).update(query);
 
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
     // FIXME: upload in components
@@ -205,10 +209,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // select / populate
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
-    const entityToDelete = await db.query(uid).findOne({
-      ...query,
-      where: { id: entityId },
-    });
+    query.where = query.where || {};
+    query.where.id = entityId;
+
+    const entityToDelete = await db.query(uid).findOne(query);
 
     if (!entityToDelete) {
       return null;
