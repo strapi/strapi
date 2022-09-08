@@ -57,6 +57,7 @@ const ApiTokenCreateView = () => {
   );
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
+  const typeApiToken = useRef('custom');
   const { setCurrentStep } = useGuidedTour();
   const {
     allowedActions: { canCreate, canUpdate },
@@ -244,6 +245,8 @@ const ApiTokenCreateView = () => {
   };
 
   const handleChangeSelectApiTokenType = ({ target: { value } }) => {
+    typeApiToken.current = value;
+
     if (value === 'full-access') {
       dispatch({
         type: 'SELECT_ALL_ACTIONS',
@@ -294,13 +297,18 @@ const ApiTokenCreateView = () => {
           initialValues={{
             name: apiToken?.name || '',
             description: apiToken?.description || '',
-            type: state.selectedActions.length > 0 && !apiToken?.type ? 'custom' : apiToken?.type,
+            type: apiToken?.type,
             lifespan: apiToken?.lifespan,
           }}
           enableReinitialize
           onSubmit={(body, actions) => handleSubmit(body, actions)}
         >
           {({ errors, handleChange, isSubmitting, values }) => {
+            if (state.selectedActions.length > 0 && !values?.type) {
+              typeApiToken.current = typeApiToken.current ? typeApiToken.current : 'custom';
+              values.type = typeApiToken.current;
+            }
+
             return (
               <Form>
                 <HeaderLayout
@@ -492,6 +500,7 @@ const ApiTokenCreateView = () => {
                               }
                               onChange={(value) => {
                                 handleChangeSelectApiTokenType({ target: { value } });
+                                console.log('value', value);
                                 handleChange({ target: { name: 'type', value } });
                               }}
                               placeholder="Select"
