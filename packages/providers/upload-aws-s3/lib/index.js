@@ -24,7 +24,7 @@ module.exports = {
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
         const path = file.path ? `${file.path}/` : '';
-        const fileKey = `${rootPath}${path}${file.hash}${file.ext}`
+        const fileKey = `${rootPath ? rootPath.replace(/\/+$/, "") + "/" : ""}${path}${file.hash}${file.ext}`
 
         S3.upload(
           {
