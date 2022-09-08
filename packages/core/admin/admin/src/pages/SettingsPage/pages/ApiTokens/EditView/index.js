@@ -354,9 +354,9 @@ const ApiTokenCreateView = () => {
                     })
                   }
                   primaryAction={
-                    canEditInputs && (
+                    canEditInputs ? (
                       <Stack horizontal spacing={2}>
-                        {canRegenerate && apiToken?.name && (
+                        {canRegenerate && apiToken?.id && (
                           <Regenerate
                             onRegenerate={handleRegenerate}
                             idToRegenerate={apiToken?.id}
@@ -375,6 +375,11 @@ const ApiTokenCreateView = () => {
                           })}
                         </Button>
                       </Stack>
+                    ) : (
+                      canRegenerate &&
+                      apiToken?.id && (
+                        <Regenerate onRegenerate={handleRegenerate} idToRegenerate={apiToken?.id} />
+                      )
                     )
                   }
                   navigationAction={
