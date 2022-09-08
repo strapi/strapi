@@ -294,17 +294,13 @@ const ApiTokenCreateView = () => {
           initialValues={{
             name: apiToken?.name || '',
             description: apiToken?.description || '',
-            type: apiToken?.type,
+            type: state.selectedActions.length > 0 && !apiToken?.type ? 'custom' : apiToken?.type,
             lifespan: apiToken?.lifespan,
           }}
           enableReinitialize
           onSubmit={(body, actions) => handleSubmit(body, actions)}
         >
           {({ errors, handleChange, isSubmitting, values }) => {
-            if (state.selectedActions.length > 0 && !values?.type) {
-              values.type = 'custom';
-            }
-
             return (
               <Form>
                 <HeaderLayout
