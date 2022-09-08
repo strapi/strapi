@@ -97,6 +97,10 @@ export const RelationInputWrapper = ({
     searchFor(term, { idsToOmit: modifiedData?.[name]?.connect?.map((relation) => relation.id) });
   };
 
+  const handleOpenSearch = () => {
+    searchFor('', { idsToOmit: modifiedData?.[name]?.connect?.map((relation) => relation.id) });
+  };
+
   const handleSearchMore = () => {
     search.fetchNextPage();
   };
@@ -143,7 +147,7 @@ export const RelationInputWrapper = ({
       onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
       onSearchClose={() => {}}
-      onSearchOpen={() => {}}
+      onSearchOpen={handleOpenSearch}
       placeholder={formatMessage(
         placeholder || {
           id: getTrad('relation.add'),

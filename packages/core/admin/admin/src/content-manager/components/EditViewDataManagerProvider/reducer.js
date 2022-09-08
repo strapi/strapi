@@ -74,17 +74,20 @@ const reducer = (state, action) =>
       }
       case 'LOAD_RELATION': {
         const initialDataPath = ['initialData', ...action.keys, 'results'];
-        const modifiedDataPath = ['modifiedData', ...action.keys];
         const { value } = action;
 
         set(draftState, initialDataPath, value);
-        set(draftState, modifiedDataPath, { connect: [], disconnect: [] });
 
         break;
       }
       case 'CONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
         const { value, replace = false } = action;
+        const isConnectAlreadyExist = get(state, [...path, 'connect']);
+
+        if (!isConnectAlreadyExist) {
+          set(draftState, [...path, 'connect'], []);
+        }
 
         if (replace) {
           set(draftState, [...path, 'connect'], [value]);
@@ -92,6 +95,20 @@ const reducer = (state, action) =>
           const nextValue = get(draftState, [...path, 'connect']);
           nextValue.push(value);
         }
+
+        break;
+      }
+      case 'DISCONNECT_RELATION': {
+        const path = ['modifiedData', ...action.keys];
+        const { value } = action;
+        const isDisconnectAlreadyExist = get(state, [...path, 'disconnect']);
+
+        if (!isDisconnectAlreadyExist) {
+          set(draftState, [...path, 'disconnect'], []);
+        }
+
+        const nextValue = get(draftState, [...path, 'disconnect']);
+        nextValue.push(value);
 
         break;
       }
@@ -214,15 +231,6 @@ const reducer = (state, action) =>
         currentValue.splice(parseInt(action.keys[keysLength], 10), 1);
 
         set(draftState, pathToComponentData, currentValue);
-
-        break;
-      }
-      case 'DISCONNECT_RELATION': {
-        const path = ['modifiedData', ...action.keys];
-        const { value } = action;
-
-        const nextValue = get(draftState, [...path, 'disconnect']);
-        nextValue.push(value);
 
         break;
       }
