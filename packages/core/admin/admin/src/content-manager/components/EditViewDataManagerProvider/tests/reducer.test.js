@@ -258,6 +258,36 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
   });
 
   describe('CONNECT_RELATION', () => {
+    it('should create connect array in modifiedData', () => {
+      const state = {
+        ...initialState,
+
+        initialData: {},
+        modifiedData: {
+          relation: {},
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        componentsDataStructure: {},
+        initialData: {},
+        modifiedData: {
+          relation: {
+            connect: [{ id: 1 }],
+          },
+        },
+      };
+
+      const action = {
+        type: 'CONNECT_RELATION',
+        keys: ['relation'],
+        value: { id: 1 },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
     it('should add a relation in the modifiedData', () => {
       const state = {
         ...initialState,
@@ -396,6 +426,36 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
   });
 
   describe('DISCONNECT_RELATION', () => {
+    it('should create disconnect array in modifiedData', () => {
+      const state = {
+        ...initialState,
+
+        initialData: {},
+        modifiedData: {
+          relation: {},
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        componentsDataStructure: {},
+        initialData: {},
+        modifiedData: {
+          relation: {
+            disconnect: [{ id: 1 }],
+          },
+        },
+      };
+
+      const action = {
+        type: 'DISCONNECT_RELATION',
+        keys: ['relation'],
+        value: { id: 1 },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
     it('should remove a relation from modifiedData', () => {
       const state = {
         ...initialState,
