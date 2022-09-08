@@ -48,7 +48,7 @@ const controllersRegistry = () => {
       const filteredControllers = pickBy((_, uid) => hasNamespace(uid, namespace))(controllers);
 
       const map = {};
-      for (const uid in filteredControllers) {
+      for (const uid of Object.keys(filteredControllers)) {
         Object.defineProperty(map, uid, {
           enumerable: true,
           get: () => {
@@ -78,7 +78,7 @@ const controllersRegistry = () => {
      * @returns
      */
     add(namespace, newControllers) {
-      for (const controllerName in newControllers) {
+      for (const controllerName of Object.keys(newControllers)) {
         const controller = newControllers[controllerName];
         const uid = addNamespace(controllerName, namespace);
 
