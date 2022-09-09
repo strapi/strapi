@@ -72,7 +72,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
   it('should show a list of api tokens', async () => {
     useRBAC.mockImplementation(() => ({
-      allowedActions: { canCreate: true, canDelete: true, canRead: true, canUpdate: true },
+      allowedActions: {
+        canCreate: true,
+        canDelete: true,
+        canRead: true,
+        canUpdate: true,
+        canRegenerate: true,
+      },
     }));
     const history = createMemoryHistory();
     history.push('/settings/api-tokens');
@@ -986,7 +992,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
   it('should not show the create button when the user does not have the rights to create', async () => {
     useRBAC.mockImplementation(() => ({
-      allowedActions: { canCreate: false, canDelete: true, canRead: true, canUpdate: true },
+      allowedActions: {
+        canCreate: false,
+        canDelete: true,
+        canRead: true,
+        canUpdate: true,
+        canRegenerate: true,
+      },
     }));
 
     const history = createMemoryHistory();
@@ -999,7 +1011,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
   it('should show the delete button when the user have the rights to delete', async () => {
     useRBAC.mockImplementation(() => ({
-      allowedActions: { canCreate: false, canDelete: true, canRead: true, canUpdate: false },
+      allowedActions: {
+        canCreate: false,
+        canDelete: true,
+        canRead: true,
+        canUpdate: false,
+        canRegenerate: false,
+      },
     }));
     const history = createMemoryHistory();
     history.push('/settings/api-tokens');
@@ -1014,7 +1032,13 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
   it('should show the read button when the user have the rights to read and not to update', async () => {
     useRBAC.mockImplementation(() => ({
-      allowedActions: { canCreate: false, canDelete: true, canRead: true, canUpdate: false },
+      allowedActions: {
+        canCreate: false,
+        canDelete: true,
+        canRead: true,
+        canUpdate: false,
+        canRegenerate: false,
+      },
     }));
     const history = createMemoryHistory();
     history.push('/settings/api-tokens');

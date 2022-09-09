@@ -63,7 +63,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', config: { actions: ['admin::api-tokens.update'] } },
+        { name: 'admin::hasPermissions', config: { actions: ['admin::api-tokens.regenerate'] } },
       ],
     },
   },

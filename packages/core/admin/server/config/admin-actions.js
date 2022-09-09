@@ -151,6 +151,14 @@ module.exports = {
       subCategory: 'general',
     },
     {
+      uid: 'api-tokens.regenerate',
+      displayName: 'Regenerate',
+      pluginName: 'admin',
+      section: 'settings',
+      category: 'api tokens',
+      subCategory: 'general',
+    },
+    {
       uid: 'api-tokens.delete',
       displayName: 'Delete (revoke)',
       pluginName: 'admin',
