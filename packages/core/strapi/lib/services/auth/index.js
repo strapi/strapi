@@ -4,7 +4,6 @@ const { strict: assert } = require('assert');
 const { has, prop } = require('lodash/fp');
 
 const { UnauthorizedError } = require('@strapi/utils').errors;
-const requestCtx = require('../request-context');
 
 const INVALID_STRATEGY_MSG =
   'Invalid auth strategy. Expecting an object with properties {name: string, authenticate: function, verify: function}';
@@ -60,9 +59,6 @@ const createAuthentication = () => {
             strategy,
             credentials,
           };
-
-          const store = requestCtx.getStore();
-          store.auth = ctx.state.auth;
 
           return next();
         }

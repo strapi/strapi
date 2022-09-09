@@ -1,9 +1,9 @@
 const { requestContext } = require('@strapi/strapi');
 
 module.exports = {
-  beforeCreate() {
-    const store = requestContext.getStore();
+  beforeUpdate() {
+    const ctx = requestContext.get();
 
-    console.log('User info in service: ', store.auth);
+    console.log('User info in service: ', ctx.state.user);
   },
 };

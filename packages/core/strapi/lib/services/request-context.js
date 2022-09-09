@@ -2,4 +2,16 @@
 
 const { AsyncLocalStorage } = require('async_hooks');
 
-module.exports = new AsyncLocalStorage();
+const storage = new AsyncLocalStorage();
+
+const requestCtx = {
+  async run(store, cb) {
+    return storage.run(store, cb);
+  },
+
+  get() {
+    return storage.getStore();
+  },
+};
+
+module.exports = requestCtx;

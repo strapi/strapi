@@ -34,19 +34,7 @@ const createServer = (strapi) => {
     keys: strapi.config.get('server.app.keys'),
   });
 
-  app.use(async (ctx, next) => {
-    const store = {
-      foo: 'bar',
-    };
-
-    // TODO: handle errors
-    await new Promise((res) => {
-      requestCtx.run(store, async () => {
-        await next();
-        res();
-      });
-    });
-  });
+  app.use((ctx, next) => requestCtx.run(ctx, () => next()));
 
   const router = new Router();
 
