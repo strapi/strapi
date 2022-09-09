@@ -9,6 +9,7 @@ const { createContentAPI } = require('./content-api');
 const registerAllRoutes = require('./register-routes');
 const registerApplicationMiddlewares = require('./register-middlewares');
 const createKoaApp = require('./koa');
+const requestCtx = require('../request-context');
 
 const healthCheck = async (ctx) => {
   ctx.set('strapi', 'You are so French!');
@@ -31,6 +32,20 @@ const createServer = (strapi) => {
   const app = createKoaApp({
     proxy: strapi.config.get('server.proxy'),
     keys: strapi.config.get('server.app.keys'),
+  });
+
+  app.use(async (ctx, next) => {
+    const store = {
+      foo: 'bar',
+    };
+
+    // TODO: handle errors
+    await new Promise((res) => {
+      requestCtx.run(store, async () => {
+        await next();
+        res();
+      });
+    });
   });
 
   const router = new Router();
