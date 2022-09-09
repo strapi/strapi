@@ -17,7 +17,13 @@ jest.mock('@strapi/helper-plugin', () => ({
   useFocusWhenNavigate: jest.fn(),
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useRBAC: jest.fn(() => ({
-    allowedActions: { canCreate: true, canDelete: true, canRead: true, canUpdate: true },
+    allowedActions: {
+      canCreate: true,
+      canDelete: true,
+      canRead: true,
+      canUpdate: true,
+      canRegenerate: true,
+    },
   })),
   useGuidedTour: jest.fn(() => ({
     startSection: jest.fn(),
