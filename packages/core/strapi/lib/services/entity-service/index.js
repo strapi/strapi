@@ -132,7 +132,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const entity = await db.transaction(async () => {
       const componentData = await createComponents(uid, validData);
 
-      let entity = await db.query(uid).create({
+      const entity = await db.query(uid).create({
         ...query,
         data: creationPipeline(Object.assign(omitComponentData(model, validData), componentData), {
           contentType: model,
@@ -143,7 +143,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       // FIXME: upload in components
       if (files && Object.keys(files).length > 0) {
         await this.uploadFiles(uid, entity, files);
-        entity = await this.findOne(uid, entity.id, wrappedParams);
+        return this.findOne(uid, entity.id, wrappedParams);
       }
 
       return entity;
@@ -182,7 +182,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
       const componentData = await updateComponents(uid, entityToUpdate, validData);
 
-      let entity = await db.query(uid).update({
+      const entity = await db.query(uid).update({
         ...query,
         where: { id: entityId },
         data: updatePipeline(Object.assign(omitComponentData(model, validData), componentData), {
@@ -194,11 +194,15 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       // FIXME: upload in components
       if (files && Object.keys(files).length > 0) {
         await this.uploadFiles(uid, entity, files);
-        entity = await this.findOne(uid, entity.id, wrappedParams);
+        return this.findOne(uid, entity.id, wrappedParams);
       }
 
       return entity;
     });
+
+    if (!entity) {
+      return null;
+    }
 
     await this.emitEvent(uid, ENTRY_UPDATE, entity);
 
@@ -228,6 +232,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
       return entityToDelete;
     });
+
+    if (!entity) {
+      return null;
+    }
 
     await this.emitEvent(uid, ENTRY_DELETE, entity);
 

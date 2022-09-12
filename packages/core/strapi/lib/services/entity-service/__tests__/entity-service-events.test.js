@@ -28,6 +28,7 @@ describe('Entity service triggers webhooks', () => {
         }),
       },
       db: {
+        transaction: (cb) => cb(),
         query: () => ({
           count: () => 0,
           create: ({ data }) => data,
