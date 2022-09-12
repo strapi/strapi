@@ -65,6 +65,7 @@ const RelationInput = ({
   publicationStateTranslations,
   relations: paginatedRelations,
   searchResults,
+  size,
 }) => {
   const [value, setValue] = useState(null);
   const listRef = useRef();
@@ -139,6 +140,7 @@ const RelationInput = ({
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
         totalNumberOfRelations={totalNumberOfRelations}
+        size={size}
         search={
           <>
             <FieldLabel>{label}</FieldLabel>
@@ -337,6 +339,7 @@ RelationInput.propTypes = {
     published: PropTypes.string.isRequired,
   }).isRequired,
   searchResults: ReactQuerySearchResult,
+  size: PropTypes.number.isRequired,
   relations: ReactQueryRelationResult,
 };
 

@@ -5,7 +5,14 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
 
-export const Relation = ({ children, loadMore, search, totalNumberOfRelations, ...props }) => {
+export const Relation = ({
+  children,
+  loadMore,
+  search,
+  totalNumberOfRelations,
+  size,
+  ...props
+}) => {
   return (
     <Box
       paddingTop={4}
@@ -22,7 +29,7 @@ export const Relation = ({ children, loadMore, search, totalNumberOfRelations, .
         alignItems="end"
         wrap="wrap"
       >
-        <Stack basis="70%" spacing={1} {...props}>
+        <Stack basis={size <= 6 ? '100%' : '70%'} spacing={1} {...props}>
           {search}
         </Stack>
         <Flex>{loadMore}</Flex>
@@ -42,5 +49,6 @@ Relation.propTypes = {
   children: PropTypes.node.isRequired,
   search: PropTypes.node,
   loadMore: PropTypes.node,
+  size: PropTypes.number.isRequired,
   totalNumberOfRelations: PropTypes.string,
 };
