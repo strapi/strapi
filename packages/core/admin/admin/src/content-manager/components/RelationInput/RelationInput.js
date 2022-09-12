@@ -138,6 +138,7 @@ const RelationInput = ({
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
+        totalNumberOfRelations={totalNumberOfRelations}
         search={
           <>
             <FieldLabel>{label}</FieldLabel>
@@ -258,10 +259,12 @@ const RelationInput = ({
             }}
           </List>
         </RelationList>
-        <Box paddingTop={2}>
-          <FieldHint />
-          <FieldError />
-        </Box>
+        {(description || error) && (
+          <Box paddingTop={2}>
+            <FieldHint />
+            <FieldError />
+          </Box>
+        )}
       </Relation>
     </Field>
   );
