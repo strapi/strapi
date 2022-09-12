@@ -28,7 +28,7 @@ class CustomFields {
   register(customFields) {
     if (Array.isArray(customFields)) {
       // If several custom fields are passed, register them one by one
-      customFields.forEach(customField => {
+      customFields.forEach((customField) => {
         this.register(customField);
       });
     } else {

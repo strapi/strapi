@@ -4,7 +4,7 @@ const customFieldsRegistry = require('../custom-fields');
 
 const strapi = {
   plugins: { plugintest: 'foo' },
-  plugin: jest.fn(plugin => strapi.plugins[plugin]),
+  plugin: jest.fn((plugin) => strapi.plugins[plugin]),
 };
 
 describe('Custom fields registry', () => {

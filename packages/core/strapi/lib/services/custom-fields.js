@@ -1,6 +1,6 @@
 'use strict';
 
-const createCustomFields = strapi => {
+const createCustomFields = (strapi) => {
   return {
     register(customField) {
       strapi.container.get('custom-fields').add(customField);
