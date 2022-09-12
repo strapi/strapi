@@ -129,7 +129,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // select / populate
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
-    const entity = await db.transaction(async () => {
+    let entity = await db.transaction(async () => {
       const componentData = await createComponents(uid, validData);
 
       const entity = await db.query(uid).create({
@@ -139,15 +139,15 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
         }),
       });
 
-      // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
-      // FIXME: upload in components
-      if (files && Object.keys(files).length > 0) {
-        await this.uploadFiles(uid, entity, files);
-        return this.findOne(uid, entity.id, wrappedParams);
-      }
-
       return entity;
     });
+
+    // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+    // FIXME: upload in components
+    if (files && Object.keys(files).length > 0) {
+      await this.uploadFiles(uid, entity, files);
+      entity = this.findOne(uid, entity.id, wrappedParams);
+    }
 
     await this.emitEvent(uid, ENTRY_CREATE, entity);
 
@@ -160,7 +160,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const model = strapi.getModel(uid);
 
-    const entity = await db.transaction(async () => {
+    let entity = await db.transaction(async () => {
       const entityToUpdate = await db.query(uid).findOne({ where: { id: entityId } });
 
       if (!entityToUpdate) {
@@ -190,18 +190,18 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
         }),
       });
 
-      // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
-      // FIXME: upload in components
-      if (files && Object.keys(files).length > 0) {
-        await this.uploadFiles(uid, entity, files);
-        return this.findOne(uid, entity.id, wrappedParams);
-      }
-
       return entity;
     });
 
     if (!entity) {
       return null;
+    }
+
+    // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+    // FIXME: upload in components
+    if (files && Object.keys(files).length > 0) {
+      await this.uploadFiles(uid, entity, files);
+      entity = this.findOne(uid, entity.id, wrappedParams);
     }
 
     await this.emitEvent(uid, ENTRY_UPDATE, entity);
