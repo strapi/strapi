@@ -129,22 +129,25 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // select / populate
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
-    // TODO: wrap into transaction
-    const componentData = await createComponents(uid, validData);
+    const entity = await db.transaction(async () => {
+      const componentData = await createComponents(uid, validData);
 
-    let entity = await db.query(uid).create({
-      ...query,
-      data: creationPipeline(Object.assign(omitComponentData(model, validData), componentData), {
-        contentType: model,
-      }),
+      let entity = await db.query(uid).create({
+        ...query,
+        data: creationPipeline(Object.assign(omitComponentData(model, validData), componentData), {
+          contentType: model,
+        }),
+      });
+
+      // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+      // FIXME: upload in components
+      if (files && Object.keys(files).length > 0) {
+        await this.uploadFiles(uid, entity, files);
+        entity = await this.findOne(uid, entity.id, wrappedParams);
+      }
+
+      return entity;
     });
-
-    // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
-    // FIXME: upload in components
-    if (files && Object.keys(files).length > 0) {
-      await this.uploadFiles(uid, entity, files);
-      entity = await this.findOne(uid, entity.id, wrappedParams);
-    }
 
     await this.emitEvent(uid, ENTRY_CREATE, entity);
 
@@ -157,42 +160,45 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const model = strapi.getModel(uid);
 
-    const entityToUpdate = await db.query(uid).findOne({ where: { id: entityId } });
+    const entity = await db.transaction(async () => {
+      const entityToUpdate = await db.query(uid).findOne({ where: { id: entityId } });
 
-    if (!entityToUpdate) {
-      return null;
-    }
+      if (!entityToUpdate) {
+        return null;
+      }
 
-    const isDraft = contentTypesUtils.isDraft(entityToUpdate, model);
+      const isDraft = contentTypesUtils.isDraft(entityToUpdate, model);
 
-    const validData = await entityValidator.validateEntityUpdate(
-      model,
-      data,
-      {
-        isDraft,
-      },
-      entityToUpdate
-    );
+      const validData = await entityValidator.validateEntityUpdate(
+        model,
+        data,
+        {
+          isDraft,
+        },
+        entityToUpdate
+      );
 
-    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
+      const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
-    // TODO: wrap in transaction
-    const componentData = await updateComponents(uid, entityToUpdate, validData);
+      const componentData = await updateComponents(uid, entityToUpdate, validData);
 
-    let entity = await db.query(uid).update({
-      ...query,
-      where: { id: entityId },
-      data: updatePipeline(Object.assign(omitComponentData(model, validData), componentData), {
-        contentType: model,
-      }),
+      let entity = await db.query(uid).update({
+        ...query,
+        where: { id: entityId },
+        data: updatePipeline(Object.assign(omitComponentData(model, validData), componentData), {
+          contentType: model,
+        }),
+      });
+
+      // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+      // FIXME: upload in components
+      if (files && Object.keys(files).length > 0) {
+        await this.uploadFiles(uid, entity, files);
+        entity = await this.findOne(uid, entity.id, wrappedParams);
+      }
+
+      return entity;
     });
-
-    // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
-    // FIXME: upload in components
-    if (files && Object.keys(files).length > 0) {
-      await this.uploadFiles(uid, entity, files);
-      entity = await this.findOne(uid, entity.id, wrappedParams);
-    }
 
     await this.emitEvent(uid, ENTRY_UPDATE, entity);
 
@@ -205,23 +211,27 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // select / populate
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
-    const entityToDelete = await db.query(uid).findOne({
-      ...query,
-      where: { id: entityId },
+    const entity = await db.transaction(async () => {
+      const entityToDelete = await db.query(uid).findOne({
+        ...query,
+        where: { id: entityId },
+      });
+
+      if (!entityToDelete) {
+        return null;
+      }
+
+      const componentsToDelete = await getComponents(uid, entityToDelete);
+
+      await db.query(uid).delete({ where: { id: entityToDelete.id } });
+      await deleteComponents(uid, { ...entityToDelete, ...componentsToDelete });
+
+      return entityToDelete;
     });
 
-    if (!entityToDelete) {
-      return null;
-    }
+    await this.emitEvent(uid, ENTRY_DELETE, entity);
 
-    const componentsToDelete = await getComponents(uid, entityToDelete);
-
-    await db.query(uid).delete({ where: { id: entityToDelete.id } });
-    await deleteComponents(uid, { ...entityToDelete, ...componentsToDelete });
-
-    await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
-
-    return entityToDelete;
+    return entity;
   },
 
   // FIXME: used only for the CM to be removed

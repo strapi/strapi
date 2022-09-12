@@ -8,6 +8,7 @@ const { createMigrationsProvider } = require('./migrations');
 const { createLifecyclesProvider } = require('./lifecycles');
 const createConnection = require('./connection');
 const errors = require('./errors');
+const transactionCtx = require('./transaction-context');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
@@ -47,6 +48,24 @@ class Database {
     return this.entityManager.getRepository(uid);
   }
 
+  async transaction(cb) {
+    if (!cb) {
+      return this.connection.transaction();
+    }
+
+    const trx = await this.connection.transaction();
+    return transactionCtx.run(trx, async () => {
+      try {
+        const res = await cb();
+        await trx.commit();
+        return res;
+      } catch (error) {
+        await trx.rollback();
+        throw error;
+      }
+    });
+  }
+
   getConnection(tableName) {
     const schema = this.connection.getSchemaName();
     const connection = tableName ? this.connection(tableName) : this.connection;
@@ -56,10 +75,6 @@ class Database {
   getSchemaConnection(trx = this.connection) {
     const schema = this.connection.getSchemaName();
     return schema ? trx.schema.withSchema(schema) : trx.schema;
-  }
-
-  transaction() {
-    return this.connection.transaction();
   }
 
   queryBuilder(uid) {

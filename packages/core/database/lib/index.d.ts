@@ -160,6 +160,7 @@ export interface Database {
   entityManager: EntityManager;
 
   query<T extends keyof AllTypes>(uid: T): QueryFromContentType<T>;
+  transaction(cb: (em: EntityManager) => Promise<any>): Promise<void>;
 }
 export class Database implements Database {
   static transformContentTypes(contentTypes: any[]): ModelConfig[];
