@@ -113,9 +113,60 @@ const reducer = (state, action) =>
         break;
       }
       case 'INIT_FORM': {
+        const { initialValues, relationalFields } = action;
+
         draftState.formErrors = {};
-        draftState.initialData = action.initialValues;
-        draftState.modifiedData = action.initialValues;
+
+        draftState.initialData = {
+          ...initialValues,
+
+          /**
+           * The state we keep in the client for relations looks like:
+           *
+           * {
+           *   count: int
+           *   results: [<Relation>]
+           * }
+           *
+           * but the content API only returns `count`, which is why we need
+           * to extend the existing state rather than overwriting it.
+           */
+          ...relationalFields.reduce((acc, name) => {
+            return (acc[name] = {
+              ...(initialValues?.[name] ?? {}),
+              ...(state.initialData?.[name] ?? {}),
+            });
+          }, {}),
+        };
+
+        draftState.modifiedData = {
+          ...initialValues,
+
+          /**
+           * The client sends the following to the content API
+           *
+           * {
+           *   connect: [<Relation>],
+           *   disconnect: [<Relation>]
+           * }
+           *
+           * but receives only `count` in return. After save/ publish
+           * we want to:
+           * 1) reset connect/ disconnect
+           * 2) extend the existing state with the API response
+           *
+           */
+
+          ...relationalFields.reduce((acc, name) => {
+            const { connect, disconnect, ...currentState } = state.modifiedData?.[name] ?? {};
+
+            return (acc[name] = {
+              ...(initialValues?.[name] ?? {}),
+              ...(currentState ?? {}),
+            });
+          }, {}),
+        };
+
         draftState.modifiedDZName = null;
         draftState.shouldCheckErrors = false;
         break;
