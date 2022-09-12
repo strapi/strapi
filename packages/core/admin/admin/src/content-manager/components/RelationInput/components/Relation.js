@@ -16,11 +16,11 @@ export const Relation = ({ children, loadMore, search, ...props }) => {
       hasRadius
       background="neutral100"
     >
-      <Flex justifyContent="space-between" alignItems="end">
-        <Stack width="55%" spacing={1} {...props}>
+      <Flex gap={2} justifyContent="space-between" alignItems="end" wrap="wrap">
+        <Stack basis="70%" spacing={1} {...props}>
           {search}
         </Stack>
-        {loadMore}
+        <Flex>{loadMore}</Flex>
       </Flex>
       <Box>{children}</Box>
     </Stack>

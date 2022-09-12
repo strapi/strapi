@@ -83,7 +83,15 @@ const getSelectStyles = (theme, error) => {
         },
       };
     },
-    placeholder: (base) => ({ ...base, marginLeft: 0 }),
+    placeholder: (base) => ({
+      ...base,
+      color: theme.colors.neutral600,
+      marginLeft: 0,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      maxWidth: '80%',
+    }),
     singleValue(base, state) {
       let color = theme.colors.neutral800;
 
