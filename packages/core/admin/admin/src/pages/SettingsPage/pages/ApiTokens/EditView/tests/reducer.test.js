@@ -20,6 +20,47 @@ describe('ADMIN | Pages | API TOKENS | EditView | reducer', () => {
     expect(reducer(initialState, action).selectedActions).toEqual(['api::address.address.find']);
   });
 
+  it('should select all actions of a permission', () => {
+    const action = {
+      type: 'SELECT_ALL_IN_PERMISSION',
+      value: [
+        {
+          action: 'find',
+          actionId: 'api::category.category.find',
+        },
+        {
+          action: 'findOne',
+          actionId: 'api::category.category.findOne',
+        },
+        {
+          action: 'create',
+          actionId: 'api::category.category.create',
+        },
+        {
+          action: 'update',
+          actionId: 'api::category.category.update',
+        },
+        {
+          action: 'delete',
+          actionId: 'api::category.category.delete',
+        },
+        {
+          action: 'createLocalization',
+          actionId: 'api::category.category.createLocalization',
+        },
+      ],
+    };
+
+    expect(reducer(initialState, action).selectedActions).toEqual([
+      'api::category.category.find',
+      'api::category.category.findOne',
+      'api::category.category.create',
+      'api::category.category.update',
+      'api::category.category.delete',
+      'api::category.category.createLocalization',
+    ]);
+  });
+
   it('should select all actions', () => {
     const action = {
       type: 'SELECT_ALL_ACTIONS',
