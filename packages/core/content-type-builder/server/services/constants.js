@@ -29,7 +29,6 @@ const DEFAULT_TYPES = [
   'boolean',
 
   'relation',
-  'customField',
 ];
 
 const VALID_UID_TARGETS = ['string', 'text'];
