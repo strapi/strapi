@@ -74,9 +74,17 @@ const reducer = (state, action) =>
       }
       case 'LOAD_RELATION': {
         const initialDataPath = ['initialData', ...action.keys, 'results'];
+        const modifiedDataPath = ['modifiedData', ...action.keys, 'results'];
         const { value } = action;
 
         set(draftState, initialDataPath, value);
+
+        /**
+         * We set the value also on modifiedData, because initialData and
+         * modifiedData need to stay in sync, so that the CM can comare
+         * both states, to render the diry UI state
+         */
+        set(draftState, modifiedDataPath, value);
 
         break;
       }
