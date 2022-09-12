@@ -11,6 +11,7 @@ const symbolToString = typeof Symbol !== 'undefined' ? Symbol.prototype.toString
 const SYMBOL_REGEXP = /^Symbol\((.*)\)(.*)$/;
 
 function printNumber(val) {
+  // eslint-disable-next-line eqeqeq
   if (val != +val) return 'NaN';
   const isNegativeZero = val === 0 && 1 / val < 0;
   return isNegativeZero ? '-0' : `${val}`;

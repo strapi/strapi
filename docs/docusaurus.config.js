@@ -8,13 +8,14 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Doc',
   tagline: 'Dinosaurs are cool',
-  url: 'https://your-docusaurus-test-site.com',
-  baseUrl: '/',
+  url: 'https://strapi.github.io/strapi',
+  baseUrl: '/strapi/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'strapi',
   projectName: 'strapi',
+  trailingSlash: false,
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -32,7 +33,7 @@ const config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
-          // editUrl: 'https://github.com/strapi/strapi/tree/main/docs//docs',
+          editUrl: 'https://github.com/strapi/strapi/tree/main/docs/',
         },
         blog: false,
       },
@@ -43,7 +44,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     {
       navbar: {
-        // title: 'Doc',
+        title: 'Contributor documentation',
         hideOnScroll: true,
         logo: {
           alt: 'Doc',

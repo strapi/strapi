@@ -2,6 +2,9 @@
 
 module.exports = {
   extends: '@strapi/eslint-config/back',
+  parserOptions: {
+    ecmaVersion: 2020,
+  },
   globals: {
     strapi: false,
   },
@@ -23,14 +26,16 @@ module.exports = {
       },
     ],
     'prefer-destructuring': ['error', { AssignmentExpression: { array: false } }],
-    eqeqeq: 'warn',
-    'no-underscore-dangle': 'warn',
-    'no-use-before-define': 'warn',
-    'no-param-reassign': 'warn',
+    'no-underscore-dangle': 'off',
+    'no-use-before-define': 'off',
     'no-continue': 'warn',
-    'no-process-exit': 'warn',
-    'no-plusplus': 'warn',
-    'no-loop-func': 'warn',
-    'guard-for-in': 'warn',
+    'no-process-exit': 'off',
+    'no-loop-func': 'off',
+    'no-param-reassign': [
+      'error',
+      {
+        props: false,
+      },
+    ],
   },
 };
