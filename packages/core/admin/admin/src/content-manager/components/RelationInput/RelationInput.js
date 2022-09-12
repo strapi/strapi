@@ -146,7 +146,7 @@ const RelationInput = ({
             <FieldLabel>{label}</FieldLabel>
             <ReactSelect
               // position fixed doesn't update position on scroll
-              // TODO: find why menu position is not updated on opitions change
+              // react select doesn't update menu position on options change
               menuPosition="absolute"
               components={{ Option }}
               options={options}
