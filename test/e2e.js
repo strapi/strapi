@@ -4,6 +4,8 @@ const path = require('path');
 const execa = require('execa');
 const yargs = require('yargs');
 
+process.env.NODE_ENV = 'test';
+
 const appName = 'testApp';
 process.env.ENV_PATH = path.resolve(__dirname, '..', appName, '.env');
 
@@ -39,13 +41,14 @@ const databases = {
   },
 };
 
-const runAllTests = async args => {
+const runAllTests = async (args) => {
   return execa('yarn', ['test:e2e', ...args], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
     env: {
       FORCE_COLOR: 1,
       ENV_PATH: process.env.ENV_PATH,
+      JWT_SECRET: 'aSecret',
     },
   });
 };
@@ -74,18 +77,19 @@ yargs
   .command(
     '$0',
     'run end to end tests',
-    yargs => {
-      yargs.option('database', {
+    (yarg) => {
+      yarg.option('database', {
         alias: 'db',
         describe: 'choose a database',
         choices: Object.keys(databases),
         default: 'sqlite',
       });
     },
-    argv => {
+    (argv) => {
       const { database, _: args } = argv;
 
       main(databases[database], args);
     }
   )
-  .help().argv;
+  .help()
+  .parse();

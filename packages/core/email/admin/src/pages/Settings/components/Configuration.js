@@ -2,6 +2,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Stack } from '@strapi/design-system/Stack';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
@@ -10,12 +11,16 @@ import { TextInput } from '@strapi/design-system/TextInput';
 import { Select, Option } from '@strapi/design-system/Select';
 import getTrad from '../../../utils/getTrad';
 
+const DocumentationLink = styled.a`
+  color: ${({ theme }) => theme.colors.primary600};
+`;
+
 const Configuration = ({ config }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Stack size={4}>
-      <Stack size={1}>
+    <Stack spacing={4}>
+      <Stack spacing={1}>
         <Typography variant="delta" as="h2">
           {formatMessage({
             id: getTrad('Settings.email.plugin.title.config'),
@@ -32,13 +37,16 @@ const Configuration = ({ config }) => {
             {
               file: './config/plugins.js',
               link: (
-                <a
+                <DocumentationLink
                   href="https://docs.strapi.io/developer-docs/latest/plugins/email.html"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  link
-                </a>
+                  {formatMessage({
+                    id: getTrad('link'),
+                    defaultMessage: 'Link',
+                  })}
+                </DocumentationLink>
               ),
             }
           )}

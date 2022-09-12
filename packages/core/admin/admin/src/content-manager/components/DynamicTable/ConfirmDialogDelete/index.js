@@ -25,7 +25,7 @@ const ConfirmDialogDelete = ({ isConfirmButtonLoading, isOpen, onToggleDialog, o
       isOpen={isOpen}
     >
       <DialogBody icon={<ExclamationMarkCircle />}>
-        <Stack size={2}>
+        <Stack spacing={2}>
           <Flex justifyContent="center">
             <Typography id="confirm-description">
               {formatMessage({

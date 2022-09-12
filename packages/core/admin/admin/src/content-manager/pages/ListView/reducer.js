@@ -4,6 +4,7 @@
  */
 
 import produce from 'immer';
+import get from 'lodash/get';
 import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
@@ -17,6 +18,7 @@ export const initialState = {
   data: [],
   isLoading: true,
   contentType: {},
+  components: [],
   initialDisplayedHeaders: [],
   displayedHeaders: [],
   pagination: {
@@ -26,21 +28,22 @@ export const initialState = {
 
 const listViewReducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, drafState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case GET_DATA: {
         return {
           ...initialState,
           contentType: state.contentType,
+          components: state.components,
           initialDisplayedHeaders: state.initialDisplayedHeaders,
           displayedHeaders: state.displayedHeaders,
         };
       }
 
       case GET_DATA_SUCCEEDED: {
-        drafState.pagination = action.pagination;
-        drafState.data = action.data;
-        drafState.isLoading = false;
+        draftState.pagination = action.pagination;
+        draftState.data = action.data;
+        draftState.isLoading = false;
         break;
       }
 
@@ -59,43 +62,74 @@ const listViewReducer = (state = initialState, action) =>
             key: `__${name}_key__`,
           };
 
-          if (attributes[name].type === 'relation') {
-            drafState.displayedHeaders.push({
-              ...header,
-              queryInfos: {
-                defaultParams: {},
-                endPoint: `collection-types/${uid}`,
-              },
-            });
-          } else {
-            drafState.displayedHeaders.push(header);
+          switch (attributes[name].type) {
+            case 'component': {
+              const componentName = attributes[name].component;
+              const mainFieldName = get(
+                state,
+                ['components', componentName, 'settings', 'mainField'],
+                null
+              );
+              const mainFieldAttribute = get(state, [
+                'components',
+                componentName,
+                'attributes',
+                mainFieldName,
+              ]);
+
+              draftState.displayedHeaders.push({
+                ...header,
+                metadatas: {
+                  ...metas,
+                  mainField: {
+                    ...mainFieldAttribute,
+                    name: mainFieldName,
+                  },
+                },
+              });
+              break;
+            }
+
+            case 'relation':
+              draftState.displayedHeaders.push({
+                ...header,
+                queryInfos: {
+                  defaultParams: {},
+                  endPoint: `collection-types/${uid}`,
+                },
+              });
+              break;
+
+            default:
+              draftState.displayedHeaders.push(header);
           }
         } else {
-          drafState.displayedHeaders = state.displayedHeaders.filter(
-            header => header.name !== name
+          draftState.displayedHeaders = state.displayedHeaders.filter(
+            (header) => header.name !== name
           );
         }
 
         break;
       }
       case ON_RESET_LIST_HEADERS: {
-        drafState.displayedHeaders = state.initialDisplayedHeaders;
+        draftState.displayedHeaders = state.initialDisplayedHeaders;
         break;
       }
       case RESET_PROPS: {
         return initialState;
       }
       case SET_LIST_LAYOUT: {
-        const { contentType, displayedHeaders } = action;
+        const { contentType, components, displayedHeaders } = action;
 
-        drafState.contentType = contentType;
-        drafState.displayedHeaders = displayedHeaders;
-        drafState.initialDisplayedHeaders = displayedHeaders;
+        draftState.contentType = contentType;
+        draftState.components = components;
+        draftState.displayedHeaders = displayedHeaders;
+        draftState.initialDisplayedHeaders = displayedHeaders;
 
         break;
       }
       default:
-        return drafState;
+        return draftState;
     }
   });
 

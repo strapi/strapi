@@ -33,10 +33,10 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
 
   return (
     <Box paddingBottom={4} paddingTop={6} style={{ paddingLeft: firstRowWidth }}>
-      <Stack horizontal size={0}>
+      <Stack horizontal spacing={0}>
         {displayedActions.map(({ label, actionId }) => {
           return (
-            <CenteredStack key={actionId} size={3}>
+            <CenteredStack key={actionId} spacing={3}>
               <Typography variant="sigma" textColor="neutral500">
                 {formatMessage({
                   id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
@@ -45,7 +45,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
               </Typography>
               <BaseCheckbox
                 disabled={isFormDisabled || IS_DISABLED}
-                onValueChange={value => {
+                onValueChange={(value) => {
                   onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value);
                 }}
                 name={actionId}

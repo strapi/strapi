@@ -38,7 +38,7 @@ const run = async () => {
     window.strapi.features = {
       ...window.strapi.features,
       allFeatures: features,
-      isEnabled: f => features.includes(f),
+      isEnabled: (f) => features.includes(f),
     };
 
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
@@ -48,7 +48,7 @@ const run = async () => {
 
   // We need to make sure to fetch the project type before importing the StrapiApp
   // otherwise the strapi-babel-plugin does not work correctly
-  const StrapiApp = await import('./StrapiApp');
+  const StrapiApp = await import(/* webpackChunkName: "admin-app" */ './StrapiApp');
 
   const app = StrapiApp.default({
     appPlugins: plugins,

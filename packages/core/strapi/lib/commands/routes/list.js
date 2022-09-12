@@ -6,8 +6,9 @@ const { toUpper } = require('lodash/fp');
 
 const strapi = require('../../index');
 
-module.exports = async function() {
-  const app = await strapi().load();
+module.exports = async function () {
+  const appContext = await strapi.compile();
+  const app = await strapi(appContext).load();
 
   const list = app.server.listRoutes();
 
@@ -17,8 +18,8 @@ module.exports = async function() {
   });
 
   list
-    .filter(route => route.methods.length)
-    .forEach(route => {
+    .filter((route) => route.methods.length)
+    .forEach((route) => {
       infoTable.push([route.methods.map(toUpper).join('|'), route.path]);
     });
 

@@ -1,33 +1,33 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-const BLOCKING_LABELS = [`flag: 💥 Breaking change`, `flag: don't merge`];
+const BLOCKING_LABELS = [`flag: 💥 Breaking change`, `flag: don't merge`, `flag: documentation`];
 
 async function main() {
   try {
     const labels = github.context.payload.pull_request?.labels ?? [];
 
-    const blockingLabels = labels.filter(label => BLOCKING_LABELS.includes(label.name));
+    const blockingLabels = labels.filter((label) => BLOCKING_LABELS.includes(label.name));
 
     if (blockingLabels.length > 0) {
       core.setFailed(
         `The PR has been labelled with a blocking label (${blockingLabels
-          .map(label => label.name)
+          .map((label) => label.name)
           .join(', ')}).`
       );
 
       return;
     }
 
-    const sourceLabelCount = labels.filter(label => label.name.startsWith('source: ')).length;
-    const issueLabelCount = labels.filter(label => label.name.startsWith('issue-type: ')).length;
+    const sourceLabelCount = labels.filter((label) => label.name.startsWith('source: ')).length;
+    const issueLabelCount = labels.filter((label) => label.name.startsWith('pr: ')).length;
 
     if (sourceLabelCount !== 1) {
       core.setFailed(`The PR must have one and only one 'source:' label.`);
     }
 
     if (issueLabelCount !== 1) {
-      core.setFailed(`The PR must have one and only one 'issue-type:' label.`);
+      core.setFailed(`The PR must have one and only one 'pr:' label.`);
     }
 
     // NOTE: to avoid manual work, this is commented until we can set the workflow to trigger on pull_request milestone changes.

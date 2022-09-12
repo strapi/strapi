@@ -31,7 +31,7 @@ const CenteredTypography = styled(Typography)`
   text-align: center;
 `;
 
-const CMEditViewCopyLocale = props => {
+const CMEditViewCopyLocale = (props) => {
   if (!props.localizations.length) {
     return null;
   }
@@ -64,7 +64,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
       const { data: response } = await axiosInstance.get(requestURL);
 
       const cleanedData = cleanData(response, allLayoutData, localizations);
-      ['createdBy', 'updatedBy', 'publishedAt', 'id', 'createdAt'].forEach(key => {
+      ['createdBy', 'updatedBy', 'publishedAt', 'id', 'createdAt'].forEach((key) => {
         if (!initialData[key]) return;
         cleanedData[key] = initialData[key];
       });
@@ -94,12 +94,12 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
     }
   };
 
-  const handleChange = value => {
+  const handleChange = (value) => {
     setValue(value);
   };
 
   const handleToggle = () => {
-    setIsOpen(prev => !prev);
+    setIsOpen((prev) => !prev);
   };
 
   return (
@@ -122,7 +122,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack size={2}>
+            <Stack spacing={2}>
               <Flex justifyContent="center">
                 <CenteredTypography id="confirm-description">
                   {formatMessage({

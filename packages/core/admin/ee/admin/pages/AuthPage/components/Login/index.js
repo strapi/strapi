@@ -16,7 +16,7 @@ const DividerFull = styled(Divider)`
   flex: 1;
 `;
 
-const Login = loginProps => {
+const Login = (loginProps) => {
   const ssoEnabled = strapi.features.isEnabled(strapi.features.SSO);
   const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
   const { formatMessage } = useIntl();
@@ -33,7 +33,7 @@ const Login = loginProps => {
     <UnauthenticatedLayout>
       <BaseLogin {...loginProps}>
         <Box paddingTop={7}>
-          <Stack size={7}>
+          <Stack spacing={7}>
             <Flex>
               <DividerFull />
               <Box paddingLeft={3} paddingRight={3}>
@@ -52,7 +52,7 @@ const Login = loginProps => {
 };
 
 Login.defaultProps = {
-  onSubmit: e => e.preventDefault(),
+  onSubmit: (e) => e.preventDefault(),
   requestError: null,
 };
 

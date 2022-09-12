@@ -56,12 +56,12 @@ function List({
           <Tr>
             <Th>
               <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
+                {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
+                {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
               </Typography>
             </Th>
           </Tr>
@@ -84,12 +84,12 @@ function List({
           <Tr>
             <Th>
               <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
+                {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
+                {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
               </Typography>
             </Th>
           </Tr>
@@ -121,106 +121,104 @@ function List({
   }
 
   return (
-    <>
-      <BoxWrapper>
-        <Box
-          paddingLeft={6}
-          paddingRight={isMain ? 6 : 0}
-          {...(isMain && { style: { overflowX: 'auto' } })}
-        >
-          <table>
-            {isMain && (
-              <thead>
-                <tr>
-                  <th>
-                    <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
-                    </Typography>
-                  </th>
-                  <th colSpan="2">
-                    <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
-                    </Typography>
-                  </th>
-                </tr>
-              </thead>
-            )}
-            <tbody>
-              {items.map(item => {
-                const { type } = item;
-                const CustomRow = customRowComponent;
+    <BoxWrapper>
+      <Box
+        paddingLeft={6}
+        paddingRight={isMain ? 6 : 0}
+        {...(isMain && { style: { overflowX: 'auto' } })}
+      >
+        <table>
+          {isMain && (
+            <thead>
+              <tr>
+                <th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
+                  </Typography>
+                </th>
+                <th colSpan="2">
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
+                  </Typography>
+                </th>
+              </tr>
+            </thead>
+          )}
+          <tbody>
+            {items.map((item) => {
+              const { type } = item;
+              const CustomRow = customRowComponent;
 
-                return (
-                  <React.Fragment key={item.name}>
-                    <CustomRow
+              return (
+                <React.Fragment key={item.name}>
+                  <CustomRow
+                    {...item}
+                    isNestedInDZComponent={isNestedInDZComponent}
+                    targetUid={targetUid}
+                    editTarget={editTarget}
+                    firstLoopComponentUid={firstLoopComponentUid}
+                    isFromDynamicZone={isFromDynamicZone}
+                    secondLoopComponentUid={secondLoopComponentUid}
+                  />
+
+                  {type === 'component' && (
+                    <ComponentList
                       {...item}
-                      isNestedInDZComponent={isNestedInDZComponent}
+                      customRowComponent={customRowComponent}
                       targetUid={targetUid}
+                      isNestedInDZComponent={isFromDynamicZone}
                       editTarget={editTarget}
                       firstLoopComponentUid={firstLoopComponentUid}
-                      isFromDynamicZone={isFromDynamicZone}
-                      secondLoopComponentUid={secondLoopComponentUid}
                     />
+                  )}
 
-                    {type === 'component' && (
-                      <ComponentList
-                        {...item}
-                        customRowComponent={customRowComponent}
-                        targetUid={targetUid}
-                        isNestedInDZComponent={isFromDynamicZone}
-                        editTarget={editTarget}
-                        firstLoopComponentUid={firstLoopComponentUid}
-                      />
-                    )}
-
-                    {type === 'dynamiczone' && (
-                      <DynamicZoneList
-                        {...item}
-                        customRowComponent={customRowComponent}
-                        addComponent={addComponentToDZ}
-                        targetUid={targetUid}
-                      />
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-        </Box>
-
-        {isMain && isInDevelopmentMode && (
-          <TFooter icon={<Plus />} onClick={onClickAddField}>
-            {formatMessage({
-              id: getTrad(
-                `form.button.add.field.to.${
-                  modifiedData.contentType
-                    ? modifiedData.contentType.schema.kind
-                    : editTarget || 'collectionType'
-                }`
-              ),
-              defaultMessage: 'Add another field',
+                  {type === 'dynamiczone' && (
+                    <DynamicZoneList
+                      {...item}
+                      customRowComponent={customRowComponent}
+                      addComponent={addComponentToDZ}
+                      targetUid={targetUid}
+                    />
+                  )}
+                </React.Fragment>
+              );
             })}
-          </TFooter>
-        )}
-        {isSub && isInDevelopmentMode && (
-          <NestedTFooter
-            icon={<Plus />}
-            onClick={onClickAddField}
-            color={isFromDynamicZone ? 'primary' : 'neutral'}
-          >
-            {formatMessage({
-              id: getTrad(`form.button.add.field.to.component`),
-              defaultMessage: 'Add another field',
-            })}
-          </NestedTFooter>
-        )}
-      </BoxWrapper>
-    </>
+          </tbody>
+        </table>
+      </Box>
+
+      {isMain && isInDevelopmentMode && (
+        <TFooter icon={<Plus />} onClick={onClickAddField}>
+          {formatMessage({
+            id: getTrad(
+              `form.button.add.field.to.${
+                modifiedData.contentType
+                  ? modifiedData.contentType.schema.kind
+                  : editTarget || 'collectionType'
+              }`
+            ),
+            defaultMessage: 'Add another field',
+          })}
+        </TFooter>
+      )}
+      {isSub && isInDevelopmentMode && (
+        <NestedTFooter
+          icon={<Plus />}
+          onClick={onClickAddField}
+          color={isFromDynamicZone ? 'primary' : 'neutral'}
+        >
+          {formatMessage({
+            id: getTrad(`form.button.add.field.to.component`),
+            defaultMessage: 'Add another field',
+          })}
+        </NestedTFooter>
+      )}
+    </BoxWrapper>
   );
 }
 
 List.defaultProps = {
-  addComponentToDZ: () => {},
+  addComponentToDZ() {},
   customRowComponent: null,
   firstLoopComponentUid: null,
   isFromDynamicZone: false,

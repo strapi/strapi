@@ -1,11 +1,19 @@
 'use strict';
 
+const path = require('path');
 const execa = require('execa');
 const _ = require('lodash');
+const { exists } = require('fs-extra');
 const { ValidationError } = require('@strapi/utils').errors;
+const { isUsingTypeScript } = require('@strapi/typescript-utils');
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
 
+const {
+  validateUpdateProjectSettings,
+  validateUpdateProjectSettingsFiles,
+  validateUpdateProjectSettingsImagesDimensions,
+} = require('../validation/project-settings');
 const { getService } = require('../utils');
 
 const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
@@ -13,7 +21,7 @@ const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
 /**
  * Validates a plugin name format
  */
-const isValidPluginName = plugin => {
+const isValidPluginName = (plugin) => {
   return _.isString(plugin) && !_.isEmpty(plugin) && PLUGIN_NAME_REGEX.test(plugin);
 };
 
@@ -35,21 +43,84 @@ module.exports = {
   },
 
   async init() {
-    const uuid = strapi.config.get('uuid', false);
+    let uuid = strapi.config.get('uuid', false);
     const hasAdmin = await getService('user').exists();
+    const { menuLogo } = await getService('project-settings').getProjectSettings();
+    // set to null if telemetryDisabled flag not avaialble in package.json
+    const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled', null);
 
-    return { data: { uuid, hasAdmin } };
+    if (telemetryDisabled !== null && telemetryDisabled === true) {
+      uuid = false;
+    }
+
+    return {
+      data: {
+        uuid,
+        hasAdmin,
+        menuLogo: menuLogo ? menuLogo.url : null,
+      },
+    };
+  },
+
+  async getProjectSettings() {
+    return getService('project-settings').getProjectSettings();
+  },
+
+  async updateProjectSettings(ctx) {
+    const projectSettingsService = getService('project-settings');
+
+    const {
+      request: { files, body },
+    } = ctx;
+
+    await validateUpdateProjectSettings(body);
+    await validateUpdateProjectSettingsFiles(files);
+
+    const formatedFiles = await projectSettingsService.parseFilesData(files);
+    await validateUpdateProjectSettingsImagesDimensions(formatedFiles);
+
+    return projectSettingsService.updateProjectSettings({ ...body, ...formatedFiles });
+  },
+
+  async telemetryProperties(ctx) {
+    // If the telemetry is disabled, ignore the request and return early
+    if (strapi.telemetry.isDisabled) {
+      ctx.status = 204;
+      return;
+    }
+
+    const useTypescriptOnServer = await isUsingTypeScript(strapi.dirs.app.root);
+    const useTypescriptOnAdmin = await isUsingTypeScript(
+      path.join(strapi.dirs.app.root, 'src', 'admin')
+    );
+
+    return {
+      data: {
+        useTypescriptOnServer,
+        useTypescriptOnAdmin,
+      },
+    };
   },
 
   async information() {
     const currentEnvironment = strapi.config.get('environment');
     const autoReload = strapi.config.get('autoReload', false);
     const strapiVersion = strapi.config.get('info.strapi', null);
+    const dependencies = strapi.config.get('info.dependencies', {});
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
+    const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
 
     return {
-      data: { currentEnvironment, autoReload, strapiVersion, nodeVersion, communityEdition },
+      data: {
+        currentEnvironment,
+        autoReload,
+        strapiVersion,
+        dependencies,
+        nodeVersion,
+        communityEdition,
+        useYarn,
+      },
     };
   },
 
@@ -82,6 +153,7 @@ module.exports = {
       name: plugin.info.name || key,
       displayName: plugin.info.displayName || plugin.info.name || key,
       description: plugin.info.description || '',
+      packageName: plugin.info.packageName,
     }));
 
     ctx.send({ plugins });

@@ -42,7 +42,7 @@ describe('Test Graphql API End to End', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    graphqlQuery = body => {
+    graphqlQuery = (body) => {
       return rq({
         url: '/graphql',
         method: 'POST',
@@ -61,11 +61,11 @@ describe('Test Graphql API End to End', () => {
       { name: 'post 1', bigint: 1316130638171, nullable: 'value', category: 'BLOG' },
       { name: 'post 2', bigint: 1416130639261, nullable: null, category: 'PRODUCT' },
     ];
-    let data = {
+    const data = {
       posts: [],
     };
 
-    test.each(postsPayload)('Create Post %o', async post => {
+    test.each(postsPayload)('Create Post %o', async (post) => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           mutation createPost($data: PostInput!) {
@@ -125,7 +125,7 @@ describe('Test Graphql API End to End', () => {
       expect(body).toMatchObject({
         data: {
           posts: {
-            data: postsPayload.map(entry => ({
+            data: postsPayload.map((entry) => ({
               id: expect.any(String),
               attributes: omit('id', entry),
             })),
@@ -192,7 +192,7 @@ describe('Test Graphql API End to End', () => {
         `,
       });
 
-      const expectedPosts = [...data.posts].reverse().map(entry => ({
+      const expectedPosts = [...data.posts].reverse().map((entry) => ({
         id: expect.any(String),
         attributes: omit('id', entry),
       }));
@@ -294,6 +294,12 @@ describe('Test Graphql API End to End', () => {
       ],
       [
         {
+          category: { eqi: 'Blog' },
+        },
+        [postsPayload[0]],
+      ],
+      [
+        {
           name: { contains: 'post' },
         },
         postsPayload,
@@ -388,12 +394,12 @@ describe('Test Graphql API End to End', () => {
       expect(posts.length).toBe(expected.length);
 
       // all the posts returned are in the expected array
-      posts.map(prop('attributes')).forEach(post => {
+      posts.map(prop('attributes')).forEach((post) => {
         expect(expected.map(omit('id'))).toEqual(expect.arrayContaining([post]));
       });
 
       // all expected values are in the result
-      expected.forEach(expectedPost => {
+      expected.forEach((expectedPost) => {
         expect(posts.map(prop('attributes'))).toEqual(
           expect.arrayContaining([omit('id', expectedPost)])
         );
@@ -481,7 +487,7 @@ describe('Test Graphql API End to End', () => {
     });
 
     test('Delete Posts', async () => {
-      for (let post of data.posts) {
+      for (const post of data.posts) {
         const res = await graphqlQuery({
           query: /* GraphQL */ `
             mutation deletePost($id: ID!) {

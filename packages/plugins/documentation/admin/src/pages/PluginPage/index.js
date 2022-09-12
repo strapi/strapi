@@ -49,7 +49,7 @@ const PluginPage = () => {
     openWithNewTab(`${slash}${data?.prefix}/v${data?.currentVersion}`);
   };
 
-  const handleRegenerateDoc = version => {
+  const handleRegenerateDoc = (version) => {
     regenerateDocMutation.mutate({ version, prefix: data?.prefix });
   };
 
@@ -64,7 +64,7 @@ const PluginPage = () => {
     setIsConfirmButtonLoading(false);
   };
 
-  const handleClickDelete = version => {
+  const handleClickDelete = (version) => {
     setVersionToDelete(version);
     setShowConfirmDelete(!showConfirmDelete);
   };
@@ -123,7 +123,7 @@ const PluginPage = () => {
               <Tbody>
                 {data.docVersions
                   .sort((a, b) => (a.generatedDate < b.generatedDate ? 1 : -1))
-                  .map(doc => (
+                  .map((doc) => (
                     <Tr key={doc.version}>
                       <Td width="50%">
                         <Typography>{doc.version}</Typography>
@@ -167,7 +167,7 @@ const PluginPage = () => {
                                 icon={<Trash />}
                                 label={formatMessage(
                                   {
-                                    id: getTrad('pages.PluginPage.table.icon.delete'),
+                                    id: 'global.delete-target',
                                     defaultMessage: 'Delete {target}',
                                   },
                                   { target: `${doc.version}` }

@@ -16,7 +16,6 @@ import Label from './Label';
 import FieldWrapper from './FieldWrapper';
 
 const WAIT = 600;
-const stringify = JSON.stringify;
 const DEFAULT_THEME = 'blackboard';
 
 const loadCss = async () => {
@@ -80,9 +79,7 @@ class InputJSON extends React.Component {
     try {
       if (value === null) return this.codeMirror.setValue('');
 
-      const nextValue = stringify(value, null, 2);
-
-      return this.codeMirror.setValue(nextValue);
+      return this.codeMirror.setValue(value);
     } catch (err) {
       return this.setState({ error: true });
     }
@@ -90,11 +87,10 @@ class InputJSON extends React.Component {
 
   setSize = () => this.codeMirror.setSize('100%', 'auto');
 
-  getContentAtLine = line => this.codeMirror.getLine(line);
+  getContentAtLine = (line) => this.codeMirror.getLine(line);
 
-  getEditorOption = opt => this.codeMirror.getOption(opt);
-
-  getValue = () => this.codeMirror.getValue();
+  // getEditorOption = (opt) => this.codeMirror.getOption(opt);
+  // getValue = () => this.codeMirror.getValue();
 
   markSelection = ({ message }) => {
     let line = parseInt(message.split(':')[0].split('line ')[1], 10) - 1;
@@ -145,7 +141,7 @@ class InputJSON extends React.Component {
     this.timer = setTimeout(() => this.testJSON(doc.getValue()), WAIT);
   };
 
-  testJSON = value => {
+  testJSON = (value) => {
     try {
       jsonlint.parse(value);
     } catch (err) {
@@ -160,7 +156,7 @@ class InputJSON extends React.Component {
 
     return (
       <FieldWrapper name={this.props.name} hint={this.props.description} error={this.props.error}>
-        <Stack size={1}>
+        <Stack spacing={1}>
           <Label
             intlLabel={this.props.intlLabel}
             labelAction={this.props.labelAction}
@@ -192,7 +188,7 @@ InputJSON.defaultProps = {
   error: undefined,
   intlLabel: undefined,
   labelAction: undefined,
-  onChange: () => {},
+  onChange() {},
   value: null,
   required: false,
 };

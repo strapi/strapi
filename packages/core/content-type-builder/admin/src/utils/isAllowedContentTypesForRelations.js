@@ -1,4 +1,4 @@
-const isAllowedContentTypesForRelations = contentType => {
+const isAllowedContentTypesForRelations = (contentType) => {
   return (
     contentType.kind === 'collectionType' &&
     (contentType.restrictRelationsTo === null ||

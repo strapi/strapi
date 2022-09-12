@@ -40,14 +40,14 @@ const useRoleActions = () => {
   const { push } = useHistory();
 
   const handleGoTo = useCallback(
-    id => {
+    (id) => {
       push(`/settings/roles/${id}`);
     },
     [push]
   );
 
   const handleToggle = useCallback(() => {
-    setIsModalOpen(prev => !prev);
+    setIsModalOpen((prev) => !prev);
   }, []);
 
   const handleToggleModalForCreatingRole = useCallback(() => {
@@ -56,7 +56,7 @@ const useRoleActions = () => {
   }, [trackUsage]);
 
   const getIcons = useCallback(
-    role => [
+    (role) => [
       {
         onClick: handleToggle,
         label: formatMessage({ id: 'app.utils.duplicate', defaultMessage: 'Duplicate' }),
@@ -69,7 +69,7 @@ const useRoleActions = () => {
       },
       {
         onClick: handleToggle,
-        label: formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' }),
+        label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
         icon: <Trash />,
       },
     ],
@@ -89,12 +89,8 @@ const RoleListPage = () => {
   useFocusWhenNavigate();
 
   const { sortedRoles, isLoading } = useSortedRoles();
-  const {
-    isModalOpen,
-    handleToggle,
-    handleToggleModalForCreatingRole,
-    getIcons,
-  } = useRoleActions();
+  const { isModalOpen, handleToggle, handleToggleModalForCreatingRole, getIcons } =
+    useRoleActions();
 
   const rowCount = sortedRoles.length + 1;
   const colCount = 5;
@@ -106,7 +102,7 @@ const RoleListPage = () => {
       <SettingsPageTitle name="Roles" />
       <HeaderLayout
         primaryAction={
-          <Button onClick={handleToggleModalForCreatingRole} startIcon={<Plus />} size="L">
+          <Button onClick={handleToggleModalForCreatingRole} startIcon={<Plus />} size="S">
             {formatMessage({
               id: 'Settings.roles.list.button.add',
               defaultMessage: 'Add new role',
@@ -114,7 +110,7 @@ const RoleListPage = () => {
           </Button>
         }
         title={formatMessage({
-          id: 'Settings.roles.title',
+          id: 'global.roles',
           defaultMessage: 'roles',
         })}
         subtitle={formatMessage({
@@ -140,7 +136,7 @@ const RoleListPage = () => {
               <Th>
                 <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({
-                    id: 'Settings.roles.list.header.name',
+                    id: 'global.name',
                     defaultMessage: 'Name',
                   })}
                 </Typography>
@@ -148,7 +144,7 @@ const RoleListPage = () => {
               <Th>
                 <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({
-                    id: 'Settings.roles.list.header.description',
+                    id: 'global.description',
                     defaultMessage: 'Description',
                   })}
                 </Typography>
@@ -156,7 +152,7 @@ const RoleListPage = () => {
               <Th>
                 <Typography variant="sigma" textColor="neutral600">
                   {formatMessage({
-                    id: 'Settings.roles.list.header.users',
+                    id: 'global.users',
                     defaultMessage: 'Users',
                   })}
                 </Typography>
@@ -164,7 +160,7 @@ const RoleListPage = () => {
               <Th>
                 <VisuallyHidden>
                   {formatMessage({
-                    id: 'Settings.roles.list.header.actions',
+                    id: 'global.actions',
                     defaultMessage: 'Actions',
                   })}
                 </VisuallyHidden>
@@ -172,7 +168,7 @@ const RoleListPage = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {sortedRoles?.map(role => (
+            {sortedRoles?.map((role) => (
               <RoleRow
                 key={role.id}
                 id={role.id}

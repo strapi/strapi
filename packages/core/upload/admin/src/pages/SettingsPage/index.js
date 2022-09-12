@@ -73,7 +73,7 @@ export const SettingsPage = () => {
 
   const isSaveButtonDisabled = isEqual(initialData, modifiedData);
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (isSaveButtonDisabled) {
@@ -133,10 +133,10 @@ export const SettingsPage = () => {
               loading={isSubmiting}
               type="submit"
               startIcon={<Check />}
-              size="L"
+              size="S"
             >
               {formatMessage({
-                id: 'app.components.Button.save',
+                id: 'global.save',
                 defaultMessage: 'Save',
               })}
             </Button>
@@ -151,9 +151,9 @@ export const SettingsPage = () => {
             <LoadingIndicatorPage />
           ) : (
             <Layout>
-              <Stack size={12}>
+              <Stack spacing={12}>
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                  <Stack size={4}>
+                  <Stack spacing={4}>
                     <Flex>
                       <Typography variant="delta" as="h2">
                         {formatMessage({
@@ -186,7 +186,7 @@ export const SettingsPage = () => {
                             id: 'app.components.ToggleCheckbox.on-label',
                             defaultMessage: 'On',
                           })}
-                          onChange={e => {
+                          onChange={(e) => {
                             handleChange({
                               target: { name: 'responsiveDimensions', value: e.target.checked },
                             });
@@ -216,7 +216,7 @@ export const SettingsPage = () => {
                             id: 'app.components.ToggleCheckbox.on-label',
                             defaultMessage: 'On',
                           })}
-                          onChange={e => {
+                          onChange={(e) => {
                             handleChange({
                               target: { name: 'sizeOptimization', value: e.target.checked },
                             });
@@ -246,7 +246,7 @@ export const SettingsPage = () => {
                             id: 'app.components.ToggleCheckbox.on-label',
                             defaultMessage: 'On',
                           })}
-                          onChange={e => {
+                          onChange={(e) => {
                             handleChange({
                               target: { name: 'autoOrientation', value: e.target.checked },
                             });

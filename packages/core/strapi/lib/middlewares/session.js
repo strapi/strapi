@@ -12,14 +12,16 @@ const defaultConfig = {
   signed: true,
   rolling: false,
   renew: false,
-  secure: process.env.NODE_ENV === 'production' ? true : false,
+  secure: process.env.NODE_ENV === 'production',
   sameSite: null,
 };
 
 module.exports = (userConfig, { strapi }) => {
-  const keys = strapi.server.app.keys;
+  const { keys } = strapi.server.app;
   if (!isArray(keys) || isEmpty(keys) || keys.some(isEmpty)) {
-    throw new Error(`App keys are required. Please set app.keys in config/server.js (ex: keys: ['myKeyA', 'myKeyB'])`);
+    throw new Error(
+      `App keys are required. Please set app.keys in config/server.js (ex: keys: ['myKeyA', 'myKeyB'])`
+    );
   }
 
   const config = defaultsDeep(defaultConfig, userConfig);

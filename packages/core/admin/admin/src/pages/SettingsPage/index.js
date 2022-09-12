@@ -47,7 +47,7 @@ function SettingsPage() {
   }
 
   const settingTitle = formatMessage({
-    id: 'app.components.LeftMenuLinkContainer.settings',
+    id: 'global.settings',
     defaultMessage: 'Settings',
   });
 

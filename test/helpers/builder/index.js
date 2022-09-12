@@ -21,7 +21,7 @@ const createTestBuilder = (options = {}) => {
     },
 
     async sanitizedFixtures(strapi) {
-      const fixtures = this.fixtures;
+      const { fixtures } = this;
 
       for (const key of Object.keys(fixtures)) {
         fixtures[key] = await this.sanitizedFixturesFor(key, strapi);

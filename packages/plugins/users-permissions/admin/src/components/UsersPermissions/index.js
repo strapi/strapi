@@ -13,20 +13,20 @@ import init from './init';
 
 const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
   const { formatMessage } = useIntl();
-  const [state, dispatch] = useReducer(reducer, initialState, state =>
+  const [state, dispatch] = useReducer(reducer, initialState, (state) =>
     init(state, permissions, routes)
   );
 
   useImperativeHandle(ref, () => ({
-    getPermissions: () => {
+    getPermissions() {
       return {
         permissions: state.modifiedData,
       };
     },
-    resetForm: () => {
+    resetForm() {
       dispatch({ type: 'ON_RESET' });
     },
-    setFormAfterSubmit: () => {
+    setFormAfterSubmit() {
       dispatch({ type: 'ON_SUBMIT_SUCCEEDED' });
     },
   }));
@@ -45,7 +45,7 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
       value,
     });
 
-  const handleSelectedAction = actionToSelect =>
+  const handleSelectedAction = (actionToSelect) =>
     dispatch({
       type: 'SELECT_ACTION',
       actionToSelect,
@@ -62,8 +62,8 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
     <UsersPermissionsProvider value={providerValue}>
       <Grid gap={0} shadow="filterShadow" hasRadius background="neutral0">
         <GridItem col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
-          <Stack size={6}>
-            <Stack size={2}>
+          <Stack spacing={6}>
+            <Stack spacing={2}>
               <Typography variant="delta" as="h2">
                 {formatMessage({
                   id: getTrad('Plugins.header.title'),

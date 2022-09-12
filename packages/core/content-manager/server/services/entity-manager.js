@@ -1,6 +1,6 @@
 'use strict';
 
-const { assoc, has, prop, omit } = require('lodash/fp');
+const { assoc, has, prop, omit, merge } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 
@@ -28,7 +28,7 @@ const wrapWithEmitEvent = (event, fn) => async (entity, body, model) => {
   return result;
 };
 
-const findCreatorRoles = entity => {
+const findCreatorRoles = (entity) => {
   const createdByPath = `${CREATED_BY_ATTRIBUTE}.id`;
 
   if (has(createdByPath, entity)) {
@@ -40,13 +40,9 @@ const findCreatorRoles = entity => {
 };
 
 // TODO: define when we use this one vs basic populate
-const getDeepPopulate = (uid, populate, depth = 0) => {
+const getDeepPopulate = (uid, populate) => {
   if (populate) {
     return populate;
-  }
-
-  if (depth > 2) {
-    return {};
   }
 
   const { attributes } = strapi.getModel(uid);
@@ -55,25 +51,23 @@ const getDeepPopulate = (uid, populate, depth = 0) => {
     const attribute = attributes[attributeName];
 
     if (attribute.type === 'relation') {
-      populateAcc[attributeName] = attribute.target
-        ? { populate: getDeepPopulate(attribute.target, null, depth + 1) }
-        : true;
+      populateAcc[attributeName] = true; // Only populate first level of relations
     }
 
     if (attribute.type === 'component') {
       populateAcc[attributeName] = {
-        populate: getDeepPopulate(attribute.component, null, depth + 1),
+        populate: getDeepPopulate(attribute.component, null),
       };
     }
 
     if (attribute.type === 'media') {
-      populateAcc[attributeName] = true;
+      populateAcc[attributeName] = { populate: 'folder' };
     }
 
     if (attribute.type === 'dynamiczone') {
       populateAcc[attributeName] = {
         populate: (attribute.components || []).reduce((acc, componentUID) => {
-          return Object.assign(acc, getDeepPopulate(componentUID, null, depth + 1));
+          return merge(acc, getDeepPopulate(componentUID, null));
         }, {}),
       };
     }
@@ -90,7 +84,7 @@ const getBasePopulate = (uid, populate) => {
 
   const { attributes } = strapi.getModel(uid);
 
-  return Object.keys(attributes).filter(attributeName => {
+  return Object.keys(attributes).filter((attributeName) => {
     return ['relation', 'component', 'dynamiczone', 'media'].includes(
       attributes[attributeName].type
     );
@@ -115,7 +109,7 @@ const getCounterPopulate = (uid, populate) => {
   }, {});
 };
 
-const addCreatedByRolesPopulate = populate => {
+const addCreatedByRolesPopulate = (populate) => {
   return {
     ...populate,
     createdBy: {
@@ -149,11 +143,11 @@ module.exports = ({ strapi }) => ({
     return strapi.entityService.findPage(uid, params);
   },
 
-  findWithRelationCounts(opts, uid, populate) {
+  findWithRelationCountsPage(opts, uid, populate) {
     const counterPopulate = addCreatedByRolesPopulate(getCounterPopulate(uid, populate));
     const params = { ...opts, populate: counterPopulate };
 
-    return strapi.entityService.findWithRelationCounts(uid, params);
+    return strapi.entityService.findWithRelationCountsPage(uid, params);
   },
 
   async findOne(id, uid, populate) {

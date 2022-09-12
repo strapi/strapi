@@ -62,7 +62,7 @@ function ComponentCard({ componentUid, intlLabel, icon, onClick }) {
   return (
     <button type="button" onClick={handleClick}>
       <ComponentBox borderRadius="borderRadius">
-        <Stack size={1} style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <Stack spacing={1} style={{ justifyContent: 'center', alignItems: 'center' }}>
           <StyledFontAwesomeIcon icon={icon} />
           <Typography variant="pi" fontWeight="bold" textColor="neutral600">
             {formatMessage(intlLabel)}
@@ -74,8 +74,8 @@ function ComponentCard({ componentUid, intlLabel, icon, onClick }) {
 }
 
 ComponentCard.defaultProps = {
-  icon: 'smile',
-  onClick: () => {},
+  icon: 'dice-d6',
+  onClick() {},
 };
 
 ComponentCard.propTypes = {

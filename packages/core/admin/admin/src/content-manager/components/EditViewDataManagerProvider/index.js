@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
-import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
+import set from 'lodash/set';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Prompt, Redirect } from 'react-router-dom';
@@ -10,10 +14,13 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
+  getYupInnerErrors,
+  getAPIInnerErrors,
 } from '@strapi/helper-plugin';
+
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
-import { cleanData, createYupSchema, getYupInnerErrors } from './utils';
+import { cleanData, createYupSchema } from './utils';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -226,9 +233,14 @@ const EditViewDataManagerProvider = ({
     ({ target: { name, value, type } }, shouldSetInitialValue = false) => {
       let inputValue = value;
 
-      // Empty string is not a valid date,
-      // Set the date to null when it's empty
-      if (type === 'date' && value === '') {
+      // Allow to reset text, textarea, email, uid, select/enum, and number
+      if (
+        ['text', 'textarea', 'string', 'email', 'uid', 'select', 'select-one', 'number'].includes(
+          type
+        ) &&
+        !value &&
+        value !== 0
+      ) {
         inputValue = null;
       }
 
@@ -239,16 +251,6 @@ const EditViewDataManagerProvider = ({
         });
 
         return;
-      }
-
-      // Allow to reset enum
-      if (type === 'select-one' && value === '') {
-        inputValue = null;
-      }
-
-      // Allow to reset number input
-      if (type === 'number' && value === '') {
-        inputValue = null;
       }
 
       dispatch({
@@ -262,7 +264,7 @@ const EditViewDataManagerProvider = ({
   );
 
   const createFormData = useCallback(
-    data => {
+    (data) => {
       // First we need to remove the added keys needed for the dnd
       const preparedData = removeKeyInObject(cloneDeep(data), '__temp_key__');
       // Then we need to apply our helper
@@ -286,34 +288,31 @@ const EditViewDataManagerProvider = ({
   }, [hasDraftAndPublish, shouldNotRunValidations]);
 
   const handleSubmit = useCallback(
-    async e => {
+    async (e) => {
       e.preventDefault();
       let errors = {};
 
-      // First validate the form
       try {
         await yupSchema.validate(modifiedData, { abortEarly: false });
+      } catch (err) {
+        errors = getYupInnerErrors(err);
+      }
 
-        const formData = createFormData(modifiedData);
+      try {
+        if (isEmpty(errors)) {
+          const formData = createFormData(modifiedData);
 
-        if (isCreatingEntry) {
-          onPost(formData, trackerProperty);
-        } else {
-          onPut(formData, trackerProperty);
+          if (isCreatingEntry) {
+            await onPost(formData, trackerProperty);
+          } else {
+            await onPut(formData, trackerProperty);
+          }
         }
       } catch (err) {
-        console.log('ValidationError');
-        console.log(err);
-
-        errors = getYupInnerErrors(err);
-
-        toggleNotification({
-          type: 'warning',
-          message: {
-            id: getTrad('containers.EditView.notification.errors'),
-            defaultMessage: 'The form contains some errors',
-          },
-        });
+        errors = {
+          ...errors,
+          ...getAPIInnerErrors(err, { getTrad }),
+        };
       }
 
       dispatch({
@@ -321,16 +320,7 @@ const EditViewDataManagerProvider = ({
         errors,
       });
     },
-    [
-      createFormData,
-      isCreatingEntry,
-      modifiedData,
-      onPost,
-      onPut,
-      toggleNotification,
-      trackerProperty,
-      yupSchema,
-    ]
+    [createFormData, isCreatingEntry, modifiedData, onPost, onPut, trackerProperty, yupSchema]
   );
 
   const handlePublish = useCallback(async () => {
@@ -345,15 +335,20 @@ const EditViewDataManagerProvider = ({
     let errors = {};
 
     try {
-      // Validate the form using yup
       await schema.validate(modifiedData, { abortEarly: false });
-
-      onPublish();
     } catch (err) {
-      console.error('ValidationError');
-      console.error(err);
-
       errors = getYupInnerErrors(err);
+    }
+
+    try {
+      if (isEmpty(errors)) {
+        await onPublish();
+      }
+    } catch (err) {
+      errors = {
+        ...errors,
+        ...getAPIInnerErrors(err, { getTrad }),
+      };
     }
 
     dispatch({
@@ -363,8 +358,8 @@ const EditViewDataManagerProvider = ({
   }, [allLayoutData, currentContentTypeLayout, isCreatingEntry, modifiedData, onPublish]);
 
   const shouldCheckDZErrors = useCallback(
-    dzName => {
-      const doesDZHaveError = Object.keys(formErrors).some(key => key.split('.')[0] === dzName);
+    (dzName) => {
+      const doesDZHaveError = Object.keys(formErrors).some((key) => key.split('.')[0] === dzName);
       const shouldCheckErrors = !isEmpty(formErrors) && doesDZHaveError;
 
       return shouldCheckErrors;
@@ -418,7 +413,7 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const onRemoveRelation = useCallback(keys => {
+  const onRemoveRelation = useCallback((keys) => {
     dispatch({
       type: 'REMOVE_RELATION',
       keys,
@@ -531,7 +526,7 @@ const EditViewDataManagerProvider = ({
 EditViewDataManagerProvider.defaultProps = {
   from: '/',
   initialValues: null,
-  redirectToPreviousPage: () => {},
+  redirectToPreviousPage() {},
 };
 
 EditViewDataManagerProvider.propTypes = {

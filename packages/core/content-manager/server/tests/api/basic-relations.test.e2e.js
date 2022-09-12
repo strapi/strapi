@@ -8,7 +8,7 @@ let strapi;
 let rq;
 const builder = createTestBuilder();
 
-let data = {
+const data = {
   stamps: [],
   collectors: [],
 };
@@ -110,8 +110,8 @@ const collectorFixtures = ({ stamp }) => [
   },
 ];
 
-const getCollectorByName = (collectors, name) => collectors.find(c => c.name === name);
-const getStampByName = (stamps, name) => stamps.find(s => s.name === name);
+const getCollectorByName = (collectors, name) => collectors.find((c) => c.name === name);
+const getStampByName = (stamps, name) => stamps.find((s) => s.name === name);
 
 describe('CM API', () => {
   beforeAll(async () => {

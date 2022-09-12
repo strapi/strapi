@@ -1,7 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { render, waitFor } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { useGuidedTour } from '@strapi/helper-plugin';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import { ConfigurationsContext } from '../../../contexts';
 import {
   fetchAppInfo,
@@ -11,6 +13,7 @@ import {
 } from '../utils/api';
 import packageJSON from '../../../../../package.json';
 import Theme from '../../Theme';
+import ThemeToggleProvider from '../../ThemeToggleProvider';
 import AuthenticatedApp from '..';
 
 const strapiVersion = packageJSON.version;
@@ -21,18 +24,31 @@ jest.mock('@strapi/helper-plugin', () => ({
   useGuidedTour: jest.fn(() => ({
     setGuidedTourVisibility: jest.fn(),
   })),
+  useNotification: jest.fn(() => ({
+    toggleNotification: jest.fn(),
+  })),
 }));
 
 jest.mock('../utils/api', () => ({
   fetchStrapiLatestRelease: jest.fn(),
   fetchAppInfo: jest.fn(),
   fetchCurrentUserPermissions: jest.fn(),
-  fetchUserRoles: jest.fn(() => [{ code: 'strapi-super-admin' }]),
+  fetchUserRoles: jest.fn(),
 }));
 
-jest.mock('../../PluginsInitializer', () => () => <div>PluginsInitializer</div>);
+jest.mock('../../PluginsInitializer', () => () => {
+  return <div>PluginsInitializer</div>;
+});
 // eslint-disable-next-line react/prop-types
-jest.mock('../../RBACProvider', () => ({ children }) => <div>{children}</div>);
+jest.mock('../../RBACProvider', () => {
+  const Compo = ({ children }) => <div>{children}</div>;
+
+  Compo.propTypes = {
+    children: PropTypes.node.isRequired,
+  };
+
+  return Compo;
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,14 +58,18 @@ const queryClient = new QueryClient({
   },
 });
 
-const app = (
-  <Theme>
-    <QueryClientProvider client={queryClient}>
-      <ConfigurationsContext.Provider value={{ showReleaseNotification: false }}>
-        <AuthenticatedApp />
-      </ConfigurationsContext.Provider>
-    </QueryClientProvider>
-  </Theme>
+const configurationContextValue = { showReleaseNotification: false };
+
+const App = () => (
+  <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+    <Theme>
+      <QueryClientProvider client={queryClient}>
+        <ConfigurationsContext.Provider value={configurationContextValue}>
+          <AuthenticatedApp />
+        </ConfigurationsContext.Provider>
+      </QueryClientProvider>
+    </Theme>
+  </ThemeToggleProvider>
 );
 
 describe('Admin | components | AuthenticatedApp', () => {
@@ -74,10 +94,14 @@ describe('Admin | components | AuthenticatedApp', () => {
     );
     fetchCurrentUserPermissions.mockImplementation(() => Promise.resolve([]));
 
-    const { container } = render(app);
+    const { container } = render(<App />);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c0 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -89,10 +113,6 @@ describe('Admin | components | AuthenticatedApp', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c2 {
@@ -140,26 +160,27 @@ describe('Admin | components | AuthenticatedApp', () => {
   });
 
   it('should not fetch the latest release', () => {
-    render(app);
+    render(<App />);
 
     expect(fetchStrapiLatestRelease).not.toHaveBeenCalled();
   });
 
-  it('should call setGuidedTourVisibility when user is super admin', async () => {
-    const setGuidedTourVisibility = jest.fn();
-    useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
-    render(app);
-
-    await waitFor(() => expect(setGuidedTourVisibility).toHaveBeenCalledWith(true));
-  });
-
-  it.only('should not setGuidedTourVisibility when user is not super admin', async () => {
-    fetchUserRoles.mockImplementation(() => [{ code: 'strapi-editor' }]);
+  it('should not setGuidedTourVisibility when user is not super admin', async () => {
+    fetchUserRoles.mockImplementationOnce(() => [{ code: 'strapi-editor' }]);
     const setGuidedTourVisibility = jest.fn();
     useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
 
-    render(app);
+    render(<App />);
 
     await waitFor(() => expect(setGuidedTourVisibility).not.toHaveBeenCalled());
+  });
+
+  it('should call setGuidedTourVisibility when user is super admin', async () => {
+    fetchUserRoles.mockImplementationOnce(() => [{ code: 'strapi-super-admin' }]);
+    const setGuidedTourVisibility = jest.fn();
+    useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
+    render(<App />);
+
+    await waitFor(() => expect(setGuidedTourVisibility).toHaveBeenCalledWith(true));
   });
 });

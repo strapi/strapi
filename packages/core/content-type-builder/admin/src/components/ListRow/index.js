@@ -92,7 +92,7 @@ function ListRow({
     >
       <td style={{ position: 'relative' }}>
         {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
-        <Stack paddingLeft={2} size={4} horizontal>
+        <Stack paddingLeft={2} spacing={4} horizontal>
           <AttributeIcon key={src} type={src} />
           <Typography fontWeight="bold">{name}</Typography>
         </Stack>
@@ -136,20 +136,20 @@ function ListRow({
         {isInDevelopmentMode ? (
           <Flex justifyContent="flex-end" {...stopPropagation}>
             {configurable ? (
-              <Stack horizontal size={1}>
+              <Stack horizontal spacing={1}>
                 {!isMorph && (
                   <IconButton
                     onClick={handleClick}
                     label={`${formatMessage({
                       id: 'app.utils.edit',
-                      formatMessage: 'Edit',
+                      defaultMessage: 'Edit',
                     })} ${name}`}
                     noBorder
                     icon={<Pencil />}
                   />
                 )}
                 <IconButton
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
                     removeAttribute(
                       editTarget,
@@ -158,7 +158,7 @@ function ListRow({
                     );
                   }}
                   label={`${formatMessage({
-                    id: 'app.utils.delete',
+                    id: 'global.delete',
                     defaultMessage: 'Delete',
                   })} ${name}`}
                   noBorder
@@ -186,7 +186,7 @@ ListRow.defaultProps = {
   configurable: true,
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
-  onClick: () => {},
+  onClick() {},
   relation: '',
   repeatable: false,
   secondLoopComponentUid: null,

@@ -10,7 +10,7 @@ const initialState = {
     {
       icon: Puzzle,
       intlLabel: {
-        id: 'app.components.LeftMenuLinkContainer.listPlugins',
+        id: 'global.plugins',
         defaultMessage: 'Plugins',
       },
       to: '/list-plugins',
@@ -19,7 +19,7 @@ const initialState = {
     {
       icon: ShoppingCart,
       intlLabel: {
-        id: 'app.components.LeftMenuLinkContainer.installNewPlugin',
+        id: 'global.marketplace',
         defaultMessage: 'Marketplace',
       },
       to: '/marketplace',
@@ -28,7 +28,7 @@ const initialState = {
     {
       icon: Cog,
       intlLabel: {
-        id: 'app.components.LeftMenuLinkContainer.settings',
+        id: 'global.settings',
         defaultMessage: 'Settings',
       },
       to: '/settings',
@@ -43,7 +43,7 @@ const initialState = {
 };
 
 const reducer = (state = initialState, action) =>
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'SET_SECTION_LINKS': {
         const { authorizedGeneralSectionLinks, authorizedPluginSectionLinks } = action.data;

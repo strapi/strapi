@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { Portal } from '@strapi/design-system/Portal';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { IconButton } from '@strapi/design-system/IconButton';
-import { LinkButton } from '@strapi/design-system/LinkButton';
+import { LinkButton } from '@strapi/design-system/v2/LinkButton';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
@@ -73,7 +73,7 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
       <UpgradeWrapper onClick={onClose}>
         <FocusTrap onEscape={onClose}>
           <UpgradeContainer
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             aria-labelledby="upgrade-plan"
             background="neutral0"
             hasRadius
@@ -82,14 +82,14 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
             <CloseButtonContainer>
               <IconButton onClick={onClose} aria-label="Close" icon={<Cross />} />
             </CloseButtonContainer>
-            <StackFlexStart size={6}>
+            <StackFlexStart spacing={6}>
               <Typography fontWeight="bold" textColor="primary600">
                 {formatMessage({
                   id: 'app.components.UpgradePlanModal.text-ce',
                   defaultMessage: 'COMMUNITY EDITION',
                 })}
               </Typography>
-              <Stack size={2}>
+              <Stack spacing={2}>
                 <Typography variant="alpha" as="h2" id="upgrade-plan">
                   {formatMessage({
                     id: 'app.components.UpgradePlanModal.limit-reached',
@@ -104,7 +104,11 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
                   })}
                 </Typography>
               </Stack>
-              <LinkButton href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
+              <LinkButton
+                href="https://strapi.io/pricing-self-hosted"
+                isExternal
+                endIcon={<ExternalLink />}
+              >
                 {formatMessage({
                   id: 'app.components.UpgradePlanModal.button',
                   defaultMessage: 'Learn more',

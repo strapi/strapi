@@ -7,18 +7,18 @@ const urlJoin = require('url-join');
 const { getService } = require('../utils');
 
 const DEFAULT_PERMISSIONS = [
-  { action: 'plugin::users-permissions.auth.admincallback', roleType: 'public' },
-  { action: 'plugin::users-permissions.auth.adminregister', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.callback', roleType: 'public' },
-  { action: 'plugin::users-permissions.auth.connect', roleType: null },
-  { action: 'plugin::users-permissions.auth.forgotpassword', roleType: 'public' },
-  { action: 'plugin::users-permissions.auth.resetpassword', roleType: 'public' },
+  { action: 'plugin::users-permissions.auth.connect', roleType: 'public' },
+  { action: 'plugin::users-permissions.auth.forgotPassword', roleType: 'public' },
+  { action: 'plugin::users-permissions.auth.resetPassword', roleType: 'public' },
   { action: 'plugin::users-permissions.auth.register', roleType: 'public' },
-  { action: 'plugin::users-permissions.auth.emailconfirmation', roleType: 'public' },
-  { action: 'plugin::users-permissions.user.me', roleType: null },
+  { action: 'plugin::users-permissions.auth.emailConfirmation', roleType: 'public' },
+  { action: 'plugin::users-permissions.auth.sendEmailConfirmation', roleType: 'public' },
+  { action: 'plugin::users-permissions.user.me', roleType: 'authenticated' },
+  { action: 'plugin::users-permissions.auth.changePassword', roleType: 'authenticated' },
 ];
 
-const transformRoutePrefixFor = pluginName => route => {
+const transformRoutePrefixFor = (pluginName) => (route) => {
   const prefix = route.config && route.config.prefix;
   const path = prefix !== undefined ? `${prefix}${route.path}` : `/${pluginName}${route.path}`;
 
@@ -32,7 +32,7 @@ module.exports = ({ strapi }) => ({
   getActions({ defaultEnable = false } = {}) {
     const actionMap = {};
 
-    const isContentApi = action => {
+    const isContentApi = (action) => {
       if (!_.has(action, Symbol.for('__type__'))) {
         return false;
       }
@@ -101,20 +101,20 @@ module.exports = ({ strapi }) => ({
     const routesMap = {};
 
     _.forEach(strapi.api, (api, apiName) => {
-      const routes = _.flatMap(api.routes, route => {
+      const routes = _.flatMap(api.routes, (route) => {
         if (_.has(route, 'routes')) {
           return route.routes;
         }
 
         return route;
-      }).filter(route => route.info.type === 'content-api');
+      }).filter((route) => route.info.type === 'content-api');
 
       if (routes.length === 0) {
         return;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
-      routesMap[`api::${apiName}`] = routes.map(route => ({
+      routesMap[`api::${apiName}`] = routes.map((route) => ({
         ...route,
         path: urlJoin(apiPrefix, route.path),
       }));
@@ -123,20 +123,20 @@ module.exports = ({ strapi }) => ({
     _.forEach(strapi.plugins, (plugin, pluginName) => {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
-      const routes = _.flatMap(plugin.routes, route => {
+      const routes = _.flatMap(plugin.routes, (route) => {
         if (_.has(route, 'routes')) {
           return route.routes.map(transformPrefix);
         }
 
         return transformPrefix(route);
-      }).filter(route => route.info.type === 'content-api');
+      }).filter((route) => route.info.type === 'content-api');
 
       if (routes.length === 0) {
         return;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
-      routesMap[`plugin::${pluginName}`] = routes.map(route => ({
+      routesMap[`plugin::${pluginName}`] = routes.map((route) => ({
         ...route,
         path: urlJoin(apiPrefix, route.path),
       }));
@@ -153,7 +153,7 @@ module.exports = ({ strapi }) => ({
 
     const appActions = _.flatMap(strapi.api, (api, apiName) => {
       return _.flatMap(api.controllers, (controller, controllerName) => {
-        return _.keys(controller).map(actionName => {
+        return _.keys(controller).map((actionName) => {
           return `api::${apiName}.${controllerName}.${actionName}`;
         });
       });
@@ -161,7 +161,7 @@ module.exports = ({ strapi }) => ({
 
     const pluginsActions = _.flatMap(strapi.plugins, (plugin, pluginName) => {
       return _.flatMap(plugin.controllers, (controller, controllerName) => {
-        return _.keys(controller).map(actionName => {
+        return _.keys(controller).map((actionName) => {
           return `plugin::${pluginName}.${controllerName}.${actionName}`;
         });
       });
@@ -172,7 +172,7 @@ module.exports = ({ strapi }) => ({
     const toDelete = _.difference(permissionsFoundInDB, allActions);
 
     await Promise.all(
-      toDelete.map(action => {
+      toDelete.map((action) => {
         return strapi.query('plugin::users-permissions.permission').delete({ where: { action } });
       })
     );
@@ -186,7 +186,7 @@ module.exports = ({ strapi }) => ({
         )(DEFAULT_PERMISSIONS);
 
         await Promise.all(
-          toCreate.map(action => {
+          toCreate.map((action) => {
             return strapi.query('plugin::users-permissions.permission').create({
               data: {
                 action,

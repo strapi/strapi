@@ -12,7 +12,7 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { DraftAndPublishBadge } from '../index';
 
-const makeApp = props => (
+const makeApp = (props) => (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{}} defaultLocale="en">
       <DraftAndPublishBadge {...props} />
@@ -45,6 +45,10 @@ describe('<DraftAndPublishBadge />', () => {
       }
 
       .c1 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -52,10 +56,6 @@ describe('<DraftAndPublishBadge />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c4 {
@@ -145,6 +145,10 @@ describe('<DraftAndPublishBadge />', () => {
       }
 
       .c1 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -152,10 +156,6 @@ describe('<DraftAndPublishBadge />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c4 {

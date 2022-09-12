@@ -48,18 +48,13 @@ describe('Content Type Builder - Components', () => {
                 path: ['component', 'displayName'],
               },
               {
-                message: 'icon.required',
-                name: 'ValidationError',
-                path: ['component', 'icon'],
-              },
-              {
                 message: 'category.required',
                 name: 'ValidationError',
                 path: ['component', 'category'],
               },
             ],
           },
-          message: '4 errors occurred',
+          message: '3 errors occurred',
           name: 'ValidationError',
         },
       });
@@ -139,7 +134,7 @@ describe('Content Type Builder - Components', () => {
         data: expect.any(Array),
       });
 
-      res.body.data.forEach(el => {
+      res.body.data.forEach((el) => {
         expect(el).toMatchObject({
           uid: expect.any(String),
           schema: expect.objectContaining({
@@ -243,18 +238,13 @@ describe('Content Type Builder - Components', () => {
                 path: ['component', 'displayName'],
               },
               {
-                message: 'icon.required',
-                name: 'ValidationError',
-                path: ['component', 'icon'],
-              },
-              {
                 message: 'category.required',
                 name: 'ValidationError',
                 path: ['component', 'category'],
               },
             ],
           },
-          message: '3 errors occurred',
+          message: '2 errors occurred',
           name: 'ValidationError',
         },
       });

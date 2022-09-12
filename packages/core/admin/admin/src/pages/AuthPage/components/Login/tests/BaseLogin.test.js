@@ -8,6 +8,12 @@ import * as yup from 'yup';
 import { createMemoryHistory } from 'history';
 import BaseLogin from '../BaseLogin';
 
+jest.mock('../../../../../hooks/useConfigurations', () => () => ({
+  logos: {
+    auth: { custom: 'customAuthLogo.png', default: 'defaultAuthLogo.png' },
+  },
+}));
+
 describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
   it('should render and match the snapshot', () => {
     const history = createMemoryHistory();
@@ -41,132 +47,18 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         padding-bottom: 32px;
       }
 
-      .c34 {
+      .c37 {
         padding-top: 16px;
       }
 
-      .c10 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c10 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c10 > * + * {
-        margin-top: 24px;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c3 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c33 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c36 {
-        color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
       .c35 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        position: relative;
-        outline: none;
-      }
-
-      .c35 svg path {
-        fill: #4945ff;
-      }
-
-      .c35 svg {
-        font-size: 0.625rem;
-      }
-
-      .c35:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c35:focus-visible {
-        outline: none;
-      }
-
-      .c35:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c32 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c29 {
+      .c32 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -180,21 +72,21 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         outline: none;
       }
 
-      .c29 svg {
+      .c32 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c29 svg > g,
-      .c29 svg path {
+      .c32 svg > g,
+      .c32 svg path {
         fill: #ffffff;
       }
 
-      .c29[aria-disabled='true'] {
+      .c32[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c29:after {
+      .c32:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -209,11 +101,11 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         border: 2px solid transparent;
       }
 
-      .c29:focus-visible {
+      .c32:focus-visible {
         outline: none;
       }
 
-      .c29:focus-visible:after {
+      .c32:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -224,16 +116,14 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         border: 2px solid #4945ff;
       }
 
-      .c30 {
+      .c33 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
         border: 1px solid #4945ff;
-        background: #4945ff;
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -245,7 +135,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         width: 100%;
       }
 
-      .c30 .sc-ksdxgE {
+      .c33 .sc-eCImPb {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -256,71 +146,190 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         align-items: center;
       }
 
-      .c30 .c31 {
+      .c33 .c34 {
         color: #ffffff;
       }
 
-      .c30[aria-disabled='true'] {
+      .c33[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c30[aria-disabled='true'] .c31 {
+      .c33[aria-disabled='true'] .c34 {
         color: #666687;
       }
 
-      .c30[aria-disabled='true'] svg > g,
-      .c30[aria-disabled='true'] svg path {
+      .c33[aria-disabled='true'] svg > g,
+      .c33[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c30[aria-disabled='true']:active {
+      .c33[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c30[aria-disabled='true']:active .c31 {
+      .c33[aria-disabled='true']:active .c34 {
         color: #666687;
       }
 
-      .c30[aria-disabled='true']:active svg > g,
-      .c30[aria-disabled='true']:active svg path {
+      .c33[aria-disabled='true']:active svg > g,
+      .c33[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c30:hover {
+      .c33:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c30:active {
+      .c33:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c13 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
+      .c33 svg > g,
+      .c33 svg path {
+        fill: #ffffff;
       }
 
-      .c14 {
-        color: #d02b20;
+      .c30 {
+        margin: 0;
+        height: 18px;
+        min-width: 18px;
+        border-radius: 4px;
+        border: 1px solid #c0c0cf;
+        -webkit-appearance: none;
+        background-color: #ffffff;
+        cursor: pointer;
+      }
+
+      .c30:checked {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c30:checked:after {
+        content: '';
+        display: block;
+        position: relative;
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
+        width: 10px;
+        height: 10px;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c30:checked:disabled:after {
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
+      }
+
+      .c30:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c30:indeterminate {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c30:indeterminate:after {
+        content: '';
+        display: block;
+        position: relative;
+        color: white;
+        height: 2px;
+        width: 10px;
+        background-color: #ffffff;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c30:indeterminate:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c30:indeterminate:disabled:after {
+        background-color: #8e8ea9;
+      }
+
+      .c31 {
+        padding-left: 8px;
+      }
+
+      .c26 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c27 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c27 > * + * {
+        margin-top: 4px;
+      }
+
+      .c28 {
+        color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c15 {
-        line-height: 0;
+      .c29 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
       }
 
-      .c21 {
-        padding-right: 12px;
-        padding-left: 8px;
+      .c29 * {
+        cursor: pointer;
       }
 
-      .c12 {
+      .c24 {
+        border: none;
+        background: transparent;
+        font-size: 1.6rem;
+        width: auto;
+        padding: 0;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c3 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -328,13 +337,13 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c36 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c16 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -342,119 +351,17 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
       }
 
-      .c18 {
-        border: none;
-        border-radius: 4px;
-        padding-left: 16px;
-        padding-right: 16px;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-      }
-
-      .c18::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c18::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c18:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c18::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c18[aria-disabled='true'] {
-        background: inherit;
-        color: inherit;
-      }
-
-      .c18:focus {
-        outline: none;
-        box-shadow: none;
-      }
-
-      .c19 {
-        border: none;
-        border-radius: 4px;
-        padding-left: 16px;
-        padding-right: 0;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-      }
-
-      .c19::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c19::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c19:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c19::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c19[aria-disabled='true'] {
-        background: inherit;
-        color: inherit;
-      }
-
-      .c19:focus {
-        outline: none;
-        box-shadow: none;
-      }
-
-      .c17 {
-        border: 1px solid #dcdce4;
-        border-radius: 4px;
-        background: #ffffff;
-        height: 2.5rem;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c17:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c11 {
+      .c10 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -470,82 +377,19 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
       }
 
       .c11 > * + * {
-        margin-top: 4px;
+        margin-top: 24px;
       }
 
-      .c27 {
-        margin: 0;
-        height: 18px;
-        min-width: 18px;
-        border-radius: 4px;
-        border: 1px solid #c0c0cf;
-        -webkit-appearance: none;
-        background-color: #ffffff;
-        cursor: pointer;
-      }
-
-      .c27:checked {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c27:checked:after {
-        content: '';
-        display: block;
-        position: relative;
-        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
-        width: 10px;
-        height: 10px;
-        left: 50%;
-        top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
-        transform: translateX(-50%) translateY(-50%);
-      }
-
-      .c27:checked:disabled:after {
-        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
-      }
-
-      .c27:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
-      }
-
-      .c27:indeterminate {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c27:indeterminate:after {
-        content: '';
-        display: block;
-        position: relative;
-        color: white;
-        height: 2px;
-        width: 10px;
-        background-color: #ffffff;
-        left: 50%;
-        top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
-        transform: translateX(-50%) translateY(-50%);
-      }
-
-      .c27:indeterminate:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
-      }
-
-      .c27:indeterminate:disabled:after {
-        background-color: #8e8ea9;
-      }
-
-      .c28 {
+      .c23 {
+        padding-right: 12px;
         padding-left: 8px;
       }
 
-      .c24 {
+      .c12 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -555,34 +399,167 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         flex-direction: column;
       }
 
-      .c24 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c24 > * + * {
-        margin-top: 4px;
-      }
-
-      .c25 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c26 {
+      .c15 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-align-items: flex-start;
-        -webkit-box-align: flex-start;
-        -ms-flex-align: flex-start;
-        align-items: flex-start;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
-      .c26 * {
-        cursor: pointer;
+      .c18 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c14 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c16 {
+        color: #d02b20;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c17 {
+        line-height: 0;
+      }
+
+      .c20 {
+        border: none;
+        border-radius: 4px;
+        padding-bottom: 0.65625rem;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 0.65625rem;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+        background: inherit;
+      }
+
+      .c20::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c20::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c20:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c20::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c20[aria-disabled='true'] {
+        color: inherit;
+      }
+
+      .c20:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c21 {
+        border: none;
+        border-radius: 4px;
+        padding-bottom: 0.65625rem;
+        padding-left: 16px;
+        padding-right: 0;
+        padding-top: 0.65625rem;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+        background: inherit;
+      }
+
+      .c21::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c21::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c21:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c21::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c21[aria-disabled='true'] {
+        color: inherit;
+      }
+
+      .c21:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c19 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        background: #ffffff;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c19:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c13 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c13 > * + * {
+        margin-top: 4px;
       }
 
       .c7 {
@@ -598,20 +575,67 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         line-height: 1.5;
       }
 
-      .c22 {
-        border: none;
-        background: transparent;
-        font-size: 1.6rem;
-        width: auto;
-        padding: 0;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
+      .c39 {
+        color: #4945ff;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c38 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c38 svg path {
+        fill: #4945ff;
+      }
+
+      .c38 svg {
+        font-size: 0.625rem;
+      }
+
+      .c38:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c38:focus-visible {
+        outline: none;
+      }
+
+      .c38:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c0:focus-visible {
+        outline: none;
       }
 
       .c2 {
@@ -629,16 +653,16 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         height: 4.5rem;
       }
 
-      .c23 svg {
+      .c25 svg {
         height: 1rem;
         width: 1rem;
       }
 
-      .c23 svg path {
+      .c25 svg path {
         fill: #666687;
       }
 
-      .c20::-ms-reveal {
+      .c22::-ms-reveal {
         display: none;
       }
 
@@ -662,6 +686,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                 alt=""
                 aria-hidden="true"
                 class="c5"
+                src="defaultAuthLogo.png"
               />
               <div
                 class="c6"
@@ -683,36 +708,38 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               </div>
             </div>
             <div
-              class="c10"
+              class="c10 c11"
+              spacing="6"
             >
               <div>
                 <div>
                   <div
-                    class="c11"
+                    class="c12 c13"
+                    spacing="1"
                   >
-                    <div
-                      class="c12"
+                    <label
+                      class="c14"
+                      for="textinput-1"
+                      required=""
                     >
-                      <label
-                        class="c13"
-                        for="textinput-1"
-                        required=""
+                      <div
+                        class="c15"
                       >
                         Email
                         <span
-                          class="c14 c15"
+                          class="c16 c17"
                         >
                           *
                         </span>
-                      </label>
-                    </div>
+                      </div>
+                    </label>
                     <div
-                      class="c16 c17"
+                      class="c18 c19"
                     >
                       <input
                         aria-disabled="false"
                         aria-invalid="false"
-                        class="c18"
+                        class="c20"
                         id="textinput-1"
                         name="email"
                         placeholder="kai@doe.com"
@@ -725,42 +752,43 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               <div>
                 <div>
                   <div
-                    class="c11"
+                    class="c12 c13"
+                    spacing="1"
                   >
-                    <div
-                      class="c12"
+                    <label
+                      class="c14"
+                      for="textinput-2"
+                      required=""
                     >
-                      <label
-                        class="c13"
-                        for="textinput-2"
-                        required=""
+                      <div
+                        class="c15"
                       >
                         Password
                         <span
-                          class="c14 c15"
+                          class="c16 c17"
                         >
                           *
                         </span>
-                      </label>
-                    </div>
+                      </div>
+                    </label>
                     <div
-                      class="c16 c17"
+                      class="c18 c19"
                     >
                       <input
                         aria-disabled="false"
                         aria-invalid="false"
-                        class="c19 c20"
+                        class="c21 c22"
                         id="textinput-2"
                         name="password"
                         type="password"
                         value=""
                       />
                       <div
-                        class="c21"
+                        class="c23"
                       >
                         <button
                           aria-label="Hide password"
-                          class="c22 c23"
+                          class="c24 c25"
                           type="button"
                         >
                           <svg
@@ -783,20 +811,21 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               </div>
               <div>
                 <div
-                  class="c24"
+                  class="c26 c27"
+                  spacing="1"
                 >
                   <label
-                    class="c25 c26"
+                    class="c28 c29"
                   >
                     <input
                       aria-label="rememberMe"
-                      class="c27"
+                      class="c30"
                       id="checkbox-1"
                       name="rememberMe"
                       type="checkbox"
                     />
                     <div
-                      class="c28"
+                      class="c31"
                     >
                       Remember me
                     </div>
@@ -805,11 +834,11 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               </div>
               <button
                 aria-disabled="false"
-                class="c29 c30"
+                class="c32 c33"
                 type="submit"
               >
                 <span
-                  class="c31 c32"
+                  class="c34 c35"
                 >
                   Login
                 </span>
@@ -818,17 +847,17 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
           </form>
         </div>
         <div
-          class="c33"
+          class="c36"
         >
           <div
-            class="c34"
+            class="c37"
           >
             <a
-              class="c35"
+              class="c38"
               href="/auth/forgot-password"
             >
               <span
-                class="c36"
+                class="c39"
               >
                 Forgot your password?
               </span>

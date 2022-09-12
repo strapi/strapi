@@ -12,7 +12,12 @@ import SearchAsset from '../index';
 
 const handleChange = jest.fn();
 
-const makeApp = queryValue => (
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+}));
+
+const makeApp = (queryValue) => (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en">
       <SearchAsset onChangeSearch={handleChange} queryValue={queryValue} />

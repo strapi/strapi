@@ -8,7 +8,7 @@ const { addNamespace, hasNamespace } = require('../utils');
  * @typedef {import('./services').ServiceFactory} ServiceFactory
  */
 
-const servicesRegistry = strapi => {
+const servicesRegistry = (strapi) => {
   const services = {};
   const instantiatedServices = {};
 
@@ -48,7 +48,7 @@ const servicesRegistry = strapi => {
 
       // create lazy accessor to avoid instantiating the services;
       const map = {};
-      for (const uid in filteredServices) {
+      for (const uid of Object.keys(filteredServices)) {
         Object.defineProperty(map, uid, {
           enumerable: true,
           get: () => {
@@ -78,7 +78,7 @@ const servicesRegistry = strapi => {
      * @returns
      */
     add(namespace, newServices) {
-      for (const serviceName in newServices) {
+      for (const serviceName of Object.keys(newServices)) {
         const service = newServices[serviceName];
         const uid = addNamespace(serviceName, namespace);
 

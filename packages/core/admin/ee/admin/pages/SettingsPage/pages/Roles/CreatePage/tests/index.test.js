@@ -9,19 +9,11 @@ import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { Router, Switch, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import moment from 'moment';
+import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../../../../admin/src/components/Theme';
+import ThemeToggleProvider from '../../../../../../../../admin/src/components/ThemeToggleProvider';
 
 import { CreatePage } from '../index';
-
-jest.mock('moment', () => {
-  const mMoment = {
-    format: jest.fn().mockReturnThis(),
-    valueOf: jest.fn(),
-  };
-
-  return jest.fn(() => mMoment);
-});
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -30,33 +22,41 @@ jest.mock('@strapi/helper-plugin', () => ({
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
-const makeApp = history => (
+const makeApp = (history) => (
   <IntlProvider
     messages={{ 'Settings.roles.form.created': 'Created' }}
     textComponent="span"
     locale="en"
     defaultLocale="en"
   >
-    <Theme>
-      <Router history={history}>
-        <Switch>
-          <Route path="/settings/roles/duplicate/:id">
-            <CreatePage />
-          </Route>
-          <Route path="/settings/roles/new">
-            <CreatePage />
-          </Route>
-        </Switch>
-      </Router>
-    </Theme>
+    <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+      <Theme>
+        <Router history={history}>
+          <Switch>
+            <Route path="/settings/roles/duplicate/:id">
+              <CreatePage />
+            </Route>
+            <Route path="/settings/roles/new">
+              <CreatePage />
+            </Route>
+          </Switch>
+        </Router>
+      </Theme>
+    </ThemeToggleProvider>
   </IntlProvider>
 );
 
 describe('<CreatePage />', () => {
+  beforeAll(() => {
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(new Date(2020, 3, 1));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   it('renders and matches the snapshot', () => {
-    moment()
-      .format.mockReturnValueOnce('2021–01–30T12:34:56+00:00')
-      .mockReturnValueOnce('01–30-2021');
     const history = createMemoryHistory();
     const App = makeApp(history);
     const { container } = render(App);

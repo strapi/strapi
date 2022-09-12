@@ -51,16 +51,10 @@ const formsAPI = {
     contentType.form.advanced.push(advanced);
     contentType.form.base.push(base);
   },
-  extendFields(
-    fields,
-    {
-      validator,
-      form: { advanced, base },
-    }
-  ) {
+  extendFields(fields, { validator, form: { advanced, base } }) {
     const formType = this.types.attribute;
 
-    fields.forEach(field => {
+    fields.forEach((field) => {
       if (!formType[field]) {
         formType[field] = {
           validators: [],
@@ -73,11 +67,10 @@ const formsAPI = {
             ],
           },
         };
-
-        formType[field].validators.push(validator);
-        formType[field].form.advanced.push(advanced);
-        formType[field].form.base.push(base);
       }
+      formType[field].validators.push(validator);
+      formType[field].form.advanced.push(advanced);
+      formType[field].form.base.push(base);
     });
   },
   getAdvancedForm(target, props = null) {
@@ -109,7 +102,7 @@ const formsAPI = {
 
     const refData = cloneDeep(initialData);
 
-    this.contentTypeSchemaMutations.forEach(cb => {
+    this.contentTypeSchemaMutations.forEach((cb) => {
       enhancedData = cb(enhancedData, refData);
     });
 

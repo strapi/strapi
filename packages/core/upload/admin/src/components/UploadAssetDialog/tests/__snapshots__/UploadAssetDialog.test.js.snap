@@ -13,6 +13,299 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   width: 1px;
 }
 
+.c10 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-left: 40px;
+}
+
+.c19 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
+}
+
+.c20 {
+  background: #f6f6f9;
+  padding-top: 64px;
+  padding-bottom: 64px;
+  border-radius: 4px;
+  border-color: #c0c0cf;
+  border: 1px solid #c0c0cf;
+  position: relative;
+}
+
+.c26 {
+  padding-top: 12px;
+  padding-bottom: 20px;
+}
+
+.c28 {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  z-index: 1;
+  width: 100%;
+}
+
+.c30 {
+  position: relative;
+}
+
+.c34 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c31 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c31 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c31 svg > g,
+.c31 svg path {
+  fill: #ffffff;
+}
+
+.c31[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c31:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c31:focus-visible {
+  outline: none;
+}
+
+.c31:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c32 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c32 .sc-ezHhwS {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c32 .c33 {
+  color: #ffffff;
+}
+
+.c32[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c32[aria-disabled='true'] .c33 {
+  color: #666687;
+}
+
+.c32[aria-disabled='true'] svg > g,
+.c32[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c32[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c32[aria-disabled='true']:active .c33 {
+  color: #666687;
+}
+
+.c32[aria-disabled='true']:active svg > g,
+.c32[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c32:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c32:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c32 svg > g,
+.c32 svg path {
+  fill: #ffffff;
+}
+
+.c38 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c38 .sc-ezHhwS {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c38 .c33 {
+  color: #ffffff;
+}
+
+.c38[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c38[aria-disabled='true'] .c33 {
+  color: #666687;
+}
+
+.c38[aria-disabled='true'] svg > g,
+.c38[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c38[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c38[aria-disabled='true']:active .c33 {
+  color: #666687;
+}
+
+.c38[aria-disabled='true']:active svg > g,
+.c38[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c38:hover {
+  background-color: #f6f6f9;
+}
+
+.c38:active {
+  background-color: #eaeaef;
+}
+
+.c38 .c33 {
+  color: #32324d;
+}
+
+.c38 svg > g,
+.c38 svg path {
+  fill: #32324d;
+}
+
+.c22 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c23 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c7 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c27 {
+  color: #666687;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
 .c2 {
   background: #ffffff;
   border-radius: 4px;
@@ -31,7 +324,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   position: fixed;
   z-index: 4;
   inset: 0;
-  background: rgb(220,220,228,0.8);
+  background: #32324d1F;
   padding: 0 40px;
   display: -webkit-box;
   display: -webkit-flex;
@@ -52,6 +345,10 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
 }
 
 .c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -63,13 +360,13 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
+}
+
+.c36 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c36 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -77,10 +374,6 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
 .c8 {
@@ -195,20 +488,6 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   margin-left: 8px;
 }
 
-.c7 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c27 {
-  color: #666687;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
 .c17 {
   background: #eaeaef;
 }
@@ -217,48 +496,6 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   height: 1px;
   border: none;
   margin: 0;
-}
-
-.c10 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-left: 40px;
-}
-
-.c19 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
-}
-
-.c20 {
-  background: #f6f6f9;
-  padding-top: 64px;
-  padding-bottom: 64px;
-  border-radius: 4px;
-  border-color: #c0c0cf;
-  border: 1px solid #c0c0cf;
-  position: relative;
-}
-
-.c26 {
-  padding-top: 12px;
-  padding-bottom: 20px;
-}
-
-.c28 {
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
-  z-index: 1;
-  width: 100%;
-}
-
-.c30 {
-  position: relative;
 }
 
 .c14 {
@@ -293,240 +530,6 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   cursor: not-allowed;
 }
 
-.c34 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c31 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c31 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c31 svg > g,
-.c31 svg path {
-  fill: #ffffff;
-}
-
-.c31[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c31:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c31:focus-visible {
-  outline: none;
-}
-
-.c31:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c32 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: none;
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c32 .sc-dYPfWK {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c32 .c33 {
-  color: #ffffff;
-}
-
-.c32[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c32[aria-disabled='true'] .c33 {
-  color: #666687;
-}
-
-.c32[aria-disabled='true'] svg > g,
-.c32[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c32[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c32[aria-disabled='true']:active .c33 {
-  color: #666687;
-}
-
-.c32[aria-disabled='true']:active svg > g,
-.c32[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c32:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c32:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c38 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: none;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c38 .sc-dYPfWK {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c38 .c33 {
-  color: #ffffff;
-}
-
-.c38[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c38[aria-disabled='true'] .c33 {
-  color: #666687;
-}
-
-.c38[aria-disabled='true'] svg > g,
-.c38[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c38[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c38[aria-disabled='true']:active .c33 {
-  color: #666687;
-}
-
-.c38[aria-disabled='true']:active svg > g,
-.c38[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c38:hover {
-  background-color: #f6f6f9;
-}
-
-.c38:active {
-  background-color: #eaeaef;
-}
-
-.c38 .c33 {
-  color: #32324d;
-}
-
-.c38 svg > g,
-.c38 svg path {
-  fill: #32324d;
-}
-
-.c22 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c23 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
 .c24 {
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
@@ -553,27 +556,29 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
 <body
   class="lock-body-scroll"
 >
-  <div
-    class="c0"
-  >
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-log"
-      role="log"
-    />
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-status"
-      role="status"
-    />
-    <p
-      aria-live="assertive"
-      aria-relevant="all"
-      id="live-region-alert"
-      role="alert"
-    />
+  <div>
+    <div
+      class="c0"
+    >
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-log"
+        role="log"
+      />
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-status"
+        role="status"
+      />
+      <p
+        aria-live="assertive"
+        aria-relevant="all"
+        id="live-region-alert"
+        role="alert"
+      />
+    </div>
   </div>
   <div
     data-react-portal="true"
@@ -805,29 +810,399 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   width: 1px;
 }
 
-<div
-    class="c0"
-  >
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-log"
-      role="log"
-    />
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-status"
-      role="status"
-    />
-    <p
-      aria-live="assertive"
-      aria-relevant="all"
-      id="live-region-alert"
-      role="alert"
-    />
+<div>
+    <div
+      class="c0"
+    >
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-log"
+        role="log"
+      />
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-status"
+        role="status"
+      />
+      <p
+        aria-live="assertive"
+        aria-relevant="all"
+        id="live-region-alert"
+        role="alert"
+      />
+    </div>
   </div>
-  .c1 {
+  .c9 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-left: 40px;
+}
+
+.c18 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
+}
+
+.c33 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c30 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c30 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c30 svg > g,
+.c30 svg path {
+  fill: #ffffff;
+}
+
+.c30[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c30:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c30:focus-visible {
+  outline: none;
+}
+
+.c30:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c34 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c34 .sc-ezHhwS {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c34 .c32 {
+  color: #ffffff;
+}
+
+.c34[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c34[aria-disabled='true'] .c32 {
+  color: #666687;
+}
+
+.c34[aria-disabled='true'] svg > g,
+.c34[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c34[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c34[aria-disabled='true']:active .c32 {
+  color: #666687;
+}
+
+.c34[aria-disabled='true']:active svg > g,
+.c34[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c34:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c34:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c34 svg > g,
+.c34 svg path {
+  fill: #ffffff;
+}
+
+.c31 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c31 .sc-ezHhwS {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c31 .c32 {
+  color: #ffffff;
+}
+
+.c31[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c31[aria-disabled='true'] .c32 {
+  color: #666687;
+}
+
+.c31[aria-disabled='true'] svg > g,
+.c31[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c31[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c31[aria-disabled='true']:active .c32 {
+  color: #666687;
+}
+
+.c31[aria-disabled='true']:active svg > g,
+.c31[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c31:hover {
+  background-color: #f6f6f9;
+}
+
+.c31:active {
+  background-color: #eaeaef;
+}
+
+.c31 .c32 {
+  color: #32324d;
+}
+
+.c31 svg > g,
+.c31 svg path {
+  fill: #32324d;
+}
+
+.c20 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c22 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c23 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c26 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c24 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c24:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c25 {
+  display: block;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.875rem;
+  border: none;
+  color: #32324d;
+  resize: none;
+  background: inherit;
+}
+
+.c25::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c25::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c25:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c25::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c25:focus-within {
+  outline: none;
+}
+
+.c21 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c21 > * + * {
+  margin-top: 4px;
+}
+
+.c19 textarea {
+  height: 5rem;
+  line-height: 1.25rem;
+}
+
+.c19 textarea::-webkit-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c19 textarea::-moz-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c19 textarea:-ms-input-placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c19 textarea::placeholder {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c6 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c1 {
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
@@ -845,7 +1220,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   position: fixed;
   z-index: 4;
   inset: 0;
-  background: rgb(220,220,228,0.8);
+  background: #32324d1F;
   padding: 0 40px;
   display: -webkit-box;
   display: -webkit-flex;
@@ -866,6 +1241,10 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
 }
 
 .c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -877,13 +1256,13 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
+}
+
+.c28 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c27 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -891,10 +1270,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
 .c7 {
@@ -1000,20 +1375,13 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   border-bottom: 1px solid #eaeaef;
 }
 
-.c26 {
+.c27 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c28 > * + * {
+.c29 > * + * {
   margin-left: 8px;
-}
-
-.c6 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
 }
 
 .c16 {
@@ -1024,19 +1392,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   height: 1px;
   border: none;
   margin: 0;
-}
-
-.c9 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-left: 40px;
-}
-
-.c18 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
 }
 
 .c15 {
@@ -1069,346 +1424,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
 
 .c10[aria-disabled='true'] {
   cursor: not-allowed;
-}
-
-.c22 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c25 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c21 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c23 {
-  border: 1px solid #dcdce4;
-  border-radius: 4px;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  background: #ffffff;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c23:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c24 {
-  display: block;
-  width: 100%;
-  font-weight: 400;
-  font-size: 0.875rem;
-  border: none;
-  color: #32324d;
-  resize: none;
-}
-
-.c24::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c24::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c24:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c24::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c24:focus-within {
-  outline: none;
-}
-
-.c20 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c20 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c20 > * + * {
-  margin-top: 4px;
-}
-
-.c19 textarea {
-  height: 5rem;
-  line-height: 1.25rem;
-}
-
-.c19 textarea::-webkit-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c19 textarea::-moz-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c19 textarea:-ms-input-placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c19 textarea::placeholder {
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c32 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c29 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c29 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c29 svg > g,
-.c29 svg path {
-  fill: #ffffff;
-}
-
-.c29[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c29:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c29:focus-visible {
-  outline: none;
-}
-
-.c29:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c33 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: none;
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c33 .sc-dYPfWK {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c33 .c31 {
-  color: #ffffff;
-}
-
-.c33[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c33[aria-disabled='true'] .c31 {
-  color: #666687;
-}
-
-.c33[aria-disabled='true'] svg > g,
-.c33[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c33[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c33[aria-disabled='true']:active .c31 {
-  color: #666687;
-}
-
-.c33[aria-disabled='true']:active svg > g,
-.c33[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c33:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c33:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c30 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: none;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c30 .sc-dYPfWK {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c30 .c31 {
-  color: #ffffff;
-}
-
-.c30[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c30[aria-disabled='true'] .c31 {
-  color: #666687;
-}
-
-.c30[aria-disabled='true'] svg > g,
-.c30[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c30[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c30[aria-disabled='true']:active .c31 {
-  color: #666687;
-}
-
-.c30[aria-disabled='true']:active svg > g,
-.c30[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c30:hover {
-  background-color: #f6f6f9;
-}
-
-.c30:active {
-  background-color: #eaeaef;
-}
-
-.c30 .c31 {
-  color: #32324d;
-}
-
-.c30 svg > g,
-.c30 svg path {
-  fill: #32324d;
 }
 
 <div
@@ -1528,31 +1543,36 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                     >
                       <div>
                         <div
-                          class="c20"
+                          class="c20 c21"
+                          spacing="1"
                         >
                           <div
-                            class="c21"
+                            class="c22"
                           >
                             <label
-                              class="c22"
+                              class="c23"
                               for="textarea-1"
                             >
-                              URL
+                              <div
+                                class="c22"
+                              >
+                                URL
+                              </div>
                             </label>
                           </div>
                           <div
-                            class="c23"
+                            class="c24"
                           >
                             <textarea
                               aria-describedby="textarea-1-hint"
                               aria-invalid="false"
-                              class="c24"
+                              class="c25"
                               id="textarea-1"
                               name="urls"
                             />
                           </div>
                           <p
-                            class="c25"
+                            class="c26"
                             id="textarea-1-hint"
                           >
                             Separate your URL links by a carriage return.
@@ -1562,36 +1582,36 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c3 c26"
+                    class="c3 c27"
                   >
                     <div
                       class="c5"
                     >
                       <div
-                        class="c27 c28"
+                        class="c28 c29"
                       >
                         <button
                           aria-disabled="false"
-                          class="c29 c30"
+                          class="c30 c31"
                           type="button"
                         >
                           <span
-                            class="c31 c32"
+                            class="c32 c33"
                           >
                             app.components.Button.cancel
                           </span>
                         </button>
                       </div>
                       <div
-                        class="c27 c28"
+                        class="c28 c29"
                       >
                         <button
                           aria-disabled="false"
-                          class="c29 c33"
+                          class="c30 c34"
                           type="submit"
                         >
                           <span
-                            class="c31 c32"
+                            class="c32 c33"
                           >
                             Next
                           </span>

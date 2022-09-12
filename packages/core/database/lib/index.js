@@ -1,27 +1,16 @@
 'use strict';
 
-const knex = require('knex');
-
 const { getDialect } = require('./dialects');
 const createSchemaProvider = require('./schema');
 const createMetadata = require('./metadata');
 const { createEntityManager } = require('./entity-manager');
 const { createMigrationsProvider } = require('./migrations');
 const { createLifecyclesProvider } = require('./lifecycles');
+const createConnection = require('./connection');
 const errors = require('./errors');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
-
-const createConnection = config => {
-  const knexInstance = knex(config);
-
-  return Object.assign(knexInstance, {
-    getSchemaName() {
-      return this.client.connectionSettings.schema;
-    },
-  });
-};
 
 class Database {
   constructor(config) {
@@ -59,7 +48,11 @@ class Database {
   }
 
   async transaction(cb) {
-    await this.connection.transaction(async trx => {
+    if (!cb) {
+      return this.connection.transaction();
+    }
+
+    return this.connection.transaction(async (trx) => {
       const em = createEntityManager(this, trx);
       await cb(em);
     });
@@ -67,7 +60,7 @@ class Database {
 
   getConnection(tableName, trx) {
     const schema = this.connection.getSchemaName();
-    const connOrTrx = trx ? trx : this.connection;
+    const connOrTrx = trx || this.connection;
     const connection = tableName ? connOrTrx(tableName) : connOrTrx;
     return schema ? connection.withSchema(schema) : connection;
   }
@@ -89,7 +82,7 @@ class Database {
 
 // TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
-Database.init = async config => new Database(config);
+Database.init = async (config) => new Database(config);
 
 module.exports = {
   Database,

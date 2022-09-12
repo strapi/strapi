@@ -92,7 +92,7 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
     schema: { icon: null },
   });
 
-  const onClose = e => {
+  const onClose = (e) => {
     e.stopPropagation();
     removeComponentFromDynamicZone(dzName, index);
   };
@@ -105,8 +105,8 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
         paddingLeft={4}
         paddingRight={4}
       >
-        <StackCentered size={1}>
-          <StyledFontAwesomeIcon icon={icon} />
+        <StackCentered spacing={1}>
+          <StyledFontAwesomeIcon icon={icon || 'dice-d6'} />
           <Box maxWidth={`calc(${pxToRem(140)} - 32px)`}>
             <Typography variant="pi" fontWeight="bold" ellipsis>
               {displayName}
@@ -117,7 +117,7 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
           <CloseButton
             role="button"
             tabIndex={0}
-            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onClose(e)}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClose(e)}
             onClick={onClose}
           >
             <Cross />
@@ -132,7 +132,7 @@ ComponentCard.defaultProps = {
   component: null,
   isActive: false,
   isInDevelopmentMode: false,
-  onClick: () => {},
+  onClick() {},
 };
 
 ComponentCard.propTypes = {

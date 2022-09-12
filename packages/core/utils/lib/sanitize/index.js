@@ -13,7 +13,7 @@ module.exports = {
   contentAPI: {
     input(data, schema, { auth } = {}) {
       if (isArray(data)) {
-        return Promise.all(data.map(entry => this.input(entry, schema, { auth })));
+        return Promise.all(data.map((entry) => this.input(entry, schema, { auth })));
       }
 
       const nonWritableAttributes = getNonWritableAttributes(schema);
@@ -28,12 +28,17 @@ module.exports = {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
       }
 
+      // Apply sanitizers from registry if exists
+      strapi.sanitizers
+        .get('content-api.input')
+        .forEach((sanitizer) => transforms.push(sanitizer(schema)));
+
       return pipeAsync(...transforms)(data);
     },
 
     output(data, schema, { auth } = {}) {
       if (isArray(data)) {
-        return Promise.all(data.map(entry => this.output(entry, schema, { auth })));
+        return Promise.all(data.map((entry) => this.output(entry, schema, { auth })));
       }
 
       const transforms = [sanitizers.defaultSanitizeOutput(schema)];
@@ -41,6 +46,11 @@ module.exports = {
       if (auth) {
         transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
       }
+
+      // Apply sanitizers from registry if exists
+      strapi.sanitizers
+        .get('content-api.output')
+        .forEach((sanitizer) => transforms.push(sanitizer(schema)));
 
       return pipeAsync(...transforms)(data);
     },

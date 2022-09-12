@@ -23,10 +23,11 @@ const BlockActions = styled(Flex)`
 `;
 
 const Table = ({
+  action,
   children,
   contentType,
   components,
-  action,
+  footer,
   headers,
   isLoading,
   onConfirmDeleteAll,
@@ -85,7 +86,7 @@ const Table = ({
 
   const handleSelectAll = () => {
     if (!areAllEntriesSelected) {
-      setEntriesToDelete(rows.map(row => row.id));
+      setEntriesToDelete(rows.map((row) => row.id));
     } else {
       setEntriesToDelete([]);
     }
@@ -96,29 +97,29 @@ const Table = ({
       trackUsage(onOpenDeleteAllModalTrackedEvent);
     }
 
-    setShowConfirmDeleteAll(prev => !prev);
+    setShowConfirmDeleteAll((prev) => !prev);
   };
 
   const handleToggleConfirmDelete = () => {
     if (showConfirmDelete) {
       setEntriesToDelete([]);
     }
-    setShowConfirmDelete(prev => !prev);
+    setShowConfirmDelete((prev) => !prev);
   };
 
-  const handleClickDelete = id => {
+  const handleClickDelete = (id) => {
     setEntriesToDelete([id]);
 
     handleToggleConfirmDelete();
   };
 
   const handleSelectRow = ({ name, value }) => {
-    setEntriesToDelete(prev => {
+    setEntriesToDelete((prev) => {
       if (value) {
         return prev.concat(name);
       }
 
-      return prev.filter(id => id !== name);
+      return prev.filter((id) => id !== name);
     });
   };
 
@@ -152,14 +153,14 @@ const Table = ({
                   size="L"
                   variant="danger-light"
                 >
-                  {formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' })}
+                  {formatMessage({ id: 'global.delete', defaultMessage: 'Delete' })}
                 </Button>
               </BlockActions>
             </Flex>
           </Box>
         </Box>
       )}
-      <TableCompo colCount={COL_COUNT} rowCount={ROW_COUNT}>
+      <TableCompo colCount={COL_COUNT} rowCount={ROW_COUNT} footer={footer}>
         <TableHead
           areAllEntriesSelected={areAllEntriesSelected}
           entriesToDelete={entriesToDelete}
@@ -176,7 +177,7 @@ const Table = ({
             action={action}
           />
         ) : (
-          Children.toArray(children).map(child =>
+          Children.toArray(children).map((child) =>
             cloneElement(child, {
               entriesToDelete,
               onClickDelete: handleClickDelete,
@@ -207,16 +208,17 @@ const Table = ({
 };
 
 Table.defaultProps = {
+  action: undefined,
   children: undefined,
   components: {
     ConfirmDialogDeleteAll: undefined,
     ConfirmDialogDelete: undefined,
   },
-  action: undefined,
+  footer: undefined,
   headers: [],
   isLoading: false,
-  onConfirmDeleteAll: () => {},
-  onConfirmDelete: () => {},
+  onConfirmDeleteAll() {},
+  onConfirmDelete() {},
   onOpenDeleteAllModalTrackedEvent: undefined,
   rows: [],
   withBulkActions: false,
@@ -224,13 +226,14 @@ Table.defaultProps = {
 };
 
 Table.propTypes = {
+  action: PropTypes.node,
   children: PropTypes.node,
   contentType: PropTypes.string.isRequired,
   components: PropTypes.shape({
     ConfirmDialogDelete: PropTypes.oneOfType([PropTypes.func, PropTypes.element]),
     ConfirmDialogDeleteAll: PropTypes.oneOfType([PropTypes.func, PropTypes.element]),
   }),
-  action: PropTypes.node,
+  footer: PropTypes.node,
   headers: PropTypes.arrayOf(
     PropTypes.shape({
       cellFormatter: PropTypes.func,

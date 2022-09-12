@@ -8,28 +8,34 @@
  */
 
 import React, { memo } from 'react';
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect, Route, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { auth } from '@strapi/helper-plugin';
 
 /* eslint-disable react/jsx-curly-newline */
 
-const PrivateRoute = ({ component: Component, path, ...rest }) => (
-  <Route
-    path={path}
-    render={props =>
-      auth.getToken() !== null ? (
-        <Component {...rest} {...props} />
-      ) : (
-        <Redirect
-          to={{
-            pathname: '/auth/login',
-          }}
-        />
-      )
-    }
-  />
-);
+const PrivateRoute = ({ component: Component, path, ...rest }) => {
+  const { pathname, search } = useLocation();
+
+  return (
+    <Route
+      path={path}
+      render={(props) =>
+        auth.getToken() !== null ? (
+          <Component {...rest} {...props} />
+        ) : (
+          <Redirect
+            to={{
+              pathname: '/auth/login',
+              search:
+                pathname !== '/' && `?redirectTo=${encodeURIComponent(`${pathname}${search}`)}`,
+            }}
+          />
+        )
+      }
+    />
+  );
+};
 
 PrivateRoute.propTypes = {
   component: PropTypes.any.isRequired,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { lightTheme } from '@strapi/design-system/themes';
+import { lightTheme, darkTheme } from '@strapi/design-system/themes';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import isFunction from 'lodash/isFunction';
@@ -13,7 +13,6 @@ import App from './pages/App';
 import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
 import MenuLogo from './assets/images/logo_strapi_menu.png';
 import Providers from './components/Providers';
-import Theme from './components/Theme';
 import languageNativeNames from './translations/languageNativeNames';
 import {
   INJECT_COLUMN_IN_TABLE,
@@ -34,7 +33,7 @@ class StrapiApp {
       locales: ['en'],
       menuLogo: MenuLogo,
       notifications: { releases: true },
-      theme: lightTheme,
+      themes: { light: lightTheme, dark: darkTheme },
       translations: {},
       tutorials: true,
     };
@@ -62,15 +61,15 @@ class StrapiApp {
     };
   }
 
-  addComponents = components => {
+  addComponents = (components) => {
     if (Array.isArray(components)) {
-      components.map(compo => this.library.components.add(compo));
+      components.map((compo) => this.library.components.add(compo));
     } else {
       this.library.components.add(components);
     }
   };
 
-  addCorePluginMenuLink = link => {
+  addCorePluginMenuLink = (link) => {
     const stringifiedLink = JSON.stringify(link);
 
     invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
@@ -90,15 +89,15 @@ class StrapiApp {
     this.menu.push(link);
   };
 
-  addFields = fields => {
+  addFields = (fields) => {
     if (Array.isArray(fields)) {
-      fields.map(field => this.library.fields.add(field));
+      fields.map((field) => this.library.fields.add(field));
     } else {
       this.library.fields.add(fields);
     }
   };
 
-  addMenuLink = link => {
+  addMenuLink = (link) => {
     const stringifiedLink = JSON.stringify(link);
 
     invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
@@ -122,14 +121,14 @@ class StrapiApp {
     this.menu.push(link);
   };
 
-  addMiddlewares = middlewares => {
-    middlewares.forEach(middleware => {
+  addMiddlewares = (middlewares) => {
+    middlewares.forEach((middleware) => {
       this.middlewares.add(middleware);
     });
   };
 
-  addReducers = reducers => {
-    Object.keys(reducers).forEach(reducerName => {
+  addReducers = (reducers) => {
+    Object.keys(reducers).forEach((reducerName) => {
       this.reducers.add(reducerName, reducers[reducerName]);
     });
   };
@@ -157,13 +156,13 @@ class StrapiApp {
     invariant(this.settings[sectionId], 'The section does not exist');
     invariant(Array.isArray(links), 'TypeError expected links to be an array');
 
-    links.forEach(link => {
+    links.forEach((link) => {
       this.addSettingsLink(sectionId, link);
     });
   };
 
   async bootstrap() {
-    Object.keys(this.appPlugins).forEach(plugin => {
+    Object.keys(this.appPlugins).forEach((plugin) => {
       const bootstrap = this.appPlugins[plugin].bootstrap;
 
       if (bootstrap) {
@@ -209,7 +208,7 @@ class StrapiApp {
     if (this.customConfigurations?.locales) {
       this.configurations.locales = [
         'en',
-        ...this.customConfigurations.locales?.filter(loc => loc !== 'en'),
+        ...(this.customConfigurations.locales?.filter((loc) => loc !== 'en') || []),
       ];
     }
 
@@ -226,7 +225,7 @@ class StrapiApp {
     }
 
     if (this.customConfigurations?.theme) {
-      this.configurations.theme = merge(this.configurations.theme, this.customConfigurations.theme);
+      merge(this.configurations.themes.light, this.customConfigurations.theme);
     }
 
     if (this.customConfigurations?.notifications?.releases !== undefined) {
@@ -238,7 +237,7 @@ class StrapiApp {
     }
   };
 
-  createHook = name => {
+  createHook = (name) => {
     this.hooksDict[name] = createHook();
   };
 
@@ -254,7 +253,7 @@ class StrapiApp {
 
     this.settings[section.id] = { ...section, links: [] };
 
-    links.forEach(link => {
+    links.forEach((link) => {
       this.addSettingsLink(section.id, link);
     });
   };
@@ -275,12 +274,12 @@ class StrapiApp {
     }
   };
 
-  getPlugin = pluginId => {
+  getPlugin = (pluginId) => {
     return this.plugins[pluginId];
   };
 
   async initialize() {
-    Object.keys(this.appPlugins).forEach(plugin => {
+    Object.keys(this.appPlugins).forEach((plugin) => {
       this.appPlugins[plugin].register({
         addComponents: this.addComponents,
         addCorePluginMenuLink: this.addCorePluginMenuLink,
@@ -320,7 +319,7 @@ class StrapiApp {
    * @returns {Object} The imported admin translations
    */
   async loadAdminTrads() {
-    const arrayOfPromises = this.configurations.locales.map(locale => {
+    const arrayOfPromises = this.configurations.locales.map((locale) => {
       return import(/* webpackChunkName: "[request]" */ `./translations/${locale}.json`)
         .then(({ default: data }) => {
           return { data, locale };
@@ -351,7 +350,7 @@ class StrapiApp {
     const adminTranslations = await this.loadAdminTrads();
 
     const arrayOfPromises = Object.keys(this.appPlugins)
-      .map(plugin => {
+      .map((plugin) => {
         const registerTrads = this.appPlugins[plugin].registerTrads;
 
         if (registerTrads) {
@@ -360,7 +359,7 @@ class StrapiApp {
 
         return null;
       })
-      .filter(a => a);
+      .filter((a) => a);
 
     const pluginsTrads = await Promise.all(arrayOfPromises);
     const mergedTrads = pluginsTrads.reduce((acc, currentPluginTrads) => {
@@ -370,7 +369,7 @@ class StrapiApp {
         return acc1;
       }, {});
 
-      Object.keys(pluginTrads).forEach(locale => {
+      Object.keys(pluginTrads).forEach((locale) => {
         acc[locale] = { ...acc[locale], ...pluginTrads[locale] };
       });
 
@@ -400,7 +399,7 @@ class StrapiApp {
     this.hooksDict[name].register(fn);
   };
 
-  registerPlugin = pluginConf => {
+  registerPlugin = (pluginConf) => {
     const plugin = Plugin(pluginConf);
 
     this.plugins[plugin.pluginId] = plugin;
@@ -415,7 +414,7 @@ class StrapiApp {
       : this.hooksDict[name].runWaterfall(initialValue, store);
   };
 
-  runHookParallel = name => this.hooksDict[name].runParallel();
+  runHookParallel = (name) => this.hooksDict[name].runParallel();
 
   render() {
     const store = this.createStore();
@@ -427,44 +426,43 @@ class StrapiApp {
     } = this.library;
 
     return (
-      <Theme theme={this.configurations.theme}>
-        <Providers
-          authLogo={this.configurations.authLogo}
-          components={components}
-          fields={fields}
-          localeNames={localeNames}
-          getAdminInjectedComponents={this.getAdminInjectedComponents}
-          getPlugin={this.getPlugin}
-          messages={this.configurations.translations}
-          menu={this.menu}
-          menuLogo={this.configurations.menuLogo}
-          plugins={this.plugins}
-          runHookParallel={this.runHookParallel}
-          runHookWaterfall={(name, initialValue, async = false) => {
-            return this.runHookWaterfall(name, initialValue, async, store);
-          }}
-          runHookSeries={this.runHookSeries}
-          settings={this.settings}
-          showTutorials={this.configurations.tutorials}
-          showReleaseNotification={this.configurations.notifications.releases}
-          store={store}
-        >
-          <>
-            <Helmet
-              link={[
-                {
-                  rel: 'icon',
-                  type: 'image/png',
-                  href: this.configurations.head.favicon,
-                },
-              ]}
-            />
-            <BrowserRouter basename={basename}>
-              <App store={store} />
-            </BrowserRouter>
-          </>
-        </Providers>
-      </Theme>
+      <Providers
+        authLogo={this.configurations.authLogo}
+        components={components}
+        fields={fields}
+        localeNames={localeNames}
+        getAdminInjectedComponents={this.getAdminInjectedComponents}
+        getPlugin={this.getPlugin}
+        messages={this.configurations.translations}
+        menu={this.menu}
+        menuLogo={this.configurations.menuLogo}
+        plugins={this.plugins}
+        runHookParallel={this.runHookParallel}
+        runHookWaterfall={(name, initialValue, async = false) => {
+          return this.runHookWaterfall(name, initialValue, async, store);
+        }}
+        runHookSeries={this.runHookSeries}
+        themes={this.configurations.themes}
+        settings={this.settings}
+        showTutorials={this.configurations.tutorials}
+        showReleaseNotification={this.configurations.notifications.releases}
+        store={store}
+      >
+        <>
+          <Helmet
+            link={[
+              {
+                rel: 'icon',
+                type: 'image/png',
+                href: this.configurations.head.favicon,
+              },
+            ]}
+          />
+          <BrowserRouter basename={basename}>
+            <App store={store} />
+          </BrowserRouter>
+        </>
+      </Providers>
     );
   }
 }

@@ -1,4 +1,15 @@
 import React, { useState, useRef } from 'react';
+import { Formik } from 'formik';
+import { useIntl } from 'react-intl';
+import { useRouteMatch } from 'react-router-dom';
+import {
+  useOverlayBlocker,
+  SettingsPageTitle,
+  LoadingIndicatorPage,
+  Form,
+  useNotification,
+  Link,
+} from '@strapi/helper-plugin';
 import { ContentLayout, HeaderLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
@@ -9,18 +20,7 @@ import { Textarea } from '@strapi/design-system/Textarea';
 import { Typography } from '@strapi/design-system/Typography';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Check from '@strapi/icons/Check';
-import { Link } from '@strapi/design-system/Link';
 import { GridItem, Grid } from '@strapi/design-system/Grid';
-import { Formik } from 'formik';
-import { useIntl } from 'react-intl';
-import { useRouteMatch } from 'react-router-dom';
-import {
-  useOverlayBlocker,
-  SettingsPageTitle,
-  LoadingIndicatorPage,
-  Form,
-  useNotification,
-} from '@strapi/helper-plugin';
 import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
@@ -40,7 +40,7 @@ const EditPage = () => {
   const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = useRef();
 
-  const handleEditRoleSubmit = async data => {
+  const handleEditRoleSubmit = async (data) => {
     // Set loading state
     lockApp();
     setIsSubmitting(true);
@@ -97,7 +97,7 @@ const EditPage = () => {
                     startIcon={<Check />}
                   >
                     {formatMessage({
-                      id: 'app.components.Button.save',
+                      id: 'global.save',
                       defaultMessage: 'Save',
                     })}
                   </Button>
@@ -108,14 +108,14 @@ const EditPage = () => {
               navigationAction={
                 <Link startIcon={<ArrowLeft />} to="/settings/users-permissions/roles">
                   {formatMessage({
-                    id: 'app.components.go-back',
+                    id: 'global.back',
                     defaultMessage: 'Back',
                   })}
                 </Link>
               }
             />
             <ContentLayout>
-              <Stack size={7}>
+              <Stack spacing={7}>
                 <Box
                   background="neutral0"
                   hasRadius
@@ -125,7 +125,7 @@ const EditPage = () => {
                   paddingLeft={7}
                   paddingRight={7}
                 >
-                  <Stack size={4}>
+                  <Stack spacing={4}>
                     <Typography variant="delta" as="h2">
                       {formatMessage({
                         id: getTrad('EditPage.form.roles'),
@@ -139,7 +139,7 @@ const EditPage = () => {
                           value={values.name || ''}
                           onChange={handleChange}
                           label={formatMessage({
-                            id: 'Settings.roles.form.input.name',
+                            id: 'global.name',
                             defaultMessage: 'Name',
                           })}
                           error={
@@ -155,7 +155,7 @@ const EditPage = () => {
                           value={values.description || ''}
                           onChange={handleChange}
                           label={formatMessage({
-                            id: 'Settings.roles.form.input.description',
+                            id: 'global.description',
                             defaultMessage: 'Description',
                           })}
                           error={

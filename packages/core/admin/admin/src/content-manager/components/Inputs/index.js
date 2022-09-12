@@ -42,10 +42,7 @@ function Inputs({
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = fieldSchema.type;
-
-  const errorId = useMemo(() => {
-    return get(formErrors, [keys, 'id'], null);
-  }, [formErrors, keys]);
+  const error = get(formErrors, [keys], null);
 
   const fieldName = useMemo(() => {
     return getFieldName(keys);
@@ -160,12 +157,39 @@ function Inputs({
     return disabled;
   }, [disabled, isCreatingEntry, isUserAllowedToEditField, isUserAllowedToReadField]);
 
-  const options = useMemo(() => generateOptions(fieldSchema.enum || [], isRequired), [
-    fieldSchema,
-    isRequired,
-  ]);
+  const options = useMemo(
+    () => generateOptions(fieldSchema.enum || [], isRequired),
+    [fieldSchema, isRequired]
+  );
 
   const { label, description, placeholder, visible } = metadatas;
+
+  /**
+   * It decides whether using the default `step` accoding to its `inputType` or the one
+   * obtained from `metadatas`.
+   *
+   * The `metadatas.step` is returned when the `inputValue` is divisible by it or when the
+   * `inputValue` is empty, otherwise the default `step` is returned.
+   */
+  const inputStep = useMemo(() => {
+    if (!metadatas.step || (inputType !== 'datetime' && inputType !== 'time')) {
+      return step;
+    }
+
+    if (!inputValue) {
+      return metadatas.step;
+    }
+
+    let minutes;
+
+    if (inputType === 'datetime') {
+      minutes = parseInt(inputValue.substr(14, 2), 10);
+    } else if (inputType === 'time') {
+      minutes = parseInt(inputValue.slice(-2), 10);
+    }
+
+    return minutes % metadatas.step === 0 ? metadatas.step : step;
+  }, [inputType, inputValue, metadatas.step, step]);
 
   if (visible === false) {
     return null;
@@ -177,7 +201,7 @@ function Inputs({
         description={description ? { id: description, defaultMessage: description } : null}
         intlLabel={{ id: label, defaultMessage: label }}
         labelAction={labelAction}
-        error={errorId}
+        error={error && formatMessage(error)}
         name={keys}
         required={isRequired}
       />
@@ -215,6 +239,7 @@ function Inputs({
         }
         queryInfos={queryInfos}
         value={value}
+        error={error && formatMessage(error)}
       />
     );
   }
@@ -224,9 +249,11 @@ function Inputs({
       attribute={fieldSchema}
       autoComplete="new-password"
       intlLabel={{ id: label, defaultMessage: label }}
+      // in case the default value of the boolean is null, attribute.default doesn't exist
+      isNullable={inputType === 'bool' && [null, undefined].includes(fieldSchema.default)}
       description={description ? { id: description, defaultMessage: description } : null}
       disabled={shouldDisableField}
-      error={errorId}
+      error={error}
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
@@ -242,7 +269,7 @@ function Inputs({
       options={options}
       placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
       required={fieldSchema.required || false}
-      step={step}
+      step={inputStep}
       type={inputType}
       // validations={validations}
       value={inputValue}
@@ -279,7 +306,4 @@ Inputs.propTypes = {
 
 const Memoized = memo(Inputs, isEqual);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);

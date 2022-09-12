@@ -13,7 +13,7 @@ if (edition === 'EE') {
     let strapi;
     let utils;
     const builder = createTestBuilder();
-    let requests = {
+    const requests = {
       public: null,
       admin: null,
     };
@@ -84,7 +84,7 @@ if (edition === 'EE') {
       // Create users with the new role & create associated auth requests
       const users = [];
 
-      for (let i = 0; i < localTestData.users.length; ++i) {
+      for (let i = 0; i < localTestData.users.length; i += 1) {
         const userFixture = localTestData.users[i];
         const userAttributes = {
           ...userFixture,
@@ -103,7 +103,7 @@ if (edition === 'EE') {
       Object.assign(localTestData, { role, permissions, users });
     };
 
-    const getUserRequest = idx => requests[localTestData.users[idx].id];
+    const getUserRequest = (idx) => requests[localTestData.users[idx].id];
     const getModelName = () => localTestData.models.article.singularName;
 
     const deleteFixtures = async () => {

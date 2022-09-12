@@ -15,7 +15,7 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
 
-  const toggleWarningDelete = () => setWarningDelete(prevState => !prevState);
+  const toggleWarningDelete = () => setWarningDelete((prevState) => !prevState);
 
   const handleConfirmDelete = async () => {
     try {
@@ -71,7 +71,4 @@ DeleteLink.propTypes = {
 
 const Memoized = memo(DeleteLink, isEqual);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);

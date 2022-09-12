@@ -46,7 +46,7 @@ const DraftAndPublishToggle = ({
       )
     : '';
 
-  const handleToggle = () => setShowWarning(prev => !prev);
+  const handleToggle = () => setShowWarning((prev) => !prev);
 
   const handleConfirm = () => {
     onChange({ target: { name, value: false } });
@@ -85,7 +85,7 @@ const DraftAndPublishToggle = ({
       {showWarning && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={showWarning}>
           <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack size={2}>
+            <Stack spacing={2}>
               <Flex justifyContent="center">
                 <TypographyTextAlign id="confirm-description">
                   {formatMessage({

@@ -16,7 +16,7 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
   const { formatMessage } = useIntl();
 
   return (
-    <Stack size={4}>
+    <Stack spacing={4}>
       <Flex justifyContent="space-between">
         <div>
           <Box>
@@ -39,7 +39,7 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
         <LinkToCTB />
       </Flex>
       <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
-        <Stack size={2}>
+        <Stack spacing={2}>
           {editLayout.map((row, index) => (
             <RowsLayout key={row.rowId} row={row} rowIndex={index} onRemoveField={onRemoveField} />
           ))}
@@ -57,7 +57,7 @@ const DisplayedFields = ({ editLayout, editLayoutRemainingFields, onRemoveField,
             variant="secondary"
             disabled={editLayoutRemainingFields.length === 0}
           >
-            {editLayoutRemainingFields.map(field => (
+            {editLayoutRemainingFields.map((field) => (
               <MenuItem key={field} onClick={() => onAddField(field)}>
                 {field}
               </MenuItem>

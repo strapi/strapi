@@ -29,7 +29,7 @@ const Status = ({ isPending, statusCode }) => {
 
   if (isPending) {
     return (
-      <Stack horizontal size={2} style={{ alignItems: 'center' }}>
+      <Stack horizontal spacing={2} style={{ alignItems: 'center' }}>
         <Icon as={Loader} />
         <Typography>
           {formatMessage({ id: 'Settings.webhooks.trigger.pending', defaultMessage: 'pending' })}
@@ -40,7 +40,7 @@ const Status = ({ isPending, statusCode }) => {
 
   if (statusCode >= 200 && statusCode < 300) {
     return (
-      <Stack horizontal size={2} style={{ alignItems: 'center' }}>
+      <Stack horizontal spacing={2} style={{ alignItems: 'center' }}>
         <Icon as={Check} color="success700" />
         <Typography>
           {formatMessage({ id: 'Settings.webhooks.trigger.success', defaultMessage: 'success' })}
@@ -51,7 +51,7 @@ const Status = ({ isPending, statusCode }) => {
 
   if (statusCode >= 300) {
     return (
-      <Stack horizontal size={2} style={{ alignItems: 'center' }}>
+      <Stack horizontal spacing={2} style={{ alignItems: 'center' }}>
         <Icon as={Cross} color="danger700" />
         <Typography>
           {formatMessage({ id: 'Settings.error', defaultMessage: 'error' })} {statusCode}
@@ -115,7 +115,7 @@ const CancelButton = ({ onCancel }) => {
   return (
     <Flex justifyContent="flex-end">
       <button onClick={onCancel} type="button">
-        <Stack horizontal size={2} style={{ alignItems: 'center' }}>
+        <Stack horizontal spacing={2} style={{ alignItems: 'center' }}>
           <Typography textColor="neutral400">
             {formatMessage({ id: 'Settings.webhooks.trigger.cancel', defaultMessage: 'cancel' })}
           </Typography>
@@ -160,7 +160,7 @@ const TriggerContainer = ({ isPending, onCancel, response }) => {
 
 TriggerContainer.defaultProps = {
   isPending: false,
-  onCancel: () => {},
+  onCancel() {},
   response: {},
 };
 

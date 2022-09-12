@@ -8,7 +8,7 @@ const SQL_QUERIES = {
   FOREIGN_KEY_LIST: 'pragma foreign_key_list(??)',
 };
 
-const toStrapiType = column => {
+const toStrapiType = (column) => {
   const { type } = column;
 
   const rootType = type.toLowerCase().match(/[^(), ]+/)[0];
@@ -16,7 +16,7 @@ const toStrapiType = column => {
   switch (rootType) {
     case 'integer': {
       if (column.pk) {
-        return { type: 'increments', args: [{ primary: true }] };
+        return { type: 'increments', args: [{ primary: true, primaryKey: true }] };
       }
 
       return { type: 'integer' };
@@ -84,13 +84,13 @@ class SqliteSchemaInspector {
   async getTables() {
     const rows = await this.db.connection.raw(SQL_QUERIES.TABLE_LIST);
 
-    return rows.map(row => row.name);
+    return rows.map((row) => row.name);
   }
 
   async getColumns(tableName) {
     const rows = await this.db.connection.raw(SQL_QUERIES.TABLE_INFO, [tableName]);
 
-    return rows.map(row => {
+    return rows.map((row) => {
       const { type, args = [], ...rest } = toStrapiType(row);
 
       return {
@@ -110,11 +110,11 @@ class SqliteSchemaInspector {
 
     const ret = [];
 
-    for (const index of indexes.filter(index => !index.name.startsWith('sqlite_'))) {
+    for (const index of indexes.filter((index) => !index.name.startsWith('sqlite_'))) {
       const res = await this.db.connection.raw(SQL_QUERIES.INDEX_INFO, [index.name]);
 
       ret.push({
-        columns: res.map(row => row.name),
+        columns: res.map((row) => row.name),
         name: index.name,
         type: index.unique ? 'unique' : null,
       });

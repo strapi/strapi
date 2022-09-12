@@ -23,7 +23,7 @@ function BoundRoute({ route }) {
   const colors = getMethodColor(route.method);
 
   return (
-    <Stack size={2}>
+    <Stack spacing={2}>
       <Typography variant="delta" as="h3">
         {formatMessage({
           id: 'users-permissions.BoundRoute.title',
@@ -35,14 +35,14 @@ function BoundRoute({ route }) {
           .{action}
         </Typography>
       </Typography>
-      <Stack horizontal hasRadius background="neutral0" borderColor="neutral200" size={0}>
+      <Stack horizontal hasRadius background="neutral0" borderColor="neutral200" spacing={0}>
         <MethodBox background={colors.background} borderColor={colors.border} padding={2}>
           <Typography fontWeight="bold" textColor={colors.text}>
             {method}
           </Typography>
         </MethodBox>
         <Box paddingLeft={2} paddingRight={2}>
-          {map(formattedRoute, value => (
+          {map(formattedRoute, (value) => (
             <Typography key={value} textColor={value.includes(':') ? 'neutral600' : 'neutral900'}>
               /{value}
             </Typography>

@@ -13,6 +13,7 @@ const layout = {
         type: 'REDIRECT',
         target: '/plugins/content-type-builder',
       },
+      trackingEvent: 'didClickGuidedTourHomepageContentTypeBuilder',
     },
     create: {
       title: {
@@ -31,6 +32,7 @@ const layout = {
         },
         type: 'CLOSE',
       },
+      trackingEvent: 'didClickGuidedTourStep1CollectionType',
     },
     success: {
       title: {
@@ -49,6 +51,7 @@ const layout = {
         type: 'REDIRECT',
         target: '/content-manager',
       },
+      trackingEvent: 'didCreateGuidedTourCollectionType',
     },
   },
   contentManager: {
@@ -65,6 +68,7 @@ const layout = {
         type: 'REDIRECT',
         target: '/content-manager',
       },
+      trackingEvent: 'didClickGuidedTourHomepageContentManager',
     },
     create: {
       title: {
@@ -83,6 +87,7 @@ const layout = {
         },
         type: 'CLOSE',
       },
+      trackingEvent: 'didClickGuidedTourStep2ContentManager',
     },
     success: {
       title: {
@@ -101,6 +106,7 @@ const layout = {
         type: 'REDIRECT',
         target: '/settings/api-tokens',
       },
+      trackingEvent: 'didCreateGuidedTourEntry',
     },
   },
   apiTokens: {
@@ -117,6 +123,7 @@ const layout = {
         type: 'REDIRECT',
         target: '/settings/api-tokens',
       },
+      trackingEvent: 'didClickGuidedTourHomepageApiTokens',
     },
     create: {
       title: {
@@ -135,6 +142,7 @@ const layout = {
         },
         type: 'CLOSE',
       },
+      trackingEvent: 'didClickGuidedTourStep3ApiTokens',
     },
     success: {
       title: {
@@ -146,6 +154,7 @@ const layout = {
         defaultMessage:
           "<p>See content in action by making an HTTP request:</p><ul><li><p>To this URL: <light>https://'<'YOUR_DOMAIN'>'/api/'<'YOUR_CT'>'</light></p></li><li><p>With the header: <light>Authorization: bearer '<'YOUR_API_TOKEN'>'</light></p></li></ul><p>For more ways to interact with content, see the <documentationLink>documentation</documentationLink>.</p>",
       },
+      trackingEvent: 'didGenerateGuidedTourApiTokens',
     },
   },
 };

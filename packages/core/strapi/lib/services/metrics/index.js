@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * Strapi telemetry package.
  * You can learn more at https://docs.strapi.io/developer-docs/latest/getting-started/usage-information.html
@@ -22,15 +23,21 @@ const LIMITED_EVENTS = [
   'didEnableResponsiveDimensions',
 ];
 
-const createTelemetryInstance = strapi => {
+const createTelemetryInstance = (strapi) => {
   const uuid = strapi.config.get('uuid');
-  const isDisabled = !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED);
+  const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled');
+  const isDisabled =
+    !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED) || isTruthy(telemetryDisabled);
 
   const crons = [];
   const sender = createSender(strapi);
   const sendEvent = wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS });
 
   return {
+    get isDisabled() {
+      return isDisabled;
+    },
+
     register() {
       if (!isDisabled) {
         const pingCron = scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
@@ -70,7 +77,7 @@ const createTelemetryInstance = strapi => {
     },
     destroy() {
       // clear open handles
-      crons.forEach(cron => cron.cancel());
+      crons.forEach((cron) => cron.cancel());
     },
     async send(event, payload) {
       if (isDisabled) return true;
@@ -79,18 +86,14 @@ const createTelemetryInstance = strapi => {
   };
 };
 
-const hash = str =>
-  crypto
-    .createHash('sha256')
-    .update(str)
-    .digest('hex');
+const hash = (str) => crypto.createHash('sha256').update(str).digest('hex');
 
-const hashProject = strapi =>
+const hashProject = (strapi) =>
   hash(`${strapi.config.get('info.name')}${strapi.config.get('info.description')}`);
 
-const hashDep = strapi => {
+const hashDep = (strapi) => {
   const depStr = JSON.stringify(strapi.config.info.dependencies);
-  const readmePath = path.join(strapi.dirs.root, 'README.md');
+  const readmePath = path.join(strapi.dirs.app.root, 'README.md');
 
   try {
     if (fs.existsSync(readmePath)) {

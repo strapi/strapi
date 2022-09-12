@@ -13,7 +13,6 @@
   "HeaderNav.link.advancedSettings": "Gelişmiş Ayarlar",
   "HeaderNav.link.emailTemplates": "E-posta Şablonları",
   "HeaderNav.link.providers": "Sağlayıcıları",
-  "HeaderNav.link.roles": "Kurallar",
   "Plugin.permissions.plugins.description": "{name} eklentisi için izin verilen tüm eylemleri tanımlayın.",
   "Plugins.header.description": "Yalnızca bir güzergahla sınırlandırılan işlemler aşağıda listelenmiştir.",
   "Plugins.header.title": "İzinler",

@@ -8,7 +8,7 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
 let rq;
-let data = {
+const data = {
   products: [],
   shops: [],
 };

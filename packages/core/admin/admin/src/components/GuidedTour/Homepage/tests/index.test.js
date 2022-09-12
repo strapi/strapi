@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
-import { useGuidedTour } from '@strapi/helper-plugin';
+import { useGuidedTour, TrackingProvider } from '@strapi/helper-plugin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import GuidedTourHomepage from '../index';
 
@@ -31,13 +31,15 @@ jest.mock('@strapi/helper-plugin', () => ({
 const history = createMemoryHistory();
 
 const App = (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}} textComponent="span">
-      <Router history={history}>
-        <GuidedTourHomepage />
-      </Router>
-    </IntlProvider>
-  </ThemeProvider>
+  <TrackingProvider>
+    <ThemeProvider theme={lightTheme}>
+      <IntlProvider locale="en" messages={{}} textComponent="span">
+        <Router history={history}>
+          <GuidedTourHomepage />
+        </Router>
+      </IntlProvider>
+    </ThemeProvider>
+  </TrackingProvider>
 );
 
 describe('GuidedTour Homepage', () => {
@@ -57,12 +59,12 @@ describe('GuidedTour Homepage', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c4 {
+      .c5 {
         margin-right: 20px;
         min-width: 1.875rem;
       }
 
-      .c11 {
+      .c12 {
         background: #7b79ff;
         border-radius: 4px;
         width: 0.125rem;
@@ -70,11 +72,11 @@ describe('GuidedTour Homepage', () => {
         min-height: 5.3125rem;
       }
 
-      .c12 {
+      .c13 {
         margin-top: 8px;
       }
 
-      .c21 {
+      .c22 {
         background: #c0c0cf;
         border-radius: 4px;
         width: 0.125rem;
@@ -82,14 +84,14 @@ describe('GuidedTour Homepage', () => {
         min-height: 4.0625rem;
       }
 
-      .c26 {
+      .c27 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c23 {
+      .c24 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -103,21 +105,21 @@ describe('GuidedTour Homepage', () => {
         outline: none;
       }
 
-      .c23 svg {
+      .c24 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c23 svg > g,
-      .c23 svg path {
+      .c24 svg > g,
+      .c24 svg path {
         fill: #ffffff;
       }
 
-      .c23[aria-disabled='true'] {
+      .c24[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c23:after {
+      .c24:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -132,11 +134,11 @@ describe('GuidedTour Homepage', () => {
         border: 2px solid transparent;
       }
 
-      .c23:focus-visible {
+      .c24:focus-visible {
         outline: none;
       }
 
-      .c23:focus-visible:after {
+      .c24:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -147,19 +149,19 @@ describe('GuidedTour Homepage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c24 {
+      .c25 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
+        border: 1px solid #4945ff;
         border: 1px solid #dcdce4;
         background: #ffffff;
       }
 
-      .c24 .sc-hKwDye {
+      .c25 .sc-hKwDye {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -170,56 +172,56 @@ describe('GuidedTour Homepage', () => {
         align-items: center;
       }
 
-      .c24 .c25 {
+      .c25 .c26 {
         color: #ffffff;
       }
 
-      .c24[aria-disabled='true'] {
+      .c25[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c24[aria-disabled='true'] .c25 {
+      .c25[aria-disabled='true'] .c26 {
         color: #666687;
       }
 
-      .c24[aria-disabled='true'] svg > g,
-      .c24[aria-disabled='true'] svg path {
+      .c25[aria-disabled='true'] svg > g,
+      .c25[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c24[aria-disabled='true']:active {
+      .c25[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c24[aria-disabled='true']:active .c25 {
+      .c25[aria-disabled='true']:active .c26 {
         color: #666687;
       }
 
-      .c24[aria-disabled='true']:active svg > g,
-      .c24[aria-disabled='true']:active svg path {
+      .c25[aria-disabled='true']:active svg > g,
+      .c25[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c24:hover {
+      .c25:hover {
         background-color: #f6f6f9;
       }
 
-      .c24:active {
+      .c25:active {
         background-color: #eaeaef;
       }
 
-      .c24 .c25 {
+      .c25 .c26 {
         color: #32324d;
       }
 
-      .c24 svg > g,
-      .c24 svg path {
+      .c25 svg > g,
+      .c25 svg path {
         fill: #32324d;
       }
 
-      .c5 {
+      .c6 {
         background: #4945ff;
         padding: 8px;
         border-radius: 50%;
@@ -227,14 +229,14 @@ describe('GuidedTour Homepage', () => {
         height: 1.875rem;
       }
 
-      .c10 {
+      .c11 {
         margin-right: 20px;
         margin-top: 12px;
         margin-bottom: 12px;
         min-width: 1.875rem;
       }
 
-      .c19 {
+      .c20 {
         padding: 8px;
         border-radius: 50%;
         border-style: solid;
@@ -244,7 +246,11 @@ describe('GuidedTour Homepage', () => {
         height: 1.875rem;
       }
 
-      .c3 {
+      .c4 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -252,13 +258,13 @@ describe('GuidedTour Homepage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c7 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -270,13 +276,13 @@ describe('GuidedTour Homepage', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
-      .c9 {
+      .c10 {
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -284,13 +290,13 @@ describe('GuidedTour Homepage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: flex-start;
-        -webkit-box-align: flex-start;
-        -ms-flex-align: flex-start;
-        align-items: flex-start;
       }
 
-      .c22 {
+      .c23 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -302,13 +308,13 @@ describe('GuidedTour Homepage', () => {
         -webkit-justify-content: flex-end;
         -ms-flex-pack: end;
         justify-content: flex-end;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c1 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -318,55 +324,55 @@ describe('GuidedTour Homepage', () => {
         flex-direction: column;
       }
 
-      .c1 > * {
+      .c2 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c1 > * + * {
+      .c2 > * + * {
         margin-top: 24px;
       }
 
-      .c2 {
+      .c3 {
         color: #32324d;
         font-weight: 600;
         font-size: 1.125rem;
         line-height: 1.22;
       }
 
-      .c7 {
+      .c8 {
         font-weight: 500;
         color: #ffffff;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c8 {
+      .c9 {
         color: #32324d;
         font-weight: 500;
         font-size: 1rem;
         line-height: 1.25;
       }
 
-      .c20 {
+      .c21 {
         font-weight: 500;
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
       }
 
-      .c16 {
+      .c17 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c18 {
+      .c19 {
         padding-left: 8px;
       }
 
-      .c13 {
+      .c14 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -380,21 +386,21 @@ describe('GuidedTour Homepage', () => {
         outline: none;
       }
 
-      .c13 svg {
+      .c14 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c13 svg > g,
-      .c13 svg path {
+      .c14 svg > g,
+      .c14 svg path {
         fill: #ffffff;
       }
 
-      .c13[aria-disabled='true'] {
+      .c14[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c13:after {
+      .c14:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -409,11 +415,11 @@ describe('GuidedTour Homepage', () => {
         border: 2px solid transparent;
       }
 
-      .c13:focus-visible {
+      .c14:focus-visible {
         outline: none;
       }
 
-      .c13:focus-visible:after {
+      .c14:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -424,13 +430,11 @@ describe('GuidedTour Homepage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c14 {
+      .c15 {
         padding: 8px 16px;
         background: #4945ff;
-        border: none;
-        border-radius: 4px;
         border: 1px solid #4945ff;
-        background: #4945ff;
+        border-radius: 4px;
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -439,7 +443,7 @@ describe('GuidedTour Homepage', () => {
         text-decoration: none;
       }
 
-      .c14 .c17 {
+      .c15 .c18 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -450,56 +454,62 @@ describe('GuidedTour Homepage', () => {
         align-items: center;
       }
 
-      .c14 .c15 {
+      .c15 .c16 {
         color: #ffffff;
       }
 
-      .c14[aria-disabled='true'] {
+      .c15[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true'] .c15 {
+      .c15[aria-disabled='true'] .c16 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true'] svg > g,
-      .c14[aria-disabled='true'] svg path {
+      .c15[aria-disabled='true'] svg > g,
+      .c15[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c14[aria-disabled='true']:active {
+      .c15[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true']:active .c15 {
+      .c15[aria-disabled='true']:active .c16 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true']:active svg > g,
-      .c14[aria-disabled='true']:active svg path {
+      .c15[aria-disabled='true']:active svg > g,
+      .c15[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c14:hover {
+      .c15:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c14:active {
+      .c15:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c15 svg > g,
+      .c15 svg path {
+        fill: #ffffff;
       }
 
       <div
         class="c0"
       >
         <div
-          class="c1"
+          class="c1 c2"
+          spacing="6"
         >
           <h2
-            class="c2"
+            class="c3"
           >
             3 steps to get started
           </h2>
@@ -510,58 +520,58 @@ describe('GuidedTour Homepage', () => {
               class=""
             >
               <div
-                class="c3"
+                class="c4"
               >
                 <div
-                  class="c4"
+                  class="c5"
                 >
                   <div
-                    class="c5 c6"
+                    class="c6 c7"
                     height="1.875rem"
                     width="1.875rem"
                   >
                     <span
-                      class="c7"
+                      class="c8"
                     >
                       1
                     </span>
                   </div>
                 </div>
                 <h3
-                  class="c8"
+                  class="c9"
                 >
                   🧠 Build the content structure
                 </h3>
               </div>
               <div
-                class="c9"
+                class="c10"
               >
                 <div
-                  class="c10 c6"
+                  class="c11 c7"
                 >
                   <div
-                    class="c11"
+                    class="c12"
                     height="100%"
                     width="0.125rem"
                   />
                 </div>
                 <div
-                  class="c12"
+                  class="c13"
                 >
                   <a
                     aria-disabled="false"
-                    class="c13 c14"
+                    class="c14 c15"
                     href="/plugins/content-type-builder"
                     variant="default"
                   >
                     <span
-                      class="c15 c16"
+                      class="c16 c17"
                     >
                       Go to the Content type Builder
                     </span>
                     <div
                       aria-hidden="true"
-                      class="c17 c18"
+                      class="c18 c19"
                     >
                       <svg
                         fill="none"
@@ -584,43 +594,43 @@ describe('GuidedTour Homepage', () => {
               class=""
             >
               <div
-                class="c3"
+                class="c4"
               >
                 <div
-                  class="c4"
+                  class="c5"
                 >
                   <div
-                    class="c19 c6"
+                    class="c20 c7"
                     height="1.875rem"
                     width="1.875rem"
                   >
                     <span
-                      class="c20"
+                      class="c21"
                     >
                       2
                     </span>
                   </div>
                 </div>
                 <h3
-                  class="c8"
+                  class="c9"
                 >
                   ⚡️ What would you like to share with the world?
                 </h3>
               </div>
               <div
-                class="c9"
+                class="c10"
               >
                 <div
-                  class="c10 c6"
+                  class="c11 c7"
                 >
                   <div
-                    class="c21"
+                    class="c22"
                     height="100%"
                     width="0.125rem"
                   />
                 </div>
                 <div
-                  class="c12"
+                  class="c13"
                 />
               </div>
             </div>
@@ -628,52 +638,52 @@ describe('GuidedTour Homepage', () => {
               class=""
             >
               <div
-                class="c3"
+                class="c4"
               >
                 <div
-                  class="c4"
+                  class="c5"
                 >
                   <div
-                    class="c19 c6"
+                    class="c20 c7"
                     height="1.875rem"
                     width="1.875rem"
                   >
                     <span
-                      class="c20"
+                      class="c21"
                     >
                       3
                     </span>
                   </div>
                 </div>
                 <h3
-                  class="c8"
+                  class="c9"
                 >
                   🚀 See content in action
                 </h3>
               </div>
               <div
-                class="c9"
+                class="c10"
               >
                 <div
-                  class="c10 c6"
+                  class="c11 c7"
                 />
                 <div
-                  class="c12"
+                  class="c13"
                 />
               </div>
             </div>
           </div>
         </div>
         <div
-          class="c22"
+          class="c23"
         >
           <button
             aria-disabled="false"
-            class="c23 c24"
+            class="c24 c25"
             type="button"
           >
             <span
-              class="c25 c26"
+              class="c26 c27"
             >
               Skip the tour
             </span>

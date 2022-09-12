@@ -75,7 +75,7 @@ const SortDisplayedFields = ({
         hasRadius
       >
         <ScrollableContainer size="1" paddingBottom={4} ref={scrollableContainerRef}>
-          <Stack horizontal size={3}>
+          <Stack horizontal spacing={3}>
             {displayedFields.map((field, index) => (
               <DraggableCard
                 key={field}
@@ -83,7 +83,7 @@ const SortDisplayedFields = ({
                 isDraggingSibling={isDraggingSibling}
                 onMoveField={onMoveField}
                 onClickEditField={onClickEditField}
-                onRemoveField={e => handleRemoveField(e, index)}
+                onRemoveField={(e) => handleRemoveField(e, index)}
                 name={field}
                 labelField={metadatas[field].list.label || field}
                 setIsDraggingSibling={setIsDraggingSibling}
@@ -102,7 +102,7 @@ const SortDisplayedFields = ({
             disabled={listRemainingFields.length <= 0}
             data-testid="add-field"
           >
-            {listRemainingFields.map(field => (
+            {listRemainingFields.map((field) => (
               <MenuItem key={field} onClick={() => handleAddField(field)}>
                 {field}
               </MenuItem>

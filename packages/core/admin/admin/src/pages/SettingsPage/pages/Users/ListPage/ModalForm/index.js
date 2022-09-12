@@ -34,14 +34,14 @@ const ModalForm = ({ queryName, onToggle }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const postMutation = useMutation(body => axiosInstance.post('/admin/users', body), {
-    onSuccess: async ({ data }) => {
+  const postMutation = useMutation((body) => axiosInstance.post('/admin/users', body), {
+    async onSuccess({ data }) {
       setRegistrationToken(data.data.registrationToken);
       await queryClient.invalidateQueries(queryName);
       goNext();
       setIsSubmitting(false);
     },
-    onError: err => {
+    onError(err) {
       setIsSubmitting(false);
 
       toggleNotification({
@@ -51,7 +51,7 @@ const ModalForm = ({ queryName, onToggle }) => {
 
       throw err;
     },
-    onSettled: () => {
+    onSettled() {
       unlockApp();
     },
   });
@@ -112,7 +112,7 @@ const ModalForm = ({ queryName, onToggle }) => {
           return (
             <Form>
               <ModalBody>
-                <Stack size={6}>
+                <Stack spacing={6}>
                   {currentStep !== 'create' && <MagicLink registrationToken={registrationToken} />}
                   <Box>
                     <Typography variant="beta" as="h2">
@@ -122,10 +122,10 @@ const ModalForm = ({ queryName, onToggle }) => {
                       })}
                     </Typography>
                     <Box paddingTop={4}>
-                      <Stack size={1}>
+                      <Stack spacing={1}>
                         <Grid gap={5}>
-                          {layout.map(row => {
-                            return row.map(input => {
+                          {layout.map((row) => {
+                            return row.map((input) => {
                               return (
                                 <GridItem key={input.name} {...input.size}>
                                   <GenericInput
@@ -146,7 +146,7 @@ const ModalForm = ({ queryName, onToggle }) => {
                   <Box>
                     <Typography variant="beta" as="h2">
                       {formatMessage({
-                        id: 'app.components.Users.ModalCreateBody.block-title.login',
+                        id: 'global.roles',
                         defaultMessage: "User's role",
                       })}
                     </Typography>
@@ -160,8 +160,8 @@ const ModalForm = ({ queryName, onToggle }) => {
                             value={values.roles}
                           />
                         </GridItem>
-                        {roleSettingsForm.map(row => {
-                          return row.map(input => {
+                        {roleSettingsForm.map((row) => {
+                          return row.map((input) => {
                             return (
                               <GridItem key={input.name} {...input.size}>
                                 <GenericInput

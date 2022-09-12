@@ -23,7 +23,7 @@ import {
   PageLink,
 } from '@strapi/design-system/Pagination';
 import PropTypes from 'prop-types';
-import { useLocation } from 'react-router-dom';
+import { useLocation, NavLink } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { stringify } from 'qs';
 import useQueryParams from '../../hooks/useQueryParams';
@@ -33,13 +33,13 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
   const activePage = parseInt(query?.page || '1', 10);
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
-  const makeSearch = page => stringify({ ...query, page }, { encode: false });
+  const makeSearch = (page) => stringify({ ...query, page }, { encode: false });
   const nextSearch = makeSearch(activePage + (pageCount > 1 ? 1 : 0));
 
   const previousSearch = makeSearch(activePage - 1);
 
   const firstLinks = [
-    <PageLink key={1} number={1} to={`${pathname}?${makeSearch(1)}`}>
+    <PageLink as={NavLink} key={1} number={1} to={`${pathname}?${makeSearch(1)}`}>
       {formatMessage(
         { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
         { page: 1 }
@@ -50,9 +50,14 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
   if (pageCount <= 4) {
     const links = Array.from({ length: pageCount })
       .map((_, i) => i + 1)
-      .map(number => {
+      .map((number) => {
         return (
-          <PageLink key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
+          <PageLink
+            as={NavLink}
+            key={number}
+            number={number}
+            to={`${pathname}?${makeSearch(number)}`}
+          >
             {formatMessage(
               { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
               { page: number }
@@ -63,14 +68,14 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
 
     return (
       <Pagination activePage={activePage} pageCount={pageCount}>
-        <PreviousLink to={`${pathname}?${previousSearch}`}>
+        <PreviousLink as={NavLink} to={`${pathname}?${previousSearch}`}>
           {formatMessage({
             id: 'components.pagination.go-to-previous',
             defaultMessage: 'Go to previous page',
           })}
         </PreviousLink>
         {links}
-        <NextLink to={`${pathname}?${nextSearch}`}>
+        <NextLink as={NavLink} to={`${pathname}?${nextSearch}`}>
           {formatMessage({
             id: 'components.pagination.go-to-next',
             defaultMessage: 'Go to next page',
@@ -87,7 +92,12 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
 
   if (pageCount > 1) {
     lastLinks.push(
-      <PageLink key={pageCount} number={pageCount} to={`${pathname}?${makeSearch(pageCount)}`}>
+      <PageLink
+        as={NavLink}
+        key={pageCount}
+        number={pageCount}
+        to={`${pathname}?${makeSearch(pageCount)}`}
+      >
         {formatMessage(
           { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
           { page: pageCount }
@@ -130,17 +140,17 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
     lastLinksToCreate = [activePage, activePage - 1];
   }
 
-  lastLinksToCreate.forEach(number => {
+  lastLinksToCreate.forEach((number) => {
     lastLinks.unshift(
-      <PageLink key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
+      <PageLink as={NavLink} key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
         Go to page {number}
       </PageLink>
     );
   });
 
-  firstLinksToCreate.forEach(number => {
+  firstLinksToCreate.forEach((number) => {
     firstLinks.push(
-      <PageLink key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
+      <PageLink as={NavLink} key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
         {formatMessage(
           { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
           { page: number }
@@ -156,9 +166,14 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
   ) {
     const middleLinksToCreate = [activePage - 1, activePage, activePage + 1];
 
-    middleLinksToCreate.forEach(number => {
+    middleLinksToCreate.forEach((number) => {
       middleLinks.push(
-        <PageLink key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
+        <PageLink
+          as={NavLink}
+          key={number}
+          number={number}
+          to={`${pathname}?${makeSearch(number)}`}
+        >
           {formatMessage(
             { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
             { page: number }
@@ -181,7 +196,7 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
 
   return (
     <Pagination activePage={activePage} pageCount={pageCount}>
-      <PreviousLink to={`${pathname}?${previousSearch}`}>
+      <PreviousLink as={NavLink} to={`${pathname}?${previousSearch}`}>
         {formatMessage({
           id: 'components.pagination.go-to-previous',
           defaultMessage: 'Go to previous page',
@@ -212,7 +227,7 @@ const PaginationURLQuery = ({ pagination: { pageCount } }) => {
         </Dots>
       )}
       {lastLinks}
-      <NextLink to={`${pathname}?${nextSearch}`}>
+      <NextLink as={NavLink} to={`${pathname}?${nextSearch}`}>
         {formatMessage({
           id: 'components.pagination.go-to-next',
           defaultMessage: 'Go to next page',

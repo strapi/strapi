@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { AutoSizer, Collection } from 'react-virtualized';
+import { FixedSizeGrid } from 'react-window';
 import { Searchbar } from '@strapi/design-system/Searchbar';
 import { IconButton } from '@strapi/design-system/IconButton';
 import Search from '@strapi/icons/Search';
@@ -10,30 +10,24 @@ import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
+
+import { getIndexFromColAndRow } from './utils/getIndexFromColAndRow';
 import useDataManager from '../../hooks/useDataManager';
 import getTrad from '../../utils/getTrad';
 import Cell from './Cell';
 
-const CELL_WIDTH = 44;
+const CELL_WIDTH = 42;
+const COLUMN_COUNT = 18;
 
-const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, value }) => {
-  const { allIcons, allComponentsIconAlreadyTaken } = useDataManager();
+const ComponentIconPicker = ({ error, intlLabel, name, onChange, value }) => {
+  const { allIcons } = useDataManager();
   const { formatMessage } = useIntl();
-  const [originalIcon] = useState(value);
-  const initialIcons = allIcons.filter(ico => {
-    if (isCreating) {
-      return !allComponentsIconAlreadyTaken.includes(ico);
-    }
-
-    // Edition
-    return !allComponentsIconAlreadyTaken.filter(icon => icon !== originalIcon).includes(ico);
-  });
 
   const searchWrapperRef = useRef();
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState('');
-  const [icons, setIcons] = useState(initialIcons);
-  const toggleSearch = () => setShowSearch(prev => !prev);
+  const [icons, setIcons] = useState(allIcons);
+  const toggleSearch = () => setShowSearch((prev) => !prev);
 
   useEffect(() => {
     if (showSearch) {
@@ -43,33 +37,39 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
 
   const handleChangeSearch = ({ target: { value } }) => {
     setSearch(value);
-    setIcons(() => initialIcons.filter(icon => icon.includes(value)));
+    setIcons(() => allIcons.filter((icon) => icon.includes(value)));
+  };
+
+  // eslint-disable-next-line react/prop-types
+  const IconRenderer = ({ columnIndex, rowIndex, style }) => {
+    const icon = icons[getIndexFromColAndRow(columnIndex, rowIndex, COLUMN_COUNT)];
+
+    return (
+      <div style={style} key={`col-${columnIndex}`}>
+        {icon && (
+          <Cell
+            style={{ width: '100%', height: '100%' }}
+            alignItems="center"
+            justifyContent="center"
+            onClick={() => {
+              onChange({ target: { name, value: icon } });
+            }}
+            isSelected={icon === value}
+            as="button"
+            type="button"
+          >
+            <FontAwesomeIcon icon={icon} />
+          </Cell>
+        )}
+      </div>
+    );
   };
 
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
-  const cellSizeAndPositionGetter = ({ index }) => {
-    const columnCount = 16;
-    const columnPosition = index % (columnCount || 1);
-
-    const height = CELL_WIDTH;
-    const width = CELL_WIDTH;
-    const x = columnPosition * (width + 1);
-    const y = parseInt(index / 16, 10) * CELL_WIDTH;
-
-    return {
-      height,
-      width,
-      x,
-      y,
-    };
-  };
-
-  const cellCount = icons.length;
-
   return (
     <Box>
-      <Stack size={1}>
+      <Stack spacing={1}>
         <Flex justifyContent="space-between">
           <Typography
             variant="pi"
@@ -91,7 +91,7 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
                 }}
                 onClear={() => {
                   setSearch('');
-                  setIcons(initialIcons);
+                  setIcons(allIcons);
                   toggleSearch();
                 }}
                 value={search}
@@ -113,45 +113,18 @@ const ComponentIconPicker = ({ error, isCreating, intlLabel, name, onChange, val
             <IconButton onClick={toggleSearch} aria-label="Edit" icon={<Search />} noBorder />
           )}
         </Flex>
-        <Stack size={1}>
-          <Box background="neutral100" borderColor={error ? 'danger600' : ''} hasRadius>
-            <Box>
-              <AutoSizer disableHeight>
-                {({ width }) => {
-                  return (
-                    <Collection
-                      cellCount={cellCount}
-                      cellRenderer={({ index, key, style }) => {
-                        const icon = icons[index];
-                        const isSelected = icon === value;
-                        const handleClick = () => {
-                          onChange({ target: { name, value: icon } });
-                        };
-
-                        return (
-                          <div style={{ ...style, width: CELL_WIDTH }} key={key}>
-                            <Cell
-                              style={{ width: '100%', height: CELL_WIDTH }}
-                              alignItems="center"
-                              justifyContent="center"
-                              onClick={handleClick}
-                              isSelected={isSelected}
-                              as="button"
-                              type="button"
-                            >
-                              <FontAwesomeIcon icon={icon} />
-                            </Cell>
-                          </div>
-                        );
-                      }}
-                      cellSizeAndPositionGetter={cellSizeAndPositionGetter}
-                      height={132}
-                      width={width}
-                    />
-                  );
-                }}
-              </AutoSizer>
-            </Box>
+        <Stack spacing={1}>
+          <Box padding={1} background="neutral100" borderColor={error ? 'danger600' : ''} hasRadius>
+            <FixedSizeGrid
+              columnCount={COLUMN_COUNT}
+              columnWidth={CELL_WIDTH}
+              height={132}
+              rowHeight={CELL_WIDTH}
+              rowCount={Math.ceil(icons.length / COLUMN_COUNT)}
+              width={CELL_WIDTH * COLUMN_COUNT}
+            >
+              {IconRenderer}
+            </FixedSizeGrid>
           </Box>
           {error && (
             <Typography
@@ -175,7 +148,6 @@ ComponentIconPicker.defaultProps = {
 
 ComponentIconPicker.propTypes = {
   error: PropTypes.string,
-  isCreating: PropTypes.bool.isRequired,
   intlLabel: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,

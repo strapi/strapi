@@ -141,13 +141,13 @@ const DraggableCard = ({
 
   const [{ isDragging }, drag, preview] = useDrag({
     type: ItemTypes.FIELD,
-    item: () => {
+    item() {
       return { index, labelField, name };
     },
-    collect: monitor => ({
+    collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
-    end: () => {
+    end() {
       setIsDraggingSibling(false);
     },
   });
@@ -167,7 +167,7 @@ const DraggableCard = ({
   // anymore, this hack forces a rerender in order to apply the dragRef
   useEffect(() => {
     if (!isDraggingSibling) {
-      forceRerenderAfterDnd(prev => !prev);
+      forceRerenderAfterDnd((prev) => !prev);
     }
   }, [isDraggingSibling]);
 
@@ -193,7 +193,7 @@ const DraggableCard = ({
           onClick={handleClickEditRow}
           isDragging={isDragging}
         >
-          <Stack horizontal size={3}>
+          <Stack horizontal spacing={3}>
             <DragButton
               as="span"
               aria-label={formatMessage(
@@ -203,7 +203,7 @@ const DraggableCard = ({
                 },
                 { item: name }
               )}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               ref={refs.dragRef}
               type="button"
             >
@@ -214,7 +214,7 @@ const DraggableCard = ({
           <Flex paddingLeft={3}>
             <ActionButton
               ref={editButtonRef}
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 onClickEditField(name);
               }}

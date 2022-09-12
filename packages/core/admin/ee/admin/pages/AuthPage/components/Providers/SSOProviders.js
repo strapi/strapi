@@ -63,7 +63,7 @@ const SSOProviders = ({ providers, displayAllProviders }) => {
   if (displayAllProviders) {
     return (
       <Grid gap={4}>
-        {providers.map(provider => (
+        {providers.map((provider) => (
           <GridItem key={provider.uid} col={4}>
             <SSOProviderButton provider={provider} />
           </GridItem>
@@ -75,7 +75,7 @@ const SSOProviders = ({ providers, displayAllProviders }) => {
   if (providers.length > 2 && !displayAllProviders) {
     return (
       <Grid gap={4}>
-        {providers.slice(0, 2).map(provider => (
+        {providers.slice(0, 2).map((provider) => (
           <GridItem key={provider.uid} col={4}>
             <SSOProviderButton provider={provider} />
           </GridItem>
@@ -83,7 +83,7 @@ const SSOProviders = ({ providers, displayAllProviders }) => {
         <GridItem col={4}>
           <Tooltip
             label={formatMessage({
-              id: 'Auth.form.button.login.providers.see-more',
+              id: 'global.see-more',
             })}
           >
             <SSOButton as={Link} to="/auth/providers">
@@ -97,7 +97,7 @@ const SSOProviders = ({ providers, displayAllProviders }) => {
 
   return (
     <SSOProvidersWrapper justifyContent="center">
-      {providers.map(provider => (
+      {providers.map((provider) => (
         <SSOProviderButton key={provider.uid} provider={provider} />
       ))}
     </SSOProvidersWrapper>

@@ -50,13 +50,17 @@ const ActionWrapper = styled.div`
 `;
 
 const mapToLocaleName = (locales, localeCode) =>
-  get(locales.find(({ code }) => code === localeCode), 'name', localeCode);
+  get(
+    locales.find(({ code }) => code === localeCode),
+    'name',
+    localeCode
+  );
 
 const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
   const locales = useSelector(selectI18NLocales);
   const allLocalizations = [{ locale: currentLocaleCode }, ...localizations];
-  const localizationNames = allLocalizations.map(locale => locale.locale);
-  const defaultLocale = locales.find(locale => locale.isDefault);
+  const localizationNames = allLocalizations.map((locale) => locale.locale);
+  const defaultLocale = locales.find((locale) => locale.isDefault);
   const hasDefaultLocale = localizationNames.includes(defaultLocale.code);
   const [visible, setVisible] = useState(false);
   const buttonRef = useRef();
@@ -66,9 +70,9 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
 
   if (hasDefaultLocale) {
     const ctLocalesWithoutDefault = localizationNames.filter(
-      locale => locale !== defaultLocale.code
+      (locale) => locale !== defaultLocale.code
     );
-    const ctLocalesNamesWithoutDefault = ctLocalesWithoutDefault.map(locale =>
+    const ctLocalesNamesWithoutDefault = ctLocalesWithoutDefault.map((locale) =>
       mapToLocaleName(locales, locale)
     );
 
@@ -81,13 +85,13 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
 
     localesArray = ctLocalesNamesWithDefault;
   } else {
-    const ctLocales = localizationNames.map(locale => mapToLocaleName(locales, locale));
+    const ctLocales = localizationNames.map((locale) => mapToLocaleName(locales, locale));
     ctLocales.sort();
 
     localesArray = ctLocales;
   }
 
-  const handleTogglePopover = () => setVisible(prev => !prev);
+  const handleTogglePopover = () => setVisible((prev) => !prev);
 
   const elId = `entry-${id}__locale`;
   const localesNames = localesArray.join(', ');
@@ -117,7 +121,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
               {visible && (
                 <Popover source={buttonRef} spacing={16} centered>
                   <ul>
-                    {localesArray.map(name => (
+                    {localesArray.map((name) => (
                       <Box key={name} padding={3} as="li">
                         <Typography>{name}</Typography>
                       </Box>

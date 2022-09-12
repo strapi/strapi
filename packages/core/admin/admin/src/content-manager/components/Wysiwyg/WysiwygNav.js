@@ -11,7 +11,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import Bold from '@strapi/icons/Bold';
 import Italic from '@strapi/icons/Italic';
 import Underline from '@strapi/icons/Underline';
-import Strikethrough from '@strapi/icons/Strikethrough';
+import StrikeThrough from '@strapi/icons/StrikeThrough';
 import BulletList from '@strapi/icons/BulletList';
 import NumberList from '@strapi/icons/NumberList';
 import Code from '@strapi/icons/Code';
@@ -45,7 +45,7 @@ const WysiwygNav = ({
   const buttonMoreRef = useRef();
 
   const handleTogglePopover = () => {
-    setVisiblePopover(prev => !prev);
+    setVisiblePopover((prev) => !prev);
   };
 
   if (disabled || isPreviewMode) {
@@ -110,7 +110,7 @@ const WysiwygNav = ({
             id="selectTitle"
             placeholder={selectPlaceholder}
             size="S"
-            onChange={value => onActionClick(value, editorRef)}
+            onChange={(value) => onActionClick(value, editorRef)}
           >
             <Option value="h1">h1</Option>
             <Option value="h2">h2</Option>
@@ -161,7 +161,7 @@ const WysiwygNav = ({
                       id="Strikethrough"
                       label="Strikethrough"
                       name="Strikethrough"
-                      icon={<Strikethrough />}
+                      icon={<StrikeThrough />}
                     />
                     <CustomIconButton
                       onClick={() => onActionClick('BulletList', editorRef, handleTogglePopover)}
@@ -233,8 +233,8 @@ const WysiwygNav = ({
 
 WysiwygNav.defaultProps = {
   isPreviewMode: false,
-  onActionClick: () => {},
-  onToggleMediaLib: () => {},
+  onActionClick() {},
+  onToggleMediaLib() {},
   onTogglePreviewMode: undefined,
 };
 

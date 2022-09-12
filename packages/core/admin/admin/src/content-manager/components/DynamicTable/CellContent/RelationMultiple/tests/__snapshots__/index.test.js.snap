@@ -1,0 +1,291 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DynamicTabe / Cellcontent / RelationMultiple renders and matches the snapshot 1`] = `
+.c11 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c5 {
+  background: #f6f6f9;
+  padding: 4px;
+  border-radius: 4px;
+  min-width: 20px;
+}
+
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c7 {
+  color: #666687;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.c4 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c9 {
+  padding-left: 8px;
+}
+
+.c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c0 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c0 svg > g,
+.c0 svg path {
+  fill: #ffffff;
+}
+
+.c0[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c0:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c0:focus-visible {
+  outline: none;
+}
+
+.c0:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c1 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+  border: 1px solid transparent;
+  background: transparent;
+}
+
+.c1 .c8 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c1 .c3 {
+  color: #ffffff;
+}
+
+.c1[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c1[aria-disabled='true'] .c3 {
+  color: #666687;
+}
+
+.c1[aria-disabled='true'] svg > g,
+.c1[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c1[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c1[aria-disabled='true']:active .c3 {
+  color: #666687;
+}
+
+.c1[aria-disabled='true']:active svg > g,
+.c1[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c1:hover {
+  background-color: #f6f6f9;
+}
+
+.c1:active {
+  border: 1px solid undefined;
+  background: undefined;
+}
+
+.c1 .c3 {
+  color: #32324d;
+}
+
+.c1 svg > g,
+.c1 svg path {
+  fill: #8e8ea9;
+}
+
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c10 svg {
+  height: 4px;
+  width: 6px;
+}
+
+.c2 {
+  padding: 4px 12px;
+}
+
+<div>
+  <div
+    aria-hidden="true"
+    class=""
+    role="button"
+  >
+    <div>
+      <button
+        aria-controls="simplemenu-1"
+        aria-disabled="false"
+        aria-expanded="false"
+        aria-haspopup="true"
+        class="c0 c1 c2"
+        type="button"
+      >
+        <span
+          class="c3 c4"
+        >
+          <div
+            class="c5 c6"
+          >
+            <span
+              class="c7"
+            >
+              1
+            </span>
+          </div>
+           
+          item
+        </span>
+        <div
+          aria-hidden="true"
+          class="c8 c9"
+        >
+          <span
+            class="c10"
+          >
+            <svg
+              aria-hidden="true"
+              fill="none"
+              height="1em"
+              viewBox="0 0 14 8"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                fill="#32324D"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </span>
+        </div>
+      </button>
+    </div>
+  </div>
+  <div
+    class="c11"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;

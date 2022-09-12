@@ -8,7 +8,7 @@ import reducer, { initialState } from './reducer';
 const Notifications = ({ children }) => {
   const [{ notifications }, dispatch] = useReducer(reducer, initialState);
 
-  const displayNotification = config => {
+  const displayNotification = (config) => {
     dispatch({
       type: 'SHOW_NOTIFICATION',
       config,
@@ -21,12 +21,12 @@ const Notifications = ({ children }) => {
         left="50%"
         marginLeft="-250px"
         position="fixed"
-        size={2}
+        spacing={2}
         top={`${46 / 16}rem`}
         width={`${500 / 16}rem`}
         zIndex={10}
       >
-        {notifications.map(notification => {
+        {notifications.map((notification) => {
           return (
             <Notification key={notification.id} dispatch={dispatch} notification={notification} />
           );

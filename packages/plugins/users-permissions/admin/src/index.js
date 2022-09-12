@@ -26,12 +26,12 @@ export default {
       [
         {
           intlLabel: {
-            id: getTrad('HeaderNav.link.roles'),
+            id: 'global.roles',
             defaultMessage: 'Roles',
           },
           id: 'roles',
           to: `/settings/${pluginId}/roles`,
-          Component: async () => {
+          async Component() {
             const component = await import(
               /* webpackChunkName: "users-roles-settings-page" */ './pages/Roles'
             );
@@ -47,7 +47,7 @@ export default {
           },
           id: 'providers',
           to: `/settings/${pluginId}/providers`,
-          Component: async () => {
+          async Component() {
             const component = await import(
               /* webpackChunkName: "users-providers-settings-page" */ './pages/Providers'
             );
@@ -63,7 +63,7 @@ export default {
           },
           id: 'email-templates',
           to: `/settings/${pluginId}/email-templates`,
-          Component: async () => {
+          async Component() {
             const component = await import(
               /* webpackChunkName: "users-email-settings-page" */ './pages/EmailTemplates'
             );
@@ -79,7 +79,7 @@ export default {
           },
           id: 'advanced-settings',
           to: `/settings/${pluginId}/advanced-settings`,
-          Component: async () => {
+          async Component() {
             const component = await import(
               /* webpackChunkName: "users-advanced-settings-page" */ './pages/AdvancedSettings'
             );
@@ -99,7 +99,7 @@ export default {
   bootstrap() {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map(locale => {
+      locales.map((locale) => {
         return import(
           /* webpackChunkName: "users-permissions-translation-[request]" */ `./translations/${locale}.json`
         )

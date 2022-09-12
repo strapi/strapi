@@ -30,7 +30,7 @@ const PermissionRow = ({
   return (
     <Accordion
       expanded={isOpen}
-      toggle={handleClick}
+      onToggle={handleClick}
       id={`accordion-${name}`}
       variant={isWhite ? 'primary' : 'secondary'}
     >

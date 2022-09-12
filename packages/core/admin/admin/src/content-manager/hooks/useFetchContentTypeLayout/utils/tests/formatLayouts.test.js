@@ -124,7 +124,10 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
             uid: 'compo',
             layouts: {
               edit: [
-                [{ name: 'full_name', size: 6 }, { name: 'city', size: 6 }],
+                [
+                  { name: 'full_name', size: 6 },
+                  { name: 'city', size: 6 },
+                ],
                 [{ name: 'compo', size: 12 }],
               ],
             },
@@ -166,7 +169,10 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
             editRelations: [],
             edit: [
               [{ name: 'dz', size: 12 }],
-              [{ name: 'full_name', size: 6 }, { name: 'city', size: 6 }],
+              [
+                { name: 'full_name', size: 6 },
+                { name: 'city', size: 6 },
+              ],
               [{ name: 'compo', size: 12 }],
             ],
           },
@@ -364,7 +370,10 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
         layouts: {
           edit: [
             [{ name: 'dz', size: 12 }],
-            [{ name: 'full_name', size: 6 }, { name: 'city', size: 6 }],
+            [
+              { name: 'full_name', size: 6 },
+              { name: 'city', size: 6 },
+            ],
             [{ name: 'compo', size: 12 }],
           ],
         },
@@ -485,11 +494,21 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
       const data = {
         uid: 'address',
         layouts: {
-          list: ['test', 'categories'],
+          list: ['test', 'categories', 'component'],
         },
         metadatas: {
           test: {
             list: { ok: true },
+          },
+          component: {
+            list: {
+              mainField: {
+                name: 'name',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
           },
           categories: {
             list: {
@@ -508,6 +527,22 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           categories: {
             type: 'relation',
             targetModel: 'category',
+          },
+          component: {
+            type: 'component',
+            component: 'some.component',
+            repeatable: false,
+          },
+        },
+      };
+      const components = {
+        'some.component': {
+          settings: {
+            mainField: 'name',
+          },
+
+          attributes: {
+            type: 'string',
           },
         },
       };
@@ -533,9 +568,23 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           fieldSchema: { type: 'relation', targetModel: 'category' },
           queryInfos: { defaultParams: {}, endPoint: 'collection-types/address' },
         },
+        {
+          name: 'component',
+          key: '__component_key__',
+          metadatas: {
+            mainField: {
+              name: 'name',
+            },
+          },
+          fieldSchema: {
+            type: 'component',
+            component: 'some.component',
+            repeatable: false,
+          },
+        },
       ];
 
-      expect(formatListLayoutWithMetas(data)).toEqual(expected);
+      expect(formatListLayoutWithMetas(data, components)).toEqual(expected);
     });
   });
 
@@ -572,7 +621,10 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
 
   describe('getDisplayedModels', () => {
     it('should return an array containing only the displayable models', () => {
-      const models = [{ uid: 'test', isDisplayed: false }, { uid: 'testtest', isDisplayed: true }];
+      const models = [
+        { uid: 'test', isDisplayed: false },
+        { uid: 'testtest', isDisplayed: true },
+      ];
 
       expect(getDisplayedModels([])).toHaveLength(0);
       expect(getDisplayedModels(models)).toHaveLength(1);

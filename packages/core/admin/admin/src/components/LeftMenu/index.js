@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { NavLink as Link } from 'react-router-dom';
+import { NavLink as RouterNavLink } from 'react-router-dom';
 import { Divider } from '@strapi/design-system/Divider';
 import {
   MainNav,
@@ -12,7 +12,7 @@ import {
   NavSection,
   NavUser,
   NavCondense,
-} from '@strapi/design-system/MainNav';
+} from '@strapi/design-system/v2/MainNav';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
@@ -29,7 +29,7 @@ const LinkUserWrapper = styled(Box)`
   left: ${({ theme }) => theme.spaces[5]};
 `;
 
-const LinkUser = styled(Link)`
+const LinkUser = styled(RouterNavLink)`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -53,25 +53,27 @@ const LinkUser = styled(Link)`
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const buttonRef = useRef();
   const [userLinksVisible, setUserLinksVisible] = useState(false);
-  const { menuLogo } = useConfigurations();
+  const {
+    logos: { menu },
+  } = useConfigurations();
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
   const { userDisplayName } = useAppInfos();
   const { formatMessage } = useIntl();
 
   const initials = userDisplayName
     .split(' ')
-    .map(name => name.substring(0, 1))
+    .map((name) => name.substring(0, 1))
     .join('')
     .substring(0, 2);
 
-  const handleToggleUserLinks = () => setUserLinksVisible(prev => !prev);
+  const handleToggleUserLinks = () => setUserLinksVisible((prev) => !prev);
 
   const handleLogout = () => {
     auth.clearAppStorage();
     handleToggleUserLinks();
   };
 
-  const handleBlur = e => {
+  const handleBlur = (e) => {
     if (
       !e.currentTarget.contains(e.relatedTarget) &&
       e.relatedTarget?.parentElement?.id !== 'main-nav-user-button'
@@ -88,28 +90,42 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   return (
     <MainNav condensed={condensed}>
       <NavBrand
+        as={RouterNavLink}
         workplace={formatMessage({
           id: 'app.components.LeftMenu.navbrand.workplace',
           defaultMessage: 'Workplace',
         })}
         title={menuTitle}
-        icon={<img src={menuLogo} alt={menuTitle} />}
+        icon={
+          <img
+            src={menu.custom || menu.default}
+            alt={formatMessage({
+              id: 'app.components.LeftMenu.logo.alt',
+              defaultMessage: 'Application logo',
+            })}
+          />
+        }
       />
 
       <Divider />
 
       <NavSections>
-        <NavLink to="/content-manager" icon={<Write />}>
-          {formatMessage({ id: 'content-manager.plugin.name', defaultMessage: 'Content manager' })}
+        <NavLink as={RouterNavLink} to="/content-manager" icon={<Write />}>
+          {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
         </NavLink>
 
         {pluginsSectionLinks.length > 0 ? (
-          <NavSection label="Plugins">
-            {pluginsSectionLinks.map(link => {
+          <NavSection
+            label={formatMessage({
+              id: 'app.components.LeftMenu.plugins',
+              defaultMessage: 'Plugins',
+            })}
+          >
+            {pluginsSectionLinks.map((link) => {
               const Icon = link.icon;
 
               return (
-                <NavLink to={link.to} key={link.to} icon={<Icon />}>
+                <NavLink as={RouterNavLink} to={link.to} key={link.to} icon={<Icon />}>
                   {formatMessage(link.intlLabel)}
                 </NavLink>
               );
@@ -118,12 +134,18 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         ) : null}
 
         {generalSectionLinks.length > 0 ? (
-          <NavSection label="General">
-            {generalSectionLinks.map(link => {
+          <NavSection
+            label={formatMessage({
+              id: 'app.components.LeftMenu.general',
+              defaultMessage: 'General',
+            })}
+          >
+            {generalSectionLinks.map((link) => {
               const LinkIcon = link.icon;
 
               return (
                 <NavLink
+                  as={RouterNavLink}
                   badgeContent={
                     (link.notificationsCount > 0 && link.notificationsCount.toString()) || undefined
                   }
@@ -156,11 +178,11 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
           hasRadius
         >
           <FocusTrap onEscape={handleToggleUserLinks}>
-            <Stack size={0}>
+            <Stack spacing={0}>
               <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
                 <Typography>
                   {formatMessage({
-                    id: 'app.components.LeftMenu.profile',
+                    id: 'global.profile',
                     defaultMessage: 'Profile',
                   })}
                 </Typography>
@@ -179,7 +201,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         </LinkUserWrapper>
       )}
 
-      <NavCondense onClick={() => setCondensed(s => !s)}>
+      <NavCondense onClick={() => setCondensed((s) => !s)}>
         {condensed
           ? formatMessage({
               id: 'app.components.LeftMenu.expand',

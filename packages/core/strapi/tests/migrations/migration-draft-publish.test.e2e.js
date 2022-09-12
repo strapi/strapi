@@ -10,7 +10,7 @@ const modelsUtils = require('../../../../../test/helpers/models');
 let builder;
 let strapi;
 let rq;
-let data = {
+const data = {
   dogs: [],
 };
 const dogModel = {
@@ -48,7 +48,7 @@ const restart = async () => {
   rq = await createAuthRequest({ strapi });
 };
 
-const sortDogs = dogs => _.sortBy(dogs, 'name');
+const sortDogs = (dogs) => _.sortBy(dogs, 'name');
 
 describe('Migration - draft and publish', () => {
   describe.each([
@@ -58,10 +58,7 @@ describe('Migration - draft and publish', () => {
     beforeAll(async () => {
       builder = createTestBuilder();
 
-      await builder
-        .addContentType(dogModel)
-        .addFixtures(dogModel.singularName, dogs)
-        .build();
+      await builder.addContentType(dogModel).addFixtures(dogModel.singularName, dogs).build();
 
       strapi = await createStrapiInstance();
       rq = await createAuthRequest({ strapi });
@@ -76,7 +73,7 @@ describe('Migration - draft and publish', () => {
 
     describe('Enabling D&P on a content-type', () => {
       test('No publishedAt before enabling the feature', async () => {
-        let { body } = await rq({
+        const { body } = await rq({
           url: '/content-manager/collection-types/api::dog.dog',
           method: 'GET',
         });
@@ -105,7 +102,7 @@ describe('Migration - draft and publish', () => {
 
         await restart();
 
-        let { body } = await rq({
+        const { body } = await rq({
           method: 'GET',
           url: '/content-manager/collection-types/api::dog.dog',
         });
@@ -117,7 +114,7 @@ describe('Migration - draft and publish', () => {
         sortedBody.forEach((dog, index) => {
           expect(dog).toMatchObject(data.dogs[index]);
           expect(dog.publishedAt).toBe(dog.createdAt || dog.created_at);
-          expect(!isNaN(new Date(dog.publishedAt).valueOf())).toBe(true);
+          expect(!Number.isNaN(new Date(dog.publishedAt).valueOf())).toBe(true);
         });
 
         data.dogs = sortedBody;
@@ -147,9 +144,9 @@ describe('Migration - draft and publish', () => {
         await restart();
 
         // drafts should have been deleted with the migration, so we remove them
-        data.dogs = data.dogs.filter(dog => !_.isNil(dog.publishedAt));
+        data.dogs = data.dogs.filter((dog) => !_.isNil(dog.publishedAt));
 
-        let { body } = await rq({
+        const { body } = await rq({
           url: '/content-manager/collection-types/api::dog.dog',
           method: 'GET',
         });

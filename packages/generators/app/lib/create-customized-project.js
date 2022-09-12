@@ -1,4 +1,5 @@
 /* eslint-disable no-unreachable */
+
 'use strict';
 
 const { join } = require('path');
@@ -14,10 +15,20 @@ const clientDependencies = require('./utils/db-client-dependencies');
 const dbQuestions = require('./utils/db-questions');
 const createProject = require('./create-project');
 
-module.exports = async scope => {
+const LANGUAGES = {
+  javascript: 'JavaScript',
+  typescript: 'TypeScript',
+};
+
+module.exports = async (scope) => {
+  if (!scope.useTypescript) {
+    const language = await askAboutLanguages(scope);
+    scope.useTypescript = language === LANGUAGES.typescript;
+  }
+
   await trackUsage({ event: 'didChooseCustomDatabase', scope });
 
-  const configuration = await askDbInfosAndTest(scope).catch(error => {
+  const configuration = await askDbInfosAndTest(scope).catch((error) => {
     return trackUsage({ event: 'didNotConnectDatabase', scope, error }).then(() => {
       throw error;
     });
@@ -47,23 +58,23 @@ async function askDbInfosAndTest(scope) {
       scope,
       configuration,
     })
-      .then(result => {
+      .then((result) => {
         if (result && result.shouldRetry === true && retries < MAX_RETRIES - 1) {
           console.log('Retrying...');
-          retries++;
+          retries += 1;
           return loop();
         }
       })
       .then(
         () => fse.remove(scope.tmpPath),
-        err => {
+        (err) => {
           return fse.remove(scope.tmpPath).then(() => {
             throw err;
           });
         }
       )
       .then(() => configuration)
-      .catch(err => {
+      .catch((err) => {
         if (retries < MAX_RETRIES - 1) {
           console.log();
           console.log(`⛔️ Connection test failed: ${err.message}`);
@@ -75,7 +86,7 @@ async function askDbInfosAndTest(scope) {
           }
 
           console.log('Retrying...');
-          retries++;
+          retries += 1;
           return loop();
         }
 
@@ -127,7 +138,7 @@ async function askDatabaseInfos(scope) {
     },
   ]);
 
-  const responses = await inquirer.prompt(dbQuestions[client].map(q => q({ scope, client })));
+  const responses = await inquirer.prompt(dbQuestions[client].map((q) => q({ scope, client })));
 
   const connection = merge({}, defaultConfigs[client] || {}, {
     client,
@@ -141,8 +152,8 @@ async function askDatabaseInfos(scope) {
 }
 
 async function installDatabaseTestingDep({ scope, configuration }) {
-  let packageManager = scope.useYarn ? 'yarnpkg' : 'npm';
-  let cmd = scope.useYarn
+  const packageManager = scope.useYarn ? 'yarnpkg' : 'npm';
+  const cmd = scope.useYarn
     ? ['--cwd', scope.tmpPath, 'add']
     : ['install', '--prefix', scope.tmpPath];
 
@@ -151,9 +162,23 @@ async function installDatabaseTestingDep({ scope, configuration }) {
     await fse.ensureDir(scope.tmpPath);
   }
 
-  const deps = Object.keys(configuration.dependencies).map(dep => {
+  const deps = Object.keys(configuration.dependencies).map((dep) => {
     return `${dep}@${configuration.dependencies[dep]}`;
   });
 
   await execa(packageManager, cmd.concat(deps));
+}
+
+async function askAboutLanguages() {
+  const { language } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'language',
+      message: 'Choose your preferred language',
+      choices: Object.values(LANGUAGES),
+      default: LANGUAGES.javascript,
+    },
+  ]);
+
+  return language;
 }

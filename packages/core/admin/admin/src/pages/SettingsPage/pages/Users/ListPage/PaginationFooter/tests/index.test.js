@@ -3,20 +3,27 @@ import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';
 import { Router, Route } from 'react-router-dom';
+import { lightTheme, darkTheme } from '@strapi/design-system';
+import { TrackingProvider } from '@strapi/helper-plugin';
 import Theme from '../../../../../../../components/Theme';
+import ThemeToggleProvider from '../../../../../../../components/ThemeToggleProvider';
 import PaginationFooter from '../index';
 
 const makeApp = (history, pagination) => {
   return (
-    <IntlProvider messages={{}} textComponent="span" locale="en" defaultLocale="en">
-      <Theme>
-        <Router history={history}>
-          <Route path="/settings/user">
-            <PaginationFooter pagination={pagination} />
-          </Route>
-        </Router>
-      </Theme>
-    </IntlProvider>
+    <TrackingProvider>
+      <IntlProvider messages={{}} textComponent="span" locale="en" defaultLocale="en">
+        <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+          <Theme>
+            <Router history={history}>
+              <Route path="/settings/user">
+                <PaginationFooter pagination={pagination} />
+              </Route>
+            </Router>
+          </Theme>
+        </ThemeToggleProvider>
+      </IntlProvider>
+    </TrackingProvider>
   );
 };
 

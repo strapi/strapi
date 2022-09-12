@@ -1,572 +1,258 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import {
+  render,
+  waitFor,
+  waitForElementToBeRemoved,
+  getByPlaceholderText,
+  fireEvent,
+  screen,
+  getByText,
+  queryByText,
+} from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
+import { useTracking, useAppInfos } from '@strapi/helper-plugin';
+import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
+import server from './server';
+
+const toggleNotification = jest.fn();
+
+jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
 
 jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useNotification: jest.fn(() => {
+    return toggleNotification;
+  }),
   pxToRem: jest.fn(),
   CheckPagePermissions: ({ children }) => children,
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+  useAppInfos: jest.fn(() => ({
+    autoReload: true,
+    dependencies: {
+      '@strapi/plugin-documentation': '4.2.0',
+      '@strapi/provider-upload-cloudinary': '4.2.0',
+    },
+    useYarn: true,
+  })),
 }));
 
+const client = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
 const App = (
-  <ThemeProvider theme={lightTheme}>
+  <QueryClientProvider client={client}>
     <IntlProvider locale="en" messages={{}} textComponent="span">
-      <MarketPlacePage />
+      <ThemeProvider theme={lightTheme}>
+        <MarketPlacePage />
+      </ThemeProvider>
     </IntlProvider>
-  </ThemeProvider>
+  </QueryClientProvider>
 );
 
-describe('Marketplace coming soon', () => {
-  it('renders and matches the snapshot', () => {
-    const {
-      container: { firstChild },
-    } = render(App);
+describe('Marketplace page', () => {
+  beforeAll(() => server.listen());
 
-    expect(firstChild).toMatchInlineSnapshot(`
-      .c1 {
-        padding-bottom: 56px;
-      }
+  afterEach(() => server.resetHandlers());
 
-      .c4 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
+  afterAll(() => server.close());
 
-      .c9 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
+  it('renders and matches the plugin tab snapshot', async () => {
+    const { container, getByTestId, getByRole } = render(App);
+    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitFor(() => expect(getByRole('heading', { name: /marketplace/i })).toBeInTheDocument());
 
-      .c0 {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .c2 {
-        overflow-x: hidden;
-      }
-
-      .c5 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c6 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c7 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c8 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
-      .c17 {
-        padding-top: 12px;
-      }
-
-      .c18 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c13 {
-        padding-bottom: 32px;
-      }
-
-      .c10 {
-        background: #ffffff;
-        padding-top: 56px;
-        padding-bottom: 56px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c21 {
-        padding-top: 24px;
-      }
-
-      .c22 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c11 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c11 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c11 > * + * {
-        margin-top: 0px;
-      }
-
-      .c23 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c23 > * + * {
-        margin-left: 8px;
-      }
-
-      .c27 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c29 {
-        padding-left: 8px;
-      }
-
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c24 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c24 svg > g,
-      .c24 svg path {
-        fill: #ffffff;
-      }
-
-      .c24[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c24:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c24:focus-visible {
-        outline: none;
-      }
-
-      .c24:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c25 {
-        padding: 10px 16px;
-        background: #4945ff;
-        border: none;
-        border-radius: 4px;
-        border: 1px solid #4945ff;
-        background: #4945ff;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-      }
-
-      .c25 .c28 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c25 .c26 {
-        color: #ffffff;
-      }
-
-      .c25[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c25[aria-disabled='true'] .c26 {
-        color: #666687;
-      }
-
-      .c25[aria-disabled='true'] svg > g,
-      .c25[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c25[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c25[aria-disabled='true']:active .c26 {
-        color: #666687;
-      }
-
-      .c25[aria-disabled='true']:active svg > g,
-      .c25[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c25:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c25:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c30 {
-        padding: 10px 16px;
-        background: #4945ff;
-        border: none;
-        border-radius: 4px;
-        border: 1px solid #d9d8ff;
-        background: #f0f0ff;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-      }
-
-      .c30 .c28 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c30 .c26 {
-        color: #ffffff;
-      }
-
-      .c30[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c30[aria-disabled='true'] .c26 {
-        color: #666687;
-      }
-
-      .c30[aria-disabled='true'] svg > g,
-      .c30[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c30[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c30[aria-disabled='true']:active .c26 {
-        color: #666687;
-      }
-
-      .c30[aria-disabled='true']:active svg > g,
-      .c30[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c30:hover {
-        background-color: #ffffff;
-      }
-
-      .c30:active {
-        background-color: #ffffff;
-        border: 1px solid #4945ff;
-      }
-
-      .c30:active .c26 {
-        color: #4945ff;
-      }
-
-      .c30:active svg > g,
-      .c30:active svg path {
-        fill: #4945ff;
-      }
-
-      .c30 .c26 {
-        color: #271fe0;
-      }
-
-      .c30 svg > g,
-      .c30 svg path {
-        fill: #271fe0;
-      }
-
-      .c3:focus-visible {
-        outline: none;
-      }
-
-      .c15 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c16 {
-        color: #271fe0;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c19 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
-      .c20 {
-        text-align: center;
-      }
-
-      .c14 {
-        width: 11.875rem;
-      }
-
-      .c12 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      <div
-        class="c0"
-      >
-        <div
-          class="c1 c2"
-        >
-          <main
-            aria-labelledby="main-content-title"
-            class="c3"
-            id="main-content"
-            tabindex="-1"
-          >
-            <div
-              style="height: 0px;"
-            >
-              <div
-                class="c4"
-                data-strapi-header="true"
-              >
-                <div
-                  class="c5"
-                >
-                  <div
-                    class="c6"
-                  >
-                    <h1
-                      class="c7"
-                    >
-                      Marketplace
-                    </h1>
-                  </div>
-                </div>
-                <p
-                  class="c8"
-                >
-                  Get more out of Strapi
-                </p>
-              </div>
-            </div>
-            <div
-              class="c9"
-            >
-              <div
-                class="c10 c11 c12"
-              >
-                <div
-                  class="c13"
-                >
-                  <img
-                    alt="marketplace illustration"
-                    class="c14"
-                    src="IMAGE_MOCK"
-                  />
-                </div>
-                <span
-                  class="c15"
-                >
-                  A new way to make Strapi awesome.
-                </span>
-                <span
-                  class="c16"
-                >
-                  Finally here.
-                </span>
-                <div
-                  class="c17 c18"
-                >
-                  <span
-                    class="c19 c20"
-                  >
-                    The web marketplace helps you get the most of Strapi. In addition, we are working hard to offer the best experience to discover and install plugins, directly from the app.
-                  </span>
-                </div>
-                <div
-                  class="c21 c22 c23"
-                >
-                  <a
-                    aria-disabled="false"
-                    class="c24 c25"
-                    href="https://market.strapi.io"
-                    rel="noreferrer noopener"
-                    target="_blank"
-                  >
-                    <span
-                      class="c26 c27"
-                    >
-                      Visit the web marketplace
-                    </span>
-                    <div
-                      aria-hidden="true"
-                      class="c28 c29"
-                    >
-                      <svg
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                          fill="#32324D"
-                        />
-                      </svg>
-                    </div>
-                  </a>
-                  <a
-                    aria-disabled="false"
-                    class="c24 c30"
-                    href="https://market.strapi.io/submit-plugin"
-                    rel="noreferrer noopener"
-                    target="_blank"
-                  >
-                    <span
-                      class="c26 c27"
-                    >
-                      Submit your plugin
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-      </div>
-    `);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('sends an event when the user enters the marketplace', () => {
+  it('renders and matches the provider tab snapshot', async () => {
+    const { container, getByRole } = render(App);
+    await waitFor(() => expect(getByRole('heading', { name: /marketplace/i })).toBeInTheDocument());
+    const providersTab = screen.getByRole('tab', { selected: false });
+    fireEvent.click(providersTab);
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('sends a single tracking event when the user enters the marketplace', () => {
     const trackUsage = jest.fn();
     useTracking.mockImplementation(() => ({ trackUsage }));
     render(App);
 
     expect(trackUsage).toHaveBeenCalledWith('didGoToMarketplace');
+    expect(trackUsage).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return plugin search results matching the query', async () => {
+    const { container } = render(App);
+    const input = await getByPlaceholderText(container, 'Search');
+    fireEvent.change(input, { target: { value: 'comment' } });
+    const match = screen.getByText('Comments');
+    const notMatch = screen.queryByText('Sentry');
+    const provider = screen.queryByText('Cloudinary');
+
+    expect(match).toBeVisible();
+    expect(notMatch).toEqual(null);
+    expect(provider).toEqual(null);
+  });
+
+  it('should return provider search results matching the query', async () => {
+    const { container } = render(App);
+    const providersTab = screen.getByRole('tab', { selected: false });
+    fireEvent.click(providersTab);
+
+    const input = await getByPlaceholderText(container, 'Search');
+    fireEvent.change(input, { target: { value: 'cloudina' } });
+    const match = screen.getByText('Cloudinary');
+    const notMatch = screen.queryByText('Mailgun');
+    const plugin = screen.queryByText('Comments');
+
+    expect(match).toBeVisible();
+    expect(notMatch).toEqual(null);
+    expect(plugin).toEqual(null);
+  });
+
+  it('should return empty plugin search results given a bad query', async () => {
+    const { container } = render(App);
+    const input = await getByPlaceholderText(container, 'Search');
+    const badQuery = 'asdf';
+    fireEvent.change(input, { target: { value: badQuery } });
+    const noResult = screen.getByText(`No result for "${badQuery}"`);
+
+    expect(noResult).toBeVisible();
+  });
+
+  it('should return empty provider search results given a bad query', async () => {
+    const { container } = render(App);
+    const providersTab = screen.getByRole('tab', { selected: false });
+    fireEvent.click(providersTab);
+    const input = await getByPlaceholderText(container, 'Search');
+    const badQuery = 'asdf';
+    fireEvent.change(input, { target: { value: badQuery } });
+    const noResult = screen.getByText(`No result for "${badQuery}"`);
+
+    expect(noResult).toBeVisible();
+  });
+
+  it('handles production environment', () => {
+    // Simulate production environment
+    useAppInfos.mockImplementationOnce(() => ({
+      autoReload: false,
+      dependencies: {},
+      useYarn: true,
+    }));
+    const { queryByText } = render(App);
+
+    // Should display notification
+    expect(toggleNotification).toHaveBeenCalledWith({
+      type: 'info',
+      message: {
+        id: 'admin.pages.MarketPlacePage.production',
+        defaultMessage: 'Manage plugins from the development environment',
+      },
+      blockTransition: true,
+    });
+
+    expect(toggleNotification).toHaveBeenCalledTimes(1);
+
+    // Should not show install buttons
+    expect(queryByText(/copy install command/i)).not.toBeInTheDocument();
+  });
+
+  it('shows an online layout', () => {
+    render(App);
+    const offlineText = screen.queryByText('You are offline');
+
+    expect(offlineText).toEqual(null);
+  });
+
+  it('shows the offline layout', () => {
+    useNavigatorOnLine.mockReturnValueOnce(false);
+    render(App);
+    const offlineText = screen.getByText('You are offline');
+
+    expect(offlineText).toBeVisible();
+  });
+
+  it('defaults to plugins tab', async () => {
+    const { container } = render(App);
+    const button = screen.getByRole('tab', { selected: true });
+    const pluginsTabActive = await getByText(button, /Plugins/i);
+
+    const tabPanel = screen.getByRole('tabpanel');
+    const pluginCardText = await getByText(tabPanel, 'Comments');
+    const providerCardText = await queryByText(tabPanel, 'Cloudinary');
+    const submitPluginText = await queryByText(container, 'Submit plugin');
+
+    expect(pluginsTabActive).not.toBe(null);
+    expect(pluginCardText).toBeVisible();
+    expect(submitPluginText).toBeVisible();
+    expect(providerCardText).toEqual(null);
+  });
+
+  it('switches to providers tab', async () => {
+    const { container } = render(App);
+    const providersTab = screen.getByRole('tab', { selected: false });
+    fireEvent.click(providersTab);
+    const button = screen.getByRole('tab', { selected: true });
+    const providersTabActive = await getByText(button, /Providers/i);
+
+    const tabPanel = screen.getByRole('tabpanel');
+    const providerCardText = await getByText(tabPanel, 'Cloudinary');
+    const pluginCardText = await queryByText(tabPanel, 'Comments');
+    const submitProviderText = await queryByText(container, 'Submit provider');
+
+    expect(providersTabActive).not.toBe(null);
+    expect(providerCardText).toBeVisible();
+    expect(submitProviderText).toBeVisible();
+    expect(pluginCardText).toEqual(null);
+  });
+
+  it('shows the installed text for installed plugins', async () => {
+    render(App);
+    const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
+    fireEvent.click(pluginsTab);
+
+    // Plugin that's already installed
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Documentation'));
+    const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
+    expect(alreadyInstalledText).toBeVisible();
+
+    // Plugin that's not installed
+    const notInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Comments'));
+    const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
+    expect(notInstalledText).toBeVisible();
+  });
+
+  it('shows the installed text for installed providers', async () => {
+    // Open providers tab
+    render(App);
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    fireEvent.click(providersTab);
+
+    // Provider that's already installed
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Cloudinary'));
+    const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
+    expect(alreadyInstalledText).toBeVisible();
+
+    // Provider that's not installed
+    const notInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Rackspace'));
+    const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
+    expect(notInstalledText).toBeVisible();
   });
 });

@@ -2,7 +2,7 @@ import getTrad from '../../../utils/getTrad';
 
 const componentField = {
   intlLabel: {
-    id: getTrad('modalForm.attribute.text.type-selection'),
+    id: 'global.type',
     defaultMessage: 'Type',
   },
   name: 'createComponent',

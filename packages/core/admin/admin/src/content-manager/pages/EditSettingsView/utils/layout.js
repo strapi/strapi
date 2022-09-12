@@ -1,7 +1,7 @@
 /* eslint-disable indent */
-const getRowSize = arr => arr.reduce((sum, value) => sum + value.size, 0);
+const getRowSize = (arr) => arr.reduce((sum, value) => sum + value.size, 0);
 
-const createLayout = arr => {
+const createLayout = (arr) => {
   return arr.reduce((acc, current, index) => {
     const row = { rowId: index, rowContent: current };
 
@@ -9,7 +9,7 @@ const createLayout = arr => {
   }, []);
 };
 
-const formatLayout = arr => {
+const formatLayout = (arr) => {
   return arr
     .reduce((acc, current) => {
       let toPush = [];
@@ -28,7 +28,13 @@ const formatLayout = arr => {
 
         return acc2;
       }, []);
-      const rowId = acc.length === 0 ? 0 : Math.max.apply(Math, acc.map(o => o.rowId)) + 1;
+      const rowId =
+        acc.length === 0
+          ? 0
+          : Math.max.apply(
+              Math,
+              acc.map((o) => o.rowId)
+            ) + 1;
 
       const currentRowSize = getRowSize(currentRow);
 
@@ -51,8 +57,8 @@ const formatLayout = arr => {
 
       return acc;
     }, [])
-    .filter(row => row.rowContent.length > 0)
-    .filter(row => {
+    .filter((row) => row.rowContent.length > 0)
+    .filter((row) => {
       if (row.rowContent.length === 1) {
         return row.rowContent[0].name !== '_TEMP_';
       }
@@ -61,15 +67,15 @@ const formatLayout = arr => {
     });
 };
 
-const unformatLayout = arr => {
+const unformatLayout = (arr) => {
   return arr.reduce((acc, current) => {
-    const currentRow = current.rowContent.filter(content => content.name !== '_TEMP_');
+    const currentRow = current.rowContent.filter((content) => content.name !== '_TEMP_');
 
     return acc.concat([currentRow]);
   }, []);
 };
 
-const getDefaultInputSize = type => {
+const getDefaultInputSize = (type) => {
   switch (type) {
     case 'boolean':
     case 'date':
@@ -91,7 +97,7 @@ const getDefaultInputSize = type => {
 
 const getFieldSize = (name, layouts = []) => {
   return layouts.reduce((acc, { rowContent }) => {
-    const size = rowContent.find(row => row.name === name)?.size ?? null;
+    const size = rowContent.find((row) => row.name === name)?.size ?? null;
 
     if (size) {
       acc = size;
@@ -102,8 +108,8 @@ const getFieldSize = (name, layouts = []) => {
 };
 
 const setFieldSize = (name, size, layouts = []) => {
-  return layouts.map(row => {
-    row.rowContent = row.rowContent.map(column => {
+  return layouts.map((row) => {
+    row.rowContent = row.rowContent.map((column) => {
       if (column.name === name) {
         return {
           ...column,

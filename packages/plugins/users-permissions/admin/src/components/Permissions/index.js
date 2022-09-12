@@ -12,22 +12,22 @@ import { initialState, reducer } from './reducer';
 const Permissions = () => {
   const { modifiedData } = useUsersPermissions();
   const { formatMessage } = useIntl();
-  const [{ collapses }, dispatch] = useReducer(reducer, initialState, state =>
+  const [{ collapses }, dispatch] = useReducer(reducer, initialState, (state) =>
     init(state, modifiedData)
   );
 
-  const handleToggle = index =>
+  const handleToggle = (index) =>
     dispatch({
       type: 'TOGGLE_COLLAPSE',
       index,
     });
 
   return (
-    <Stack size={1}>
+    <Stack spacing={1}>
       {collapses.map((collapse, index) => (
         <Accordion
           expanded={collapse.isOpen}
-          toggle={() => handleToggle(index)}
+          onToggle={() => handleToggle(index)}
           key={collapse.name}
           variant={index % 2 === 0 ? 'secondary' : undefined}
         >

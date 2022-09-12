@@ -14,7 +14,7 @@ const createContentTypeBuilder = require('./content-type-builder');
  * @returns {object} content type schema builder
  */
 module.exports = function createBuilder() {
-  const components = Object.keys(strapi.components).map(key => {
+  const components = Object.keys(strapi.components).map((key) => {
     const compo = strapi.components[key];
 
     return {
@@ -23,22 +23,28 @@ module.exports = function createBuilder() {
       plugin: compo.modelName,
       uid: compo.uid,
       filename: compo.__filename__,
-      dir: join(strapi.dirs.components, compo.category),
+      dir: join(strapi.dirs.app.components, compo.category),
       schema: compo.__schema__,
+      config: compo.config,
     };
   });
 
-  const contentTypes = Object.keys(strapi.contentTypes).map(key => {
+  const contentTypes = Object.keys(strapi.contentTypes).map((key) => {
     const contentType = strapi.contentTypes[key];
 
     const dir = contentType.plugin
       ? join(
-          strapi.dirs.extensions,
+          strapi.dirs.app.extensions,
           contentType.plugin,
           'content-types',
           contentType.info.singularName
         )
-      : join(strapi.dirs.api, contentType.apiName, 'content-types', contentType.info.singularName);
+      : join(
+          strapi.dirs.app.api,
+          contentType.apiName,
+          'content-types',
+          contentType.info.singularName
+        );
 
     return {
       modelName: contentType.modelName,
@@ -47,6 +53,7 @@ module.exports = function createBuilder() {
       filename: 'schema.json',
       dir,
       schema: contentType.__schema__,
+      config: contentType.config,
     };
   });
 
@@ -68,12 +75,12 @@ function createSchemaBuilder({ components, contentTypes }) {
   const tmpContentTypes = new Map();
 
   // init temporary ContentTypes
-  Object.keys(contentTypes).forEach(key => {
+  Object.keys(contentTypes).forEach((key) => {
     tmpContentTypes.set(contentTypes[key].uid, createSchemaHandler(contentTypes[key]));
   });
 
   // init temporary components
-  Object.keys(components).forEach(key => {
+  Object.keys(components).forEach((key) => {
     tmpComponents.set(components[key].uid, createSchemaHandler(components[key]));
   });
 
@@ -159,13 +166,13 @@ function createSchemaBuilder({ components, contentTypes }) {
         ...Array.from(tmpContentTypes.values()),
       ];
 
-      return Promise.all(schemas.map(schema => schema.flush()))
-        .catch(error => {
+      return Promise.all(schemas.map((schema) => schema.flush()))
+        .catch((error) => {
           strapi.log.error('Error writing schema files');
           strapi.log.error(error);
           return this.rollback();
         })
-        .catch(error => {
+        .catch((error) => {
           strapi.log.error(
             'Error rolling back schema files. You might need to fix your files manually'
           );
@@ -183,7 +190,7 @@ function createSchemaBuilder({ components, contentTypes }) {
     rollback() {
       return Promise.all(
         [...Array.from(tmpComponents.values()), ...Array.from(tmpContentTypes.values())].map(
-          schema => schema.rollback()
+          (schema) => schema.rollback()
         )
       );
     },

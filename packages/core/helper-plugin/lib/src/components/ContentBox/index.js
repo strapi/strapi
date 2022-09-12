@@ -27,7 +27,7 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction, titleEll
       <IconWrapper background={iconBackground} hasRadius padding={3}>
         {icon}
       </IconWrapper>
-      <Stack size={endAction ? 0 : 1}>
+      <Stack spacing={endAction ? 0 : 1}>
         <Flex>
           <TypographyWordBreak fontWeight="semiBold" variant="pi">
             {title}

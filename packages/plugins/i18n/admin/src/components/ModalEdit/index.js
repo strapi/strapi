@@ -72,7 +72,7 @@ const ModalEdit = ({ locale, onClose }) => {
                   <Tab>
                     {formatMessage({
                       id: getTrad('Settings.locales.modal.base'),
-                      defaultMessage: 'Base settings',
+                      defaultMessage: 'Basic settings',
                     })}
                   </Tab>
                   <Tab>
@@ -107,7 +107,7 @@ const ModalEdit = ({ locale, onClose }) => {
             }
             endActions={
               <Button type="submit" startIcon={<Check />} disabled={isEditing}>
-                {formatMessage({ id: 'app.components.Button.save' })}
+                {formatMessage({ id: 'global.save' })}
               </Button>
             }
           />

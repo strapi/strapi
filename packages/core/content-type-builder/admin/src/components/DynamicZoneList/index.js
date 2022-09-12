@@ -61,7 +61,7 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
   const [activeTab, setActiveTab] = useState(0);
   const { formatMessage } = useIntl();
 
-  const toggle = tab => {
+  const toggle = (tab) => {
     if (activeTab !== tab) {
       setActiveTab(tab);
     }
@@ -75,10 +75,10 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
     <Tr className="dynamiczone-row" isFromDynamicZone>
       <td colSpan={12}>
         <FixedBox paddingLeft={8}>
-          <ScrollableStack horizontal size={2}>
+          <ScrollableStack horizontal spacing={2}>
             {isInDevelopmentMode && (
               <button type="button" onClick={handleClickAdd}>
-                <ComponentStack size={1}>
+                <ComponentStack spacing={1}>
                   <StyledAddIcon />
                   <Typography variant="pi" fontWeight="bold" textColor="primary600">
                     {formatMessage({
@@ -137,7 +137,7 @@ function DynamicZoneList({ customRowComponent, components, addComponent, name, t
 }
 
 DynamicZoneList.defaultProps = {
-  addComponent: () => {},
+  addComponent() {},
   components: [],
   customRowComponent: null,
   name: null,

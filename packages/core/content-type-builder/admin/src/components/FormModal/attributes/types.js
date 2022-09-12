@@ -1,7 +1,9 @@
+import uniq from 'lodash/uniq';
 import * as yup from 'yup';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from '../../../utils/getTrad';
 import getRelationType from '../../../utils/getRelationType';
+import toRegressedEnumValue from '../../../utils/toRegressedEnumValue';
 import {
   alreadyUsedAttributeNames,
   createTextShape,
@@ -12,7 +14,7 @@ import {
 } from './validation/common';
 
 const types = {
-  date: (usedAttributeNames, reservedNames) => {
+  date(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -20,7 +22,7 @@ const types = {
 
     return yup.object(shape);
   },
-  datetime: (usedAttributeNames, reservedNames) => {
+  datetime(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -28,7 +30,7 @@ const types = {
 
     return yup.object(shape);
   },
-  time: (usedAttributeNames, reservedNames) => {
+  time(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -36,7 +38,7 @@ const types = {
 
     return yup.object(shape);
   },
-  default: (usedAttributeNames, reservedNames) => {
+  default(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -44,7 +46,7 @@ const types = {
 
     return yup.object(shape);
   },
-  biginteger: (usedAttributeNames, reservedNames) => {
+  biginteger(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -67,7 +69,7 @@ const types = {
 
     return yup.object(shape);
   },
-  boolean: (usedAttributeNames, reservedNames) => {
+  boolean(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       default: yup.boolean().nullable(),
@@ -77,7 +79,7 @@ const types = {
 
     return yup.object(shape);
   },
-  component: (usedAttributeNames, reservedNames) => {
+  component(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -89,7 +91,7 @@ const types = {
 
     return yup.object(shape);
   },
-  decimal: (usedAttributeNames, reservedNames) => {
+  decimal(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -101,7 +103,7 @@ const types = {
 
     return yup.object(shape);
   },
-  dynamiczone: (usedAttributeNames, reservedNames) => {
+  dynamiczone(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -112,14 +114,11 @@ const types = {
 
     return yup.object(shape);
   },
-  email: (usedAttributeNames, reservedNames) => {
+  email(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
-      default: yup
-        .string()
-        .email()
-        .nullable(),
+      default: yup.string().email().nullable(),
       unique: validators.unique(),
       required: validators.required(),
       maxLength: validators.maxLength(),
@@ -128,15 +127,27 @@ const types = {
 
     return yup.object(shape);
   },
-  enumeration: (usedAttributeNames, reservedNames) => {
-    const ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
+  enumeration(usedAttributeNames, reservedNames) {
+    /**
+     * For enumerations the least common denomiator is GraphQL, where
+     * values needs to match the secure name regex:
+     * GraphQL Spec https://spec.graphql.org/June2018/#sec-Names
+     *
+     * Therefore we need to make sure our users only use values, which
+     * can be returned by GraphQL, by checking the regressed values
+     * agains the GraphQL regex.
+     *
+     * TODO V5: check if we can avoid this coupling by moving this logic
+     * into the GraphQL plugin.
+     */
+    const GRAPHQL_ENUM_REGEX = /^[_A-Za-z][_0-9A-Za-z]*$/;
 
     const shape = {
       name: yup
         .string()
         .test(alreadyUsedAttributeNames(usedAttributeNames))
         .test(isNameAllowed(reservedNames))
-        .matches(ENUM_REGEX, errorsTrads.regex)
+        .matches(GRAPHQL_ENUM_REGEX, errorsTrads.regex)
         .required(errorsTrads.required),
       type: validators.type(),
       default: validators.default(),
@@ -149,30 +160,33 @@ const types = {
         .test({
           name: 'areEnumValuesUnique',
           message: getTrad('error.validation.enum-duplicate'),
-          test: values => {
-            const filtered = [...new Set(values)];
+          test(values) {
+            const duplicates = uniq(
+              values
+                .map(toRegressedEnumValue)
+                .filter((value, index, values) => values.indexOf(value) !== index)
+            );
 
-            return filtered.length === values.length;
-          },
-        })
-        .test({
-          name: 'valuesMatchesRegex',
-          message: errorsTrads.regex,
-          test: values => {
-            return values.every(val => val === '' || ENUM_REGEX.test(val));
+            return !duplicates.length;
           },
         })
         .test({
           name: 'doesNotHaveEmptyValues',
           message: getTrad('error.validation.enum-empty-string'),
-          test: values => !values.some(val => val === ''),
+          test: (values) => !values.map(toRegressedEnumValue).some((val) => val === ''),
+        })
+        .test({
+          name: 'doesMatchRegex',
+          message: getTrad('error.validation.enum-regex'),
+          test: (values) =>
+            values.map(toRegressedEnumValue).every((value) => GRAPHQL_ENUM_REGEX.test(value)),
         }),
       enumName: yup.string().nullable(),
     };
 
     return yup.object(shape);
   },
-  float: (usedAttributeNames, reservedNames) => {
+  float(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -184,7 +198,7 @@ const types = {
 
     return yup.object(shape);
   },
-  integer: (usedAttributeNames, reservedNames) => {
+  integer(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -197,7 +211,7 @@ const types = {
 
     return yup.object(shape);
   },
-  json: (usedAttributeNames, reservedNames) => {
+  json(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -207,7 +221,7 @@ const types = {
 
     return yup.object(shape);
   },
-  media: (usedAttributeNames, reservedNames) => {
+  media(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -222,7 +236,7 @@ const types = {
 
     return yup.object(shape);
   },
-  password: (usedAttributeNames, reservedNames) => {
+  password(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -235,12 +249,12 @@ const types = {
 
     return yup.object(shape);
   },
-  relation: (
+  relation(
     usedAttributeNames,
     reservedNames,
     alreadyTakenTargetAttributes,
     { initialData, modifiedData }
-  ) => {
+  ) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       target: yup.string().required(errorsTrads.required),
@@ -260,7 +274,7 @@ const types = {
         ];
 
         let forbiddenTargetAttributeName = initialForbiddenName.filter(
-          val => val !== initialData.targetAttribute
+          (val) => val !== initialData.targetAttribute
         );
 
         return schema
@@ -268,7 +282,7 @@ const types = {
           .test({
             name: 'forbiddenTargetAttributeName',
             message: getTrad('error.validation.relation.targetAttribute-taken'),
-            test: value => {
+            test(value) {
               if (!value) {
                 return false;
               }
@@ -282,7 +296,7 @@ const types = {
 
     return yup.object(shape);
   },
-  richtext: (usedAttributeNames, reservedNames) => {
+  richtext(usedAttributeNames, reservedNames) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
       type: validators.type(),
@@ -295,17 +309,17 @@ const types = {
 
     return yup.object(shape);
   },
-  string: (usedAttributeNames, reservedNames) => {
+  string(usedAttributeNames, reservedNames) {
     const shape = createTextShape(usedAttributeNames, reservedNames);
 
     return yup.object(shape);
   },
-  text: (usedAttributeNames, reservedNames) => {
+  text(usedAttributeNames, reservedNames) {
     const shape = createTextShape(usedAttributeNames, reservedNames);
 
     return yup.object(shape);
   },
-  uid: (usedAttributeNames, reservedNames) => {
+  uid(usedAttributeNames, reservedNames) {
     const shape = createTextShape(usedAttributeNames, reservedNames);
 
     return yup.object(shape);

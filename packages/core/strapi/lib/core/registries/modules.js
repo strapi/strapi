@@ -3,7 +3,7 @@
 const { pickBy, has } = require('lodash/fp');
 const { createModule } = require('../domain/module');
 
-const modulesRegistry = strapi => {
+const modulesRegistry = (strapi) => {
   const modules = {};
 
   return {

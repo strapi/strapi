@@ -22,13 +22,13 @@ module.exports = {
 
     const permissionQuery = permissionChecker.buildReadQuery(query);
 
-    const { results, pagination } = await entityManager.findWithRelationCounts(
+    const { results, pagination } = await entityManager.findWithRelationCountsPage(
       permissionQuery,
       model
     );
 
     const sanitizedResults = await Promise.all(
-      results.map(result => permissionChecker.sanitizeOutput(result))
+      results.map((result) => permissionChecker.sanitizeOutput(result))
     );
 
     ctx.body = {

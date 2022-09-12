@@ -17,7 +17,7 @@ const Policies = () => {
 
   const displayedRoutes = isEmpty(controllerRoutes)
     ? []
-    : controllerRoutes.filter(o => o.handler.endsWith(pathResolved));
+    : controllerRoutes.filter((o) => o.handler.endsWith(pathResolved));
 
   return (
     <GridItem
@@ -30,14 +30,14 @@ const Policies = () => {
       style={{ minHeight: '100%' }}
     >
       {selectedAction ? (
-        <Stack size={2}>
+        <Stack spacing={2}>
           {displayedRoutes.map((route, key) => (
             // eslint-disable-next-line react/no-array-index-key
             <BoundRoute key={key} route={route} />
           ))}
         </Stack>
       ) : (
-        <Stack size={2}>
+        <Stack spacing={2}>
           <Typography variant="delta" as="h3">
             {formatMessage({
               id: 'users-permissions.Policies.header.title',

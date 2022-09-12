@@ -23,7 +23,7 @@ const LanguageProvider = ({ children, localeNames, messages }) => {
     window.localStorage.setItem(localStorageKey, locale);
   }, [locale]);
 
-  const changeLocale = locale => {
+  const changeLocale = (locale) => {
     dispatch({
       type: 'CHANGE_LOCALE',
       locale,

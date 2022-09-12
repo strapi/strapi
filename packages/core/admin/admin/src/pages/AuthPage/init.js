@@ -1,4 +1,4 @@
-const init = initialState => {
+const init = (initialState) => {
   return initialState;
 };
 

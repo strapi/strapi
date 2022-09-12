@@ -1,14 +1,14 @@
 'use strict';
 
-const path = require('path');
+const { resolve, join, extname, basename } = require('path');
 const fse = require('fs-extra');
 const koaStatic = require('koa-static');
 
 const registerAdminPanelRoute = ({ strapi }) => {
-  let buildDir = path.resolve(strapi.dirs.root, 'build');
+  let buildDir = resolve(strapi.dirs.dist.root, 'build');
 
   if (!fse.pathExistsSync(buildDir)) {
-    buildDir = path.resolve(__dirname, '../../build');
+    buildDir = resolve(__dirname, '../../build');
   }
 
   const serveAdminMiddleware = async (ctx, next) => {
@@ -23,7 +23,7 @@ const registerAdminPanelRoute = ({ strapi }) => {
     }
 
     ctx.type = 'html';
-    ctx.body = fse.createReadStream(path.join(buildDir + '/index.html'));
+    ctx.body = fse.createReadStream(join(buildDir, 'index.html'));
   };
 
   strapi.server.routes([
@@ -32,7 +32,18 @@ const registerAdminPanelRoute = ({ strapi }) => {
       path: `${strapi.config.admin.path}/:path*`,
       handler: [
         serveAdminMiddleware,
-        serveStatic(buildDir, { maxage: 60000, defer: false, index: 'index.html' }),
+        serveStatic(buildDir, {
+          maxage: 31536000,
+          defer: false,
+          index: 'index.html',
+          setHeaders(res, path) {
+            const ext = extname(path);
+            // publicly cache static files to avoid unnecessary network & disk access
+            if (ext !== '.html') {
+              res.setHeader('cache-control', 'public, max-age=31536000, immutable');
+            }
+          },
+        }),
       ],
       config: { auth: false },
     },
@@ -45,7 +56,8 @@ const serveStatic = (filesDir, koaStaticOptions = {}) => {
 
   return async (ctx, next) => {
     const prev = ctx.path;
-    const newPath = path.basename(ctx.path);
+    const newPath = basename(ctx.path);
+
     ctx.path = newPath;
     await serve(ctx, async () => {
       ctx.path = prev;

@@ -8,9 +8,11 @@ import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import LanguageProvider from '../../../../../../admin/admin/src/components/LanguageProvider';
-import Theme from '../../../../../../admin/admin/src/components/Theme';
-import en from '../../../../../../admin/admin/src/translations/en.json';
+import { lightTheme, darkTheme } from '@strapi/design-system';
+import LanguageProvider from '@strapi/admin/admin/src/components/LanguageProvider';
+import Theme from '@strapi/admin/admin/src/components/Theme';
+import ThemeToggleProvider from '@strapi/admin/admin/src/components/ThemeToggleProvider';
+import en from '@strapi/admin/admin/src/translations/en.json';
 import FormModalNavigationProvider from '../../../components/FormModalNavigationProvider';
 import pluginEn from '../../../translations/en.json';
 import getTrad from '../../../utils/getTrad';
@@ -24,8 +26,8 @@ jest.mock('../../../hooks/useDataManager', () => {
     modifiedData: mockData,
     isInDevelopmentMode: true,
     isInContentTypeView: true,
-    submitData: () => {},
-    toggleModalCancel: () => {},
+    submitData() {},
+    toggleModalCancel() {},
   }));
 });
 
@@ -33,6 +35,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   // eslint-disable-next-line
   CheckPermissions: ({ children }) => <div>{children}</div>,
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
 const makeApp = () => {
@@ -52,13 +55,15 @@ const makeApp = () => {
 
   return (
     <LanguageProvider messages={messages} localeNames={localeNames}>
-      <Theme>
-        <Router history={history}>
-          <FormModalNavigationProvider>
-            <ListView />
-          </FormModalNavigationProvider>
-        </Router>
-      </Theme>
+      <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
+        <Theme>
+          <Router history={history}>
+            <FormModalNavigationProvider>
+              <ListView />
+            </FormModalNavigationProvider>
+          </Router>
+        </Theme>
+      </ThemeToggleProvider>
     </LanguageProvider>
   );
 };

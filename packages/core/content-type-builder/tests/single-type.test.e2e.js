@@ -1,6 +1,7 @@
 /**
  * Integration test for the content-type-builder content types management apis
  */
+
 'use strict';
 
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
@@ -156,7 +157,7 @@ describe('Content Type Builder - Content types', () => {
       const { uid } = createRes.body.data;
 
       // create data
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < 2; i += 1) {
         await strapi.query(uid).create({ data: { title: 'Test' } });
       }
 

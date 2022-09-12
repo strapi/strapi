@@ -21,14 +21,15 @@ export function resetProps() {
   return { type: RESET_PROPS };
 }
 
-export const setLayout = contentType => {
+export const setLayout = ({ components, contentType }) => {
   const { layouts } = contentType;
 
   return {
     contentType,
+    components,
     displayedHeaders: layouts.list,
     type: SET_LIST_LAYOUT,
   };
 };
 
-export const onChangeListHeaders = target => ({ type: ON_CHANGE_LIST_HEADERS, target });
+export const onChangeListHeaders = (target) => ({ type: ON_CHANGE_LIST_HEADERS, target });

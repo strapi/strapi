@@ -106,7 +106,10 @@ describe('Filtering API', () => {
 
     const sanitizedFixtures = await builder.sanitizedFixtures(strapi);
 
-    Object.assign(data, _.mapValues(sanitizedFixtures, value => transformToRESTResource(value)));
+    Object.assign(
+      data,
+      _.mapValues(sanitizedFixtures, (value) => transformToRESTResource(value))
+    );
   });
 
   afterAll(async () => {
@@ -164,6 +167,40 @@ describe('Filtering API', () => {
         expect(res.body.data).toEqual([]);
       });
     });
+    describe('Filter equals with case insensitive', () => {
+      test('Should be usable with eqi suffix', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              name: {
+                $eqi: 'PRODuct 1',
+              },
+            },
+          },
+        });
+
+        expect(res.body.data.length).toBe(1);
+        expect(res.body.data[0]).toMatchObject(data.product[0]);
+      });
+
+      test('Should return an empty array when no match', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              name: {
+                $eqi: 'Product non existant',
+              },
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([]);
+      });
+    });
 
     describe('Filter not equals', () => {
       test('Should return an array with matching entities', async () => {
@@ -180,7 +217,7 @@ describe('Filtering API', () => {
         });
 
         expect(res.body.data).toEqual(
-          expect.arrayContaining(data.product.map(o => expect.objectContaining(o)))
+          expect.arrayContaining(data.product.map((o) => expect.objectContaining(o)))
         );
       });
 
@@ -215,7 +252,7 @@ describe('Filtering API', () => {
         [{ $notNull: '0' }],
         [{ $notNull: 'f' }],
         [{ $notNull: '' }],
-      ])('Should return only matching items (%s)', async priceFilter => {
+      ])('Should return only matching items (%s)', async (priceFilter) => {
         const res = await rq({
           method: 'GET',
           url: '/products',
@@ -226,7 +263,7 @@ describe('Filtering API', () => {
           },
         });
 
-        const matching = data.product.filter(x => x.attributes.price === null);
+        const matching = data.product.filter((x) => x.attributes.price === null);
 
         res.body.data.sort((a, b) => (a.id > b.id ? 1 : -1));
         expect(res.body.data.length).toBe(matching.length);
@@ -246,7 +283,7 @@ describe('Filtering API', () => {
         [{ $null: '0' }],
         [{ $null: 'f' }],
         [{ $null: '' }],
-      ])('Should return three matches (%s)', async priceFilter => {
+      ])('Should return three matches (%s)', async (priceFilter) => {
         const res = await rq({
           method: 'GET',
           url: '/products',
@@ -276,7 +313,7 @@ describe('Filtering API', () => {
         });
 
         expect(res1.body.data).toEqual(
-          expect.arrayContaining(data.product.map(o => expect.objectContaining(o)))
+          expect.arrayContaining(data.product.map((o) => expect.objectContaining(o)))
         );
 
         const res2 = await rq({
@@ -340,7 +377,7 @@ describe('Filtering API', () => {
         });
 
         expect(res.body.data).toEqual(
-          expect.arrayContaining(data.product.map(o => expect.objectContaining(o)))
+          expect.arrayContaining(data.product.map((o) => expect.objectContaining(o)))
         );
 
         const res2 = await rq({
@@ -1224,7 +1261,7 @@ describe('Filtering API', () => {
     });
 
     test('Combined filters', async () => {
-      let res = await rq({
+      const res = await rq({
         method: 'GET',
         url: '/products',
         qs: {
@@ -1299,9 +1336,11 @@ describe('Filtering API', () => {
         },
       });
 
-      [data.product[3], data.product[0], data.product[2], data.product[1]].forEach(expectedPost => {
-        expect(res.body.data).toEqual(expect.arrayContaining([expectedPost]));
-      });
+      [data.product[3], data.product[0], data.product[2], data.product[1]].forEach(
+        (expectedPost) => {
+          expect(res.body.data).toEqual(expect.arrayContaining([expectedPost]));
+        }
+      );
     });
   });
 
@@ -1410,7 +1449,7 @@ describe('Filtering API', () => {
 
   describe('Type casting', () => {
     describe('Booleans', () => {
-      test.each(['1', 'true', true, 't'])('Cast truthy booleans %s', async val => {
+      test.each(['1', 'true', true, 't'])('Cast truthy booleans %s', async (val) => {
         const res = await rq({
           method: 'GET',
           url: '/products',
@@ -1425,7 +1464,7 @@ describe('Filtering API', () => {
         );
       });
 
-      test.each(['1', 'true', true, 't'])('Cast truthy booleans nested %s', async val => {
+      test.each(['1', 'true', true, 't'])('Cast truthy booleans nested %s', async (val) => {
         const res = await rq({
           method: 'GET',
           url: '/products',
@@ -1442,7 +1481,7 @@ describe('Filtering API', () => {
         );
       });
 
-      test.each(['1', 'true', true, 't'])('Cast truthy booleans in arrays %s', async val => {
+      test.each(['1', 'true', true, 't'])('Cast truthy booleans in arrays %s', async (val) => {
         const res = await rq({
           method: 'GET',
           url: '/products',
@@ -1459,7 +1498,7 @@ describe('Filtering API', () => {
         );
       });
 
-      test.each(['0', 'false', false, 'f'])('Cast truthy booleans %s', async val => {
+      test.each(['0', 'false', false, 'f'])('Cast truthy booleans %s', async (val) => {
         const res = await rq({
           method: 'GET',
           url: '/products',
@@ -1472,7 +1511,7 @@ describe('Filtering API', () => {
         expect(res.body.data).toEqual(expect.arrayContaining([data.product[1], data.product[3]]));
       });
 
-      test.each(['0', 'false', false, 'f'])('Cast truthy booleans nested %s', async val => {
+      test.each(['0', 'false', false, 'f'])('Cast truthy booleans nested %s', async (val) => {
         const res = await rq({
           method: 'GET',
           url: '/products',
@@ -1487,7 +1526,7 @@ describe('Filtering API', () => {
         expect(res.body.data).toEqual(expect.arrayContaining([data.product[1], data.product[3]]));
       });
 
-      test.each(['0', 'false', false, 'f'])('Cast truthy booleans in arrays %s', async val => {
+      test.each(['0', 'false', false, 'f'])('Cast truthy booleans in arrays %s', async (val) => {
         const res = await rq({
           method: 'GET',
           url: '/products',
@@ -1541,7 +1580,7 @@ describe('Filtering API', () => {
           },
         });
         expect(res.body.data).toEqual(
-          expect.arrayContaining(expectedIds.map(id => data.product[id]))
+          expect.arrayContaining(expectedIds.map((id) => data.product[id]))
         );
       });
     });

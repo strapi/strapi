@@ -9,11 +9,10 @@ import flatMap from 'lodash/flatMap';
 import isEqual from 'lodash/isEqual';
 import get from 'lodash/get';
 import set from 'lodash/set';
-import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
+import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { Main } from '@strapi/design-system/Main';
 import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Link } from '@strapi/design-system/Link';
 import { Button } from '@strapi/design-system/Button';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
@@ -48,7 +47,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const modelName = get(mainLayout, ['info', 'displayName'], '');
   const attributes = get(modifiedData, ['attributes'], {});
 
-  const entryTitleOptions = Object.keys(attributes).filter(attr => {
+  const entryTitleOptions = Object.keys(attributes).filter((attr) => {
     const type = get(attributes, [attr, 'type'], '');
 
     return (
@@ -59,8 +58,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
         'relation',
         'component',
         'boolean',
-        'date',
         'media',
+        'password',
         'richtext',
         'timestamp',
       ].includes(type) && !!type
@@ -69,22 +68,22 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   const editLayout = get(modifiedData, ['layouts', 'edit'], []);
   const displayedFields = flatMap(editLayout, 'rowContent');
   const editLayoutRemainingFields = Object.keys(modifiedData.attributes)
-    .filter(attr => {
+    .filter((attr) => {
       if (!isContentTypeView) {
         return true;
       }
 
       return get(modifiedData, ['attributes', attr, 'type'], '') !== 'relation';
     })
-    .filter(attr => get(modifiedData, ['metadatas', attr, 'edit', 'visible'], false) === true)
-    .filter(attr => {
-      return displayedFields.findIndex(el => el.name === attr) === -1;
+    .filter((attr) => get(modifiedData, ['metadatas', attr, 'edit', 'visible'], false) === true)
+    .filter((attr) => {
+      return displayedFields.findIndex((el) => el.name === attr) === -1;
     })
     .sort();
   const relationsLayout = get(modifiedData, ['layouts', 'editRelations'], []);
   const editRelationsLayoutRemainingFields = Object.keys(attributes)
-    .filter(attr => attributes[attr].type === 'relation')
-    .filter(attr => relationsLayout.indexOf(attr) === -1);
+    .filter((attr) => attributes[attr].type === 'relation')
+    .filter((attr) => relationsLayout.indexOf(attr) === -1);
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -95,11 +94,11 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
   };
 
   const handleToggleModal = () => {
-    setIsModalFormOpen(prev => !prev);
+    setIsModalFormOpen((prev) => !prev);
   };
 
   const toggleConfirmDialog = () => {
-    setIsConfirmDialogOpen(prev => !prev);
+    setIsConfirmDialogOpen((prev) => !prev);
   };
 
   const handleMetaChange = ({ target: { name, value } }) => {
@@ -118,7 +117,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
     });
   };
 
-  const handleMetaSubmit = e => {
+  const handleMetaSubmit = (e) => {
     e.preventDefault();
     dispatch({
       type: 'SUBMIT_META_FORM',
@@ -126,17 +125,17 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
     handleToggleModal();
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     toggleConfirmDialog();
   };
 
   const submitMutation = useMutation(
-    body => {
+    (body) => {
       return putCMSettingsEV(body, slug, isContentTypeView);
     },
     {
-      onSuccess: ({ data }) => {
+      onSuccess({ data }) {
         if (updateLayout) {
           updateLayout(data.data);
         }
@@ -146,7 +145,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
         toggleConfirmDialog();
         trackUsage('didEditEditSettings');
       },
-      onError: () => {
+      onError() {
         toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
       },
     }
@@ -216,7 +215,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
       onMoveField={handleMoveField}
       moveRow={moveRow}
       moveItem={moveItem}
-      setEditFieldToSelect={name => {
+      setEditFieldToSelect={(name) => {
         dispatch({
           type: 'SET_FIELD_TO_EDIT',
           name,
@@ -243,14 +242,14 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
             navigationAction={
               <Link
                 startIcon={<ArrowLeft />}
-                onClick={e => {
+                onClick={(e) => {
                   e.preventDefault();
                   goBack();
                 }}
                 to="/"
               >
                 {formatMessage({
-                  id: 'app.components.go-back',
+                  id: 'global.back',
                   defaultMessage: 'Back',
                 })}
               </Link>
@@ -261,7 +260,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                 startIcon={<Check />}
                 type="submit"
               >
-                {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+                {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>
             }
           />
@@ -275,7 +274,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
               paddingLeft={7}
               paddingRight={7}
             >
-              <Stack size={4}>
+              <Stack spacing={4}>
                 <Typography variant="delta" as="h2">
                   {formatMessage({
                     id: getTrad('containers.SettingPage.settings'),
@@ -293,7 +292,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                         id: getTrad('containers.SettingPage.editSettings.entry.title.description'),
                         defaultMessage: 'Set the display field of your entry',
                       })}
-                      onChange={value => {
+                      onChange={(value) => {
                         handleChange({
                           target: {
                             name: 'settings.mainField',
@@ -303,7 +302,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                       }}
                       value={modifiedData.settings.mainField}
                     >
-                      {entryTitleOptions.map(attribute => (
+                      {entryTitleOptions.map((attribute) => (
                         <Option key={attribute} value={attribute}>
                           {attribute}
                         </Option>
@@ -326,7 +325,7 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                       attributes={attributes}
                       editLayout={editLayout}
                       editLayoutRemainingFields={editLayoutRemainingFields}
-                      onAddField={field => {
+                      onAddField={(field) => {
                         dispatch({
                           type: 'ON_ADD_FIELD',
                           name: field,
@@ -346,8 +345,8 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
                       <RelationalFields
                         editRelationsLayoutRemainingFields={editRelationsLayoutRemainingFields}
                         relationsLayout={relationsLayout}
-                        onAddField={name => dispatch({ type: 'ADD_RELATION', name })}
-                        onRemoveField={index => dispatch({ type: 'REMOVE_RELATION', index })}
+                        onAddField={(name) => dispatch({ type: 'ADD_RELATION', name })}
+                        onRemoveField={(index) => dispatch({ type: 'REMOVE_RELATION', index })}
                       />
                     </GridItem>
                   )}

@@ -127,9 +127,9 @@ module.exports = ({ strapi }) => {
     contentTypes
       .map(prop('uid'))
       .filter(startsWith('admin::'))
-      .forEach(uid => extensionService.shadowCRUD(uid).disable());
+      .forEach((uid) => extensionService.shadowCRUD(uid).disable());
 
-    const contentTypesWithShadowCRUD = contentTypes.filter(ct =>
+    const contentTypesWithShadowCRUD = contentTypes.filter((ct) =>
       extensionService.shadowCRUD(ct.uid).isEnabled()
     );
 
@@ -144,7 +144,7 @@ module.exports = ({ strapi }) => {
    * Register needed GraphQL types for every content type
    * @param {object[]} contentTypes
    */
-  const registerAPITypes = contentTypes => {
+  const registerAPITypes = (contentTypes) => {
     for (const contentType of contentTypes) {
       const { kind, modelType } = contentType;
 
@@ -174,7 +174,7 @@ module.exports = ({ strapi }) => {
     }
   };
 
-  const registerMorphTypes = contentTypes => {
+  const registerMorphTypes = (contentTypes) => {
     // Create & register a union type that includes every type or component registered
     const genericMorphType = builders.buildGenericMorphDefinition();
     registry.register(GENERIC_MORPH_TYPENAME, genericMorphType, { kind: KINDS.morph });

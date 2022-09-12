@@ -39,7 +39,7 @@ const exists = async (whereParams = {}) => {
  *
  * @returns {string}
  */
-const hash = accessKey => {
+const hash = (accessKey) => {
   return crypto
     .createHmac('sha512', strapi.config.get('admin.apiToken.salt'))
     .update(accessKey)
@@ -54,7 +54,7 @@ const hash = accessKey => {
  *
  * @returns {Promise<ApiToken>}
  */
-const create = async attributes => {
+const create = async (attributes) => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
   const apiToken = await strapi.query('admin::api-token').create({
@@ -74,20 +74,21 @@ const create = async attributes => {
 /**
  * @returns {void}
  */
-const createSaltIfNotDefined = () => {
-  if (strapi.config.get('admin.apiToken.salt')) {
-    return;
-  }
+const checkSaltIsDefined = () => {
+  if (!strapi.config.get('admin.apiToken.salt')) {
+    // TODO V5: stop reading API_TOKEN_SALT
+    if (process.env.API_TOKEN_SALT) {
+      process.emitWarning(`[deprecated] In future versions, Strapi will stop reading directly from the environment variable API_TOKEN_SALT. Please set apiToken.salt in config/admin.js instead.
+For security reasons, keep storing the secret in an environment variable and use env() to read it in config/admin.js (ex: \`apiToken: { salt: env('API_TOKEN_SALT') }\`). See https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#configuration-using-environment-variables.`);
 
-  if (process.env.API_TOKEN_SALT) {
-    throw new Error(
-      `There's something wrong with the configuration of your api-token salt. If you have changed the env variable used in the configuration file, please verify that you have created and set the variable in your .env file.`
-    );
+      strapi.config.set('admin.apiToken.salt', process.env.API_TOKEN_SALT);
+    } else {
+      throw new Error(
+        `Missing apiToken.salt. Please set apiToken.salt in config/admin.js (ex: you can generate one using Node with \`crypto.randomBytes(16).toString('base64')\`).
+For security reasons, prefer storing the secret in an environment variable and read it in config/admin.js. See https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#configuration-using-environment-variables.`
+      );
+    }
   }
-
-  const salt = crypto.randomBytes(16).toString('hex');
-  strapi.fs.appendFile(process.env.ENV_PATH || '.env', `API_TOKEN_SALT=${salt}\n`);
-  strapi.config.set('admin.apiToken.salt', salt);
 };
 
 /**
@@ -105,7 +106,7 @@ const list = async () => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const revoke = async id => {
+const revoke = async (id) => {
   return strapi.query('admin::api-token').delete({ select: SELECT_FIELDS, where: { id } });
 };
 
@@ -114,7 +115,7 @@ const revoke = async id => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const getById = async id => {
+const getById = async (id) => {
   return getBy({ id });
 };
 
@@ -123,7 +124,7 @@ const getById = async id => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const getByName = async name => {
+const getByName = async (name) => {
   return getBy({ name });
 };
 
@@ -162,7 +163,7 @@ const getBy = async (whereParams = {}) => {
 module.exports = {
   create,
   exists,
-  createSaltIfNotDefined,
+  checkSaltIsDefined,
   hash,
   list,
   revoke,

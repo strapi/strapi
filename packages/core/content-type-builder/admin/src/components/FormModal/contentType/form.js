@@ -11,7 +11,7 @@ const nameField = {
 
 const forms = {
   advanced: {
-    default: () => {
+    default() {
       return {
         sections: [
           {
@@ -40,7 +40,7 @@ const forms = {
     },
   },
   base: {
-    create: () => {
+    create() {
       return {
         sections: [
           {
@@ -83,7 +83,7 @@ const forms = {
         ],
       };
     },
-    edit: () => {
+    edit() {
       return {
         sections: [
           {
@@ -125,7 +125,7 @@ const forms = {
               },
               {
                 intlLabel: {
-                  id: getTrad('modalForm.attribute.text.type-selection'),
+                  id: 'global.type',
                   defaultMessage: 'Type',
                 },
                 name: 'kind',

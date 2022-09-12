@@ -26,8 +26,8 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
     value: '',
   });
 
-  const handleChangeFilterField = value => {
-    const nextField = displayedFilters.find(f => f.name === value);
+  const handleChangeFilterField = (value) => {
+    const nextField = displayedFilters.find((f) => f.name === value);
     const {
       fieldSchema: { type, options },
     } = nextField;
@@ -42,26 +42,26 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
     setModifiedData({ name: value, filter, value: filterValue });
   };
 
-  const handleChangeOperator = operator => {
+  const handleChangeOperator = (operator) => {
     if (modifiedData.name === 'mime') {
-      setModifiedData(prev => ({ ...prev, filter: operator, value: 'image' }));
+      setModifiedData((prev) => ({ ...prev, filter: operator, value: 'image' }));
     } else {
-      setModifiedData(prev => ({ ...prev, filter: operator, value: '' }));
+      setModifiedData((prev) => ({ ...prev, filter: operator, value: '' }));
     }
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (modifiedData.value) {
       if (modifiedData.name === 'mime') {
-        const alreadyAppliedFilters = filters.filter(filter => {
+        const alreadyAppliedFilters = filters.filter((filter) => {
           return Object.keys(filter)[0] === 'mime';
         });
 
         if (modifiedData.value === 'file') {
-          const filtersWithoutMimeType = filters.filter(filter => {
+          const filtersWithoutMimeType = filters.filter((filter) => {
             return Object.keys(filter)[0] !== 'mime';
           });
 
@@ -71,7 +71,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
 
           if (modifiedData.filter === '$contains') {
             hasCurrentFilter =
-              alreadyAppliedFilters.find(filter => {
+              alreadyAppliedFilters.find((filter) => {
                 return filter.mime?.$not?.$contains !== undefined;
               }) !== undefined;
 
@@ -84,7 +84,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
             };
           } else {
             hasCurrentFilter =
-              alreadyAppliedFilters.find(filter => {
+              alreadyAppliedFilters.find((filter) => {
                 return Array.isArray(filter.mime?.$contains);
               }) !== undefined;
 
@@ -110,7 +110,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
         }
 
         const hasFilter =
-          alreadyAppliedFilters.find(filter => {
+          alreadyAppliedFilters.find((filter) => {
             return filter.mime[modifiedData.filter] === modifiedData.value;
           }) !== undefined;
 
@@ -121,7 +121,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
           return;
         }
 
-        const filtersWithoutFile = filters.filter(filter => {
+        const filtersWithoutFile = filters.filter((filter) => {
           const filterType = Object.keys(filter)[0];
 
           if (filterType !== 'mime') {
@@ -141,7 +141,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
 
         const oppositeFilter = modifiedData.filter === '$contains' ? '$notContains' : '$contains';
 
-        const oppositeFilterIndex = filtersWithoutFile.findIndex(filter => {
+        const oppositeFilterIndex = filtersWithoutFile.findIndex((filter) => {
           return filter.mime?.[oppositeFilter] === modifiedData.value;
         });
         const hasOppositeFilter = oppositeFilterIndex !== -1;
@@ -170,7 +170,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
       }
 
       const hasFilter =
-        filters.find(filter => {
+        filters.find((filter) => {
           return (
             filter[modifiedData.name] &&
             filter[modifiedData.name]?.[modifiedData.filter] === modifiedData.value
@@ -189,72 +189,70 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
     onToggle();
   };
 
-  const appliedFilter = displayedFilters.find(filter => filter.name === modifiedData.name);
+  const appliedFilter = displayedFilters.find((filter) => filter.name === modifiedData.name);
 
   return (
-    <>
-      <Popover source={source} padding={3} spacing={4}>
-        <FocusTrap onEscape={onToggle}>
-          <form onSubmit={handleSubmit}>
-            <Stack size={1} style={{ minWidth: 184 }}>
-              <Box>
-                <Select
-                  aria-label={formatMessage({
-                    id: 'app.utils.select-field',
-                    defaultMessage: 'Select field',
-                  })}
-                  name="name"
-                  size="M"
-                  onChange={handleChangeFilterField}
-                  value={modifiedData.name}
-                >
-                  {displayedFilters.map(filter => {
-                    return (
-                      <Option key={filter.name} value={filter.name}>
-                        {filter.metadatas.label}
-                      </Option>
-                    );
-                  })}
-                </Select>
-              </Box>
-              <Box>
-                <Select
-                  aria-label={formatMessage({
-                    id: 'app.utils.select-filter',
-                    defaultMessage: 'Select filter',
-                  })}
-                  name="filter"
-                  size="M"
-                  value={modifiedData.filter}
-                  onChange={handleChangeOperator}
-                >
-                  {getFilterList(appliedFilter).map(option => {
-                    return (
-                      <Option key={option.value} value={option.value}>
-                        {formatMessage(option.intlLabel)}
-                      </Option>
-                    );
-                  })}
-                </Select>
-              </Box>
-              <Box>
-                <FilterValueInput
-                  {...appliedFilter.metadatas}
-                  {...appliedFilter.fieldSchema}
-                  value={modifiedData.value}
-                  onChange={value => setModifiedData(prev => ({ ...prev, value }))}
-                />
-              </Box>
-              <Box>
-                <Button size="L" variant="secondary" startIcon={<Plus />} type="submit" fullWidth>
-                  {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
-                </Button>
-              </Box>
-            </Stack>
-          </form>
-        </FocusTrap>
-      </Popover>
-    </>
+    <Popover source={source} padding={3} spacing={4}>
+      <FocusTrap onEscape={onToggle}>
+        <form onSubmit={handleSubmit}>
+          <Stack spacing={1} style={{ minWidth: 184 }}>
+            <Box>
+              <Select
+                aria-label={formatMessage({
+                  id: 'app.utils.select-field',
+                  defaultMessage: 'Select field',
+                })}
+                name="name"
+                size="M"
+                onChange={handleChangeFilterField}
+                value={modifiedData.name}
+              >
+                {displayedFilters.map((filter) => {
+                  return (
+                    <Option key={filter.name} value={filter.name}>
+                      {filter.metadatas.label}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Box>
+            <Box>
+              <Select
+                aria-label={formatMessage({
+                  id: 'app.utils.select-filter',
+                  defaultMessage: 'Select filter',
+                })}
+                name="filter"
+                size="M"
+                value={modifiedData.filter}
+                onChange={handleChangeOperator}
+              >
+                {getFilterList(appliedFilter).map((option) => {
+                  return (
+                    <Option key={option.value} value={option.value}>
+                      {formatMessage(option.intlLabel)}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Box>
+            <Box>
+              <FilterValueInput
+                {...appliedFilter.metadatas}
+                {...appliedFilter.fieldSchema}
+                value={modifiedData.value}
+                onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
+              />
+            </Box>
+            <Box>
+              <Button size="L" variant="secondary" startIcon={<Plus />} type="submit" fullWidth>
+                {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
+              </Button>
+            </Box>
+          </Stack>
+        </form>
+      </FocusTrap>
+    </Popover>
   );
 };
 

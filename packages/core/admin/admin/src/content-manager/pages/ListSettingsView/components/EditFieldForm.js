@@ -72,7 +72,7 @@ const EditFieldForm = ({
                   defaultMessage: 'Label',
                 })}
                 name="label"
-                onChange={e => onChangeEditLabel(e)}
+                onChange={(e) => onChangeEditLabel(e)}
                 value={fieldForm.label}
                 hint={formatMessage({
                   id: getTrad('form.Input.label.inputDescription'),
@@ -90,8 +90,9 @@ const EditFieldForm = ({
                     defaultMessage: 'Enable sort on this field',
                   })}
                   name="sortable"
-                  onChange={e =>
-                    onChangeEditLabel({ target: { name: 'sortable', value: e.target.checked } })}
+                  onChange={(e) =>
+                    onChangeEditLabel({ target: { name: 'sortable', value: e.target.checked } })
+                  }
                   onLabel={formatMessage({
                     id: 'app.components.ToggleCheckbox.on-label',
                     defaultMessage: 'on',
@@ -113,7 +114,7 @@ const EditFieldForm = ({
           }
           endActions={
             <Button type="submit">
-              {formatMessage({ id: 'form.button.finish', defaultMessage: 'Finish' })}
+              {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
             </Button>
           }
         />

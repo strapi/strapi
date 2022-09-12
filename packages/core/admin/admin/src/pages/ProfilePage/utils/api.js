@@ -1,3 +1,4 @@
+import omit from 'lodash/omit';
 import { axiosInstance } from '../../../core/utils';
 
 const fetchUser = async () => {
@@ -6,10 +7,11 @@ const fetchUser = async () => {
   return data.data;
 };
 
-const putUser = async body => {
-  const { data } = await axiosInstance.put('/admin/users/me', body);
+const putUser = async (body) => {
+  const dataToSend = omit(body, ['confirmPassword', 'currentTheme']);
+  const { data } = await axiosInstance.put('/admin/users/me', dataToSend);
 
-  return data.data;
+  return { ...data.data, currentTheme: body.currentTheme };
 };
 
 export { fetchUser, putUser };

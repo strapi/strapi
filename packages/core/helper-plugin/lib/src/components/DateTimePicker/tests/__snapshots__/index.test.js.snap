@@ -1,21 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DateTimePicker snapshots the component 1`] = `
-.c4 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
 .c1 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -25,30 +15,62 @@ exports[`DateTimePicker snapshots the component 1`] = `
   flex-direction: column;
 }
 
-.c1 > * {
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c2 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c1 > * + * {
+.c2 > * + * {
   margin-top: 4px;
 }
 
-.c5 > * {
+.c7 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c5 > * + * {
+.c7 > * + * {
   margin-left: 8px;
 }
 
-.c9 {
+.c12 {
   padding-right: 8px;
   padding-left: 12px;
 }
 
-.c7 {
+.c8 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c10 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -60,59 +82,56 @@ exports[`DateTimePicker snapshots the component 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
-.c11 {
+.c14 {
   border: none;
   border-radius: 4px;
+  padding-bottom: 0.65625rem;
   padding-left: 0;
   padding-right: 16px;
+  padding-top: 0.65625rem;
   color: #32324d;
   font-weight: 400;
   font-size: 0.875rem;
   display: block;
   width: 100%;
-}
-
-.c11::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c11::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c11:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c11::placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c11[aria-disabled='true'] {
   background: inherit;
+}
+
+.c14::-webkit-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c14::-moz-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c14:-ms-input-placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c14::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c14[aria-disabled='true'] {
   color: inherit;
 }
 
-.c11:focus {
+.c14:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c8 {
+.c11 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
-  height: 2.5rem;
   outline: none;
   box-shadow: 0;
   -webkit-transition-property: border-color,box-shadow,fill;
@@ -121,41 +140,31 @@ exports[`DateTimePicker snapshots the component 1`] = `
   transition-duration: 0.2s;
 }
 
-.c8:focus-within {
+.c11:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c6 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c6 > * {
+.c9 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c6 > * + * {
+.c9 > * + * {
   margin-top: 4px;
 }
 
-.c10 {
+.c13 {
   border: none;
   background: transparent;
   border-radius: 4px;
 }
 
-.c10 svg path {
+.c13 svg path {
   fill: #8e8ea9;
 }
 
-.c15 {
+.c19 {
   position: absolute;
   left: 0;
   right: 0;
@@ -166,34 +175,42 @@ exports[`DateTimePicker snapshots the component 1`] = `
   border: none;
 }
 
-.c15:focus {
+.c19:focus {
   outline: none;
 }
 
-.c15[aria-disabled='true'] {
+.c19[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c21 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c18 {
+.c22 {
   padding-left: 12px;
 }
 
-.c20 {
+.c24 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c13 {
+.c15 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c17 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -201,13 +218,13 @@ exports[`DateTimePicker snapshots the component 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.c20 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-}
-
-.c16 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -219,32 +236,24 @@ exports[`DateTimePicker snapshots the component 1`] = `
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
-.c12 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
+.c25 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
-.c12 > * {
+.c16 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c12 > * + * {
-  margin-top: 0px;
-}
-
-.c14 {
+.c18 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -260,28 +269,28 @@ exports[`DateTimePicker snapshots the component 1`] = `
   transition-duration: 0.2s;
 }
 
-.c14:focus-within {
+.c18:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c22 {
+.c26 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c22 svg {
+.c26 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c22 svg path {
+.c26 svg path {
   fill: #666687;
 }
 
-.c23 {
+.c27 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -290,15 +299,15 @@ exports[`DateTimePicker snapshots the component 1`] = `
   border: none;
 }
 
-.c23 svg {
+.c27 svg {
   width: 0.375rem;
 }
 
-.c17 {
+.c21 {
   width: 100%;
 }
 
-.c19 {
+.c23 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -309,29 +318,20 @@ exports[`DateTimePicker snapshots the component 1`] = `
   align-items: center;
 }
 
-.c19 svg {
+.c23 svg {
   height: 1rem;
   width: 1rem;
 }
 
-.c19 svg path {
+.c23 svg path {
   fill: #8e8ea9;
 }
 
-.c3 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c24 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c2 {
+.c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -339,10 +339,33 @@ exports[`DateTimePicker snapshots the component 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.c4 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c28 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c3 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
 .c0 > div > div p[data-strapi-field-error='true'] {
@@ -355,21 +378,27 @@ exports[`DateTimePicker snapshots the component 1`] = `
   role="group"
 >
   <div
-    class="c1"
+    class="c1 c2"
+    spacing="1"
   >
     <div
-      class="c2"
+      class="c3"
     >
       <label
-        class="c3"
+        class="c4"
         for="field-1"
         id="datetime-label"
       >
-        Date time picker
+        <div
+          class="c5"
+        >
+          Date time picker
+        </div>
       </label>
     </div>
     <div
-      class="c4 c5"
+      class="c6 c7"
+      spacing="2"
     >
       <div
         class=""
@@ -377,18 +406,19 @@ exports[`DateTimePicker snapshots the component 1`] = `
         <div>
           <div>
             <div
-              class="c6"
+              class="c8 c9"
+              spacing="1"
             >
               <div
-                class="c7 c8"
+                class="c10 c11"
               >
                 <div
-                  class="c9"
+                  class="c12"
                 >
                   <button
                     aria-disabled="false"
                     aria-label="Date picker, current is 10/13/2021"
-                    class="c10"
+                    class="c13"
                     type="button"
                   >
                     <svg
@@ -413,11 +443,10 @@ exports[`DateTimePicker snapshots the component 1`] = `
                   aria-disabled="false"
                   aria-invalid="false"
                   aria-label="Date time picker"
-                  class="c11"
+                  class="c14"
                   data-testid="datetimepicker-date"
                   id="datepicker-1"
                   name="datetimepicker"
-                  placeholder="1/1/1970"
                   value="10/13/2021"
                 />
               </div>
@@ -427,10 +456,10 @@ exports[`DateTimePicker snapshots the component 1`] = `
       </div>
       <div>
         <div
-          class="c12"
+          class="c15 c16"
         >
           <div
-            class="c13 c14"
+            class="c17 c18"
           >
             <button
               aria-disabled="false"
@@ -438,23 +467,23 @@ exports[`DateTimePicker snapshots the component 1`] = `
               aria-haspopup="listbox"
               aria-label="Date time picker"
               aria-labelledby="timepicker-1-label timepicker-1-content"
-              class="c15"
+              class="c19"
               data-testid="datetimepicker-time"
               id="timepicker-1"
               type="button"
             />
             <div
-              class="c16 c17"
+              class="c20 c21"
             >
               <div
-                class="c13"
+                class="c17"
               >
                 <div
                   aria-hidden="true"
-                  class="c18"
+                  class="c22"
                 >
                   <div
-                    class="c19"
+                    class="c23"
                   >
                     <svg
                       fill="none"
@@ -473,10 +502,10 @@ exports[`DateTimePicker snapshots the component 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c20"
+                  class="c24"
                 >
                   <span
-                    class="c21"
+                    class="c25"
                     id="timepicker-1-content"
                   >
                     10:00
@@ -484,11 +513,11 @@ exports[`DateTimePicker snapshots the component 1`] = `
                 </div>
               </div>
               <div
-                class="c13"
+                class="c17"
               >
                 <button
                   aria-hidden="true"
-                  class="c18 c22 c23"
+                  class="c22 c26 c27"
                   tabindex="-1"
                   type="button"
                 >
@@ -514,7 +543,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
       </div>
     </div>
     <p
-      class="c24"
+      class="c28"
       id="field-1-hint"
     >
       This is a super description

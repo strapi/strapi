@@ -39,7 +39,7 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
         paddingBottom={9}
         type="button"
       >
-        <Stack size={2}>
+        <Stack spacing={2}>
           <Flex justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
             <IconWrapper>
               <PlusCircle />
@@ -57,10 +57,13 @@ const ComponentInitializer = ({ error, isReadOnly, onClick }) => {
       </Box>
       {error?.id && (
         <Typography textColor="danger600" variant="pi">
-          {formatMessage({
-            id: error.id,
-            defaultMessage: error.id,
-          })}
+          {formatMessage(
+            {
+              id: error.id,
+              defaultMessage: error.id,
+            },
+            { ...error.values }
+          )}
         </Typography>
       )}
     </>
@@ -75,6 +78,8 @@ ComponentInitializer.defaultProps = {
 ComponentInitializer.propTypes = {
   error: PropTypes.shape({
     id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
   }),
   isReadOnly: PropTypes.bool,
   onClick: PropTypes.func.isRequired,

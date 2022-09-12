@@ -12,7 +12,7 @@ const { getService } = require('../utils');
 const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
 
 const { sanitize } = utils;
-const { ApplicationError, ValidationError } = utils.errors;
+const { ApplicationError, ValidationError, NotFoundError } = utils.errors;
 
 const sanitizeOutput = (user, ctx) => {
   const schema = strapi.getModel('plugin::users-permissions.user');
@@ -55,10 +55,9 @@ module.exports = {
 
     const user = {
       ...ctx.request.body,
+      email: email.toLowerCase(),
       provider: 'local',
     };
-
-    user.email = _.toLower(user.email);
 
     if (!role) {
       const defaultRole = await strapi
@@ -90,7 +89,10 @@ module.exports = {
     const { id } = ctx.params;
     const { email, username, password } = ctx.request.body;
 
-    const user = await getService('user').fetch({ id });
+    const user = await getService('user').fetch(id);
+    if (!user) {
+      throw new NotFoundError(`User not found`);
+    }
 
     await validateUpdateUserBody(ctx.request.body);
 
@@ -103,7 +105,7 @@ module.exports = {
         .query('plugin::users-permissions.user')
         .findOne({ where: { username } });
 
-      if (userWithSameUsername && userWithSameUsername.id != id) {
+      if (userWithSameUsername && _.toString(userWithSameUsername.id) !== _.toString(id)) {
         throw new ApplicationError('Username already taken');
       }
     }
@@ -113,13 +115,13 @@ module.exports = {
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: email.toLowerCase() } });
 
-      if (userWithSameEmail && userWithSameEmail.id != id) {
+      if (userWithSameEmail && _.toString(userWithSameEmail.id) !== _.toString(id)) {
         throw new ApplicationError('Email already taken');
       }
       ctx.request.body.email = ctx.request.body.email.toLowerCase();
     }
 
-    let updateData = {
+    const updateData = {
       ...ctx.request.body,
     };
 
@@ -133,10 +135,10 @@ module.exports = {
    * Retrieve user records.
    * @return {Object|Array}
    */
-  async find(ctx, next, { populate } = {}) {
-    const users = await getService('user').fetchAll(ctx.query.filters, populate);
+  async find(ctx) {
+    const users = await getService('user').fetchAll(ctx.query);
 
-    ctx.body = await Promise.all(users.map(user => sanitizeOutput(user, ctx)));
+    ctx.body = await Promise.all(users.map((user) => sanitizeOutput(user, ctx)));
   },
 
   /**
@@ -145,7 +147,9 @@ module.exports = {
    */
   async findOne(ctx) {
     const { id } = ctx.params;
-    let data = await getService('user').fetch({ id });
+    const { query } = ctx;
+
+    let data = await getService('user').fetch(id, query);
 
     if (data) {
       data = await sanitizeOutput(data, ctx);
@@ -180,11 +184,14 @@ module.exports = {
    * @return {Object|Array}
    */
   async me(ctx) {
-    const user = ctx.state.user;
+    const authUser = ctx.state.user;
+    const { query } = ctx;
 
-    if (!user) {
+    if (!authUser) {
       return ctx.unauthorized();
     }
+
+    const user = await getService('user').fetch(authUser.id, query);
 
     ctx.body = await sanitizeOutput(user, ctx);
   },

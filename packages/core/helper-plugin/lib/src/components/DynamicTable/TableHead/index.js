@@ -32,7 +32,7 @@ const TableHead = ({
           <Th>
             <BaseCheckbox
               aria-label={formatMessage({
-                id: 'app.component.table.select.all-entries',
+                id: 'global.select-all-entries',
                 defaultMessage: 'Select all entries',
               })}
               checked={areAllEntriesSelected}
@@ -44,11 +44,11 @@ const TableHead = ({
         {headers.map(({ name, metadatas: { sortable: isSortable, label } }) => {
           const isSorted = sortBy === name;
           const isUp = sortOrder === 'ASC';
+
           const sortLabel = formatMessage(
             { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
             { label }
           );
-          const intlLabel = formatMessage({ id: label || name, defaultMessage: label || name });
 
           const handleClickSort = (shouldAllowClick = true) => {
             if (isSortable && shouldAllowClick) {
@@ -65,27 +65,25 @@ const TableHead = ({
             <Th
               key={name}
               action={
-                isSorted ? (
+                isSorted && (
                   <IconButton
                     label={sortLabel}
                     onClick={handleClickSort}
-                    icon={isSorted ? <SortIcon isUp={isUp} /> : undefined}
+                    icon={isSorted && <SortIcon isUp={isUp} />}
                     noBorder
                   />
-                ) : (
-                  undefined
                 )
               }
             >
-              <Tooltip label={isSortable ? sortLabel : intlLabel}>
+              <Tooltip label={isSortable ? sortLabel : label}>
                 <Typography
                   textColor="neutral600"
                   as={!isSorted && isSortable ? 'button' : 'span'}
-                  label={intlLabel}
+                  label={label}
                   onClick={() => handleClickSort(!isSorted)}
                   variant="sigma"
                 >
-                  {intlLabel}
+                  {label}
                 </Typography>
               </Tooltip>
             </Th>
@@ -96,7 +94,7 @@ const TableHead = ({
           <Th>
             <VisuallyHidden>
               {formatMessage({
-                id: 'components.TableHeader.actions-label',
+                id: 'global.actions',
                 defaultMessage: 'Actions',
               })}
             </VisuallyHidden>

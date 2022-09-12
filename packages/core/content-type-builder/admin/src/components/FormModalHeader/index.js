@@ -109,7 +109,7 @@ const FormModalHeader = ({
 
   return (
     <ModalHeader>
-      <Stack horizontal size={3}>
+      <Stack horizontal spacing={3}>
         <AttributeIcon type={icon} />
 
         <Breadcrumbs label={breadcrumbsLabel}>

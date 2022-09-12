@@ -5,7 +5,7 @@ import { componentField, componentForm } from '../component';
 import { nameField } from './nameField';
 
 const baseForm = {
-  component: (data, step) => {
+  component(data, step) {
     if (step === '1') {
       const itemsToConcat =
         data.createComponent === true ? componentForm.base('componentToCreate.') : [];
@@ -37,7 +37,7 @@ const baseForm = {
           items: [
             {
               intlLabel: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
+                id: 'global.type',
                 defaultMessage: 'Type',
               },
               name: 'repeatable',
@@ -75,7 +75,7 @@ const baseForm = {
       ],
     };
   },
-  date: () => {
+  date() {
     return {
       sections: [
         {
@@ -84,7 +84,7 @@ const baseForm = {
             nameField,
             {
               intlLabel: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
+                id: 'global.type',
                 defaultMessage: 'Type',
               },
               name: 'type',
@@ -107,7 +107,8 @@ const baseForm = {
                   metadatas: {
                     intlLabel: {
                       id: getTrad('form.attribute.item.date.type.date'),
-                      defaultMessage: 'date',
+                      defaultMessage: 'date (ex: 01/01/{currentYear})',
+                      values: { currentYear: new Date().getFullYear() },
                     },
                   },
                 },
@@ -117,7 +118,8 @@ const baseForm = {
                   metadatas: {
                     intlLabel: {
                       id: getTrad('form.attribute.item.date.type.datetime'),
-                      defaultMessage: 'datetime',
+                      defaultMessage: 'datetime (ex: 01/01/{currentYear} 00:00 AM)',
+                      values: { currentYear: new Date().getFullYear() },
                     },
                   },
                 },
@@ -127,7 +129,7 @@ const baseForm = {
                   metadatas: {
                     intlLabel: {
                       id: getTrad('form.attribute.item.date.type.time'),
-                      defaultMessage: 'time',
+                      defaultMessage: 'time (ex: 00:00 AM)',
                     },
                   },
                 },
@@ -138,7 +140,7 @@ const baseForm = {
       ],
     };
   },
-  enumeration: () => {
+  enumeration() {
     return {
       sections: [
         { sectionTitle: null, items: [nameField] },
@@ -166,7 +168,7 @@ const baseForm = {
       ],
     };
   },
-  media: () => {
+  media() {
     return {
       sections: [
         { sectionTitle: null, items: [nameField] },
@@ -175,7 +177,7 @@ const baseForm = {
           items: [
             {
               intlLabel: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
+                id: 'global.type',
                 defaultMessage: 'Type',
               },
               name: 'multiple',
@@ -211,7 +213,7 @@ const baseForm = {
       ],
     };
   },
-  number: () => {
+  number() {
     return {
       sections: [
         {
@@ -284,7 +286,7 @@ const baseForm = {
       ],
     };
   },
-  relation: () => {
+  relation() {
     return {
       sections: [
         {
@@ -301,7 +303,7 @@ const baseForm = {
       ],
     };
   },
-  string: () => {
+  string() {
     return {
       sections: [
         { sectionTitle: null, items: [nameField] },
@@ -310,7 +312,7 @@ const baseForm = {
           items: [
             {
               intlLabel: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
+                id: 'global.type',
                 defaultMessage: 'Type',
               },
               name: 'type',
@@ -347,7 +349,7 @@ const baseForm = {
       ],
     };
   },
-  text: () => {
+  text() {
     return {
       sections: [
         { sectionTitle: null, items: [nameField] },
@@ -356,7 +358,7 @@ const baseForm = {
           items: [
             {
               intlLabel: {
-                id: getTrad('modalForm.attribute.text.type-selection'),
+                id: 'global.type',
                 defaultMessage: 'Type',
               },
               name: 'type',
@@ -393,7 +395,7 @@ const baseForm = {
       ],
     };
   },
-  uid: (data, step, attributes) => {
+  uid(data, step, attributes) {
     const options = attributes
       .filter(({ type }) => ['string', 'text'].includes(type))
       .map(({ name }) => ({
@@ -427,7 +429,7 @@ const baseForm = {
                 {
                   key: '__null_reset_value__',
                   value: '',
-                  metadatas: { intlLabel: { id: getTrad('none'), defaultMessage: 'None' } },
+                  metadatas: { intlLabel: { id: 'global.none', defaultMessage: 'None' } },
                 },
                 ...options,
               ],

@@ -12,10 +12,10 @@ import Inputs from '../Inputs';
 
 const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, name }) => {
   const { getComponentLayout } = useContentTypeLayout();
-  const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
-    componentUid,
-    getComponentLayout,
-  ]);
+  const componentLayoutData = useMemo(
+    () => getComponentLayout(componentUid),
+    [componentUid, getComponentLayout]
+  );
   const fields = componentLayoutData.layouts.edit;
 
   return (
@@ -28,7 +28,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
       hasRadius={isNested}
       borderColor={isNested ? 'neutral200' : ''}
     >
-      <Stack size={6}>
+      <Stack spacing={6}>
         {fields.map((fieldRow, key) => {
           return (
             <Grid gap={4} key={key}>

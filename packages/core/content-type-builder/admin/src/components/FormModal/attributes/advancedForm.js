@@ -6,7 +6,7 @@ import { componentForm } from '../component';
 import options from './attributeOptions';
 
 const advancedForm = {
-  boolean: () => {
+  boolean() {
     return {
       sections: [
         {
@@ -43,7 +43,7 @@ const advancedForm = {
         },
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.private],
@@ -51,7 +51,7 @@ const advancedForm = {
       ],
     };
   },
-  component: ({ repeatable }, step) => {
+  component({ repeatable }, step) {
     if (step === '1') {
       return { sections: componentForm.advanced('componentToCreate') };
     }
@@ -61,7 +61,7 @@ const advancedForm = {
         sections: [
           {
             sectionTitle: {
-              id: getTrad('form.attribute.item.settings.name'),
+              id: 'global.settings',
               defaultMessage: 'Settings',
             },
             items: [options.required, options.private, options.max, options.min],
@@ -74,7 +74,7 @@ const advancedForm = {
       sections: [
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.private],
@@ -82,7 +82,7 @@ const advancedForm = {
       ],
     };
   },
-  date: ({ type }) => {
+  date({ type }) {
     return {
       sections: [
         {
@@ -100,7 +100,7 @@ const advancedForm = {
         },
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.unique, options.private],
@@ -108,12 +108,12 @@ const advancedForm = {
       ],
     };
   },
-  dynamiczone: () => {
+  dynamiczone() {
     return {
       sections: [
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.max, options.min],
@@ -121,7 +121,7 @@ const advancedForm = {
       ],
     };
   },
-  email: () => {
+  email() {
     return {
       sections: [
         {
@@ -136,7 +136,7 @@ const advancedForm = {
 
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [
@@ -150,7 +150,7 @@ const advancedForm = {
       ],
     };
   },
-  enumeration: data => {
+  enumeration(data) {
     return {
       sections: [
         {
@@ -177,7 +177,7 @@ const advancedForm = {
                 },
                 ...(data.enum || [])
                   .filter((value, index) => data.enum.indexOf(value) === index && value)
-                  .map(value => {
+                  .map((value) => {
                     return {
                       key: value,
                       value,
@@ -206,7 +206,7 @@ const advancedForm = {
 
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.private],
@@ -214,12 +214,12 @@ const advancedForm = {
       ],
     };
   },
-  json: () => {
+  json() {
     return {
       sections: [
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.private],
@@ -227,7 +227,7 @@ const advancedForm = {
       ],
     };
   },
-  media: () => {
+  media() {
     return {
       sections: [
         {
@@ -248,15 +248,15 @@ const advancedForm = {
         },
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [options.private, options.required],
+          items: [options.required, options.private],
         },
       ],
     };
   },
-  number: data => {
+  number(data) {
     const inputStep = data.type === 'decimal' || data.type === 'float' ? 'any' : 1;
 
     return {
@@ -279,7 +279,7 @@ const advancedForm = {
         },
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.unique, options.max, options.min, options.private],
@@ -287,14 +287,14 @@ const advancedForm = {
       ],
     };
   },
-  password: () => {
+  password() {
     return {
       sections: [
         { sectionTitle: null, items: [options.default] },
 
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.maxLength, options.minLength, options.private],
@@ -302,12 +302,12 @@ const advancedForm = {
       ],
     };
   },
-  relation: () => {
+  relation() {
     return {
       sections: [
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.private],
@@ -315,13 +315,13 @@ const advancedForm = {
       ],
     };
   },
-  richtext: () => {
+  richtext() {
     return {
       sections: [
         { sectionTitle: null, items: [options.default] },
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.maxLength, options.minLength, options.private],
@@ -329,14 +329,14 @@ const advancedForm = {
       ],
     };
   },
-  text: () => {
+  text() {
     return {
       sections: [
         { sectionTitle: null, items: [options.default, options.regex] },
 
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [
@@ -350,7 +350,7 @@ const advancedForm = {
       ],
     };
   },
-  uid: data => {
+  uid(data) {
     return {
       sections: [
         {
@@ -360,7 +360,7 @@ const advancedForm = {
 
         {
           sectionTitle: {
-            id: getTrad('form.attribute.item.settings.name'),
+            id: 'global.settings',
             defaultMessage: 'Settings',
           },
           items: [options.required, options.maxLength, options.minLength, options.private],

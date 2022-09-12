@@ -34,6 +34,6 @@ const buildScalarFilters = ({ strapi }) => {
   }, {});
 };
 
-module.exports = context => ({
+module.exports = (context) => ({
   scalars: buildScalarFilters(context),
 });

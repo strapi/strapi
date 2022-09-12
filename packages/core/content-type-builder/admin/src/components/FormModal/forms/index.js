@@ -1,6 +1,5 @@
 import get from 'lodash/get';
 import toLower from 'lodash/toLower';
-import getTrad from '../../../utils/getTrad';
 import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
 import { categoryForm, createCategorySchema } from '../category';
 import { contentTypeForm, createContentTypeSchema } from '../contentType';
@@ -94,20 +93,20 @@ const forms = {
   },
   contentType: {
     schema(alreadyTakenNames, isEditing, ctUid, reservedNames, extensions, contentTypes) {
-      const singularNames = Object.values(contentTypes).map(contentType => {
+      const singularNames = Object.values(contentTypes).map((contentType) => {
         return contentType.schema.singularName;
       });
 
-      const pluralNames = Object.values(contentTypes).map(contentType => {
+      const pluralNames = Object.values(contentTypes).map((contentType) => {
         return contentType.schema.pluralNames;
       });
 
       const takenNames = isEditing
-        ? alreadyTakenNames.filter(uid => uid !== ctUid)
+        ? alreadyTakenNames.filter((uid) => uid !== ctUid)
         : alreadyTakenNames;
 
       const takenSingularNames = isEditing
-        ? singularNames.filter(singName => {
+        ? singularNames.filter((singName) => {
             const currentSingularName = get(contentTypes, [ctUid, 'schema', 'singularName'], '');
 
             return currentSingularName !== singName;
@@ -115,7 +114,7 @@ const forms = {
         : singularNames;
 
       const takenPluralNames = isEditing
-        ? pluralNames.filter(pluralName => {
+        ? pluralNames.filter((pluralName) => {
             const currentPluralName = get(contentTypes, [ctUid, 'schema', 'pluralName'], '');
 
             return currentPluralName !== pluralName;
@@ -156,7 +155,7 @@ const forms = {
             ...baseForm,
             {
               sectionTitle: {
-                id: getTrad('form.attribute.item.settings.name'),
+                id: 'global.settings',
                 defaultMessage: 'Settings',
               },
               items: itemsToAdd,
@@ -175,7 +174,7 @@ const forms = {
       compoUid = null
     ) {
       const takenNames = isEditing
-        ? alreadyTakenAttributes.filter(uid => uid !== compoUid)
+        ? alreadyTakenAttributes.filter((uid) => uid !== compoUid)
         : alreadyTakenAttributes;
 
       return createComponentSchema(takenNames, reservedNames.models, componentCategory);
@@ -212,8 +211,8 @@ const forms = {
   editCategory: {
     schema(allCategories, initialData) {
       const allowedCategories = allCategories
-        .filter(cat => cat !== initialData.name)
-        .map(cat => toLower(cat));
+        .filter((cat) => cat !== initialData.name)
+        .map((cat) => toLower(cat));
 
       return createCategorySchema(allowedCategories);
     },

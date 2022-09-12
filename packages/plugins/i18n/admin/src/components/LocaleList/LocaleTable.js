@@ -40,7 +40,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
         </Tr>
       </Thead>
       <Tbody>
-        {locales.map(locale => (
+        {locales.map((locale) => (
           <Tr
             key={locale.id}
             {...onRowClick({
@@ -64,7 +64,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
             <Td>
               <Stack
                 horizontal
-                size={1}
+                spacing={1}
                 style={{ justifyContent: 'flex-end' }}
                 {...stopPropagation}
               >

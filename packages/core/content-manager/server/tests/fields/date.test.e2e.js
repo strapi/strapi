@@ -54,7 +54,7 @@ describe('Test type date', () => {
     '2019-08-08 00:00:00.123Z',
     '2019-08-08T00:00:00.123',
     '2019-08-08T00:00:00.123Z',
-  ])('Date can be sent in any iso format and the date part will be kept, (%s)', async input => {
+  ])('Date can be sent in any iso format and the date part will be kept, (%s)', async (input) => {
     const res = await rq.post('/content-manager/collection-types/api::withdate.withdate', {
       body: {
         field: input,
@@ -69,7 +69,7 @@ describe('Test type date', () => {
 
   test.each([1234567891012, '1234567891012', '2019/12/11', '12:11:11'])(
     'Throws on invalid date (%s)',
-    async value => {
+    async (value) => {
       const res = await rq.post('/content-manager/collection-types/api::withdate.withdate', {
         body: {
           field: value,
@@ -86,13 +86,13 @@ describe('Test type date', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.pagination).toBeDefined();
     expect(Array.isArray(res.body.results)).toBe(true);
-    res.body.results.forEach(entry => {
+    res.body.results.forEach((entry) => {
       expect(entry.field).toMatch(/^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$/);
     });
   });
 
   test('Updating entry sets the right value and format JSON', async () => {
-    const now = new Date(2018, 7, 5);
+    const now = '2018-08-05';
 
     const res = await rq.post('/content-manager/collection-types/api::withdate.withdate', {
       body: {
@@ -100,7 +100,7 @@ describe('Test type date', () => {
       },
     });
 
-    const newDate = new Date(2017, 10, 23);
+    const newDate = '2017-11-23';
     const updateRes = await rq.put(
       `/content-manager/collection-types/api::withdate.withdate/${res.body.id}`,
       {

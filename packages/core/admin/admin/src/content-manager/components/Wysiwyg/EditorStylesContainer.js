@@ -16,7 +16,7 @@ export const EditorStylesContainer = styled.div`
     height: ${({ isExpandMode }) => (isExpandMode ? '100%' : '290px')};
     color: ${({ theme }) => theme.colors.neutral800};
     direction: ltr;
-    font-family: --apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
       'Open Sans', 'Helvetica Neue', sans-serif;
   }
 
@@ -29,7 +29,8 @@ export const EditorStylesContainer = styled.div`
 
   .CodeMirror-scrollbar-filler,
   .CodeMirror-gutter-filler {
-    background-color: white; /* The little square between H and V scrollbars */
+    /* The little square between H and V scrollbars */
+    background-color: ${({ theme }) => `${theme.colors.neutral0}`};
   }
 
   /* GUTTER */
@@ -158,7 +159,7 @@ export const EditorStylesContainer = styled.div`
   .CodeMirror {
     position: relative;
     overflow: hidden;
-    background: white;
+    background: ${({ theme }) => `${theme.colors.neutral0}`};
   }
 
   .CodeMirror-scroll {
@@ -224,7 +225,7 @@ export const EditorStylesContainer = styled.div`
     margin: 0;
     white-space: pre;
     word-wrap: normal;
-    line-height: inherit;
+    line-height: 1.5;
     color: inherit;
     /* z-index: 2; */
     position: relative;
@@ -292,6 +293,7 @@ export const EditorStylesContainer = styled.div`
   .CodeMirror-cursor {
     position: absolute;
     pointer-events: none;
+    border-color: ${({ theme }) => `${theme.colors.neutral800}`};
   }
   .CodeMirror-measure pre {
     position: static;

@@ -2,7 +2,7 @@ interface EntityManager {
   assocCreatorRoles(): any;
   find(): any;
   findPage(): any;
-  findWithRelationCounts(): any;
+  findWithRelationCountsPage(): any;
   count(): any;
   findOne(): any;
   findOneWithCreatorRoles(): any;

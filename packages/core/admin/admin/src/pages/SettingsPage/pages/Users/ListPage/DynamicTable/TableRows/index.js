@@ -31,8 +31,8 @@ const TableRows = ({
 
   return (
     <Tbody>
-      {rows.map(data => {
-        const isChecked = entriesToDelete.findIndex(id => id === data.id) !== -1;
+      {rows.map((data) => {
+        const isChecked = entriesToDelete.findIndex((id) => id === data.id) !== -1;
 
         return (
           <Tr
@@ -63,7 +63,7 @@ const TableRows = ({
               return (
                 <Td key={key}>
                   {typeof cellFormatter === 'function' ? (
-                    cellFormatter(data, { key, name, ...rest })
+                    cellFormatter(data, { key, name, formatMessage, ...rest })
                   ) : (
                     <Typography textColor="neutral800">{data[name] || '-'}</Typography>
                   )}
@@ -89,7 +89,7 @@ const TableRows = ({
                       <IconButton
                         onClick={() => onClickDelete(data.id)}
                         label={formatMessage(
-                          { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
+                          { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
                           { target: getFullName(data.firstname, data.lastname) }
                         )}
                         noBorder
@@ -110,8 +110,8 @@ const TableRows = ({
 TableRows.defaultProps = {
   canDelete: false,
   entriesToDelete: [],
-  onClickDelete: () => {},
-  onSelectRow: () => {},
+  onClickDelete() {},
+  onSelectRow() {},
   rows: [],
   withBulkActions: false,
   withMainAction: false,

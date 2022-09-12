@@ -50,7 +50,7 @@ const FormModalEndActions = ({
         <Button
           variant="secondary"
           type="submit"
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
 
             onSubmitAddComponentToDz(e, true);
@@ -69,14 +69,14 @@ const FormModalEndActions = ({
       <Button
         variant="default"
         type="submit"
-        onClick={e => {
+        onClick={(e) => {
           e.preventDefault();
 
           onSubmitAddComponentToDz(e, false);
         }}
       >
         {formatMessage({
-          id: getTrad('form.button.finish'),
+          id: 'global.finish',
           defaultMessage: 'Finish',
         })}
       </Button>
@@ -88,14 +88,14 @@ const FormModalEndActions = ({
       <Button
         variant="default"
         type="submit"
-        onClick={e => {
+        onClick={(e) => {
           e.preventDefault();
 
           onSubmitEditDz(e, false);
         }}
       >
         {formatMessage({
-          id: getTrad('form.button.finish'),
+          id: 'global.finish',
           defaultMessage: 'Finish',
         })}
       </Button>
@@ -108,7 +108,7 @@ const FormModalEndActions = ({
         <Button
           variant="secondary"
           type="submit"
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
 
             onSubmitCreateDz(e, true);
@@ -131,7 +131,7 @@ const FormModalEndActions = ({
           }}
         >
           {formatMessage({
-            id: getTrad('form.button.finish'),
+            id: 'global.finish',
             defaultMessage: 'Finish',
           })}
         </Button> */}
@@ -145,7 +145,7 @@ const FormModalEndActions = ({
         <Button
           variant="secondary"
           type="submit"
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
 
             onSubmitAddComponentAttribute(e, true);
@@ -169,7 +169,7 @@ const FormModalEndActions = ({
         <Button
           variant="secondary"
           type="submit"
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
 
             onSubmitAddComponentAttribute(e, true);
@@ -189,14 +189,14 @@ const FormModalEndActions = ({
         <Button
           variant="default"
           type="button"
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
 
             onSubmitAddComponentAttribute(e, false);
           }}
         >
           {formatMessage({
-            id: getTrad('form.button.finish'),
+            id: 'global.finish',
             defaultMessage: 'Finish',
           })}
         </Button>
@@ -210,7 +210,7 @@ const FormModalEndActions = ({
         <Button
           type={isEditingAttribute ? 'button' : 'submit'}
           variant="secondary"
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
 
             onSubmitEditAttribute(e, true);
@@ -225,14 +225,14 @@ const FormModalEndActions = ({
         <Button
           type={isEditingAttribute ? 'submit' : 'button'}
           variant="default"
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
 
             onSubmitEditAttribute(e, false);
           }}
         >
           {formatMessage({
-            id: getTrad('form.button.finish'),
+            id: 'global.finish',
             defaultMessage: 'Finish',
           })}
         </Button>
@@ -248,27 +248,27 @@ const FormModalEndActions = ({
             <Button
               type="button"
               variant="danger"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 deleteContentType();
               }}
             >
               {formatMessage({
-                id: getTrad('form.button.delete'),
+                id: 'global.delete',
                 defaultMessage: 'Delete',
               })}
             </Button>
             <Button
               type="submit"
               variant="default"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
 
                 onSubmitEditContentType(e, false);
               }}
             >
               {formatMessage({
-                id: getTrad('form.button.finish'),
+                id: 'global.finish',
                 defaultMessage: 'Finish',
               })}
             </Button>
@@ -278,14 +278,14 @@ const FormModalEndActions = ({
           <Button
             type="submit"
             variant="secondary"
-            onClick={e => {
+            onClick={(e) => {
               e.preventDefault();
 
               onSubmitCreateContentType(e, true);
             }}
           >
             {formatMessage({
-              id: getTrad('form.button.continue'),
+              id: 'global.continue',
               defaultMessage: 'Continue',
             })}
           </Button>
@@ -302,27 +302,27 @@ const FormModalEndActions = ({
             <Button
               type="button"
               variant="danger"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 deleteComponent();
               }}
             >
               {formatMessage({
-                id: getTrad('form.button.delete'),
+                id: 'global.delete',
                 defaultMessage: 'Delete',
               })}
             </Button>
             <Button
               type="submit"
               variant="default"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
 
                 onSubmitEditComponent(e, false);
               }}
             >
               {formatMessage({
-                id: getTrad('form.button.finish'),
+                id: 'global.finish',
                 defaultMessage: 'Finish',
               })}
             </Button>
@@ -332,14 +332,14 @@ const FormModalEndActions = ({
           <Button
             type="submit"
             variant="secondary"
-            onClick={e => {
+            onClick={(e) => {
               e.preventDefault();
 
               onSubmitCreateComponent(e, true);
             }}
           >
             {formatMessage({
-              id: getTrad('form.button.continue'),
+              id: 'global.continue',
               defaultMessage: 'Continue',
             })}
           </Button>
@@ -354,28 +354,28 @@ const FormModalEndActions = ({
         <Button
           type="button"
           variant="danger"
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
 
             deleteCategory(categoryName);
           }}
         >
           {formatMessage({
-            id: getTrad('form.button.delete'),
+            id: 'global.delete',
             defaultMessage: 'Delete',
           })}
         </Button>
         <Button
           type="submit"
           variant="default"
-          onClick={e => {
+          onClick={(e) => {
             e.preventDefault();
 
             onSubmitEditCategory(e);
           }}
         >
           {formatMessage({
-            id: getTrad('form.button.finish'),
+            id: 'global.finish',
             defaultMessage: 'finish',
           })}
         </Button>

@@ -1,0 +1,17 @@
+name: Add bugs to bugs project
+
+on:
+  issues:
+    types:
+      - opened
+      - transferred
+
+jobs:
+  add-to-project:
+    name: Add issue to Support Team project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@main
+        with:
+          project-url: https://github.com/orgs/strapi/projects/15
+          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}

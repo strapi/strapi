@@ -13,10 +13,21 @@ https://guides.github.com/features/mastering-markdown/
 
 Please ensure you have also read and understand the contributing guide.
 
-https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue
+https://github.com/strapi/strapi/blob/main/CONTRIBUTING.md#reporting-an-issue
 -->
 
 ## Bug report
+
+### Required System information
+
+<!-- Please ensure you are using the Node LTS version (v14 or v16 or v18) -->
+<!-- Strapi v3 is not supported unless it is a critical/high security issue -->
+
+- Node.js version:
+- NPM version:
+- Strapi version:
+- Database:
+- Operating system:
 
 ### Describe the bug
 
@@ -40,14 +51,6 @@ If applicable, add screenshots to help explain your problem.
 ### Code snippets
 
 If applicable, add code samples to help explain your problem.
-
-### System
-
-- Node.js version: <!-- Please ensure you are using the Node LTS version (v12, v14, v16) -->
-- NPM version:
-- Strapi version: <!-- v3 is not supported unless it is a critical/high security issue -->
-- Database:
-- Operating system:
 
 ### Additional context
 

@@ -38,12 +38,27 @@ describe('metrics', () => {
     const testData = [
       [['fieldA'], [false]],
       [['fieldA', 'fieldB'], [false]],
-      [['fieldA', 'field1'], [true, 2, 1]],
-      [['field1', 'field2'], [true, 2, 2]],
+      [
+        ['fieldA', 'field1'],
+        [true, 2, 1],
+      ],
+      [
+        ['field1', 'field2'],
+        [true, 2, 2],
+      ],
       [['field1'], [true, 1, 1]],
-      [['fieldA', 'fieldB', 'field1', 'field2'], [true, 4, 2]],
-      [['fieldA', 'fieldB', 'field3', 'field4'], [true, 4, 2]],
-      [['fieldA', 'fieldB', 'field5', 'field6'], [true, 4, 2]],
+      [
+        ['fieldA', 'fieldB', 'field1', 'field2'],
+        [true, 4, 2],
+      ],
+      [
+        ['fieldA', 'fieldB', 'field3', 'field4'],
+        [true, 4, 2],
+      ],
+      [
+        ['fieldA', 'fieldB', 'field5', 'field6'],
+        [true, 4, 2],
+      ],
     ];
 
     test.each(testData)('%s', async (list, expectedResult) => {

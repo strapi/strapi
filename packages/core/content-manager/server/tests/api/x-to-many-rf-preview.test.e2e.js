@@ -5,7 +5,7 @@ const { createAuthRequest } = require('../../../../../../test/helpers/request');
 const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../../../test/helpers/builder');
 
-const toIds = arr => uniq(map(prop('id'))(arr));
+const toIds = (arr) => uniq(map(prop('id'))(arr));
 
 let strapi;
 let rq;
@@ -107,8 +107,8 @@ const fixtures = {
   ],
 };
 
-const getUID = modelName => `api::${modelName}.${modelName}`;
-const getCMPrefixUrl = modelName => `/content-manager/collection-types/${getUID(modelName)}`;
+const getUID = (modelName) => `api::${modelName}.${modelName}`;
+const getCMPrefixUrl = (modelName) => `/content-manager/collection-types/${getUID(modelName)}`;
 
 describe('x-to-many RF Preview', () => {
   const cmProductUrl = getCMPrefixUrl(productModel.singularName);
@@ -133,7 +133,7 @@ describe('x-to-many RF Preview', () => {
   });
 
   describe('Entity Misc', () => {
-    test.each(['foobar', 'name'])(`Throws if the targeted field is invalid (%s)`, async field => {
+    test.each(['foobar', 'name'])(`Throws if the targeted field is invalid (%s)`, async (field) => {
       const product = data.product[0];
       const { body, statusCode } = await rq.get(`${cmProductUrl}/${product.id}/${field}`);
 
@@ -168,7 +168,7 @@ describe('x-to-many RF Preview', () => {
   describe('Relation Nature', () => {
     test(`Throws if the relation's nature is not a x-to-many`, async () => {
       const url = getCMPrefixUrl(categoryModel.singularName);
-      const id = data.category[0].id;
+      const { id } = data.category[0];
 
       const { body, statusCode } = await rq.get(`${url}/${id}/product`);
 
@@ -208,25 +208,26 @@ describe('x-to-many RF Preview', () => {
   });
 
   describe('Pagination', () => {
-    test.each([[1, 10], [2, 10], [5, 1], [4, 2], [1, 100]])(
-      'Custom pagination (%s, %s)',
-      async (page, pageSize) => {
-        const product = data.product[0];
+    test.each([
+      [1, 10],
+      [2, 10],
+      [5, 1],
+      [4, 2],
+      [1, 100],
+    ])('Custom pagination (%s, %s)', async (page, pageSize) => {
+      const product = data.product[0];
 
-        const { body, statusCode } = await rq.get(
-          `${cmProductUrl}/${product.id}/shops?page=${page}&pageSize=${pageSize}`
-        );
+      const { body, statusCode } = await rq.get(
+        `${cmProductUrl}/${product.id}/shops?page=${page}&pageSize=${pageSize}`
+      );
 
-        expect(statusCode).toBe(200);
+      expect(statusCode).toBe(200);
 
-        const { pagination, results } = body;
+      const { pagination, results } = body;
 
-        expect(pagination.page).toBe(page);
-        expect(pagination.pageSize).toBe(pageSize);
-        expect(results).toHaveLength(
-          Math.min(pageSize, PRODUCT_SHOP_COUNT - pageSize * (page - 1))
-        );
-      }
-    );
+      expect(pagination.page).toBe(page);
+      expect(pagination.pageSize).toBe(pageSize);
+      expect(results).toHaveLength(Math.min(pageSize, PRODUCT_SHOP_COUNT - pageSize * (page - 1)));
+    });
   });
 });

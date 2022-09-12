@@ -16,7 +16,7 @@ import ComponentPicker from './components/ComponentPicker';
 
 /* eslint-disable react/no-array-index-key */
 
-const createCollapses = arrayLength =>
+const createCollapses = (arrayLength) =>
   Array.from({ length: arrayLength }).map(() => ({ isOpen: false }));
 
 const DynamicZone = ({
@@ -53,7 +53,7 @@ const DynamicZone = ({
 
   useEffect(() => {
     if (shouldOpenAddedComponent) {
-      setComponentsCollapses(prev =>
+      setComponentsCollapses((prev) =>
         prev.map((collapse, index) => {
           if (index === prev.length - 1) {
             return { ...collapse, isOpen: true };
@@ -71,10 +71,10 @@ const DynamicZone = ({
   const { max = Infinity, min = -Infinity } = fieldSchema;
   const dynamicZoneErrors = useMemo(() => {
     return Object.keys(formErrors)
-      .filter(key => {
+      .filter((key) => {
         return key === name;
       })
-      .map(key => formErrors[key]);
+      .map((key) => formErrors[key]);
   }, [formErrors, name]);
 
   const dynamicZoneAvailableComponents = useMemo(() => fieldSchema.components || [], [fieldSchema]);
@@ -89,7 +89,7 @@ const DynamicZone = ({
     hasError && get(dynamicZoneErrors, [0, 'id'], '') === 'components.Input.error.validation.max';
 
   const handleAddComponent = useCallback(
-    componentUid => {
+    (componentUid) => {
       setIsOpen(false);
 
       addComponentToDynamicZone(name, componentUid, hasError);
@@ -100,7 +100,7 @@ const DynamicZone = ({
 
   const handleClickOpenPicker = () => {
     if (dynamicDisplayedComponentsLength < max) {
-      setIsOpen(prev => !prev);
+      setIsOpen((prev) => !prev);
     } else {
       toggleNotification({
         type: 'info',
@@ -109,8 +109,8 @@ const DynamicZone = ({
     }
   };
 
-  const handleToggleComponent = indexToToggle => {
-    setComponentsCollapses(prev =>
+  const handleToggleComponent = (indexToToggle) => {
+    setComponentsCollapses((prev) =>
       prev.map(({ isOpen }, index) => {
         if (index === indexToToggle) {
           return { isOpen: !isOpen };
@@ -123,7 +123,7 @@ const DynamicZone = ({
 
   const handleMoveComponentDown = (name, currentIndex) => {
     moveComponentDown(name, currentIndex);
-    setComponentsCollapses(prev => {
+    setComponentsCollapses((prev) => {
       return prev.map(({ isOpen }, index, refArray) => {
         if (index === currentIndex + 1) {
           return { isOpen: refArray[currentIndex].isOpen };
@@ -140,7 +140,7 @@ const DynamicZone = ({
 
   const handleMoveComponentUp = (name, currentIndex) => {
     moveComponentUp(name, currentIndex);
-    setComponentsCollapses(prev => {
+    setComponentsCollapses((prev) => {
       return prev.map(({ isOpen }, index, refArray) => {
         if (index === currentIndex - 1) {
           return { isOpen: refArray[currentIndex].isOpen };
@@ -182,7 +182,7 @@ const DynamicZone = ({
   }
 
   return (
-    <Stack size={6}>
+    <Stack spacing={6}>
       {dynamicDisplayedComponentsLength > 0 && (
         <Box>
           <DzLabel
@@ -277,9 +277,6 @@ DynamicZone.propTypes = {
 
 const Memoized = memo(DynamicZone, isEqual);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);
 
 export { DynamicZone };

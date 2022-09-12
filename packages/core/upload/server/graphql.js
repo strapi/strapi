@@ -2,7 +2,9 @@
 
 const path = require('path');
 const os = require('os');
+const mime = require('mime-types');
 const fse = require('fs-extra');
+const { FILE_MODEL_UID } = require('./constants');
 const { getStreamSize } = require('./utils/file');
 
 const UPLOAD_MUTATION_NAME = 'upload';
@@ -28,7 +30,7 @@ module.exports = ({ strapi }) => {
   const { getTypeName, getEntityResponseName } = getGraphQLService('utils').naming;
   const { toEntityResponse } = getGraphQLService('format').returnTypes;
 
-  const fileModel = strapi.getModel('plugin::upload.file');
+  const fileModel = strapi.getModel(FILE_MODEL_UID);
   const fileTypeName = getTypeName(fileModel);
   const fileEntityResponseType = getEntityResponseName(fileModel);
 
@@ -45,10 +47,14 @@ module.exports = ({ strapi }) => {
   const formatFile = async (upload, extraInfo, metas) => {
     const uploadService = getUploadService('upload');
     const { filename, mimetype, createReadStream } = await upload;
-    const currentFile = uploadService.formatFileInfo(
+    const currentFile = await uploadService.formatFileInfo(
       {
         filename,
-        type: mimetype,
+        /**
+         * in case the mime-type wasn't sent, Strapi tries to guess it
+         * from the file extension, to avoid a corrupt database state
+         */
+        type: mimetype || mime.lookup(filename) || 'application/octet-stream',
         size: await getStreamSize(createReadStream()),
       },
       extraInfo || {},
@@ -104,7 +110,12 @@ module.exports = ({ strapi }) => {
             let sanitizedEntity;
 
             try {
-              const { file: upload, info, ...metas } = args;
+              const { file: upload, info = {}, ...metas } = args;
+
+              const apiUploadFolderService = getUploadService('api-upload-folder');
+
+              const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+              info.folder = apiUploadFolder.id;
 
               const file = await formatFile(upload, info, { ...metas, tmpWorkingDirectory });
               const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file, {});
@@ -142,17 +153,27 @@ module.exports = ({ strapi }) => {
             try {
               const { files: uploads, ...metas } = args;
 
+              const apiUploadFolderService = getUploadService('api-upload-folder');
+
+              const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+
               const files = await Promise.all(
-                uploads.map(upload => formatFile(upload, {}, { ...metas, tmpWorkingDirectory }))
+                uploads.map((upload) =>
+                  formatFile(
+                    upload,
+                    { folder: apiUploadFolder.id },
+                    { ...metas, tmpWorkingDirectory }
+                  )
+                )
               );
 
               const uploadService = getUploadService('upload');
 
               const uploadedFiles = await Promise.all(
-                files.map(file => uploadService.uploadFileAndPersist(file, {}))
+                files.map((file) => uploadService.uploadFileAndPersist(file, {}))
               );
 
-              sanitizedEntities = uploadedFiles.map(file =>
+              sanitizedEntities = uploadedFiles.map((file) =>
                 toEntityResponse(file, { args, resourceUID: fileTypeName })
               );
             } finally {
@@ -215,11 +236,11 @@ module.exports = ({ strapi }) => {
       types: [fileInfoInputType, mutations],
       resolversConfig: {
         // Use custom scopes for the upload file CRUD operations
-        ['Query.uploadFiles']: { auth: { scope: 'plugin::upload.content-api.find' } },
-        ['Query.uploadFile']: { auth: { scope: 'plugin::upload.content-api.findOne' } },
-        ['Mutation.createUploadFile']: { auth: { scope: 'plugin::upload.content-api.upload' } },
-        ['Mutation.updateUploadFile']: { auth: { scope: 'plugin::upload.content-api.upload' } },
-        ['Mutation.deleteUploadFile']: { auth: { scope: 'plugin::upload.content-api.destroy' } },
+        'Query.uploadFiles': { auth: { scope: 'plugin::upload.content-api.find' } },
+        'Query.uploadFile': { auth: { scope: 'plugin::upload.content-api.findOne' } },
+        'Mutation.createUploadFile': { auth: { scope: 'plugin::upload.content-api.upload' } },
+        'Mutation.updateUploadFile': { auth: { scope: 'plugin::upload.content-api.upload' } },
+        'Mutation.deleteUploadFile': { auth: { scope: 'plugin::upload.content-api.destroy' } },
 
         [`Mutation.${UPLOAD_MUTATION_NAME}`]: {
           auth: { scope: 'plugin::upload.content-api.upload' },

@@ -6,12 +6,11 @@ import upperFirst from 'lodash/upperFirst';
 import pick from 'lodash/pick';
 import get from 'lodash/get';
 import { stringify } from 'qs';
-import { useNotification, useTracking, ConfirmDialog } from '@strapi/helper-plugin';
+import { useNotification, useTracking, ConfirmDialog, Link } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
 import { Divider } from '@strapi/design-system/Divider';
 import { Layout, HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
-import { Link } from '@strapi/design-system/Link';
 import { Main } from '@strapi/design-system/Main';
 import { Button } from '@strapi/design-system/Button';
 import Check from '@strapi/icons/Check';
@@ -35,9 +34,9 @@ const ListSettingsView = ({ layout, slug }) => {
   const { refetchData } = useContext(ModelsContext);
 
   const [showWarningSubmit, setWarningSubmit] = useState(false);
-  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
+  const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
-  const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
+  const toggleModalForm = () => setIsModalFormOpen((prevState) => !prevState);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, layout)
   );
@@ -77,7 +76,7 @@ const ListSettingsView = ({ layout, slug }) => {
     submitMutation.mutate(body);
   };
 
-  const handleAddField = item => {
+  const handleAddField = (item) => {
     dispatch({
       type: 'ADD_FIELD',
       item,
@@ -100,13 +99,13 @@ const ListSettingsView = ({ layout, slug }) => {
     }
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     toggleWarningSubmit();
     trackUsage('willSaveContentTypeLayout');
   };
 
-  const handleClickEditField = fieldToEdit => {
+  const handleClickEditField = (fieldToEdit) => {
     dispatch({
       type: 'SET_FIELD_TO_EDIT',
       fieldToEdit,
@@ -121,7 +120,7 @@ const ListSettingsView = ({ layout, slug }) => {
     toggleModalForm();
   };
 
-  const handleSubmitFieldEdit = e => {
+  const handleSubmitFieldEdit = (e) => {
     e.preventDefault();
     toggleModalForm();
     dispatch({
@@ -129,12 +128,12 @@ const ListSettingsView = ({ layout, slug }) => {
     });
   };
 
-  const submitMutation = useMutation(body => putCMSettingsLV(body, slug), {
-    onSuccess: () => {
+  const submitMutation = useMutation((body) => putCMSettingsLV(body, slug), {
+    onSuccess() {
       trackUsage('didEditListSettings');
       refetchData();
     },
-    onError: () => {
+    onError() {
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
@@ -191,17 +190,17 @@ const ListSettingsView = ({ layout, slug }) => {
           <HeaderLayout
             navigationAction={
               <Link startIcon={<ArrowLeft />} to={goBackUrl} id="go-back">
-                {formatMessage({ id: 'app.components.go-back', defaultMessage: 'Back' })}
+                {formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
               </Link>
             }
             primaryAction={
               <Button
-                size="L"
+                size="S"
                 startIcon={<Check />}
                 disabled={isEqual(modifiedData, initialData)}
                 type="submit"
               >
-                {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
+                {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>
             }
             subtitle={formatMessage({
