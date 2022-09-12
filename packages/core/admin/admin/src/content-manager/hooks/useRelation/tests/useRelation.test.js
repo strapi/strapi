@@ -118,8 +118,8 @@ describe('useRelation', () => {
     });
   });
 
-  test('doesn not fetch relations if a relation endpoint was not passed', async () => {
-    await setup(undefined, { relation: { endpoint: undefined } });
+  test('doesn not fetch relations if it was not enabled', async () => {
+    await setup(undefined, { relation: { enabled: false } });
 
     expect(axiosInstance.get).not.toBeCalled();
   });

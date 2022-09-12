@@ -28,9 +28,11 @@ export const RelationInputWrapper = ({
   const { formatMessage } = useIntl();
   const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
+  const relationsCount = initialData[name]?.count ?? 0;
 
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
+      enabled: relationsCount > 0 && !!endpoints.relation,
       endpoint: endpoints.relation,
       onLoad(data) {
         loadRelation({ target: { name, value: data.results } });
@@ -51,14 +53,17 @@ export const RelationInputWrapper = ({
     },
   });
 
-  // TODO: we should initialize the empty connect/ disconnect
-  // arrays before adding the first relation to it instead of
-  // calling loadRelation()
   useEffect(() => {
     if (!endpoints.relation) {
       loadRelation({ target: { name, value: [] } });
     }
   }, [loadRelation, name, endpoints.relation]);
+
+  useEffect(() => {
+    if (relationsCount === 0 || !!endpoints.relation) {
+      loadRelation({ target: { name, value: [] } });
+    }
+  }, [relationsCount, endpoints.relation, loadRelation, name]);
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const isSingleRelation = [
@@ -122,7 +127,7 @@ export const RelationInputWrapper = ({
           id: intlLabel.id,
           defaultMessage: `${intlLabel.defaultMessage} ({numberOfEntries})`,
         },
-        { numberOfEntries: initialData[name]?.count ?? 0 }
+        { numberOfEntries: relationsCount }
       )}
       labelLoadMore={
         // TODO: only display if there are more; derive from count
