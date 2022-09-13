@@ -63,7 +63,7 @@ const setup = (props) =>
             name="some-relation-1"
             label="Some Relation"
             labelLoadMore="Load more"
-            loadingMessage="Relations are loading"
+            loadingMessage={() => 'Relations are loading'}
             numberOfRelationsToDisplay={5}
             onRelationAdd={() => jest.fn()}
             onSearchOpen={() => jest.fn()}
@@ -79,6 +79,7 @@ const setup = (props) =>
             }}
             relations={FIXTURES_RELATIONS}
             searchResults={FIXTURES_SEARCH}
+            size={8}
             {...props}
           />
         </IntlProvider>

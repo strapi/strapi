@@ -50,5 +50,5 @@ Relation.propTypes = {
   search: PropTypes.node,
   loadMore: PropTypes.node,
   size: PropTypes.number.isRequired,
-  totalNumberOfRelations: PropTypes.string,
+  totalNumberOfRelations: PropTypes.number,
 };
