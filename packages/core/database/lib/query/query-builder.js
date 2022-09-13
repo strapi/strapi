@@ -255,24 +255,11 @@ const createQueryBuilder = (uid, db) => {
       state.populate = helpers.processPopulate(state.populate, { qb: this, uid, db });
       state.data = helpers.toRow(meta, state.data);
 
-      this.processSelect();
+      state.select = state.select.map((field) => helpers.toColumnName(meta, field));
     },
 
     shouldUseDistinct() {
       return state.joins.length > 0 && _.isEmpty(state.groupBy);
-    },
-
-    processSelect() {
-      state.select = state.select.map((field) => helpers.toColumnName(meta, field));
-
-      if (this.shouldUseDistinct()) {
-        const joinsOrderByColumns = state.joins.flatMap((join) => {
-          return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
-        });
-        const orderByColumns = state.orderBy.map(({ column }) => column);
-
-        state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
-      }
     },
 
     getKnexQuery() {
@@ -293,11 +280,6 @@ const createQueryBuilder = (uid, db) => {
       switch (state.type) {
         case 'select': {
           qb.select(state.select.map((column) => this.aliasColumn(column)));
-
-          if (this.shouldUseDistinct()) {
-            qb.distinct();
-          }
-
           break;
         }
         case 'count': {
@@ -384,6 +366,10 @@ const createQueryBuilder = (uid, db) => {
 
       if (state.joins.length > 0) {
         helpers.applyJoins(qb, state.joins);
+      }
+
+      if (this.shouldUseDistinct() && state.type === 'select') {
+        return db.getConnection().select('*').distinct().from(qb.as('subQuery'));
       }
 
       return qb;
