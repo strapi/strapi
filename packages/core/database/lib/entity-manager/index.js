@@ -47,7 +47,7 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
 
   const obj = {};
 
-  for (const attributeName in attributes) {
+  for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
     if (types.isScalar(attribute.type)) {
@@ -698,7 +698,7 @@ const createEntityManager = (db) => {
     async deleteRelations(uid, id) {
       const { attributes } = db.metadata.get(uid);
 
-      for (const attributeName in attributes) {
+      for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
         if (attribute.type !== 'relation') {

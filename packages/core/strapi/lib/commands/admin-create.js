@@ -17,7 +17,7 @@ const passwordValidator = yup
 const adminCreateSchema = yup.object().shape({
   email: emailValidator,
   password: passwordValidator,
-  firstname: yup.string().required('First name is required'),
+  firstname: yup.string().trim().required('First name is required'),
   lastname: yup.string(),
 });
 
