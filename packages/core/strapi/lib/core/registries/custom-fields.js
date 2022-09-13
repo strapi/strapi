@@ -3,7 +3,7 @@
 const { has } = require('lodash/fp');
 const validators = require('../../services/entity-validator/validators');
 
-const customFieldsRegistry = strapi => {
+const customFieldsRegistry = (strapi) => {
   const customFields = {};
 
   return {

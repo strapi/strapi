@@ -8,7 +8,6 @@ const { ApplicationError } = require('@strapi/utils').errors;
 const { isRelation, isConfigurable } = require('../../utils/attributes');
 const { typeKinds } = require('../constants');
 const createSchemaHandler = require('./schema-handler');
-const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
 const reuseUnsetPreviousProperties = (newAttribute, oldAttribute) => {
   _.defaults(
@@ -72,14 +71,11 @@ module.exports = function createComponentBuilder() {
      * @returns {object} new content type
      */
     createContentType(infos) {
-      const { attributes } = infos;
       const uid = createContentTypeUID(infos);
 
       if (this.contentTypes.has(uid)) {
         throw new ApplicationError('contentType.alreadyExists');
       }
-
-      convertCustomFieldType(attributes);
 
       const contentType = createSchemaHandler({
         modelName: infos.singularName,
@@ -133,13 +129,11 @@ module.exports = function createComponentBuilder() {
     },
 
     editContentType(infos) {
-      const { uid, attributes } = infos;
+      const { uid } = infos;
 
       if (!this.contentTypes.has(uid)) {
         throw new ApplicationError('contentType.notFound');
       }
-
-      convertCustomFieldType(attributes);
 
       const contentType = this.contentTypes.get(uid);
 
