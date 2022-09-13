@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const fse = require('fs-extra');
 const { PayloadTooLargeError } = require('@strapi/utils/lib/errors');
+const { kbytesToBytes } = require('../../../core/upload/server/utils/file');
 
 const UPLOADS_FOLDER_NAME = 'uploads';
 
@@ -22,7 +23,7 @@ module.exports = {
       );
     }
     const verifySize = (file) => {
-      if (sizeLimit && file.size > sizeLimit) {
+      if (sizeLimit && kbytesToBytes(file.size) > sizeLimit) {
         throw new PayloadTooLargeError();
       }
     };
