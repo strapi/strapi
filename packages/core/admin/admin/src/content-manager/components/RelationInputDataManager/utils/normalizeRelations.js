@@ -2,15 +2,8 @@ import { getRelationLink } from './getRelationLink';
 
 import { PUBLICATION_STATES } from '../constants';
 
-const normalizeRelation = (
-  relation,
-  { modifiedData, shouldAddLink, mainFieldName, targetModel }
-) => {
+const normalizeRelation = (relation, { shouldAddLink, mainFieldName, targetModel }) => {
   const nextRelation = { ...relation };
-
-  if (modifiedData?.disconnect?.find((relation) => relation.id === nextRelation.id)) {
-    return null;
-  }
 
   if (shouldAddLink) {
     nextRelation.href = getRelationLink(targetModel, nextRelation.id);
@@ -43,6 +36,13 @@ export const normalizeRelations = (
         ]
           ?.map((page) =>
             page?.results
+              .filter((relation) =>
+                modifiedData?.disconnect?.find(
+                  (disconnectRelation) => disconnectRelation.id === relation.id
+                )
+                  ? null
+                  : relation
+              )
               .map((relation) =>
                 normalizeRelation(relation, {
                   modifiedData,
