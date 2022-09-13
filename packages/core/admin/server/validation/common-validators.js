@@ -16,7 +16,7 @@ const getActionFromProvider = (actionId) => {
 
 const email = yup.string().email().lowercase();
 
-const firstname = yup.string().min(1);
+const firstname = yup.string().trim().min(1);
 
 const lastname = yup.string();
 
