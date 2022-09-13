@@ -8,7 +8,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Doc',
   tagline: 'Dinosaurs are cool',
-  url: 'https://strapi.github.io/strapi',
+  url: 'https://strapi.github.io',
   baseUrl: '/strapi/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -64,6 +64,12 @@ const config = {
             position: 'left',
             sidebarId: 'api',
             label: 'API',
+          },
+          {
+            type: 'docSidebar',
+            position: 'left',
+            sidebarId: 'community',
+            label: 'Community',
           },
         ],
       },
