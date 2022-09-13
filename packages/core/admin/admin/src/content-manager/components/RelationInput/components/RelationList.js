@@ -43,10 +43,10 @@ export const RelationList = ({ children, ...props }) => {
 };
 
 RelationList.defaultProps = {
-  overflow: undefined,
+  overflow: '',
 };
 
 RelationList.propTypes = {
   children: PropTypes.node.isRequired,
-  overflow: PropTypes.oneOf(['top-bottom', 'bottom', 'top']),
+  overflow: PropTypes.oneOf(['top-bottom', 'bottom', 'top', '']),
 };

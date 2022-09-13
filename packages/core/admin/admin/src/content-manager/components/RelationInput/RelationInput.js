@@ -156,7 +156,7 @@ const RelationInput = ({
               inputId={id}
               isSearchable
               isClear
-              loadingMessage={() => loadingMessage}
+              loadingMessage={loadingMessage}
               onChange={(relation) => {
                 setValue(null);
                 onRelationAdd(relation);

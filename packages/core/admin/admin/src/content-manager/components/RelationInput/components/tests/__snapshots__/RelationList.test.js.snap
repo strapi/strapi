@@ -97,6 +97,7 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
 <div>
   <div
     class="c0"
+    overflow=""
   >
     <div
       class="c1 c2"
