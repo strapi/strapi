@@ -35,6 +35,7 @@ function setup(name = 'test', args) {
           () =>
             useRelation(name, {
               relation: {
+                enabled: true,
                 endpoint: '/',
                 pageParams: {
                   limit: 10,
