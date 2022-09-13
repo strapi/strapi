@@ -80,10 +80,11 @@ const reducer = (state, action) =>
         set(draftState, initialDataPath, value);
 
         /**
-         * We set the value also on modifiedData, because initialData and
-         * modifiedData need to stay in sync, so that the CM can comare
-         * both states, to render the diry UI state
+         * We need to set the value also on modifiedData, because initialData
+         * and modifiedData need to stay in sync, so that the CM can compare
+         * both states, to render the dirty UI state
          */
+
         set(draftState, modifiedDataPath, value);
 
         break;
@@ -132,13 +133,14 @@ const reducer = (state, action) =>
            * The state we keep in the client for relations looks like:
            *
            * {
-           *   count: int
+           *   count: <int>
            *   results: [<Relation>]
            * }
            *
-           * but the content API only returns `count`, which is why we need
-           * to extend the existing state rather than overwriting it.
+           * The content API only returns { count: <int> }, which is why
+           * we need to extend the existing state rather than overwriting it.
            */
+
           ...relationalFields.reduce((acc, name) => {
             return (acc[name] = {
               ...(initialValues?.[name] ?? {}),
@@ -151,18 +153,19 @@ const reducer = (state, action) =>
           ...initialValues,
 
           /**
-           * The client sends the following to the content API
+           * The client sends the following to the content API:
            *
            * {
            *   connect: [<Relation>],
            *   disconnect: [<Relation>]
            * }
            *
-           * but receives only `count` in return. After save/ publish
-           * we want to:
-           * 1) reset connect/ disconnect
-           * 2) extend the existing state with the API response
+           * but receives only { count: <int> } in return. After save/ publish
+           * we have to:
            *
+           * 1) reset the connect/ disconnect arrays
+           * 2) extend the existing state with the API response, so that `count`
+           *    stays in sync
            */
 
           ...relationalFields.reduce((acc, name) => {
