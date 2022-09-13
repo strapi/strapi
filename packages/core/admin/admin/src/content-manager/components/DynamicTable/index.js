@@ -47,7 +47,7 @@ const DynamicTable = ({
             ...metadatas,
             label: formatMessage({
               id: getTrad(`containers.ListPage.table-headers.${header.name}`),
-              defaultMessage: header.name,
+              defaultMessage: metadatas.label,
             }),
           },
           name: sortFieldValue,
@@ -60,7 +60,7 @@ const DynamicTable = ({
           ...metadatas,
           label: formatMessage({
             id: getTrad(`containers.ListPage.table-headers.${header.name}`),
-            defaultMessage: header.name,
+            defaultMessage: metadatas.label,
           }),
         },
       };
