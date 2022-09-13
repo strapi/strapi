@@ -122,7 +122,7 @@ const reducer = (state, action) =>
         break;
       }
       case 'INIT_FORM': {
-        const { initialValues, relationalFields } = action;
+        const { initialValues, relationalFields = [] } = action;
 
         draftState.formErrors = {};
 
@@ -142,10 +142,12 @@ const reducer = (state, action) =>
            */
 
           ...relationalFields.reduce((acc, name) => {
-            return (acc[name] = {
-              ...(initialValues?.[name] ?? {}),
+            acc[name] = {
               ...(state.initialData?.[name] ?? {}),
-            });
+              ...(initialValues?.[name] ?? {}),
+            };
+
+            return acc;
           }, {}),
         };
 
@@ -171,10 +173,12 @@ const reducer = (state, action) =>
           ...relationalFields.reduce((acc, name) => {
             const { connect, disconnect, ...currentState } = state.modifiedData?.[name] ?? {};
 
-            return (acc[name] = {
+            acc[name] = {
               ...(initialValues?.[name] ?? {}),
               ...(currentState ?? {}),
-            });
+            };
+
+            return acc;
           }, {}),
         };
 
