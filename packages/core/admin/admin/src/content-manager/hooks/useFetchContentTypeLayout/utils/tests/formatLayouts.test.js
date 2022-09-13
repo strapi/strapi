@@ -568,7 +568,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
         generateRelationQueryInfosForComponents(addressSchema, 'categories', simpleModels)
       ).toEqual({
         defaultParams: {
-          _component: 'api::address.address',
+          component: 'api::address.address',
         },
         shouldDisplayRelationLink: true,
       });

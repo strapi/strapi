@@ -163,4 +163,23 @@ describe('RelationInputWrapper | select', () => {
       },
     });
   });
+
+  test('splits the name properly, so that components are handled for endpoints', async () => {
+    useCMEditViewDataManager.mockReturnValueOnce({
+      ...CM_DATA_FIXTURE,
+      isCreatingEntry: false,
+    });
+
+    const { result } = await setup({
+      ...SELECT_ATTR_FIXTURE,
+      name: 'someting.component-name.field-name',
+    });
+
+    expect(result.current.queryInfos).toStrictEqual({
+      endpoints: {
+        relation: '/content-manager/collection-types/slug/2/field-name',
+        search: '/content-manager/relations/slug/field-name',
+      },
+    });
+  });
 });
