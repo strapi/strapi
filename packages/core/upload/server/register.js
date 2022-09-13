@@ -62,36 +62,23 @@ const createProvider = (config) => {
     );
   }
 
-  if (providerOptions?.sizeLimit) {
-    // TODO V5: remove sizeLimit from providerOptions
-    process.emitWarning(
-      `[deprecated] In future versions, "sizeLimit" argument will be ignored from upload.config.providerOptions. Move it to upload.config`
-    );
-  }
-
-  if (!providerInstance.checkFileSize) {
-    providerInstance.checkFileSize = (file) => {
-      const fileSize = kbytesToBytes(file.size);
-
-      if (providerOptions?.sizeLimit && fileSize > providerOptions.sizeLimit) {
-        throw new PayloadTooLargeError();
-      } else if (config.sizeLimit && fileSize > config.sizeLimit) {
-        throw new PayloadTooLargeError();
-      }
-    };
-  }
-
   const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {
-    return async function (file, options = actionOptions[methodName]) {
-      return providerInstance[methodName](file, options);
-    };
+    return async (file, options = actionOptions[methodName]) =>
+      providerInstance[methodName](file, options);
   });
 
-  return Object.assign(Object.create(baseProvider), wrappedProvider);
-};
+  const baseProvider = {
+    extend(obj) {
+      Object.assign(this, obj);
+    },
+    checkFileSize(file) {
+      const fileSize = kbytesToBytes(file.size);
 
-const baseProvider = {
-  extend(obj) {
-    Object.assign(this, obj);
-  },
+      if (config.sizeLimit && fileSize > config.sizeLimit) {
+        throw new PayloadTooLargeError();
+      }
+    },
+  };
+
+  return Object.assign(Object.create(baseProvider), wrappedProvider);
 };

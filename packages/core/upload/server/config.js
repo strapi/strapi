@@ -4,7 +4,9 @@ module.exports = {
   default: {
     enabled: true,
     provider: 'local',
-    sizeLimit: 1000000,
+    providerOptions: {
+      sizeLimit: 1000000,
+    },
     actionOptions: {},
   },
   validator() {},
