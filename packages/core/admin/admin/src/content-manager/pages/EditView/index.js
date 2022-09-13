@@ -208,6 +208,7 @@ const EditView = ({
                                         return (
                                           <GridItem col={size} key={name} s={12} xs={12}>
                                             <Inputs
+                                              size={size}
                                               fieldSchema={fieldSchema}
                                               keys={name}
                                               labelAction={labelAction}

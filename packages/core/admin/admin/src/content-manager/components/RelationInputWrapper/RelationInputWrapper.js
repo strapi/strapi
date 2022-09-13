@@ -23,6 +23,7 @@ export const RelationInputWrapper = ({
   queryInfos: { endpoints, defaultParams, shouldDisplayRelationLink },
   placeholder,
   relationType,
+  size,
   targetModel,
 }) => {
   const { formatMessage } = useIntl();
@@ -177,6 +178,7 @@ export const RelationInputWrapper = ({
       searchResults={normalizeRelations(search, {
         mainFieldName: mainField.name,
       })}
+      size={size}
     />
   );
 };
@@ -214,6 +216,7 @@ RelationInputWrapper.propTypes = {
     values: PropTypes.object,
   }),
   relationType: PropTypes.string.isRequired,
+  size: PropTypes.number.isRequired,
   targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.shape({
     defaultParams: PropTypes.shape({
