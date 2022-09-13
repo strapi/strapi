@@ -1,7 +1,9 @@
 'use strict';
 
+const { PayloadTooLargeError } = require('@strapi/utils/lib/errors');
 const _ = require('lodash');
 const registerUploadMiddleware = require('./middlewares/upload');
+const { kbytesToBytes } = require('./utils/file');
 
 /**
  * Register upload plugin
@@ -58,6 +60,25 @@ const createProvider = (config) => {
     process.emitWarning(
       `The upload provider "${providerName}" doesn't implement the uploadStream function. Strapi will fallback on the upload method. Some performance issues may occur.`
     );
+  }
+
+  if (providerOptions.sizeLimit) {
+    // TODO V5: remove sizeLimit from providerOptions
+    process.emitWarning(
+      `[deprecated] In future versions, "sizeLimit" argument will be ignored from upload.config.providerOptions. Move it to upload.config`
+    );
+  }
+
+  if (!providerInstance.checkFileSize) {
+    providerInstance.checkFileSize = (file) => {
+      const fileSize = kbytesToBytes(file.size);
+
+      if (providerOptions.sizeLimit && fileSize > providerOptions.sizeLimit) {
+        throw new PayloadTooLargeError();
+      } else if (config.sizeLimit && fileSize > config.sizeLimit) {
+        throw new PayloadTooLargeError();
+      }
+    };
   }
 
   const wrappedProvider = _.mapValues(providerInstance, (method, methodName) => {

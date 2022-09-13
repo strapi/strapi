@@ -6,6 +6,7 @@
 const { Writable } = require('stream');
 
 const bytesToKbytes = (bytes) => Math.round((bytes / 1000) * 100) / 100;
+const kbytesToBytes = (kbytes) => kbytes * 1000;
 
 const streamToBuffer = (stream) =>
   new Promise((resolve, reject) => {
@@ -46,6 +47,7 @@ function writableDiscardStream(options) {
 module.exports = {
   streamToBuffer,
   bytesToKbytes,
+  kbytesToBytes,
   getStreamSize,
   writableDiscardStream,
 };
