@@ -1,4 +1,4 @@
-import React, { memo, useRef, useState } from 'react';
+import React, { memo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -18,11 +18,10 @@ import { Stack } from '@strapi/design-system/Stack';
 import ExclamationMarkCircle from '@strapi/icons/ExclamationMarkCircle';
 import Check from '@strapi/icons/Check';
 import { getTrad } from '../../../utils';
-import { connect, getDraftRelations, select } from './utils';
+import { connect, select } from './utils';
 
 const Header = ({
   allowedActions: { canUpdate, canCreate, canPublish },
-  componentLayouts,
   initialData,
   isCreatingEntry,
   isSingleType,
@@ -35,9 +34,7 @@ const Header = ({
 }) => {
   const { goBack } = useHistory();
   const [showWarningUnpublish, setWarningUnpublish] = useState(false);
-  const [showWarningDraftRelation, setShowWarningDraftRelation] = useState(false);
   const { formatMessage } = useIntl();
-  const draftRelationsCountRef = useRef(0);
 
   const currentContentTypeMainField = get(layout, ['settings', 'mainField'], 'id');
   const currentContentTypeName = get(layout, ['info', 'displayName'], 'NOT FOUND');
@@ -58,14 +55,6 @@ const Header = ({
   if (isSingleType) {
     title = currentContentTypeName;
   }
-
-  const checkIfHasDraftRelations = () => {
-    const count = getDraftRelations(modifiedData, layout, componentLayouts);
-
-    draftRelationsCountRef.current = count;
-
-    return count;
-  };
 
   let primaryAction = null;
 
@@ -97,17 +86,7 @@ const Header = ({
       ? { id: 'app.utils.unpublish', defaultMessage: 'Unpublish' }
       : { id: 'app.utils.publish', defaultMessage: 'Publish' };
 
-    /* eslint-disable indent */
-    const onClick = isPublished
-      ? () => setWarningUnpublish(true)
-      : () => {
-          if (checkIfHasDraftRelations() === 0) {
-            onPublish();
-          } else {
-            setShowWarningDraftRelation(true);
-          }
-        };
-    /* eslint-enable indent */
+    const onClick = isPublished ? () => setWarningUnpublish(true) : () => onPublish();
 
     primaryAction = (
       <Flex>
@@ -135,13 +114,6 @@ const Header = ({
   }
 
   const toggleWarningUnpublish = () => setWarningUnpublish((prevState) => !prevState);
-  const toggleWarningDraftRelation = () => setShowWarningDraftRelation((prevState) => !prevState);
-
-  const handlePublish = () => {
-    toggleWarningDraftRelation();
-    draftRelationsCountRef.current = 0;
-    onPublish();
-  };
 
   const handleUnpublish = () => {
     toggleWarningUnpublish();
@@ -232,64 +204,6 @@ const Header = ({
           />
         </Dialog>
       )}
-
-      {showWarningDraftRelation && (
-        <Dialog
-          onClose={toggleWarningDraftRelation}
-          title="Confirmation"
-          labelledBy="confirmation"
-          describedBy="confirm-description"
-          isOpen={showWarningDraftRelation}
-        >
-          <DialogBody icon={<ExclamationMarkCircle />}>
-            <Stack spacing={2}>
-              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Typography id="confirm-description">
-                  {draftRelationsCountRef.current}
-                  {formatMessage(
-                    {
-                      id: getTrad(`popUpwarning.warning.has-draft-relations.message`),
-                      defaultMessage:
-                        '<b>{count, plural, =0 { of your content relations is} one { of your content relations is} other { of your content relations are}}</b> not published yet.<br></br>It might engender broken links and errors on your project.',
-                    },
-                    {
-                      br: () => <br />,
-                      b: (chunks) => <Typography fontWeight="bold">{chunks}</Typography>,
-                      count: draftRelationsCountRef.current,
-                    }
-                  )}
-                </Typography>
-              </Flex>
-              <Flex justifyContent="center" style={{ textAlign: 'center' }}>
-                <Typography id="confirm-description">
-                  {formatMessage({
-                    id: getTrad('popUpWarning.warning.publish-question'),
-                    defaultMessage: 'Do you still want to publish it?',
-                  })}
-                </Typography>
-              </Flex>
-            </Stack>
-          </DialogBody>
-          <DialogFooter
-            startAction={
-              <Button onClick={toggleWarningDraftRelation} variant="tertiary">
-                {formatMessage({
-                  id: 'components.popUpWarning.button.cancel',
-                  defaultMessage: 'No, cancel',
-                })}
-              </Button>
-            }
-            endAction={
-              <Button variant="success" onClick={handlePublish}>
-                {formatMessage({
-                  id: getTrad('popUpwarning.warning.has-draft-relations.button-confirm'),
-                  defaultMessage: 'Yes, publish',
-                })}
-              </Button>
-            }
-          />
-        </Dialog>
-      )}
     </>
   );
 };
@@ -300,7 +214,6 @@ Header.propTypes = {
     canCreate: PropTypes.bool.isRequired,
     canPublish: PropTypes.bool.isRequired,
   }).isRequired,
-  componentLayouts: PropTypes.object.isRequired,
   initialData: PropTypes.object.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool.isRequired,

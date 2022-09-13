@@ -12,12 +12,10 @@ import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
 import { Header } from '../index';
-import components from '../utils/tests/data/compos-schema.json';
-import ct from '../utils/tests/data/ct-schema.json';
+import ct from './data/ct-schema.json';
 
 const defaultProps = {
   allowedActions: { canUpdate: true, canCreate: true, canPublish: true },
-  componentLayouts: components,
   initialData: {},
   isCreatingEntry: true,
   isSingleType: false,
