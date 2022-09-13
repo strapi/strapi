@@ -34,7 +34,7 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
 
   const obj = {};
 
-  for (const attributeName in attributes) {
+  for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
     if (types.isScalar(attribute.type)) {
@@ -333,7 +333,7 @@ const createEntityManager = (db) => {
     async attachRelations(uid, id, data) {
       const { attributes } = db.metadata.get(uid);
 
-      for (const attributeName in attributes) {
+      for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
         const isValidLink = _.has(attributeName, data) && !_.isNil(data[attributeName]);
@@ -487,7 +487,7 @@ const createEntityManager = (db) => {
     async updateRelations(uid, id, data) {
       const { attributes } = db.metadata.get(uid);
 
-      for (const attributeName in attributes) {
+      for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
         if (attribute.type !== 'relation' || !_.has(attributeName, data)) {
@@ -667,7 +667,7 @@ const createEntityManager = (db) => {
     async deleteRelations(uid, id) {
       const { attributes } = db.metadata.get(uid);
 
-      for (const attributeName in attributes) {
+      for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
         if (attribute.type !== 'relation') {
@@ -776,7 +776,6 @@ const createEntityManager = (db) => {
       }
     },
 
-    // TODO: support multiple relations at once with the populate syntax
     // TODO: add lifecycle events
     async populate(uid, entity, populate) {
       const entry = await this.findOne(uid, {
@@ -788,30 +787,37 @@ const createEntityManager = (db) => {
       return { ...entity, ...entry };
     },
 
-    // TODO: support multiple relations at once with the populate syntax
     // TODO: add lifecycle events
-    async load(uid, entity, field, params) {
+    async load(uid, entity, fields, params) {
       const { attributes } = db.metadata.get(uid);
 
-      const attribute = attributes[field];
+      const fieldsArr = _.castArray(fields);
+      fieldsArr.forEach((field) => {
+        const attribute = attributes[field];
 
-      if (!attribute || attribute.type !== 'relation') {
-        throw new Error('Invalid load. Expected a relational attribute');
-      }
+        if (!attribute || attribute.type !== 'relation') {
+          throw new Error(`Invalid load. Expected ${field} to be a relational attribute`);
+        }
+      });
 
       const entry = await this.findOne(uid, {
         select: ['id'],
         where: { id: entity.id },
-        populate: {
-          [field]: params || true,
-        },
+        populate: fieldsArr.reduce((acc, field) => {
+          acc[field] = params || true;
+          return acc;
+        }, {}),
       });
 
       if (!entry) {
         return null;
       }
 
-      return entry[field];
+      if (Array.isArray(fields)) {
+        return _.pick(fields, entry);
+      }
+
+      return entry[fields];
     },
 
     // cascading

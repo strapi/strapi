@@ -29,16 +29,16 @@ const StyledTable = styled.table`
 const displayedData = {
   headers: {
     default: [
-      'Settings.webhooks.events.create',
-      'Settings.webhooks.events.update',
-      'app.utils.delete',
+      { id: 'Settings.webhooks.events.create', defaultMessage: 'Create' },
+      { id: 'Settings.webhooks.events.update', defaultMessage: 'Update' },
+      { id: 'app.utils.delete', defaultMessage: 'Delete' },
     ],
     draftAndPublish: [
-      'Settings.webhooks.events.create',
-      'Settings.webhooks.events.update',
-      'app.utils.delete',
-      'app.utils.publish',
-      'app.utils.unpublish',
+      { id: 'Settings.webhooks.events.create', defaultMessage: 'Create' },
+      { id: 'Settings.webhooks.events.update', defaultMessage: 'Update' },
+      { id: 'app.utils.delete', defaultMessage: 'Delete' },
+      { id: 'app.utils.publish', defaultMessage: 'Publish' },
+      { id: 'app.utils.unpublish', defaultMessage: 'Unpublish' },
     ],
   },
   events: {
@@ -122,7 +122,7 @@ const EventInput = ({ isDraftAndPublish }) => {
                     })}
                   >
                     <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: header, defaultMessage: header })}
+                      {formatMessage(header)}
                     </Typography>
                   </td>
                 );
@@ -131,7 +131,7 @@ const EventInput = ({ isDraftAndPublish }) => {
               return (
                 <td key={header}>
                   <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({ id: header, defaultMessage: header })}
+                    {formatMessage(header)}
                   </Typography>
                 </td>
               );

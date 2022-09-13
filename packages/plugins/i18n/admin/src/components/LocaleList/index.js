@@ -34,7 +34,7 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
     <Main tabIndex={-1}>
       <HeaderLayout
         primaryAction={
-          <Button startIcon={<Plus />} onClick={onToggleCreateModal} size="L">
+          <Button startIcon={<Plus />} onClick={onToggleCreateModal} size="S">
             {formatMessage({ id: getTrad('Settings.list.actions.add') })}
           </Button>
         }
