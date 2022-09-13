@@ -1,0 +1,48 @@
+{
+  "name": "@strapi/utils",
+  "version": "4.3.6",
+  "description": "Shared utilities for the Strapi packages",
+  "keywords": [
+    "strapi",
+    "utils"
+  ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./lib",
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "test:unit": "jest --verbose"
+  },
+  "dependencies": {
+    "@sindresorhus/slugify": "1.1.0",
+    "date-fns": "2.29.2",
+    "http-errors": "1.8.1",
+    "lodash": "4.17.21",
+    "yup": "0.32.9"
+  },
+  "engines": {
+    "node": ">=14.19.1 <=16.x.x",
+    "npm": ">=6.0.0"
+  }
+}

@@ -1,0 +1,583 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FolderCard has all required ids set when rendering a start action 1`] = `
+.c9 {
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.c10 {
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c20 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c14 {
+  font-weight: 500;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c6 {
+  margin: 0;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 4px;
+  border: 1px solid #c0c0cf;
+  -webkit-appearance: none;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.c6:checked {
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c6:checked:after {
+  content: '';
+  display: block;
+  position: relative;
+  background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
+  width: 10px;
+  height: 10px;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  -ms-transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.c6:checked:disabled:after {
+  background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
+}
+
+.c6:disabled {
+  background-color: #dcdce4;
+  border: 1px solid #c0c0cf;
+}
+
+.c6:indeterminate {
+  background-color: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c6:indeterminate:after {
+  content: '';
+  display: block;
+  position: relative;
+  color: white;
+  height: 2px;
+  width: 10px;
+  background-color: #ffffff;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  -ms-transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.c6:indeterminate:disabled {
+  background-color: #dcdce4;
+  border: 1px solid #c0c0cf;
+}
+
+.c6:indeterminate:disabled:after {
+  background-color: #8e8ea9;
+}
+
+.c0 {
+  position: relative;
+}
+
+.c5 {
+  position: relative;
+  z-index: 2;
+}
+
+.c7 {
+  background: #eaf5ff;
+  color: #66b7f1;
+  padding-top: 8px;
+  padding-right: 12px;
+  padding-bottom: 8px;
+  padding-left: 12px;
+  border-radius: 4px;
+}
+
+.c12 {
+  padding: 4px;
+  max-width: 100%;
+}
+
+.c2 {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  cursor: pointer;
+  cursor: pointer;
+}
+
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c4 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c4 > * + * {
+  margin-left: 8px;
+}
+
+.c16 {
+  right: 16px;
+}
+
+.c17 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c18 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c18 > * + * {
+  margin-left: 8px;
+}
+
+.c19 {
+  position: absolute;
+  top: 12px;
+}
+
+.c1 {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  width: 100%;
+}
+
+.c1:hover,
+.c1:focus {
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.c8 path {
+  fill: currentColor;
+}
+
+.c15 {
+  display: none;
+}
+
+.c11 {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c13:focus {
+  outline: 2px solid #4945ff;
+  outline-offset: -2px;
+}
+
+<div>
+  <div
+    class="c0 "
+    tabindex="0"
+  >
+    <button
+      aria-hidden="true"
+      aria-label="Folder 1"
+      class="c1"
+      tabindex="-1"
+      type="button"
+    />
+    <div
+      class="c2 c3 c4"
+      cursor="pointer"
+      spacing="2"
+    >
+      <div
+        class="c5"
+      >
+        <input
+          aria-labelledby="folder-3-title"
+          class="c6"
+          type="checkbox"
+        />
+      </div>
+      <div
+        class="c7"
+      >
+        <svg
+          class="c8"
+          fill="none"
+          height="1.5rem"
+          viewBox="0 0 24 24"
+          width="1.5rem"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
+            fill="#212134"
+          />
+        </svg>
+      </div>
+      <h2
+        class="c9 c10 c11"
+        id="folder-3-title"
+        overflow="hidden"
+      >
+        <button
+          class="c12 c13"
+          type="button"
+        >
+          <div
+            class="c10"
+          >
+            <span
+              class="c14"
+            >
+              Pictures
+            </span>
+          </div>
+        </button>
+      </h2>
+      <div
+        class="c15"
+      >
+        <div
+          class="c16 c17 c18 c19"
+          spacing="2"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="c20"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;
+
+exports[`FolderCard renders and matches the snapshot 1`] = `
+.c7 {
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.c8 {
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c18 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c12 {
+  font-weight: 500;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c0 {
+  position: relative;
+}
+
+.c5 {
+  background: #eaf5ff;
+  color: #66b7f1;
+  padding-top: 8px;
+  padding-right: 12px;
+  padding-bottom: 8px;
+  padding-left: 12px;
+  border-radius: 4px;
+}
+
+.c10 {
+  padding: 4px;
+  max-width: 100%;
+}
+
+.c2 {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  cursor: pointer;
+  cursor: pointer;
+}
+
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c4 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c4 > * + * {
+  margin-left: 8px;
+}
+
+.c14 {
+  right: 16px;
+}
+
+.c15 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c16 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c16 > * + * {
+  margin-left: 8px;
+}
+
+.c17 {
+  position: absolute;
+  top: 12px;
+}
+
+.c1 {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  width: 100%;
+}
+
+.c1:hover,
+.c1:focus {
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.c6 path {
+  fill: currentColor;
+}
+
+.c13 {
+  display: none;
+}
+
+.c9 {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c11:focus {
+  outline: 2px solid #4945ff;
+  outline-offset: -2px;
+}
+
+<div>
+  <div
+    class="c0 "
+    tabindex="0"
+  >
+    <button
+      aria-hidden="true"
+      aria-label="Folder 1"
+      class="c1"
+      tabindex="-1"
+      type="button"
+    />
+    <div
+      class="c2 c3 c4"
+      cursor="pointer"
+      spacing="2"
+    >
+      <div
+        class="c5"
+      >
+        <svg
+          class="c6"
+          fill="none"
+          height="1.5rem"
+          viewBox="0 0 24 24"
+          width="1.5rem"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12.414 5H21a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h7.414l2 2z"
+            fill="#212134"
+          />
+        </svg>
+      </div>
+      <h2
+        class="c7 c8 c9"
+        id="folder-1-title"
+        overflow="hidden"
+      >
+        <button
+          class="c10 c11"
+          type="button"
+        >
+          <div
+            class="c8"
+          >
+            <span
+              class="c12"
+            >
+              Pictures
+            </span>
+          </div>
+        </button>
+      </h2>
+      <div
+        class="c13"
+      >
+        <div
+          class="c14 c15 c16 c17"
+          spacing="2"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="c18"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;

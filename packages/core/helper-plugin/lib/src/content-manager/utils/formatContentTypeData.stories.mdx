@@ -1,0 +1,32 @@
+<!--- formatContentTypeData.stories.mdx --->
+
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title="utils/formatContentTypeData" />
+
+# formatContentTypeData
+
+This util is used to format the data received by the backend so it can be used by the admin.
+It:
+- sets the key `__temp_key__` to each component (easier for reordering repeatable components)
+- stringifies JSON fields (easier to harmonize the data format for the json editor from user input or backend data)
+
+## Usage
+
+```js
+import { formatContentTypeData } from '@strapi/helper-plugin';
+
+const Compo = ({ allLayoutData }) => {
+  const allLayoutDataRef = useRef(allLayoutData);
+
+  const cleanReceivedData = useCallback(data => {
+    return formatContentTypeData(
+      data,
+      allLayoutDataRef.current.contentType,
+      allLayoutDataRef.current.components
+    );
+  }, []);
+
+  // ...
+};
+```

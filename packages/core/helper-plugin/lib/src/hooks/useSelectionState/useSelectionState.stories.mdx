@@ -1,0 +1,38 @@
+<!--- useLockScroll.stories.mdx --->
+
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title="hooks/useSelectionState" />
+
+# useSelectionState
+
+This hook is used in order to facilitate the select / partial selection of a global set
+
+## Usage
+
+```js
+import { useSelectionState } from '@strapi/helper-plugin';
+
+const Modal = ({ onToggle, isOpen }) => {
+  const [selectedAssets, { selectOne, selectAll, selectOnly, setSelections }] = useSelectionState(
+    ['id'], // This are the comparaison attribute names
+    []
+  );
+
+  const elements = [{ id: 1, name: 'Hello' }, { id: 2, name: 'World' }];
+
+  // selectOne({ id: 1 name: 'Hello' }) add the object to the selection list
+  // selectOnly({ id: 1 name: 'Hello' }) add the object to the selection list and remove every others in the list
+  // selectAll(assets) select all or remove all
+  // setSelections(): regular state used in react
+
+  return (
+    <div>
+      <button onClick={() => selectAll(assets)}>Select all</button>
+      {elements.map(el => (
+        <div key={el.id}>{el.name}</div>
+      ))}
+    </div>
+  );
+};
+```

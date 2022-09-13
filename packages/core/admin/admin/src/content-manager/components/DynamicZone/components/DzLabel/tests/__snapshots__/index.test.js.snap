@@ -1,0 +1,530 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<DzLabel /> displays the labelAction correctly 1`] = `
+.c10 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c1 {
+  background: #ffffff;
+  color: #8e8ea9;
+  padding-top: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c8 {
+  padding-left: 4px;
+}
+
+.c4 {
+  max-width: 22.25rem;
+}
+
+.c0 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c6 {
+  font-weight: 600;
+  color: #666687;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c7 {
+  font-weight: 600;
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c2 {
+  border-radius: 1.625rem;
+}
+
+.c9 {
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+.c9 svg {
+  width: 12px;
+  height: 12px;
+  fill: #8e8ea9;
+}
+
+.c9 svg path {
+  fill: #8e8ea9;
+}
+
+<div>
+  <div
+    class="c0"
+  >
+    <div
+      class=""
+    >
+      <div
+        class="c1 c2"
+      >
+        <div
+          class="c3"
+        >
+          <div
+            class="c4 c5"
+          >
+            <span
+              class="c6"
+            >
+              dz
+               
+            </span>
+            <span
+              class="c7"
+            >
+              (
+              1
+              )
+            </span>
+            <div
+              class="c8"
+            >
+              <span>
+                <button
+                  aria-describedby="tooltip-1"
+                  aria-label="i18n"
+                  class="c9"
+                  tabindex="0"
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12.59 23.679l-.044-.007a.045.045 0 00.043.007zM22.334 8.345a.295.295 0 00-.572-.033.296.296 0 01-.28.206h-.828a.294.294 0 01-.153-.042l-1.199-.72a.293.293 0 00-.152-.042h-1.918a.294.294 0 00-.163.05l-2.366 1.577a.295.295 0 00-.131.248v2.236a.295.295 0 00.156.261l3.101 1.656a.298.298 0 01.157.257L18 15.257a.296.296 0 00.153.255l1.246.69a.297.297 0 01.152.258v2.604a.297.297 0 00.34.292.296.296 0 00.152-.07c.502-.443 1.223-1.09 1.319-1.237a11.186 11.186 0 001.175-2.415c.679-1.966.142-5.501-.203-7.289zM13.629 14.507l-3.286-2.464a.214.214 0 00-.129-.043H8.655a.203.203 0 01-.143-.06l-.735-.734a.216.216 0 00-.152-.063h-2.85a.202.202 0 01-.198-.243.203.203 0 01.055-.104l.451-.45a.202.202 0 01.144-.06H6.96a.428.428 0 00.413-.313l.369-1.312a.214.214 0 01.107-.132L9.32 7.77a.203.203 0 00.11-.18v-.67c0-.042.013-.082.037-.116l.782-1.126a.2.2 0 01.095-.074l1.095-.411a.203.203 0 00.131-.19v-.611a.203.203 0 00-.09-.17l-1.097-.729a.205.205 0 00-.206-.012l-1.493.747a.202.202 0 01-.214-.022l-.709-.56a.204.204 0 01.006-.321l.575-.424a.202.202 0 00-.005-.33l-.896-.625a.203.203 0 00-.214-.012c-.324.177-1.275.702-1.613.939a11.222 11.222 0 00-3.651 4.285c-.098.202-.218.407-.23.628-.012.221-.185.715-.258.915a.202.202 0 00.013.166l1.912 3.514a.2.2 0 00.074.077l2.012 1.207a.201.201 0 01.097.146l.403 2.922a.205.205 0 00.086.14l1.57 1.079a.214.214 0 01.088.133l.832 3.953a.193.193 0 00.027.066c.078.126.39.589.766.658-.035.01-.066.031-.101.041.09.016.18.037.268.063.107.028.214.053.321.076.168.033.184.06.265-.09.107-.2.23-.268.321-.292a.207.207 0 00.155-.156l.54-2.5a.215.215 0 01.085-.13l2.411-1.709a.214.214 0 00.09-.175v-3.212a.215.215 0 00-.082-.172z"
+                      fill="#32324D"
+                    />
+                    <path
+                      d="M12.321.857s-.195.011-.235.012a11.113 11.113 0 00-3.932.845c.13.09-.094.173-.094.173l.35.684h1.876l1.285.643 1.125-.643-.375-1.714zM17.262 4.718l.863-.75a.214.214 0 00-.05-.357l-1.008-.467a.214.214 0 00-.284.101l-.415.869a.214.214 0 00.08.274l.56.35a.214.214 0 00.254-.02zM21.302 5.822l-.312-.483a.337.337 0 01-.014-.023c-.056-.115-.521-1.055-.91-1.42-.292-.276-.375-.196-.398-.135a.202.202 0 01-.064.085l-1.545 1.25a.214.214 0 01-.135.047h-.8a.214.214 0 00-.151.062l-.643.643a.215.215 0 000 .304l.643.642a.214.214 0 00.152.063h4.027a.215.215 0 00.214-.223l-.03-.705a.214.214 0 00-.034-.107z"
+                      fill="#32324D"
+                    />
+                    <path
+                      d="M12 2.143A9.857 9.857 0 115.03 5.03 9.791 9.791 0 0112 2.143zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0z"
+                      fill="#32324D"
+                    />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="c10"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;
+
+exports[`<DzLabel /> displays the name of the dz when the label is empty 1`] = `
+.c8 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c1 {
+  background: #ffffff;
+  color: #8e8ea9;
+  padding-top: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c4 {
+  max-width: 22.25rem;
+}
+
+.c0 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c6 {
+  font-weight: 600;
+  color: #666687;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c7 {
+  font-weight: 600;
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c2 {
+  border-radius: 1.625rem;
+}
+
+<div>
+  <div
+    class="c0"
+  >
+    <div
+      class=""
+    >
+      <div
+        class="c1 c2"
+      >
+        <div
+          class="c3"
+        >
+          <div
+            class="c4 c5"
+          >
+            <span
+              class="c6"
+            >
+              test
+               
+            </span>
+            <span
+              class="c7"
+            >
+              (
+              1
+              )
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="c8"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;
+
+exports[`<DzLabel /> renders and matches the snapshot 1`] = `
+.c8 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c1 {
+  background: #ffffff;
+  color: #8e8ea9;
+  padding-top: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c4 {
+  max-width: 22.25rem;
+}
+
+.c0 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c6 {
+  font-weight: 600;
+  color: #666687;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c7 {
+  font-weight: 600;
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c2 {
+  border-radius: 1.625rem;
+}
+
+<div>
+  <div
+    class="c0"
+  >
+    <div
+      class=""
+    >
+      <div
+        class="c1 c2"
+      >
+        <div
+          class="c3"
+        >
+          <div
+            class="c4 c5"
+          >
+            <span
+              class="c6"
+            >
+              dz
+               
+            </span>
+            <span
+              class="c7"
+            >
+              (
+              1
+              )
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="c8"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;

@@ -1,0 +1,95 @@
+<!--- GuidedTourProvider.stories.mdx --->
+
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title="providers/GuidedTourProvider" />
+
+# GuidedTourProvider
+
+This Provider is used to create a new context for the GuidedTour. The example uses a reducer to handle the state.
+
+## Usage
+
+``` js
+import { GuidedTourProvider } from '@strapi/helper-plugin';
+const initialState = {
+  currentStep: null,
+  guidedTourState: {
+    contentTypeBuilder: {
+      create: false,
+      success: false,
+    },
+    contentManager: {
+      create: false,
+      success: false,
+    },
+    apiTokens: {
+      create: false,
+      success: false,
+    },
+  },
+  isGuidedTourVisible: false,
+  isSkipped: false,
+};
+
+const GuidedTour = ({ children }) => {
+  const [{ currentStep, guidedTourState, isGuidedTourVisible, isSkipped }, dispatch] = useReducer(
+    reducer,
+    initialState,
+    init
+  );
+
+  const setCurrentStep = step => {
+    // currentStep format: 'contentTypeBuilder.create' 
+
+    return dispatch({
+      type: 'SET_CURRENT_STEP',
+      step,
+    });
+  };
+
+  const setGuidedTourVisibility = value => {
+    dispatch({
+      type: 'SET_GUIDED_TOUR_VISIBILITY',
+      value,
+    });
+  };
+
+  const setStepState = (currentStep, value) => {
+    dispatch({
+      type: 'SET_STEP_STATE',
+      currentStep,
+      value,
+    });
+  };
+
+  const startSection = sectionName => {
+    // Add conditions for the section to start, which will allow the ModalGuidedTour to be visible
+    
+    return setCurrentStep(`${sectionName}.${step-to-show}`);
+  };
+
+  const setSkipped = value => {
+    dispatch({
+      type: 'SET_SKIPPED',
+      value,
+    });
+  };
+
+  return (
+    <GuidedTourProvider
+      guidedTourState={guidedTourState}
+      currentStep={currentStep}
+      setCurrentStep={setCurrentStep}
+      setGuidedTourVisibility={setGuidedTourVisibility}
+      setSkipped={setSkipped}
+      setStepState={setStepState}
+      startSection={startSection}
+      isGuidedTourVisible={isGuidedTourVisible}
+      isSkipped={isSkipped}
+    >
+      {children}
+    </GuidedTourProvider>
+  );
+};
+```

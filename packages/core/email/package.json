@@ -1,0 +1,48 @@
+{
+  "name": "@strapi/plugin-email",
+  "version": "4.3.6",
+  "description": "Easily configure your Strapi application to send emails.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "scripts": {
+    "test:front": "cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll"
+  },
+  "dependencies": {
+    "@strapi/provider-email-sendmail": "4.3.6",
+    "@strapi/utils": "4.3.6",
+    "lodash": "4.17.21"
+  },
+  "devDependencies": {
+    "@strapi/helper-plugin": "4.3.6",
+    "@testing-library/react": "12.1.4"
+  },
+  "engines": {
+    "node": ">=14.19.1 <=16.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "name": "email",
+    "displayName": "Email",
+    "description": "Configure your application to send emails.",
+    "required": true,
+    "kind": "plugin"
+  }
+}

@@ -1,0 +1,74 @@
+<!--- DateTimePicker.stories.mdx --->
+
+import { useState } from 'react';
+import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
+import DateTimePicker from './index';
+
+<Meta 
+  title="components/DateTimePicker" 
+  component={DateTimePicker}
+  argTypes={{
+    label: {
+      control: { 
+        type: 'text'
+      }
+    },
+    value: {
+      control: {
+        type: 'date'
+      }
+    }
+  }}
+/>
+
+# DateTimePicker
+
+This is the doc of the `DateTimePicker` component
+
+## Base
+
+Description...
+
+<Canvas>
+  <Story name="base">
+    {() => {
+      const [value, setValue] = useState();
+      return (
+        <DateTimePicker
+          onClear={() => setValue(undefined)}
+          value={value}
+          onChange={e => setValue(e)}
+          label="Date time picker"
+          hint="This is a super description"
+        />
+      );
+    }}
+  </Story>
+</Canvas>
+
+## Error
+
+Description...
+
+<Canvas>
+  <Story name="error">
+    <DateTimePicker
+      hint="This is a super description"
+      error="Very very very very very very very long error"
+    />
+  </Story>
+</Canvas>
+
+## Initial data
+
+Description...
+
+<Canvas>
+  <Story name="intial data">
+    <DateTimePicker
+      label="Date time picker"
+      hint="This is a super description"
+      value="2021-10-13T10:00:00.000Z"
+    />
+  </Story>
+</Canvas>

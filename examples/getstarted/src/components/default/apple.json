@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_default_apples",
+  "info": {
+    "displayName": "apple",
+    "icon": "apple-alt",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

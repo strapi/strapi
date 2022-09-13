@@ -1,0 +1,42 @@
+{
+  "name": "@strapi/plugin-content-manager",
+  "version": "4.3.6",
+  "description": "A powerful UI to easily manage your data.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "scripts": {
+    "test:unit": "jest --verbose"
+  },
+  "dependencies": {
+    "@sindresorhus/slugify": "1.1.0",
+    "@strapi/utils": "4.3.6",
+    "lodash": "4.17.21"
+  },
+  "engines": {
+    "node": ">=14.19.1 <=16.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "icon": "plug",
+    "name": "content-manager",
+    "displayName": "Content Manager",
+    "description": "Quick way to see, edit and delete the data in your database.",
+    "required": true,
+    "kind": "plugin"
+  }
+}

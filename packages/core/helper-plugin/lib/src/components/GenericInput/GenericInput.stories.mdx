@@ -1,0 +1,66 @@
+<!--- GenericInput.stories.mdx --->
+
+import { useState } from 'react';
+import { Meta, Story, Canvas } from '@storybook/addon-docs/blocks';
+import { Grid, GridItem } from '@strapi/design-system/Grid';
+import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
+import { Main } from '@strapi/design-system/Main';
+import { Stack } from '@strapi/design-system/Stack';
+import { Box } from '@strapi/design-system/Box';
+import set from 'lodash/set';
+import GenericInput from './index';
+import layout from './storyUtils/layout';
+
+<Meta title="components/GenericInput" component={GenericInput} />
+
+# GenericInput
+
+This is the doc of the `GenericInput` component
+
+## GenericInput
+
+Description...
+
+<Canvas>
+  <Story name="base">
+    {() => {
+      const [state, setState] = useState({
+        firstname: 'ee',
+        email: '',
+        private: null,
+        isNullable: null,
+        isActiveByDefault: true,
+        isInactiveByDefault: false
+      });
+      return (
+        <ContentLayout>
+          <Stack spacing={4}>
+            {layout.map((row, rowIndex) => {
+              return (
+                <Box key={rowIndex}>
+                  <Grid gap={4}>
+                    {row.map(input => {
+                      return (
+                        <GridItem key={input.name} {...input.size}>
+                          <GenericInput
+                            {...input}
+                            value={state[input.name]}
+                            onChange={({ target: { name, value } }) => {
+                              setState(prev => {
+                                return { ...prev, [name]: value };
+                              });
+                            }}
+                          />
+                        </GridItem>
+                      );
+                    })}
+                  </Grid>
+                </Box>
+              );
+            })}
+          </Stack>
+        </ContentLayout>
+      );
+    }}
+  </Story>
+</Canvas>

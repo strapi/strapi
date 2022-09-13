@@ -1,0 +1,78 @@
+<!--- FilterPopoverURLQuery.stories.mdx --->
+
+import { useEffect, useState, useRef } from 'react';
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Button, Box, Main, Flex, Stack } from '@strapi/design-system';
+import useQueryParams from '../../hooks/useQueryParams';
+import FilterListURLQuery from '../FilterListURLQuery';
+import FilterPopoverURLQuery from './index';
+
+<Meta title="components/FilterPopoverURLQuery" />
+
+# FilterPopoverURLQuery
+
+This component is used to change the page size.
+
+## Imports
+
+```js
+import { FilterPopoverURLQuery } from '@strapi/helper-plugin';
+import { FilterListURLQuery } from '@strapi/helper-plugin';
+```
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    {() => {
+      const [isVisible, setIsVisible] = useState(false);
+      const buttonRef = useRef();
+      const handleToggle = () => {
+        setIsVisible(prev => !prev);
+      };
+      const [{ query }, setQuery] = useQueryParams();
+      const filters = {
+        $and: [{ city: { $eq: 'paris' } }, { categories: { name: { $eq: 'paris' } } }],
+      };
+      const filtersSchema = [
+        {
+          name: 'categories',
+          fieldSchema: {
+            type: 'relation',
+            mainField: { name: 'name', schema: { type: 'string' } },
+          },
+          metadatas: { label: 'categories' },
+        },
+        {
+          name: 'city',
+          fieldSchema: {
+            type: 'string',
+          },
+          metadatas: { label: 'city' },
+        },
+      ];
+      return (
+        <Main>
+          <Stack spacing={6}>
+            <Flex paddingTop={6}>
+              <Button variant="tertiary" onClick={handleToggle} size="S" ref={buttonRef}>
+                Filters
+              </Button>
+              <FilterPopoverURLQuery
+                displayedFilters={filtersSchema}
+                isVisible={isVisible}
+                onToggle={handleToggle}
+                source={buttonRef}
+              />
+              <FilterListURLQuery filtersSchema={filtersSchema} />
+            </Flex>
+          </Stack>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={FilterPopoverURLQuery} />

@@ -1,0 +1,21 @@
+<!--- prefixFileUrlWithBackendUrl.stories.mdx --->
+
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title="utils/prefixFileUrlWithBackendUrl" />
+
+# prefixFileUrlWithBackendUrl
+
+This util is used to create URL aware of the backend. Practical to resolve assets.
+
+## Usage
+
+```js
+import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
+
+const Compo = () => {
+  const url = prefixFileUrlWithBackendUrl('/somewhere-i-belong');
+
+  return <div>{url}</div>;
+};
+```

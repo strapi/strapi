@@ -1,0 +1,99 @@
+<!--- EmptyStateLayout.stories.mdx --->
+
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Main, Row } from '@strapi/design-system';
+import { TextInput } from '@strapi/design-system/TextInput';
+import { Button } from '@strapi/design-system/Button';
+import { Box } from '@strapi/design-system/Box';
+import { Typography } from '@strapi/design-system/Typography';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import Form from './';
+
+<Meta title="components/Form" />
+
+# Form
+
+This component is used to display a Formik form with additionnal error handling on fields
+
+## Per field error
+
+<Canvas>
+  <Story name="Per field error">
+    <Main>
+      <Formik
+        initialValues={{ email: '' }}
+        validationSchema={Yup.object().shape({
+          email: Yup.string()
+            .email('Invalid email')
+            .required('Required'),
+        })}
+      >
+        {({ handleSubmit, values, errors, handleChange }) => (
+          <Form onSubmit={handleSubmit}>
+            <TextInput
+              name="email"
+              label="Email"
+              hint="Enter a valid email"
+              value={values.email}
+              error={errors.email}
+              value={values.displayName}
+              onChange={handleChange}
+            />
+            <Button type="submit">Submit</Button>
+          </Form>
+        )}
+      </Formik>
+    </Main>
+  </Story>
+</Canvas>
+
+## Per form error
+
+Make sure to run this story in detached mode. The embeded iframe breaks the focus behaviour.
+
+<Canvas>
+  <Story name="Per form error">
+    <Main>
+      <Formik
+        initialValues={{ email: '' }}
+        validationSchema={Yup.object().shape({
+          email: Yup.string()
+            .email('Invalid email')
+            .required('Required'),
+        })}
+        validateOnChange={false}
+      >
+        {({ handleSubmit, values, errors, handleChange }) => (
+          <Form onSubmit={handleSubmit} noValidate>
+            {errors.email ? (
+              <Box
+                padding={3}
+                hasRadius
+                background="danger100"
+                color="danger600"
+                tabIndex={-1}
+                id="global-form-error"
+              >
+                <Typography>The email is invalid</Typography>
+              </Box>
+            ) : null}
+            <TextInput
+              name="email"
+              label="Email"
+              hint="Enter a valid email"
+              value={values.email}
+              value={values.displayName}
+              onChange={handleChange}
+            />
+            <Button type="submit">Submit</Button>
+          </Form>
+        )}
+      </Formik>
+    </Main>
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={EmptyStateLayout} />

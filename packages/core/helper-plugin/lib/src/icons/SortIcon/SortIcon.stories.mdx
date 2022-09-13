@@ -1,0 +1,27 @@
+<!--- SortIcon.stories.mdx --->
+
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Typography } from '@strapi/design-system/Typography';
+import { Flex } from '@strapi/design-system/Flex';
+import SortIcon from './index';
+
+<Meta title="icons/SortIcon" />
+
+# SortIcon
+
+This component is used in order to display the SortIcon.
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    <Flex>
+      <SortIcon />
+      <Typography>Arrow down</Typography>
+    </Flex>
+    <Flex>
+      <SortIcon isUp />
+      <Typography>Arrow up</Typography>
+    </Flex>
+  </Story>
+</Canvas>

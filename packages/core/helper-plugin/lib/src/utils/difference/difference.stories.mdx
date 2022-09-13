@@ -1,0 +1,33 @@
+<!--- difference.stories.mdx --->
+
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title="utils/difference" />
+
+# Imports
+
+```js
+import { difference } from '@strapi/helper-plugin';
+```
+
+## Usage
+
+Returns the difference between two objects:
+
+```js
+const firstObject = {
+  key1: 'a',
+  key2: 'b',
+};
+const secondObject = {
+  key1: 'a',
+  key2: {
+    key21: 'b',
+  },
+};
+
+console.log(difference(firstObject, secondObject));
+// { key2: 'b' }
+console.log(difference(secondObject, firstObject));
+// { key2: { key21: 'b' } }
+```

@@ -1,0 +1,17 @@
+**/node_modules/**
+**/build/**
+**/dist/**
+**/OLD/**
+testApp/**
+examples/**
+cypress/**
+packages/generators/generators/lib/files/
+packages/generators/app/lib/resources/files/
+packages/core/admin/admin/src/plugins.js
+packages/core/helper-plugin/build/**
+packages/core/helper-plugin/lib/src/old/components/**
+packages/core/helper-plugin/lib/src/testUtils/**
+packages/core/helper-plugin/lib/src/utils/**
+.eslintrc.js
+.eslintrc.front.js
+.eslintrc.back.js

@@ -1,0 +1,78 @@
+<!--- ContentBox.stories.mdx --->
+
+import { useState } from 'react';
+import { ArgsTable, Meta, Canvas, Story } from '@storybook/addon-docs';
+import ContentBox from './index';
+import { Stack } from '@strapi/design-system/Stack';
+import { IconButton } from '@strapi/design-system/IconButton';
+import InformationSquare from '@strapi/icons/InformationSquare';
+import CodeSquare from '@strapi/icons/CodeSquare';
+import PlaySquare from '@strapi/icons/PlaySquare';
+import FeatherSquare from '@strapi/icons/FeatherSquare';
+import Duplicate from '@strapi/icons/Duplicate';
+
+<Meta title="components/ContentBox" />
+
+# ContentBox
+
+TODO
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    <Stack spacing={4}>
+      <ContentBox
+        title="Read the documentation"
+        subtitle="Discover the concepts, reference, guides and PlaySquares"
+        icon={<InformationSquare />}
+        iconBackground="primary100"
+      />
+      <ContentBox
+        title="Code example"
+        subtitle="Learn by testing real project developed by the community"
+        icon={<CodeSquare />}
+        iconBackground="warning100"
+      />
+      <ContentBox
+        title="PlaySquare"
+        subtitle="Discover the concepts, reference, guides and tutorials"
+        icon={<PlaySquare />}
+        iconBackground="secondary100"
+      />
+      <ContentBox
+        title="FeatherSquare"
+        subtitle="Discover the concepts, reference, guides and tutorials"
+        icon={<FeatherSquare />}
+        iconBackground="alternative100"
+      />
+      <ContentBox
+        titleEllipsis
+        endAction={<IconButton label="Duplicate" noBorder icon={<Duplicate />} />}
+        title="http://localhost:4000/admin/auth/register?registrationToken=e02849fabef5239fe3c459d23d8c3b30d5057aa9"
+        subtitle="Send this link to the user for them to connect"
+        icon={
+          //to replace with real envelope icon
+          <svg xmlns="http://www.w3.org/2000/svg">
+            <text
+              transform="translate(-23 -9)"
+              fill="#4B515A"
+              fillRule="evenodd"
+              fontSize="32"
+              fontFamily="AppleColorEmoji, Apple Color Emoji"
+            >
+              <tspan x="23" y="36">
+                ✉️
+              </tspan>
+            </text>
+          </svg>
+        }
+        iconBackground="neutral100"
+      />
+    </Stack>
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={ContentBox} />

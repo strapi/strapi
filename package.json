@@ -1,0 +1,116 @@
+{
+  "name": "strapi",
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "workspaces": [
+    "packages/*",
+    "packages/*/*",
+    "examples/*",
+    ".github/actions/*"
+  ],
+  "scripts": {
+    "setup": "yarn && yarn build",
+    "watch": "lerna run --stream watch --no-private",
+    "build": "lerna run --stream build --no-private",
+    "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
+    "lint": "npm-run-all -p lint:code lint:css",
+    "lint:code": "eslint .",
+    "lint:css": "stylelint packages/**/admin/src/**/*.js",
+    "lint:fix": "eslint --fix .",
+    "lint:other": "npm run prettier:other -- --check",
+    "format": "npm-run-all -p format:*",
+    "format:code": "npm run prettier:code -- --write",
+    "format:other": "npm run prettier:other -- --write",
+    "prettier:code": "prettier \"**/*.js\"",
+    "prettier:other": "prettier \"**/*.{md,css,scss,yaml,yml}\"",
+    "test:clean": "rimraf ./coverage",
+    "test:front": "npm run test:clean && cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:update": "cross-env IS_EE=true jest --config ./jest.config.front.js --u",
+    "test:front:ce": "npm run test:clean && cross-env IS_EE=false jest --config ./jest.config.front.js --coverage",
+    "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "test:front:update:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --u",
+    "test:unit": "jest --verbose",
+    "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --verbose --runInBand --testRunner=jest-circus/runner --forceExit --detectOpenHandles",
+    "test:generate-app": "node test/create-test-app.js",
+    "doc:api": "node scripts/open-api/serve.js"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,md,css,scss,yaml,yml}": [
+      "prettier --write"
+    ],
+    "*.js": [
+      "eslint --fix"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "7.18.10",
+    "@babel/eslint-parser": "7.18.9",
+    "@babel/preset-react": "7.18.6",
+    "@strapi/eslint-config": "0.1.2",
+    "@swc/core": "1.2.224",
+    "@swc/jest": "0.2.22",
+    "babel-eslint": "10.1.0",
+    "chalk": "4.1.2",
+    "chokidar": "3.5.3",
+    "cross-env": "7.0.3",
+    "dotenv": "14.2.0",
+    "eslint": "8.21.0",
+    "execa": "1.0.0",
+    "fs-extra": "10.1.0",
+    "get-port": "5.1.1",
+    "glob": "7.2.3",
+    "husky": "3.1.0",
+    "inquirer": "8.2.4",
+    "istanbul": "~0.4.2",
+    "jest": "26.6.3",
+    "jest-circus": "26.6.3",
+    "jest-cli": "26.6.3",
+    "jest-watch-typeahead": "0.6.5",
+    "lerna": "5.4.3",
+    "lint-staged": "10.5.4",
+    "lodash": "4.17.21",
+    "npm-run-all": "4.1.5",
+    "nx": "14.4.2",
+    "plop": "2.7.6",
+    "prettier": "2.7.1",
+    "qs": "6.11.0",
+    "request": "2.88.2",
+    "request-promise-native": "1.0.9",
+    "rimraf": "3.0.2",
+    "stylelint": "13.13.1",
+    "stylelint-config-recommended": "3.0.0",
+    "stylelint-config-styled-components": "0.1.1",
+    "stylelint-processor-styled-components": "1.10.0",
+    "supertest": "6.2.4",
+    "yargs": "13.3.2"
+  },
+  "engines": {
+    "node": ">=14.19.1 <=16.x.x",
+    "npm": ">=6.0.0"
+  }
+}
