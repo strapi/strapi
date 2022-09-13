@@ -111,8 +111,11 @@ const reducer = (state, action) =>
           const existsInDisconnect = disconnectedRelations.find(
             (disconnectValue) => disconnectValue.id === value.id
           );
-          const newDisconnectArray = pull([...disconnectedRelations], existsInDisconnect);
-          set(draftState, [...path, 'disconnect'], newDisconnectArray);
+
+          if (existsInDisconnect) {
+            const newDisconnectArray = pull([...disconnectedRelations], existsInDisconnect);
+            set(draftState, [...path, 'disconnect'], newDisconnectArray);
+          }
         }
 
         break;

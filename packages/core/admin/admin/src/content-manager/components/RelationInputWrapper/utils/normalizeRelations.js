@@ -4,11 +4,14 @@ import { PUBLICATION_STATES } from '../constants';
 
 const normalizeRelation = (
   relation,
-  { modifiedData, shouldAddLink, mainFieldName, targetModel }
+  { modifiedData, shouldAddLink, mainFieldName, targetModel, location }
 ) => {
   const nextRelation = { ...relation };
 
-  if (modifiedData?.disconnect?.find((relation) => relation.id === nextRelation.id)) {
+  if (
+    location !== 'search' &&
+    modifiedData?.disconnect?.find((relation) => relation.id === nextRelation.id)
+  ) {
     return null;
   }
 
@@ -31,7 +34,7 @@ const normalizeRelation = (
 
 export const normalizeRelations = (
   relations,
-  { modifiedData = {}, shouldAddLink = false, mainFieldName, targetModel }
+  { modifiedData = {}, shouldAddLink = false, mainFieldName, targetModel, location }
 ) => {
   return {
     ...relations,
@@ -49,6 +52,7 @@ export const normalizeRelations = (
                   shouldAddLink,
                   mainFieldName,
                   targetModel,
+                  location,
                 })
               )
               .filter(Boolean)

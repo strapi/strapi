@@ -182,6 +182,7 @@ export const RelationInputWrapper = ({
       })}
       searchResults={normalizeRelations(search, {
         mainFieldName: mainField.name,
+        location: 'search',
       })}
       size={size}
     />
