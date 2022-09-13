@@ -322,6 +322,40 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(reducer(state, action)).toEqual(expected);
     });
 
+    it('should remove the relation from disconnect and add the relation to connect', () => {
+      const state = {
+        ...initialState,
+
+        initialData: {},
+        modifiedData: {
+          relation: {
+            connect: [],
+            disconnect: [{ id: 1 }],
+          },
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        componentsDataStructure: {},
+        initialData: {},
+        modifiedData: {
+          relation: {
+            connect: [{ id: 1 }],
+            disconnect: [],
+          },
+        },
+      };
+
+      const action = {
+        type: 'CONNECT_RELATION',
+        keys: ['relation'],
+        value: { id: 1 },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
     it('should overwrite existing data, when replace is set to true', () => {
       const state = {
         ...initialState,
@@ -464,6 +498,40 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         modifiedData: {
           relation: {
             connect: [],
+            disconnect: [],
+          },
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        componentsDataStructure: {},
+        initialData: {},
+        modifiedData: {
+          relation: {
+            connect: [],
+            disconnect: [{ id: 1 }],
+          },
+        },
+      };
+
+      const action = {
+        type: 'DISCONNECT_RELATION',
+        keys: ['relation'],
+        value: { id: 1 },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should remove the relation from connect and add it to connect', () => {
+      const state = {
+        ...initialState,
+
+        initialData: {},
+        modifiedData: {
+          relation: {
+            connect: [{ id: 1 }],
             disconnect: [],
           },
         },

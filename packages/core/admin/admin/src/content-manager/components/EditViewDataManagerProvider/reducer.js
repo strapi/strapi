@@ -3,6 +3,7 @@ import unset from 'lodash/unset';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import take from 'lodash/take';
+import pull from 'lodash/pull';
 import { moveFields } from './utils';
 import { getMaxTempKey } from '../../utils';
 
@@ -92,9 +93,10 @@ const reducer = (state, action) =>
       case 'CONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
         const { value, replace = false } = action;
-        const isConnectAlreadyExist = get(state, [...path, 'connect']);
+        const connectedRelations = get(state, [...path, 'connect']);
+        const disconnectedRelations = get(state, [...path, 'disconnect']);
 
-        if (!isConnectAlreadyExist) {
+        if (!connectedRelations) {
           set(draftState, [...path, 'connect'], []);
         }
 
@@ -105,19 +107,42 @@ const reducer = (state, action) =>
           nextValue.push(value);
         }
 
+        if (disconnectedRelations?.length) {
+          const existsInDisconnect = disconnectedRelations.find(
+            (disconnectValue) => disconnectValue.id === value.id
+          );
+
+          if (existsInDisconnect) {
+            const newDisconnectArray = pull([...disconnectedRelations], existsInDisconnect);
+            set(draftState, [...path, 'disconnect'], newDisconnectArray);
+          }
+        }
+
         break;
       }
       case 'DISCONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
         const { value } = action;
-        const isDisconnectAlreadyExist = get(state, [...path, 'disconnect']);
+        const disconnectedRelations = get(state, [...path, 'disconnect']);
+        const connectedRelations = get(state, [...path, 'connect']);
 
-        if (!isDisconnectAlreadyExist) {
+        if (!disconnectedRelations) {
           set(draftState, [...path, 'disconnect'], []);
         }
 
         const nextValue = get(draftState, [...path, 'disconnect']);
         nextValue.push(value);
+
+        if (connectedRelations?.length) {
+          const existsInConnect = connectedRelations.find(
+            (connectValue) => connectValue.id === value.id
+          );
+
+          if (existsInConnect) {
+            const newConnectArray = pull([...connectedRelations], existsInConnect);
+            set(draftState, [...path, 'connect'], newConnectArray);
+          }
+        }
 
         break;
       }
