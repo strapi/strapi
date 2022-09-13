@@ -3,7 +3,6 @@ import React from 'react';
 
 import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
-import { Box } from '@strapi/design-system/Box';
 
 export const Relation = ({
   children,
@@ -25,9 +24,11 @@ export const Relation = ({
         <Stack basis={size <= 6 ? '100%' : '70%'} spacing={1} {...props}>
           {search}
         </Stack>
-        <Flex>{loadMore}</Flex>
+
+        {loadMore}
       </Flex>
-      <Box>{children}</Box>
+
+      {children}
     </>
   );
 };
