@@ -137,10 +137,10 @@ const merge = async (valuesToMerge) => {
       valueGroup.forEach((keyGroup) => {
         updateTranslationFiles(keyGroup, targetKey);
         keyGroup.replaceAll(`id: '${targetKey}'`);
-        mergedCount++;
+        mergedCount += 1;
       });
     }
-    current++;
+    current += 1;
   }
 
   console.log(`Merged ${mergedCount} keys`);

@@ -46,7 +46,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version >= v14 and <= v16 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version >= v14 and <= v18 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
@@ -132,9 +132,11 @@ $ yarn test:generate-app mysql
 
 A new app is required every time you run the end-to-end tests otherwise, the test suite will fail. A script is available to make this process easier: `node test/e2e.js`. It will delete the current test app, generate a new one and run the test suite.
 
+The script takes a path as optional argument (e.g. `node test/e2e.js path/to/test`). Options for jest can be passed using the double-dash notion: e.g. to update snapshots `node test/e2e.js -- -u`.
+
 ### Changing the database
 
-By default the script `test/e2e,js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
+By default the script `test/e2e.js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
 
 ```bash
 $ node test/e2e.js --db=sqlite

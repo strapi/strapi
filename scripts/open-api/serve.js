@@ -25,7 +25,7 @@ async function run() {
   }
 
   const server = http.createServer((req, res) => {
-    if (req.url == '/spec.yml') {
+    if (req.url === '/spec.yml') {
       return fse.createReadStream(openAPISpecPath).pipe(res);
     }
 

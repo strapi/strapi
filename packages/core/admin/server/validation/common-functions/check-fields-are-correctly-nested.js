@@ -12,7 +12,7 @@ const checkFieldsAreCorrectlyNested = (fields) => {
   }
 
   let failed = false;
-  for (let indexA = 0; indexA < fields.length; indexA++) {
+  for (let indexA = 0; indexA < fields.length; indexA += 1) {
     failed = fields
       .slice(indexA + 1)
       .some(
