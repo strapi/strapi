@@ -37,6 +37,7 @@ function Inputs({
   shouldNotRunValidations,
   queryInfos,
   value,
+  size,
 }) {
   const { fields } = useLibrary();
   const { formatMessage } = useIntl();
@@ -240,6 +241,7 @@ function Inputs({
             : null
         }
         queryInfos={queryInfos}
+        size={size}
         value={value}
         error={error && formatMessage(error)}
       />
@@ -283,8 +285,9 @@ function Inputs({
 Inputs.defaultProps = {
   formErrors: {},
   labelAction: undefined,
-  queryInfos: {},
+  size: undefined,
   value: null,
+  queryInfos: {},
 };
 
 Inputs.propTypes = {
@@ -297,13 +300,14 @@ Inputs.propTypes = {
   metadatas: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   readableFields: PropTypes.array.isRequired,
+  size: PropTypes.number,
   shouldNotRunValidations: PropTypes.bool.isRequired,
+  value: PropTypes.any,
   queryInfos: PropTypes.shape({
     containsKey: PropTypes.string,
     defaultParams: PropTypes.object,
     endPoint: PropTypes.string,
   }),
-  value: PropTypes.any,
 };
 
 const Memoized = memo(Inputs, isEqual);

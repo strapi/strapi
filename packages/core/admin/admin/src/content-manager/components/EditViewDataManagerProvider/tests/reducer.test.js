@@ -517,6 +517,69 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it('should take relational fields into account, when setting the state', () => {
+      const state = {
+        ...initialState,
+        formErrors: true,
+        initialData: {
+          relation: {
+            something: true,
+          },
+        },
+        modifiedData: true,
+        modifiedDZName: true,
+        shouldCheckErrors: true,
+      };
+      const expected = {
+        ...initialState,
+        formErrors: {},
+        initialData: { ok: true, relation: { something: true, count: 10 } },
+        modifiedData: { ok: true, relation: { count: 10 } },
+        modifiedDZName: null,
+        shouldCheckErrors: false,
+      };
+
+      const action = {
+        type: 'INIT_FORM',
+        initialValues: { ok: true, relation: { count: 10 } },
+        relationalFields: ['relation'],
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should reset connect/ disconnect for relational fields', () => {
+      const state = {
+        ...initialState,
+        formErrors: true,
+        initialData: {},
+        modifiedData: {
+          relation: {
+            connect: [{ id: 1 }],
+            disconnect: [{ id: 2 }],
+          },
+        },
+        modifiedDZName: true,
+        shouldCheckErrors: true,
+      };
+      const expected = {
+        ...initialState,
+        formErrors: {},
+        initialData: { ok: true, relation: { count: 10 } },
+        modifiedData: { ok: true, relation: { count: 10 } },
+        modifiedDZName: null,
+        shouldCheckErrors: false,
+      };
+
+      const action = {
+        type: 'INIT_FORM',
+        initialValues: { ok: true, relation: { count: 10 } },
+        relationalFields: ['relation'],
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
   });
 
   describe('MOVE_COMPONENT_FIELD', () => {

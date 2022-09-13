@@ -65,14 +65,15 @@ const RelationInput = ({
   publicationStateTranslations,
   relations: paginatedRelations,
   searchResults,
+  size,
 }) => {
   const [value, setValue] = useState(null);
   const listRef = useRef();
   const outerListRef = useRef();
   const [overflow, setOverflow] = useState('');
 
-  const relations = useMemo(() => paginatedRelations.data?.pages.flat(), [paginatedRelations]);
-  const totalNumberOfRelations = relations?.length ?? 0;
+  const relations = useMemo(() => paginatedRelations.data.pages.flat(), [paginatedRelations]);
+  const totalNumberOfRelations = relations.length ?? 0;
 
   const dynamicListHeight = useMemo(
     () =>
@@ -89,7 +90,7 @@ const RelationInput = ({
 
   const options = useMemo(
     () =>
-      searchResults?.data?.pages?.flat().map((result) => ({
+      searchResults.data.pages.flat().map((result) => ({
         ...result,
         value: result.id,
         label: result.mainField,
@@ -98,7 +99,7 @@ const RelationInput = ({
   );
 
   useEffect(() => {
-    if (!paginatedRelations.isLoading && relations?.length > 0) {
+    if (!paginatedRelations.isLoading && relations.length > 0) {
       listRef.current.scrollToItem(relations.length, 'end');
     }
 
@@ -124,7 +125,7 @@ const RelationInput = ({
 
     const outerListRefCurrent = outerListRef?.current;
 
-    if (!paginatedRelations.isLoading && relations?.length > 0 && outerListRefCurrent) {
+    if (!paginatedRelations.isLoading && relations.length > 0 && outerListRefCurrent) {
       outerListRef.current.addEventListener('scroll', handleNativeScroll);
     }
 
@@ -138,10 +139,15 @@ const RelationInput = ({
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
+        totalNumberOfRelations={totalNumberOfRelations}
+        size={size}
         search={
           <>
             <FieldLabel>{label}</FieldLabel>
             <ReactSelect
+              // position fixed doesn't update position on scroll
+              // react select doesn't update menu position on options change
+              menuPosition="absolute"
               components={{ Option }}
               options={options}
               isDisabled={disabled}
@@ -156,7 +162,7 @@ const RelationInput = ({
                 onRelationAdd(relation);
 
                 // scroll to the end of the list
-                if (relations?.length > 0) {
+                if (relations.length > 0) {
                   setTimeout(() => {
                     listRef.current.scrollToItem(relations.length, 'end');
                   });
@@ -258,10 +264,12 @@ const RelationInput = ({
             }}
           </List>
         </RelationList>
-        <Box paddingTop={2}>
-          <FieldHint />
-          <FieldError />
-        </Box>
+        {(description || error) && (
+          <Box paddingTop={2}>
+            <FieldHint />
+            <FieldError />
+          </Box>
+        )}
       </Relation>
     </Field>
   );
@@ -334,6 +342,7 @@ RelationInput.propTypes = {
     published: PropTypes.string.isRequired,
   }).isRequired,
   searchResults: ReactQuerySearchResult,
+  size: PropTypes.number.isRequired,
   relations: ReactQueryRelationResult,
 };
 

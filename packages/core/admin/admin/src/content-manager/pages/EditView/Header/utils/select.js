@@ -2,7 +2,6 @@ import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect() {
   const {
-    allLayoutData,
     initialData,
     isCreatingEntry,
     isSingleType,
@@ -15,7 +14,6 @@ function useSelect() {
   } = useCMEditViewDataManager();
 
   return {
-    componentLayouts: allLayoutData.components,
     initialData,
     isCreatingEntry,
     isSingleType,

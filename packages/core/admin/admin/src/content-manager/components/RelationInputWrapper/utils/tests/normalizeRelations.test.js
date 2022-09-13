@@ -119,4 +119,29 @@ describe('normalizeRelations', () => {
       },
     });
   });
+
+  test('allows to connect new relations, eventhough pages is empty', () => {
+    expect(
+      normalizeRelations(
+        {
+          data: {
+            pages: [],
+          },
+        },
+        {
+          modifiedData: { connect: [{ id: 1 }] },
+        }
+      )
+    ).toStrictEqual({
+      data: {
+        pages: [
+          [
+            expect.objectContaining({
+              id: 1,
+            }),
+          ],
+        ],
+      },
+    });
+  });
 });

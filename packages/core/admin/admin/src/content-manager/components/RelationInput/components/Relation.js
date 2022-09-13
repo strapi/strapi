@@ -5,10 +5,16 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Flex } from '@strapi/design-system/Flex';
 import { Box } from '@strapi/design-system/Box';
 
-export const Relation = ({ children, loadMore, search, ...props }) => {
+export const Relation = ({
+  children,
+  loadMore,
+  search,
+  totalNumberOfRelations,
+  size,
+  ...props
+}) => {
   return (
-    <Stack
-      spacing={3}
+    <Box
       paddingTop={4}
       paddingBottom={4}
       paddingLeft={6}
@@ -16,24 +22,33 @@ export const Relation = ({ children, loadMore, search, ...props }) => {
       hasRadius
       background="neutral100"
     >
-      <Flex justifyContent="space-between" alignItems="end">
-        <Stack width="55%" spacing={1} {...props}>
+      <Flex
+        paddingBottom={totalNumberOfRelations > 0 ? 3 : 0}
+        gap={2}
+        justifyContent="space-between"
+        alignItems="end"
+        wrap="wrap"
+      >
+        <Stack basis={size <= 6 ? '100%' : '70%'} spacing={1} {...props}>
           {search}
         </Stack>
-        {loadMore}
+        <Flex>{loadMore}</Flex>
       </Flex>
       <Box>{children}</Box>
-    </Stack>
+    </Box>
   );
 };
 
 Relation.defaultProps = {
   search: undefined,
   loadMore: undefined,
+  totalNumberOfRelations: 0,
 };
 
 Relation.propTypes = {
   children: PropTypes.node.isRequired,
   search: PropTypes.node,
   loadMore: PropTypes.node,
+  size: PropTypes.number.isRequired,
+  totalNumberOfRelations: PropTypes.string,
 };

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { memo, useEffect, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 
-import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, NotAllowedInput, useQueryParams } from '@strapi/helper-plugin';
 
 import { RelationInput } from '../RelationInput';
 import { useRelation } from '../../hooks/useRelation';
@@ -23,12 +23,14 @@ export const RelationInputWrapper = ({
   queryInfos: { endpoints, defaultParams, shouldDisplayRelationLink },
   placeholder,
   relationType,
+  size,
   targetModel,
 }) => {
   const { formatMessage } = useIntl();
   const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
   const relationsCount = initialData[name]?.count ?? 0;
+  const [{ query }] = useQueryParams();
 
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
@@ -39,6 +41,7 @@ export const RelationInputWrapper = ({
       },
       pageParams: {
         ...defaultParams,
+        locale: query?.plugins?.i18n?.locale,
         pageSize: RELATIONS_TO_DISPLAY,
       },
     },
@@ -48,6 +51,7 @@ export const RelationInputWrapper = ({
       pageParams: {
         ...defaultParams,
         entityId: isCreatingEntry ? undefined : initialData.id,
+        locale: query?.plugins?.i18n?.locale,
         pageSize: SEARCH_RESULTS_TO_DISPLAY,
       },
     },
@@ -179,6 +183,7 @@ export const RelationInputWrapper = ({
       searchResults={normalizeRelations(search, {
         mainFieldName: mainField.name,
       })}
+      size={size}
     />
   );
 };
@@ -216,6 +221,7 @@ RelationInputWrapper.propTypes = {
     values: PropTypes.object,
   }),
   relationType: PropTypes.string.isRequired,
+  size: PropTypes.number.isRequired,
   targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.shape({
     defaultParams: PropTypes.shape({

@@ -130,12 +130,17 @@ const EditViewDataManagerProvider = ({
 
   useEffect(() => {
     if (initialValues) {
+      const relationalFields = Object.keys(initialValues).filter(
+        (key) => currentContentTypeLayout?.attributes[key]?.type === 'relation'
+      );
+
       dispatch({
         type: 'INIT_FORM',
         initialValues,
+        relationalFields,
       });
     }
-  }, [initialValues]);
+  }, [initialValues, currentContentTypeLayout]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
     trackUsageRef.current('didAddComponentToDynamicZone');
