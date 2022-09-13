@@ -377,7 +377,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
   });
 
   describe('LOAD_RELATION', () => {
-    it.skip('should add loaded relations to initalData', () => {
+    it('should add loaded relations to initalData', () => {
       const state = {
         ...initialState,
         initialData: {},
@@ -398,8 +398,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         modifiedData: {
           relation: {
-            connect: [],
-            disconnect: [],
+            results: [{ id: 1 }],
           },
         },
       });
@@ -417,8 +416,42 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
         modifiedData: {
           relation: {
-            connect: [],
-            disconnect: [],
+            results: [{ id: 2 }, { id: 1 }],
+          },
+        },
+      });
+    });
+
+    it('should add loaded relations to initalData and remove duplicates', () => {
+      const state = {
+        ...initialState,
+        initialData: {
+          relation: {
+            results: [{ id: 1 }, { id: 2 }],
+          },
+        },
+
+        modifiedData: {
+          relation: {
+            results: [{ id: 1 }, { id: 2 }],
+          },
+        },
+      };
+
+      let nextState = reducer(state, {
+        type: 'LOAD_RELATION',
+        keys: ['relation'],
+        value: [{ id: 1 }, { id: 2 }, { id: 3 }],
+      });
+
+      expect(nextState).toStrictEqual({
+        ...initialState,
+        initialData: {
+          relation: { results: [{ id: 3 }, { id: 1 }, { id: 2 }] },
+        },
+        modifiedData: {
+          relation: {
+            results: [{ id: 3 }, { id: 1 }, { id: 2 }],
           },
         },
       });

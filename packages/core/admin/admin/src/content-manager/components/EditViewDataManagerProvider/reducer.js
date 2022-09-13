@@ -75,9 +75,15 @@ const reducer = (state, action) =>
       case 'LOAD_RELATION': {
         const initialDataPath = ['initialData', ...action.keys, 'results'];
         const modifiedDataPath = ['modifiedData', ...action.keys, 'results'];
+        const currentState = get(state, initialDataPath, []);
         const { value } = action;
+        const newValues = value.filter(
+          (newRelation) =>
+            !currentState.find((existingRelation) => existingRelation.id === newRelation.id)
+        );
+        const nextState = [...newValues, ...currentState];
 
-        set(draftState, initialDataPath, value);
+        set(draftState, initialDataPath, nextState);
 
         /**
          * We need to set the value also on modifiedData, because initialData
@@ -85,7 +91,7 @@ const reducer = (state, action) =>
          * both states, to render the dirty UI state
          */
 
-        set(draftState, modifiedDataPath, value);
+        set(draftState, modifiedDataPath, nextState);
 
         break;
       }
