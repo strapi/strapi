@@ -74,9 +74,18 @@ const reducer = (state, action) =>
       }
       case 'LOAD_RELATION': {
         const initialDataPath = ['initialData', ...action.keys, 'results'];
+        const modifiedDataPath = ['modifiedData', ...action.keys, 'results'];
         const { value } = action;
 
         set(draftState, initialDataPath, value);
+
+        /**
+         * We need to set the value also on modifiedData, because initialData
+         * and modifiedData need to stay in sync, so that the CM can compare
+         * both states, to render the dirty UI state
+         */
+
+        set(draftState, modifiedDataPath, value);
 
         break;
       }
@@ -113,9 +122,66 @@ const reducer = (state, action) =>
         break;
       }
       case 'INIT_FORM': {
+        const { initialValues, relationalFields = [] } = action;
+
         draftState.formErrors = {};
-        draftState.initialData = action.initialValues;
-        draftState.modifiedData = action.initialValues;
+
+        draftState.initialData = {
+          ...initialValues,
+
+          /**
+           * The state we keep in the client for relations looks like:
+           *
+           * {
+           *   count: <int>
+           *   results: [<Relation>]
+           * }
+           *
+           * The content API only returns { count: <int> }, which is why
+           * we need to extend the existing state rather than overwriting it.
+           */
+
+          ...relationalFields.reduce((acc, name) => {
+            acc[name] = {
+              ...(state.initialData?.[name] ?? {}),
+              ...(initialValues?.[name] ?? {}),
+            };
+
+            return acc;
+          }, {}),
+        };
+
+        draftState.modifiedData = {
+          ...initialValues,
+
+          /**
+           * The client sends the following to the content API:
+           *
+           * {
+           *   connect: [<Relation>],
+           *   disconnect: [<Relation>]
+           * }
+           *
+           * but receives only { count: <int> } in return. After save/ publish
+           * we have to:
+           *
+           * 1) reset the connect/ disconnect arrays
+           * 2) extend the existing state with the API response, so that `count`
+           *    stays in sync
+           */
+
+          ...relationalFields.reduce((acc, name) => {
+            const { connect, disconnect, ...currentState } = state.modifiedData?.[name] ?? {};
+
+            acc[name] = {
+              ...(initialValues?.[name] ?? {}),
+              ...(currentState ?? {}),
+            };
+
+            return acc;
+          }, {}),
+        };
+
         draftState.modifiedDZName = null;
         draftState.shouldCheckErrors = false;
         break;

@@ -187,6 +187,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
     const result = cleanData(
       {
         relation: {
+          count: 10,
           connect: [{ id: 1, something: true }],
           disconnect: [{ id: 2, something: true }],
         },
