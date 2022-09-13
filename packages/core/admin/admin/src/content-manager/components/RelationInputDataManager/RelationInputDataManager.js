@@ -10,7 +10,7 @@ import { connect, select, normalizeRelations } from './utils';
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
 import { getTrad } from '../../utils';
 
-export const RelationInputWrapper = ({
+export const RelationInputDataManger = ({
   editable,
   description,
   intlLabel,
@@ -188,7 +188,7 @@ export const RelationInputWrapper = ({
   );
 };
 
-RelationInputWrapper.defaultProps = {
+RelationInputDataManger.defaultProps = {
   editable: true,
   description: '',
   labelAction: null,
@@ -196,7 +196,7 @@ RelationInputWrapper.defaultProps = {
   placeholder: null,
 };
 
-RelationInputWrapper.propTypes = {
+RelationInputDataManger.propTypes = {
   editable: PropTypes.bool,
   description: PropTypes.string,
   intlLabel: PropTypes.shape({
@@ -235,6 +235,6 @@ RelationInputWrapper.propTypes = {
   }).isRequired,
 };
 
-const Memoized = memo(RelationInputWrapper);
+const Memoized = memo(RelationInputDataManger);
 
 export default connect(Memoized, select);

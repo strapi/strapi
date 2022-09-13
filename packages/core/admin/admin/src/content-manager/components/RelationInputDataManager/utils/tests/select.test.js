@@ -43,7 +43,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
-describe('RelationInputWrapper | select', () => {
+describe('RelationInputDataManager | select', () => {
   test('returns isCreatingEntry', async () => {
     const { result } = await setup(SELECT_ATTR_FIXTURE);
 
