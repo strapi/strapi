@@ -1412,6 +1412,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       spacing="4"
                     >
                       <svg
+                        aria-hidden="true"
                         class="c34"
                         fill="none"
                         height="1em"
@@ -1520,6 +1521,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       spacing="4"
                     >
                       <svg
+                        aria-hidden="true"
                         class="c34"
                         fill="none"
                         height="1em"
@@ -1632,6 +1634,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       spacing="4"
                     >
                       <svg
+                        aria-hidden="true"
                         class="c34"
                         fill="none"
                         height="1em"
@@ -1742,6 +1745,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       spacing="4"
                     >
                       <svg
+                        aria-hidden="true"
                         class="c34"
                         fill="none"
                         height="1em"
@@ -1852,6 +1856,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       spacing="4"
                     >
                       <svg
+                        aria-hidden="true"
                         class="c34"
                         fill="none"
                         height="1em"
@@ -1960,6 +1965,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       spacing="4"
                     >
                       <svg
+                        aria-hidden="true"
                         class="c34"
                         fill="none"
                         height="1em"
@@ -2070,6 +2076,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       spacing="4"
                     >
                       <svg
+                        aria-hidden="true"
                         class="c34"
                         fill="none"
                         height="1em"
@@ -2174,6 +2181,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       spacing="4"
                     >
                       <svg
+                        aria-hidden="true"
                         class="c34"
                         fill="none"
                         height="1em"
@@ -2321,6 +2329,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   spacing="4"
                                 >
                                   <svg
+                                    aria-hidden="true"
                                     class="c34"
                                     fill="none"
                                     height="1em"
@@ -2448,6 +2457,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   spacing="4"
                                 >
                                   <svg
+                                    aria-hidden="true"
                                     class="c34"
                                     fill="none"
                                     height="1em"
@@ -2575,6 +2585,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   spacing="4"
                                 >
                                   <svg
+                                    aria-hidden="true"
                                     class="c34"
                                     fill="none"
                                     height="1em"
@@ -2724,6 +2735,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       spacing="4"
                     >
                       <svg
+                        aria-hidden="true"
                         class="c34"
                         fill="none"
                         height="1em"
@@ -2871,6 +2883,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   spacing="4"
                                 >
                                   <svg
+                                    aria-hidden="true"
                                     class="c34"
                                     fill="none"
                                     height="1em"
@@ -2998,6 +3011,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   spacing="4"
                                 >
                                   <svg
+                                    aria-hidden="true"
                                     class="c34"
                                     fill="none"
                                     height="1em"
@@ -3125,6 +3139,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   spacing="4"
                                 >
                                   <svg
+                                    aria-hidden="true"
                                     class="c34"
                                     fill="none"
                                     height="1em"
@@ -3274,6 +3289,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       spacing="4"
                     >
                       <svg
+                        aria-hidden="true"
                         class="c34"
                         fill="none"
                         height="1em"
@@ -3678,6 +3694,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -3805,6 +3822,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -3932,6 +3950,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -4123,6 +4142,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -4250,6 +4270,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -4377,6 +4398,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -4504,6 +4526,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -4633,6 +4656,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -4762,6 +4786,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -4957,6 +4982,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -5084,6 +5110,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -5211,6 +5238,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -5359,6 +5387,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           spacing="4"
                                                         >
                                                           <svg
+                                                            aria-hidden="true"
                                                             class="c34"
                                                             fill="none"
                                                             height="1em"
@@ -5486,6 +5515,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           spacing="4"
                                                         >
                                                           <svg
+                                                            aria-hidden="true"
                                                             class="c34"
                                                             fill="none"
                                                             height="1em"
@@ -5613,6 +5643,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           spacing="4"
                                                         >
                                                           <svg
+                                                            aria-hidden="true"
                                                             class="c34"
                                                             fill="none"
                                                             height="1em"
@@ -5740,6 +5771,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           spacing="4"
                                                         >
                                                           <svg
+                                                            aria-hidden="true"
                                                             class="c34"
                                                             fill="none"
                                                             height="1em"
@@ -5869,6 +5901,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           spacing="4"
                                                         >
                                                           <svg
+                                                            aria-hidden="true"
                                                             class="c34"
                                                             fill="none"
                                                             height="1em"
@@ -5998,6 +6031,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                           spacing="4"
                                                         >
                                                           <svg
+                                                            aria-hidden="true"
                                                             class="c34"
                                                             fill="none"
                                                             height="1em"
@@ -6234,6 +6268,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -6361,6 +6396,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"
@@ -6490,6 +6526,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               spacing="4"
                                             >
                                               <svg
+                                                aria-hidden="true"
                                                 class="c34"
                                                 fill="none"
                                                 height="1em"

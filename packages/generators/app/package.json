@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-new",
-  "version": "4.3.6",
+  "version": "4.3.8",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "generate",
@@ -50,7 +50,7 @@
     "uuid": "^8.3.2"
   },
   "engines": {
-    "node": ">=14.19.1 <=16.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   }
 }
