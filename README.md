@@ -86,15 +86,17 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Node:**
 
-- NodeJS >= 14 <= 16
+- NodeJS >= 14 <= 18
 - NPM >= 6.x
 
 **Database:**
 
-- MySQL >= 5.7.8
-- MariaDB >= 10.2.7
-- PostgreSQL >= 10
-- SQLite >= 3
+| Database   | Minimum | Recommended |
+| ---------- | ------- | ----------- |
+| MySQL      | 5.7.8   | 8.0         |
+| MariaDB    | 10.3    | 10.6        |
+| PostgreSQL | 11.0    | 14.0        |
+| SQLite     | 3       | 3           |
 
 **We recommend always using the latest version of Strapi to start your new projects**.
 

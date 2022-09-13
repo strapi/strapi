@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
-.c10 {
+.c9 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -37,12 +37,12 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
 }
 
 .c8 {
-  color: #32324d;
+  color: #666687;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c2 {
+.c6 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -56,7 +56,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c5 {
+.c4 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -70,21 +70,21 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c5 svg {
+.c4 svg {
   height: 12px;
   width: 12px;
 }
 
-.c5 svg > g,
-.c5 svg path {
+.c4 svg > g,
+.c4 svg path {
   fill: #ffffff;
 }
 
-.c5[aria-disabled='true'] {
+.c4[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c5:after {
+.c4:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -99,11 +99,11 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c5:focus-visible {
+.c4:focus-visible {
   outline: none;
 }
 
-.c5:focus-visible:after {
+.c4:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -114,7 +114,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c4 {
+.c3 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -128,7 +128,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c3 {
+.c2 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
@@ -140,11 +140,11 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   width: 20px;
   height: 20px;
   margin-right: 10px;
-  background-color: #ffffff;
+  background-color: #000000;
   border: 1px solid rgba(0,0,0,0.1);
 }
 
-.c6 {
+.c5 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -159,19 +159,14 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c6 svg {
+.c5 svg {
   width: 8px;
   height: 8px;
 }
 
-.c6 svg > path {
+.c5 svg > path {
   fill: #8e8ea9;
   justify-self: flex-end;
-}
-
-.c9 {
-  text-transform: uppercase;
-  color: #808080;
 }
 
 <div>
@@ -180,41 +175,37 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
       class="c0 c1"
       spacing="1"
     >
-      <div
+      <label
         class="c2"
+        for="color"
       >
-        <label
+        <div
           class="c3"
-          for="color"
         >
-          <div
-            class="c4"
-          >
-            color-picker
-          </div>
-        </label>
-      </div>
+          color-picker
+        </div>
+      </label>
       <button
         aria-controls="color-picker-value"
         aria-disabled="false"
         aria-expanded="false"
         aria-haspopup="dialog"
         aria-label="Color picker toggle"
-        class="c5 c6"
+        class="c4 c5"
         type="button"
       >
         <div
-          class="c2"
+          class="c6"
         >
           <div
             class="c7"
-            color="#ffffff"
+            color="#000000"
           />
           <span
-            class="c8 c9"
-            color="#808080"
+            class="c8"
+            style="text-transform: uppercase;"
           >
-            #ffffff
+            #000000
           </span>
         </div>
         <svg
@@ -236,7 +227,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    class="c10"
+    class="c9"
   >
     <p
       aria-live="polite"
