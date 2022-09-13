@@ -18,7 +18,7 @@ const setup = (props) =>
 
 describe('Content-Manager || RelationInput || Option', () => {
   it('should render custom Option with published state title', () => {
-    setup({ options: [{ mainField: 'relation 1', publicationState: 'published' }] });
+    setup({ options: [{ id: 1, mainField: 'relation 1', publicationState: 'published' }] });
 
     act(() => {
       fireEvent.mouseDown(screen.getByRole('button'));
@@ -29,7 +29,7 @@ describe('Content-Manager || RelationInput || Option', () => {
   });
 
   it('should render custom Option with draft state title', () => {
-    setup({ options: [{ mainField: 'relation 1', publicationState: 'draft' }] });
+    setup({ options: [{ id: 1, mainField: 'relation 1', publicationState: 'draft' }] });
 
     act(() => {
       fireEvent.mouseDown(screen.getByRole('button'));

@@ -79,6 +79,7 @@ const setup = (props) =>
             }}
             relations={FIXTURES_RELATIONS}
             searchResults={FIXTURES_SEARCH}
+            size={8}
             {...props}
           />
         </IntlProvider>
