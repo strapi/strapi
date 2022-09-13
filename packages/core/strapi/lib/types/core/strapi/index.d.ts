@@ -88,7 +88,9 @@ export interface Strapi {
   contentType(uid: string): any;
 
   /**
-   * Test
+   * The custom fields registry
+   * 
+   * It returns the custom fields interface
    */
   readonly customFields: CustomFields;
 
