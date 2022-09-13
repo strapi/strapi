@@ -10,7 +10,7 @@ import { GenericInput, NotAllowedInput, useLibrary } from '@strapi/helper-plugin
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
 import InputUID from '../InputUID';
-import { RelationInputWrapper } from '../RelationInputWrapper';
+import { RelationInputDataManager } from '../RelationInputDataManager';
 
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
@@ -213,7 +213,7 @@ function Inputs({
 
   if (type === 'relation') {
     return (
-      <RelationInputWrapper
+      <RelationInputDataManager
         {...metadatas}
         {...fieldSchema}
         description={
