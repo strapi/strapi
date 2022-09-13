@@ -6,7 +6,7 @@ import has from 'lodash/has';
  * @param {array} sections The sections to mutate
  */
 const addItemsToFormSection = (formTypeOptions, sections) => {
-  formTypeOptions.forEach(item => {
+  formTypeOptions.forEach((item) => {
     if (!has(item, 'sectionTitle')) {
       // When there is no sectionTitle key,
       // add the item to the default section

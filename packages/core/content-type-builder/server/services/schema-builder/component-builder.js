@@ -8,7 +8,6 @@ const { nameToSlug, nameToCollectionName } = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 const { isConfigurable } = require('../../utils/attributes');
 const createSchemaHandler = require('./schema-handler');
-const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
 module.exports = function createComponentBuilder() {
   return {
@@ -33,14 +32,11 @@ module.exports = function createComponentBuilder() {
      * create a component in the tmpComponent map
      */
     createComponent(infos) {
-      const { attributes } = infos;
       const uid = this.createComponentUID(infos);
 
       if (this.components.has(uid)) {
         throw new ApplicationError('component.alreadyExists');
       }
-
-      convertCustomFieldType(attributes);
 
       const handler = createSchemaHandler({
         dir: path.join(strapi.dirs.app.components, nameToSlug(infos.category)),
@@ -76,13 +72,12 @@ module.exports = function createComponentBuilder() {
      * create a component in the tmpComponent map
      */
     editComponent(infos) {
-      const { uid, attributes } = infos;
+      const { uid } = infos;
 
       if (!this.components.has(uid)) {
         throw new ApplicationError('component.notFound');
       }
 
-      convertCustomFieldType(attributes);
       const component = this.components.get(uid);
 
       const [, nameUID] = uid.split('.');

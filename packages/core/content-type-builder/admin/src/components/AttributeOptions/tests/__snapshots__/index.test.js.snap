@@ -306,6 +306,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -373,6 +374,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -440,6 +442,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -509,6 +512,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -572,6 +576,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -639,6 +644,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -708,6 +714,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -773,6 +780,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -842,6 +850,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -909,6 +918,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -978,6 +988,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -1043,6 +1054,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -1110,6 +1122,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"
@@ -1183,6 +1196,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
                           class="c20"
                         >
                           <svg
+                            aria-hidden="true"
                             class="c21"
                             fill="none"
                             height="1em"

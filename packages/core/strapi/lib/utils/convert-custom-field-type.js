@@ -1,11 +1,11 @@
 'use strict';
 
-const convertCustomFieldType = strapi => {
+const convertCustomFieldType = (strapi) => {
   const allContentTypeSchemaAttributes = Object.values(strapi.contentTypes).map(
-    schema => schema.attributes
+    (schema) => schema.attributes
   );
   const allComponentSchemaAttributes = Object.values(strapi.components).map(
-    schema => schema.attributes
+    (schema) => schema.attributes
   );
   const allSchemasAttributes = [...allContentTypeSchemaAttributes, ...allComponentSchemaAttributes];
 

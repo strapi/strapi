@@ -5,13 +5,13 @@ import { Flex } from '@strapi/design-system/Flex';
 import Paint from '@strapi/icons/Paint';
 
 const IconBox = styled(Flex)`
-  // Hard code color values
-  // to stay consistent between themes
-  background-color: #f0f0ff; // primary100
-  border: 1px solid #d9d8ff; // primary200
+  /* Hard code color values */
+  /* to stay consistent between themes */
+  background-color: #f0f0ff; /* primary100 */
+  border: 1px solid #d9d8ff; /* primary200 */
 
   svg > path {
-    fill: #4945ff; // primary600
+    fill: #4945ff; /* primary600 */
   }
 `;
 
