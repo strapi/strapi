@@ -174,7 +174,7 @@ const generateRelationQueryInfosForComponents = (contentTypeConfiguration, field
 
   return {
     defaultParams: {
-      _component: contentTypeConfiguration.uid,
+      component: contentTypeConfiguration.uid,
     },
     shouldDisplayRelationLink,
   };

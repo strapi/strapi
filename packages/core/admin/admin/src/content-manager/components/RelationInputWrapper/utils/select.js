@@ -48,12 +48,14 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, q
       return null;
     }
 
-    return getRequestUrl(`${collectionTypePrefix}/${slug}/${initialData.id}/${name}`);
+    return getRequestUrl(
+      `${collectionTypePrefix}/${slug}/${initialData.id}/${name.split('.').at(-1)}`
+    );
   }, [isCreatingEntry, slug, initialData, name, isSingleType]);
 
   // /content-manager/relations/[content-type]/[field-name]
   const relationSearchEndpoint = useMemo(() => {
-    return getRequestUrl(`relations/${slug}/${name}`);
+    return getRequestUrl(`relations/${slug}/${name.split('.').at(-1)}`);
   }, [slug, name]);
 
   return {
