@@ -62,7 +62,7 @@ const createProvider = (config) => {
     );
   }
 
-  if (providerOptions.sizeLimit) {
+  if (providerOptions?.sizeLimit) {
     // TODO V5: remove sizeLimit from providerOptions
     process.emitWarning(
       `[deprecated] In future versions, "sizeLimit" argument will be ignored from upload.config.providerOptions. Move it to upload.config`
@@ -73,7 +73,7 @@ const createProvider = (config) => {
     providerInstance.checkFileSize = (file) => {
       const fileSize = kbytesToBytes(file.size);
 
-      if (providerOptions.sizeLimit && fileSize > providerOptions.sizeLimit) {
+      if (providerOptions?.sizeLimit && fileSize > providerOptions.sizeLimit) {
         throw new PayloadTooLargeError();
       } else if (config.sizeLimit && fileSize > config.sizeLimit) {
         throw new PayloadTooLargeError();
