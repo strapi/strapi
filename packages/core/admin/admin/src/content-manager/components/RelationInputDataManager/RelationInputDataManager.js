@@ -107,7 +107,11 @@ export const RelationInputDataManger = ({
   };
 
   const handleOpenSearch = () => {
-    searchFor('', { idsToOmit: modifiedData?.[name]?.connect?.map((relation) => relation.id) });
+    searchFor('', {
+      idsToInclude:
+        !isCreatingEntry && modifiedData?.[name]?.disconnect?.map((relation) => relation.id),
+      idsToOmit: modifiedData?.[name]?.connect?.map((relation) => relation.id),
+    });
   };
 
   const handleSearchMore = () => {
