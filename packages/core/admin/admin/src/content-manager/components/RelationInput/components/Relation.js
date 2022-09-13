@@ -14,14 +14,7 @@ export const Relation = ({
   ...props
 }) => {
   return (
-    <Box
-      paddingTop={4}
-      paddingBottom={4}
-      paddingLeft={6}
-      paddingRight={6}
-      hasRadius
-      background="neutral100"
-    >
+    <>
       <Flex
         paddingBottom={totalNumberOfRelations > 0 ? 3 : 0}
         gap={2}
@@ -35,7 +28,7 @@ export const Relation = ({
         <Flex>{loadMore}</Flex>
       </Flex>
       <Box>{children}</Box>
-    </Box>
+    </>
   );
 };
 
