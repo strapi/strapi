@@ -26,7 +26,7 @@ module.exports = class WorkerQueue {
   enqueue(payload) {
     debug('Enqueue event in worker queue');
     if (this.running < this.concurrency) {
-      this.running++;
+      this.running += 1;
       this.execute(payload);
     } else {
       this.queue.unshift(payload);
@@ -40,7 +40,7 @@ module.exports = class WorkerQueue {
     if (payload) {
       this.execute(payload);
     } else {
-      this.running--;
+      this.running -= 1;
     }
   }
 
