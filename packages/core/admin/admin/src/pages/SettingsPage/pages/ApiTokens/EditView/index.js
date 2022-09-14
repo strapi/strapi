@@ -243,11 +243,9 @@ const ApiTokenCreateView = () => {
 
   const handleChangeSelectAllCheckbox = ({ target: { value } }) => {
     setHasChangedPermissions(true);
-    value.forEach((action) => {
-      dispatch({
-        type: 'ON_CHANGE',
-        value: action.actionId,
-      });
+    dispatch({
+      type: 'SELECT_ALL_IN_PERMISSION',
+      value,
     });
   };
 

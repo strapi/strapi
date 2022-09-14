@@ -19,6 +19,23 @@ const reducer = (state, action) =>
         }
         break;
       }
+      case 'SELECT_ALL_IN_PERMISSION': {
+        const areAllSelected = action.value.every((item) =>
+          draftState.selectedActions.includes(item.actionId)
+        );
+
+        if (areAllSelected) {
+          action.value.forEach((item) => {
+            pull(draftState.selectedActions, item.actionId);
+          });
+        } else {
+          action.value.forEach((item) => {
+            draftState.selectedActions.push(item.actionId);
+          });
+        }
+        break;
+      }
+
       case 'SELECT_ALL_ACTIONS': {
         draftState.selectedActions = [...draftState.data.allActionsIds];
 
