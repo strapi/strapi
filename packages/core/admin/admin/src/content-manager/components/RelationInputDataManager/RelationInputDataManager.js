@@ -36,9 +36,6 @@ export const RelationInputDataManger = ({
     relation: {
       enabled: relationsCount > 0 && !!endpoints.relation,
       endpoint: endpoints.relation,
-      onLoad(data) {
-        loadRelation({ target: { name, value: data.results } });
-      },
       pageParams: {
         ...defaultParams,
         locale: query?.plugins?.i18n?.locale,
@@ -57,17 +54,34 @@ export const RelationInputDataManger = ({
     },
   });
 
-  useEffect(() => {
-    if (!endpoints.relation) {
-      loadRelation({ target: { name, value: [] } });
-    }
-  }, [loadRelation, name, endpoints.relation]);
+  const stringifiedRelations = JSON.stringify(relations);
+  const normalizedRelations = useMemo(
+    () =>
+      normalizeRelations(relations, {
+        modifiedData: modifiedData?.[name],
+        mainFieldName: mainField.name,
+        shouldAddLink: shouldDisplayRelationLink,
+        targetModel,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      stringifiedRelations,
+      modifiedData,
+      name,
+      mainField.name,
+      shouldDisplayRelationLink,
+      targetModel,
+    ]
+  );
 
   useEffect(() => {
-    if (relationsCount === 0 || !!endpoints.relation) {
-      loadRelation({ target: { name, value: [] } });
+    if (relations.status === 'success') {
+      loadRelation({
+        target: { name, value: normalizedRelations.data.pages.flat() },
+      });
     }
-  }, [relationsCount, endpoints.relation, loadRelation, name]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadRelation, relations.status, stringifiedRelations, name]);
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const isSingleRelation = [
@@ -174,12 +188,7 @@ export const RelationInputDataManger = ({
           defaultMessage: 'Published',
         }),
       }}
-      relations={normalizeRelations(relations, {
-        modifiedData: modifiedData?.[name],
-        mainFieldName: mainField.name,
-        shouldAddLink: shouldDisplayRelationLink,
-        targetModel,
-      })}
+      relations={normalizedRelations}
       searchResults={normalizeRelations(search, {
         mainFieldName: mainField.name,
       })}
