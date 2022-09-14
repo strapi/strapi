@@ -126,8 +126,8 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       .c22 {
         color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c21 {

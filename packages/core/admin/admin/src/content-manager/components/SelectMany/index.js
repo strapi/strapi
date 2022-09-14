@@ -17,6 +17,7 @@ function SelectMany({
   name,
   isDisabled,
   isLoading,
+  loadingMessage,
   onInputChange,
   onMenuClose,
   onMenuOpen,
@@ -61,6 +62,7 @@ function SelectMany({
         }}
         mainField={mainField}
         isLoading={isLoading}
+        loadingMessage={loadingMessage}
         isMulti
         isSearchable
         options={options}
@@ -119,6 +121,7 @@ SelectMany.propTypes = {
   displayNavigationLink: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  loadingMessage: PropTypes.func.isRequired,
   mainField: PropTypes.shape({
     name: PropTypes.string.isRequired,
     schema: PropTypes.shape({
