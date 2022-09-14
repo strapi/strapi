@@ -208,6 +208,7 @@ const createComponent = (attributeName, attribute, meta) => {
       orderBy: {
         order: 'asc',
       },
+      ...(attribute.repeatable === true ? { orderColumnName: 'order' } : {}),
     },
   });
 };
