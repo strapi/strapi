@@ -199,8 +199,8 @@ const reducer = (state, action) =>
             const { connect, disconnect, ...currentState } = state.modifiedData?.[name] ?? {};
 
             acc[name] = {
-              ...(initialValues?.[name] ?? {}),
               ...(currentState ?? {}),
+              ...(initialValues?.[name] ?? {}),
             };
 
             return acc;
