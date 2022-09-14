@@ -10,6 +10,9 @@ const hasInversedBy = _.has('inversedBy');
 const hasMappedBy = _.has('mappedBy');
 
 const isOneToAny = (attribute) => ['oneToOne', 'oneToMany'].includes(attribute.relation);
+const isManyToAny = (attribute) => ['manyToMany', 'manyToOne'].includes(attribute.relation);
+const isAnyToOne = (attribute) => ['oneToOne', 'manyToOne'].includes(attribute.relation);
+const isAnyToMany = (attribute) => ['oneToMany', 'manyToMany'].includes(attribute.relation);
 const isBidirectional = (attribute) => hasInversedBy(attribute) || hasMappedBy(attribute);
 const isOwner = (attribute) => !isBidirectional(attribute) || hasInversedBy(attribute);
 const shouldUseJoinTable = (attribute) => attribute.useJoinTable !== false;
@@ -398,11 +401,17 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
   const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
   let inverseJoinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
 
-  const orderColumnName = _.snakeCase(`${meta.singularName}_order`);
-
-  // if relation is slef referencing
+  // if relation is self referencing
   if (joinColumnName === inverseJoinColumnName) {
     inverseJoinColumnName = `inv_${inverseJoinColumnName}`;
+  }
+
+  const orderColumnName = _.snakeCase(`${meta.singularName}_order`);
+  let inverseOrderColumnName = _.snakeCase(`${targetMeta.singularName}_order`);
+
+  // if relation is self referencing
+  if (attribute.relation === 'manyToMany' && joinColumnName === inverseJoinColumnName) {
+    inverseOrderColumnName = `inv_${inverseOrderColumnName}`;
   }
 
   const metadataSchema = {
@@ -424,13 +433,6 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
           unsigned: true,
         },
       },
-      [orderColumnName]: {
-        type: 'integer',
-        column: {
-          unsigned: true,
-          defaultTo: 0,
-        },
-      },
       // TODO: add extra pivot attributes -> user should use an intermediate entity
     },
     indexes: [
@@ -441,10 +443,6 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       {
         name: `${joinTableName}_inv_fk`,
         columns: [inverseJoinColumnName],
-      },
-      {
-        name: `${joinTableName}_order_fk`,
-        columns: [orderColumnName],
       },
     ],
     foreignKeys: [
@@ -475,17 +473,27 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       name: inverseJoinColumnName,
       referencedColumn: 'id',
     },
-    orderColumnName,
   };
 
-  if (isBidirectional(attribute)) {
-    let inverseOrderColumnName = _.snakeCase(`${targetMeta.singularName}_order`);
+  // order
+  if (isAnyToMany(attribute)) {
+    metadataSchema.attributes[orderColumnName] = {
+      type: 'integer',
+      column: {
+        unsigned: true,
+        defaultTo: 0,
+      },
+    };
+    metadataSchema.indexes.push({
+      name: `${joinTableName}_order_fk`,
+      columns: [orderColumnName],
+    });
+    joinTable.orderColumnName = orderColumnName;
+    joinTable.orderBy = { [orderColumnName]: 'asc' };
+  }
 
-    // if relation is slef referencing
-    if (joinColumnName === inverseJoinColumnName) {
-      inverseOrderColumnName = `inv_${inverseOrderColumnName}`;
-    }
-
+  // inv order
+  if (isBidirectional(attribute) && isManyToAny(attribute)) {
     metadataSchema.attributes[inverseOrderColumnName] = {
       type: 'integer',
       column: {
@@ -519,9 +527,15 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       name: joinTableName,
       joinColumn: joinTable.inverseJoinColumn,
       inverseJoinColumn: joinTable.joinColumn,
-      orderColumnName: joinTable.inverseOrderColumnName,
-      inverseOrderColumnName: joinTable.orderColumnName,
     };
+
+    if (isManyToAny(attribute)) {
+      inverseAttribute.joinTable.orderColumnName = inverseOrderColumnName;
+      inverseAttribute.joinTable.orderBy = { [inverseOrderColumnName]: 'asc' };
+    }
+    if (isAnyToMany(attribute)) {
+      inverseAttribute.joinTable.inverseOrderColumnName = orderColumnName;
+    }
   }
 };
 
@@ -530,4 +544,7 @@ module.exports = {
 
   isBidirectional,
   isOneToAny,
+  isManyToAny,
+  isAnyToOne,
+  isAnyToMany,
 };
