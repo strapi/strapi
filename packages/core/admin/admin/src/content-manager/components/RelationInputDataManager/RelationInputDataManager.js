@@ -22,6 +22,7 @@ export const RelationInputDataManger = ({
   name,
   queryInfos: { endpoints, defaultParams, shouldDisplayRelationLink },
   placeholder,
+  required,
   relationType,
   size,
   targetModel,
@@ -133,6 +134,7 @@ export const RelationInputDataManger = ({
         },
         { numberOfEntries: relationsCount }
       )}
+      labelAction={labelAction}
       labelLoadMore={
         // TODO: only display if there are more; derive from count
         !isCreatingEntry &&
@@ -174,6 +176,7 @@ export const RelationInputDataManger = ({
           defaultMessage: 'Published',
         }),
       }}
+      required={required}
       relations={normalizeRelations(relations, {
         modifiedData: modifiedData?.[name],
         mainFieldName: mainField.name,
@@ -194,6 +197,7 @@ RelationInputDataManger.defaultProps = {
   labelAction: null,
   isFieldAllowed: true,
   placeholder: null,
+  required: false,
 };
 
 RelationInputDataManger.propTypes = {
@@ -220,6 +224,7 @@ RelationInputDataManger.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  required: PropTypes.bool,
   relationType: PropTypes.string.isRequired,
   size: PropTypes.number.isRequired,
   targetModel: PropTypes.string.isRequired,

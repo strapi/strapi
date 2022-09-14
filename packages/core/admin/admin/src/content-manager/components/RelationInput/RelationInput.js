@@ -62,6 +62,7 @@ const RelationInput = ({
   name,
   numberOfRelationsToDisplay,
   label,
+  labelAction,
   labelLoadMore,
   loadingMessage,
   onRelationAdd,
@@ -73,6 +74,7 @@ const RelationInput = ({
   onSearch,
   placeholder,
   publicationStateTranslations,
+  required,
   relations: paginatedRelations,
   searchResults,
   size,
@@ -109,16 +111,11 @@ const RelationInput = ({
   );
 
   useEffect(() => {
-    if (!paginatedRelations.isLoading && relations.length > 0) {
-      listRef.current.scrollToItem(relations.length, 'end');
+    if (totalNumberOfRelations <= numberOfRelationsToDisplay) {
+      return setOverflow('');
     }
 
-    // TODO: should we use useCallback instead?
     const handleNativeScroll = (e) => {
-      if (totalNumberOfRelations <= numberOfRelationsToDisplay) {
-        return setOverflow('');
-      }
-
       const parentScrollContainerHeight = e.target.parentNode.scrollHeight;
       const maxScrollBottom = e.target.scrollHeight - e.target.scrollTop;
 
@@ -153,7 +150,9 @@ const RelationInput = ({
         size={size}
         search={
           <>
-            <FieldLabel>{label}</FieldLabel>
+            <FieldLabel action={labelAction} required={required}>
+              {label}
+            </FieldLabel>
             <ReactSelect
               // position fixed doesn't update position on scroll
               // react select doesn't update menu position on options change
@@ -328,7 +327,9 @@ RelationInput.defaultProps = {
   description: undefined,
   disabled: false,
   error: undefined,
+  labelAction: null,
   labelLoadMore: null,
+  required: false,
   relations: [],
   searchResults: [],
 };
@@ -339,6 +340,7 @@ RelationInput.propTypes = {
   disabled: PropTypes.bool,
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
+  labelAction: PropTypes.element,
   labelLoadMore: PropTypes.string,
   loadingMessage: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
@@ -355,6 +357,7 @@ RelationInput.propTypes = {
     draft: PropTypes.string.isRequired,
     published: PropTypes.string.isRequired,
   }).isRequired,
+  required: PropTypes.bool,
   searchResults: ReactQuerySearchResult,
   size: PropTypes.number.isRequired,
   relations: ReactQueryRelationResult,

@@ -57,6 +57,23 @@ describe('normalizeRelations', () => {
     });
   });
 
+  test('filter disconnected relations', () => {
+    expect(
+      normalizeRelations(FIXTURE_RELATIONS, {
+        modifiedData: { disconnect: [{ id: 2 }] },
+      })
+    ).toStrictEqual({
+      data: {
+        pages: [
+          [
+            expect.objectContaining(FIXTURE_RELATIONS.data.pages[0].results[0]),
+            expect.objectContaining(FIXTURE_RELATIONS.data.pages[0].results[2]),
+          ],
+        ],
+      },
+    });
+  });
+
   test('add link to each relation', () => {
     expect(
       normalizeRelations(FIXTURE_RELATIONS, {
