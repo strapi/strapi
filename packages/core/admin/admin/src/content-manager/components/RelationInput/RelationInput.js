@@ -99,16 +99,11 @@ const RelationInput = ({
   );
 
   useEffect(() => {
-    if (!paginatedRelations.isLoading && relations.length > 0) {
-      listRef.current.scrollToItem(relations.length, 'end');
+    if (totalNumberOfRelations <= numberOfRelationsToDisplay) {
+      return setOverflow('');
     }
 
-    // TODO: should we use useCallback instead?
     const handleNativeScroll = (e) => {
-      if (totalNumberOfRelations <= numberOfRelationsToDisplay) {
-        return setOverflow('');
-      }
-
       const parentScrollContainerHeight = e.target.parentNode.scrollHeight;
       const maxScrollBottom = e.target.scrollHeight - e.target.scrollTop;
 
