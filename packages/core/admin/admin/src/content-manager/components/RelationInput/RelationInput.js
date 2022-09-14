@@ -11,6 +11,7 @@ import { Icon } from '@strapi/design-system/Icon';
 import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/Field';
 import { TextButton } from '@strapi/design-system/TextButton';
 import { Typography } from '@strapi/design-system/Typography';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 
 import Cross from '@strapi/icons/Cross';
 import Refresh from '@strapi/icons/Refresh';
@@ -27,6 +28,15 @@ const LinkEllipsis = styled(Link)`
   overflow: hidden;
   text-overflow: ellipsis;
   display: inherit;
+`;
+
+const BoxEllipsis = styled(Box)`
+  > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inherit;
+  }
 `;
 
 const rotation = keyframes`
@@ -236,17 +246,21 @@ const RelationInput = ({
                   }
                   style={style}
                 >
-                  <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+                  <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                     {href ? (
-                      <LinkEllipsis to={href} disabled={disabled}>
-                        {mainField ?? id}
-                      </LinkEllipsis>
+                      <Tooltip description={mainField ?? id}>
+                        <LinkEllipsis to={href} disabled={disabled}>
+                          {mainField ?? id}
+                        </LinkEllipsis>
+                      </Tooltip>
                     ) : (
-                      <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
-                        {mainField ?? id}
-                      </Typography>
+                      <Tooltip description={mainField ?? id}>
+                        <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
+                          {mainField ?? id}
+                        </Typography>
+                      </Tooltip>
                     )}
-                  </Box>
+                  </BoxEllipsis>
 
                   {publicationState && (
                     <Badge

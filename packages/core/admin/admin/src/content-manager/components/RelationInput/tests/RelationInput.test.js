@@ -95,7 +95,6 @@ describe('Content-Manager || RelationInput', () => {
     expect(screen.getByText('Some Relation')).toBeInTheDocument();
     expect(screen.getByText('Load more')).toBeInTheDocument();
     expect(screen.getByText('Select...')).toBeInTheDocument();
-    expect(screen.getByText('Relation 1')).toBeInTheDocument();
   });
 
   describe('Callbacks', () => {
