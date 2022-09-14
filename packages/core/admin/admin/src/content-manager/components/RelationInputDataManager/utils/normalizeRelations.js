@@ -36,12 +36,11 @@ export const normalizeRelations = (
         ]
           ?.map((page) =>
             page?.results
-              .filter((relation) =>
-                modifiedData?.disconnect?.find(
-                  (disconnectRelation) => disconnectRelation.id === relation.id
-                )
-                  ? null
-                  : relation
+              .filter(
+                (relation) =>
+                  !modifiedData?.disconnect?.find(
+                    (disconnectRelation) => disconnectRelation.id === relation.id
+                  )
               )
               .map((relation) =>
                 normalizeRelation(relation, {
