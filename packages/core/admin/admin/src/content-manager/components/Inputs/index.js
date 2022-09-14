@@ -35,6 +35,7 @@ function Inputs({
   shouldNotRunValidations,
   queryInfos,
   value,
+  values,
 }) {
   const { fields } = useLibrary();
   const { formatMessage } = useIntl();
@@ -88,8 +89,15 @@ function Inputs({
       return [];
     }
 
+    if (fieldSchema.setValue) {
+      // eslint-disable-next-line no-eval
+      const setFn = eval(fieldSchema.setValue);
+
+      return setFn(values);
+    }
+
     return value;
-  }, [type, value]);
+  }, [type, value, fieldSchema, values]);
 
   const step = useMemo(() => {
     return getStep(type);
@@ -283,6 +291,7 @@ Inputs.defaultProps = {
   labelAction: undefined,
   queryInfos: {},
   value: null,
+  values: {},
 };
 
 Inputs.propTypes = {
@@ -302,6 +311,7 @@ Inputs.propTypes = {
     endPoint: PropTypes.string,
   }),
   value: PropTypes.any,
+  values: PropTypes.any,
 };
 
 const Memoized = memo(Inputs, isEqual);
