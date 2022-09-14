@@ -458,7 +458,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
               class=" css-1kj7tu4-ValueContainer"
             >
               <div
-                class=" css-930xd4-placeholder"
+                class=" css-6gbuim-placeholder"
               >
                 Select...
               </div>
