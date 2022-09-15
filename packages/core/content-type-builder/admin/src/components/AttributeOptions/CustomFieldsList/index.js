@@ -45,7 +45,7 @@ const CustomFieldsList = () => {
           })}
         </Grid>
         <Link
-          href="https://docs.strapi.io/developer-docs/latest/getting-started/introduction.html"
+          href="https://docs-next.strapi.io/developer-docs/latest/development/custom-fields.html"
           isExternal
         >
           {formatMessage({
