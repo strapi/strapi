@@ -63,7 +63,7 @@ const createContentTypeSchema = (
         },
       })
       .test({
-        name: 'nameNotAllowed',
+        name: 'pluralNameNotAllowed',
         message: getTrad('error.contentTypeName.reserved-name'),
         test(value) {
           if (!value) {
@@ -99,7 +99,7 @@ const createContentTypeSchema = (
         },
       })
       .test({
-        name: 'nameNotAllowed',
+        name: 'singularNameNotAllowed',
         message: getTrad('error.contentTypeName.reserved-name'),
         test(value) {
           if (!value) {
