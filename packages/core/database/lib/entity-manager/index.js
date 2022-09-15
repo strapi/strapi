@@ -1116,6 +1116,44 @@ const createEntityManager = (db) => {
                 .where(joinTable.on || {})
                 .execute();
             }
+
+            // Delete the previous relations for anyToOne relations
+            if (isBidirectional(attribute) && isAnyToOne(attribute)) {
+              // update orders for previous anyToOne relations that will be deleted if it has order (manyToOne)
+              if (isManyToAny(attribute)) {
+                const currentRelsToDelete = await this.createQueryBuilder(joinTable.name)
+                  .select(select)
+                  .where({
+                    [joinColumn.name]: id,
+                    [inverseJoinColumn.name]: { $ne: relIdsToaddOrMove[0] },
+                  })
+                  .where(joinTable.on || {})
+                  .execute();
+
+                for (const relToDelete of currentRelsToDelete) {
+                  if (relToDelete[inverseOrderColumnName] !== null) {
+                    await this.createQueryBuilder(joinTable.name)
+                      .decrement(inverseOrderColumnName, 1)
+                      .where({
+                        [inverseJoinColumn.name]: relToDelete[inverseJoinColumn.name],
+                        [inverseOrderColumnName]: { $gt: relToDelete[inverseOrderColumnName] },
+                      })
+                      .where(joinTable.on || {})
+                      .execute();
+                  }
+                }
+              }
+
+              // delete previous oneToAny relations
+              await this.createQueryBuilder(joinTable.name)
+                .delete()
+                .where({
+                  [joinColumn.name]: id,
+                  [inverseJoinColumn.name]: { $notIn: relIdsToaddOrMove },
+                })
+                .where(joinTable.on || {})
+                .execute();
+            }
           }
         }
       }
