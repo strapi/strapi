@@ -246,19 +246,17 @@ const RelationInput = ({
                   style={style}
                 >
                   <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                    {href ? (
-                      <Tooltip description={mainField ?? id}>
+                    <Tooltip description={mainField ?? id}>
+                      {href ? (
                         <LinkEllipsis to={href} disabled={disabled}>
                           {mainField ?? id}
                         </LinkEllipsis>
-                      </Tooltip>
-                    ) : (
-                      <Tooltip description={mainField ?? id}>
+                      ) : (
                         <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
                           {mainField ?? id}
                         </Typography>
-                      </Tooltip>
-                    )}
+                      )}
+                    </Tooltip>
                   </BoxEllipsis>
 
                   {publicationState && (
