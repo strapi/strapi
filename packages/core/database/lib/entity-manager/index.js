@@ -1125,7 +1125,7 @@ const createEntityManager = (db) => {
                   .select(select)
                   .where({
                     [joinColumn.name]: id,
-                    [inverseJoinColumn.name]: { $ne: relIdsToaddOrMove[0] },
+                    [inverseJoinColumn.name]: { $notIn: relIdsToaddOrMove },
                   })
                   .where(joinTable.on || {})
                   .execute();
