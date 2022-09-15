@@ -481,7 +481,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       type: 'integer',
       column: {
         unsigned: true,
-        defaultTo: 0,
+        defaultTo: null,
       },
     };
     metadataSchema.indexes.push({
@@ -498,7 +498,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       type: 'integer',
       column: {
         unsigned: true,
-        defaultTo: 0,
+        defaultTo: null,
       },
     };
 
