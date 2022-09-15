@@ -511,11 +511,7 @@ const createEntityManager = (db) => {
               for (const relToDelete of currentRelsToDelete) {
                 if (relToDelete[orderColumnName] !== null) {
                   await this.createQueryBuilder(joinTable.name)
-                    .update({
-                      [orderColumnName]: db
-                        .getConnection()
-                        .raw('?? - 1', relToDelete[orderColumnName]),
-                    })
+                    .decrement(orderColumnName, 1)
                     .where({
                       [joinColumn.name]: relToDelete[joinColumn.name],
                       [orderColumnName]: { $gt: relToDelete[orderColumnName] },
@@ -766,11 +762,7 @@ const createEntityManager = (db) => {
                 for (const relToDelete of relsToDelete) {
                   if (relToDelete[inverseOrderColumnName] !== null) {
                     const updatePromise = this.createQueryBuilder(joinTable.name)
-                      .update({
-                        [inverseOrderColumnName]: db
-                          .getConnection()
-                          .raw('?? - 1', relToDelete[inverseOrderColumnName]),
-                      })
+                      .decrement(inverseOrderColumnName, 1)
                       .where({
                         [inverseJoinColumn.name]: relToDelete[inverseJoinColumn.name],
                         [inverseOrderColumnName]: { $gt: relToDelete[inverseOrderColumnName] },
@@ -831,11 +823,7 @@ const createEntityManager = (db) => {
                   for (const relToDelete of relsToDelete) {
                     if (relToDelete[orderColumnName] !== null) {
                       await this.createQueryBuilder(joinTable.name)
-                        .update({
-                          [orderColumnName]: db
-                            .getConnection()
-                            .raw('?? - 1', relToDelete[orderColumnName]),
-                        })
+                        .decrement(orderColumnName, 1)
                         .where({
                           [joinColumn.name]: id,
                           [orderColumnName]: { $gt: relToDelete[orderColumnName] },
@@ -852,11 +840,7 @@ const createEntityManager = (db) => {
                   for (const relToDelete of relsToDelete) {
                     if (relToDelete[inverseOrderColumnName] !== null) {
                       const updatePromise = this.createQueryBuilder(joinTable.name)
-                        .update({
-                          [inverseOrderColumnName]: db
-                            .getConnection()
-                            .raw('?? - 1', relToDelete[inverseOrderColumnName]),
-                        })
+                        .decrement(inverseOrderColumnName, 1)
                         .where({
                           [inverseJoinColumn.name]: relToDelete[inverseJoinColumn.name],
                           [inverseOrderColumnName]: { $gt: relToDelete[inverseOrderColumnName] },
@@ -911,11 +895,7 @@ const createEntityManager = (db) => {
                   const currentOrderIsNull = currentRel[orderColumnName] === null;
                   if (!currentOrderIsNull) {
                     await this.createQueryBuilder(joinTable.name)
-                      .update({
-                        [orderColumnName]: db
-                          .getConnection()
-                          .raw('?? - 1', currentRel[orderColumnName]),
-                      })
+                      .decrement(orderColumnName, 1)
                       .where({
                         [joinColumn.name]: id,
                         [orderColumnName]: { $gt: currentRel[orderColumnName] },
@@ -1001,11 +981,7 @@ const createEntityManager = (db) => {
                     for (const relToDelete of relsToDelete) {
                       if (relToDelete[orderColumnName] !== null) {
                         await this.createQueryBuilder(joinTable.name)
-                          .update({
-                            [orderColumnName]: db
-                              .getConnection()
-                              .raw('?? - 1', relToDelete[orderColumnName]),
-                          })
+                          .decrement(orderColumnName, 1)
                           .where({
                             [joinColumn.name]: id,
                             [orderColumnName]: { $gt: relToDelete[orderColumnName] },
@@ -1023,11 +999,7 @@ const createEntityManager = (db) => {
                     for (const relToDelete of relsToDelete) {
                       if (relToDelete[inverseOrderColumnName] !== null) {
                         const updatePromise = this.createQueryBuilder(joinTable.name)
-                          .update({
-                            [inverseOrderColumnName]: db
-                              .getConnection()
-                              .raw('?? - 1', relToDelete[inverseOrderColumnName]),
-                          })
+                          .decrement(inverseOrderColumnName, 1)
                           .where({
                             [inverseJoinColumn.name]: relToDelete[inverseJoinColumn.name],
                             [inverseOrderColumnName]: { $gt: relToDelete[inverseOrderColumnName] },
@@ -1123,11 +1095,7 @@ const createEntityManager = (db) => {
                 for (const relToDelete of currentRelsToDelete) {
                   if (relToDelete[orderColumnName] !== null) {
                     await this.createQueryBuilder(joinTable.name)
-                      .update({
-                        [orderColumnName]: db
-                          .getConnection()
-                          .raw('?? - 1', relToDelete[orderColumnName]),
-                      })
+                      .decrement(orderColumnName, 1)
                       .where({
                         [joinColumn.name]: relToDelete[joinColumn.name],
                         [orderColumnName]: { $gt: relToDelete[orderColumnName] },
@@ -1289,11 +1257,7 @@ const createEntityManager = (db) => {
               for (const relToDelete of relsToDelete) {
                 if (relToDelete[inverseOrderColumnName] !== null) {
                   const updatePromise = this.createQueryBuilder(joinTable.name)
-                    .update({
-                      [inverseOrderColumnName]: db
-                        .getConnection()
-                        .raw('?? - 1', relToDelete[inverseOrderColumnName]),
-                    })
+                    .decrement(inverseOrderColumnName, 1)
                     .where({
                       [inverseJoinColumn.name]: relToDelete[inverseJoinColumn.name],
                       [inverseOrderColumnName]: { $gt: relToDelete[inverseOrderColumnName] },

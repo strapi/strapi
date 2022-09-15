@@ -25,6 +25,8 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
       forUpdate: false,
       orderBy: [],
       groupBy: [],
+      increments: [],
+      decrements: [],
       aliasCounter: 0,
     },
     initialState
@@ -80,6 +82,20 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
     update(data) {
       state.type = 'update';
       state.data = data;
+
+      return this;
+    },
+
+    increment(column, amount = 1) {
+      state.type = 'update';
+      state.increments.push({ column, amount });
+
+      return this;
+    },
+
+    decrement(column, amount = 1) {
+      state.type = 'update';
+      state.decrements.push({ column, amount });
 
       return this;
     },
@@ -349,7 +365,9 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
           break;
         }
         case 'update': {
-          qb.update(state.data);
+          if (state.data) {
+            qb.update(state.data);
+          }
           break;
         }
         case 'delete': {
@@ -372,6 +390,14 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
 
       if (state.forUpdate) {
         qb.forUpdate();
+      }
+
+      if (!_.isEmpty(state.increments)) {
+        state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
+      }
+
+      if (!_.isEmpty(state.decrements)) {
+        state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
       }
 
       if (state.limit) {
