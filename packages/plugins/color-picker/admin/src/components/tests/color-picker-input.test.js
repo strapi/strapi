@@ -5,7 +5,7 @@ import { IntlProvider } from 'react-intl';
 import ColorPickerInput from '../ColorPicker/ColorPickerInput';
 
 const mockAttribute = {
-  customField: 'plugin::custom-fields.color-picker',
+  customField: 'plugin::color-picker.color',
   pluginOptions: { i18n: { localized: true } },
   type: 'string',
 };
