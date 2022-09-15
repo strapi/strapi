@@ -63,7 +63,6 @@ export const useRelation = (cacheKey, { relation, search }) => {
   );
 
   const searchFor = (term, options = {}) => {
-    searchRes.remove();
     setSearchParams({
       ...options,
       _q: encodeURIComponent(term),
