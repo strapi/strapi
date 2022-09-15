@@ -33,7 +33,12 @@ const processOrderBy = (orderBy, ctx) => {
       const attribute = attributes[key];
 
       if (!attribute) {
-        throw new Error(`Attribute ${key} not found on model ${uid}`);
+        // throw new Error(`Attribute ${key} not found on model ${uid}`);
+
+        return {
+          column: key,
+          order: direction,
+        };
       }
 
       if (types.isScalar(attribute.type)) {
