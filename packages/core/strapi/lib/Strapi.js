@@ -383,7 +383,7 @@ class Strapi {
     this.telemetry.register();
 
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
-    // Swap type customField for underlying data type
+    // NOTE: Swap type customField for underlying data type
     convertCustomFieldType(this);
 
     return this;

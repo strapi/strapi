@@ -2,8 +2,8 @@
 
 module.exports = ({ strapi }) => {
   strapi.customFields.register({
-    name: 'color-picker',
-    plugin: 'custom-fields',
+    name: 'color',
+    plugin: 'color-picker',
     type: 'string',
   });
 };
