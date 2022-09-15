@@ -32,7 +32,7 @@ export const normalizeRelations = (
       pages:
         [
           ...(relations?.data?.pages ?? []),
-          ...(modifiedData?.connect ? [{ results: modifiedData?.connect }] : []),
+          ...(modifiedData?.connect ? [{ results: modifiedData.connect }] : []),
         ]
           ?.map((page) =>
             page?.results
@@ -52,8 +52,7 @@ export const normalizeRelations = (
               )
               .filter(Boolean)
           )
-          ?.filter((page) => page.length > 0)
-          ?.reverse() ?? [],
+          ?.filter((page) => page.length > 0) ?? [],
     },
   };
 };
