@@ -15,10 +15,6 @@ export const useRelation = (cacheKey, { relation, search }) => {
         },
       });
 
-      if (relation?.onLoad) {
-        relation.onLoad(data);
-      }
-
       return data;
     } catch (err) {
       return null;
