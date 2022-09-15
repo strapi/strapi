@@ -5,6 +5,28 @@ import type { StringMap } from './utils';
 import type { GenericController } from '../../../core-api/controller'
 import type { GenericService } from '../../../core-api/service'
 
+// TODO move custom fields types to a separate file
+interface CustomFieldServerOptions {
+  /**
+   * The name of the custom field
+   */
+  name: string;
+
+  /**
+   * The name of the plugin creating the custom field
+   */
+  plugin?: string;
+
+  /**
+   * The existing Strapi data type the custom field uses
+   */
+  type: string;
+}
+
+interface CustomFields {
+  register: (customFields: CustomFieldServerOptions[] | CustomFieldServerOptions) => void;
+}
+
 /**
  * The Strapi interface implemented by the main Strapi class.
  */
@@ -64,6 +86,13 @@ export interface Strapi {
    * Find a content type using its unique identifier
    */
   contentType(uid: string): any;
+
+  /**
+   * The custom fields registry
+   * 
+   * It returns the custom fields interface
+   */
+  readonly customFields: CustomFields;
 
   /**
    * Getter for the Strapi policies container
@@ -195,7 +224,7 @@ export interface Strapi {
   /**
    * Restart the server and reload all the configuration.
    * It re-runs all the lifecycles phases.
-   * 
+   *
    * @example
    * ``` ts
    * setImmediate(() => strapi.reload());
@@ -223,13 +252,13 @@ export interface Strapi {
   /**
    * Opent he administration panel in a browser if the option is enabled.
    * You can disable it using the admin.autoOpen configuration variable.
-   * 
+   *
    * Note: It only works in development envs.
    */
   openAdmin(options: { isInitialized: boolean }): Promise<void>;
 
   /**
-   * Load the admin panel server logic into the server code and initialize its configuration. 
+   * Load the admin panel server logic into the server code and initialize its configuration.
    */
   loadAdmin(): Promise<void>;
 
@@ -288,7 +317,7 @@ export interface Strapi {
   container: any;
 
   /**
-   * References to all the directories handled by Strapi 
+   * References to all the directories handled by Strapi
    */
   dirs: StrapiDirectories;
 
@@ -323,7 +352,7 @@ export interface Strapi {
   startupLogger: any;
 
   /**
-   * Strapi logger used to send errors, warning or information messages 
+   * Strapi logger used to send errors, warning or information messages
    */
   log: any;
 
@@ -356,7 +385,7 @@ export interface Strapi {
   /**
    * Entity Service instance
    */
-  entityService: any;  
+  entityService: any;
 }
 
 export interface Lifecycles {
