@@ -38,7 +38,7 @@ module.exports = {
 
     return {
       uploadStream(file) {
-        verifySize(file);
+        verifySize(file, { sizeLimit });
         return new Promise((resolve, reject) => {
           pipeline(
             file.stream,

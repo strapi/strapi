@@ -67,18 +67,16 @@ const createProvider = (config) => {
       providerInstance[methodName](file, options);
   });
 
-  const baseProvider = {
-    extend(obj) {
-      Object.assign(this, obj);
-    },
-    checkFileSize(file) {
-      const fileSize = kbytesToBytes(file.size);
-
-      if (config.sizeLimit && fileSize > config.sizeLimit) {
-        throw new PayloadTooLargeError();
-      }
-    },
-  };
-
   return Object.assign(Object.create(baseProvider), wrappedProvider);
+};
+
+const baseProvider = {
+  extend(obj) {
+    Object.assign(this, obj);
+  },
+  checkFileSize(file, { sizeLimit }) {
+    if (sizeLimit && kbytesToBytes(file.size) > sizeLimit) {
+      throw new PayloadTooLargeError();
+    }
+  },
 };
