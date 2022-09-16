@@ -8,16 +8,10 @@ import {
   useNotification,
   useTracking,
   useGuidedTour,
-  Link,
   useRBAC,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
-import { Button } from '@strapi/design-system/Button';
-import Check from '@strapi/icons/Check';
-import ArrowLeft from '@strapi/icons/ArrowLeft';
 import { Formik } from 'formik';
-import { Stack } from '@strapi/design-system/Stack';
 import { get } from 'lodash';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
@@ -25,10 +19,8 @@ import { formatAPIErrors } from '../../../../../utils';
 import { axiosInstance } from '../../../../../core/utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
-import HeaderContentBox from './components/ContentBox';
-import Permissions from './components/Permissions';
-import Regenerate from './components/Regenerate';
-import FormApiToken from './components/FormApiToken';
+import FormHead from './components/FormHead';
+import FormBody from './components/FormBody';
 import adminPermissions from '../../../../../permissions';
 import { ApiTokenPermissionsContextProvider } from '../../../../../contexts/ApiTokenPermissions';
 import init from './init';
@@ -242,32 +234,10 @@ const ApiTokenCreateView = () => {
     });
   };
 
-  const handleChangeSelectApiTokenType = ({ target: { value } }) => {
-    setHasChangedPermissions(false);
-
-    if (value === 'full-access') {
-      dispatch({
-        type: 'SELECT_ALL_ACTIONS',
-      });
-    }
-    if (value === 'read-only') {
-      dispatch({
-        type: 'ON_CHANGE_READ_ONLY',
-      });
-    }
-  };
-
   const setSelectedAction = ({ target: { value } }) => {
     dispatch({
       type: 'SET_SELECTED_ACTION',
       value,
-    });
-  };
-
-  const handleRegenerate = (newKey) => {
-    setApiToken({
-      ...apiToken,
-      accessKey: newKey,
     });
   };
 
@@ -308,73 +278,23 @@ const ApiTokenCreateView = () => {
 
             return (
               <Form>
-                <HeaderLayout
-                  title={
-                    apiToken?.name ||
-                    formatMessage({
-                      id: 'Settings.apiTokens.createPage.title',
-                      defaultMessage: 'Create API Token',
-                    })
-                  }
-                  primaryAction={
-                    canEditInputs ? (
-                      <Stack horizontal spacing={2}>
-                        {canRegenerate && apiToken?.id && (
-                          <Regenerate
-                            onRegenerate={handleRegenerate}
-                            idToRegenerate={apiToken?.id}
-                          />
-                        )}
-                        <Button
-                          disabled={isSubmitting}
-                          loading={isSubmitting}
-                          startIcon={<Check />}
-                          type="submit"
-                          size="S"
-                        >
-                          {formatMessage({
-                            id: 'global.save',
-                            defaultMessage: 'Save',
-                          })}
-                        </Button>
-                      </Stack>
-                    ) : (
-                      canRegenerate &&
-                      apiToken?.id && (
-                        <Regenerate onRegenerate={handleRegenerate} idToRegenerate={apiToken?.id} />
-                      )
-                    )
-                  }
-                  navigationAction={
-                    <Link startIcon={<ArrowLeft />} to="/settings/api-tokens">
-                      {formatMessage({
-                        id: 'global.back',
-                        defaultMessage: 'Back',
-                      })}
-                    </Link>
-                  }
+                <FormHead
+                  apiToken={apiToken}
+                  setApiToken={setApiToken}
+                  canEditInputs={canEditInputs}
+                  canRegenerate={canRegenerate}
+                  isSubmitting={isSubmitting}
                 />
-                <ContentLayout>
-                  <Stack spacing={6}>
-                    {Boolean(apiToken?.name) && <HeaderContentBox apiToken={apiToken.accessKey} />}
-                    <FormApiToken
-                      errors={errors}
-                      onChange={handleChange}
-                      canEditInputs={canEditInputs}
-                      isCreating={isCreating}
-                      values={values}
-                      apiToken={apiToken}
-                      onChangeSelectApiTokenType={(val) => handleChangeSelectApiTokenType(val)}
-                    />
-                    <Permissions
-                      disabled={
-                        !canEditInputs ||
-                        values?.type === 'read-only' ||
-                        values?.type === 'full-access'
-                      }
-                    />
-                  </Stack>
-                </ContentLayout>
+                <FormBody
+                  apiToken={apiToken}
+                  errors={errors}
+                  onChange={handleChange}
+                  canEditInputs={canEditInputs}
+                  isCreating={isCreating}
+                  values={values}
+                  onDispatch={dispatch}
+                  setHasChangedPermissions={setHasChangedPermissions}
+                />
               </Form>
             );
           }}

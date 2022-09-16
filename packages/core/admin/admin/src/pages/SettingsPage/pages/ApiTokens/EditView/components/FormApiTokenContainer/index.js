@@ -11,17 +11,33 @@ import { TextInput } from '@strapi/design-system/TextInput';
 import { Typography } from '@strapi/design-system/Typography';
 import { getDateOfExpiration } from '../../utils';
 
-const FormApiToken = ({
+const FormApiTokenContainer = ({
   errors,
   onChange,
   canEditInputs,
   isCreating,
   values,
   apiToken,
-  onChangeSelectApiTokenType,
+  onDispatch,
+  setHasChangedPermissions,
 }) => {
   const { formatMessage } = useIntl();
   const [lang] = usePersistentState('strapi-admin-language', 'en');
+
+  const handleChangeSelectApiTokenType = ({ target: { value } }) => {
+    setHasChangedPermissions(false);
+
+    if (value === 'full-access') {
+      onDispatch({
+        type: 'SELECT_ALL_ACTIONS',
+      });
+    }
+    if (value === 'read-only') {
+      onDispatch({
+        type: 'ON_CHANGE_READ_ONLY',
+      });
+    }
+  };
 
   return (
     <Box
@@ -168,7 +184,7 @@ const FormApiToken = ({
                   : null
               }
               onChange={(value) => {
-                onChangeSelectApiTokenType({ target: { value } });
+                handleChangeSelectApiTokenType({ target: { value } });
                 onChange({ target: { name: 'type', value } });
               }}
               placeholder="Select"
@@ -201,7 +217,7 @@ const FormApiToken = ({
   );
 };
 
-FormApiToken.propTypes = {
+FormApiTokenContainer.propTypes = {
   errors: PropTypes.shape({
     name: PropTypes.string,
     description: PropTypes.string,
@@ -227,11 +243,12 @@ FormApiToken.propTypes = {
     description: PropTypes.string,
     createdAt: PropTypes.string,
   }).isRequired,
-  onChangeSelectApiTokenType: PropTypes.func.isRequired,
+  onDispatch: PropTypes.func.isRequired,
+  setHasChangedPermissions: PropTypes.func.isRequired,
 };
 
-FormApiToken.defaultProps = {
+FormApiTokenContainer.defaultProps = {
   errors: {},
 };
 
-export default FormApiToken;
+export default FormApiTokenContainer;
