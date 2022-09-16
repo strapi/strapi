@@ -55,6 +55,8 @@ module.exports = {
 
       try {
         const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
+        if ('json' in ctx.query)
+          return ctx.send(JSON.parse(documentation));
         const layout = fs.readFileSync(
           path.resolve(__dirname, '..', 'public', 'index.html'),
           'utf8'
