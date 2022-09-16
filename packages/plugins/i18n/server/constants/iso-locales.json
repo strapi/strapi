@@ -460,6 +460,10 @@
     "name":"English (Anguilla) (en-AI)"
   },
   {
+    "code":"en-AS",
+    "name":"English (American Samoa) (en-AS)"
+  },
+  {
     "code":"en-AU",
     "name":"English (Australia) (en-AU)"
   },
@@ -588,6 +592,22 @@
     "name":"English (Guernsey) (en-GG)"
   },
   {
+    "code":"en-CA",
+    "name":"English (Canada) (en-CA)"
+  },
+  {
+    "code":"en-EG",
+    "name":"English (Egypt) (en-EG)"
+  },
+  {
+    "code":"en-EU",
+    "name":"English (Europe) (en-EU)"
+  },
+  {
+    "code":"en-GU",
+    "name":"English (Guam) (en-GU)"
+  },
+  {
     "code":"en-GY",
     "name":"English (Guyana) (en-GY)"
   },
@@ -648,6 +668,10 @@
     "name":"English (Malaysia) (en-MY)"
   },
   {
+    "code":"en-JM",
+    "name":"English (Jamaica) (en-JM)"
+  },
+  {
     "code":"en-MT",
     "name":"English (Malta) (en-MT)"
   },
@@ -694,6 +718,14 @@
   {
     "code":"en-NF",
     "name":"English (Norfolk Island) (en-NF)"
+  },
+  {
+    "code":"en-NA",
+    "name":"English (Namibia) (en-NA)"
+  },
+  {
+    "code":"en-NZ",
+    "name":"English (New Zealand) (en-NZ)"
   },
   {
     "code":"en-MP",
@@ -822,6 +854,26 @@
   {
     "code":"en-TV",
     "name":"English (Tuvalu) (en-TV)"
+  },
+  {
+    "code":"en-PH",
+    "name":"English (Philippines) (en-PH)"
+  },
+  {
+    "code":"en-SA",
+    "name":"English (Saudi Arabia) (en-SA)"
+  },
+  {
+    "code":"en-SG",
+    "name":"English (Singapore) (en-SG)"
+  },
+  {
+    "code":"en-ZA",
+    "name":"English (South Africa) (en-ZA)"
+  },
+  {
+    "code":"en-TT",
+    "name":"English (Trinidad and Tobago) (en-TT)"
   },
   {
     "code":"en-AE",
@@ -1604,20 +1656,20 @@
     "name":"Nepali (Nepal) (ne-NP)"
   },
   {
-    "code": "se",
-    "name": "Northern Sami"
+    "code":"se",
+    "name":"Northern Sami"
   },
   {
-    "code": "se-FI",
-    "name": "Northern Sami (Finland)"
+    "code":"se-FI",
+    "name":"Northern Sami (Finland)"
   },
   {
-    "code": "se-NO",
-    "name": "Northern Sami (Norway)"
+    "code":"se-NO",
+    "name":"Northern Sami (Norway)"
   },
   {
-    "code": "se-SE",
-    "name": "Northern Sami (Sweden)"
+    "code":"se-SE",
+    "name":"Northern Sami (Sweden)"
   },
   {
     "code":"nd",
@@ -2244,12 +2296,12 @@
     "name":"Urdu (Pakistan) (ur-PK)"
   },
   {
-    "code": "ug",
-    "name": "Uyghur"
+    "code":"ug",
+    "name":"Uyghur"
   },
   {
-    "code": "ug-CN",
-    "name": "Uyghur (China)"
+    "code":"ug-CN",
+    "name":"Uyghur (China)"
   },
   {
     "code":"uz",
