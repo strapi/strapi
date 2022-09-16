@@ -21,7 +21,7 @@ export const BulkDeleteButton = ({ selected, onSuccess }) => {
   const handleConfirmRemove = async () => {
     const { page, pageSize, assetCount, ...others } = query;
     const isSelected = selected?.length >= Number(assetCount);
-    const numOfSelectedPages = Math.ceil(selected?.length / Number(pageSize));
+    const numOfSelectedPages = Math.ceil(selected.length / Number(pageSize));
     const queryParams = {
       ...others,
       pageSize,
