@@ -62,6 +62,17 @@ const createContentTypeSchema = (
           return context.parent.singularName !== value;
         },
       })
+      .test({
+        name: 'pluralNameNotAllowed',
+        message: getTrad('error.contentTypeName.reserved-name'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !reservedNames.includes(toLower(trim(value)));
+        },
+      })
       .required(errorsTrads.required),
     singularName: yup
       .string()
@@ -85,6 +96,17 @@ const createContentTypeSchema = (
           }
 
           return context.parent.pluralName !== value;
+        },
+      })
+      .test({
+        name: 'singularNameNotAllowed',
+        message: getTrad('error.contentTypeName.reserved-name'),
+        test(value) {
+          if (!value) {
+            return false;
+          }
+
+          return !reservedNames.includes(toLower(trim(value)));
         },
       })
       .required(errorsTrads.required),
