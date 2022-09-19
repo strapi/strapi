@@ -12,8 +12,9 @@ const {
   isEmpty,
   isArray,
   isNull,
-  uniqBy,
-  differenceBy,
+  uniqWith,
+  isEqual,
+  differenceWith,
   groupBy,
   isNumber,
 } = require('lodash/fp');
@@ -49,11 +50,11 @@ const toIdArray = (data) => {
 
       return datum;
     });
-  return uniqBy('id', array);
+  return uniqWith(isEqual, array);
 };
 
 const toAssocs = (data) => {
-  if (isArray(data) || isString(data) || isNumber(data) || data?.id) {
+  if (isArray(data) || isString(data) || isNumber(data) || isNull(data) || data?.id) {
     return {
       set: isNull(data) ? data : toIdArray(data),
     };
@@ -384,6 +385,8 @@ const createEntityManager = (db) => {
           continue;
         }
 
+        const cleanRelationData = toAssocs(data[attributeName]);
+
         if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
           const { target, morphBy } = attribute;
 
@@ -393,9 +396,11 @@ const createEntityManager = (db) => {
             // set columns
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
+            const relId = toId(cleanRelationData.set[0]);
+
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .where({ id: toId(data[attributeName]) })
+              .where({ id: relId })
               .execute();
           } else if (targetAttribute.relation === 'morphToMany') {
             const { joinTable } = targetAttribute;
@@ -403,7 +408,7 @@ const createEntityManager = (db) => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            const rows = toAssocs(data[attributeName]).set.map((data, idx) => {
+            const rows = cleanRelationData.set.map((data, idx) => {
               return {
                 [joinColumn.name]: data.id,
                 [idColumn.name]: id,
@@ -432,7 +437,7 @@ const createEntityManager = (db) => {
 
           const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
-          const rows = toAssocs(data[attributeName]).set.map((data) => ({
+          const rows = cleanRelationData.set.map((data) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
@@ -458,13 +463,14 @@ const createEntityManager = (db) => {
         }
 
         if (attribute.joinColumn && attribute.owner) {
+          const relIdsToAdd = toIds(cleanRelationData.set);
           if (
             attribute.relation === 'oneToOne' &&
             isBidirectional(attribute) &&
-            data[attributeName]
+            relIdsToAdd.length
           ) {
             await this.createQueryBuilder(uid)
-              .where({ [attribute.joinColumn.name]: data[attributeName], id: { $ne: id } })
+              .where({ [attribute.joinColumn.name]: relIdsToAdd, id: { $ne: id } })
               .update({ [attribute.joinColumn.name]: null })
               .execute();
           }
@@ -478,6 +484,7 @@ const createEntityManager = (db) => {
           const { target } = attribute;
 
           // TODO: check it is an id & the entity exists (will throw due to FKs otherwise so not a big pbl in SQL)
+          const relIdsToAdd = toIds(cleanRelationData.set);
 
           await this.createQueryBuilder(target)
             .where({ [attribute.joinColumn.referencedColumn]: id })
@@ -487,7 +494,7 @@ const createEntityManager = (db) => {
           await this.createQueryBuilder(target)
             .update({ [attribute.joinColumn.referencedColumn]: id })
             // NOTE: works if it is an array or a single id
-            .where({ id: data[attributeName] })
+            .where({ id: relIdsToAdd })
             .execute();
         }
 
@@ -502,7 +509,6 @@ const createEntityManager = (db) => {
             select.push(orderColumnName);
           }
 
-          const cleanRelationData = toAssocs(data[attributeName]);
           const relsToAdd = cleanRelationData.set || cleanRelationData.connect;
           const relIdsToadd = toIds(relsToAdd);
 
@@ -574,6 +580,7 @@ const createEntityManager = (db) => {
         if (attribute.type !== 'relation' || !has(attributeName, data)) {
           continue;
         }
+        const cleanRelationData = toAssocs(data[attributeName]);
 
         if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
           const { target, morphBy } = attribute;
@@ -591,10 +598,11 @@ const createEntityManager = (db) => {
               .where({ [idColumn.name]: id, [typeColumn.name]: uid })
               .execute();
 
-            if (!isNull(data[attributeName])) {
+            if (!isNull(cleanRelationData.set)) {
+              const relId = toIds(cleanRelationData.set[0]);
               await this.createQueryBuilder(target)
                 .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-                .where({ id: toId(data[attributeName]) })
+                .where({ id: relId })
                 .execute();
             }
           } else if (targetAttribute.relation === 'morphToMany') {
@@ -613,7 +621,7 @@ const createEntityManager = (db) => {
               })
               .execute();
 
-            const rows = toAssocs(data[attributeName]).set.map((data, idx) => ({
+            const rows = cleanRelationData.set.map((data, idx) => ({
               [joinColumn.name]: data.id,
               [idColumn.name]: id,
               [typeColumn.name]: uid,
@@ -652,7 +660,7 @@ const createEntityManager = (db) => {
             })
             .execute();
 
-          const rows = toAssocs(data[attributeName]).set.map((data) => ({
+          const rows = cleanRelationData.set.map((data) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
@@ -693,10 +701,10 @@ const createEntityManager = (db) => {
             .update({ [attribute.joinColumn.referencedColumn]: null })
             .execute();
 
-          if (!isNull(data[attributeName])) {
+          if (!isNull(cleanRelationData.set)) {
+            const relIdsToAdd = toIds(cleanRelationData.set);
             await this.createQueryBuilder(target)
-              // NOTE: works if it is an array or a single id
-              .where({ id: data[attributeName] })
+              .where({ id: relIdsToAdd })
               .update({ [attribute.joinColumn.referencedColumn]: id })
               .execute();
           }
@@ -715,10 +723,9 @@ const createEntityManager = (db) => {
           }
 
           // only delete relations
-          if (isNull(data[attributeName])) {
+          if (isNull(cleanRelationData.set)) {
             await deleteAllRelations({ id, attribute, joinTable, db });
           } else {
-            const cleanRelationData = toAssocs(data[attributeName]);
             const isPartialUpdate = !has('set', cleanRelationData);
             let relIdsToaddOrMove;
 
@@ -731,7 +738,7 @@ const createEntityManager = (db) => {
               relIdsToaddOrMove = toIds(cleanRelationData.connect);
               // DELETE relations in disconnect
               const relIdsToDelete = toIds(
-                differenceBy('id', cleanRelationData.disconnect, cleanRelationData.connect)
+                differenceWith(isEqual, cleanRelationData.disconnect, cleanRelationData.connect)
               );
 
               await deleteAllRelations({ id, attribute, joinTable, onlyFor: relIdsToDelete, db });
