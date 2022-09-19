@@ -175,8 +175,20 @@ describe('Admin | components | AuthenticatedApp', () => {
     await waitFor(() => expect(setGuidedTourVisibility).not.toHaveBeenCalled());
   });
 
-  it('should call setGuidedTourVisibility when user is super admin', async () => {
+  it('should not setGuidedTourVisibility when user is a super admin and autoReload is false ', async () => {
     fetchUserRoles.mockImplementationOnce(() => [{ code: 'strapi-super-admin' }]);
+    fetchAppInfo.mockImplementationOnce(() => ({ autoReload: false }));
+    const setGuidedTourVisibility = jest.fn();
+    useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
+
+    render(<App />);
+
+    await waitFor(() => expect(setGuidedTourVisibility).not.toHaveBeenCalled());
+  });
+
+  it('should call setGuidedTourVisibility when user is super admin and autoReload is true', async () => {
+    fetchUserRoles.mockImplementationOnce(() => [{ code: 'strapi-super-admin' }]);
+    fetchAppInfo.mockImplementationOnce(() => ({ autoReload: true }));
     const setGuidedTourVisibility = jest.fn();
     useGuidedTour.mockImplementation(() => ({ setGuidedTourVisibility }));
     render(<App />);
