@@ -15,6 +15,7 @@ const {
   uniqBy,
   differenceBy,
   groupBy,
+  isNumber,
 } = require('lodash/fp');
 const types = require('../types');
 const { createField } = require('../fields');
@@ -32,15 +33,8 @@ const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
 
 const isValidId = (value) => isString(value) || isInteger(value);
-const toAssocs = (data) => {
-  if (data?.connect || data?.disconnect || (isPlainObject(data) && !data.id)) {
-    return {
-      connect: toAssocs(data.connect),
-      disconnect: toAssocs(data.disconnect),
-    };
-  }
-
-  return castArray(data)
+const toIdArray = (data) => {
+  const array = castArray(data)
     .filter((datum) => !isNil(datum))
     .map((datum) => {
       // if it is a string or an integer return an obj with id = to datum
@@ -55,6 +49,26 @@ const toAssocs = (data) => {
 
       return datum;
     });
+  return uniqBy('id', array);
+};
+
+const toAssocs = (data) => {
+  if (isArray(data) || isString(data) || isNumber(data) || data?.id) {
+    return {
+      set: isNull(data) ? data : toIdArray(data),
+    };
+  }
+
+  if (data?.set) {
+    return {
+      set: isNull(data.set) ? data.set : toIdArray(data.set),
+    };
+  }
+
+  return {
+    connect: toIdArray(data?.connect),
+    disconnect: toIdArray(data?.disconnect),
+  };
 };
 
 const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
@@ -389,7 +403,7 @@ const createEntityManager = (db) => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            const rows = toAssocs(data[attributeName]).map((data, idx) => {
+            const rows = toAssocs(data[attributeName]).set.map((data, idx) => {
               return {
                 [joinColumn.name]: data.id,
                 [idColumn.name]: id,
@@ -418,7 +432,7 @@ const createEntityManager = (db) => {
 
           const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
-          const rows = toAssocs(data[attributeName]).map((data) => ({
+          const rows = toAssocs(data[attributeName]).set.map((data) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
@@ -489,7 +503,7 @@ const createEntityManager = (db) => {
           }
 
           const cleanRelationData = toAssocs(data[attributeName]);
-          const relsToAdd = uniqBy('id', cleanRelationData.connect || cleanRelationData);
+          const relsToAdd = cleanRelationData.set || cleanRelationData.connect;
           const relIdsToadd = toIds(relsToAdd);
 
           await deletePreviousOneToAnyRelations({ id, attribute, joinTable, relIdsToadd, db });
@@ -599,7 +613,7 @@ const createEntityManager = (db) => {
               })
               .execute();
 
-            const rows = toAssocs(data[attributeName]).map((data, idx) => ({
+            const rows = toAssocs(data[attributeName]).set.map((data, idx) => ({
               [joinColumn.name]: data.id,
               [idColumn.name]: id,
               [typeColumn.name]: uid,
@@ -638,7 +652,7 @@ const createEntityManager = (db) => {
             })
             .execute();
 
-          const rows = toAssocs(data[attributeName]).map((data) => ({
+          const rows = toAssocs(data[attributeName]).set.map((data) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
@@ -705,21 +719,20 @@ const createEntityManager = (db) => {
             await deleteAllRelations({ id, attribute, joinTable, db });
           } else {
             const cleanRelationData = toAssocs(data[attributeName]);
-            const isPartialUpdate =
-              has('connect', cleanRelationData) || has('disconnect', cleanRelationData);
+            const isPartialUpdate = !has('set', cleanRelationData);
             let relIdsToaddOrMove;
 
             if (isPartialUpdate) {
               // does not support pivot
-              let connect = uniqBy('id', cleanRelationData.connect || []);
-              let disconnect = uniqBy('id', cleanRelationData.disconnect || []);
               if (isAnyToOne(attribute)) {
-                connect = connect.slice(-1);
-                disconnect = [];
+                cleanRelationData.connect = cleanRelationData.connect.slice(-1);
+                cleanRelationData.disconnect = [];
               }
-              relIdsToaddOrMove = toIds(connect);
+              relIdsToaddOrMove = toIds(cleanRelationData.connect);
               // DELETE relations in disconnect
-              const relIdsToDelete = toIds(differenceBy('id', disconnect, connect));
+              const relIdsToDelete = toIds(
+                differenceBy('id', cleanRelationData.disconnect, cleanRelationData.connect)
+              );
 
               await deleteAllRelations({ id, attribute, joinTable, onlyFor: relIdsToDelete, db });
 
@@ -746,8 +759,7 @@ const createEntityManager = (db) => {
                 ).max;
               }
 
-              for (const relToAddOrMove of connect) {
-                // const currentRel = currentMovingRelsMap[relToAddOrMove.id]?.[0];
+              for (const relToAddOrMove of cleanRelationData.connect) {
                 const currentRel = currentMovingRelsMap[relToAddOrMove.id]?.[0];
                 if (currentRel && isAnyToMany(attribute)) {
                   const currentOrderIsNull = currentRel[orderColumnName] === null;
@@ -783,6 +795,7 @@ const createEntityManager = (db) => {
                     [joinColumn.name]: id,
                     [inverseJoinColumn.name]: relToAddOrMove.id,
                     ...(relToAddOrMove.__pivot || {}),
+                    ...(joinTable.on || {}),
                   };
 
                   if (isAnyToMany(attribute)) {
@@ -806,8 +819,7 @@ const createEntityManager = (db) => {
               }
             } else {
               // overwrite all relations
-              const relsToAdd = uniqBy('id', cleanRelationData);
-              relIdsToaddOrMove = toIds(relsToAdd);
+              relIdsToaddOrMove = toIds(cleanRelationData.set);
               await deleteAllRelations({ id, attribute, joinTable, except: relIdsToaddOrMove, db });
 
               const currentMovingRels = await this.createQueryBuilder(joinTable.name)
@@ -821,7 +833,7 @@ const createEntityManager = (db) => {
               const currentMovingRelsMap = groupBy(inverseJoinColumn.name, currentMovingRels);
 
               let max = 0;
-              for (const relToAdd of relsToAdd) {
+              for (const relToAdd of cleanRelationData.set) {
                 const currentRel = currentMovingRelsMap[relToAdd.id]?.[0];
 
                 if (currentRel && isAnyToMany(attribute)) {
