@@ -5,7 +5,7 @@ const _ = require('lodash/fp');
 const { fromRow } = require('../transform');
 
 /**
- * Populate X to One relation
+ * Populate oneToOne and manyToOne relation
  * @param {*} input
  * @param {*} ctx
  * @returns
@@ -193,7 +193,7 @@ const oneToMany = async (input, ctx) => {
         rootColumn: joinTable.inverseJoinColumn.referencedColumn,
         rootTable: qb.alias,
         on: joinTable.on,
-        orderBy: joinTable.orderBy,
+        orderBy: _.mapValues((v) => populateValue.ordering || v, joinTable.orderBy),
       })
       .addSelect(joinColAlias)
       .where({ [joinColAlias]: referencedValues })
@@ -276,7 +276,7 @@ const manyToMany = async (input, ctx) => {
       rootColumn: joinTable.inverseJoinColumn.referencedColumn,
       rootTable: populateQb.alias,
       on: joinTable.on,
-      orderBy: joinTable.orderBy,
+      orderBy: _.mapValues((v) => populateValue.ordering || v, joinTable.orderBy),
     })
     .addSelect(joinColAlias)
     .where({ [joinColAlias]: referencedValues })
@@ -367,7 +367,7 @@ const morphX = async (input, ctx) => {
           ...(joinTable.on || {}),
           field: attributeName,
         },
-        orderBy: joinTable.orderBy,
+        orderBy: _.mapValues((v) => populateValue.ordering || v, joinTable.orderBy),
       })
       .addSelect([`${alias}.${idColumn.name}`, `${alias}.${typeColumn.name}`])
       .where({
@@ -552,6 +552,7 @@ const pickPopulateParams = _.pick([
   'limit',
   'offset',
   'filters',
+  'ordering',
 ]);
 
 const applyPopulate = async (results, populate, ctx) => {

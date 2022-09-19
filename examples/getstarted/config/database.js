@@ -4,7 +4,6 @@ const sqlite = {
     filename: '.tmp/data.db',
   },
   useNullAsDefault: true,
-  debug: true,
 };
 
 const postgres = {
