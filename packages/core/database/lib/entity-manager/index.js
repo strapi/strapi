@@ -15,7 +15,6 @@ const {
   uniqWith,
   isEqual,
   differenceWith,
-  groupBy,
   isNumber,
 } = require('lodash/fp');
 const types = require('../types');
@@ -753,7 +752,10 @@ const createEntityManager = (db) => {
                 })
                 .where(joinTable.on || {})
                 .execute();
-              const currentMovingRelsMap = groupBy(inverseJoinColumn.name, currentMovingRels);
+              const currentMovingRelsMap = currentMovingRels.reduce(
+                (acc, rel) => Object.assign(acc, { [rel[inverseJoinColumn.name]]: rel }),
+                {}
+              );
 
               if (isAnyToMany(attribute)) {
                 max = (
@@ -767,7 +769,7 @@ const createEntityManager = (db) => {
               }
 
               for (const relToAddOrMove of cleanRelationData.connect) {
-                const currentRel = currentMovingRelsMap[relToAddOrMove.id]?.[0];
+                const currentRel = currentMovingRelsMap[relToAddOrMove.id];
                 if (currentRel && isAnyToMany(attribute)) {
                   const currentOrderIsNull = currentRel[orderColumnName] === null;
                   if (!currentOrderIsNull) {
@@ -787,9 +789,13 @@ const createEntityManager = (db) => {
                     });
                   }
 
+                  if (currentOrderIsNull) {
+                    max += 1;
+                  }
+
                   await this.createQueryBuilder(joinTable.name)
                     .update({
-                      [orderColumnName]: currentOrderIsNull ? max + 1 : max,
+                      [orderColumnName]: max,
                     })
                     .where({
                       [joinColumn.name]: id,
@@ -837,14 +843,17 @@ const createEntityManager = (db) => {
                 })
                 .where(joinTable.on || {})
                 .execute();
-              const currentMovingRelsMap = groupBy(inverseJoinColumn.name, currentMovingRels);
+              const currentMovingRelsMap = currentMovingRels.reduce(
+                (acc, rel) => Object.assign(acc, { [rel[inverseJoinColumn.name]]: rel }),
+                {}
+              );
 
-              let max = 0;
+              let index = 0;
               for (const relToAdd of cleanRelationData.set) {
-                const currentRel = currentMovingRelsMap[relToAdd.id]?.[0];
+                const currentRel = currentMovingRelsMap[relToAdd.id];
 
                 if (currentRel && isAnyToMany(attribute)) {
-                  const update = { [orderColumnName]: max + 1 };
+                  const update = { [orderColumnName]: index + 1 };
                   await this.createQueryBuilder(joinTable.name)
                     .update(update)
                     .where({
@@ -862,7 +871,7 @@ const createEntityManager = (db) => {
                   };
 
                   if (isAnyToMany(attribute)) {
-                    insert[orderColumnName] = max + 1;
+                    insert[orderColumnName] = index + 1;
                   }
                   // can be optimized in one query
                   if (isBidirectional(attribute) && isManyToAny(attribute)) {
@@ -878,7 +887,7 @@ const createEntityManager = (db) => {
 
                   await this.createQueryBuilder(joinTable.name).insert(insert).execute();
                 }
-                max += 1;
+                index += 1;
               }
             }
 

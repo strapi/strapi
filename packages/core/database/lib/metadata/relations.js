@@ -406,8 +406,8 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
     inverseJoinColumnName = `inv_${inverseJoinColumnName}`;
   }
 
-  const orderColumnName = _.snakeCase(`${meta.singularName}_order`);
-  let inverseOrderColumnName = _.snakeCase(`${targetMeta.singularName}_order`);
+  const orderColumnName = _.snakeCase(`${targetMeta.singularName}_order`);
+  let inverseOrderColumnName = _.snakeCase(`${meta.singularName}_order`);
 
   // if relation is self referencing
   if (attribute.relation === 'manyToMany' && joinColumnName === inverseJoinColumnName) {
