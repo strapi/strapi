@@ -182,7 +182,7 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * When uploading an image, an additional thubmnail is generated.
+   * When uploading an image, an additional thumbnail is generated.
    * Also, if there are responsive formats defined, another set of images will be generated too.
    *
    * @param {*} fileData
@@ -201,7 +201,7 @@ module.exports = ({ strapi }) => ({
       height,
     });
 
-    // For performance reasons, all uploads are wrapped in a single Promise.all
+    // For performance reasons, these uploads are wrapped in a single Promise.all
     const uploadThumbnail = async (thumbnailFile) => {
       await getService('provider').upload(thumbnailFile);
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
@@ -213,10 +213,11 @@ module.exports = ({ strapi }) => ({
       _.set(fileData, ['formats', key], file);
     };
 
-    const uploadPromises = [];
+    // Upload original image first in case there is an error
+    // f.e. the image is too big but the responsive formats are not.
+    await getService('provider').upload(fileData);
 
-    // Upload image
-    uploadPromises.push(getService('provider').upload(fileData));
+    const uploadPromises = [];
 
     // Generate & Upload thumbnail and responsive formats
     if (await isOptimizableImage(fileData)) {
@@ -227,10 +228,10 @@ module.exports = ({ strapi }) => ({
 
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
-        for (const format of formats) {
-          if (!format) continue;
+        formats.forEach((format) => {
+          if (!format) return;
           uploadPromises.push(uploadResponsiveFormat(format));
-        }
+        });
       }
     }
     // Wait for all uploads to finish
