@@ -539,6 +539,10 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "English (Northern Mariana Islands) (en-MP)",
   },
   {
+    "code": "en-PA",
+    "name": "English (Panama) (en-PA)",
+  },
+  {
     "code": "en-PK",
     "name": "English (Pakistan) (en-PK)",
   },
