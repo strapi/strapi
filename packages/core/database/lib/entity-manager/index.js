@@ -26,8 +26,8 @@ const { isBidirectional, isManyToAny, isAnyToOne, isAnyToMany } = require('../me
 const {
   deletePreviousOneToAnyRelations,
   deletePreviousAnyToOneRelations,
-  deleteAllRelations,
-} = require('./utils');
+  deleteRelations,
+} = require('./regular-relations');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -723,7 +723,7 @@ const createEntityManager = (db) => {
 
           // only delete relations
           if (isNull(cleanRelationData.set)) {
-            await deleteAllRelations({ id, attribute, joinTable, db });
+            await deleteRelations({ id, attribute, joinTable, db }, { relsToDelete: 'all' });
           } else {
             const isPartialUpdate = !has('set', cleanRelationData);
             let relIdsToaddOrMove;
@@ -740,7 +740,10 @@ const createEntityManager = (db) => {
                 differenceWith(isEqual, cleanRelationData.disconnect, cleanRelationData.connect)
               );
 
-              await deleteAllRelations({ id, attribute, joinTable, onlyFor: relIdsToDelete, db });
+              await deleteRelations(
+                { id, attribute, joinTable, db },
+                { relsToDelete: relIdsToDelete }
+              );
 
               // add/move
               let max;
@@ -833,7 +836,10 @@ const createEntityManager = (db) => {
             } else {
               // overwrite all relations
               relIdsToaddOrMove = toIds(cleanRelationData.set);
-              await deleteAllRelations({ id, attribute, joinTable, except: relIdsToaddOrMove, db });
+              await deleteRelations(
+                { id, attribute, joinTable, db },
+                { relsToDelete: 'all', relsToNotDelete: relIdsToaddOrMove }
+              );
 
               const currentMovingRels = await this.createQueryBuilder(joinTable.name)
                 .select(select)
@@ -1025,7 +1031,7 @@ const createEntityManager = (db) => {
         if (attribute.joinTable) {
           const { joinTable } = attribute;
 
-          await deleteAllRelations({ id, attribute, joinTable, db });
+          await deleteRelations({ id, attribute, joinTable, db }, { relsToDelete: 'all' });
         }
       }
     },

@@ -110,16 +110,13 @@ const deletePreviousAnyToOneRelations = async ({ id, attribute, joinTable, relId
 };
 
 // INVERSE ORDER UPDATE
-const deleteAllRelations = async ({
-  id,
-  attribute,
-  joinTable,
-  except = undefined,
-  onlyFor = undefined,
-  db,
-}) => {
+const deleteRelations = async (
+  { id, attribute, joinTable, db },
+  { relsToNotDelete = [], relsToDelete = [] }
+) => {
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
   const select = getSelect(joinTable, attribute);
+  const all = relsToDelete === 'all';
 
   if (isAnyToMany(attribute) || (isBidirectional(attribute) && isManyToAny(attribute))) {
     let lastId = 0;
@@ -131,8 +128,8 @@ const deleteAllRelations = async ({
         .where({
           [joinColumn.name]: id,
           id: { $gt: lastId },
-          ...(except ? { [inverseJoinColumn.name]: { $notIn: except } } : {}),
-          ...(onlyFor ? { [inverseJoinColumn.name]: { $in: onlyFor } } : {}),
+          [inverseJoinColumn.name]: { $notIn: relsToNotDelete },
+          ...(all ? {} : { [inverseJoinColumn.name]: { $in: relsToDelete } }),
         })
         .where(joinTable.on || {})
         .orderBy('id')
@@ -186,8 +183,8 @@ const deleteAllRelations = async ({
     .delete()
     .where({
       [joinColumn.name]: id,
-      ...(except ? { [inverseJoinColumn.name]: { $notIn: except } } : {}),
-      ...(onlyFor ? { [inverseJoinColumn.name]: { $in: onlyFor } } : {}),
+      [inverseJoinColumn.name]: { $notIn: relsToNotDelete },
+      ...(all ? {} : { [inverseJoinColumn.name]: { $in: relsToDelete } }),
     })
     .where(joinTable.on || {})
     .execute();
@@ -196,5 +193,5 @@ const deleteAllRelations = async ({
 module.exports = {
   deletePreviousOneToAnyRelations,
   deletePreviousAnyToOneRelations,
-  deleteAllRelations,
+  deleteRelations,
 };
