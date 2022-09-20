@@ -47,6 +47,10 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Amharic (Ethiopia) (am-ET)",
   },
   {
+    "code": "aig",
+    "name": "Antigua and Barbuda Creole English",
+  },
+  {
     "code": "ar",
     "name": "Arabic (ar)",
   },
@@ -173,6 +177,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "ksf-CM",
     "name": "Bafia (Cameroon) (ksf-CM)",
+  },
+  {
+    "code": "bah",
+    "name": "Bahamas Creole English",
   },
   {
     "code": "bm",
@@ -451,12 +459,20 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "English (en)",
   },
   {
+    "code": "en-AI",
+    "name": "English (Anguilla) (en-AI)",
+  },
+  {
     "code": "en-AS",
     "name": "English (American Samoa) (en-AS)",
   },
   {
     "code": "en-AU",
     "name": "English (Australia) (en-AU)",
+  },
+  {
+    "code": "en-AT",
+    "name": "English (Austria) (en-AT)",
   },
   {
     "code": "en-BB",
@@ -477,6 +493,106 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "en-BW",
     "name": "English (Botswana) (en-BW)",
+  },
+  {
+    "code": "en-IO",
+    "name": "English (British Indian Ocean Territory) (en-IO)",
+  },
+  {
+    "code": "en-BI",
+    "name": "English (Burundi) (en-BI)",
+  },
+  {
+    "code": "en-CM",
+    "name": "English (Cameroon) (en-CM)",
+  },
+  {
+    "code": "en-CA",
+    "name": "English (Canada) (en-CA)",
+  },
+  {
+    "code": "en-KY",
+    "name": "English (Cayman Islands) (en-KY)",
+  },
+  {
+    "code": "en-CX",
+    "name": "English (Christmas Island) (en-CX)",
+  },
+  {
+    "code": "en-CC",
+    "name": "English (Cocos [Keeling] Islands) (en-CC)",
+  },
+  {
+    "code": "en-CK",
+    "name": "English (Cook Islands) (en-CK)",
+  },
+  {
+    "code": "en-CY",
+    "name": "English (Cyprus) (en-CY)",
+  },
+  {
+    "code": "en-DK",
+    "name": "English (Denmark) (en-DK)",
+  },
+  {
+    "code": "en-DG",
+    "name": "English (Diego Garcia) (en-DG)",
+  },
+  {
+    "code": "en-DM",
+    "name": "English (Dominica) (en-DM)",
+  },
+  {
+    "code": "en-EG",
+    "name": "English (Egypt) (en-EG)",
+  },
+  {
+    "code": "en-ER",
+    "name": "English (Eritrea) (en-ER)",
+  },
+  {
+    "code": "en-EU",
+    "name": "English (Europe) (en-EU)",
+  },
+  {
+    "code": "en-FK",
+    "name": "English (Falkland Islands) (en-FK)",
+  },
+  {
+    "code": "en-FJ",
+    "name": "English (Fiji) (en-FJ)",
+  },
+  {
+    "code": "en-FI",
+    "name": "English (Finland) (en-FI)",
+  },
+  {
+    "code": "en-GM",
+    "name": "English (Gambia) (en-GM)",
+  },
+  {
+    "code": "en-DE",
+    "name": "English (Germany) (en-DE)",
+  },
+  {
+    "code": "en-GH",
+    "name": "English (Ghana) (en-GH)",
+  },
+  {
+    "code": "en-GI",
+    "name": "English (Gibraltar) (en-GI)",
+  },
+  {
+    "code": "en-GD",
+    "name": "English (Grenada) (en-GD)",
+  },
+  {
+    "code": "en-GU",
+    "name": "English (Guam) (en-GU)",
+  },
+  {
+    "code": "en-GG",
+    "name": "English (Guernsey) (en-GG)",
   },
   {
     "code": "en-CA",
@@ -511,6 +627,50 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "English (Ireland) (en-IE)",
   },
   {
+    "code": "en-IM",
+    "name": "English (Isle of Man) (en-IM)",
+  },
+  {
+    "code": "en-IL",
+    "name": "English (Israel) (en-IL)",
+  },
+  {
+    "code": "en-JM",
+    "name": "English (Jamaica) (en-JM)",
+  },
+  {
+    "code": "en-JE",
+    "name": "English (Jersey) (en-JE)",
+  },
+  {
+    "code": "en-KE",
+    "name": "English (Kenya) (en-KE)",
+  },
+  {
+    "code": "en-KI",
+    "name": "English (Kiribati) (en-KI)",
+  },
+  {
+    "code": "en-LS",
+    "name": "English (Lesotho) (en-LS)",
+  },
+  {
+    "code": "en-MO",
+    "name": "English (Macao SAR China) (en-MO)",
+  },
+  {
+    "code": "en-MG",
+    "name": "English (Madagascar) (en-MG)",
+  },
+  {
+    "code": "en-MW",
+    "name": "English (Malawi) (en-MW)",
+  },
+  {
+    "code": "en-MY",
+    "name": "English (Malaysia) (en-MY)",
+  },
+  {
     "code": "en-JM",
     "name": "English (Jamaica) (en-JM)",
   },
@@ -527,6 +687,42 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "English (Mauritius) (en-MU)",
   },
   {
+    "code": "en-FM",
+    "name": "English (Micronesia) (en-FM)",
+  },
+  {
+    "code": "en-MS",
+    "name": "English (Montserrat) (en-MS)",
+  },
+  {
+    "code": "en-NA",
+    "name": "English (Namibia) (en-NA)",
+  },
+  {
+    "code": "en-NR",
+    "name": "English (Nauru) (en-NR)",
+  },
+  {
+    "code": "en-NL",
+    "name": "English (Netherlands) (en-NL)",
+  },
+  {
+    "code": "en-NZ",
+    "name": "English (New Zealand) (en-NZ)",
+  },
+  {
+    "code": "en-NG",
+    "name": "English (Nigeria) (en-NG)",
+  },
+  {
+    "code": "en-NU",
+    "name": "English (Niue) (en-NU)",
+  },
+  {
+    "code": "en-NF",
+    "name": "English (Norfolk Island) (en-NF)",
+  },
+  {
     "code": "en-NA",
     "name": "English (Namibia) (en-NA)",
   },
@@ -541,6 +737,126 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "en-PK",
     "name": "English (Pakistan) (en-PK)",
+  },
+  {
+    "code": "en-PW",
+    "name": "English (Palau) (en-PW)",
+  },
+  {
+    "code": "en-PG",
+    "name": "English (Papua New Guinea) (en-PG)",
+  },
+  {
+    "code": "en-PH",
+    "name": "English (Philippines) (en-PH)",
+  },
+  {
+    "code": "en-PN",
+    "name": "English (Pitcairn Islands) (en-PN)",
+  },
+  {
+    "code": "en-PR",
+    "name": "English (Puerto Rico) (en-PR)",
+  },
+  {
+    "code": "en-RW",
+    "name": "English (Rwanda) (en-RW)",
+  },
+  {
+    "code": "en-WS",
+    "name": "English (Samoa) (en-WS)",
+  },
+  {
+    "code": "en-SA",
+    "name": "English (Saudi Arabia) (en-SA)",
+  },
+  {
+    "code": "en-SC",
+    "name": "English (Seychelles) (en-SC)",
+  },
+  {
+    "code": "en-SL",
+    "name": "English (Sierra Leone) (en-SL)",
+  },
+  {
+    "code": "en-SG",
+    "name": "English (Singapore) (en-SG)",
+  },
+  {
+    "code": "en-SX",
+    "name": "English (Sint Maarten) (en-SX)",
+  },
+  {
+    "code": "en-SI",
+    "name": "English (Slovenia) (en-SI)",
+  },
+  {
+    "code": "en-SB",
+    "name": "English (Solomon Islands) (en-SB)",
+  },
+  {
+    "code": "en-ZA",
+    "name": "English (South Africa) (en-ZA)",
+  },
+  {
+    "code": "en-SS",
+    "name": "English (South Sudan) (en-SS)",
+  },
+  {
+    "code": "en-SH",
+    "name": "English (St Helena) (en-SH)",
+  },
+  {
+    "code": "en-KN",
+    "name": "English (St Kitts & Nevis) (en-KN)",
+  },
+  {
+    "code": "en-LC",
+    "name": "English (St Lucia) (en-LC)",
+  },
+  {
+    "code": "svc",
+    "name": "Vincentian Creole English",
+  },
+  {
+    "code": "vic",
+    "name": "Virgin Islands Creole English",
+  },
+  {
+    "code": "en-SD",
+    "name": "English (Sudan) (en-SD)",
+  },
+  {
+    "code": "en-SZ",
+    "name": "English (Swaziland) (en-SZ)",
+  },
+  {
+    "code": "en-SE",
+    "name": "English (Sweden) (en-SE)",
+  },
+  {
+    "code": "en-CH",
+    "name": "English (Switzerland) (en-CH)",
+  },
+  {
+    "code": "en-TZ",
+    "name": "English (Tanzania) (en-TZ)",
+  },
+  {
+    "code": "en-TK",
+    "name": "English (Tokelau) (en-TK)",
+  },
+  {
+    "code": "en-TO",
+    "name": "English (Tonga) (en-TO)",
+  },
+  {
+    "code": "en-TT",
+    "name": "English (Trinidad and Tobago) (en-TT)",
+  },
+  {
+    "code": "en-TV",
+    "name": "English (Tuvalu) (en-TV)",
   },
   {
     "code": "en-PH",
@@ -579,12 +895,24 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "English (U.S., Computer) (en-US-POSIX)",
   },
   {
+    "code": "en-UG",
+    "name": "English (Uganda) (en-UG)",
+  },
+  {
     "code": "en-GB",
     "name": "English (United Kingdom) (en-GB)",
   },
   {
     "code": "en-US",
     "name": "English (United States) (en-US)",
+  },
+  {
+    "code": "en-VU",
+    "name": "English (Vanuatu) (en-VU)",
+  },
+  {
+    "code": "en-ZM",
+    "name": "English (Zambia) (en-ZM)",
   },
   {
     "code": "en-ZW",
@@ -1137,6 +1465,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "lv-LV",
     "name": "Latvian (Latvia) (lv-LV)",
+  },
+  {
+    "code": "lir",
+    "name": "Liberian English",
   },
   {
     "code": "ln",
@@ -1941,6 +2273,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "tr-TR",
     "name": "Turkish (Turkey) (tr-TR)",
+  },
+  {
+    "code": "tch",
+    "name": "Turks And Caicos Creole English",
   },
   {
     "code": "uk",
