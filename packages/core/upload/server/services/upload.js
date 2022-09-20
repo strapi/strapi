@@ -201,7 +201,7 @@ module.exports = ({ strapi }) => ({
       height,
     });
 
-    // For performance reasons, these uploads are wrapped in a single Promise.all
+    // For performance reasons, all uploads are wrapped in a single Promise.all
     const uploadThumbnail = async (thumbnailFile) => {
       await getService('provider').upload(thumbnailFile);
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
@@ -213,11 +213,10 @@ module.exports = ({ strapi }) => ({
       _.set(fileData, ['formats', key], file);
     };
 
-    // Upload original image first in case there is an error
-    // f.e. the image is too big but the responsive formats are not.
-    await getService('provider').upload(fileData);
-
     const uploadPromises = [];
+
+    // Upload image
+    uploadPromises.push(getService('provider').upload(fileData));
 
     // Generate & Upload thumbnail and responsive formats
     if (await isOptimizableImage(fileData)) {
@@ -246,6 +245,9 @@ module.exports = ({ strapi }) => ({
     const config = strapi.config.get('plugin.upload');
 
     const { isImage } = getService('image-manipulation');
+
+    // Validate image size
+    await getService('provider').checkFileSize(fileData);
 
     if (await isImage(fileData)) {
       await this.uploadImage(fileData);
