@@ -142,6 +142,11 @@ const createCompoLinkModelMeta = (baseModelMeta) => {
         name: `${baseModelMeta.tableName}_entity_fk`,
         columns: ['entity_id'],
       },
+      {
+        name: `${baseModelMeta.tableName}_unique`,
+        columns: ['entity_id', 'component_id', 'field'],
+        type: 'unique',
+      },
     ],
     foreignKeys: [
       {

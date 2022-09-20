@@ -444,6 +444,11 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
         name: `${joinTableName}_inv_fk`,
         columns: [inverseJoinColumnName],
       },
+      {
+        name: `${joinTableName}_unique`,
+        columns: [joinColumnName, inverseJoinColumnName],
+        type: 'unique',
+      },
     ],
     foreignKeys: [
       {
