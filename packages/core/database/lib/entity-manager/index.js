@@ -16,6 +16,8 @@ const {
   isEqual,
   differenceWith,
   isNumber,
+  map,
+  difference,
 } = require('lodash/fp');
 const types = require('../types');
 const { createField } = require('../fields');
@@ -723,7 +725,7 @@ const createEntityManager = (db) => {
 
           // only delete relations
           if (isNull(cleanRelationData.set)) {
-            await deleteRelations({ id, attribute, joinTable, db }, { relsToDelete: 'all' });
+            await deleteRelations({ id, attribute, joinTable, db }, { relIdsToDelete: 'all' });
           } else {
             const isPartialUpdate = !has('set', cleanRelationData);
             let relIdsToaddOrMove;
@@ -740,10 +742,7 @@ const createEntityManager = (db) => {
                 differenceWith(isEqual, cleanRelationData.disconnect, cleanRelationData.connect)
               );
 
-              await deleteRelations(
-                { id, attribute, joinTable, db },
-                { relsToDelete: relIdsToDelete }
-              );
+              await deleteRelations({ id, attribute, joinTable, db }, { relIdsToDelete });
 
               // add/move
               let max;
@@ -838,63 +837,75 @@ const createEntityManager = (db) => {
               relIdsToaddOrMove = toIds(cleanRelationData.set);
               await deleteRelations(
                 { id, attribute, joinTable, db },
-                { relsToDelete: 'all', relsToNotDelete: relIdsToaddOrMove }
+                { relIdsToDelete: 'all', relIdsToNotDelete: relIdsToaddOrMove }
               );
 
-              const currentMovingRels = await this.createQueryBuilder(joinTable.name)
-                .select(select)
-                .where({
-                  [joinColumn.name]: id,
-                  [inverseJoinColumn.name]: { $in: relIdsToaddOrMove },
-                })
-                .where(joinTable.on || {})
-                .execute();
-              const currentMovingRelsMap = currentMovingRels.reduce(
-                (acc, rel) => Object.assign(acc, { [rel[inverseJoinColumn.name]]: rel }),
-                {}
-              );
-
-              let index = 0;
-              for (const relToAdd of cleanRelationData.set) {
-                const currentRel = currentMovingRelsMap[relToAdd.id];
-
-                if (currentRel && isAnyToMany(attribute)) {
-                  const update = { [orderColumnName]: index + 1 };
-                  await this.createQueryBuilder(joinTable.name)
-                    .update(update)
-                    .where({
-                      [joinColumn.name]: id,
-                      [inverseJoinColumn.name]: relToAdd.id,
-                    })
-                    .where(joinTable.on || {})
-                    .execute();
-                } else if (!currentRel) {
-                  const insert = {
-                    [joinColumn.name]: id,
-                    [inverseJoinColumn.name]: relToAdd.id,
-                    ...(joinTable.on || {}),
-                    ...(relToAdd.__pivot || {}),
-                  };
-
-                  if (isAnyToMany(attribute)) {
-                    insert[orderColumnName] = index + 1;
-                  }
-                  // can be optimized in one query
-                  if (isBidirectional(attribute) && isManyToAny(attribute)) {
-                    const { max: reverseMax } = await this.createQueryBuilder(joinTable.name)
-                      .max(inverseOrderColumnName)
-                      .where({ [inverseJoinColumn.name]: id })
-                      .where(joinTable.on || {})
-                      .first()
-                      .execute();
-
-                    insert[inverseOrderColumnName] = reverseMax + 1;
-                  }
-
-                  await this.createQueryBuilder(joinTable.name).insert(insert).execute();
-                }
-                index += 1;
+              if (isEmpty(cleanRelationData.set)) {
+                continue;
               }
+
+              const insert = cleanRelationData.set.map((relToAdd) => ({
+                [joinColumn.name]: id,
+                [inverseJoinColumn.name]: relToAdd.id,
+                ...(joinTable.on || {}),
+                ...(relToAdd.__pivot || {}),
+              }));
+
+              // add order value
+              if (isAnyToMany(attribute)) {
+                insert.forEach((row, idx) => {
+                  row[orderColumnName] = idx + 1;
+                });
+              }
+
+              // add inv order value
+              if (isBidirectional(attribute) && isManyToAny(attribute)) {
+                const existingRels = await this.createQueryBuilder(joinTable.name)
+                  .select('id')
+                  .where({
+                    [joinColumn.name]: id,
+                    [inverseJoinColumn.name]: { $in: relIdsToaddOrMove },
+                  })
+                  .where(joinTable.on || {})
+                  .execute();
+
+                const nonExistingRelsIds = difference(relIdsToaddOrMove, map('id', existingRels));
+
+                const maxResults = await db
+                  .getConnection()
+                  .select(inverseJoinColumn.name)
+                  .max(inverseOrderColumnName, { as: 'max' })
+                  .whereIn(inverseJoinColumn.name, nonExistingRelsIds)
+                  .where(joinTable.on || {})
+                  .groupBy(inverseJoinColumn.name)
+                  .from(joinTable.name);
+
+                const maxMap = maxResults.reduce(
+                  (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
+                  {}
+                );
+
+                insert.forEach((row) => {
+                  row[inverseOrderColumnName] = (maxMap[row[inverseJoinColumn.name]] || 0) + 1;
+                });
+              }
+
+              // insert rows
+              const query = this.createQueryBuilder(joinTable.name)
+                .insert(insert)
+                .onConflict([
+                  joinColumn.name,
+                  inverseJoinColumn.name,
+                  ...Object.keys(joinTable.on || {}),
+                ]);
+
+              if (isAnyToMany(attribute)) {
+                query.merge([orderColumnName]);
+              } else {
+                query.ignore();
+              }
+
+              await query.execute();
             }
 
             // Delete the previous relations for oneToAny relations
@@ -1031,7 +1042,7 @@ const createEntityManager = (db) => {
         if (attribute.joinTable) {
           const { joinTable } = attribute;
 
-          await deleteRelations({ id, attribute, joinTable, db }, { relsToDelete: 'all' });
+          await deleteRelations({ id, attribute, joinTable, db }, { relIdsToDelete: 'all' });
         }
       }
     },
