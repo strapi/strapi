@@ -356,7 +356,6 @@
   "components.FilterOptions.FILTER_TYPES.$lt": "小于",
   "components.FilterOptions.FILTER_TYPES.$lte": "小于或等于",
   "components.FilterOptions.FILTER_TYPES.$ne": "不等于",
-  "components.FilterOptions.FILTER_TYPES.$neq": "不等于",
   "components.FilterOptions.FILTER_TYPES.$notContains": "不包含 (区分大小写)",
   "components.FilterOptions.FILTER_TYPES.$notNull": "不为空",
   "components.FilterOptions.FILTER_TYPES.$null": "为空",
