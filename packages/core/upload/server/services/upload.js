@@ -243,10 +243,8 @@ module.exports = ({ strapi }) => ({
    */
   async uploadFileAndPersist(fileData, { user } = {}) {
     const config = strapi.config.get('plugin.upload');
-
     const { isImage } = getService('image-manipulation');
 
-    // Validate image size
     await getService('provider').checkFileSize(fileData);
 
     if (await isImage(fileData)) {
