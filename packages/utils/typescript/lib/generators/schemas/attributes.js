@@ -75,14 +75,14 @@ const getAttributeModifiers = (attribute) => {
     addImport('CustomField');
 
     const customFieldUid = factory.createStringLiteral(attribute.customField);
-    const typeParams = [customFieldUid];
+    const typeArguments = [customFieldUid];
 
     if (attribute.options) {
-      typeParams.push(toTypeLiteral(attribute.options));
+      typeArguments.push(toTypeLiteral(attribute.options));
     }
 
     modifiers.push(
-      factory.createTypeReferenceNode(factory.createIdentifier('CustomField'), typeParams)
+      factory.createTypeReferenceNode(factory.createIdentifier('CustomField'), typeArguments)
     );
   }
 
