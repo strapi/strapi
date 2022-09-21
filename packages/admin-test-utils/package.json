@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin-test-utils",
-  "version": "4.3.6",
+  "version": "4.3.9",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",
@@ -33,6 +33,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
-    "node": ">=14.19.1 <=16.x.x"
+    "node": ">=14.19.1 <=18.x.x"
   }
 }

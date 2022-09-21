@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-aws-s3",
-  "version": "4.3.6",
+  "version": "4.3.9",
   "description": "AWS S3 provider for strapi upload",
   "keywords": [
     "upload",
@@ -37,11 +37,11 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "aws-sdk": "2.1188.0",
+    "aws-sdk": "2.1215.0",
     "lodash": "4.17.21"
   },
   "engines": {
-    "node": ">=14.19.1 <=16.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   }
 }

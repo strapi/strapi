@@ -21,6 +21,7 @@ const createEntityService = require('./services/entity-service');
 const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
+const requestContext = require('./services/request-context');
 const createAuth = require('./services/auth');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
@@ -108,6 +109,7 @@ class Strapi {
     this.log = createLogger(this.config.get('logger', {}));
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
+    this.requestContext = requestContext;
 
     createUpdateNotifier(this).notify();
   }
