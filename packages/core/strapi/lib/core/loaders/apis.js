@@ -40,7 +40,7 @@ module.exports = async (strapi) => {
 
   validateContentTypesUnicity(apis);
 
-  for (const apiName in apis) {
+  for (const apiName of Object.keys(apis)) {
     strapi.container.get('apis').add(apiName, apis[apiName]);
   }
 };
@@ -131,11 +131,12 @@ const loadDir = async (dir) => {
 
   const root = {};
   for (const fd of fds) {
-    if (!fd.isFile()) {
+    if (!fd.isFile() || extname(fd.name) === '.map') {
       continue;
     }
 
     const key = basename(fd.name, extname(fd.name));
+
     root[normalizeName(key)] = await loadFile(join(dir, fd.name));
   }
 

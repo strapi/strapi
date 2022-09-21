@@ -22,7 +22,7 @@ const createMiddleware = ({ sendEvent }) => {
         sendEvent('didReceiveRequest', { eventProperties: { url: ctx.request.url } });
 
         // Increase counter.
-        _state.counter++;
+        _state.counter += 1;
       }
     }
 

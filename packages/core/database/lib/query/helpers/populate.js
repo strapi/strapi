@@ -8,7 +8,7 @@ const { fromRow } = require('./transform');
 const getRootLevelPopulate = (meta) => {
   const populate = {};
 
-  for (const attributeName in meta.attributes) {
+  for (const attributeName of Object.keys(meta.attributes)) {
     const attribute = meta.attributes[attributeName];
     if (attribute.type === 'relation') {
       populate[attributeName] = true;
@@ -72,7 +72,7 @@ const processPopulate = (populate, ctx) => {
   }
 
   const finalPopulate = {};
-  for (const key in populateMap) {
+  for (const key of Object.keys(populateMap)) {
     const attribute = meta.attributes[key];
 
     if (!attribute) {
@@ -119,7 +119,7 @@ const applyPopulate = async (results, populate, ctx) => {
     return results;
   }
 
-  for (const key in populate) {
+  for (const key of Object.keys(populate)) {
     const attribute = meta.attributes[key];
     const targetMeta = db.metadata.get(attribute.target);
 
@@ -540,7 +540,7 @@ const applyPopulate = async (results, populate, ctx) => {
       }, {});
 
       const map = {};
-      for (const type in idsByType) {
+      for (const type of Object.keys(idsByType)) {
         const ids = idsByType[type];
 
         // type was removed but still in morph relation
@@ -604,7 +604,7 @@ const applyPopulate = async (results, populate, ctx) => {
       }, {});
 
       const map = {};
-      for (const type in idsByType) {
+      for (const type of Object.keys(idsByType)) {
         const ids = idsByType[type];
 
         // type was removed but still in morph relation

@@ -65,11 +65,11 @@ const AuthenticatedApp = () => {
     if (userRoles) {
       const isUserSuperAdmin = userRoles.find(({ code }) => code === 'strapi-super-admin');
 
-      if (isUserSuperAdmin) {
+      if (isUserSuperAdmin && appInfos?.autoReload) {
         setGuidedTourVisibilityRef.current(true);
       }
     }
-  }, [userRoles]);
+  }, [userRoles, appInfos]);
 
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
