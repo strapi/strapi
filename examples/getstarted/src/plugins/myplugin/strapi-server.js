@@ -11,5 +11,6 @@ module.exports = () => {
     config,
     controllers,
     contentTypes,
+    routes: require('./server/routes'),
   };
 };

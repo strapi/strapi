@@ -67,7 +67,7 @@ const applyUserConfig = async (plugins) => {
 
     const config = defaultsDeep(defaultConfig, userPluginConfig);
     try {
-      plugin.config.validator(config);
+      plugin.config?.validator?.(config);
     } catch (e) {
       throw new Error(`Error regarding ${pluginName} config: ${e.message}`);
     }
@@ -101,7 +101,8 @@ const loadPlugins = async (strapi) => {
     }
 
     const pluginServer = loadConfigFile(serverEntrypointPath);
-    plugins[pluginName] = defaultsDeep(defaultPlugin, pluginServer);
+    // plugins[pluginName] = defaultsDeep(defaultPlugin, pluginServer);
+    plugins[pluginName] = { ...defaultPlugin, ...pluginServer };
   }
 
   // TODO: validate plugin format
