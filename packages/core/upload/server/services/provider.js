@@ -9,7 +9,7 @@ module.exports = ({ strapi }) => ({
       return strapi.plugin('upload').provider.generateFileName(filename);
     }
   },
-  
+
   async upload(file) {
     if (isFunction(strapi.plugin('upload').provider.uploadStream)) {
       file.stream = file.getStream();
