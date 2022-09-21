@@ -438,6 +438,8 @@ describe('Attributes', () => {
         });
       });
 
+      // TODO custom field
+
       describe('Plugin Options', () => {
         test('No plugin options', () => {
           const attribute = {};
