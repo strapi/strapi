@@ -54,7 +54,7 @@ const willRegisterPermission = (context) => {
 const registerI18nPermissionsHandlers = () => {
   const { engine } = strapi.admin.services.permission;
 
-  engine.hooks.willRegisterPermission.register(willRegisterPermission);
+  engine.hooks['before-register.permission'].register(willRegisterPermission);
 };
 
 module.exports = {

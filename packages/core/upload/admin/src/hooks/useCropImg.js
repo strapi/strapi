@@ -52,7 +52,7 @@ export const useCropImg = () => {
       if (!cropperRef.current) {
         reject(
           new Error(
-            'The cropper has not been instanciated: make sure to call the crop() function before calling produceFile().'
+            'The cropper has not been instantiated: make sure to call the crop() function before calling produceFile().'
           )
         );
       } else {
