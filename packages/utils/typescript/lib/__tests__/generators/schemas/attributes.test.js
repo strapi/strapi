@@ -448,7 +448,7 @@ describe('Attributes', () => {
 
         test('Basic custom field', () => {
           const attribute = {
-            type: 'customField',
+            type: 'string',
             customField: 'plugin::color-picker.color',
           };
           const modifiers = getAttributeModifiers(attribute);
@@ -463,7 +463,7 @@ describe('Attributes', () => {
 
         test('Advanced custom field', () => {
           const attribute = {
-            type: 'customField',
+            type: 'string',
             customField: 'plugin::color-picker.color',
             options: {
               format: 'hex',
