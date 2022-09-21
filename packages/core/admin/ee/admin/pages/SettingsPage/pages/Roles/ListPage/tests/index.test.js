@@ -93,6 +93,7 @@ describe('<ListPage />', () => {
       .c4 {
         -webkit-animation: gzYjWD 1s infinite linear;
         animation: gzYjWD 1s infinite linear;
+        will-change: transform;
       }
 
       .c2 {
