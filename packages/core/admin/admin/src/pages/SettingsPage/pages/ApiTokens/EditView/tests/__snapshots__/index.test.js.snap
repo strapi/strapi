@@ -756,6 +756,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   width: 1px;
 }
 
+.c0:focus-visible {
+  outline: none;
+}
+
 .c1 {
   background: #f6f6f9;
   padding-top: 24px;
@@ -810,10 +814,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
-}
-
-.c0:focus-visible {
-  outline: none;
 }
 
 .c59 {
@@ -2725,6 +2725,10 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   width: 1px;
 }
 
+.c0:focus-visible {
+  outline: none;
+}
+
 .c20 {
   padding-right: 56px;
   padding-left: 56px;
@@ -2779,10 +2783,6 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   font-weight: 600;
   font-size: 2rem;
   line-height: 1.25;
-}
-
-.c0:focus-visible {
-  outline: none;
 }
 
 .c71 {
