@@ -731,13 +731,11 @@ const createEntityManager = (db) => {
             let relIdsToaddOrMove;
 
             if (isPartialUpdate) {
-              // does not support pivot
               if (isAnyToOne(attribute)) {
                 cleanRelationData.connect = cleanRelationData.connect.slice(-1);
                 cleanRelationData.disconnect = [];
               }
               relIdsToaddOrMove = toIds(cleanRelationData.connect);
-              // DELETE relations in disconnect
               const relIdsToDelete = toIds(
                 differenceWith(isEqual, cleanRelationData.disconnect, cleanRelationData.connect)
               );
@@ -769,6 +767,25 @@ const createEntityManager = (db) => {
                     .execute()
                 ).max;
               }
+
+              const nonExistingRelsIds = difference(
+                relIdsToaddOrMove,
+                map(inverseJoinColumn.name, currentMovingRels)
+              );
+
+              const maxResults = await db
+                .getConnection()
+                .select(inverseJoinColumn.name)
+                .max(inverseOrderColumnName, { as: 'max' })
+                .whereIn(inverseJoinColumn.name, nonExistingRelsIds)
+                .where(joinTable.on || {})
+                .groupBy(inverseJoinColumn.name)
+                .from(joinTable.name);
+
+              const maxMap = maxResults.reduce(
+                (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
+                {}
+              );
 
               for (const relToAddOrMove of cleanRelationData.connect) {
                 const currentRel = currentMovingRelsMap[relToAddOrMove.id];
@@ -818,14 +835,7 @@ const createEntityManager = (db) => {
                   }
 
                   if (isBidirectional(attribute) && isManyToAny(attribute)) {
-                    const { max: reverseMax } = await this.createQueryBuilder(joinTable.name)
-                      .max(inverseOrderColumnName)
-                      .where({ [inverseJoinColumn.name]: relToAddOrMove.id })
-                      .where(joinTable.on || {})
-                      .first()
-                      .execute();
-
-                    insert[inverseOrderColumnName] = reverseMax + 1;
+                    insert[inverseOrderColumnName] = (maxMap[relToAddOrMove.id] || 0) + 1;
                   }
 
                   await this.createQueryBuilder(joinTable.name).insert(insert).execute();
@@ -861,7 +871,7 @@ const createEntityManager = (db) => {
               // add inv order value
               if (isBidirectional(attribute) && isManyToAny(attribute)) {
                 const existingRels = await this.createQueryBuilder(joinTable.name)
-                  .select('id')
+                  .select(inverseJoinColumn.name)
                   .where({
                     [joinColumn.name]: id,
                     [inverseJoinColumn.name]: { $in: relIdsToaddOrMove },
@@ -869,7 +879,10 @@ const createEntityManager = (db) => {
                   .where(joinTable.on || {})
                   .execute();
 
-                const nonExistingRelsIds = difference(relIdsToaddOrMove, map('id', existingRels));
+                const nonExistingRelsIds = difference(
+                  relIdsToaddOrMove,
+                  map(inverseJoinColumn.name, existingRels)
+                );
 
                 const maxResults = await db
                   .getConnection()
