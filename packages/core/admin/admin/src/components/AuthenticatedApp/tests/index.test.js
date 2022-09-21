@@ -130,6 +130,7 @@ describe('Admin | components | AuthenticatedApp', () => {
       .c3 {
         -webkit-animation: gzYjWD 1s infinite linear;
         animation: gzYjWD 1s infinite linear;
+        will-change: transform;
       }
 
       .c1 {
