@@ -1,15 +1,17 @@
 import * as yup from 'yup';
 import { toLower, trim } from 'lodash';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+import { nameToCollectionName } from '@strapi/utils/lib';
 import getTrad from '../../../utils/getTrad';
 import { createUid } from '../utils/createUid';
 
-const createContentTypeSchema = (
-  usedContentTypeNames,
-  reservedNames,
-  singularNames,
-  pluralNames
-) => {
+const createContentTypeSchema = ({
+  usedContentTypeNames = [],
+  reservedModels = [],
+  reservedCollectionNames = [],
+  singularNames = [],
+  pluralNames = [],
+}) => {
   const shape = {
     displayName: yup
       .string()
@@ -34,7 +36,7 @@ const createContentTypeSchema = (
             return false;
           }
 
-          return !reservedNames.includes(toLower(trim(value)));
+          return !reservedModels.includes(toLower(trim(value)));
         },
       })
       .required(errorsTrads.required),
@@ -70,7 +72,20 @@ const createContentTypeSchema = (
             return false;
           }
 
-          return !reservedNames.includes(toLower(trim(value)));
+          return !reservedModels.includes(toLower(trim(value)));
+        },
+      })
+      .test({
+        name: 'pluralCollectionNameNotAllowed',
+        message: getTrad('error.contentTypeName.reserved-name'),
+        test(value) {
+          // test whether the given plural name will create a conflict with a
+          // default DB table name
+          if (!value) {
+            return false;
+          }
+
+          return !reservedCollectionNames.includes(nameToCollectionName(toLower(trim(value))));
         },
       })
       .required(errorsTrads.required),
@@ -106,7 +121,7 @@ const createContentTypeSchema = (
             return false;
           }
 
-          return !reservedNames.includes(toLower(trim(value)));
+          return !reservedModels.includes(toLower(trim(value)));
         },
       })
       .required(errorsTrads.required),
