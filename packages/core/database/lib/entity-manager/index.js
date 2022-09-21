@@ -525,30 +525,30 @@ const createEntityManager = (db) => {
             };
           });
 
-          // add order value when relevant
+          // add order value
           if (isAnyToMany(attribute)) {
             insert.forEach((rel, idx) => {
               rel[orderColumnName] = idx + 1;
             });
           }
-          // add inv_order value when relevant
+          // add inv_order value
           if (isBidirectional(attribute) && isManyToAny(attribute)) {
-            const maxMap = {};
-            await Promise.all(
-              relIdsToadd.map(async (relId) => {
-                const { max } = await this.createQueryBuilder(joinTable.name)
-                  .max(inverseOrderColumnName)
-                  .where({ [inverseJoinColumn.name]: relId })
-                  .where(joinTable.on || {})
-                  .first()
-                  .execute();
+            const maxResults = await db
+              .getConnection()
+              .select(inverseJoinColumn.name)
+              .max(inverseOrderColumnName, { as: 'max' })
+              .whereIn(inverseJoinColumn.name, relIdsToadd)
+              .where(joinTable.on || {})
+              .groupBy(inverseJoinColumn.name)
+              .from(joinTable.name);
 
-                maxMap[relId] = max;
-              })
+            const maxMap = maxResults.reduce(
+              (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
+              {}
             );
 
             insert.forEach((rel) => {
-              rel[inverseOrderColumnName] = maxMap[rel[inverseJoinColumn.name]] + 1;
+              rel[inverseOrderColumnName] = (maxMap[rel[inverseJoinColumn.name]] || 0) + 1;
             });
           }
 
