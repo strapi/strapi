@@ -1,7 +1,7 @@
 'use strict';
 
 const { GraphQLDateTime, GraphQLLong, GraphQLJSON } = require('graphql-scalars');
-const { GraphQLUpload } = require('graphql-upload');
+const { GraphQLUpload } = require('graphql-upload-cjs');
 const { asNexusMethod } = require('nexus');
 
 const TimeScalar = require('./time');

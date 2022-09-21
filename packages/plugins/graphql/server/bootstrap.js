@@ -9,7 +9,7 @@ const {
   ApolloServerPluginLandingPageGraphQLPlayground,
 } = require('apollo-server-core');
 const depthLimit = require('graphql-depth-limit');
-const { graphqlUploadKoa } = require('graphql-upload');
+const { graphqlUploadKoa } = require('graphql-upload-cjs');
 const formatGraphqlError = require('./format-graphql-error');
 
 const merge = mergeWith((a, b) => {

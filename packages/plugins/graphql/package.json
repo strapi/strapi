@@ -37,7 +37,7 @@
     "graphql-depth-limit": "^1.1.0",
     "graphql-playground-middleware-koa": "^1.6.21",
     "graphql-scalars": "1.17.0",
-    "graphql-upload": "15.0.2",
+    "graphql-upload-cjs": "15.0.2",
     "koa-compose": "^4.1.0",
     "lodash": "4.17.21",
     "nexus": "1.2.0",
