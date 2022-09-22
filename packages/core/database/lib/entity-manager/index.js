@@ -438,12 +438,13 @@ const createEntityManager = (db) => {
 
           const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
-          const rows = cleanRelationData.set.map((data) => ({
+          const rows = cleanRelationData.set.map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
             ...(joinTable.on || {}),
             ...(data.__pivot || {}),
+            order: idx + 1,
           }));
 
           if (isEmpty(rows)) {
@@ -657,12 +658,13 @@ const createEntityManager = (db) => {
             })
             .execute();
 
-          const rows = cleanRelationData.set.map((data) => ({
+          const rows = cleanRelationData.set.map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
             ...(joinTable.on || {}),
             ...(data.__pivot || {}),
+            order: idx + 1,
           }));
 
           if (isEmpty(rows)) {
