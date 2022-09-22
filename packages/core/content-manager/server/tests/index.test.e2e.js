@@ -585,7 +585,7 @@ describe('Relations', () => {
       expect(tags.length).toBe(0);
 
       const category = await getRelations('article', 'category', body.id);
-      expect(category.name).toBe(data.categories[0].name);
+      expect(category[0].name).toBe(data.categories[0].name);
     });
 
     test('Update article1 with cat2', async () => {
@@ -619,7 +619,7 @@ describe('Relations', () => {
       expect(tags.length).toBe(0);
 
       const category = await getRelations('article', 'category', body.id);
-      expect(category.name).toBe(data.categories[1].name);
+      expect(category[0].name).toBe(data.categories[1].name);
     });
 
     test('Create article2', async () => {
@@ -687,7 +687,7 @@ describe('Relations', () => {
       expect(tags.length).toBe(0);
 
       const category = await getRelations('article', 'category', body.id);
-      expect(category.name).toBe(data.categories[1].name);
+      expect(category[0].name).toBe(data.categories[1].name);
     });
 
     test('Update cat1 with article1', async () => {
@@ -760,7 +760,8 @@ describe('Relations', () => {
       });
 
       expect(body).toMatchObject({
-        name: 'cat3',
+        results: [{ name: 'cat3' }],
+        pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 },
       });
     });
 
@@ -771,7 +772,8 @@ describe('Relations', () => {
       });
 
       expect(body).toMatchObject({
-        name: 'cat2',
+        results: [{ name: 'cat2' }],
+        pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 },
       });
     });
 
@@ -916,7 +918,7 @@ describe('Relations', () => {
       });
 
       const reference = await getRelations('article', 'reference', body.id);
-      expect(reference.id).toBe(data.references[0].id);
+      expect(reference[0].id).toBe(data.references[0].id);
     });
 
     test('Create article2 with ref1', async () => {
@@ -950,7 +952,7 @@ describe('Relations', () => {
         username: null,
       });
       const reference = await getRelations('article', 'reference', body.id);
-      expect(reference.id).toBe(data.references[0].id);
+      expect(reference[0].id).toBe(data.references[0].id);
     });
   });
 
@@ -976,7 +978,7 @@ describe('Relations', () => {
       expect(createdReference.id).toBeDefined();
 
       const tag = await getRelations('reference', 'tag', createdReference.id);
-      expect(tag.id).toBe(createdTag.id);
+      expect(tag[0].id).toBe(createdTag.id);
     });
 
     test('Detach Tag to a Reference', async () => {
@@ -998,7 +1000,7 @@ describe('Relations', () => {
       });
 
       let tag = await getRelations('reference', 'tag', createdReference.id);
-      expect(tag.id).toBe(createdTag.id);
+      expect(tag[0].id).toBe(createdTag.id);
 
       const { body: referenceToUpdate } = await rq({
         url: `/content-manager/collection-types/api::reference.reference/${createdReference.id}`,
