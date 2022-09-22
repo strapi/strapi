@@ -30,12 +30,11 @@ export const RelationInputDataManger = ({
   const { formatMessage } = useIntl();
   const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
-  const relationsCount = initialData[name]?.count ?? 0;
   const [{ query }] = useQueryParams();
 
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
-      enabled: relationsCount > 0 && !!endpoints.relation,
+      enabled: initialData[name]?.count !== 0 && !!endpoints.relation,
       endpoint: endpoints.relation,
       pageParams: {
         ...defaultParams,
@@ -141,13 +140,10 @@ export const RelationInputDataManger = ({
       description={description}
       disabled={isDisabled}
       id={name}
-      label={formatMessage(
-        {
-          id: intlLabel.id,
-          defaultMessage: `${intlLabel.defaultMessage} ({numberOfEntries})`,
-        },
-        { numberOfEntries: relationsCount }
-      )}
+      label={`${formatMessage({
+        id: intlLabel.id,
+        defaultMessage: intlLabel.defaultMessage,
+      })} ${initialData[name]?.count !== undefined ? `(${initialData[name].count})` : ''}`}
       labelAction={labelAction}
       labelLoadMore={
         // TODO: only display if there are more; derive from count

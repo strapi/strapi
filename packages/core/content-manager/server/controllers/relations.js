@@ -208,7 +208,8 @@ module.exports = {
       ctx.body = await strapi.entityService.findPage(targetedModel.uid, queryParams);
     } else {
       const results = await strapi.entityService.findMany(targetedModel.uid, queryParams);
-      ctx.body = results[0];
+      // TODO: Temporary fix (use data instead)
+      ctx.body = { results, pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 } };
     }
   },
 };
