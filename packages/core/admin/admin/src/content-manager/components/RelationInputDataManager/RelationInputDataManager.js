@@ -143,7 +143,7 @@ export const RelationInputDataManger = ({
       label={`${formatMessage({
         id: intlLabel.id,
         defaultMessage: intlLabel.defaultMessage,
-      })} ${initialData[name]?.count ? `(${initialData[name].count})` : ''}`}
+      })} ${initialData[name]?.count !== undefined ? `(${initialData[name].count})` : ''}`}
       labelAction={labelAction}
       labelLoadMore={
         // TODO: only display if there are more; derive from count
