@@ -1,6 +1,5 @@
 'use strict';
 
-const { isEmpty } = require('lodash/fp');
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
@@ -204,7 +203,7 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
             },
           ]);
         } else {
-          expect(res.body).toMatchObject({
+          expect(res.body.results[0]).toMatchObject({
             id: expect.any(Number),
             name: 'Skate',
             ...addPublishedAtCheck(expect.any(String)),
@@ -237,13 +236,8 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
           url: `/content-manager/collection-types/api::shop.shop/${data.shops[1].id}/${fieldName}`,
         });
 
-        if (isManyRelation) {
-          expect(res.status).toBe(200);
-          expect(res.body.results).toHaveLength(0);
-        } else {
-          expect(res.status).toBe(204);
-          expect(isEmpty(res.body)).toBe(true);
-        }
+        expect(res.status).toBe(200);
+        expect(res.body.results).toHaveLength(0);
       });
 
       if (isManyRelation) {
@@ -321,7 +315,7 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
             },
           ]);
         } else {
-          expect(res.body).toMatchObject({
+          expect(res.body.results[0]).toMatchObject({
             id: expect.any(Number),
             name: 'Skate',
             ...addPublishedAtCheck(expect.any(String)),
