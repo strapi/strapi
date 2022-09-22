@@ -505,10 +505,6 @@ const createEntityManager = (db) => {
           const { joinTable } = attribute;
           const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } =
             joinTable;
-          const select = [joinColumn.name];
-          if (isAnyToMany(attribute)) {
-            select.push(orderColumnName);
-          }
 
           const relsToAdd = cleanRelationData.set || cleanRelationData.connect;
           const relIdsToadd = toIds(relsToAdd);
@@ -740,25 +736,39 @@ const createEntityManager = (db) => {
                 differenceWith(isEqual, cleanRelationData.disconnect, cleanRelationData.connect)
               );
 
+              if (isEmpty(cleanRelationData.connect)) {
+                continue;
+              }
+
               await deleteRelations({ id, attribute, joinTable, db }, { relIdsToDelete });
 
-              // add/move
-              let max;
-              const currentMovingRels = await this.createQueryBuilder(joinTable.name)
-                .select(select)
-                .where({
-                  [joinColumn.name]: id,
-                  [inverseJoinColumn.name]: { $in: relIdsToaddOrMove },
-                })
-                .where(joinTable.on || {})
-                .execute();
-              const currentMovingRelsMap = currentMovingRels.reduce(
-                (acc, rel) => Object.assign(acc, { [rel[inverseJoinColumn.name]]: rel }),
-                {}
-              );
+              // Fetch current relations to handle ordering
+              let currentMovingRels;
+              if (
+                isAnyToMany(attribute) ||
+                (isBidirectional(attribute) && isManyToAny(attribute))
+              ) {
+                currentMovingRels = await this.createQueryBuilder(joinTable.name)
+                  .select(select)
+                  .where({
+                    [joinColumn.name]: id,
+                    [inverseJoinColumn.name]: { $in: relIdsToaddOrMove },
+                  })
+                  .where(joinTable.on || {})
+                  .execute();
+              }
 
+              // prepare relations to insert
+              const insert = cleanRelationData.connect.map((relToAdd) => ({
+                [joinColumn.name]: id,
+                [inverseJoinColumn.name]: relToAdd.id,
+                ...(joinTable.on || {}),
+                ...(relToAdd.__pivot || {}),
+              }));
+
+              // add order value
               if (isAnyToMany(attribute)) {
-                max = (
+                const orderMax = (
                   await this.createQueryBuilder(joinTable.name)
                     .max(orderColumnName)
                     .where({ [joinColumn.name]: id })
@@ -766,32 +776,60 @@ const createEntityManager = (db) => {
                     .first()
                     .execute()
                 ).max;
+
+                insert.forEach((row, idx) => {
+                  row[orderColumnName] = orderMax + idx + 1;
+                });
               }
 
-              const nonExistingRelsIds = difference(
-                relIdsToaddOrMove,
-                map(inverseJoinColumn.name, currentMovingRels)
-              );
+              // add inv order value
+              if (isBidirectional(attribute) && isManyToAny(attribute)) {
+                const nonExistingRelsIds = difference(
+                  relIdsToaddOrMove,
+                  map(inverseJoinColumn.name, currentMovingRels)
+                );
 
-              const maxResults = await db
-                .getConnection()
-                .select(inverseJoinColumn.name)
-                .max(inverseOrderColumnName, { as: 'max' })
-                .whereIn(inverseJoinColumn.name, nonExistingRelsIds)
-                .where(joinTable.on || {})
-                .groupBy(inverseJoinColumn.name)
-                .from(joinTable.name);
+                const maxResults = await db
+                  .getConnection()
+                  .select(inverseJoinColumn.name)
+                  .max(inverseOrderColumnName, { as: 'max' })
+                  .whereIn(inverseJoinColumn.name, nonExistingRelsIds)
+                  .where(joinTable.on || {})
+                  .groupBy(inverseJoinColumn.name)
+                  .from(joinTable.name);
 
-              const maxMap = maxResults.reduce(
-                (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
-                {}
-              );
+                const maxMap = maxResults.reduce(
+                  (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
+                  {}
+                );
 
-              for (const relToAddOrMove of cleanRelationData.connect) {
-                const currentRel = currentMovingRelsMap[relToAddOrMove.id];
-                if (currentRel && isAnyToMany(attribute)) {
-                  const currentOrderIsNull = currentRel[orderColumnName] === null;
-                  if (!currentOrderIsNull) {
+                insert.forEach((row) => {
+                  row[inverseOrderColumnName] = (maxMap[row[inverseJoinColumn.name]] || 0) + 1;
+                });
+              }
+
+              // insert rows
+              const query = this.createQueryBuilder(joinTable.name)
+                .insert(insert)
+                .onConflict([
+                  joinColumn.name,
+                  inverseJoinColumn.name,
+                  ...Object.keys(cleanRelationData.connect[0].__pivot || {}),
+                ]);
+
+              if (isAnyToMany(attribute)) {
+                query.merge([orderColumnName]);
+              } else {
+                query.ignore();
+              }
+
+              await query.execute();
+
+              // remove gap between orders
+              if (isAnyToMany(attribute)) {
+                currentMovingRels.sort((a, b) => b[orderColumnName] - a[orderColumnName]);
+                for (const currentRel of currentMovingRels) {
+                  if (currentRel[orderColumnName] !== null) {
                     await this.createQueryBuilder(joinTable.name)
                       .decrement(orderColumnName, 1)
                       .where({
@@ -800,46 +838,7 @@ const createEntityManager = (db) => {
                       })
                       .where(joinTable.on || {})
                       .execute();
-
-                    currentMovingRels.forEach((rel) => {
-                      if (rel[orderColumnName] > currentRel[orderColumnName]) {
-                        rel[orderColumnName] -= 1;
-                      }
-                    });
                   }
-
-                  if (currentOrderIsNull) {
-                    max += 1;
-                  }
-
-                  await this.createQueryBuilder(joinTable.name)
-                    .update({
-                      [orderColumnName]: max,
-                    })
-                    .where({
-                      [joinColumn.name]: id,
-                      [inverseJoinColumn.name]: relToAddOrMove.id,
-                    })
-                    .where(joinTable.on || {})
-                    .execute();
-                } else if (!currentRel) {
-                  const insert = {
-                    [joinColumn.name]: id,
-                    [inverseJoinColumn.name]: relToAddOrMove.id,
-                    ...(relToAddOrMove.__pivot || {}),
-                    ...(joinTable.on || {}),
-                  };
-
-                  if (isAnyToMany(attribute)) {
-                    insert[orderColumnName] = max + 1;
-                  }
-
-                  if (isBidirectional(attribute) && isManyToAny(attribute)) {
-                    insert[inverseOrderColumnName] = (maxMap[relToAddOrMove.id] || 0) + 1;
-                  }
-
-                  await this.createQueryBuilder(joinTable.name).insert(insert).execute();
-                  max += 1;
                 }
               }
             } else {
@@ -909,7 +908,7 @@ const createEntityManager = (db) => {
                 .onConflict([
                   joinColumn.name,
                   inverseJoinColumn.name,
-                  ...Object.keys(joinTable.on || {}),
+                  ...Object.keys(cleanRelationData.set[0].__pivot || {}),
                 ]);
 
               if (isAnyToMany(attribute)) {
