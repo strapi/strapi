@@ -99,7 +99,6 @@ describe('i18n - Find existing relations', () => {
     rq = await createAuthRequest({ strapi });
 
     data.shops = await builder.sanitizedFixturesFor(shopModel.singularName, strapi);
-    console.log('data.shops', data.shops);
     data.products = await builder.sanitizedFixturesFor(productModel.singularName, strapi);
   });
 
