@@ -2207,6 +2207,10 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Tasawaq (Niger) (twq-NE)",
   },
   {
+    "code": "mi",
+    "name": "Te Reo Māori (mi)",
+  },
+  {
     "code": "te",
     "name": "Telugu (te)",
   },
