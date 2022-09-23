@@ -39,6 +39,10 @@ const expectedData = {
         repeatable: false,
         component: 'blog.quote',
       },
+      someCustomField: {
+        customField: 'plugin::test.test',
+        type: 'customField',
+      },
     },
   },
   contentTypeToEdit: {
@@ -79,6 +83,10 @@ const expectedData = {
         type: 'component',
         repeatable: false,
         component: 'blog.quote',
+      },
+      someCustomField: {
+        customField: 'plugin::test.test',
+        type: 'customField',
       },
     },
   },
@@ -146,6 +154,10 @@ const expectedData = {
           repeatable: false,
           component: 'default.nested-compo',
         },
+        someCustomField: {
+          customField: 'plugin::test.test',
+          type: 'customField',
+        },
       },
     },
     {
@@ -203,6 +215,10 @@ const expectedData = {
           repeatable: false,
           component: 'default.nested-compo',
         },
+        someCustomField: {
+          customField: 'plugin::test.test',
+          type: 'customField',
+        },
       },
     },
     {
@@ -259,6 +275,10 @@ const expectedData = {
           repeatable: false,
           component: 'default.nested-compo',
         },
+        someCustomField: {
+          customField: 'plugin::test.test',
+          type: 'customField',
+        },
       },
     },
     'default.nested-compo': {
@@ -314,6 +334,10 @@ const expectedData = {
           type: 'component',
           repeatable: false,
           component: 'default.nested-compo',
+        },
+        someCustomField: {
+          customField: 'plugin::test.test',
+          type: 'customField',
         },
       },
     },
