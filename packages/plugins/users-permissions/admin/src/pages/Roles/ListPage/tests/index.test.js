@@ -382,6 +382,7 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
       .c28 {
         -webkit-animation: gzYjWD 1s infinite linear;
         animation: gzYjWD 1s infinite linear;
+        will-change: transform;
       }
 
       .c26 {

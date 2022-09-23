@@ -94,7 +94,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c32 .sc-ezHhwS {
+.c32 .sc-kBzgEd {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -164,7 +164,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c37 .sc-ezHhwS {
+.c37 .sc-kBzgEd {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
