@@ -16,7 +16,9 @@ const CustomFieldsList = () => {
   const customFields = useCustomFields();
   const registeredCustomFields = Object.entries(customFields.getAll());
 
-  if (!registeredCustomFields.length) return <EmptyAttributes />;
+  if (!registeredCustomFields.length) {
+    return <EmptyAttributes />;
+  }
 
   // Sort the array alphabetically by customField name
   const sortedCustomFields = registeredCustomFields.sort((a, b) =>
