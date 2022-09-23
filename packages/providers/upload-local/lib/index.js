@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const fse = require('fs-extra');
 const { PayloadTooLargeError } = require('@strapi/utils/lib/errors');
-const { kbytesToBytes } = require('../../../core/upload/server/utils/file');
+const { kbytesToBytes, bytesToHumanReadable } = require('../../../core/upload/server/utils/file');
 
 const UPLOADS_FOLDER_NAME = 'uploads';
 
@@ -35,9 +35,17 @@ module.exports = {
       checkFileSize(file, { sizeLimit } = {}) {
         // TODO V5: remove providerOptions sizeLimit
         if (providerOptionsSizeLimit) {
-          if (kbytesToBytes(file.size) > providerOptionsSizeLimit) throw new PayloadTooLargeError();
+          if (kbytesToBytes(file.size) > providerOptionsSizeLimit)
+            throw new PayloadTooLargeError(
+              `${file.name} exceeds size limit of ${bytesToHumanReadable(
+                providerOptionsSizeLimit
+              )}.`
+            );
         } else if (sizeLimit) {
-          if (kbytesToBytes(file.size) > sizeLimit) throw new PayloadTooLargeError();
+          if (kbytesToBytes(file.size) > sizeLimit)
+            throw new PayloadTooLargeError(
+              `${file.name} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
+            );
         }
       },
       uploadStream(file) {

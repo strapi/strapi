@@ -3,7 +3,7 @@
 const { PayloadTooLargeError } = require('@strapi/utils/lib/errors');
 const _ = require('lodash');
 const registerUploadMiddleware = require('./middlewares/upload');
-const { kbytesToBytes } = require('./utils/file');
+const { kbytesToBytes, bytesToHumanReadable } = require('./utils/file');
 
 /**
  * Register upload plugin
@@ -76,7 +76,9 @@ const baseProvider = {
   },
   checkFileSize(file, { sizeLimit }) {
     if (sizeLimit && kbytesToBytes(file.size) > sizeLimit) {
-      throw new PayloadTooLargeError();
+      throw new PayloadTooLargeError(
+        `${file.name} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
+      );
     }
   },
 };
