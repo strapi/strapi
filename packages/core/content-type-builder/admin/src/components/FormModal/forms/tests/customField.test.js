@@ -20,24 +20,6 @@ const mockBaseCustomField = {
   },
 };
 
-const mockBaseArgs = {
-  schemaAttributes: [
-    {
-      type: 'string',
-      required: true,
-      unique: true,
-      configurable: true,
-      name: 'type',
-    },
-  ],
-  attributeType: 'string',
-  reservedNames: {},
-  customFieldValidator: () => ({
-    test: yup.string().required(),
-  }),
-  ctbFormsAPI,
-};
-
 const mockNoSectionInput = [
   {
     intlLabel: {
@@ -80,7 +62,20 @@ describe('customField forms', () => {
   describe('schema', () => {
     it('validates input using the provided validator', async () => {
       const mockArgs = {
-        ...mockBaseArgs,
+        schemaAttributes: [
+          {
+            type: 'string',
+            required: true,
+            unique: true,
+            configurable: true,
+            name: 'type',
+          },
+        ],
+        attributeType: 'string',
+        reservedNames: {},
+        customFieldValidator: () => ({
+          test: yup.string().required(),
+        }),
         schemaData: {
           modifiedData: {
             type: 'string',
@@ -91,6 +86,7 @@ describe('customField forms', () => {
           },
           initialData: {},
         },
+        ctbFormsAPI,
       };
       const customFieldValidator = forms.customField.schema(mockArgs);
       const modifiedData = mockArgs.schemaData.modifiedData;
