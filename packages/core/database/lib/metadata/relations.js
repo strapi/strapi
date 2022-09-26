@@ -272,6 +272,7 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
     orderBy: {
       order: 'asc',
     },
+    pivotColumns: [joinColumnName, typeColumnName, idColumnName],
   };
 
   attribute.joinTable = joinTable;
@@ -478,6 +479,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       name: inverseJoinColumnName,
       referencedColumn: 'id',
     },
+    pivotColumns: [joinColumnName, inverseJoinColumnName],
   };
 
   // order
@@ -532,6 +534,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       name: joinTableName,
       joinColumn: joinTable.inverseJoinColumn,
       inverseJoinColumn: joinTable.joinColumn,
+      pivotColumns: joinTable.pivotColumns,
     };
 
     if (isManyToAny(attribute)) {
