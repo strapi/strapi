@@ -29,6 +29,7 @@ const {
   deletePreviousOneToAnyRelations,
   deletePreviousAnyToOneRelations,
   deleteRelations,
+  cleanOrderColumns,
 } = require('./regular-relations');
 
 const toId = (value) => value.id || value;
@@ -731,7 +732,6 @@ const createEntityManager = (db) => {
             if (isPartialUpdate) {
               if (isAnyToOne(attribute)) {
                 cleanRelationData.connect = cleanRelationData.connect.slice(-1);
-                cleanRelationData.disconnect = [];
               }
               relIdsToaddOrMove = toIds(cleanRelationData.connect);
               const relIdsToDelete = toIds(
@@ -813,11 +813,7 @@ const createEntityManager = (db) => {
               // insert rows
               const query = this.createQueryBuilder(joinTable.name)
                 .insert(insert)
-                .onConflict([
-                  joinColumn.name,
-                  inverseJoinColumn.name,
-                  ...Object.keys(cleanRelationData.connect[0].__pivot || {}),
-                ]);
+                .onConflict(joinTable.pivotColumns);
 
               if (isAnyToMany(attribute)) {
                 query.merge([orderColumnName]);
@@ -828,22 +824,11 @@ const createEntityManager = (db) => {
               await query.execute();
 
               // remove gap between orders
-              if (isAnyToMany(attribute)) {
-                currentMovingRels.sort((a, b) => b[orderColumnName] - a[orderColumnName]);
-                for (const currentRel of currentMovingRels) {
-                  if (currentRel[orderColumnName] !== null) {
-                    await this.createQueryBuilder(joinTable.name)
-                      .decrement(orderColumnName, 1)
-                      .where({
-                        [joinColumn.name]: id,
-                        [orderColumnName]: { $gt: currentRel[orderColumnName] },
-                      })
-                      .where(joinTable.on || {})
-                      .execute();
-                  }
-                }
-              }
+              await cleanOrderColumns({ joinTable, attribute, db, id });
             } else {
+              if (isAnyToOne(attribute)) {
+                cleanRelationData.set = cleanRelationData.set.slice(-1);
+              }
               // overwrite all relations
               relIdsToaddOrMove = toIds(cleanRelationData.set);
               await deleteRelations(
@@ -907,11 +892,7 @@ const createEntityManager = (db) => {
               // insert rows
               const query = this.createQueryBuilder(joinTable.name)
                 .insert(insert)
-                .onConflict([
-                  joinColumn.name,
-                  inverseJoinColumn.name,
-                  ...Object.keys(cleanRelationData.set[0].__pivot || {}),
-                ]);
+                .onConflict(joinTable.pivotColumns);
 
               if (isAnyToMany(attribute)) {
                 query.merge([orderColumnName]);
@@ -923,22 +904,24 @@ const createEntityManager = (db) => {
             }
 
             // Delete the previous relations for oneToAny relations
-            await deletePreviousOneToAnyRelations({
-              id,
-              attribute,
-              joinTable,
-              relIdsToadd: relIdsToaddOrMove,
-              db,
-            });
+            if (!isEmpty(relIdsToaddOrMove)) {
+              await deletePreviousOneToAnyRelations({
+                id,
+                attribute,
+                joinTable,
+                relIdsToadd: relIdsToaddOrMove,
+                db,
+              });
 
-            // Delete the previous relations for anyToOne relations
-            await deletePreviousAnyToOneRelations({
-              id,
-              attribute,
-              joinTable,
-              relIdsToadd: relIdsToaddOrMove,
-              db,
-            });
+              // Delete the previous relations for anyToOne relations
+              await deletePreviousAnyToOneRelations({
+                id,
+                attribute,
+                joinTable,
+                relIdToadd: relIdsToaddOrMove[0],
+                db,
+              });
+            }
           }
         }
       }

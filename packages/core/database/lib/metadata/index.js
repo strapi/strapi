@@ -123,7 +123,7 @@ const createCompoLinkModelMeta = (baseModelMeta) => {
         type: 'integer',
         column: {
           unsigned: true,
-          defaultTo: 0,
+          defaultTo: null,
         },
       },
     },
@@ -188,6 +188,7 @@ const createDynamicZone = (attributeName, attribute, meta) => {
       orderBy: {
         order: 'asc',
       },
+      pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
     },
   });
 };
@@ -210,10 +211,11 @@ const createComponent = (attributeName, attribute, meta) => {
       on: {
         field: attributeName,
       },
+      orderColumnName: 'order',
       orderBy: {
         order: 'asc',
       },
-      ...(attribute.repeatable === true ? { orderColumnName: 'order' } : {}),
+      pivotColumns: ['entity_id', 'component_id', 'field'],
     },
   });
 };
