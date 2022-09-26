@@ -6,7 +6,7 @@
  */
 const addItemsToFormSection = (formTypeOptions, sections) => {
   formTypeOptions.forEach((item) => {
-    if (!item?.sectionTitle) {
+    if (!('sectionTitle' in item)) {
       // When there is no sectionTitle key,
       // add the item to the default section
       sections[0].items.push(item);
