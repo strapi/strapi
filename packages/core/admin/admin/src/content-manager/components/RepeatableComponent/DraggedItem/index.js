@@ -270,6 +270,7 @@ const DraggedItem = ({
                             metadatas={metadatas}
                             // onBlur={hasErrors ? checkFormErrors : null}
                             queryInfos={queryInfos}
+                            size={size}
                           />
                         </GridItem>
                       );

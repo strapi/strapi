@@ -65,6 +65,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
                       fieldSchema={fieldSchema}
                       metadatas={metadatas}
                       queryInfos={queryInfos}
+                      size={size}
                     />
                   </GridItem>
                 );
