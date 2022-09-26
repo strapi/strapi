@@ -1,4 +1,4 @@
-import addItemsToFormSections from '../forms/utils/addItemsToFormSection';
+import addItemsToFormSections from '../addItemsToFormSection';
 
 describe('addItemsToFormSection', () => {
   it('adds items to the default section', () => {
