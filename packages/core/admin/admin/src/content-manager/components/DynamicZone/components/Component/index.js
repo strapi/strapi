@@ -153,7 +153,7 @@ const Component = ({
                 <Suspense
                   fallback={
                     <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
-                      <Loader />
+                      <Loader>Loading content.</Loader>
                     </Flex>
                   }
                 >
