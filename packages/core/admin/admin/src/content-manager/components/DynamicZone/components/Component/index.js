@@ -149,22 +149,22 @@ const Component = ({
           />
           <AccordionContent>
             <AccordionContentRadius background="neutral0">
-              <FocusTrap onEscape={() => onToggle(index)}>
-                <Suspense
-                  fallback={
-                    <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
-                      <Loader>Loading content.</Loader>
-                    </Flex>
-                  }
-                >
+              <Suspense
+                fallback={
+                  <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
+                    <Loader>Loading content.</Loader>
+                  </Flex>
+                }
+              >
+                <FocusTrap onEscape={() => onToggle(index)}>
                   <FieldComponent
                     componentUid={componentUid}
                     icon={icon}
                     name={`${name}.${index}`}
                     isFromDynamicZone
                   />
-                </Suspense>
-              </FocusTrap>
+                </FocusTrap>
+              </Suspense>
             </AccordionContentRadius>
           </AccordionContent>
         </Accordion>
