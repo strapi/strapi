@@ -15,7 +15,6 @@ describe('Content type validator', () => {
           builder: {
             getReservedNames() {
               return {
-                collectionNames: ['reserved_collections'],
                 models: [],
                 attributes: ['thisIsReserved'],
               };
@@ -69,41 +68,6 @@ describe('Content type validator', () => {
                 path: ['contentType', 'attributes', 'thisIsReserved'],
                 message:
                   'Attribute keys cannot be one of __component, __contentType, thisIsReserved',
-                name: 'ValidationError',
-              },
-            ],
-          },
-        });
-      });
-    });
-
-    test('Throws when plural name will clash with a reserved collection name', async () => {
-      const data = {
-        contentType: {
-          singularName: 'test',
-          pluralName: 'reserved-collections',
-          displayName: 'Test',
-          attributes: {
-            slug: {
-              type: 'string',
-              default: '',
-            },
-          },
-        },
-      };
-
-      expect.assertions(1);
-
-      await validateUpdateContentTypeInput(data).catch((err) => {
-        expect(err).toMatchObject({
-          name: 'ValidationError',
-          message: 'PluralName must not cause clash with DB table names: reserved_collections',
-          details: {
-            errors: [
-              {
-                path: ['contentType', 'pluralName'],
-                message:
-                  'PluralName must not cause clash with DB table names: reserved_collections',
                 name: 'ValidationError',
               },
             ],

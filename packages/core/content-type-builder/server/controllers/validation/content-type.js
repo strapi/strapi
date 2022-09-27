@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, validateYupSchema, nameToCollectionName } = require('@strapi/utils');
+const { yup, validateYupSchema } = require('@strapi/utils');
 
 const { getService } = require('../../utils');
 const { modelTypes, DEFAULT_TYPES, typeKinds } = require('../../services/constants');
@@ -60,7 +60,6 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
         .string()
         .min(1)
         .test(alreadyUsedContentTypeName(isEdition))
-        .test(forbiddenCollectionNameValidator())
         .test(forbiddenContentTypeNameValidator())
         .isKebabCase()
         .required(),
@@ -105,28 +104,6 @@ const validateUpdateContentTypeInput = (data) => {
   removeDeletedUIDTargetFields(data.contentType);
 
   return validateYupSchema(createContentTypeSchema(data, { isEdition: true }))(data);
-};
-
-/**
- * Validate whether the provided plural name will create a conflict with one of
- * the default DB table names
- * @returns {Object}
- */
-const forbiddenCollectionNameValidator = () => {
-  const reservedCollectionNames = getService('builder').getReservedNames().collectionNames;
-
-  return {
-    name: 'forbiddenCollectionName',
-    message: `PluralName must not cause clash with DB table names: ${reservedCollectionNames.join(
-      ', '
-    )}`,
-    test(value) {
-      if (value && reservedCollectionNames.includes(nameToCollectionName(value))) {
-        return false;
-      }
-      return true;
-    },
-  };
 };
 
 const forbiddenContentTypeNameValidator = () => {

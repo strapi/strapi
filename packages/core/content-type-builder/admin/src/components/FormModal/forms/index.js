@@ -124,7 +124,6 @@ const forms = {
       const contentTypeShape = createContentTypeSchema({
         usedContentTypeNames: takenNames,
         reservedModels: reservedNames.models,
-        reservedCollectionNames: reservedNames.collectionNames,
         singularNames: takenSingularNames,
         pluralNames: takenPluralNames,
       });
