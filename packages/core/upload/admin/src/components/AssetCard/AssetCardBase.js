@@ -128,6 +128,7 @@ export const AssetCardBase = ({
 };
 
 AssetCardBase.defaultProps = {
+  children: undefined,
   selected: false,
   onEdit: undefined,
   onSelect: undefined,
@@ -137,7 +138,7 @@ AssetCardBase.defaultProps = {
 };
 
 AssetCardBase.propTypes = {
-  children: PropTypes.node.isRequired,
+  children: PropTypes.node,
   extension: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onEdit: PropTypes.func,

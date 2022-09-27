@@ -36,11 +36,19 @@ export const DocAssetCard = ({ name, extension, size, ...restProps }) => {
 };
 
 DocAssetCard.defaultProps = {
+  selected: false,
+  onEdit: undefined,
+  onSelect: undefined,
+  onRemove: undefined,
   size: 'M',
 };
 
 DocAssetCard.propTypes = {
-  ...AssetCardBase.propTypes,
+  extension: PropTypes.string.isRequired,
+  onEdit: PropTypes.func,
+  onSelect: PropTypes.func,
+  onRemove: PropTypes.func,
+  selected: PropTypes.bool,
   name: PropTypes.string.isRequired,
   size: PropTypes.oneOf(['S', 'M']),
 };
