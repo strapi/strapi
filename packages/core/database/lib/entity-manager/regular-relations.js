@@ -186,7 +186,7 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds }) => {
   const whereBinding = [];
 
   if (hasOrderColumn(attribute) && id) {
-    update.push('?? = t.src_order');
+    update.push('?? = b.src_order');
     updateBinding.push(orderColumnName);
     select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS src_order');
     selectBinding.push(joinColumn.name, orderColumnName);
@@ -195,7 +195,7 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds }) => {
   }
 
   if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
-    update.push('?? = t.inv_order');
+    update.push('?? = b.inv_order');
     updateBinding.push(inverseOrderColumnName);
     select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS inv_order');
     selectBinding.push(inverseJoinColumn.name, inverseOrderColumnName);
@@ -205,37 +205,47 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds }) => {
 
   // raw query as knex doesn't allow updating from a subquery
   // https://github.com/knex/knex/issues/2504
-  /*
-  `UPDATE :joinTable:
-    SET :orderColumn: = t.src_order, :inverseOrderColumn: = t.inv_order
-    FROM (
-      SELECT
-        id,
-        ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
-        ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
-      FROM :joinTable:
-      WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
-    ) AS t
-    WHERE t.id = :joinTable:.id`,
-*/
-  await db.getConnection().raw(
-    `UPDATE ??
-      SET ${update.join(', ')}
-      FROM (
-        SELECT ${select.join(', ')}
-        FROM ??
-        WHERE ${where.join(' OR ')}
-      ) AS t
-      WHERE t.id = ??.id`,
-    [
-      joinTable.name,
-      ...updateBinding,
-      ...selectBinding,
-      joinTable.name,
-      ...whereBinding,
-      joinTable.name,
-    ]
-  );
+  switch (strapi.db.dialect.client) {
+    case 'mysql':
+      await db.getConnection().raw(
+        `UPDATE
+          ?? as a,
+          (
+            SELECT ${select.join(', ')}
+            FROM ??
+            WHERE ${where.join(' OR ')}
+          ) AS b
+        SET ${update.join(', ')}
+        WHERE b.id = a.id`,
+        [joinTable.name, ...selectBinding, joinTable.name, ...whereBinding, ...updateBinding]
+      );
+      break;
+    default:
+      await db.getConnection().raw(
+        `UPDATE ?? as a
+          SET ${update.join(', ')}
+          FROM (
+            SELECT ${select.join(', ')}
+            FROM ??
+            WHERE ${where.join(' OR ')}
+          ) AS b
+          WHERE b.id = a.id`,
+        [joinTable.name, ...updateBinding, ...selectBinding, joinTable.name, ...whereBinding]
+      );
+    /*
+      `UPDATE :joinTable: as a
+        SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
+        FROM (
+          SELECT
+            id,
+            ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
+            ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
+          FROM :joinTable:
+          WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
+        ) AS b
+        WHERE b.id = a.id`,
+    */
+  }
 };
 
 module.exports = {
