@@ -1,30 +1,13 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import {
-  Card,
-  CardAction,
-  CardAsset,
-  CardBadge,
-  CardBody,
-  CardCheckbox,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardSubtitle,
-  CardTimer,
-} from '@strapi/design-system/Card';
-import { IconButton } from '@strapi/design-system/IconButton';
-import Pencil from '@strapi/icons/Pencil';
-import Trash from '@strapi/icons/Trash';
-import { useIntl } from 'react-intl';
+import { CardAsset, CardTimer } from '@strapi/design-system/Card';
 import { Box } from '@strapi/design-system/Box';
-import { VideoPreview } from './VideoPreview';
-import { getTrad, formatDuration } from '../../utils';
 
-const Extension = styled.span`
-  text-transform: uppercase;
-`;
+import { VideoPreview } from './VideoPreview';
+import { AssetCardBase } from './AssetCardBase';
+
+import { formatDuration } from '../../utils';
 
 const VideoPreviewWrapper = styled(Box)`
   canvas,
@@ -35,69 +18,20 @@ const VideoPreviewWrapper = styled(Box)`
   }
 `;
 
-export const VideoAssetCard = ({
-  name,
-  extension,
-  url,
-  mime,
-  selected,
-  onSelect,
-  onEdit,
-  onRemove,
-  size,
-}) => {
-  const { formatMessage } = useIntl();
+export const VideoAssetCard = ({ name, url, mime, size, ...props }) => {
   const [duration, setDuration] = useState();
 
   const formattedDuration = duration && formatDuration(duration);
 
   return (
-    <Card height="100%">
-      <CardHeader>
-        {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
-        {(onRemove || onEdit) && (
-          <CardAction position="end">
-            {onRemove && (
-              <IconButton
-                label={formatMessage({
-                  id: getTrad('control-card.remove-selection'),
-                  defaultMessage: 'Remove from selection',
-                })}
-                icon={<Trash />}
-                onClick={onRemove}
-              />
-            )}
-
-            {onEdit && (
-              <IconButton
-                label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-                icon={<Pencil />}
-                onClick={onEdit}
-              />
-            )}
-          </CardAction>
-        )}
-        <CardAsset size={size}>
-          <VideoPreviewWrapper size={size}>
-            <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} alt={name} />
-          </VideoPreviewWrapper>
-        </CardAsset>
-        <CardTimer>{formattedDuration || '...'}</CardTimer>
-      </CardHeader>
-      <CardBody>
-        <CardContent>
-          <Box paddingTop={1}>
-            <CardTitle as="h2">{name}</CardTitle>
-          </Box>
-          <CardSubtitle>
-            <Extension>{extension}</Extension>
-          </CardSubtitle>
-        </CardContent>
-        <CardBadge>
-          {formatMessage({ id: getTrad('settings.section.video.label'), defaultMessage: 'Video' })}
-        </CardBadge>
-      </CardBody>
-    </Card>
+    <AssetCardBase {...props} variant="Video">
+      <CardAsset size={size}>
+        <VideoPreviewWrapper size={size}>
+          <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} alt={name} />
+        </VideoPreviewWrapper>
+      </CardAsset>
+      <CardTimer>{formattedDuration || '...'}</CardTimer>
+    </AssetCardBase>
   );
 };
 
