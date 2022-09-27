@@ -547,6 +547,9 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
   }
 };
 
+const hasOrderColumn = (attribute) => isAnyToMany(attribute);
+const hasInverseOrderColumn = (attribute) => isBidirectional(attribute) && isManyToAny(attribute);
+
 module.exports = {
   createRelation,
 
@@ -555,4 +558,6 @@ module.exports = {
   isManyToAny,
   isAnyToOne,
   isAnyToMany,
+  hasOrderColumn,
+  hasInverseOrderColumn,
 };
