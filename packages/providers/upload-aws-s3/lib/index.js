@@ -20,11 +20,19 @@ module.exports = {
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
         const path = file.path ? `${file.path}/` : '';
+        let ACL;
+        if(config.defaultAcl === undefined){
+          ACL = 'public-read';
+        } else if(config.defaultAcl === false){
+          ACL = undefined;
+        } else if(typeof config.defaultAcl === "string"){
+          ACL = config.defaultAcl;
+        }
         S3.upload(
           {
             Key: `${path}${file.hash}${file.ext}`,
             Body: file.stream || Buffer.from(file.buffer, 'binary'),
-            ACL: 'public-read',
+            ACL,
             ContentType: file.mime,
             ...customParams,
           },
@@ -33,9 +41,13 @@ module.exports = {
               return reject(err);
             }
 
-            // set the bucket file url
-            file.url = data.Location;
-
+            // set the bucket file url. 
+            // If there is a Custom endpoint for data access set, replace the upload endpoint with the read enpoint URL
+            if(config.customReadEndpoint){
+              file.url = config.customReadEndpoint.replace(/\/$/g,'')+'/'+data.Key;
+            } else {
+              file.url = data.Location;
+            }
             resolve();
           }
         );
