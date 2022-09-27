@@ -6,11 +6,21 @@ const {
   isOneToAny,
   isManyToAny,
   isAnyToOne,
-  isAnyToMany,
+  hasOrderColumn,
+  hasInverseOrderColumn,
 } = require('../metadata/relations');
 const { createQueryBuilder } = require('../query');
 
-const deletePreviousOneToAnyRelations = async ({ id, attribute, joinTable, relIdsToadd, db }) => {
+/**
+ * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
+ * @param {Object} params
+ * @param {string} params.id - entity id on which the relations for entities relIdsToadd are created
+ * @param {string} params.attribute - attribute of the relation
+ * @param {string} params.inverseRelIds - entity ids of the inverse side for which the current relations will be deleted
+ * @param {string} params.db - database instance
+ */
+const deletePreviousOneToAnyRelations = async ({ id, attribute, relIdsToadd, db }) => {
+  const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
   // need to delete the previous relations for oneToAny relations
@@ -25,16 +35,27 @@ const deletePreviousOneToAnyRelations = async ({ id, attribute, joinTable, relId
       .where(joinTable.on || {})
       .execute();
 
-    await cleanOrderColumns({ joinTable, attribute, db, inverseRelIds: relIdsToadd });
+    await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToadd });
   }
 };
 
-const deletePreviousAnyToOneRelations = async ({ id, attribute, joinTable, relIdToadd, db }) => {
+/**
+ * If a relation currently exists for this xToOne relations, this function removes it and update the inverse order if needed.
+ * @param {Object} params
+ * @param {string} params.id - entity id on which the relation for entity relIdToadd is created
+ * @param {string} params.attribute - attribute of the relation
+ * @param {string} params.relIdToadd - entity id of the new relation
+ * @param {string} params.db - database instance
+ */
+const deletePreviousAnyToOneRelations = async ({ id, attribute, relIdToadd, db }) => {
+  const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
   // Delete the previous relations for anyToOne relations
   if (isBidirectional(attribute) && isAnyToOne(attribute)) {
     // update orders for previous anyToOne relations that will be deleted if it has order (manyToOne)
+
+    // handling manyToOne
     if (isManyToAny(attribute)) {
       // if the database integrity was not broken relsToDelete is supposed to be of length 1
       const relsToDelete = await createQueryBuilder(joinTable.name, db)
@@ -48,7 +69,6 @@ const deletePreviousAnyToOneRelations = async ({ id, attribute, joinTable, relId
 
       const relIdsToDelete = map(inverseJoinColumn.name, relsToDelete);
 
-      // delete previous anyToOne relations
       await createQueryBuilder(joinTable.name, db)
         .delete()
         .where({
@@ -58,9 +78,10 @@ const deletePreviousAnyToOneRelations = async ({ id, attribute, joinTable, relId
         .where(joinTable.on || {})
         .execute();
 
-      await cleanOrderColumns({ joinTable, attribute, db, inverseRelIds: relIdsToDelete });
+      await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToDelete });
+
+      // handling oneToOne
     } else {
-      // delete previous anyToOne relations
       await createQueryBuilder(joinTable.name, db)
         .delete()
         .where({
@@ -73,15 +94,27 @@ const deletePreviousAnyToOneRelations = async ({ id, attribute, joinTable, relId
   }
 };
 
-// INVERSE ORDER UPDATE
-const deleteRelations = async (
-  { id, attribute, joinTable, db },
-  { relIdsToNotDelete = [], relIdsToDelete = [] }
-) => {
+/**
+ * Delete all or some relations of entity field
+ * @param {Object} params
+ * @param {string} params.id - entity id for which the relations will be deleted
+ * @param {string} params.attribute - attribute of the relation
+ * @param {string} params.db - database instance
+ * @param {string} params.relIdsToDelete - ids of entities to remove from the relations. Also accepts 'all'
+ * @param {string} params.relIdsToNotDelete - ids of entities to not remove from the relation when relIdsToDelete equals 'all'
+ */
+const deleteRelations = async ({
+  id,
+  attribute,
+  db,
+  relIdsToNotDelete = [],
+  relIdsToDelete = [],
+}) => {
+  const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
   const all = relIdsToDelete === 'all';
 
-  if (isAnyToMany(attribute) || (isBidirectional(attribute) && isManyToAny(attribute))) {
+  if (hasOrderColumn(attribute) || hasInverseOrderColumn(attribute)) {
     let lastId = 0;
     let done = false;
     const batchSize = 100;
@@ -112,7 +145,7 @@ const deleteRelations = async (
         .where(joinTable.on || {})
         .execute();
 
-      await cleanOrderColumns({ joinTable, attribute, db, id, inverseRelIds: batchIds });
+      await cleanOrderColumns({ attribute, db, id, inverseRelIds: batchIds });
     }
   } else {
     await createQueryBuilder(joinTable.name, db)
@@ -130,69 +163,79 @@ const deleteRelations = async (
 /**
  * Clean the order columns by ensuring the order value are continuous (ex: 1, 2, 3 and not 1, 5, 10)
  * @param {Object} params
- * @param {string} params.joinTable - joinTable of the relation where the clean will be done
- * @param {string} params.attribute - attribute on which the clean will be done
- * @param {string} params.db - Database instance
- * @param {string} params.id - Entity ID for which the clean will be done
- * @param {string} params.inverseRelIds - Entity ids of the inverse side for which the clean will be done
+ * @param {string} params.id - entity id for which the clean will be done
+ * @param {string} params.attribute - attribute of the relation
+ * @param {string} params.db - database instance
+ * @param {string} params.inverseRelIds - entity ids of the inverse side for which the clean will be done
  */
-const cleanOrderColumns = async ({ joinTable, attribute, db, id, inverseRelIds }) => {
+const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds }) => {
   if (
-    !(isAnyToMany(attribute) && id) &&
-    !(isBidirectional(attribute) && isManyToAny(attribute) && !isEmpty(inverseRelIds))
+    !(hasOrderColumn(attribute) && id) &&
+    !(hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds))
   ) {
     return;
   }
 
+  const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } = joinTable;
-  const knex = db.getConnection();
-  const update = {};
-  const subQuery = knex(joinTable.name).select('id');
+  const update = [];
+  const updateBinding = [];
+  const select = ['??'];
+  const selectBinding = ['id'];
+  const where = [];
+  const whereBinding = [];
 
-  if (isAnyToMany(attribute) && id) {
-    update[orderColumnName] = knex.raw('t.src_order');
-    const on = [joinColumn.name, ...Object.keys(joinTable.on)];
-    subQuery
-      .select(
-        knex.raw(`ROW_NUMBER() OVER (PARTITION BY ${on.join(', ')} ORDER BY ??) AS src_order`, [
-          ...on,
-          orderColumnName,
-        ])
-      )
-      .where(joinColumn.name, id);
+  if (hasOrderColumn(attribute) && id) {
+    update.push('?? = t.src_order');
+    updateBinding.push(orderColumnName);
+    select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS src_order');
+    selectBinding.push(joinColumn.name, orderColumnName);
+    where.push('?? = ?');
+    whereBinding.push(joinColumn.name, id);
   }
 
-  if (isBidirectional(attribute) && isManyToAny(attribute) && !isEmpty(inverseRelIds)) {
-    update[inverseOrderColumnName] = knex.raw('t.inv_order');
-    const on = [inverseJoinColumn.name, ...Object.keys(joinTable.on)];
-    subQuery
-      .select(
-        knex.raw(`ROW_NUMBER() OVER (PARTITION BY ${on.join(', ')} ORDER BY ??) AS inv_order`, [
-          ...on,
-          inverseOrderColumnName,
-        ])
-      )
-      .orWhereIn(inverseJoinColumn.name, inverseRelIds);
+  if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
+    update.push('?? = t.inv_order');
+    updateBinding.push(inverseOrderColumnName);
+    select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS inv_order');
+    selectBinding.push(inverseJoinColumn.name, inverseOrderColumnName);
+    where.push(`?? IN (${inverseRelIds.map(() => '?').join(', ')})`);
+    whereBinding.push(inverseJoinColumn.name, ...inverseRelIds);
   }
 
-  await knex(joinTable.name)
-    .update(update)
-    .from(subQuery)
-    .where('t.id', knex.raw('??.id', joinTable.name));
-
+  // raw query as knex doesn't allow updating from a subquery
+  // https://github.com/knex/knex/issues/2504
   /*
-    `UPDATE :joinTable:
-      SET :orderColumn: = t.order, :inverseOrderColumn: = t.inv_order
+  `UPDATE :joinTable:
+    SET :orderColumn: = t.src_order, :inverseOrderColumn: = t.inv_order
+    FROM (
+      SELECT
+        id,
+        ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
+        ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
+      FROM :joinTable:
+      WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
+    ) AS t
+    WHERE t.id = :joinTable:.id`,
+*/
+  await db.getConnection().raw(
+    `UPDATE ??
+      SET ${update.join(', ')}
       FROM (
-        SELECT
-          id,
-          ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS order,
-          ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
-        FROM :joinTable:
-        WHERE :joinColumn: = :id OR :inverseJoinColumn: IN (:inverseRelIds)
+        SELECT ${select.join(', ')}
+        FROM ??
+        WHERE ${where.join(' OR ')}
       ) AS t
-      WHERE t.id = :joinTable:.id`,
-  */
+      WHERE t.id = ??.id`,
+    [
+      joinTable.name,
+      ...updateBinding,
+      ...selectBinding,
+      joinTable.name,
+      ...whereBinding,
+      joinTable.name,
+    ]
+  );
 };
 
 module.exports = {
