@@ -27,6 +27,7 @@ const { deleteRelatedMorphOneRelationsAfterMorphToManyUpdate } = require('./morp
 const {
   isBidirectional,
   isAnyToOne,
+  isOneToAny,
   hasOrderColumn,
   hasInverseOrderColumn,
 } = require('../metadata/relations');
@@ -516,7 +517,9 @@ const createEntityManager = (db) => {
           const relsToAdd = cleanRelationData.set || cleanRelationData.connect;
           const relIdsToadd = toIds(relsToAdd);
 
-          await deletePreviousOneToAnyRelations({ id, attribute, relIdsToadd, db });
+          if (isBidirectional(attribute) && isOneToAny(attribute)) {
+            await deletePreviousOneToAnyRelations({ id, attribute, relIdsToadd, db });
+          }
 
           // prepare new relations to insert
           const insert = relsToAdd.map((data) => {
@@ -909,15 +912,17 @@ const createEntityManager = (db) => {
             }
 
             // Delete the previous relations for oneToAny relations
-            if (!isEmpty(relIdsToaddOrMove)) {
+            if (isBidirectional(attribute) && isOneToAny(attribute)) {
               await deletePreviousOneToAnyRelations({
                 id,
                 attribute,
                 relIdsToadd: relIdsToaddOrMove,
                 db,
               });
+            }
 
-              // Delete the previous relations for anyToOne relations
+            // Delete the previous relations for anyToOne relations
+            if (isBidirectional(attribute) && isAnyToOne(attribute)) {
               await deletePreviousAnyToOneRelations({
                 id,
                 attribute,
