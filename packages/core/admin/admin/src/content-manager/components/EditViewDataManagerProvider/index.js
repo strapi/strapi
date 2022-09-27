@@ -420,6 +420,20 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
+  // This is meant to be a temporary fix
+  // When using "fill in from another locale"
+  // i18n dispatch an update in the store which causes EditViewDataManagerProvider to INIT_FORM (see useEffect)
+  // We then lose initialData and cannot watch for differences with modifiedData
+  // This fix should allow user to save after editing an entity with "fill in from another locale"
+
+  // This solution doesn't work as the recover dispatch happens before the INIT_FORM one
+  // const recoverInitialData = (initialData) => {
+  //   dispatch({
+  //     type: 'RECOVER_INITIALDATA',
+  //     previousInitialData: initialData,
+  //   });
+  // };
+
   const removeComponentFromDynamicZone = useCallback(
     (dynamicZoneName, index) => {
       trackUsageRef.current('removeComponentFromDynamicZone');
@@ -493,6 +507,7 @@ const EditViewDataManagerProvider = ({
         onUnpublish,
         onRemoveRelation,
         readActionAllowedFields,
+        // recoverInitialData,
         redirectToPreviousPage,
         removeComponentFromDynamicZone,
         removeComponentFromField,

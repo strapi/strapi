@@ -21,6 +21,7 @@ const crudInitialState = {
   componentsDataStructure: {},
   contentTypeDataStructure: {},
   isLoading: true,
+  isUpdateComingFromI18N: false,
   data: null,
   status: 'resolved',
 };
@@ -66,6 +67,10 @@ const crudReducer = (state = crudInitialState, action) =>
         draftState.data = action.data;
         break;
       }
+      // We could create a separate dispatch here
+      // localizedValues could be watched in EditViewDataManagerProvider and fire a dispatch to update only modifiedData
+      // but then we might need to clean this data after everything is set in CM?
+      // it implies that content-manager will know about what is happening with i18n, which is a change of paradigm
       default:
         return draftState;
     }

@@ -45,7 +45,12 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
-  const { allLayoutData, initialData, slug } = useCMEditViewDataManager();
+  const {
+    allLayoutData,
+    initialData,
+    slug,
+    // recoverInitialData
+  } = useCMEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState(options[0]?.value || '');
@@ -61,6 +66,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
 
     setIsLoading(true);
     try {
+      // const previousInitialData = initialData;
       const { data: response } = await axiosInstance.get(requestURL);
 
       const cleanedData = cleanData(response, allLayoutData, localizations);
@@ -70,6 +76,16 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
       });
 
       dispatch({ type: 'ContentManager/CrudReducer/GET_DATA_SUCCEEDED', data: cleanedData });
+
+      // This is meant to be a temporary fix
+      // initialData from localized entity is lost after the previous dispatch (just above)
+      // This dispatch causes initialValues from EditViewDataManagerProvider to change
+      // Which causes an INIT_FORM dispatch (useEffect in EditViewDataManagerProvider) making initialData and modifiedData equal
+      // We need to recover previous initialData to watch for difference and allow the user to save this change
+      // We might need to consider including i18n in Strapi core or at least share knowledge about each other
+
+      // This solution doesn't work as the recover dispatch happens before the INIT_FORM one
+      // recoverInitialData(previousInitialData);
 
       toggleNotification({
         type: 'success',

@@ -176,6 +176,10 @@ const reducer = (state, action) =>
 
         break;
       }
+      // case 'RECOVER_INITIALDATA': {
+      //   draftState.initialData = action.previousInitialData;
+      //   break;
+      // }
       case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE': {
         if (action.shouldCheckErrors) {
           draftState.shouldCheckErrors = !state.shouldCheckErrors;
