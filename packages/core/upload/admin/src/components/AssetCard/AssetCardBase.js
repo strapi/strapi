@@ -24,16 +24,20 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-const CardActionsContainer = styled(CardAction)``;
+const CardActionsContainer = styled(CardAction)`
+  opacity: 0;
+
+  &:focus-within {
+    opacity: 1;
+  }
+`;
 
 const CardContainer = styled(Card)`
-  ${CardActionsContainer} {
-    display: none;
-  }
+  cursor: pointer;
 
   &:hover {
     ${CardActionsContainer} {
-      display: block;
+      opacity: 1;
     }
   }
 `;
@@ -51,12 +55,35 @@ export const AssetCardBase = ({
 }) => {
   const { formatMessage } = useIntl();
 
+  /** @type {import("react").MouseEventHandler<HTMLDivElement> } */
+  const handleClick = (e) => {
+    if (onEdit) {
+      onEdit(e);
+    }
+  };
+
+  /**
+   * @type {import("react").MouseEventHandler<HTMLDivElement> }
+   *
+   * This is required because we need to stop the propagation of the event
+   * bubbling to the `CardContainer`, however the `CardCheckbox` only returns
+   * the `boolean` value as opposed to the event itself.
+   */
+  const handlePropagationClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <CardContainer height="100%">
+    <CardContainer role="button" height="100%" tabIndex={-1} onClick={handleClick}>
       <CardHeader>
-        {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
+        {onSelect && (
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+          <div onClick={handlePropagationClick}>
+            <CardCheckbox value={selected} onValueChange={onSelect} />
+          </div>
+        )}
         {(onRemove || onEdit) && (
-          <CardActionsContainer position="end">
+          <CardActionsContainer onClick={handlePropagationClick} position="end">
             {onRemove && (
               <IconButton
                 label={formatMessage({
