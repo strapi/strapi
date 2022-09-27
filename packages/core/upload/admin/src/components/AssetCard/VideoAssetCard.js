@@ -24,7 +24,7 @@ export const VideoAssetCard = ({ name, url, mime, size, ...props }) => {
   const formattedDuration = duration && formatDuration(duration);
 
   return (
-    <AssetCardBase {...props} variant="Video">
+    <AssetCardBase name={name} {...props} variant="Video">
       <CardAsset size={size}>
         <VideoPreviewWrapper size={size}>
           <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} alt={name} />
