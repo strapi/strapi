@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { memo, useEffect, useMemo } from 'react';
 import { useIntl } from 'react-intl';
+import get from 'lodash/get';
 
 import { useCMEditViewDataManager, NotAllowedInput, useQueryParams } from '@strapi/helper-plugin';
 
@@ -34,7 +35,7 @@ export const RelationInputDataManger = ({
 
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
-      enabled: initialData[name]?.count !== 0 && !!endpoints.relation,
+      enabled: get(initialData, name)?.count !== 0 && !!endpoints.relation,
       endpoint: endpoints.relation,
       pageParams: {
         ...defaultParams,
@@ -54,11 +55,12 @@ export const RelationInputDataManger = ({
     },
   });
 
+  const relationsFromModifiedData = get(modifiedData, name);
   const stringifiedRelations = JSON.stringify(relations);
   const normalizedRelations = useMemo(
     () =>
       normalizeRelations(relations, {
-        modifiedData: modifiedData?.[name],
+        modifiedData: relationsFromModifiedData,
         mainFieldName: mainField.name,
         shouldAddLink: shouldDisplayRelationLink,
         targetModel,
@@ -117,11 +119,15 @@ export const RelationInputDataManger = ({
   };
 
   const handleSearch = (term) => {
-    searchFor(term, { idsToOmit: modifiedData?.[name]?.connect?.map((relation) => relation.id) });
+    searchFor(term, {
+      idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
+    });
   };
 
   const handleOpenSearch = () => {
-    searchFor('', { idsToOmit: modifiedData?.[name]?.connect?.map((relation) => relation.id) });
+    searchFor('', {
+      idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
+    });
   };
 
   const handleSearchMore = () => {
@@ -190,6 +196,7 @@ export const RelationInputDataManger = ({
       required={required}
       searchResults={normalizeRelations(search, {
         mainFieldName: mainField.name,
+        search: 'search',
       })}
       size={size}
     />
