@@ -215,7 +215,7 @@ const createComponent = (attributeName, attribute, meta) => {
       orderBy: {
         order: 'asc',
       },
-      pivotColumns: ['entity_id', 'component_id', 'field'],
+      pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
     },
   });
 };
