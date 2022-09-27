@@ -83,6 +83,41 @@ module.exports = ({ env }) => ({
 });
 ```
 
+#### Configuration for S3 compatible services which provide a different domain for Read Access (Like cloudflare R2)
+```js
+module.exports = ({ env }) => ({
+  // ...
+  upload: {
+    config: {
+      provider: 'aws-s3',
+      providerOptions: {
+        accessKeyId: env("AWS_ACCESS_KEY_ID"),
+        secretAccessKey: env("AWS_SECRET_ACCESS_KEY"),
+        endpoint: env("AWS_ENDPOINT"),
+        /**
+         * If this Option is set, the file is stored with this AWS_CUSTOM_READ_ENDPOINT in the DB and not with AWS_ENDPOINT.
+         * Can be used in Cloudflare R2 with Domain-Access or Public URL: https://pub-<YOUR_PULIC_BUCKET_ID>.r2.dev
+         * Check the cloudflare docs for the setup: https://developers.cloudflare.com/r2/data-access/public-buckets/#enable-public-access-for-your-bucket
+         */
+        customReadEndpoint: env("AWS_CUSTOM_READ_ENDPOINT"),
+        /**
+         * defaultAcl: undefined will set ACL option to public-read,
+         * defaultAcl: false will not set any ACL option (needed for cloudflare R2)
+         * defaultAcl: 'some-string' will set 'some-string' as ACL header. See AWS docs for all possible options.
+         */
+        defaultAcl: false,
+        s3BucketEndpoint: false, // Whether the provided endpoint addresses an individual bucket. false if it addresses the root API endpoint
+        s3ForcePathStyle: true, // removes bucket name from Endpoint URL
+        params: {
+          Bucket: env("AWS_BUCKET"),
+        },
+      },
+    },
+  },
+  // ...
+});
+```
+
 ### Security Middleware Configuration
 
 Due to the default settings in the Strapi Security Middleware you will need to modify the `contentSecurityPolicy` settings to properly see thumbnail previews in the Media Library. You should replace `strapi::security` string with the object bellow instead as explained in the [middleware configuration](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/required/middlewares.html#loading-order) documentation.
