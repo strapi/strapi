@@ -20,23 +20,24 @@ const { createQueryBuilder } = require('../query');
  * @param {string} params.db - database instance
  */
 const deletePreviousOneToAnyRelations = async ({ id, attribute, relIdsToadd, db }) => {
+  if (!(isBidirectional(attribute) && isOneToAny(attribute))) {
+    throw new Error(
+      'deletePreviousOneToAnyRelations can only be called for bidirectional oneToAny relations'
+    );
+  }
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
-  // need to delete the previous relations for oneToAny relations
-  if (isBidirectional(attribute) && isOneToAny(attribute)) {
-    // delete previous oneToAny relations
-    await createQueryBuilder(joinTable.name, db)
-      .delete()
-      .where({
-        [inverseJoinColumn.name]: relIdsToadd,
-        [joinColumn.name]: { $ne: id },
-      })
-      .where(joinTable.on || {})
-      .execute();
+  await createQueryBuilder(joinTable.name, db)
+    .delete()
+    .where({
+      [inverseJoinColumn.name]: relIdsToadd,
+      [joinColumn.name]: { $ne: id },
+    })
+    .where(joinTable.on || {})
+    .execute();
 
-    await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToadd });
-  }
+  await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToadd });
 };
 
 /**
@@ -51,46 +52,46 @@ const deletePreviousAnyToOneRelations = async ({ id, attribute, relIdToadd, db }
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
-  // Delete the previous relations for anyToOne relations
-  if (isBidirectional(attribute) && isAnyToOne(attribute)) {
-    // update orders for previous anyToOne relations that will be deleted if it has order (manyToOne)
+  if (!(isBidirectional(attribute) && isAnyToOne(attribute))) {
+    throw new Error(
+      'deletePreviousAnyToOneRelations can only be called for bidirectional anyToOne relations'
+    );
+  }
+  // handling manyToOne
+  if (isManyToAny(attribute)) {
+    // if the database integrity was not broken relsToDelete is supposed to be of length 1
+    const relsToDelete = await createQueryBuilder(joinTable.name, db)
+      .select(inverseJoinColumn.name)
+      .where({
+        [joinColumn.name]: id,
+        [inverseJoinColumn.name]: { $ne: relIdToadd },
+      })
+      .where(joinTable.on || {})
+      .execute();
 
-    // handling manyToOne
-    if (isManyToAny(attribute)) {
-      // if the database integrity was not broken relsToDelete is supposed to be of length 1
-      const relsToDelete = await createQueryBuilder(joinTable.name, db)
-        .select(inverseJoinColumn.name)
-        .where({
-          [joinColumn.name]: id,
-          [inverseJoinColumn.name]: { $ne: relIdToadd },
-        })
-        .where(joinTable.on || {})
-        .execute();
+    const relIdsToDelete = map(inverseJoinColumn.name, relsToDelete);
 
-      const relIdsToDelete = map(inverseJoinColumn.name, relsToDelete);
+    await createQueryBuilder(joinTable.name, db)
+      .delete()
+      .where({
+        [joinColumn.name]: id,
+        [inverseJoinColumn.name]: { $in: relIdsToDelete },
+      })
+      .where(joinTable.on || {})
+      .execute();
 
-      await createQueryBuilder(joinTable.name, db)
-        .delete()
-        .where({
-          [joinColumn.name]: id,
-          [inverseJoinColumn.name]: { $in: relIdsToDelete },
-        })
-        .where(joinTable.on || {})
-        .execute();
+    await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToDelete });
 
-      await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToDelete });
-
-      // handling oneToOne
-    } else {
-      await createQueryBuilder(joinTable.name, db)
-        .delete()
-        .where({
-          [joinColumn.name]: id,
-          [inverseJoinColumn.name]: { $ne: relIdToadd },
-        })
-        .where(joinTable.on || {})
-        .execute();
-    }
+    // handling oneToOne
+  } else {
+    await createQueryBuilder(joinTable.name, db)
+      .delete()
+      .where({
+        [joinColumn.name]: id,
+        [inverseJoinColumn.name]: { $ne: relIdToadd },
+      })
+      .where(joinTable.on || {})
+      .execute();
   }
 };
 
