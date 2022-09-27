@@ -1407,39 +1407,24 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                           </div>
                         </label>
                         <div
-                          class=" css-1iyvlxg-container"
+                          class=" css-1tkrshn-container"
                         >
-                          <span
-                            class="css-1f43avz-a11yText-A11yText"
-                            id="react-select-2-live-region"
-                          />
-                          <span
-                            aria-atomic="false"
-                            aria-live="polite"
-                            aria-relevant="additions text"
-                            class="css-1f43avz-a11yText-A11yText"
-                          />
                           <div
                             class=" css-1sb7bue-control"
                           >
                             <div
-                              class=" css-do2euy-ValueContainer"
+                              class=" css-1kj7tu4-ValueContainer"
                             >
                               <div
-                                class=" css-1sqm0gs-singleValue"
+                                class=" css-p5rves-singleValue"
                               >
                                 Media Library
                               </div>
                               <input
                                 aria-autocomplete="list"
-                                aria-expanded="false"
-                                aria-haspopup="true"
-                                aria-invalid="false"
-                                aria-readonly="true"
-                                class="css-mohuvp-dummyInput-DummyInput"
+                                class="css-wmatm6-dummyInput-DummyInput"
                                 id="asset-folder"
-                                inputmode="none"
-                                role="combobox"
+                                readonly=""
                                 tabindex="0"
                                 value=""
                               />
