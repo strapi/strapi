@@ -9,3 +9,4 @@ export { default as useSettingsForm } from './useSettingsForm';
 export { default as usePermissionsDataManager } from './usePermissionsDataManager';
 export { default as useReleaseNotification } from './useReleaseNotification';
 export { default as useThemeToggle } from './useThemeToggle';
+export { default as useRegenerate } from './useRegenerate';
