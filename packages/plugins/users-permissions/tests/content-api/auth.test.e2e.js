@@ -45,7 +45,9 @@ describe('Auth API', () => {
         body: {},
       });
 
-      expect(res.statusCode).toBe(403);
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error.name).toBe('ApplicationError');
+      expect(res.body.error.message).toBe('You must be authenticated to reset your password');
     });
 
     test('Fails on invalid confirmation password', async () => {
