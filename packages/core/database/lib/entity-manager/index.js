@@ -746,11 +746,13 @@ const createEntityManager = (db) => {
                 differenceWith(isEqual, cleanRelationData.disconnect, cleanRelationData.connect)
               );
 
+              if (!isEmpty(relIdsToDelete)) {
+                await deleteRelations({ id, attribute, db, relIdsToDelete });
+              }
+
               if (isEmpty(cleanRelationData.connect)) {
                 continue;
               }
-
-              await deleteRelations({ id, attribute, db, relIdsToDelete });
 
               // Fetch current relations to handle ordering
               let currentMovingRels;
