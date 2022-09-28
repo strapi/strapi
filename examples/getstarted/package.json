@@ -12,6 +12,7 @@
     "strapi": "strapi"
   },
   "dependencies": {
+    "@strapi/plugin-color-picker": "4.3.9",
     "@strapi/plugin-documentation": "4.3.9",
     "@strapi/plugin-graphql": "4.3.9",
     "@strapi/plugin-i18n": "4.3.9",

@@ -23,6 +23,7 @@ const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const requestContext = require('./services/request-context');
 const createAuth = require('./services/auth');
+const createCustomFields = require('./services/custom-fields');
 const createContentAPI = require('./services/content-api');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
@@ -36,12 +37,14 @@ const hooksRegistry = require('./core/registries/hooks');
 const controllersRegistry = require('./core/registries/controllers');
 const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
+const customFieldsRegistry = require('./core/registries/custom-fields');
 const createConfigProvider = require('./core/registries/config');
 const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 const { destroyOnSignal } = require('./utils/signals');
 const sanitizersRegistry = require('./core/registries/sanitizers');
+const convertCustomFieldType = require('./utils/convert-custom-field-type');
 
 // TODO: move somewhere else
 const draftAndPublishSync = require('./migrations/draft-publish');
@@ -89,6 +92,7 @@ class Strapi {
     this.container.register('controllers', controllersRegistry(this));
     this.container.register('modules', modulesRegistry(this));
     this.container.register('plugins', pluginsRegistry(this));
+    this.container.register('custom-fields', customFieldsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
     this.container.register('content-api', createContentAPI(this));
@@ -112,6 +116,8 @@ class Strapi {
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
     this.requestContext = requestContext;
+
+    this.customFields = createCustomFields(this);
 
     createUpdateNotifier(this).notify();
   }
@@ -385,6 +391,8 @@ class Strapi {
     this.telemetry.register();
 
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
+    // NOTE: Swap type customField for underlying data type
+    convertCustomFieldType(this);
 
     return this;
   }
