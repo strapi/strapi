@@ -7,7 +7,7 @@
 const _ = require('lodash');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
-const { Command } = require('commander');
+const { Command, Option } = require('commander');
 
 const program = new Command();
 
@@ -101,6 +101,123 @@ program
   .option('-ts, --typescript', 'Create a typescript project')
   .description('Create a new application')
   .action(require('../lib/commands/new'));
+
+// `$ strapi export`
+program
+  .command('export')
+  .description('Export data from Strapi to file')
+  // TODO: Final version should be possible to provide all options on the CLI instead of config file
+  .option('--exportConfig, -ce <configFile>', 'Path to the transfer config file')
+  .option(
+    '--output, -o <outputFilename>',
+    'Filename to output (without extension)',
+    'strapi-{timestamp}'
+  )
+  .addOption(
+    new Option('--source', 'which type of Strapi instance', true)
+      .choices(['local, remote'])
+      .default('local')
+  )
+  .addOption(
+    new Option('--sourceUrl', 'Remote url', true) // required if remote === true
+  )
+  .addOption(new Option('--sourceToken', 'Auth token for remote Strapi')) // required if remote === true
+  .addOption(new Option('--compress', 'compress content', true))
+  .addOption(new Option('--zip, -z', 'combine into one gzip file', true)) // if this is set to false, we output to a folder
+  .addOption(new Option('--encrypt, -e', 'encrypt content', true))
+  .addOption(new Option('--encryptionPassword, -pe', 'prompt for encryption password?')) // should we allow passing in a password directly? insecure, but may be necessary for some CI environments
+  .addOption(new Option('--encryptionkeyfile, -ke <keyfile>', 'path to keyfile to encrypt with'))
+  .addOption(
+    new Option('--encryptionCipher <crypto cipher>', 'node crypto cipher to use', 'aes-256') // .choices(crypto.getCiphers())
+  )
+  .addOption(
+    new Option('--encryptionHash <crypto hash>', 'node crypto hash to use', 'sha-256') // .choices(crypto.getHashes())
+  )
+  .addOption(
+    new Option(
+      '--splitSize [max MB per file]',
+      'split exported file when exceeding max filesize in MB'
+    )
+  )
+  // content, hooks, relations
+  .addOption(new Option('--includeLocalMediaFiles', 'Include local media files', true))
+  .addOption(
+    new Option(
+      '--includeProviderMediaFiles',
+      'Download and include remote provider media files',
+      false
+    )
+  )
+  .addOption(new Option('--includeContent', 'Include content items', true))
+  .addOption(new Option('--includeWebhooks', 'Include webhooks', true))
+  .addOption(new Option('--contentTypes, -ct <content types>', 'Include these content types')) // If this is a local instance of strapi, we could provide a list of their actual content types
+  .action(require('../lib/commands/transfer'));
+
+// `$ strapi import`
+program
+  .command('import')
+  .description('Import data from file to Strapi')
+  // TODO: Final version should be possible to provide all options on the CLI instead of config file
+  .option('--importConfig, -ci <configFile>', 'Path to the transfer config file')
+  .option('--input, -o <input filename>', 'Path to the first file to be imported')
+  .addOption(
+    new Option('--destination', 'which type of Strapi instance', true)
+      .choices(['local, remote'])
+      .default('local')
+  )
+  .addOption(
+    new Option('--destinationUrl', 'Remote url', true) // required if remote === true
+  )
+  .addOption(
+    new Option(
+      '--resolveConflict, -rc <conflictStrategy>',
+      'Which strategy to use for ID conflicts'
+    )
+      .choices(['newest', 'overwrite', 'abort', 'ignore'])
+      .default('newest')
+  )
+  .addOption(
+    new Option(
+      '--schemaStrategy <schemaStrategy>',
+      'exactMatch requires every field to match, strict requires version and schema to match, subset requires source schema to exist in destination, bypass skips checks'
+    )
+      .choices(['exactMatch', 'strict', 'subset', 'bypass'])
+      .default('exactMatch')
+  )
+  .addOption(
+    new Option(
+      '--requireEmptyDestination',
+      'Require the destination to not contain any entities before starting',
+      true
+    )
+  )
+  .addOption(new Option('--destinationToken', 'Auth token for remote Strapi')) // required if remote === true
+  .addOption(
+    new Option('--allowInsecureConnection', 'Bypass check for https on remote destination', false)
+  )
+  /**
+   *
+   * Considering that the output stream will be compress -> encrypt -> file -> gzip without compression into file(s)
+   * we should store an unencrypted metadata about the contents that tells the destination:
+   * - if the content is encrypted and the cipher used
+   * - if the content is compressed
+   *
+   *  */
+  // .addOption(new Option('--compress', 'compress content', true)) // we should be able to autodetect
+  // .addOption(new Option('--zip, -z', 'combine into one gzip file', true)) // if this is set to false, we output to a folder
+  // .addOption(new Option('--encrypt, -e', 'encrypt content', true))
+  .addOption(new Option('--decryptionPassword, -pi', 'prompt for decryption password?')) // should we allow passing in a password directly? insecure, but may be necessary for some CI environments
+  .addOption(new Option('--decryptionkeyfile, -ki <keyfile>', 'path to keyfile to encrypt with'))
+
+  .action(require('../lib/commands/transfer'));
+
+// `$ strapi transfer`
+program
+  .command('transfer')
+  .description('Transfer data from local source to a remote Strapi')
+  // TODO: Final version should be possible to provide all options on the CLI instead of config file
+  .requiredOption('--config, -c <configFile>', 'Path to the transfer config file')
+  .action(require('../lib/commands/transfer'));
 
 // `$ strapi start`
 program
