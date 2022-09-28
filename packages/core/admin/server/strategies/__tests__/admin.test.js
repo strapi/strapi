@@ -16,7 +16,7 @@ describe('Admin Auth Strategy', () => {
       const ctx = createContext({}, { request, state: {} });
       const user = { id: 1, isActive: true };
       const findOne = jest.fn(() => user);
-      const generateUserAbility = jest.fn();
+      const generateUserAbility = jest.fn(() => 'ability');
 
       global.strapi = {
         admin: {
@@ -32,7 +32,11 @@ describe('Admin Auth Strategy', () => {
 
       expect(decodeJwtToken).toHaveBeenCalledWith('admin_tests-jwt-token');
       expect(findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: ['roles'] });
-      expect(response).toStrictEqual({ authenticated: true, credentials: user });
+      expect(response).toStrictEqual({
+        authenticated: true,
+        credentials: user,
+        ability: 'ability',
+      });
     });
 
     test('Fails to authenticate if the authorization header is missing', async () => {

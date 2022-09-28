@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Box } from '@strapi/design-system/Box';
+import { useCustomFields } from '@strapi/helper-plugin';
 import Date from '@strapi/icons/Date';
 import Boolean from '@strapi/icons/Boolean';
 import Email from '@strapi/icons/Email';
@@ -40,10 +42,38 @@ const iconByTypes = {
   dynamiczone: <DynamicZone />,
 };
 
-const FieldTypeIcon = ({ type }) => iconByTypes[type] || null;
+const FieldTypeIcon = ({ type, customFieldUid }) => {
+  const customFieldsRegistry = useCustomFields();
+
+  let Compo = iconByTypes[type];
+
+  if (customFieldUid) {
+    const customField = customFieldsRegistry.get(customFieldUid);
+    const CustomFieldIcon = customField.icon;
+
+    if (CustomFieldIcon) {
+      Compo = (
+        <Box marginRight={3} width={7} height={6}>
+          <CustomFieldIcon />
+        </Box>
+      );
+    }
+  }
+
+  if (!iconByTypes[type]) {
+    return null;
+  }
+
+  return Compo;
+};
+
+FieldTypeIcon.defaultProps = {
+  customFieldUid: null,
+};
 
 FieldTypeIcon.propTypes = {
   type: PropTypes.string.isRequired,
+  customFieldUid: PropTypes.string,
 };
 
 export default FieldTypeIcon;
