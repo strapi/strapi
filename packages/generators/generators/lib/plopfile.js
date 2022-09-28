@@ -9,6 +9,7 @@ const generatePlugin = require('./plops/plugin');
 const generatePolicy = require('./plops/policy');
 const generateMiddleware = require('./plops/middleware');
 const generateService = require('./plops/service');
+const generateEnvironment = require('./plops/environment');
 
 module.exports = (plop) => {
   // Plop config
@@ -23,4 +24,5 @@ module.exports = (plop) => {
   generatePolicy(plop);
   generateMiddleware(plop);
   generateService(plop);
+  generateEnvironment(plop);
 };
