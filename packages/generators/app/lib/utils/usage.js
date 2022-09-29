@@ -65,7 +65,7 @@ const getProperties = (scope, error) => ({
   useYarn: scope.useYarn,
   useTypescriptOnServer: scope.useTypescript,
   useTypescriptOnAdmin: scope.useTypescript,
-  hostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'StrapiCloud',
+  isHostedOnStrapiCloud: process.env.STRAPI_CLOUD === 'true',
   noRun: (scope.runQuickstartApp !== true).toString(),
 });
 
