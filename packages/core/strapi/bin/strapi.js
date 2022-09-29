@@ -107,50 +107,40 @@ program
   .command('export')
   .description('Export data from Strapi to file')
   // TODO: Final version should be possible to provide all options on the CLI instead of config file
-  .option('--exportConfig, -ce <configFile>', 'Path to the transfer config file')
+  .option('--config <configFile>', 'Path to the config file')
   .option(
-    '--output, -o <outputFilename>',
+    '--output <outputFilename>',
     'Filename to output (without extension)',
-    'strapi-{timestamp}'
+    'strapi-{timestamp}.gz'
   )
-  .addOption(
-    new Option('--source', 'which type of Strapi instance', true)
-      .choices(['local, remote'])
-      .default('local')
-  )
-  .addOption(
-    new Option('--sourceUrl', 'Remote url', true) // required if remote === true
-  )
-  .addOption(new Option('--sourceToken', 'Auth token for remote Strapi')) // required if remote === true
+  .addOption(new Option('--sourceUrl', 'Remote url to use instead of local instance of Strapi'))
+  .addOption(new Option('--sourceToken', 'Auth token for remote Strapi')) // required if sourceUrl is set
+  .addOption(new Option('--encrypt', 'encrypt output file', true))
   .addOption(new Option('--compress', 'compress content', true))
-  .addOption(new Option('--zip, -z', 'combine into one gzip file', true)) // if this is set to false, we output to a folder
-  .addOption(new Option('--encrypt, -e', 'encrypt content', true))
-  .addOption(new Option('--encryptionPassword, -pe', 'prompt for encryption password?')) // should we allow passing in a password directly? insecure, but may be necessary for some CI environments
-  .addOption(new Option('--encryptionkeyfile, -ke <keyfile>', 'path to keyfile to encrypt with'))
+  .addOption(new Option('--archive', 'combine into one gzip file', true)) // if this is set to false, we output to a folder
+  .addOption(new Option('--password, -p', 'prompt for password to encrypt with'))
+  // .addOption(new Option('--encryptionkeyfile, -ke <keyfile>', 'path to keyfile to encrypt with'))
+  .addOption(
+    new Option(
+      '--only <data,to,include>',
+      'List of data to include (webhooks, content, localmedia, providermedia, config)' // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+    )
+  )
+  .addOption(
+    new Option(
+      '--exclude <data,to,exclude>',
+      'List of data to exclude (webhooks, content, localmedia, providermedia, config, relations)' // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+    )
+  )
   .addOption(
     new Option('--encryptionCipher <crypto cipher>', 'node crypto cipher to use', 'aes-256') // .choices(crypto.getCiphers())
   )
+  // .addOption(
+  //   new Option('--encryptionHash <crypto hash>', 'node crypto hash to use', 'sha-256') // .choices(crypto.getHashes())
+  // )
   .addOption(
-    new Option('--encryptionHash <crypto hash>', 'node crypto hash to use', 'sha-256') // .choices(crypto.getHashes())
+    new Option('--split [max MB per file]', 'split exported file when exceeding max filesize in MB')
   )
-  .addOption(
-    new Option(
-      '--splitSize [max MB per file]',
-      'split exported file when exceeding max filesize in MB'
-    )
-  )
-  // content, hooks, relations
-  .addOption(new Option('--includeLocalMediaFiles', 'Include local media files', true))
-  .addOption(
-    new Option(
-      '--includeProviderMediaFiles',
-      'Download and include remote provider media files',
-      false
-    )
-  )
-  .addOption(new Option('--includeContent', 'Include content items', true))
-  .addOption(new Option('--includeWebhooks', 'Include webhooks', true))
-  .addOption(new Option('--contentTypes, -ct <content types>', 'Include these content types')) // If this is a local instance of strapi, we could provide a list of their actual content types
   .action(require('../lib/commands/transfer'));
 
 // `$ strapi import`
@@ -158,31 +148,29 @@ program
   .command('import')
   .description('Import data from file to Strapi')
   // TODO: Final version should be possible to provide all options on the CLI instead of config file
-  .option('--importConfig, -ci <configFile>', 'Path to the transfer config file')
-  .option('--input, -o <input filename>', 'Path to the first file to be imported')
+  .option('--config <configFile>', 'Path to the config file')
+  .option('--input <input filename>', 'Path to the file to be imported')
   .addOption(
-    new Option('--destination', 'which type of Strapi instance', true)
-      .choices(['local, remote'])
-      .default('local')
+    new Option('--destinationUrl', 'Remote url to use instead of local instance of Strapi') // required if remote === true
   )
   .addOption(
-    new Option('--destinationUrl', 'Remote url', true) // required if remote === true
+    new Option('--destinationToken', 'Auth token for remote Strapi') // required if remote === true
   )
   .addOption(
-    new Option(
-      '--resolveConflict, -rc <conflictStrategy>',
-      'Which strategy to use for ID conflicts'
-    )
+    new Option('--destinationAllowInsecure', 'Bypass check for https on remote destination', false)
+  )
+  .addOption(
+    new Option('--conflictStrategy <conflictStrategy>', 'Which strategy to use for ID conflicts')
       .choices(['newest', 'overwrite', 'abort', 'ignore'])
       .default('newest')
   )
   .addOption(
     new Option(
       '--schemaStrategy <schemaStrategy>',
-      'exactMatch requires every field to match, strict requires version and schema to match, subset requires source schema to exist in destination, bypass skips checks'
+      'exactMatch requires every field to match, strict requires Strapi version and schemas to match, subset requires source schema to exist in destination, bypass skips checks'
     )
-      .choices(['exactMatch', 'strict', 'subset', 'bypass'])
-      .default('exactMatch')
+      .choices(['exact', 'strict', 'subset', 'bypass'])
+      .default('exact')
   )
   .addOption(
     new Option(
@@ -190,10 +178,6 @@ program
       'Require the destination to not contain any entities before starting',
       true
     )
-  )
-  .addOption(new Option('--destinationToken', 'Auth token for remote Strapi')) // required if remote === true
-  .addOption(
-    new Option('--allowInsecureConnection', 'Bypass check for https on remote destination', false)
   )
   /**
    *
