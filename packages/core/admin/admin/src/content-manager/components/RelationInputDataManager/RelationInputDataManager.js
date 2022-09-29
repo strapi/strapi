@@ -173,7 +173,6 @@ export const RelationInputDataManger = ({
       onRelationLoadMore={() => handleRelationLoadMore()}
       onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
-      onSearchClose={() => {}}
       onSearchOpen={handleOpenSearch}
       placeholder={formatMessage(
         placeholder || {
