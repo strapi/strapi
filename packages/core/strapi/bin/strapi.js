@@ -103,6 +103,9 @@ program
   .action(require('../lib/commands/new'));
 
 // `$ strapi export`
+const listOption = (value) => {
+  return value.split(',');
+};
 program
   .command('export')
   .description('Export data from Strapi to file')
@@ -117,19 +120,21 @@ program
   .addOption(new Option('--sourceToken', 'Auth token for remote Strapi')) // required if sourceUrl is set
   .addOption(new Option('--encrypt', 'encrypt output file', true))
   .addOption(new Option('--compress', 'compress content', true))
-  .addOption(new Option('--archive', 'combine into one gzip file', true)) // if this is set to false, we output to a folder
+  // .addOption(new Option('--archive', 'combine into one gzip file', true)) // for now we REQUIRE this to be true
   .addOption(new Option('--password, -p', 'prompt for password to encrypt with'))
-  // .addOption(new Option('--encryptionkeyfile, -ke <keyfile>', 'path to keyfile to encrypt with'))
+  // .addOption(new Option('--key, -k <keyfile>', 'path to keyfile to encrypt with')) // for now we will only use passwords
   .addOption(
     new Option(
       '--only <data,to,include>',
-      'List of data to include (webhooks, content, localmedia, providermedia, config)' // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+      'Comma-separated list of data to include (webhooks, content, localmedia, providermedia, config)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+      listOption
     )
   )
   .addOption(
     new Option(
       '--exclude <data,to,exclude>',
-      'List of data to exclude (webhooks, content, localmedia, providermedia, config, relations)' // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+      'Comma-separated list of data to exclude (webhooks,content,localmedia,providermedia,config,relations)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+      listOption
     )
   )
   .addOption(
@@ -166,6 +171,20 @@ program
   )
   .addOption(
     new Option(
+      '--only <data,to,include>',
+      'Comma-separated list of data to include (webhooks,content,localmedia,providermedia,config)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+      listOption
+    )
+  )
+  .addOption(
+    new Option(
+      '--exclude <data,to,exclude>',
+      'Comma-separated list of data to exclude (webhooks,content,localmedia,providermedia,config,relations)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+      listOption
+    )
+  )
+  .addOption(
+    new Option(
       '--schemaComparison <schemaComparison>',
       'exact requires every field to match, strict requires Strapi version and schemas to match, subset requires source schema to exist in destination, bypass skips checks'
     )
@@ -187,20 +206,18 @@ program
    * - if the content is compressed
    *
    *  */
-  // .addOption(new Option('--compress', 'compress content', true)) // we should be able to autodetect
-  // .addOption(new Option('--zip, -z', 'combine into one gzip file', true)) // if this is set to false, we output to a folder
-  // .addOption(new Option('--encrypt, -e', 'encrypt content', true))
-  .addOption(new Option('--decryptionPassword, -pi', 'prompt for decryption password?')) // should we allow passing in a password directly? insecure, but may be necessary for some CI environments
-  .addOption(new Option('--decryptionkeyfile, -ki <keyfile>', 'path to keyfile to encrypt with'))
+  // We do not need a compressed content option. We autodetect by "brute force"; try reading the file and within a few bytes it will fail and we try the other method
+  // .addOption(new Option('--decompress', 'decompress content', true)) // we should be able to autodetect
+  // An --encrypt option is superfluous. If user provides a password, we try it. Otherwise it fails and we notify user.
+  .addOption(new Option('-password, -p', 'prompt for password'))
+  .addOption(
+    new Option(
+      '--encryptionCipher <crypto cipher>',
+      'node crypto cipher to use for decryption',
+      'aes-256'
+    ) // .choices(crypto.getCiphers())
+  )
 
-  .action(require('../lib/commands/transfer'));
-
-// `$ strapi transfer`
-program
-  .command('transfer')
-  .description('Transfer data from local source to a remote Strapi')
-  // TODO: Final version should be possible to provide all options on the CLI instead of config file
-  .requiredOption('--config, -c <configFile>', 'Path to the transfer config file')
   .action(require('../lib/commands/transfer'));
 
 // `$ strapi start`
