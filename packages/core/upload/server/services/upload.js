@@ -341,7 +341,7 @@ module.exports = ({ strapi }) => ({
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
     }
 
-    sendMediaMetrics(fileValues, user);
+    sendMediaMetrics(fileValues);
 
     const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
 
@@ -357,7 +357,7 @@ module.exports = ({ strapi }) => ({
       fileValues[CREATED_BY_ATTRIBUTE] = user.id;
     }
 
-    sendMediaMetrics(fileValues, user);
+    sendMediaMetrics(fileValues);
 
     const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
 
@@ -442,6 +442,12 @@ module.exports = ({ strapi }) => ({
   },
 
   setSettings(value) {
+    if (value.responsiveDimensions === true) {
+      strapi.telemetry.send('didEnableResponsiveDimensions');
+    } else {
+      strapi.telemetry.send('didDisableResponsiveDimensions');
+    }
+
     return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
   },
 });

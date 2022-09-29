@@ -41,6 +41,8 @@ const create = async (attributes) => {
 
   const createdUser = await strapi.query('admin::user').create({ data: user, populate: ['roles'] });
 
+  getService('metrics').sendDidInviteUser();
+
   return createdUser;
 };
 

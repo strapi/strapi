@@ -34,8 +34,6 @@ module.exports = {
 
     const createdUser = await getService('user').create(attributes);
 
-    getService('metrics').sendDidInviteUser(ctx.state?.user);
-
     const userInfo = getService('user').sanitizeUser(createdUser);
 
     // Note: We need to assign manually the registrationToken to the

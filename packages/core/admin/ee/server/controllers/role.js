@@ -92,14 +92,7 @@ module.exports = {
       return ctx.notFound('role.notFound');
     }
 
-    const { permissions, shouldSendUpdate } = await roleService.assignPermissions(
-      role.id,
-      input.permissions
-    );
-
-    if (shouldSendUpdate) {
-      await getService('metrics').sendDidUpdateRolePermissions(ctx.state?.user);
-    }
+    const permissions = await roleService.assignPermissions(role.id, input.permissions);
 
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 

@@ -315,7 +315,6 @@ const assignPermissions = async (roleId, permissions = []) => {
   const superAdmin = await getService('role').getSuperAdmin();
   const isSuperAdmin = superAdmin && superAdmin.id === roleId;
   const assignRole = set('role', roleId);
-  let shouldSendUpdate = false;
 
   const permissionsWithRole = permissions
     // Add the role attribute to every permission
@@ -352,13 +351,10 @@ const assignPermissions = async (roleId, permissions = []) => {
   }
 
   if (!isSuperAdmin && (permissionsToAdd.length || permissionsToDelete.length)) {
-    shouldSendUpdate = true;
+    await getService('metrics').sendDidUpdateRolePermissions();
   }
 
-  return {
-    permissions: permissionsToReturn,
-    shouldSendUpdate,
-  };
+  return permissionsToReturn;
 };
 
 const addPermissions = async (roleId, permissions) => {

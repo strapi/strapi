@@ -82,21 +82,10 @@ describe('Role controller', () => {
     test('Fails on missing permissions input', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
 
-      const state = {
-        user: {
-          id: 1,
-        },
-      };
-
-      const ctx = createContext(
-        {
-          params: { id: 1 },
-          body: {},
-        },
-        {
-          state,
-        }
-      );
+      const ctx = createContext({
+        params: { id: 1 },
+        body: {},
+      });
 
       global.strapi = {
         admin: {
@@ -124,23 +113,12 @@ describe('Role controller', () => {
     test('Fails on missing action permission', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
 
-      const state = {
-        user: {
-          id: 1,
+      const ctx = createContext({
+        params: { id: 1 },
+        body: {
+          permissions: [{}],
         },
-      };
-
-      const ctx = createContext(
-        {
-          params: { id: 1 },
-          body: {
-            permissions: [{}],
-          },
-        },
-        {
-          state,
-        }
-      );
+      });
       global.strapi = {
         admin: {
           services: {
@@ -167,10 +145,7 @@ describe('Role controller', () => {
     test('Assign permissions if input is valid', async () => {
       const roleID = 1;
       const findOneRole = jest.fn(() => Promise.resolve({ id: roleID }));
-      const assignPermissions = jest.fn((roleID, permissions) =>
-        Promise.resolve({ permissions, shouldSendUpdate: true })
-      );
-      const sendDidUpdateRolePermissions = jest.fn();
+      const assignPermissions = jest.fn((roleID, permissions) => Promise.resolve(permissions));
       const inputPermissions = [
         {
           action: 'test',
@@ -180,24 +155,12 @@ describe('Role controller', () => {
         },
       ];
 
-      const state = {
-        user: {
-          id: 1,
-          email: 'someTestEmailString',
+      const ctx = createContext({
+        params: { id: roleID },
+        body: {
+          permissions: inputPermissions,
         },
-      };
-
-      const ctx = createContext(
-        {
-          params: { id: roleID },
-          body: {
-            permissions: inputPermissions,
-          },
-        },
-        {
-          state,
-        }
-      );
+      });
 
       global.strapi = {
         admin: {
@@ -220,9 +183,6 @@ describe('Role controller', () => {
                   options: { applyToProperties: ['fields'] },
                 })),
               },
-            },
-            metrics: {
-              sendDidUpdateRolePermissions,
             },
           },
         },

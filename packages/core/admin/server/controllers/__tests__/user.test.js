@@ -15,12 +15,7 @@ describe('User Controller', () => {
 
     test('Fails if user already exist', async () => {
       const exists = jest.fn(() => Promise.resolve(true));
-      const state = {
-        user: {
-          id: 1,
-        },
-      };
-      const ctx = createContext({ body }, { state });
+      const ctx = createContext({ body });
 
       global.strapi = {
         admin: {
@@ -49,15 +44,8 @@ describe('User Controller', () => {
       const exists = jest.fn(() => Promise.resolve(false));
       const sanitizeUser = jest.fn((user) => Promise.resolve(user));
       const created = jest.fn();
-      const sendDidInviteUser = jest.fn();
-      const state = {
-        user: {
-          id: 1,
-          email: 'someTestEmailString',
-        },
-      };
-      const ctx = createContext({ body }, { state, created });
-      console.log(ctx);
+      const ctx = createContext({ body }, { created });
+
       global.strapi = {
         admin: {
           services: {
@@ -65,9 +53,6 @@ describe('User Controller', () => {
               exists,
               create,
               sanitizeUser,
-            },
-            metrics: {
-              sendDidInviteUser,
             },
           },
         },
@@ -79,7 +64,6 @@ describe('User Controller', () => {
       expect(create).toHaveBeenCalledWith(body);
       expect(sanitizeUser).toHaveBeenCalled();
       expect(created).toHaveBeenCalled();
-      expect(sendDidInviteUser).toHaveBeenCalled();
     });
   });
 

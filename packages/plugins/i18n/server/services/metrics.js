@@ -11,7 +11,6 @@ const sendDidInitializeEvent = async () => {
     0
   )(strapi.contentTypes);
 
-  // This event is anonymous
   await strapi.telemetry.send('didInitializeI18n', { groupProperties: { numberOfContentTypes } });
 };
 
