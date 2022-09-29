@@ -182,14 +182,17 @@ const RelationInput = ({
     };
   }, []);
 
-  const handleMenuClose = (e) => {
+  const handleMenuClose = () => {
     setIsMenuOpen(false);
-    onSearchClose(e);
+
+    if (onSearchClose) {
+      onSearchClose();
+    }
   };
 
-  const handleMenuOpen = (e) => {
+  const handleMenuOpen = () => {
     setIsMenuOpen(true);
-    onSearchOpen(e);
+    onSearchOpen();
   };
 
   return (
@@ -378,6 +381,7 @@ RelationInput.defaultProps = {
   error: undefined,
   labelAction: null,
   labelLoadMore: null,
+  onSearchClose: undefined,
   required: false,
   relations: [],
   searchResults: [],
@@ -399,7 +403,7 @@ RelationInput.propTypes = {
   onRelationLoadMore: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
   onSearchNextPage: PropTypes.func.isRequired,
-  onSearchClose: PropTypes.func.isRequired,
+  onSearchClose: PropTypes.func,
   onSearchOpen: PropTypes.func.isRequired,
   placeholder: PropTypes.string.isRequired,
   publicationStateTranslations: PropTypes.shape({
