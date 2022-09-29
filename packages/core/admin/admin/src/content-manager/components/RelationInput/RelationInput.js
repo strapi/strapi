@@ -1,6 +1,6 @@
 import React, { useRef, useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
 
 import { ReactSelect } from '@strapi/helper-plugin';
@@ -15,7 +15,6 @@ import { Tooltip } from '@strapi/design-system/Tooltip';
 
 import Cross from '@strapi/icons/Cross';
 import Refresh from '@strapi/icons/Refresh';
-import Loader from '@strapi/icons/Loader';
 
 import { Relation } from './components/Relation';
 import { RelationItem } from './components/RelationItem';
@@ -37,21 +36,6 @@ const BoxEllipsis = styled(Box)`
     text-overflow: ellipsis;
     display: inherit;
   }
-`;
-
-const rotation = keyframes`
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(359deg);
-  }
-`;
-
-// TODO - to replace with loading prop on TextButton after DS release
-const LoaderWrapper = styled(Box)`
-  animation: ${rotation} 2s infinite linear;
-  will-change: transform;
 `;
 
 const RelationInput = ({
@@ -197,18 +181,10 @@ const RelationInput = ({
         loadMore={
           shouldDisplayLoadMoreButton && (
             <TextButton
-              disabled={paginatedRelations.isLoading}
+              disabled={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
               onClick={() => onRelationLoadMore()}
-              startIcon={
-                paginatedRelations.isLoading ? (
-                  // TODO: To replace with loading prop on TextButton after DS release
-                  <LoaderWrapper>
-                    <Loader />
-                  </LoaderWrapper>
-                ) : (
-                  <Refresh />
-                )
-              }
+              loading={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
+              startIcon={<Refresh />}
             >
               {labelLoadMore}
             </TextButton>
@@ -300,6 +276,7 @@ const ReactQueryRelationResult = PropTypes.shape({
     ),
   }),
   hasNextPage: PropTypes.bool,
+  isFetchingNextPage: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
 });
