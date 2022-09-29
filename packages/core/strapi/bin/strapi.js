@@ -139,7 +139,7 @@ program
   //   new Option('--encryptionHash <crypto hash>', 'node crypto hash to use', 'sha-256') // .choices(crypto.getHashes())
   // )
   .addOption(
-    new Option('--split [max MB per file]', 'split exported file when exceeding max filesize in MB')
+    new Option('--split <max MB per file>', 'split exported file when exceeding max filesize in MB')
   )
   .action(require('../lib/commands/transfer'));
 
@@ -166,8 +166,8 @@ program
   )
   .addOption(
     new Option(
-      '--schemaStrategy <schemaStrategy>',
-      'exactMatch requires every field to match, strict requires Strapi version and schemas to match, subset requires source schema to exist in destination, bypass skips checks'
+      '--schemaComparison <schemaComparison>',
+      'exact requires every field to match, strict requires Strapi version and schemas to match, subset requires source schema to exist in destination, bypass skips checks'
     )
       .choices(['exact', 'strict', 'subset', 'bypass'])
       .default('exact')

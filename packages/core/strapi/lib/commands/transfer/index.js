@@ -3,7 +3,7 @@
 /**
  * `$ strapi transfer`
  *
- * Generate a new Strapi application.
+ * Transfer between Strapi data providers
  */
 
 module.exports = (/* ...args */) => {
