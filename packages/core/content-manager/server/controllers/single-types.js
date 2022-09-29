@@ -74,7 +74,6 @@ module.exports = {
       ctx.body = await permissionChecker.sanitizeOutput(newEntity);
 
       await strapi.telemetry.send('didCreateFirstContentTypeEntry', {
-        adminUser: user,
         eventProperties: { model },
       });
       return;

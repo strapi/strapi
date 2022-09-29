@@ -38,13 +38,13 @@ const generateFileName = (name) => {
   return `${baseName}_${randomSuffix()}`;
 };
 
-const sendMediaMetrics = (data, adminUser) => {
+const sendMediaMetrics = (data) => {
   if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
-    strapi.telemetry.send('didSaveMediaWithCaption', { adminUser });
+    strapi.telemetry.send('didSaveMediaWithCaption');
   }
 
   if (_.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText)) {
-    strapi.telemetry.send('didSaveMediaWithAlternativeText', { adminUser });
+    strapi.telemetry.send('didSaveMediaWithAlternativeText');
   }
 };
 

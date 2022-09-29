@@ -181,7 +181,6 @@ describe('Single Types', () => {
     );
 
     expect(sendTelemetry).toHaveBeenCalledWith('didCreateFirstContentTypeEntry', {
-      adminUser: ctx.state.user,
       eventProperties: {
         model: modelUid,
       },

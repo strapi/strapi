@@ -4,7 +4,7 @@ const { intersection, prop } = require('lodash/fp');
 const { getRelationalFields } = require('@strapi/utils').relations;
 
 module.exports = ({ strapi }) => {
-  const sendDidConfigureListView = async (contentType, configuration, adminUser) => {
+  const sendDidConfigureListView = async (contentType, configuration) => {
     const displayedFields = prop('length', configuration.layouts.list);
     const relationalFields = getRelationalFields(contentType);
     const displayedRelationalFields = intersection(
@@ -13,7 +13,6 @@ module.exports = ({ strapi }) => {
     ).length;
 
     const data = {
-      adminUser,
       eventProperties: { containsRelationalFields: !!displayedRelationalFields },
     };
 

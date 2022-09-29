@@ -122,7 +122,7 @@ module.exports = {
       roles: superAdminRole ? [superAdminRole.id] : [],
     });
 
-    strapi.telemetry.send('didCreateFirstAdmin', { adminUser: ctx.state?.user });
+    strapi.telemetry.send('didCreateFirstAdmin');
 
     ctx.body = {
       data: {

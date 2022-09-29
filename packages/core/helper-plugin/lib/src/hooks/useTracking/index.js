@@ -12,14 +12,20 @@ const useTracking = () => {
   trackRef.current = (event, properties) => {
     if (uuid) {
       try {
-        axios.post('https://analytics.strapi.io/api/v2/track', {
-          event,
-          adminUserId,
-          deviceId,
-          eventProperties: { ...properties },
-          userProperties: {},
-          groupProperties: { ...telemetryProperties },
-        });
+        axios.post(
+          'https://analytics.strapi.io/api/v2/track',
+          {
+            event,
+            adminUserId,
+            deviceId,
+            eventProperties: { ...properties },
+            userProperties: {},
+            groupProperties: { ...telemetryProperties, projectId: uuid },
+          },
+          {
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
       } catch (err) {
         // Silent
       }

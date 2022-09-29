@@ -65,7 +65,6 @@ module.exports = {
       });
 
       const metricsPayload = {
-        adminUser: ctx.state?.user,
         eventProperties: {
           kind: contentType.kind,
           hasDraftAndPublish: hasDraftAndPublish(contentType.schema),
@@ -84,7 +83,6 @@ module.exports = {
     } catch (error) {
       strapi.log.error(error);
       await strapi.telemetry.send('didNotCreateContentType', {
-        adminUser: ctx.state?.user,
         eventProperties: { error: error.message },
       });
       ctx.send({ error: error.message }, 400);

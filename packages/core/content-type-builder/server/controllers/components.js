@@ -68,12 +68,6 @@ module.exports = {
         components: body.components,
       });
 
-      if (strapi.components.size === 0) {
-        strapi.telemetry.send('didCreateFirstComponent', { adminUser: ctx.state?.user });
-      } else {
-        strapi.telemetry.send('didCreateComponent', { adminUser: ctx.state?.user });
-      }
-
       setImmediate(() => strapi.reload());
 
       ctx.send({ data: { uid: component.uid } }, 201);

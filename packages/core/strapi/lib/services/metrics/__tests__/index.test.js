@@ -29,6 +29,9 @@ describe('metrics', () => {
           root: process.cwd(),
         },
       },
+      requestContext: {
+        get: jest.fn(() => ({})),
+      },
     });
 
     metricsInstance.register();
@@ -60,6 +63,9 @@ describe('metrics', () => {
           root: process.cwd(),
         },
       },
+      requestContext: {
+        get: jest.fn(() => ({})),
+      },
     });
 
     metricsInstance.register();
@@ -89,6 +95,9 @@ describe('metrics', () => {
           root: process.cwd(),
         },
       },
+      requestContext: {
+        get: jest.fn(() => ({})),
+      },
     });
 
     send('someEvent');
@@ -98,7 +107,6 @@ describe('metrics', () => {
     expect(fetch.mock.calls[0][1].method).toBe('POST');
     expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
       event: 'someEvent',
-      adminUserId: '',
       groupProperties: {
         projectType: 'Community',
         projectId: 'test',
@@ -128,6 +136,9 @@ describe('metrics', () => {
         app: {
           root: process.cwd(),
         },
+      },
+      requestContext: {
+        get: jest.fn(() => ({})),
       },
     });
 

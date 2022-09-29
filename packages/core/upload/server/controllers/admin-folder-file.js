@@ -40,7 +40,6 @@ module.exports = {
 
     if (deletedFiles.length + deletedFolders.length > 1) {
       strapi.telemetry.send('didBulkDeleteMediaLibraryElements', {
-        adminUser: ctx.state?.user,
         groupProperties: {
           rootFolderNumber: deletedFolders.length,
           rootAssetNumber: deletedFiles.length,
@@ -232,7 +231,6 @@ module.exports = {
     });
 
     strapi.telemetry.send('didBulkMoveMediaLibraryElements', {
-      adminUser: ctx.state?.user,
       groupProperties: {
         rootFolderNumber: updatedFolders.length,
         rootAssetNumber: updatedFiles.length,

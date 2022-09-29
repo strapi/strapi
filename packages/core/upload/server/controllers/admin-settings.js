@@ -20,9 +20,9 @@ module.exports = {
     await getService('upload').setSettings(data);
 
     if (data.responsiveDimensions === true) {
-      strapi.telemetry.send('didEnableResponsiveDimensions', { adminUser: ctx.state?.user });
+      strapi.telemetry.send('didEnableResponsiveDimensions');
     } else {
-      strapi.telemetry.send('didDisableResponsiveDimensions', { adminUser: ctx.state?.user });
+      strapi.telemetry.send('didDisableResponsiveDimensions');
     }
 
     ctx.body = { data };

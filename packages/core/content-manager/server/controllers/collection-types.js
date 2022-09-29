@@ -88,7 +88,6 @@ module.exports = {
 
     if (totalEntries === 0) {
       strapi.telemetry.send('didCreateFirstContentTypeEntry', {
-        adminUser: user,
         eventProperties: { model },
       });
     }

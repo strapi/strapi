@@ -17,14 +17,9 @@ describe('Metrics', () => {
       },
     };
 
-    const adminUser = {
-      email: 'someTestEmail',
-    };
-
-    await metricsService.sendDidInviteUser(adminUser);
+    await metricsService.sendDidInviteUser();
 
     expect(send).toHaveBeenCalledWith('didInviteUser', {
-      adminUser,
       groupProperties: {
         numberOfRoles: 3,
         numberOfUsers: 2,
@@ -40,13 +35,9 @@ describe('Metrics', () => {
       telemetry: { send },
     };
 
-    const adminUser = {
-      email: 'someTestEmail',
-    };
+    await metricsService.sendDidUpdateRolePermissions();
 
-    await metricsService.sendDidUpdateRolePermissions(adminUser);
-
-    expect(send).toHaveBeenCalledWith('didUpdateRolePermissions', { adminUser });
+    expect(send).toHaveBeenCalledWith('didUpdateRolePermissions');
   });
 
   test('didChangeInterfaceLanguage', async () => {

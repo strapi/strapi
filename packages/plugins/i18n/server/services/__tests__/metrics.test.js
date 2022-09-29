@@ -85,14 +85,11 @@ describe('Metrics', () => {
       },
     };
 
-    const adminUser = { id: 1 };
-
     const { sendDidUpdateI18nLocalesEvent } = metricsLoader({ strapi });
 
-    await sendDidUpdateI18nLocalesEvent(adminUser);
+    await sendDidUpdateI18nLocalesEvent();
 
     expect(strapi.telemetry.send).toHaveBeenCalledWith('didUpdateI18nLocales', {
-      adminUser,
       groupProperties: {
         numberOfLocales: 3,
       },

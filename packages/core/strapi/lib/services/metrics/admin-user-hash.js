@@ -2,10 +2,10 @@
 
 const hash = require('hash.js');
 
-const generateAdminUserHash = (payload) => {
-  if (!payload.adminUser) return '';
+const generateAdminUserHash = (ctx) => {
+  if (!ctx?.state?.user) return '';
   try {
-    return hash.sha256().update(payload.adminUser.email).digest('hex');
+    return hash.sha256().update(ctx.state.user.email).digest('hex');
   } catch (error) {
     return '';
   }
