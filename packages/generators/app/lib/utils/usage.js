@@ -110,8 +110,6 @@ function trackUsage({ event, scope, error }) {
   const { uuid } = scope;
   const properties = getProperties(scope, error);
 
-  console.log('properties', properties);
-
   try {
     return trackEvent(event, {
       uuid,
