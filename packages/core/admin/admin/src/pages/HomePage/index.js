@@ -31,7 +31,7 @@ const LogoContainer = styled(Box)`
 `;
 
 const HomePage = () => {
-  // // Temporary until we develop the menu API
+  // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
   const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
 

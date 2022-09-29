@@ -9,7 +9,7 @@ const {
   contentTypes: contentTypesUtils,
   sanitize,
 } = require('@strapi/utils');
-const { ValidationError } = require('@strapi/utils').errors;
+const { ValidationError, ApplicationError } = require('@strapi/utils').errors;
 const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 const uploadFiles = require('../utils/upload-files');
 
@@ -47,6 +47,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 
   async emitEvent(uid, event, entity) {
+    if (!eventHub) return;
     const model = strapi.getModel(uid);
     const sanitizedEntity = await sanitize.sanitizers.defaultSanitizeOutput(model, entity);
 
@@ -166,6 +167,38 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
         isDraft,
       },
       entityToUpdate
+    );
+
+    // Create an array of the relations we are attempting to associate with this
+    // entity.
+    const relationChecks = [];
+    Object.keys(data).forEach((key) => {
+      const attribute = model.attributes[key];
+      if (attribute?.type !== 'relation') {
+        return;
+      }
+      if (!data[key]?.connect) {
+        return;
+      }
+      relationChecks.push({ uid: attribute.target, data: data[key].connect });
+    });
+
+    // Confirm that these relations exists in the DB before performing the query.
+    await Promise.all(
+      relationChecks.map(async (check) => {
+        await Promise.all(
+          check.data.map(async (d) => {
+            const relationEntity = await db.query(check.uid).findOne({ where: { id: d.id } });
+            if (relationEntity) {
+              return;
+            }
+            // Trying to associate a relation with this entity that does not exist
+            throw new ApplicationError(
+              `Relation of type ${check.uid} with id ${d.id} does not exist`
+            );
+          })
+        );
+      })
     );
 
     const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
