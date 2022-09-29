@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-sendmail",
-  "version": "4.3.9",
+  "version": "4.4.0",
   "description": "Sendmail provider for strapi email",
   "keywords": [
     "email",
@@ -35,7 +35,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@strapi/utils": "4.3.9",
+    "@strapi/utils": "4.4.0",
     "sendmail": "^1.6.1"
   },
   "engines": {
