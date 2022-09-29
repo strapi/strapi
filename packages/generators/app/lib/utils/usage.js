@@ -65,6 +65,7 @@ const getProperties = (scope, error) => ({
   useYarn: scope.useYarn,
   useTypescriptOnServer: scope.useTypescript,
   useTypescriptOnAdmin: scope.useTypescript,
+  hostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'StrapiCloud',
   noRun: (scope.runQuickstartApp !== true).toString(),
 });
 
@@ -108,6 +109,8 @@ function trackError({ scope, error }) {
 function trackUsage({ event, scope, error }) {
   const { uuid } = scope;
   const properties = getProperties(scope, error);
+
+  console.log('properties', properties);
 
   try {
     return trackEvent(event, {

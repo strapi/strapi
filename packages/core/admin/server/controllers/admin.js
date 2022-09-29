@@ -4,6 +4,7 @@ const path = require('path');
 const execa = require('execa');
 const _ = require('lodash');
 const { exists } = require('fs-extra');
+const { env } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
 const { isUsingTypeScript } = require('@strapi/typescript-utils');
 // eslint-disable-next-line node/no-extraneous-require
@@ -93,11 +94,13 @@ module.exports = {
     const useTypescriptOnAdmin = await isUsingTypeScript(
       path.join(strapi.dirs.app.root, 'src', 'admin')
     );
+    const hostedOnStrapiCloud = env('STRAPI_HOSTING', null) === 'StrapiCloud';
 
     return {
       data: {
         useTypescriptOnServer,
         useTypescriptOnAdmin,
+        hostedOnStrapiCloud,
       },
     };
   },
