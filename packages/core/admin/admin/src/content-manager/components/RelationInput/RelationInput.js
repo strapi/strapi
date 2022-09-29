@@ -143,6 +143,55 @@ const RelationInput = ({
     };
   }, [paginatedRelations, relations, numberOfRelationsToDisplay, totalNumberOfRelations]);
 
+  /**
+   * This code is being isolated because it's a hack to fix a placement bug in
+   * `react-select` where when the options prop is updated the position of the
+   * menu is not recalculated.
+   */
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const timeoutRef = useRef();
+
+  useEffect(() => {
+    setIsMenuOpen((isCurrentlyOpened) => {
+      /**
+       * If we're currently open and the options changed
+       * we want to close and open to ensure the menu's
+       * position is correctly calculated
+       */
+      if (isCurrentlyOpened) {
+        timeoutRef.current = setTimeout(() => {
+          setIsMenuOpen(true);
+        }, 10);
+
+        return false;
+      }
+
+      return false;
+    });
+  }, [options]);
+
+  useEffect(() => {
+    return () => {
+      /**
+       * If the component unmounts and a timer is set we should clear that timer
+       */
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleMenuClose = (e) => {
+    setIsMenuOpen(false);
+    onSearchClose(e);
+  };
+
+  const handleMenuOpen = (e) => {
+    setIsMenuOpen(true);
+    onSearchOpen(e);
+  };
+
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
@@ -157,6 +206,7 @@ const RelationInput = ({
               // position fixed doesn't update position on scroll
               // react select doesn't update menu position on options change
               menuPosition="absolute"
+              menuPlacement="auto"
               components={{ Option }}
               options={options}
               isDisabled={disabled}
@@ -181,8 +231,9 @@ const RelationInput = ({
                 setValue(value);
                 onSearch(value);
               }}
-              onMenuClose={onSearchClose}
-              onMenuOpen={onSearchOpen}
+              onMenuClose={handleMenuClose}
+              onMenuOpen={handleMenuOpen}
+              menuIsOpen={isMenuOpen}
               onMenuScrollToBottom={() => {
                 if (searchResults.hasNextPage) {
                   onSearchNextPage();
