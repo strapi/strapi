@@ -112,7 +112,7 @@ describe('Admin User CRUD (e2e)', () => {
 
   test('2. Creates a user (successfully)', async () => {
     const body = {
-      email: 'user-tests@strapi-e2e.com',
+      email: 'uSer-tEsTs@strapi-e2e.com', // Tested with a camelCase email address
       firstname: 'user_tests-firstname',
       lastname: 'user_tests-lastname',
       roles: [testData.role.id],
