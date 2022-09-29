@@ -161,6 +161,34 @@ const reducer = (state = initialState, action) =>
 
         break;
       }
+      case actions.ADD_CUSTOM_FIELD_ATTRIBUTE: {
+        const {
+          attributeToSet: { name, ...rest },
+          forTarget,
+          targetUid,
+        } = action;
+
+        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+          ? [forTarget]
+          : [forTarget, targetUid];
+
+        const currentAttributes = get(
+          state,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+          []
+        ).slice();
+
+        // Add the createdAttribute
+        const updatedAttributes = [...currentAttributes, { ...rest, name }];
+
+        set(
+          draftState,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+          updatedAttributes
+        );
+
+        break;
+      }
       case actions.CHANGE_DYNAMIC_ZONE_COMPONENTS: {
         const { dynamicZoneTarget, newComponents } = action;
 
@@ -409,6 +437,27 @@ const reducer = (state = initialState, action) =>
           draftState,
           ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
           updatedAttributes
+        );
+
+        break;
+      }
+      case actions.EDIT_CUSTOM_FIELD_ATTRIBUTE: {
+        const { forTarget, targetUid, initialAttribute, attributeToSet } = action;
+
+        const initialAttributeName = initialAttribute.name;
+        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+          ? [forTarget]
+          : [forTarget, targetUid];
+
+        const initialAttributeIndex = findAttributeIndex(
+          get(state, ['modifiedData', ...pathToDataToEdit]),
+          initialAttributeName
+        );
+
+        set(
+          draftState,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', initialAttributeIndex],
+          attributeToSet
         );
 
         break;

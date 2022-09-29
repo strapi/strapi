@@ -9,7 +9,7 @@ const createSchema = require('./model-schema');
 const { removeEmptyDefaults } = require('./data-transform');
 
 const VALID_RELATIONS = ['oneToOne', 'oneToMany'];
-const VALID_TYPES = [...DEFAULT_TYPES, 'component'];
+const VALID_TYPES = [...DEFAULT_TYPES, 'component', 'customField'];
 
 const componentSchema = createSchema(VALID_TYPES, VALID_RELATIONS, {
   modelType: modelTypes.COMPONENT,
