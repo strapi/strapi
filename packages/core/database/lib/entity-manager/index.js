@@ -618,6 +618,10 @@ const createEntityManager = (db) => {
 
             const { idColumn, typeColumn } = morphColumn;
 
+            if (isEmpty(cleanRelationData.set)) {
+              continue;
+            }
+
             await this.createQueryBuilder(joinTable.name)
               .delete()
               .where({
