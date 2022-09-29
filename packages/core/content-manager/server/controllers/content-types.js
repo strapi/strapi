@@ -105,7 +105,7 @@ module.exports = {
 
     const newConfiguration = await contentTypeService.updateConfiguration(contentType, input);
 
-    await metricsService.sendDidConfigureListView(contentType, newConfiguration, ctx.state?.user);
+    await metricsService.sendDidConfigureListView(contentType, newConfiguration);
 
     const confWithUpdatedMetadata = {
       ...newConfiguration,

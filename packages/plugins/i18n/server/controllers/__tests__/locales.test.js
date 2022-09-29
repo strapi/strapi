@@ -48,7 +48,6 @@ describe('Locales', () => {
       const expectedLocales = { code: 'af', name: 'Afrikaans (af)', isDefault: true };
       const getDefaultLocale = jest.fn(() => Promise.resolve('af'));
       const setDefaultLocale = jest.fn(() => Promise.resolve());
-      const sendDidUpdateI18nLocalesEvent = jest.fn(() => Promise.resolve());
 
       const setIsDefault = jest.fn(() => expectedLocales);
       const findByCode = jest.fn(() => undefined);
@@ -65,9 +64,6 @@ describe('Locales', () => {
                 getDefaultLocale,
                 setDefaultLocale,
                 create,
-              },
-              metrics: {
-                sendDidUpdateI18nLocalesEvent,
               },
             },
           },
@@ -89,7 +85,6 @@ describe('Locales', () => {
       const locale = { code: 'af', name: 'Afrikaans (af)' };
       const expectedLocale = { code: 'af', name: 'Afrikaans (af)', isDefault: false };
       const getDefaultLocale = jest.fn(() => Promise.resolve('en'));
-      const sendDidUpdateI18nLocalesEvent = jest.fn(() => Promise.resolve());
 
       const setIsDefault = jest.fn(() => expectedLocale);
       const findByCode = jest.fn(() => undefined);
@@ -105,9 +100,6 @@ describe('Locales', () => {
                 setIsDefault,
                 getDefaultLocale,
                 create,
-              },
-              metrics: {
-                sendDidUpdateI18nLocalesEvent,
               },
             },
           },
@@ -179,7 +171,6 @@ describe('Locales', () => {
       const updates = { name: 'Afrikaans' };
       const expectedLocales = { code: 'af', name: 'Afrikaans', isDefault: true };
       const setDefaultLocale = jest.fn(() => Promise.resolve());
-      const sendDidUpdateI18nLocalesEvent = jest.fn(() => Promise.resolve());
 
       const setIsDefault = jest.fn(() => expectedLocales);
       const findById = jest.fn(() => existingLocale);
@@ -195,9 +186,6 @@ describe('Locales', () => {
                 setIsDefault,
                 setDefaultLocale,
                 update,
-              },
-              metrics: {
-                sendDidUpdateI18nLocalesEvent,
               },
             },
           },
@@ -274,7 +262,6 @@ describe('Locales', () => {
       const locale = { code: 'af', name: 'Afrikaans (af)' };
       const expectedLocales = { code: 'af', name: 'Afrikaans (af)', isDefault: false };
       const getDefaultLocale = jest.fn(() => Promise.resolve('en'));
-      const sendDidUpdateI18nLocalesEvent = jest.fn(() => Promise.resolve());
 
       const setIsDefault = jest.fn(() => expectedLocales);
       const findById = jest.fn(() => locale);
@@ -290,9 +277,6 @@ describe('Locales', () => {
                 setIsDefault,
                 getDefaultLocale,
                 delete: deleteFn,
-              },
-              metrics: {
-                sendDidUpdateI18nLocalesEvent,
               },
             },
           },
@@ -334,7 +318,7 @@ describe('Locales', () => {
         sanitizers,
       };
 
-      const ctx = { params: { id: 1 }, state: { user: { id: 1 } } };
+      const ctx = { params: { id: 1 } };
 
       expect.assertions(5);
 

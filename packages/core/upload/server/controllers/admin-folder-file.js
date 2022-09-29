@@ -231,7 +231,7 @@ module.exports = {
     });
 
     strapi.telemetry.send('didBulkMoveMediaLibraryElements', {
-      groupProperties: {
+      eventProperties: {
         rootFolderNumber: updatedFolders.length,
         rootAssetNumber: updatedFiles.length,
         totalFolderNumber,

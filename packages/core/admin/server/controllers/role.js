@@ -132,11 +132,7 @@ module.exports = {
       permissionsToAssign = input.permissions;
     }
 
-    const { permissions, shouldSendUpdate } = await assignPermissions(role.id, permissionsToAssign);
-
-    if (shouldSendUpdate) {
-      await getService('metrics').sendDidUpdateRolePermissions(ctx.state?.user);
-    }
+    const permissions = await assignPermissions(role.id, permissionsToAssign);
 
     ctx.body = {
       data: permissions.map(sanitizePermission),
