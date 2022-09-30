@@ -139,7 +139,7 @@ const RelationInput = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const timeoutRef = useRef();
-  const previousOptions = useRef();
+  const previousOptions = useRef([]);
 
   useEffect(() => {
     /**
@@ -168,7 +168,7 @@ const RelationInput = ({
     }
 
     return () => {
-      previousOptions.current = options;
+      previousOptions.current = options || [];
     };
   }, [options]);
 
