@@ -1,10 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
+import styled from 'styled-components';
 import upperFirst from 'lodash/upperFirst';
+import { Flex } from '@strapi/design-system/Flex';
+import { Typography } from '@strapi/design-system/Typography';
+
 import { getTrad } from '../../utils';
+
 import getModalTitleSubHeader from './getModalTitleSubHeader';
+
+const SubHeaderContainer = styled(Flex)`
+  margin-bottom: 10px;
+`;
+
+const Subtitle = styled(Typography)`
+  margin-top: 4px;
+`;
 
 const FormModalSubHeader = ({
   actionType,
@@ -23,25 +35,33 @@ const FormModalSubHeader = ({
       : { id: getTrad(`attribute.${attributeType}`) };
 
   return (
-    <Typography as="h2" variant="beta">
-      {formatMessage(
-        {
-          id: getModalTitleSubHeader({
-            actionType,
-            forTarget,
-            kind,
+    <SubHeaderContainer direction="column" alignItems="flex-start">
+      <Typography as="h2" variant="beta">
+        {formatMessage(
+          {
+            id: getModalTitleSubHeader({
+              actionType,
+              forTarget,
+              kind,
+              step,
+              modalType,
+            }),
+            defaultMessage: 'Add new field',
+          },
+          {
+            type: upperFirst(formatMessage(intlLabel)),
+            name: upperFirst(attributeName),
             step,
-            modalType,
-          }),
-          defaultMessage: 'Add new field',
-        },
-        {
-          type: upperFirst(formatMessage(intlLabel)),
-          name: upperFirst(attributeName),
-          step,
-        }
-      )}
-    </Typography>
+          }
+        )}
+      </Typography>
+      <Subtitle variant="pi" textColor="neutral600">
+        {formatMessage({
+          id: getTrad(`attribute.${attributeType}.description`),
+          defaultMessage: 'A type for modeling data',
+        })}
+      </Subtitle>
+    </SubHeaderContainer>
   );
 };
 
