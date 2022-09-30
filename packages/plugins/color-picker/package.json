@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "4.4.0",
+  "version": "4.4.1",
   "description": "Strapi maintained Custom Fields",
   "strapi": {
     "name": "color-picker",
