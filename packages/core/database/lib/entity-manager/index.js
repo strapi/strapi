@@ -416,6 +416,10 @@ const createEntityManager = (db) => {
 
             const { idColumn, typeColumn } = morphColumn;
 
+            if (isEmpty(cleanRelationData.set)) {
+              continue;
+            }
+
             const rows = cleanRelationData.set.map((data, idx) => {
               return {
                 [joinColumn.name]: data.id,
@@ -427,10 +431,6 @@ const createEntityManager = (db) => {
                 field: attributeName,
               };
             });
-
-            if (isEmpty(rows)) {
-              continue;
-            }
 
             await this.createQueryBuilder(joinTable.name).insert(rows).execute();
           }
@@ -445,6 +445,10 @@ const createEntityManager = (db) => {
 
           const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
+          if (isEmpty(cleanRelationData.set)) {
+            continue;
+          }
+
           const rows = cleanRelationData.set.map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
@@ -453,10 +457,6 @@ const createEntityManager = (db) => {
             ...(data.__pivot || {}),
             order: idx + 1,
           }));
-
-          if (isEmpty(rows)) {
-            continue;
-          }
 
           // delete previous relations
           await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
@@ -628,6 +628,10 @@ const createEntityManager = (db) => {
               })
               .execute();
 
+            if (isEmpty(cleanRelationData.set)) {
+              continue;
+            }
+
             const rows = cleanRelationData.set.map((data, idx) => ({
               [joinColumn.name]: data.id,
               [idColumn.name]: id,
@@ -637,10 +641,6 @@ const createEntityManager = (db) => {
               order: idx + 1,
               field: attributeName,
             }));
-
-            if (isEmpty(rows)) {
-              continue;
-            }
 
             await this.createQueryBuilder(joinTable.name).insert(rows).execute();
           }
@@ -667,6 +667,10 @@ const createEntityManager = (db) => {
             })
             .execute();
 
+          if (isEmpty(cleanRelationData.set)) {
+            continue;
+          }
+
           const rows = cleanRelationData.set.map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
@@ -675,10 +679,6 @@ const createEntityManager = (db) => {
             ...(data.__pivot || {}),
             order: idx + 1,
           }));
-
-          if (isEmpty(rows)) {
-            continue;
-          }
 
           // delete previous relations
           await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
