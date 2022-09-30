@@ -94,7 +94,7 @@ module.exports = {
     const useTypescriptOnAdmin = await isUsingTypeScript(
       path.join(strapi.dirs.app.root, 'src', 'admin')
     );
-    const isHostedOnStrapiCloud = env.bool('STRAPI_CLOUD');
+    const isHostedOnStrapiCloud = env('STRAPI_HOSTING', null) === 'strapi.cloud';
 
     return {
       data: {

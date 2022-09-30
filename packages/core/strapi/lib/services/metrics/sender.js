@@ -55,7 +55,7 @@ module.exports = (strapi) => {
     projectType: isEE ? 'Enterprise' : 'Community',
     useTypescriptOnServer: isUsingTypeScriptSync(serverRootPath),
     useTypescriptOnAdmin: isUsingTypeScriptSync(adminRootPath),
-    isHostedOnStrapiCloud: env.bool('STRAPI_CLOUD'),
+    isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
   };
 
   addPackageJsonStrapiMetadata(anonymousMetadata, strapi);
