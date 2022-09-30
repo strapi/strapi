@@ -48,11 +48,10 @@ const createComponents = async (uid, data) => {
         );
 
         // TODO: add order
-        componentBody[attributeName] = components.map(({ id }, idx) => {
+        componentBody[attributeName] = components.map(({ id }) => {
           return {
             id,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
               component_type: componentUID,
             },
@@ -63,7 +62,6 @@ const createComponents = async (uid, data) => {
         componentBody[attributeName] = {
           id: component.id,
           __pivot: {
-            order: 1,
             field: attributeName,
             component_type: componentUID,
           },
@@ -81,13 +79,12 @@ const createComponents = async (uid, data) => {
       }
 
       componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async (value, idx) => {
+        dynamiczoneValues.map(async (value) => {
           const { id } = await createComponent(value.__component, value);
           return {
             id,
             __component: value.__component,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
             },
           };
@@ -145,11 +142,10 @@ const updateComponents = async (uid, entityToUpdate, data) => {
           componentValue.map((value) => updateOrCreateComponent(componentUID, value))
         );
 
-        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }, idx) => {
+        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
           return {
             id,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
               component_type: componentUID,
             },
@@ -160,7 +156,6 @@ const updateComponents = async (uid, entityToUpdate, data) => {
         componentBody[attributeName] = component && {
           id: component.id,
           __pivot: {
-            order: 1,
             field: attributeName,
             component_type: componentUID,
           },
@@ -180,14 +175,13 @@ const updateComponents = async (uid, entityToUpdate, data) => {
       }
 
       componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async (value, idx) => {
+        dynamiczoneValues.map(async (value) => {
           const { id } = await updateOrCreateComponent(value.__component, value);
 
           return {
             id,
             __component: value.__component,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
             },
           };

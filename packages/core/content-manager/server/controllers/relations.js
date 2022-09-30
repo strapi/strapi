@@ -24,7 +24,7 @@ module.exports = {
 
     await validateFindAvailable(ctx.request.query);
 
-    const { component, entityId, idsToOmit, _q, ...query } = ctx.request.query;
+    const { component, entityId, idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
 
     const sourceModelUid = component || model;
 
@@ -103,8 +103,17 @@ module.exports = {
 
       const alias = subQuery.getAlias();
 
+      const where = {
+        id: entityId,
+        [`${alias}.id`]: { $notNull: true },
+      };
+
+      if (!isEmpty(idsToInclude)) {
+        where[`${alias}.id`].$notIn = idsToInclude;
+      }
+
       const knexSubQuery = subQuery
-        .where({ id: entityId, [`${alias}.id`]: { $notNull: true } })
+        .where(where)
         .join({ alias, targetField })
         .select(`${alias}.id`)
         .getKnexQuery();
