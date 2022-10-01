@@ -37,9 +37,18 @@
 
 <br>
 
-Strapi is a free and open-source headless CMS delivering your content anywhere you need.
 
-- **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
+Strapi is an open-source software helping developers to easily build, deploy, and manage APIs. Its open-source headless CMS provides backend functionality for applications and gives developers the freedom to use the tools of their choice for front-end frameworks. It’s called headless because the frontend is not part of the CMS, but there’s an APIfor content to show up on different devices. Moreover, Strapi is a free and open-source headless CMS delivering your content anywhere you need.
+
+The company was founded in 2016 and headquartered in Paris, Ile-de-France.
+
+## Strapi brings unique characteristics to the headless eCommerce world that are already available in traditional websites, but only used by a very limited amount of people:
+
+- **Content Management System (CMS):** Strapi’s Admin panel is extremely intuitive and easy to use for content editors. It allows them to manage complex content structures, categories, and subcategories with simple drag & drop operations.
+- **Content Relationships:** As Strapi is using GraphQL under the hood to display content on pages (we will see this later), it’s trivial for developers to manage relations between objects of different data types within a single endpoint. For instance, you can have an article with multiple authors.
+- **Content Search:** By using the ElasticSearch tool, you can easily index your content and create powerful search features. As a consequence, it’s easier for users to find what they are looking for in a simple way.
+- **User Authentication & Authorization:** Strapi has built-in authentication tools that allow developers to easily control what a user is allowed to do. Thanks to these tools, you can lock down your API and create users with different levels of rights (e.g: admin vs anonymous).
+- - **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
 - **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Render, Netlify, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
 - **Database agnostic**. Strapi works with SQL databases. You can choose the database you prefer: PostgreSQL, MySQL, MariaDB, and SQLite.
 - **Customizable**. You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
@@ -109,6 +118,17 @@ Complete installation requirements can be found in the documentation under <a hr
 - **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
 - **Powerful CLI:** Scaffold projects and APIs on the fly.
 - **SQL databases:** Works with PostgreSQL, MySQL, MariaDB, and SQLite.
+
+## Reasons Why Strapi Matters for Ecommerce
+- Ability to manage content on multiple channels
+- Improved and tailored user experience
+- Seamless Integration
+- Provides an Extra Layer of Security
+- Shorten your time-to-market
+
+## Final Words
+Now you know the importance of Strapi to eCommerce. It is a painless solution for your eCommerce project.
+Whether you are a backend developer or an eCommerce business owner, you will find the benefits of Strapi.
 
 **[See more on our website](https://strapi.io/overview)**.
 
