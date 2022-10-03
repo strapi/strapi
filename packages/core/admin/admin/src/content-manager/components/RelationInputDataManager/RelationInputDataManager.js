@@ -195,6 +195,7 @@ export const RelationInputDataManger = ({
       required={required}
       searchResults={normalizeRelations(search, {
         mainFieldName: mainField.name,
+        isSearch: true,
       })}
       size={size}
     />
