@@ -186,7 +186,7 @@ module.exports = {
     }
 
     const queryParams = {
-      select: fieldsToSelect,
+      fields: fieldsToSelect,
     };
 
     if (!isEmpty(idsToOmit)) {
@@ -194,30 +194,22 @@ module.exports = {
     }
 
     if (MANY_RELATIONS.includes(attribute.relation)) {
-      const page = Number(query.page || 1);
-      const pageSize = Number(query.pageSize || 10);
+      const res = await strapi.entityService.loadPages(sourceModelUid, { id }, targetField, {
+        ...queryParams,
+        page: query.page,
+        pageSize: query.pageSize,
+        ordering: 'desc',
+      });
 
-      queryParams.offset = Math.max(page - 1, 0) * pageSize;
-      queryParams.limit = pageSize;
-
-      const [results, count] = await Promise.all([
-        strapi.db
-          .query(sourceModelUid)
-          .load({ id }, targetField, { ...queryParams, ordering: 'desc' }),
-        strapi.db.query(sourceModelUid).load({ id }, targetField, { ...queryParams, count: true }),
-      ]);
-
-      ctx.body = {
-        results,
-        pagination: {
-          page: Number(query.page) || 1,
-          pageSize: Number(query.pageSize) || 10,
-          pageCount: results.length,
-          total: count,
-        },
-      };
+      ctx.body = res;
     } else {
-      const result = await strapi.db.query(sourceModelUid).load({ id }, targetField, queryParams);
+      const result = await strapi.entityService.load(
+        sourceModelUid,
+        { id },
+        targetField,
+        queryParams
+      );
+      // const result = await strapi.db.query(sourceModelUid).load({ id }, targetField, queryParams);
       // TODO: Temporary fix (use data instead)
       ctx.body = {
         results: result ? [result] : [],

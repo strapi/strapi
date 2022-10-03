@@ -275,6 +275,21 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     return db.query(uid).load(entity, field, loadParams);
   },
+
+  loadPages(uid, entity, field, params = {}) {
+    if (!_.isString(field)) {
+      throw new Error(`Invalid load. Expected ${field} to be a string`);
+    }
+
+    const { attributes } = strapi.getModel(uid);
+    const attribute = attributes[field];
+
+    if (!attribute || attribute.type !== 'relation') {
+      throw new Error(`Invalid load. Expected ${field} to be an anyToMany relational attribute`);
+    }
+
+    return db.query(uid).loadPages(entity, field, transformParamsToQuery(attribute.target, params));
+  },
 });
 
 module.exports = (ctx) => {
