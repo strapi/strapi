@@ -6,7 +6,7 @@ We highly appreciate your effort to contribute, but we recommend you talk to a m
 
 ## Feature Requests
 
-Feature Requests by the community are highly encouraged. Feel free to submit a new one or upvote an existing feature request on [ProductBoard](https://portal.productboard.com/strapi).
+Feature Requests by the community are highly encouraged. Feel free to submit a new one or upvote an existing feature request on [ProductBoard](https://feedback.strapi.io/feature-requests).
 
 ## Request For Comments (RFC)
 
