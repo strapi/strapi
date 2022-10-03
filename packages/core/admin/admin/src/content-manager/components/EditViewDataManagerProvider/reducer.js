@@ -104,12 +104,12 @@ const reducer = (state, action) =>
           set(draftState, [...path, 'connect'], [value]);
         } else {
           const savedRelations = get(state, [...path, 'results']);
-          const existsInSavedRelation = savedRelations.find(
-            (savedRelation) => savedRelation.id === value.id
-          );
+          const existInSavedRelation =
+            savedRelations &&
+            savedRelations?.findIndex((savedRelations) => savedRelations.id === value.id) !== -1;
 
-          // if the relation is already saved in db, we should not add it in the connect array
-          if (!existsInSavedRelation) {
+          // we should add a relation in the connect array only if it is not an already saved relation
+          if (!existInSavedRelation) {
             const nextValue = get(draftState, [...path, 'connect']);
             nextValue.push(value);
           }
