@@ -11,11 +11,11 @@ import { getTrad } from '../../utils';
 import getModalTitleSubHeader from './getModalTitleSubHeader';
 
 const SubHeaderContainer = styled(Flex)`
-  margin-bottom: 10px;
+  margin-bottom: ${(props) => props.theme.spaces[2]};
 `;
 
 const Subtitle = styled(Typography)`
-  margin-top: 4px;
+  margin-top: ${(props) => props.theme.spaces[1]};
 `;
 
 const FormModalSubHeader = ({
