@@ -26,12 +26,21 @@ export const normalizeRelations = (
   relations,
   { modifiedData = {}, shouldAddLink = false, mainFieldName, targetModel }
 ) => {
+  // To display oldest to newest relations we need to reverse each elements in array of results
+  // and reverse each arrays itself
+  const existingRelationsReversed = [...(relations?.data?.pages ?? [])]
+    .map((relation) => ({
+      ...relation,
+      results: relation.results.slice().reverse(),
+    }))
+    .reverse();
+
   return {
     ...relations,
     data: {
       pages:
         [
-          ...(relations?.data?.pages ?? []),
+          ...(targetModel ? existingRelationsReversed : relations?.data?.pages ?? []),
           ...(modifiedData?.connect ? [{ results: modifiedData.connect }] : []),
         ]
           ?.map((page) =>

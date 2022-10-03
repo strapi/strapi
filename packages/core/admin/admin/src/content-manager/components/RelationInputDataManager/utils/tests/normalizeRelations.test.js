@@ -85,9 +85,9 @@ describe('normalizeRelations', () => {
       data: {
         pages: [
           [
-            expect.objectContaining({ href: '/content-manager/collectionType/something/1' }),
-            expect.objectContaining({ href: '/content-manager/collectionType/something/2' }),
             expect.objectContaining({ href: '/content-manager/collectionType/something/3' }),
+            expect.objectContaining({ href: '/content-manager/collectionType/something/2' }),
+            expect.objectContaining({ href: '/content-manager/collectionType/something/1' }),
           ],
         ],
       },
@@ -157,6 +157,27 @@ describe('normalizeRelations', () => {
               id: 1,
             }),
           ],
+        ],
+      },
+    });
+  });
+
+  test.only('reverse order of existing relations', () => {
+    expect(
+      normalizeRelations(FIXTURE_RELATIONS, {
+        modifiedData: { connect: [{ id: 4 }, { id: 5 }] },
+        shouldAddLink: true,
+        targetModel: 'something',
+      })
+    ).toStrictEqual({
+      data: {
+        pages: [
+          [
+            expect.objectContaining({ id: 3 }),
+            expect.objectContaining({ id: 2 }),
+            expect.objectContaining({ id: 1 }),
+          ],
+          [expect.objectContaining({ id: 4 }), expect.objectContaining({ id: 5 })],
         ],
       },
     });
