@@ -12,7 +12,7 @@ type InitializerProps = {
 };
 
 const Initializer = ({ setPlugin }: InitializerProps) => {
-  const ref = useRef<(id: string) => void | null>(setPlugin);
+  const ref = useRef(setPlugin);
 
   useEffect(() => {
     ref.current(pluginId);
