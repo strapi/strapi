@@ -52,7 +52,7 @@ const authenticate = async (ctx) => {
     }
   }
 
-  // update lastUsedAt async without waiting or worrying about result
+  // update lastUsedAt
   await strapi.query('admin::api-token').update({
     where: { id: apiToken.id },
     data: { lastUsedAt: currentDate },
