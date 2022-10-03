@@ -24,6 +24,8 @@ module.exports = {
 
     await validateFindAvailable(ctx.request.query);
 
+    // idsToOmit: used to exclude relations that the front already added but that were not saved yet
+    // idsToInclude: used to include relations that the front removed but not saved yes
     const { component, entityId, idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
 
     const sourceModelUid = component || model;
@@ -130,7 +132,7 @@ module.exports = {
 
     await validateFindExisting(ctx.request.query);
 
-    const { component, idsToOmit, ...query } = ctx.request.query;
+    const { component, ...query } = ctx.request.query;
 
     const sourceModelUid = component || model;
 
@@ -188,10 +190,6 @@ module.exports = {
     const queryParams = {
       fields: fieldsToSelect,
     };
-
-    if (!isEmpty(idsToOmit)) {
-      queryParams.filters = { id: { $notIn: idsToOmit } };
-    }
 
     if (MANY_RELATIONS.includes(attribute.relation)) {
       const res = await strapi.entityService.loadPages(sourceModelUid, { id }, targetField, {
