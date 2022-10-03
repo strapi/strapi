@@ -1,22 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 import upperFirst from 'lodash/upperFirst';
-import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
 
 import { getTrad } from '../../utils';
 
 import getModalTitleSubHeader from './getModalTitleSubHeader';
-
-const SubHeaderContainer = styled(Flex)`
-  margin-bottom: ${(props) => props.theme.spaces[2]};
-`;
-
-const Subtitle = styled(Typography)`
-  margin-top: ${(props) => props.theme.spaces[1]};
-`;
 
 const FormModalSubHeader = ({
   actionType,
@@ -35,7 +26,7 @@ const FormModalSubHeader = ({
       : { id: getTrad(`attribute.${attributeType}`) };
 
   return (
-    <SubHeaderContainer direction="column" alignItems="flex-start">
+    <Stack direction="column" alignItems="flex-start" paddingBottom={2} gap={1}>
       <Typography as="h2" variant="beta">
         {formatMessage(
           {
@@ -55,13 +46,13 @@ const FormModalSubHeader = ({
           }
         )}
       </Typography>
-      <Subtitle variant="pi" textColor="neutral600">
+      <Typography variant="pi" textColor="neutral600">
         {formatMessage({
           id: getTrad(`attribute.${attributeType}.description`),
           defaultMessage: 'A type for modeling data',
         })}
-      </Subtitle>
-    </SubHeaderContainer>
+      </Typography>
+    </Stack>
   );
 };
 
