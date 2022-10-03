@@ -5,9 +5,9 @@ const strapiUtils = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
 
 const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
+const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = strapiUtils.webhook.webhookEvents;
-const { MANY_RELATIONS } = strapiUtils.relations.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 
@@ -59,7 +59,7 @@ const getDeepPopulate = (
     const attribute = model.attributes[attributeName];
 
     if (attribute.type === 'relation') {
-      const isManyRelation = MANY_RELATIONS.includes(attribute.relation);
+      const isManyRelation = isAnyToMany(attribute);
       // always populate createdBy, updatedBy, localizations etc.
       if (!isVisibleAttribute(model, attributeName)) {
         populateAcc[attributeName] = true;

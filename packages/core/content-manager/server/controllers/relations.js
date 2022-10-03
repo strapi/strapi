@@ -2,8 +2,8 @@
 
 const { prop, isEmpty } = require('lodash/fp');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
+const { isAnyToMany } = require('@strapi/utils').relations;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
-const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
 
 const { getService } = require('../utils');
 const { validateFindAvailable, validateFindExisting } = require('./validation/relations');
@@ -191,7 +191,7 @@ module.exports = {
       fields: fieldsToSelect,
     };
 
-    if (MANY_RELATIONS.includes(attribute.relation)) {
+    if (isAnyToMany(attribute)) {
       const res = await strapi.entityService.loadPages(sourceModelUid, { id }, targetField, {
         ...queryParams,
         page: query.page,

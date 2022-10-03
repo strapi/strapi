@@ -10,6 +10,7 @@ const {
   sanitize,
 } = require('@strapi/utils');
 const { ValidationError } = require('@strapi/utils').errors;
+const { isAnyToMany } = require('@strapi/utils').relations;
 const { transformParamsToQuery } = require('@strapi/utils').convertQueryParams;
 const uploadFiles = require('../utils/upload-files');
 
@@ -278,14 +279,14 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
   loadPages(uid, entity, field, params = {}) {
     if (!_.isString(field)) {
-      throw new Error(`Invalid load. Expected ${field} to be a string`);
+      throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }
 
     const { attributes } = strapi.getModel(uid);
     const attribute = attributes[field];
 
-    if (!attribute || attribute.type !== 'relation') {
-      throw new Error(`Invalid load. Expected ${field} to be an anyToMany relational attribute`);
+    if (!isAnyToMany(attribute)) {
+      throw new Error(`Invalid load. Expected "${field}" to be an anyToMany relational attribute`);
     }
 
     return db.query(uid).loadPages(entity, field, transformParamsToQuery(attribute.target, params));
