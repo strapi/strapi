@@ -24,7 +24,7 @@ module.exports = {
 
     await validateFindAvailable(ctx.request.query);
 
-    const { component, entityId, idsToOmit, _q, ...query } = ctx.request.query;
+    const { component, entityId, idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
 
     const sourceModelUid = component || model;
 
@@ -103,8 +103,17 @@ module.exports = {
 
       const alias = subQuery.getAlias();
 
+      const where = {
+        id: entityId,
+        [`${alias}.id`]: { $notNull: true },
+      };
+
+      if (!isEmpty(idsToInclude)) {
+        where[`${alias}.id`].$notIn = idsToInclude;
+      }
+
       const knexSubQuery = subQuery
-        .where({ id: entityId, [`${alias}.id`]: { $notNull: true } })
+        .where(where)
         .join({ alias, targetField })
         .select(`${alias}.id`)
         .getKnexQuery();
@@ -208,7 +217,8 @@ module.exports = {
       ctx.body = await strapi.entityService.findPage(targetedModel.uid, queryParams);
     } else {
       const results = await strapi.entityService.findMany(targetedModel.uid, queryParams);
-      ctx.body = results[0];
+      // TODO: Temporary fix (use data instead)
+      ctx.body = { results, pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 } };
     }
   },
 };

@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { memo, useEffect, useMemo } from 'react';
 import { useIntl } from 'react-intl';
+import get from 'lodash/get';
 
 import { useCMEditViewDataManager, NotAllowedInput, useQueryParams } from '@strapi/helper-plugin';
 
@@ -22,6 +23,7 @@ export const RelationInputDataManger = ({
   name,
   queryInfos: { endpoints, defaultParams, shouldDisplayRelationLink },
   placeholder,
+  required,
   relationType,
   size,
   targetModel,
@@ -29,16 +31,12 @@ export const RelationInputDataManger = ({
   const { formatMessage } = useIntl();
   const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
-  const relationsCount = initialData[name]?.count ?? 0;
   const [{ query }] = useQueryParams();
 
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
-      enabled: relationsCount > 0 && !!endpoints.relation,
+      enabled: get(initialData, name)?.count !== 0 && !!endpoints.relation,
       endpoint: endpoints.relation,
-      onLoad(data) {
-        loadRelation({ target: { name, value: data.results } });
-      },
       pageParams: {
         ...defaultParams,
         locale: query?.plugins?.i18n?.locale,
@@ -57,17 +55,35 @@ export const RelationInputDataManger = ({
     },
   });
 
-  useEffect(() => {
-    if (!endpoints.relation) {
-      loadRelation({ target: { name, value: [] } });
-    }
-  }, [loadRelation, name, endpoints.relation]);
+  const relationsFromModifiedData = get(modifiedData, name);
+  const stringifiedRelations = JSON.stringify(relations);
+  const normalizedRelations = useMemo(
+    () =>
+      normalizeRelations(relations, {
+        modifiedData: relationsFromModifiedData,
+        mainFieldName: mainField.name,
+        shouldAddLink: shouldDisplayRelationLink,
+        targetModel,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      stringifiedRelations,
+      modifiedData,
+      name,
+      mainField.name,
+      shouldDisplayRelationLink,
+      targetModel,
+    ]
+  );
 
   useEffect(() => {
-    if (relationsCount === 0 || !!endpoints.relation) {
-      loadRelation({ target: { name, value: [] } });
+    if (relations.status === 'success') {
+      loadRelation({
+        target: { name, value: normalizedRelations.data.pages.flat() },
+      });
     }
-  }, [relationsCount, endpoints.relation, loadRelation, name]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadRelation, relations.status, stringifiedRelations, name]);
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const isSingleRelation = [
@@ -103,14 +119,16 @@ export const RelationInputDataManger = ({
   };
 
   const handleSearch = (term) => {
-    searchFor(term, { idsToOmit: modifiedData?.[name]?.connect?.map((relation) => relation.id) });
+    searchFor(term, {
+      idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
+    });
   };
 
   const handleOpenSearch = () => {
     searchFor('', {
       idsToInclude:
-        !isCreatingEntry && modifiedData?.[name]?.disconnect?.map((relation) => relation.id),
-      idsToOmit: modifiedData?.[name]?.connect?.map((relation) => relation.id),
+        !isCreatingEntry && relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
+      idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
     });
   };
 
@@ -130,13 +148,11 @@ export const RelationInputDataManger = ({
       description={description}
       disabled={isDisabled}
       id={name}
-      label={formatMessage(
-        {
-          id: intlLabel.id,
-          defaultMessage: `${intlLabel.defaultMessage} ({numberOfEntries})`,
-        },
-        { numberOfEntries: relationsCount }
-      )}
+      label={`${formatMessage({
+        id: intlLabel.id,
+        defaultMessage: intlLabel.defaultMessage,
+      })} ${initialData[name]?.count !== undefined ? `(${initialData[name].count})` : ''}`}
+      labelAction={labelAction}
       labelLoadMore={
         // TODO: only display if there are more; derive from count
         !isCreatingEntry &&
@@ -159,7 +175,6 @@ export const RelationInputDataManger = ({
       onRelationLoadMore={() => handleRelationLoadMore()}
       onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
-      onSearchClose={() => {}}
       onSearchOpen={handleOpenSearch}
       placeholder={formatMessage(
         placeholder || {
@@ -178,14 +193,11 @@ export const RelationInputDataManger = ({
           defaultMessage: 'Published',
         }),
       }}
-      relations={normalizeRelations(relations, {
-        modifiedData: modifiedData?.[name],
-        mainFieldName: mainField.name,
-        shouldAddLink: shouldDisplayRelationLink,
-        targetModel,
-      })}
+      relations={normalizedRelations}
+      required={required}
       searchResults={normalizeRelations(search, {
         mainFieldName: mainField.name,
+        search: 'search',
       })}
       size={size}
     />
@@ -198,6 +210,7 @@ RelationInputDataManger.defaultProps = {
   labelAction: null,
   isFieldAllowed: true,
   placeholder: null,
+  required: false,
 };
 
 RelationInputDataManger.propTypes = {
@@ -224,6 +237,7 @@ RelationInputDataManger.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  required: PropTypes.bool,
   relationType: PropTypes.string.isRequired,
   size: PropTypes.number.isRequired,
   targetModel: PropTypes.string.isRequired,

@@ -15,10 +15,6 @@ export const useRelation = (cacheKey, { relation, search }) => {
         },
       });
 
-      if (relation?.onLoad) {
-        relation.onLoad(data);
-      }
-
       return data;
     } catch (err) {
       return null;
@@ -67,10 +63,9 @@ export const useRelation = (cacheKey, { relation, search }) => {
   );
 
   const searchFor = (term, options = {}) => {
-    searchRes.remove();
     setSearchParams({
       ...options,
-      _q: encodeURIComponent(term),
+      _q: term,
     });
   };
 

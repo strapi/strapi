@@ -1,19 +1,50 @@
 'use strict';
 
-const _ = require('lodash/fp');
-const types = require('./types');
-const { createField } = require('./fields');
-const { createQueryBuilder } = require('./query');
+const {
+  isUndefined,
+  castArray,
+  isNil,
+  has,
+  isString,
+  isInteger,
+  pick,
+  isPlainObject,
+  isEmpty,
+  isArray,
+  isNull,
+  uniqWith,
+  isEqual,
+  differenceWith,
+  isNumber,
+  map,
+  difference,
+} = require('lodash/fp');
+const types = require('../types');
+const { createField } = require('../fields');
+const { createQueryBuilder } = require('../query');
 const { createRepository } = require('./entity-repository');
-const { isBidirectional, isOneToAny } = require('./metadata/relations');
+const { deleteRelatedMorphOneRelationsAfterMorphToManyUpdate } = require('./morph-relations');
+const {
+  isBidirectional,
+  isAnyToOne,
+  isOneToAny,
+  hasOrderColumn,
+  hasInverseOrderColumn,
+} = require('../metadata/relations');
+const {
+  deletePreviousOneToAnyRelations,
+  deletePreviousAnyToOneRelations,
+  deleteRelations,
+  cleanOrderColumns,
+} = require('./regular-relations');
 
 const toId = (value) => value.id || value;
-const toIds = (value) => _.castArray(value || []).map(toId);
+const toIds = (value) => castArray(value || []).map(toId);
 
-const isValidId = (value) => _.isString(value) || _.isInteger(value);
-const toAssocs = (data) => {
-  return _.castArray(data)
-    .filter((datum) => !_.isNil(datum))
+const isValidId = (value) => isString(value) || isInteger(value);
+const toIdArray = (data) => {
+  const array = castArray(data)
+    .filter((datum) => !isNil(datum))
     .map((datum) => {
       // if it is a string or an integer return an obj with id = to datum
       if (isValidId(datum)) {
@@ -21,12 +52,32 @@ const toAssocs = (data) => {
       }
 
       // if it is an object check it has at least a valid id
-      if (!_.has('id', datum) || !isValidId(datum.id)) {
+      if (!has('id', datum) || !isValidId(datum.id)) {
         throw new Error(`Invalid id, expected a string or integer, got ${datum}`);
       }
 
       return datum;
     });
+  return uniqWith(isEqual, array);
+};
+
+const toAssocs = (data) => {
+  if (isArray(data) || isString(data) || isNumber(data) || isNull(data) || data?.id) {
+    return {
+      set: isNull(data) ? data : toIdArray(data),
+    };
+  }
+
+  if (data?.set) {
+    return {
+      set: isNull(data.set) ? data.set : toIdArray(data.set),
+    };
+  }
+
+  return {
+    connect: toIdArray(data?.connect),
+    disconnect: toIdArray(data?.disconnect),
+  };
 };
 
 const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
@@ -40,8 +91,8 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
     if (types.isScalar(attribute.type)) {
       const field = createField(attribute);
 
-      if (_.isUndefined(data[attributeName])) {
-        if (!_.isUndefined(attribute.default) && withDefaults) {
+      if (isUndefined(data[attributeName])) {
+        if (!isUndefined(attribute.default) && withDefaults) {
           if (typeof attribute.default === 'function') {
             obj[attributeName] = attribute.default();
           } else {
@@ -66,11 +117,11 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
         const joinColumnName = attribute.joinColumn.name;
 
         // allow setting to null
-        const attrValue = !_.isUndefined(data[attributeName])
+        const attrValue = !isUndefined(data[attributeName])
           ? data[attributeName]
           : data[joinColumnName];
 
-        if (!_.isUndefined(attrValue)) {
+        if (!isUndefined(attrValue)) {
           obj[joinColumnName] = attrValue;
         }
 
@@ -91,8 +142,8 @@ const processData = (metadata, data = {}, { withDefaults = false } = {}) => {
           continue;
         }
 
-        if (!_.isUndefined(value)) {
-          if (!_.has('id', value) || !_.has(typeField, value)) {
+        if (!isUndefined(value)) {
+          if (!has('id', value) || !has(typeField, value)) {
             throw new Error(`Expects properties ${typeField} an id to make a morph association`);
           }
 
@@ -137,7 +188,7 @@ const createEntityManager = (db) => {
       const states = await db.lifecycles.run('beforeCount', uid, { params });
 
       const res = await this.createQueryBuilder(uid)
-        .init(_.pick(['_q', 'where', 'filters'], params))
+        .init(pick(['_q', 'where', 'filters'], params))
         .count()
         .first()
         .execute();
@@ -155,7 +206,7 @@ const createEntityManager = (db) => {
       const metadata = db.metadata.get(uid);
       const { data } = params;
 
-      if (!_.isPlainObject(data)) {
+      if (!isPlainObject(data)) {
         throw new Error('Create expects a data object');
       }
 
@@ -187,7 +238,7 @@ const createEntityManager = (db) => {
       const metadata = db.metadata.get(uid);
       const { data } = params;
 
-      if (!_.isArray(data)) {
+      if (!isArray(data)) {
         throw new Error('CreateMany expects data to be an array');
       }
 
@@ -195,7 +246,7 @@ const createEntityManager = (db) => {
         processData(metadata, datum, { withDefaults: true })
       );
 
-      if (_.isEmpty(dataToInsert)) {
+      if (isEmpty(dataToInsert)) {
         throw new Error('Nothing to insert');
       }
 
@@ -214,11 +265,11 @@ const createEntityManager = (db) => {
       const metadata = db.metadata.get(uid);
       const { where, data } = params;
 
-      if (!_.isPlainObject(data)) {
+      if (!isPlainObject(data)) {
         throw new Error('Update requires a data object');
       }
 
-      if (_.isEmpty(where)) {
+      if (isEmpty(where)) {
         throw new Error('Update requires a where parameter');
       }
 
@@ -232,7 +283,7 @@ const createEntityManager = (db) => {
 
       const dataToUpdate = processData(metadata, data);
 
-      if (!_.isEmpty(dataToUpdate)) {
+      if (!isEmpty(dataToUpdate)) {
         await this.createQueryBuilder(uid).where({ id }).update(dataToUpdate).execute();
       }
 
@@ -259,7 +310,7 @@ const createEntityManager = (db) => {
 
       const dataToUpdate = processData(metadata, data);
 
-      if (_.isEmpty(dataToUpdate)) {
+      if (isEmpty(dataToUpdate)) {
         throw new Error('Update requires data');
       }
 
@@ -280,7 +331,7 @@ const createEntityManager = (db) => {
 
       const { where, select, populate } = params;
 
-      if (_.isEmpty(where)) {
+      if (isEmpty(where)) {
         throw new Error('Delete requires a where parameter');
       }
 
@@ -336,11 +387,13 @@ const createEntityManager = (db) => {
       for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
-        const isValidLink = _.has(attributeName, data) && !_.isNil(data[attributeName]);
+        const isValidLink = has(attributeName, data) && !isNil(data[attributeName]);
 
         if (attribute.type !== 'relation' || !isValidLink) {
           continue;
         }
+
+        const cleanRelationData = toAssocs(data[attributeName]);
 
         if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
           const { target, morphBy } = attribute;
@@ -351,9 +404,11 @@ const createEntityManager = (db) => {
             // set columns
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
+            const relId = toId(cleanRelationData.set[0]);
+
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .where({ id: toId(data[attributeName]) })
+              .where({ id: relId })
               .execute();
           } else if (targetAttribute.relation === 'morphToMany') {
             const { joinTable } = targetAttribute;
@@ -361,7 +416,11 @@ const createEntityManager = (db) => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            const rows = toAssocs(data[attributeName]).map((data, idx) => {
+            if (isEmpty(cleanRelationData.set)) {
+              continue;
+            }
+
+            const rows = cleanRelationData.set.map((data, idx) => {
               return {
                 [joinColumn.name]: data.id,
                 [idColumn.name]: id,
@@ -372,10 +431,6 @@ const createEntityManager = (db) => {
                 field: attributeName,
               };
             });
-
-            if (_.isEmpty(rows)) {
-              continue;
-            }
 
             await this.createQueryBuilder(joinTable.name).insert(rows).execute();
           }
@@ -390,17 +445,26 @@ const createEntityManager = (db) => {
 
           const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
-          const rows = toAssocs(data[attributeName]).map((data) => ({
+          if (isEmpty(cleanRelationData.set)) {
+            continue;
+          }
+
+          const rows = cleanRelationData.set.map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
             ...(joinTable.on || {}),
             ...(data.__pivot || {}),
+            order: idx + 1,
           }));
 
-          if (_.isEmpty(rows)) {
-            continue;
-          }
+          // delete previous relations
+          await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
+            uid,
+            attributeName,
+            joinTable,
+            db,
+          });
 
           await this.createQueryBuilder(joinTable.name).insert(rows).execute();
 
@@ -408,13 +472,14 @@ const createEntityManager = (db) => {
         }
 
         if (attribute.joinColumn && attribute.owner) {
+          const relIdsToAdd = toIds(cleanRelationData.set);
           if (
             attribute.relation === 'oneToOne' &&
             isBidirectional(attribute) &&
-            data[attributeName]
+            relIdsToAdd.length
           ) {
             await this.createQueryBuilder(uid)
-              .where({ [attribute.joinColumn.name]: data[attributeName], id: { $ne: id } })
+              .where({ [attribute.joinColumn.name]: relIdsToAdd, id: { $ne: id } })
               .update({ [attribute.joinColumn.name]: null })
               .execute();
           }
@@ -428,6 +493,7 @@ const createEntityManager = (db) => {
           const { target } = attribute;
 
           // TODO: check it is an id & the entity exists (will throw due to FKs otherwise so not a big pbl in SQL)
+          const relIdsToAdd = toIds(cleanRelationData.set);
 
           await this.createQueryBuilder(target)
             .where({ [attribute.joinColumn.referencedColumn]: id })
@@ -437,7 +503,7 @@ const createEntityManager = (db) => {
           await this.createQueryBuilder(target)
             .update({ [attribute.joinColumn.referencedColumn]: id })
             // NOTE: works if it is an array or a single id
-            .where({ id: data[attributeName] })
+            .where({ id: relIdsToAdd })
             .execute();
         }
 
@@ -445,17 +511,18 @@ const createEntityManager = (db) => {
           // need to set the column on the target
 
           const { joinTable } = attribute;
-          const { joinColumn, inverseJoinColumn } = joinTable;
+          const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } =
+            joinTable;
 
-          if (isOneToAny(attribute) && isBidirectional(attribute)) {
-            await this.createQueryBuilder(joinTable.name)
-              .delete()
-              .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName]) })
-              .where(joinTable.on || {})
-              .execute();
+          const relsToAdd = cleanRelationData.set || cleanRelationData.connect;
+          const relIdsToadd = toIds(relsToAdd);
+
+          if (isBidirectional(attribute) && isOneToAny(attribute)) {
+            await deletePreviousOneToAnyRelations({ id, attribute, relIdsToadd, db });
           }
 
-          const insert = toAssocs(data[attributeName]).map((data) => {
+          // prepare new relations to insert
+          const insert = relsToAdd.map((data) => {
             return {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data.id,
@@ -464,11 +531,38 @@ const createEntityManager = (db) => {
             };
           });
 
-          // if there is nothing to insert
+          // add order value
+          if (hasOrderColumn(attribute)) {
+            insert.forEach((rel, idx) => {
+              rel[orderColumnName] = idx + 1;
+            });
+          }
+          // add inv_order value
+          if (hasInverseOrderColumn(attribute)) {
+            const maxResults = await db
+              .getConnection()
+              .select(inverseJoinColumn.name)
+              .max(inverseOrderColumnName, { as: 'max' })
+              .whereIn(inverseJoinColumn.name, relIdsToadd)
+              .where(joinTable.on || {})
+              .groupBy(inverseJoinColumn.name)
+              .from(joinTable.name);
+
+            const maxMap = maxResults.reduce(
+              (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
+              {}
+            );
+
+            insert.forEach((rel) => {
+              rel[inverseOrderColumnName] = (maxMap[rel[inverseJoinColumn.name]] || 0) + 1;
+            });
+          }
+
           if (insert.length === 0) {
             continue;
           }
 
+          // insert new relations
           await this.createQueryBuilder(joinTable.name).insert(insert).execute();
         }
       }
@@ -490,9 +584,10 @@ const createEntityManager = (db) => {
       for (const attributeName of Object.keys(attributes)) {
         const attribute = attributes[attributeName];
 
-        if (attribute.type !== 'relation' || !_.has(attributeName, data)) {
+        if (attribute.type !== 'relation' || !has(attributeName, data)) {
           continue;
         }
+        const cleanRelationData = toAssocs(data[attributeName]);
 
         if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
           const { target, morphBy } = attribute;
@@ -503,15 +598,18 @@ const createEntityManager = (db) => {
             // set columns
             const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
+            // update instead of deleting because the relation is directly on the entity table
+            // and not in a join table
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: null, [typeColumn.name]: null })
               .where({ [idColumn.name]: id, [typeColumn.name]: uid })
               .execute();
 
-            if (!_.isNull(data[attributeName])) {
+            if (!isNull(cleanRelationData.set)) {
+              const relId = toIds(cleanRelationData.set[0]);
               await this.createQueryBuilder(target)
                 .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-                .where({ id: toId(data[attributeName]) })
+                .where({ id: relId })
                 .execute();
             }
           } else if (targetAttribute.relation === 'morphToMany') {
@@ -530,7 +628,11 @@ const createEntityManager = (db) => {
               })
               .execute();
 
-            const rows = toAssocs(data[attributeName]).map((data, idx) => ({
+            if (isEmpty(cleanRelationData.set)) {
+              continue;
+            }
+
+            const rows = cleanRelationData.set.map((data, idx) => ({
               [joinColumn.name]: data.id,
               [idColumn.name]: id,
               [typeColumn.name]: uid,
@@ -539,10 +641,6 @@ const createEntityManager = (db) => {
               order: idx + 1,
               field: attributeName,
             }));
-
-            if (_.isEmpty(rows)) {
-              continue;
-            }
 
             await this.createQueryBuilder(joinTable.name).insert(rows).execute();
           }
@@ -569,17 +667,26 @@ const createEntityManager = (db) => {
             })
             .execute();
 
-          const rows = toAssocs(data[attributeName]).map((data) => ({
+          if (isEmpty(cleanRelationData.set)) {
+            continue;
+          }
+
+          const rows = cleanRelationData.set.map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
             ...(joinTable.on || {}),
             ...(data.__pivot || {}),
+            order: idx + 1,
           }));
 
-          if (_.isEmpty(rows)) {
-            continue;
-          }
+          // delete previous relations
+          await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
+            uid,
+            attributeName,
+            joinTable,
+            db,
+          });
 
           await this.createQueryBuilder(joinTable.name).insert(rows).execute();
 
@@ -602,10 +709,10 @@ const createEntityManager = (db) => {
             .update({ [attribute.joinColumn.referencedColumn]: null })
             .execute();
 
-          if (!_.isNull(data[attributeName])) {
+          if (!isNull(cleanRelationData.set)) {
+            const relIdsToAdd = toIds(cleanRelationData.set);
             await this.createQueryBuilder(target)
-              // NOTE: works if it is an array or a single id
-              .where({ id: data[attributeName] })
+              .where({ id: relIdsToAdd })
               .update({ [attribute.joinColumn.referencedColumn]: id })
               .execute();
           }
@@ -613,42 +720,218 @@ const createEntityManager = (db) => {
 
         if (attribute.joinTable) {
           const { joinTable } = attribute;
-          const { joinColumn, inverseJoinColumn } = joinTable;
-
-          // clear previous associations in the joinTable
-          await this.createQueryBuilder(joinTable.name)
-            .delete()
-            .where({ [joinColumn.name]: id })
-            .where(joinTable.on || {})
-            .execute();
-
-          if (
-            isBidirectional(attribute) &&
-            ['oneToOne', 'oneToMany'].includes(attribute.relation)
-          ) {
-            await this.createQueryBuilder(joinTable.name)
-              .delete()
-              .where({ [inverseJoinColumn.name]: toIds(data[attributeName]) })
-              .where(joinTable.on || {})
-              .execute();
+          const { joinColumn, inverseJoinColumn, orderColumnName, inverseOrderColumnName } =
+            joinTable;
+          const select = [joinColumn.name, inverseJoinColumn.name];
+          if (hasOrderColumn(attribute)) {
+            select.push(orderColumnName);
+          }
+          if (hasInverseOrderColumn(attribute)) {
+            select.push(inverseOrderColumnName);
           }
 
-          if (!_.isNull(data[attributeName])) {
-            const insert = toAssocs(data[attributeName]).map((data) => {
-              return {
-                [joinColumn.name]: id,
-                [inverseJoinColumn.name]: data.id,
-                ...(joinTable.on || {}),
-                ...(data.__pivot || {}),
-              };
-            });
+          // only delete relations
+          if (isNull(cleanRelationData.set)) {
+            await deleteRelations({ id, attribute, db, relIdsToDelete: 'all' });
+          } else {
+            const isPartialUpdate = !has('set', cleanRelationData);
+            let relIdsToaddOrMove;
 
-            // if there is nothing to insert
-            if (insert.length === 0) {
-              continue;
+            if (isPartialUpdate) {
+              if (isAnyToOne(attribute)) {
+                cleanRelationData.connect = cleanRelationData.connect.slice(-1);
+              }
+              relIdsToaddOrMove = toIds(cleanRelationData.connect);
+              const relIdsToDelete = toIds(
+                differenceWith(isEqual, cleanRelationData.disconnect, cleanRelationData.connect)
+              );
+
+              if (!isEmpty(relIdsToDelete)) {
+                await deleteRelations({ id, attribute, db, relIdsToDelete });
+              }
+
+              if (isEmpty(cleanRelationData.connect)) {
+                continue;
+              }
+
+              // Fetch current relations to handle ordering
+              let currentMovingRels;
+              if (hasOrderColumn(attribute) || hasInverseOrderColumn(attribute)) {
+                currentMovingRels = await this.createQueryBuilder(joinTable.name)
+                  .select(select)
+                  .where({
+                    [joinColumn.name]: id,
+                    [inverseJoinColumn.name]: { $in: relIdsToaddOrMove },
+                  })
+                  .where(joinTable.on || {})
+                  .execute();
+              }
+
+              // prepare relations to insert
+              const insert = cleanRelationData.connect.map((relToAdd) => ({
+                [joinColumn.name]: id,
+                [inverseJoinColumn.name]: relToAdd.id,
+                ...(joinTable.on || {}),
+                ...(relToAdd.__pivot || {}),
+              }));
+
+              // add order value
+              if (hasOrderColumn(attribute)) {
+                const orderMax = (
+                  await this.createQueryBuilder(joinTable.name)
+                    .max(orderColumnName)
+                    .where({ [joinColumn.name]: id })
+                    .where(joinTable.on || {})
+                    .first()
+                    .execute()
+                ).max;
+
+                insert.forEach((row, idx) => {
+                  row[orderColumnName] = orderMax + idx + 1;
+                });
+              }
+
+              // add inv order value
+              if (hasInverseOrderColumn(attribute)) {
+                const nonExistingRelsIds = difference(
+                  relIdsToaddOrMove,
+                  map(inverseJoinColumn.name, currentMovingRels)
+                );
+
+                const maxResults = await db
+                  .getConnection()
+                  .select(inverseJoinColumn.name)
+                  .max(inverseOrderColumnName, { as: 'max' })
+                  .whereIn(inverseJoinColumn.name, nonExistingRelsIds)
+                  .where(joinTable.on || {})
+                  .groupBy(inverseJoinColumn.name)
+                  .from(joinTable.name);
+
+                const maxMap = maxResults.reduce(
+                  (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
+                  {}
+                );
+
+                insert.forEach((row) => {
+                  row[inverseOrderColumnName] = (maxMap[row[inverseJoinColumn.name]] || 0) + 1;
+                });
+              }
+
+              // insert rows
+              const query = this.createQueryBuilder(joinTable.name)
+                .insert(insert)
+                .onConflict(joinTable.pivotColumns);
+
+              if (hasOrderColumn(attribute)) {
+                query.merge([orderColumnName]);
+              } else {
+                query.ignore();
+              }
+
+              await query.execute();
+
+              // remove gap between orders
+              await cleanOrderColumns({ attribute, db, id });
+            } else {
+              if (isAnyToOne(attribute)) {
+                cleanRelationData.set = cleanRelationData.set.slice(-1);
+              }
+              // overwrite all relations
+              relIdsToaddOrMove = toIds(cleanRelationData.set);
+              await deleteRelations({
+                id,
+                attribute,
+                db,
+                relIdsToDelete: 'all',
+                relIdsToNotDelete: relIdsToaddOrMove,
+              });
+
+              if (isEmpty(cleanRelationData.set)) {
+                continue;
+              }
+
+              const insert = cleanRelationData.set.map((relToAdd) => ({
+                [joinColumn.name]: id,
+                [inverseJoinColumn.name]: relToAdd.id,
+                ...(joinTable.on || {}),
+                ...(relToAdd.__pivot || {}),
+              }));
+
+              // add order value
+              if (hasOrderColumn(attribute)) {
+                insert.forEach((row, idx) => {
+                  row[orderColumnName] = idx + 1;
+                });
+              }
+
+              // add inv order value
+              if (hasInverseOrderColumn(attribute)) {
+                const existingRels = await this.createQueryBuilder(joinTable.name)
+                  .select(inverseJoinColumn.name)
+                  .where({
+                    [joinColumn.name]: id,
+                    [inverseJoinColumn.name]: { $in: relIdsToaddOrMove },
+                  })
+                  .where(joinTable.on || {})
+                  .execute();
+
+                const nonExistingRelsIds = difference(
+                  relIdsToaddOrMove,
+                  map(inverseJoinColumn.name, existingRels)
+                );
+
+                const maxResults = await db
+                  .getConnection()
+                  .select(inverseJoinColumn.name)
+                  .max(inverseOrderColumnName, { as: 'max' })
+                  .whereIn(inverseJoinColumn.name, nonExistingRelsIds)
+                  .where(joinTable.on || {})
+                  .groupBy(inverseJoinColumn.name)
+                  .from(joinTable.name);
+
+                const maxMap = maxResults.reduce(
+                  (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
+                  {}
+                );
+
+                insert.forEach((row) => {
+                  row[inverseOrderColumnName] = (maxMap[row[inverseJoinColumn.name]] || 0) + 1;
+                });
+              }
+
+              // insert rows
+              const query = this.createQueryBuilder(joinTable.name)
+                .insert(insert)
+                .onConflict(joinTable.pivotColumns);
+
+              if (hasOrderColumn(attribute)) {
+                query.merge([orderColumnName]);
+              } else {
+                query.ignore();
+              }
+
+              await query.execute();
             }
 
-            await this.createQueryBuilder(joinTable.name).insert(insert).execute();
+            // Delete the previous relations for oneToAny relations
+            if (isBidirectional(attribute) && isOneToAny(attribute)) {
+              await deletePreviousOneToAnyRelations({
+                id,
+                attribute,
+                relIdsToadd: relIdsToaddOrMove,
+                db,
+              });
+            }
+
+            // Delete the previous relations for anyToOne relations
+            if (isBidirectional(attribute) && isAnyToOne(attribute)) {
+              await deletePreviousAnyToOneRelations({
+                id,
+                attribute,
+                relIdToadd: relIdsToaddOrMove[0],
+                db,
+              });
+            }
           }
         }
       }
@@ -764,14 +1047,7 @@ const createEntityManager = (db) => {
         }
 
         if (attribute.joinTable) {
-          const { joinTable } = attribute;
-          const { joinColumn } = joinTable;
-
-          await this.createQueryBuilder(joinTable.name)
-            .delete()
-            .where({ [joinColumn.name]: id })
-            .where(joinTable.on || {})
-            .execute();
+          await deleteRelations({ id, attribute, db, relIdsToDelete: 'all' });
         }
       }
     },
@@ -791,7 +1067,7 @@ const createEntityManager = (db) => {
     async load(uid, entity, fields, params) {
       const { attributes } = db.metadata.get(uid);
 
-      const fieldsArr = _.castArray(fields);
+      const fieldsArr = castArray(fields);
       fieldsArr.forEach((field) => {
         const attribute = attributes[field];
 
@@ -814,7 +1090,7 @@ const createEntityManager = (db) => {
       }
 
       if (Array.isArray(fields)) {
-        return _.pick(fields, entry);
+        return pick(fields, entry);
       }
 
       return entry[fields];

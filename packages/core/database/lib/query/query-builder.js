@@ -23,8 +23,13 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
       offset: null,
       transaction: null,
       forUpdate: false,
+      onConflict: null,
+      merge: null,
+      ignore: false,
       orderBy: [],
       groupBy: [],
+      increments: [],
+      decrements: [],
       aliasCounter: 0,
     },
     initialState
@@ -67,6 +72,24 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
       return this;
     },
 
+    onConflict(args) {
+      state.onConflict = args;
+
+      return this;
+    },
+
+    merge(args) {
+      state.merge = args;
+
+      return this;
+    },
+
+    ignore() {
+      state.ignore = true;
+
+      return this;
+    },
+
     delete() {
       state.type = 'delete';
 
@@ -80,6 +103,20 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
     update(data) {
       state.type = 'update';
       state.data = data;
+
+      return this;
+    },
+
+    increment(column, amount = 1) {
+      state.type = 'update';
+      state.increments.push({ column, amount });
+
+      return this;
+    },
+
+    decrement(column, amount = 1) {
+      state.type = 'update';
+      state.decrements.push({ column, amount });
 
       return this;
     },
@@ -349,7 +386,9 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
           break;
         }
         case 'update': {
-          qb.update(state.data);
+          if (state.data) {
+            qb.update(state.data);
+          }
           break;
         }
         case 'delete': {
@@ -372,6 +411,22 @@ const createQueryBuilder = (uid, db, initialState = {}) => {
 
       if (state.forUpdate) {
         qb.forUpdate();
+      }
+
+      if (!_.isEmpty(state.increments)) {
+        state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
+      }
+
+      if (!_.isEmpty(state.decrements)) {
+        state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
+      }
+
+      if (state.onConflict) {
+        if (state.merge) {
+          qb.onConflict(state.onConflict).merge(state.merge);
+        } else if (state.ignore) {
+          qb.onConflict(state.onConflict).ignore();
+        }
       }
 
       if (state.limit) {

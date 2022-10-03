@@ -853,7 +853,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border: 1px solid #4945ff;
 }
 
-.c29 .sc-iRFsWr {
+.c29 .sc-eZhRLC {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -923,7 +923,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   background: #ffffff;
 }
 
-.c37 .sc-iRFsWr {
+.c37 .sc-eZhRLC {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1980,7 +1980,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border: 1px solid #4945ff;
 }
 
-.c33 .sc-iRFsWr {
+.c33 .sc-eZhRLC {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2050,7 +2050,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   background: #ffffff;
 }
 
-.c30 .sc-iRFsWr {
+.c30 .sc-eZhRLC {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
