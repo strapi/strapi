@@ -130,7 +130,7 @@ module.exports = {
 
     await validateFindExisting(ctx.request.query);
 
-    const { component, idsToOmit, _q, ...query } = ctx.request.query;
+    const { component, idsToOmit, ...query } = ctx.request.query;
 
     const sourceModelUid = component || model;
 
@@ -186,39 +186,43 @@ module.exports = {
     }
 
     const queryParams = {
-      sort: mainField,
-      ...query,
-      fields: fieldsToSelect, // cannot select other fields as the user may not have the permissions
-      filters: {}, // cannot filter for RBAC reasons
+      select: fieldsToSelect,
     };
 
     if (!isEmpty(idsToOmit)) {
-      addFiltersClause(queryParams, { id: { $notIn: idsToOmit } });
+      queryParams.filters = { id: { $notIn: idsToOmit } };
     }
-
-    // searching should be allowed only on mainField for permission reasons
-    if (_q) {
-      addFiltersClause(queryParams, { [mainField]: { $containsi: _q } });
-    }
-
-    const subQuery = strapi.db.queryBuilder(sourceModel.uid);
-
-    const alias = subQuery.getAlias();
-
-    const knexSubQuery = subQuery
-      .where({ id, [`${alias}.id`]: { $notNull: true } })
-      .join({ alias, targetField })
-      .select(`${alias}.id`)
-      .getKnexQuery();
-
-    addFiltersClause(queryParams, { id: { $in: knexSubQuery } });
 
     if (MANY_RELATIONS.includes(attribute.relation)) {
-      ctx.body = await strapi.entityService.findPage(targetedModel.uid, queryParams);
+      const page = Number(query.page || 1);
+      const pageSize = Number(query.pageSize || 10);
+
+      queryParams.offset = Math.max(page - 1, 0) * pageSize;
+      queryParams.limit = pageSize;
+
+      const [results, count] = await Promise.all([
+        strapi.db
+          .query(sourceModelUid)
+          .load({ id }, targetField, { ...queryParams, ordering: 'desc' }),
+        strapi.db.query(sourceModelUid).load({ id }, targetField, { ...queryParams, count: true }),
+      ]);
+
+      ctx.body = {
+        results,
+        pagination: {
+          page: Number(query.page) || 1,
+          pageSize: Number(query.pageSize) || 10,
+          pageCount: results.length,
+          total: count,
+        },
+      };
     } else {
-      const results = await strapi.entityService.findMany(targetedModel.uid, queryParams);
+      const result = await strapi.db.query(sourceModelUid).load({ id }, targetField, queryParams);
       // TODO: Temporary fix (use data instead)
-      ctx.body = { results, pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 } };
+      ctx.body = {
+        results: result ? [result] : [],
+        pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 },
+      };
     }
   },
 };
