@@ -11,6 +11,8 @@ function useSelect() {
     modifiedData,
     onPublish,
     onUnpublish,
+    publishConfirmation,
+    onPublishPromptDismissal,
   } = useCMEditViewDataManager();
 
   return {
@@ -23,6 +25,8 @@ function useSelect() {
     modifiedData,
     onPublish,
     onUnpublish,
+    publishConfirmation,
+    onPublishPromptDismissal,
   };
 }
 

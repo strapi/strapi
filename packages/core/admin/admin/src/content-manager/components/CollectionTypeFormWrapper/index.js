@@ -294,6 +294,29 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     ]
   );
 
+  const onDraftRelationCheck = useCallback(async () => {
+    try {
+      trackUsageRef.current('willCheckDraftRelations');
+
+      const endPoint = getRequestUrl(
+        `collection-types/${slug}/${id}/actions/numberOfDraftRelations`
+      );
+      dispatch(setStatus('draft-relation-check-pending'));
+
+      const numberOfDraftRelations = await axiosInstance.get(endPoint);
+      trackUsageRef.current('didCheckDraftRelations');
+
+      dispatch(setStatus('resolved'));
+
+      return numberOfDraftRelations.data.data;
+    } catch (err) {
+      displayErrors(err);
+      dispatch(setStatus('resolved'));
+
+      return Promise.reject(err);
+    }
+  }, [displayErrors, id, slug, dispatch]);
+
   const onPublish = useCallback(async () => {
     try {
       trackUsageRef.current('willPublishEntry');
@@ -397,6 +420,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     onDeleteSucceeded,
     onPost,
     onPublish,
+    onDraftRelationCheck,
     onPut,
     onUnpublish,
     status,

@@ -93,6 +93,7 @@ const EditView = ({
         onDeleteSucceeded,
         onPost,
         onPublish,
+        onDraftRelationCheck,
         onPut,
         onUnpublish,
         redirectionLink,
@@ -112,6 +113,7 @@ const EditView = ({
             isSingleType={isSingleType}
             onPost={onPost}
             onPublish={onPublish}
+            onDraftRelationCheck={onDraftRelationCheck}
             onPut={onPut}
             onUnpublish={onUnpublish}
             readActionAllowedFields={readActionAllowedFields}

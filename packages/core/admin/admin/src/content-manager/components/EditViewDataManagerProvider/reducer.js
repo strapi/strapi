@@ -15,6 +15,10 @@ const initialState = {
   modifiedData: null,
   shouldCheckErrors: false,
   modifiedDZName: null,
+  publishConfirmation: {
+    show: false,
+    draftCount: 0,
+  },
 };
 
 const reducer = (state, action) =>
@@ -345,7 +349,14 @@ const reducer = (state, action) =>
 
         break;
       }
-
+      case 'SET_PUBLISH_CONFIRMATION': {
+        draftState.publishConfirmation = { ...action.publishConfirmation };
+        break;
+      }
+      case 'RESET_PUBLISH_CONFIRMATION': {
+        draftState.publishConfirmation = { ...state.publishConfirmation, show: false };
+        break;
+      }
       default:
         return draftState;
     }

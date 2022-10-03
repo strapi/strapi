@@ -36,6 +36,7 @@ const EditViewDataManagerProvider = ({
   isSingleType,
   onPost,
   onPublish,
+  onDraftRelationCheck,
   onPut,
   onUnpublish,
   readActionAllowedFields,
@@ -46,7 +47,15 @@ const EditViewDataManagerProvider = ({
   updateActionAllowedFields,
 }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const { formErrors, initialData, modifiedData, modifiedDZName, shouldCheckErrors } = reducerState;
+  const {
+    formErrors,
+    initialData,
+    modifiedData,
+    modifiedDZName,
+    shouldCheckErrors,
+    publishConfirmation,
+  } = reducerState;
+
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
 
@@ -301,6 +310,14 @@ const EditViewDataManagerProvider = ({
     return shouldNotRunValidations ? { status: 'draft' } : {};
   }, [hasDraftAndPublish, shouldNotRunValidations]);
 
+  const handlePublishPromptDismissal = useCallback(async (e) => {
+    e.preventDefault();
+
+    return dispatch({
+      type: 'RESET_PUBLISH_CONFIRMATION',
+    });
+  }, []);
+
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
@@ -346,8 +363,27 @@ const EditViewDataManagerProvider = ({
       },
       { isCreatingEntry, isDraft: false, isFromComponent: false }
     );
-    let errors = {};
 
+    const draftCount = await onDraftRelationCheck();
+
+    if (!publishConfirmation.show && draftCount > 0) {
+      // If the warning hasn't already been shown and draft relations are found,
+      // abort the publish call and ask for confirmation from the user
+      dispatch({
+        type: 'SET_PUBLISH_CONFIRMATION',
+        publishConfirmation: {
+          show: true,
+          draftCount,
+        },
+      });
+
+      return;
+    }
+    dispatch({
+      type: 'RESET_PUBLISH_CONFIRMATION',
+    });
+
+    let errors = {};
     try {
       await schema.validate(modifiedData, { abortEarly: false });
     } catch (err) {
@@ -369,7 +405,15 @@ const EditViewDataManagerProvider = ({
       type: 'SET_FORM_ERRORS',
       errors,
     });
-  }, [allLayoutData, currentContentTypeLayout, isCreatingEntry, modifiedData, onPublish]);
+  }, [
+    allLayoutData,
+    currentContentTypeLayout,
+    isCreatingEntry,
+    modifiedData,
+    publishConfirmation.show,
+    onPublish,
+    onDraftRelationCheck,
+  ]);
 
   const shouldCheckDZErrors = useCallback(
     (dzName) => {
@@ -506,6 +550,8 @@ const EditViewDataManagerProvider = ({
         slug,
         triggerFormValidation,
         updateActionAllowedFields,
+        onPublishPromptDismissal: handlePublishPromptDismissal,
+        publishConfirmation,
       }}
     >
       <>
@@ -549,6 +595,7 @@ EditViewDataManagerProvider.propTypes = {
   isSingleType: PropTypes.bool.isRequired,
   onPost: PropTypes.func.isRequired,
   onPublish: PropTypes.func.isRequired,
+  onDraftRelationCheck: PropTypes.func.isRequired,
   onPut: PropTypes.func.isRequired,
   onUnpublish: PropTypes.func.isRequired,
   readActionAllowedFields: PropTypes.array.isRequired,

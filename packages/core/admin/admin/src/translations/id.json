@@ -415,6 +415,8 @@
   "content-manager.success.record.publish": "Diterbitkan",
   "content-manager.success.record.save": "Disimpan",
   "content-manager.success.record.unpublish": "Didraf",
+  "content-manager.popUpWarning.warning.publish-question": "Apakah Anda masih ingin menerbitkannya?",
+  "content-manager.popUpwarning.warning.has-draft-relations.button-confirm": "Ya, terbitkan",
   "form.button.done": "Selesai",
   "global.prompt.unsaved": "Anda yakin ingin meninggalkan halaman ini? Semua modifikasi Anda akan hilang",
   "notification.contentType.relations.conflict": "Jenis konten memiliki hubungan yang saling bertentangan",
