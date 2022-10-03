@@ -103,8 +103,16 @@ const reducer = (state, action) =>
         if (replace) {
           set(draftState, [...path, 'connect'], [value]);
         } else {
-          const nextValue = get(draftState, [...path, 'connect']);
-          nextValue.push(value);
+          const savedRelations = get(state, [...path, 'results']);
+          const existsInSavedRelation = savedRelations.find(
+            (savedRelation) => savedRelation.id === value.id
+          );
+
+          // if the relation is already saved in db, we should not add it in the connect array
+          if (!existsInSavedRelation) {
+            const nextValue = get(draftState, [...path, 'connect']);
+            nextValue.push(value);
+          }
         }
 
         if (disconnectedRelations?.length) {
