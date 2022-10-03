@@ -34,6 +34,6 @@ _What other approaches did we consider?_
 ## Resources
 
 - [Custom Fields page](https://strapi.io/custom-fields)
-- [Docs Beta](https://docs-next.strapi.io/developer-docs/latest/development/custom-fields.html)
+- [Docs](https://docs.strapi.io/developer-docs/latest/development/custom-fields.html)
 - [non-technical RFC](https://github.com/strapi/rfcs/pull/40)
 - [technical RFC](https://github.com/strapi/rfcs/pull/42)
