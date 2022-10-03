@@ -1,4 +1,4 @@
-import getTrad from '../../../utils/getTrad';
+import getTrad from '../../utils/getTrad';
 
 const getModalTitleSubHeader = ({ modalType, forTarget, kind, actionType, step }) => {
   switch (modalType) {
@@ -14,6 +14,9 @@ const getModalTitleSubHeader = ({ modalType, forTarget, kind, actionType, step }
           step !== 'null' && step !== null && actionType !== 'edit' ? '.step' : ''
         }`
       );
+    }
+    case 'customField': {
+      return getTrad(`modalForm.sub-header.attribute.${actionType}`);
     }
     case 'addComponentToDynamicZone':
       return getTrad('modalForm.sub-header.addComponentToDynamicZone');
