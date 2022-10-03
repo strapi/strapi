@@ -168,9 +168,9 @@ $ STRAPI_LICENSE=<license> yarn test:e2e
 
 ### Repository Organization
 
-We chose to use a monorepo design using [Yarn Workspaces](https://yarnpkg.com/en/docs/workspaces) in the way [React](https://github.com/facebook/react/tree/master/packages) or [Babel](https://github.com/babel/babel/tree/master/packages) does. This allows us to maintain the whole ecosystem keep it up-to-date and consistent.
+We chose to use a monorepo design using [Yarn Workspaces](https://yarnpkg.com/en/docs/workspaces) in the way [React](https://github.com/facebook/react/tree/main/packages) or [Babel](https://github.com/babel/babel/tree/main/packages) does. This allows us to maintain the whole ecosystem keep it up-to-date and consistent.
 
-We do our best to keep the master branch as clean as possible, with tests passing at all times. However, the master branch can move faster than the release cycle. Therefore check the [releases on npm](https://www.npmjs.com/package/@strapi/strapi) so that you are always up-to-date with the latest stable version.
+We do our best to keep the main branch as clean as possible, with tests passing at all times. However, the main branch can move faster than the release cycle. Therefore check the [releases on npm](https://www.npmjs.com/package/@strapi/strapi) so that you are always up-to-date with the latest stable version.
 
 ### Reporting an issue
 
