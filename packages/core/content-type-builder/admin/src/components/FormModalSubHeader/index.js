@@ -1,9 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Typography } from '@strapi/design-system/Typography';
 import upperFirst from 'lodash/upperFirst';
+import { Stack } from '@strapi/design-system/Stack';
+import { Typography } from '@strapi/design-system/Typography';
+
 import { getTrad } from '../../utils';
+
 import getModalTitleSubHeader from './getModalTitleSubHeader';
 
 const FormModalSubHeader = ({
@@ -23,25 +26,33 @@ const FormModalSubHeader = ({
       : { id: getTrad(`attribute.${attributeType}`) };
 
   return (
-    <Typography as="h2" variant="beta">
-      {formatMessage(
-        {
-          id: getModalTitleSubHeader({
-            actionType,
-            forTarget,
-            kind,
+    <Stack direction="column" alignItems="flex-start" paddingBottom={2} gap={1}>
+      <Typography as="h2" variant="beta">
+        {formatMessage(
+          {
+            id: getModalTitleSubHeader({
+              actionType,
+              forTarget,
+              kind,
+              step,
+              modalType,
+            }),
+            defaultMessage: 'Add new field',
+          },
+          {
+            type: upperFirst(formatMessage(intlLabel)),
+            name: upperFirst(attributeName),
             step,
-            modalType,
-          }),
-          defaultMessage: 'Add new field',
-        },
-        {
-          type: upperFirst(formatMessage(intlLabel)),
-          name: upperFirst(attributeName),
-          step,
-        }
-      )}
-    </Typography>
+          }
+        )}
+      </Typography>
+      <Typography variant="pi" textColor="neutral600">
+        {formatMessage({
+          id: getTrad(`attribute.${attributeType}.description`),
+          defaultMessage: 'A type for modeling data',
+        })}
+      </Typography>
+    </Stack>
   );
 };
 
