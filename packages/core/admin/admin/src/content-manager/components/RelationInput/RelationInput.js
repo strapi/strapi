@@ -68,6 +68,10 @@ const RelationInput = ({
   const outerListRef = useRef();
   const [overflow, setOverflow] = useState('');
 
+  const {
+    data: { pages },
+  } = searchResults;
+
   const relations = useMemo(() => paginatedRelations.data.pages.flat(), [paginatedRelations]);
   const totalNumberOfRelations = relations.length ?? 0;
 
@@ -86,12 +90,12 @@ const RelationInput = ({
 
   const options = useMemo(
     () =>
-      searchResults.data.pages.flat().map((result) => ({
+      pages.flat().map((result) => ({
         ...result,
         value: result.id,
         label: result.mainField,
       })),
-    [searchResults]
+    [pages]
   );
 
   useEffect(() => {
@@ -135,24 +139,37 @@ const RelationInput = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const timeoutRef = useRef();
+  const previousOptions = useRef([]);
 
   useEffect(() => {
-    setIsMenuOpen((isCurrentlyOpened) => {
-      /**
-       * If we're currently open and the options changed
-       * we want to close and open to ensure the menu's
-       * position is correctly calculated
-       */
-      if (isCurrentlyOpened) {
-        timeoutRef.current = setTimeout(() => {
-          setIsMenuOpen(true);
-        }, 10);
+    /**
+     * We only really want this effect to fire once when the options
+     * change from an empty array to an array with values.
+     * Otherwise, it'll fire when the infinite scrolling happens causing
+     * the menu to jump to the top all the time when loading more.
+     */
+    if (options.length > 0 && previousOptions.current.length === 0) {
+      setIsMenuOpen((isCurrentlyOpened) => {
+        /**
+         * If we're currently open and the options changed
+         * we want to close and open to ensure the menu's
+         * position is correctly calculated
+         */
+        if (isCurrentlyOpened) {
+          timeoutRef.current = setTimeout(() => {
+            setIsMenuOpen(true);
+          }, 10);
+
+          return false;
+        }
 
         return false;
-      }
+      });
+    }
 
-      return false;
-    });
+    return () => {
+      previousOptions.current = options || [];
+    };
   }, [options]);
 
   useEffect(() => {
