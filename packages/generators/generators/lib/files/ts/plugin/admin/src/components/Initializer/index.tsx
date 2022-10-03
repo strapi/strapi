@@ -11,7 +11,7 @@ type InitializerProps = {
   setPlugin: (id: string) => void;
 };
 
-const Initializer: React.FC<InitializerProps> = ({ setPlugin }) => {
+const Initializer = ({ setPlugin }: InitializerProps) => {
   const ref = useRef<(id: string) => void | null>(setPlugin);
 
   useEffect(() => {
