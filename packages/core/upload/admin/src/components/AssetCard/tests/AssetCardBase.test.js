@@ -3,12 +3,10 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { render as renderRTL, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import en from '../../../translations/en.json';
-
 import { AssetCardBase } from '../AssetCardBase';
 
 jest.mock('react-intl', () => ({
-  useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id]) }),
+  useIntl: () => ({ formatMessage: jest.fn(({ defaultMessage }) => defaultMessage) }),
 }));
 
 describe('AssetCardBase', () => {
