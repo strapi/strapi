@@ -25,6 +25,21 @@ const App = (
 );
 
 describe('<ColorPickerInput />', () => {
+  /**
+   * We do this because –
+   * https://github.com/facebook/jest/issues/12670
+   */
+  beforeAll(() => {
+    jest.setTimeout(30000);
+  });
+
+  /**
+   * Reset timeout to what is expected
+   */
+  afterAll(() => {
+    jest.setTimeout(5000);
+  });
+
   it('renders and matches the snapshot', () => {
     const { container } = render(App);
 
