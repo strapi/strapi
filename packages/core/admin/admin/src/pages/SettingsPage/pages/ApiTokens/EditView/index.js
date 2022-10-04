@@ -152,6 +152,10 @@ const ApiTokenCreateView = () => {
   const handleSubmit = async (body, actions) => {
     trackUsageRef.current(isCreating ? 'willCreateToken' : 'willEditToken');
     lockApp();
+    const lifespanVal =
+      body.lifespan && parseInt(body.lifespan, 10) && body.lifespan !== '0'
+        ? parseInt(body.lifespan, 10)
+        : null;
 
     try {
       const {
@@ -159,10 +163,7 @@ const ApiTokenCreateView = () => {
       } = isCreating
         ? await axiosInstance.post(`/admin/api-tokens`, {
             ...body,
-            lifespan:
-              body.lifespan && parseInt(body.lifespan, 10)
-                ? parseInt(body.lifespan, 10)
-                : body.lifespan,
+            lifespan: lifespanVal,
             permissions: body.type === 'custom' ? state.selectedActions : null,
           })
         : await axiosInstance.put(`/admin/api-tokens/${id}`, {

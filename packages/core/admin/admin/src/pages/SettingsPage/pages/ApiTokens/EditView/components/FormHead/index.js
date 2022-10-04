@@ -67,7 +67,7 @@ const FormHead = ({ apiToken, setApiToken, canEditInputs, canRegenerate, isSubmi
 
 FormHead.propTypes = {
   apiToken: PropTypes.shape({
-    id: PropTypes.string,
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     type: PropTypes.string,
     lifespan: PropTypes.number,
     name: PropTypes.string,
