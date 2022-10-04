@@ -18,7 +18,7 @@ class Metadata extends Map {
     for (const meta of this.values()) {
       if (seenTables.get(meta.tableName)) {
         throw new Error(
-          `DB table ${meta.tableName} already exists. Change the collectionName of this content type.\n More info here: https://docs.strapi.io/developer-docs/latest/development/backend-customization/`
+          `DB table "${meta.tableName}" already exists. Change the collectionName of the related content type.`
         );
       }
       seenTables.set(meta.tableName, true);
