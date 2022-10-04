@@ -75,11 +75,15 @@ FormHead.propTypes = {
     permissions: PropTypes.array,
     description: PropTypes.string,
     createdAt: PropTypes.string,
-  }).isRequired,
+  }),
   canEditInputs: PropTypes.bool.isRequired,
   canRegenerate: PropTypes.bool.isRequired,
   setApiToken: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool.isRequired,
+};
+
+FormHead.defaultProps = {
+  apiToken: {},
 };
 
 export default FormHead;
