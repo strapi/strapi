@@ -35,10 +35,7 @@ export const RelationInputDataManager = ({
 
   const getEntityId = () => {
     if (componentUid) {
-      const fieldNameKeys = name.split('.');
-      const parentNameKeys = fieldNameKeys.slice(0, fieldNameKeys.length - 1);
-
-      return get(initialData, parentNameKeys)?.id;
+      return get(initialData, name.split('.').slice(0, -1))?.id;
     }
 
     return initialData.id;

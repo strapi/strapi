@@ -54,8 +54,7 @@ function useSelect({
 
     if (componentUid) {
       const fieldNameKeys = name.split('.');
-      const parentNameKeys = fieldNameKeys.slice(0, fieldNameKeys.length - 1);
-      const componentId = get(initialData, parentNameKeys)?.id;
+      const componentId = get(initialData, fieldNameKeys.slice(0, -1))?.id;
 
       // repeatable components and dz are dynamically created
       // if no componentId exists in initialData it means that the user just created it
