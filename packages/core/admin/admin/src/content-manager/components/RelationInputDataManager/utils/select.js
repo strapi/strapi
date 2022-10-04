@@ -1,9 +1,16 @@
 import { useMemo } from 'react';
+import get from 'lodash/get';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 import { getRequestUrl } from '../../../utils';
 
-function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, queryInfos }) {
+function useSelect({
+  componentUid,
+  isUserAllowedToEditField,
+  isUserAllowedToReadField,
+  name,
+  queryInfos,
+}) {
   const {
     isCreatingEntry,
     createActionAllowedFields,
@@ -11,7 +18,6 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, q
     updateActionAllowedFields,
     slug,
     initialData,
-    isSingleType,
   } = useCMEditViewDataManager();
 
   const isFieldAllowed = useMemo(() => {
@@ -40,23 +46,36 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, q
     return allowedFields.includes(name);
   }, [isCreatingEntry, isUserAllowedToReadField, name, readActionAllowedFields]);
 
-  // /content-manager/[collection-type]/[content-type]/[id]/[field-name]
+  // /content-manager/relations/[model]/[id]/[field-name]
   const relationFetchEndpoint = useMemo(() => {
-    const collectionTypePrefix = isSingleType ? 'single-types' : 'collection-types';
-
     if (isCreatingEntry) {
       return null;
     }
 
-    return getRequestUrl(
-      `${collectionTypePrefix}/${slug}/${initialData.id}/${name.split('.').at(-1)}`
-    );
-  }, [isCreatingEntry, slug, initialData, name, isSingleType]);
+    if (componentUid) {
+      const fieldNameKeys = name.split('.');
+      const parentNameKeys = fieldNameKeys.slice(0, fieldNameKeys.length - 1);
+      const componentId = get(initialData, parentNameKeys)?.id;
 
-  // /content-manager/relations/[content-type]/[field-name]
+      // repeatable components and dz are dynamically created
+      // if no componentId exists in initialData it means that the user just created it
+      // there then are no relations to request
+      return componentId
+        ? getRequestUrl(`relations/${componentUid}/${componentId}/${fieldNameKeys.at(-1)}`)
+        : null;
+    }
+
+    return getRequestUrl(`relations/${slug}/${initialData.id}/${name.split('.').at(-1)}`);
+  }, [isCreatingEntry, slug, initialData, name, componentUid]);
+
+  // /content-manager/relations/[model]/[field-name]
   const relationSearchEndpoint = useMemo(() => {
+    if (componentUid) {
+      return getRequestUrl(`relations/${componentUid}/${name.split('.').at(-1)}`);
+    }
+
     return getRequestUrl(`relations/${slug}/${name.split('.').at(-1)}`);
-  }, [slug, name]);
+  }, [componentUid, slug, name]);
 
   return {
     queryInfos: {
