@@ -18,8 +18,6 @@ const validateFindAvailableSchema = yup
 const validateFindExistingSchema = yup
   .object()
   .shape({
-    component: yup.string(),
-    _q: yup.string(),
     page: yup.number().integer().min(1),
     pageSize: yup.number().integer().min(1).max(100),
   })

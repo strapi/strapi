@@ -101,6 +101,14 @@ module.exports = {
     },
     {
       method: 'GET',
+      path: '/relations/:model/:id/:targetField',
+      handler: 'relations.findExisting',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
       path: '/single-types/:model',
       handler: 'single-types.find',
       config: {
@@ -178,36 +186,6 @@ module.exports = {
           {
             name: 'plugin::content-manager.hasPermissions',
             config: { actions: ['plugin::content-manager.explorer.publish'] },
-          },
-        ],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/single-types/:model/:id/:targetField',
-      handler: 'relations.findExisting',
-      config: {
-        middlewares: [routing],
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'plugin::content-manager.hasPermissions',
-            config: { actions: ['plugin::content-manager.explorer.read'] },
-          },
-        ],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/collection-types/:model/:id/:targetField',
-      handler: 'relations.findExisting',
-      config: {
-        middlewares: [routing],
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'plugin::content-manager.hasPermissions',
-            config: { actions: ['plugin::content-manager.explorer.read'] },
           },
         ],
       },
