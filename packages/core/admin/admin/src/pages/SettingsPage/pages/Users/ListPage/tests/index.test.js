@@ -1263,6 +1263,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       <th
                         aria-colindex="2"
                         class="c32"
+                        tabindex="-1"
                       >
                         <div
                           class="c33"
