@@ -84,19 +84,7 @@ module.exports = {
       path: '/relations/:model/:targetField',
       handler: 'relations.findAvailable',
       config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'plugin::content-manager.hasPermissions',
-            config: {
-              actions: [
-                'plugin::content-manager.explorer.create',
-                'plugin::content-manager.explorer.update',
-              ],
-              hasAtLeastOne: true,
-            },
-          },
-        ],
+        policies: ['admin::isAuthenticatedAdmin'],
       },
     },
     {

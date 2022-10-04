@@ -26,57 +26,52 @@ module.exports = {
 
     // idsToOmit: used to exclude relations that the front already added but that were not saved yet
     // idsToInclude: used to include relations that the front removed but not saved yes
-    const { component, entityId, idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
+    const { entityId, idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
 
-    const sourceModelUid = component || model;
-
-    const sourceModel = strapi.getModel(sourceModelUid);
-    if (!sourceModel) {
+    const modelSchema = strapi.getModel(model);
+    if (!modelSchema) {
       return ctx.badRequest("The model doesn't exist");
     }
 
-    const permissionChecker = getService('permission-checker').create({
-      userAbility,
-      model,
-    });
-
-    if (permissionChecker.cannot.read()) {
-      return ctx.forbidden();
-    }
-
-    const attribute = sourceModel.attributes[targetField];
+    const attribute = modelSchema.attributes[targetField];
     if (!attribute || attribute.type !== 'relation') {
       return ctx.badRequest("This relational field doesn't exist");
     }
 
-    // TODO: find a way to check field permission for component
-    if (!component && permissionChecker.cannot.read(null, targetField)) {
-      return ctx.forbidden();
-    }
+    const isComponent = modelSchema.modelType === 'component';
 
-    if (entityId) {
-      const entityManager = getService('entity-manager');
+    // RBAC checks when it's a content-type
+    // TODO: do RBAC check for components too
+    if (!isComponent) {
+      const permissionChecker = getService('permission-checker').create({
+        userAbility,
+        model,
+      });
 
-      const entity = await entityManager.findOneWithCreatorRoles(entityId, model);
-
-      if (!entity) {
-        return ctx.notFound();
-      }
-
-      if (!component && permissionChecker.cannot.read(entity, targetField)) {
+      if (permissionChecker.cannot.read(null, targetField)) {
         return ctx.forbidden();
       }
-      // TODO: find a way to check field permission for component
-      if (component && permissionChecker.cannot.read(entity)) {
-        return ctx.forbidden();
+
+      if (entityId) {
+        const entityManager = getService('entity-manager');
+
+        const entity = await entityManager.findOneWithCreatorRoles(entityId, model);
+
+        if (!entity) {
+          return ctx.notFound();
+        }
+
+        if (permissionChecker.cannot.read(entity, targetField)) {
+          return ctx.forbidden();
+        }
       }
     }
 
     const targetedModel = strapi.getModel(attribute.target);
 
-    const modelConfig = component
-      ? await getService('components').findConfiguration(sourceModel)
-      : await getService('content-types').findConfiguration(sourceModel);
+    const modelConfig = isComponent
+      ? await getService('components').findConfiguration(modelSchema)
+      : await getService('content-types').findConfiguration(modelSchema);
     const mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
 
     const fieldsToSelect = ['id', mainField];
@@ -101,7 +96,7 @@ module.exports = {
     }
 
     if (entityId) {
-      const subQuery = strapi.db.queryBuilder(sourceModel.uid);
+      const subQuery = strapi.db.queryBuilder(modelSchema.uid);
 
       const alias = subQuery.getAlias();
 
@@ -152,10 +147,6 @@ module.exports = {
         userAbility,
         model,
       });
-
-      if (permissionChecker.cannot.read()) {
-        return ctx.forbidden();
-      }
 
       if (permissionChecker.cannot.read(null, targetField)) {
         return ctx.forbidden();
