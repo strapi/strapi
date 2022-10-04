@@ -734,7 +734,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                       <th
                         aria-colindex="1"
                         class="c21"
-                        tabindex="0"
                       >
                         <div
                           class="c22"
@@ -744,7 +743,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                               aria-labelledby="tooltip-1"
                               class="c23"
                               label="Name"
-                              tabindex="-1"
+                              tabindex="0"
                             >
                               Name
                             </span>
@@ -757,7 +756,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                                 aria-disabled="false"
                                 aria-labelledby="tooltip-1"
                                 class="c25 c26"
-                                tabindex="-1"
+                                tabindex="0"
                                 type="button"
                               >
                                 <svg
@@ -920,7 +919,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                       <td
                         aria-colindex="5"
                         class="c21"
-                        tabindex="-1"
                       >
                         <div
                           class="c34"
