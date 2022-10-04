@@ -108,7 +108,7 @@ const fixtures = {
 };
 
 const getUID = (modelName) => `api::${modelName}.${modelName}`;
-const getCMPrefixUrl = (modelName) => `/content-manager/collection-types/${getUID(modelName)}`;
+const getCMPrefixUrl = (modelName) => `/content-manager/relations/${getUID(modelName)}`;
 
 describe('x-to-many RF Preview', () => {
   const cmProductUrl = getCMPrefixUrl(productModel.singularName);

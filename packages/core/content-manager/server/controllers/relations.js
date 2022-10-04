@@ -137,6 +137,11 @@ module.exports = {
       return ctx.badRequest("The model doesn't exist");
     }
 
+    const attribute = modelSchema.attributes[targetField];
+    if (!attribute || attribute.type !== 'relation') {
+      return ctx.badRequest("This relational field doesn't exist");
+    }
+
     const isComponent = modelSchema.modelType === 'component';
 
     // RBAC checks when it's a content-type
@@ -165,11 +170,6 @@ module.exports = {
       if (permissionChecker.cannot.read(entity, targetField)) {
         return ctx.forbidden();
       }
-    }
-
-    const attribute = modelSchema.attributes[targetField];
-    if (!attribute || attribute.type !== 'relation') {
-      return ctx.badRequest("This relational field doesn't exist");
     }
 
     const targetedModel = strapi.getModel(attribute.target);

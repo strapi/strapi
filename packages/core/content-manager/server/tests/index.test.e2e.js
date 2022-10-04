@@ -20,7 +20,7 @@ let rq;
 const getRelations = async (modelName, field, id) => {
   const res = await rq({
     method: 'GET',
-    url: `/content-manager/collection-types/api::${modelName}.${modelName}/${id}/${field}`,
+    url: `/content-manager/relations/api::${modelName}.${modelName}/${id}/${field}`,
   });
   return res.body.results || res.body;
 };
@@ -683,7 +683,7 @@ describe('Relations', () => {
 
     test('Get article1 with cat3', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${data.articles[0].id}/category`,
+        url: `/content-manager/relations/api::article.article/${data.articles[0].id}/category`,
         method: 'GET',
       });
 
@@ -695,7 +695,7 @@ describe('Relations', () => {
 
     test('Get article2 with cat2', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${data.articles[1].id}/category`,
+        url: `/content-manager/relations/api::article.article/${data.articles[1].id}/category`,
         method: 'GET',
       });
 
@@ -707,7 +707,7 @@ describe('Relations', () => {
 
     test('Get cat1 without relations', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}/articles`,
+        url: `/content-manager/relations/api::category.category/${data.categories[0].id}/articles`,
         method: 'GET',
       });
 
@@ -724,7 +724,7 @@ describe('Relations', () => {
 
     test('Get cat2 with article2', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[1].id}/articles`,
+        url: `/content-manager/relations/api::category.category/${data.categories[1].id}/articles`,
         method: 'GET',
       });
 
@@ -736,7 +736,7 @@ describe('Relations', () => {
 
     test('Get cat3 with article1', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[2].id}/articles`,
+        url: `/content-manager/relations/api::category.category/${data.categories[2].id}/articles`,
         method: 'GET',
       });
 

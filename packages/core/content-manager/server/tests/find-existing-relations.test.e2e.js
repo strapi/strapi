@@ -184,7 +184,7 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
       test('Can retrieve the relation(s) for an entity that have some relations', async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].id}/${fieldName}`,
+          url: `/content-manager/relations/api::shop.shop/${data.shops[0].id}/${fieldName}`,
         });
 
         expect(res.status).toBe(200);
@@ -214,7 +214,7 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
       test("Can retrieve the relation(s) for an entity that don't have relations yet", async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/collection-types/api::shop.shop/${data.shops[1].id}/${fieldName}`,
+          url: `/content-manager/relations/api::shop.shop/${data.shops[1].id}/${fieldName}`,
         });
 
         expect(res.status).toBe(200);
@@ -225,7 +225,7 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
         test("Can search ''", async () => {
           const res = await rq({
             method: 'GET',
-            url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].id}/${fieldName}`,
+            url: `/content-manager/relations/api::shop.shop/${data.shops[0].id}/${fieldName}`,
             qs: {
               _q: '',
             },
@@ -255,10 +255,7 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
       test('Can retrieve the relation(s)', async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].myCompo.id}/${fieldName}`,
-          qs: {
-            component: 'default.compo',
-          },
+          url: `/content-manager/relations/default.compo/${data.shops[0].myCompo.id}/${fieldName}`,
         });
 
         expect(res.status).toBe(200);
