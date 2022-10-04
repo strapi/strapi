@@ -8,6 +8,7 @@ import {
   screen,
   getByText,
   queryByText,
+  getByRole,
 } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -35,6 +36,7 @@ jest.mock('@strapi/helper-plugin', () => ({
       '@strapi/plugin-documentation': '4.2.0',
       '@strapi/provider-upload-cloudinary': '4.2.0',
     },
+    strapiVersion: '4.1.0',
     useYarn: true,
   })),
 }));
@@ -215,7 +217,7 @@ describe('Marketplace page', () => {
     expect(pluginCardText).toEqual(null);
   });
 
-  it('shows the installed text for installed plugins', async () => {
+  it('shows the installed text for installed plugins', () => {
     render(App);
     const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
     fireEvent.click(pluginsTab);
@@ -235,7 +237,7 @@ describe('Marketplace page', () => {
     expect(notInstalledText).toBeVisible();
   });
 
-  it('shows the installed text for installed providers', async () => {
+  it('shows the installed text for installed providers', () => {
     // Open providers tab
     render(App);
     const providersTab = screen.getByRole('tab', { name: /providers/i });
@@ -254,5 +256,41 @@ describe('Marketplace page', () => {
       .find((div) => div.innerHTML.includes('Rackspace'));
     const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
     expect(notInstalledText).toBeVisible();
+  });
+
+  it('disables the button and shows compatibility tooltip message when version provided', async () => {
+    const { getByTestId } = render(App);
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Transformer'));
+    const button = getByRole(alreadyInstalledCard, 'button', { name: /copy install command/i });
+    const tooltip = getByTestId(`tooltip-Transformer`);
+    fireEvent.mouseOver(button);
+    await waitFor(() => {
+      expect(tooltip).toBeVisible();
+    });
+    expect(button).toBeDisabled();
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent(
+      'Update your Strapi version: "4.1.0" to satisfy the compatible range: "4.0.7"'
+    );
+  });
+
+  it('shows compatibility tooltip message when no version provided', async () => {
+    const { getByTestId } = render(App);
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Config Sync'));
+    const button = getByRole(alreadyInstalledCard, 'button', { name: /copy install command/i });
+    const tooltip = getByTestId(`tooltip-Config Sync`);
+    fireEvent.mouseOver(button);
+    await waitFor(() => {
+      expect(tooltip).toBeVisible();
+    });
+    expect(button).not.toBeDisabled();
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent(
+      'Unable to verify compatibility with your Strapi version: "4.1.0"'
+    );
   });
 });
