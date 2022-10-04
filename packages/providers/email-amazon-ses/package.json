@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-amazon-ses",
-  "version": "4.4.0",
+  "version": "4.4.1",
   "description": "Amazon SES provider for strapi email",
   "keywords": [
     "email",
@@ -36,7 +36,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@strapi/utils": "4.4.0",
+    "@strapi/utils": "4.4.1",
     "node-ses": "^3.0.3"
   },
   "engines": {
