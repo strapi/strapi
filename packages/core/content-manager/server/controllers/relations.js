@@ -2,8 +2,8 @@
 
 const { prop, isEmpty } = require('lodash/fp');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
+const { isAnyToMany } = require('@strapi/utils').relations;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
-const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
 
 const { getService } = require('../utils');
 const { validateFindAvailable, validateFindExisting } = require('./validation/relations');
@@ -24,6 +24,8 @@ module.exports = {
 
     await validateFindAvailable(ctx.request.query);
 
+    // idsToOmit: used to exclude relations that the front already added but that were not saved yet
+    // idsToInclude: used to include relations that the front removed but not saved yes
     const { component, entityId, idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
 
     const sourceModelUid = component || model;
@@ -130,7 +132,7 @@ module.exports = {
 
     await validateFindExisting(ctx.request.query);
 
-    const { component, idsToOmit, _q, ...query } = ctx.request.query;
+    const { component, ...query } = ctx.request.query;
 
     const sourceModelUid = component || model;
 
@@ -186,39 +188,31 @@ module.exports = {
     }
 
     const queryParams = {
-      sort: mainField,
-      ...query,
-      fields: fieldsToSelect, // cannot select other fields as the user may not have the permissions
-      filters: {}, // cannot filter for RBAC reasons
+      fields: fieldsToSelect,
     };
 
-    if (!isEmpty(idsToOmit)) {
-      addFiltersClause(queryParams, { id: { $notIn: idsToOmit } });
-    }
+    if (isAnyToMany(attribute)) {
+      const res = await strapi.entityService.loadPages(sourceModelUid, { id }, targetField, {
+        ...queryParams,
+        page: query.page,
+        pageSize: query.pageSize,
+        ordering: 'desc',
+      });
 
-    // searching should be allowed only on mainField for permission reasons
-    if (_q) {
-      addFiltersClause(queryParams, { [mainField]: { $containsi: _q } });
-    }
-
-    const subQuery = strapi.db.queryBuilder(sourceModel.uid);
-
-    const alias = subQuery.getAlias();
-
-    const knexSubQuery = subQuery
-      .where({ id, [`${alias}.id`]: { $notNull: true } })
-      .join({ alias, targetField })
-      .select(`${alias}.id`)
-      .getKnexQuery();
-
-    addFiltersClause(queryParams, { id: { $in: knexSubQuery } });
-
-    if (MANY_RELATIONS.includes(attribute.relation)) {
-      ctx.body = await strapi.entityService.findPage(targetedModel.uid, queryParams);
+      ctx.body = res;
     } else {
-      const results = await strapi.entityService.findMany(targetedModel.uid, queryParams);
+      const result = await strapi.entityService.load(
+        sourceModelUid,
+        { id },
+        targetField,
+        queryParams
+      );
+      // const result = await strapi.db.query(sourceModelUid).load({ id }, targetField, queryParams);
       // TODO: Temporary fix (use data instead)
-      ctx.body = { results, pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 } };
+      ctx.body = {
+        results: result ? [result] : [],
+        pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 },
+      };
     }
   },
 };
