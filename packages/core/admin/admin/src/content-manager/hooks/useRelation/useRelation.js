@@ -44,6 +44,9 @@ export const useRelation = (cacheKey, { relation, search }) => {
       // eslint-disable-next-line consistent-return
       return lastPage.pagination.page + 1;
     },
+    select: (data) => ({
+      pages: data.pages.map((page) => ({ ...page, results: page.results.slice().reverse() })),
+    }),
   });
 
   const searchRes = useInfiniteQuery(

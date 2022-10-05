@@ -2,7 +2,7 @@ import { getRelationLink } from './getRelationLink';
 
 import { PUBLICATION_STATES } from '../constants';
 
-const normalizeRelation = (relation, { shouldAddLink, mainFieldName, targetModel }) => {
+export const normalizeRelation = (relation, { shouldAddLink, mainFieldName, targetModel }) => {
   const nextRelation = { ...relation };
 
   if (shouldAddLink) {
@@ -32,25 +32,14 @@ const normalizeRelation = (relation, { shouldAddLink, mainFieldName, targetModel
 
 export const normalizeRelations = (
   relations,
-  { modifiedData = {}, shouldAddLink = false, mainFieldName, targetModel, isSearch = false }
+  { modifiedData = {}, shouldAddLink = false, mainFieldName, targetModel }
 ) => {
-  // To display oldest to newest relations we need to reverse each elements in array of results
-  // and reverse each arrays itself
-  const existingRelationsReversed = Array.isArray(relations?.data?.pages)
-    ? relations?.data?.pages
-        .map((relation) => ({
-          ...relation,
-          results: relation.results.slice().reverse(),
-        }))
-        .reverse()
-    : [];
-
   return {
     ...relations,
     data: {
       pages:
         [
-          ...(!isSearch ? existingRelationsReversed : relations?.data?.pages ?? []),
+          ...(relations?.data?.pages.reverse() ?? []),
           ...(modifiedData?.connect ? [{ results: modifiedData.connect }] : []),
         ]
           ?.map((page) =>
@@ -63,7 +52,6 @@ export const normalizeRelations = (
               )
               .map((relation) =>
                 normalizeRelation(relation, {
-                  modifiedData,
                   shouldAddLink,
                   mainFieldName,
                   targetModel,
