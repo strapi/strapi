@@ -23,16 +23,16 @@ module.exports = [
     method: 'POST',
     path: '/register-admin',
     handler: 'authentication.registerAdmin',
-    config: {
-      auth: false,
-      middlewares: ['admin::rateLimit'],
-    },
+    config: { auth: false },
   },
   {
     method: 'GET',
     path: '/registration-info',
     handler: 'authentication.registrationInfo',
-    config: { auth: false },
+    config: {
+      auth: false,
+      middlewares: ['admin::rateLimit'],
+    },
   },
   {
     method: 'POST',
