@@ -68,7 +68,7 @@ class RateLimitError extends ApplicationError {
     super(message, details);
     this.name = 'RateLimitError';
     this.message = message || 'Too many requests, please try again later.';
-    this.status = 429;
+    this.details = details || {};
   }
 }
 

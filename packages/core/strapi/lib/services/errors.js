@@ -1,7 +1,7 @@
 'use strict';
 
 const createError = require('http-errors');
-const { NotFoundError, UnauthorizedError, ForbiddenError, PayloadTooLargeError } =
+const { NotFoundError, UnauthorizedError, ForbiddenError, PayloadTooLargeError, PolicyError } =
   require('@strapi/utils').errors;
 
 const mapErrorsAndStatus = [
@@ -20,6 +20,10 @@ const mapErrorsAndStatus = [
   {
     classError: PayloadTooLargeError,
     status: 413,
+  },
+  {
+    classError: PolicyError,
+    status: 429,
   },
 ];
 
