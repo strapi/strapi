@@ -44,5 +44,6 @@
     "description": "Configure your application to send emails.",
     "required": true,
     "kind": "plugin"
-  }
+  },
+  "gitHead": "f99314ead7f0fdf82b921b9d8f0282a91e952ca8"
 }
