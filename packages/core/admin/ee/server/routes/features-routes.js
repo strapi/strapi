@@ -12,13 +12,19 @@ module.exports = {
       method: 'GET',
       path: '/connect/:provider',
       handler: 'authentication.providerLogin',
-      config: { auth: false },
+      config: {
+        auth: false,
+        middlewares: ['admin::rateLimit'],
+      },
     },
     {
       method: 'POST',
       path: '/connect/:provider',
       handler: 'authentication.providerLogin',
-      config: { auth: false },
+      config: {
+        auth: false,
+        middlewares: ['admin::rateLimit'],
+      },
     },
     {
       method: 'GET',

@@ -55,19 +55,28 @@ class ForbiddenError extends ApplicationError {
   }
 }
 
-class PayloadTooLargeError extends ApplicationError {
-  constructor(message, details) {
-    super(message, details);
-    this.name = 'PayloadTooLargeError';
-    this.message = message || 'Entity too large';
-  }
-}
-
 class UnauthorizedError extends ApplicationError {
   constructor(message, details) {
     super(message, details);
     this.name = 'UnauthorizedError';
     this.message = message || 'Unauthorized';
+  }
+}
+
+class RateLimitError extends ApplicationError {
+  constructor(message, details) {
+    super(message, details);
+    this.name = 'RateLimitError';
+    this.message = message || 'Too many requests, please try again later.';
+    this.status = 429;
+  }
+}
+
+class PayloadTooLargeError extends ApplicationError {
+  constructor(message, details) {
+    super(message, details);
+    this.name = 'PayloadTooLargeError';
+    this.message = message || 'Entity too large';
   }
 }
 
@@ -88,7 +97,8 @@ module.exports = {
   PaginationError,
   NotFoundError,
   ForbiddenError,
-  PayloadTooLargeError,
   UnauthorizedError,
+  RateLimitError,
+  PayloadTooLargeError,
   PolicyError,
 };
