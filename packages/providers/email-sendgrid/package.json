@@ -42,6 +42,5 @@
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
-  },
-  "gitHead": "f99314ead7f0fdf82b921b9d8f0282a91e952ca8"
+  }
 }
