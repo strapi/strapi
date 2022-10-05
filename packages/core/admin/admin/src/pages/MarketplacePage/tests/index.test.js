@@ -271,9 +271,7 @@ describe('Marketplace page', () => {
     });
     expect(button).toBeDisabled();
     expect(tooltip).toBeInTheDocument();
-    expect(tooltip).toHaveTextContent(
-      'Update your Strapi version: "4.1.0" to satisfy the compatible range: "4.0.7"'
-    );
+    expect(tooltip).toHaveTextContent('Update your Strapi version: "4.1.0" to: "4.0.7"');
   });
 
   it('shows compatibility tooltip message when no version provided', async () => {

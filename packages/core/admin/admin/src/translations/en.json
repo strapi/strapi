@@ -270,7 +270,7 @@
   "admin.pages.MarketPlacePage.plugin.installed": "Installed",
   "admin.pages.MarketPlacePage.plugin.tooltip.madeByStrapi": "Made by Strapi",
   "admin.pages.MarketPlacePage.plugin.tooltip.verified": "Plugin verified by Strapi",
-  "admin.pages.MarketPlacePage.plugin.version": "Update your Strapi version: \"{strapiAppVersion}\" to satisfy the compatible range: \"{versionRange}\"",
+  "admin.pages.MarketPlacePage.plugin.version": "Update your Strapi version: \"{strapiAppVersion}\" to: \"{versionRange}\"",
   "admin.pages.MarketPlacePage.plugin.version.null": "Unable to verify compatibility with your Strapi version: \"{strapiAppVersion}\"",
   "admin.pages.MarketPlacePage.providers": "Providers",
   "admin.pages.MarketPlacePage.search.clear": "Clear the search",

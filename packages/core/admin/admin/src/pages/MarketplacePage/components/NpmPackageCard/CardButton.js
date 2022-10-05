@@ -62,7 +62,7 @@ const CardButton = ({ strapiPeerDepVersion, strapiAppVersion, handleCopy, plugin
             {
               id: 'admin.pages.MarketPlacePage.plugin.version',
               defaultMessage:
-                'Update your Strapi version: "{strapiAppVersion}" to satisfy the compatible range: "{versionRange}"',
+                'Update your Strapi version: "{strapiAppVersion}" to: "{versionRange}"',
             },
             {
               strapiAppVersion,
