@@ -25,7 +25,7 @@ module.exports = ({ strapi }) => ({
    */
   async findPublicPermissions() {
     return strapi.entityService.findMany('plugin::users-permissions.permission', {
-      where: PUBLIC_ROLE_FILTER,
+      filters: PUBLIC_ROLE_FILTER,
     });
   },
 

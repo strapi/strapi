@@ -678,7 +678,6 @@ describe('API Token', () => {
         select: expect.arrayContaining([expect.any(String)]),
         where: { id },
         data: attributes,
-        populate: ['permissions'],
       });
       expect(res).toEqual(attributes);
     });
@@ -799,7 +798,6 @@ describe('API Token', () => {
       select: expect.arrayContaining([expect.any(String)]),
       where: { id },
       data: omit(['permissions'], updatedAttributes),
-      populate: expect.anything(), // it doesn't matter how this is used
     });
 
     expect(res).toEqual(updatedAttributes);
@@ -871,7 +869,6 @@ describe('API Token', () => {
       select: expect.arrayContaining([expect.any(String)]),
       where: { id },
       data: omit(['permissions'], updatedAttributes),
-      populate: expect.anything(), // it doesn't matter how this is used
     });
 
     expect(res).toEqual({

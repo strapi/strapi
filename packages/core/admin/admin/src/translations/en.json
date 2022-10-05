@@ -422,7 +422,7 @@
   "app.containers.Users.EditPage.roles-bloc-title": "Attributed roles",
   "app.containers.Users.ModalForm.footer.button-success": "Invite user",
   "app.links.configure-view": "Configure the view",
-  "app.page.not.found": "Oops! We can't seem to find the page you're looging for...",
+  "app.page.not.found": "Oops! We can't seem to find the page you're looking for...",
   "app.static.links.cheatsheet": "CheatSheet",
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.add-filter": "Add filter",
