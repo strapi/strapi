@@ -1,8 +1,11 @@
 'use strict';
 
 const tsUtils = require('@strapi/typescript-utils');
+const crypto = require('crypto');
 
 const validateInput = require('./utils/validate-input');
+
+const generateASecret = () => crypto.randomBytes(16).toString('base64');
 
 module.exports = (plop) => {
   // environment generator
@@ -46,6 +49,7 @@ module.exports = (plop) => {
           type: 'add',
           path: `${filePath}/{{ id }}/admin.${language}`,
           templateFile: `templates/${language}/admin.${language}.hbs`,
+          data: { generateASecret },
         },
       ];
 
