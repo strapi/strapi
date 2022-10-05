@@ -94,6 +94,11 @@ const formatAttributes = (attributes, mainDataUID) => {
       acc[name] = removeNullKeys(formattedRelationAttribute);
     }
 
+    if (currentAttribute.customField) {
+      const customFieldAttribute = { ...currentAttribute, type: 'customField' };
+      acc[name] = removeNullKeys(customFieldAttribute);
+    }
+
     return acc;
   }, {});
 };

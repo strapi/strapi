@@ -80,13 +80,13 @@ Complete installation requirements can be found in the documentation under <a hr
 - CentOS/RHEL 8
 - macOS Mojave
 - Windows 10
-- Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
+- Docker
 
 (Please note that Strapi may work on other operating systems, but these are not tested nor officially supported at this time.)
 
 **Node:**
 
-- NodeJS >= 14 <= 16
+- NodeJS >= 14 <= 18
 - NPM >= 6.x
 
 **Database:**

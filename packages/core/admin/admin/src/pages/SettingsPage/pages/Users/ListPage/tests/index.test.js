@@ -581,6 +581,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       .c44 {
         -webkit-animation: gzYjWD 1s infinite linear;
         animation: gzYjWD 1s infinite linear;
+        will-change: transform;
       }
 
       .c62 {
@@ -1262,6 +1263,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       <th
                         aria-colindex="2"
                         class="c32"
+                        tabindex="-1"
                       >
                         <div
                           class="c33"

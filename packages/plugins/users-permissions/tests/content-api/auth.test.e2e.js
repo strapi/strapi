@@ -46,6 +46,8 @@ describe('Auth API', () => {
       });
 
       expect(res.statusCode).toBe(403);
+      expect(res.body.error.name).toBe('ForbiddenError');
+      expect(res.body.error.message).toBe('Forbidden');
     });
 
     test('Fails on invalid confirmation password', async () => {
