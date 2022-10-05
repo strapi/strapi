@@ -1,11 +1,12 @@
 'use strict';
 
-const { assoc, has, prop, omit, merge } = require('lodash/fp');
+const { assoc, has, prop, omit } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const { ApplicationError } = require('@strapi/utils').errors;
+const { getDeepPopulate, getDeepPopulateDraftCount } = require('./utils/populate');
+const { sumDraftCounts } = require('./utils/draft');
 
-const { hasDraftAndPublish, isVisibleAttribute } = strapiUtils.contentTypes;
-const { isAnyToMany } = strapiUtils.relations;
+const { hasDraftAndPublish } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = strapiUtils.webhook.webhookEvents;
 
@@ -37,66 +38,6 @@ const findCreatorRoles = (entity) => {
   }
 
   return [];
-};
-
-const getDeepPopulate = (
-  uid,
-  populate,
-  { onlyMany = false, countMany = false, maxLevel = Infinity } = {},
-  level = 1
-) => {
-  if (populate) {
-    return populate;
-  }
-
-  if (level > maxLevel) {
-    return {};
-  }
-
-  const model = strapi.getModel(uid);
-
-  return Object.keys(model.attributes).reduce((populateAcc, attributeName) => {
-    const attribute = model.attributes[attributeName];
-
-    if (attribute.type === 'relation') {
-      const isManyRelation = isAnyToMany(attribute);
-      // always populate createdBy, updatedBy, localizations etc.
-      if (!isVisibleAttribute(model, attributeName)) {
-        populateAcc[attributeName] = true;
-      } else if (!onlyMany || isManyRelation) {
-        // Only populate one level of relations
-        populateAcc[attributeName] = countMany && isManyRelation ? { count: true } : true;
-      }
-    }
-
-    if (attribute.type === 'component') {
-      populateAcc[attributeName] = {
-        populate: getDeepPopulate(
-          attribute.component,
-          null,
-          { onlyMany, countMany, maxLevel },
-          level + 1
-        ),
-      };
-    }
-
-    if (attribute.type === 'media') {
-      populateAcc[attributeName] = { populate: 'folder' };
-    }
-
-    if (attribute.type === 'dynamiczone') {
-      populateAcc[attributeName] = {
-        populate: (attribute.components || []).reduce((acc, componentUID) => {
-          return merge(
-            acc,
-            getDeepPopulate(componentUID, null, { onlyMany, countMany, maxLevel }, level + 1)
-          );
-        }, {}),
-      };
-    }
-
-    return populateAcc;
-  }, {});
 };
 
 const addCreatedByRolesPopulate = (populate) => {
@@ -240,4 +181,16 @@ module.exports = ({ strapi }) => ({
 
     return strapi.entityService.update(uid, entity.id, params);
   }),
+
+  async getNumberOfDraftRelations(id, uid) {
+    const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
+
+    if (!hasRelations) {
+      return 0;
+    }
+
+    const entity = await strapi.entityService.findOne(uid, id, { populate });
+
+    return sumDraftCounts(entity, uid);
+  },
 });
