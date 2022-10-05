@@ -44,6 +44,7 @@
     "@fortawesome/free-brands-svg-icons": "^5.15.2",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@strapi/design-system": "1.2.5",
     "axios": "0.27.2",
     "date-fns": "2.29.2",
     "formik": "^2.2.6",
