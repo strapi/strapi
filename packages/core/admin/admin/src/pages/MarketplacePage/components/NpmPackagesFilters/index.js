@@ -7,7 +7,7 @@ import { Button } from '@strapi/design-system/Button';
 import Filter from '@strapi/icons/Filter';
 import FiltersPopover from './FiltersPopover';
 
-const NpmPackagesFilters = ({ possibleCollections, possibleCategories }) => {
+const NpmPackagesFilters = ({ possibleCollections, possibleCategories, npmPackageType }) => {
   const [isVisible, setIsVisible] = useState(false);
   const buttonRef = useRef();
   const { formatMessage } = useIntl();
@@ -35,6 +35,7 @@ const NpmPackagesFilters = ({ possibleCollections, possibleCategories }) => {
             setQuery={setQuery}
             possibleCollections={possibleCollections}
             possibleCategories={possibleCategories}
+            npmPackageType={npmPackageType}
           />
         )}
       </Box>
@@ -44,6 +45,7 @@ const NpmPackagesFilters = ({ possibleCollections, possibleCategories }) => {
 };
 
 NpmPackagesFilters.propTypes = {
+  npmPackageType: PropTypes.oneOf(['plugin', 'provider']).isRequired,
   possibleCollections: PropTypes.object.isRequired,
   possibleCategories: PropTypes.object.isRequired,
 };

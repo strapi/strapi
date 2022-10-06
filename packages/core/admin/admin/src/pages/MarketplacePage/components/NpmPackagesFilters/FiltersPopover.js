@@ -12,6 +12,7 @@ const FiltersPopover = ({
   onToggle,
   query,
   setQuery,
+  npmPackageType,
   possibleCategories,
   possibleCollections,
 }) => {
@@ -48,28 +49,30 @@ const FiltersPopover = ({
                 }
               />
             </Box>
-            <Box>
-              <FilterSelect
-                message={formatMessage({
-                  id: 'admin.pages.MarketPlacePage.filters.categories',
-                  defaultMessage: 'Categories',
-                })}
-                value={query?.categories || []}
-                onChange={(newCategories) => setQuery({ categories: newCategories })}
-                onClear={() => setQuery({ categories: [] }, 'remove')}
-                possibleFilters={possibleCategories}
-                customizeContent={(values) =>
-                  formatMessage(
-                    {
-                      id: 'admin.pages.MarketPlacePage.filters.categoriesSelected',
-                      defaultMessage:
-                        '{count, plural, =0 {No categories} one {# category} other {# categories}} selected',
-                    },
-                    { count: values.length }
-                  )
-                }
-              />
-            </Box>
+            {npmPackageType === 'plugin' && (
+              <Box>
+                <FilterSelect
+                  message={formatMessage({
+                    id: 'admin.pages.MarketPlacePage.filters.categories',
+                    defaultMessage: 'Categories',
+                  })}
+                  value={query?.categories || []}
+                  onChange={(newCategories) => setQuery({ categories: newCategories })}
+                  onClear={() => setQuery({ categories: [] }, 'remove')}
+                  possibleFilters={possibleCategories}
+                  customizeContent={(values) =>
+                    formatMessage(
+                      {
+                        id: 'admin.pages.MarketPlacePage.filters.categoriesSelected',
+                        defaultMessage:
+                          '{count, plural, =0 {No categories} one {# category} other {# categories}} selected',
+                      },
+                      { count: values.length }
+                    )
+                  }
+                />
+              </Box>
+            )}
           </Stack>
         </form>
       </FocusTrap>
@@ -89,6 +92,7 @@ FiltersPopover.propTypes = {
     categories: PropTypes.arrayOf(PropTypes.string),
   }),
   setQuery: PropTypes.func.isRequired,
+  npmPackageType: PropTypes.oneOf(['plugin', 'provider']).isRequired,
   possibleCollections: PropTypes.object.isRequired,
   possibleCategories: PropTypes.object.isRequired,
 };
