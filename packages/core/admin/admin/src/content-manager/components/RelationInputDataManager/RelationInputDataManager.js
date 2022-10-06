@@ -11,7 +11,7 @@ import { connect, select, normalizeRelations, normalizeSearchResults } from './u
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
 import { getTrad } from '../../utils';
 
-export const RelationInputDataManger = ({
+export const RelationInputDataManager = ({
   editable,
   description,
   intlLabel,
@@ -126,6 +126,8 @@ export const RelationInputDataManger = ({
 
   const handleOpenSearch = () => {
     searchFor('', {
+      idsToInclude:
+        !isCreatingEntry && relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
       idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
     });
   };
@@ -201,7 +203,7 @@ export const RelationInputDataManger = ({
   );
 };
 
-RelationInputDataManger.defaultProps = {
+RelationInputDataManager.defaultProps = {
   editable: true,
   description: '',
   labelAction: null,
@@ -210,7 +212,7 @@ RelationInputDataManger.defaultProps = {
   required: false,
 };
 
-RelationInputDataManger.propTypes = {
+RelationInputDataManager.propTypes = {
   editable: PropTypes.bool,
   description: PropTypes.string,
   intlLabel: PropTypes.shape({
@@ -250,6 +252,6 @@ RelationInputDataManger.propTypes = {
   }).isRequired,
 };
 
-const Memoized = memo(RelationInputDataManger);
+const Memoized = memo(RelationInputDataManager);
 
 export default connect(Memoized, select);

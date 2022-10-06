@@ -2,8 +2,8 @@
 
 const { prop, isEmpty } = require('lodash/fp');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
+const { isAnyToMany } = require('@strapi/utils').relations;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
-const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
 
 const { getService } = require('../utils');
 const { validateFindAvailable, validateFindExisting } = require('./validation/relations');
@@ -24,6 +24,8 @@ module.exports = {
 
     await validateFindAvailable(ctx.request.query);
 
+    // idsToOmit: used to exclude relations that the front already added but that were not saved yet
+    // idsToInclude: used to include relations that the front removed but not saved yes
     const { component, entityId, idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
 
     const sourceModelUid = component || model;
@@ -130,7 +132,7 @@ module.exports = {
 
     await validateFindExisting(ctx.request.query);
 
-    const { component, idsToOmit, ...query } = ctx.request.query;
+    const { component, ...query } = ctx.request.query;
 
     const sourceModelUid = component || model;
 
@@ -186,38 +188,26 @@ module.exports = {
     }
 
     const queryParams = {
-      select: fieldsToSelect,
+      fields: fieldsToSelect,
     };
 
-    if (!isEmpty(idsToOmit)) {
-      queryParams.filters = { id: { $notIn: idsToOmit } };
-    }
+    if (isAnyToMany(attribute)) {
+      const res = await strapi.entityService.loadPages(sourceModelUid, { id }, targetField, {
+        ...queryParams,
+        page: query.page,
+        pageSize: query.pageSize,
+        ordering: 'desc',
+      });
 
-    if (MANY_RELATIONS.includes(attribute.relation)) {
-      const page = Number(query.page || 1);
-      const pageSize = Number(query.pageSize || 10);
-
-      queryParams.offset = Math.max(page - 1, 0) * pageSize;
-      queryParams.limit = pageSize;
-
-      const [results, count] = await Promise.all([
-        strapi.db
-          .query(sourceModelUid)
-          .load({ id }, targetField, { ...queryParams, ordering: 'desc' }),
-        strapi.db.query(sourceModelUid).load({ id }, targetField, { ...queryParams, count: true }),
-      ]);
-
-      ctx.body = {
-        results,
-        pagination: {
-          page: Number(query.page) || 1,
-          pageSize: Number(query.pageSize) || 10,
-          pageCount: results.length,
-          total: count,
-        },
-      };
+      ctx.body = res;
     } else {
-      const result = await strapi.db.query(sourceModelUid).load({ id }, targetField, queryParams);
+      const result = await strapi.entityService.load(
+        sourceModelUid,
+        { id },
+        targetField,
+        queryParams
+      );
+      // const result = await strapi.db.query(sourceModelUid).load({ id }, targetField, queryParams);
       // TODO: Temporary fix (use data instead)
       ctx.body = {
         results: result ? [result] : [],
