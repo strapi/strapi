@@ -46,6 +46,13 @@ function useSelect({
     return allowedFields.includes(name);
   }, [isCreatingEntry, isUserAllowedToReadField, name, readActionAllowedFields]);
 
+  const fieldNameKeys = name.split('.');
+  let componentId;
+
+  if (componentUid) {
+    componentId = get(initialData, fieldNameKeys.slice(0, -1))?.id;
+  }
+
   // /content-manager/relations/[model]/[id]/[field-name]
   const relationFetchEndpoint = useMemo(() => {
     if (isCreatingEntry) {
@@ -53,9 +60,6 @@ function useSelect({
     }
 
     if (componentUid) {
-      const fieldNameKeys = name.split('.');
-      const componentId = get(initialData, fieldNameKeys.slice(0, -1))?.id;
-
       // repeatable components and dz are dynamically created
       // if no componentId exists in initialData it means that the user just created it
       // there then are no relations to request
@@ -65,7 +69,7 @@ function useSelect({
     }
 
     return getRequestUrl(`relations/${slug}/${initialData.id}/${name.split('.').at(-1)}`);
-  }, [isCreatingEntry, slug, initialData, name, componentUid]);
+  }, [isCreatingEntry, componentUid, slug, initialData.id, name, componentId, fieldNameKeys]);
 
   // /content-manager/relations/[model]/[field-name]
   const relationSearchEndpoint = useMemo(() => {
@@ -77,6 +81,7 @@ function useSelect({
   }, [componentUid, slug, name]);
 
   return {
+    componentId,
     queryInfos: {
       ...queryInfos,
       endpoints: {
