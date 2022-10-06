@@ -7,18 +7,14 @@ import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { useIntl } from 'react-intl';
 import FilterSelect from './FilterSelect';
 
-const possibleFilters = {
-  collections: {
-    'Made by Strapi': 20,
-    Verified: 4,
-  },
-  categories: {
-    'Custom fields': 20,
-    Deployment: 4,
-  },
-};
-
-const FiltersPopover = ({ source, onToggle, query, setQuery }) => {
+const FiltersPopover = ({
+  source,
+  onToggle,
+  query,
+  setQuery,
+  possibleCategories,
+  possibleCollections,
+}) => {
   const { formatMessage } = useIntl();
 
   const handleSubmit = (e) => {
@@ -39,7 +35,7 @@ const FiltersPopover = ({ source, onToggle, query, setQuery }) => {
                 value={query?.collections || []}
                 onChange={(newCollections) => setQuery({ collections: newCollections })}
                 onClear={() => setQuery({ collections: [] }, 'remove')}
-                possibleFilters={possibleFilters.collections}
+                possibleFilters={possibleCollections}
                 customizeContent={(values) =>
                   formatMessage(
                     {
@@ -61,7 +57,7 @@ const FiltersPopover = ({ source, onToggle, query, setQuery }) => {
                 value={query?.categories || []}
                 onChange={(newCategories) => setQuery({ categories: newCategories })}
                 onClear={() => setQuery({ categories: [] }, 'remove')}
-                possibleFilters={possibleFilters.categories}
+                possibleFilters={possibleCategories}
                 customizeContent={(values) =>
                   formatMessage(
                     {
@@ -93,6 +89,8 @@ FiltersPopover.propTypes = {
     categories: PropTypes.arrayOf(PropTypes.string),
   }),
   setQuery: PropTypes.func.isRequired,
+  possibleCollections: PropTypes.object.isRequired,
+  possibleCategories: PropTypes.object.isRequired,
 };
 
 export default FiltersPopover;

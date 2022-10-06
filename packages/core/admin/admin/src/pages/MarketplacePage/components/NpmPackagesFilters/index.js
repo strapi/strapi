@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { Box } from '@strapi/design-system/Box';
@@ -6,7 +7,7 @@ import { Button } from '@strapi/design-system/Button';
 import Filter from '@strapi/icons/Filter';
 import FiltersPopover from './FiltersPopover';
 
-const NpmPackagesFilters = () => {
+const NpmPackagesFilters = ({ possibleCollections, possibleCategories }) => {
   const [isVisible, setIsVisible] = useState(false);
   const buttonRef = useRef();
   const { formatMessage } = useIntl();
@@ -32,12 +33,19 @@ const NpmPackagesFilters = () => {
             source={buttonRef}
             query={query}
             setQuery={setQuery}
+            possibleCollections={possibleCollections}
+            possibleCategories={possibleCategories}
           />
         )}
       </Box>
       {/* <FilterListURLQuery filtersSchema={displayedFilters} /> */}
     </>
   );
+};
+
+NpmPackagesFilters.propTypes = {
+  possibleCollections: PropTypes.object.isRequired,
+  possibleCategories: PropTypes.object.isRequired,
 };
 
 export default NpmPackagesFilters;

@@ -236,22 +236,28 @@ const MarketPlacePage = () => {
                 </Tab>
               </Tabs>
             </Box>
-            <Box paddingBottom={4}>
-              <NpmPackagesFilters />
-            </Box>
             <TabPanels>
               {/* Plugins panel */}
               <TabPanel>
                 {searchQuery.length > 0 && !pluginSearchResults.length ? (
                   <EmptyNpmPackageSearch content={emptySearchMessage} />
                 ) : (
-                  <NpmPackagesGrid
-                    npmPackages={pluginSearchResults}
-                    installedPackageNames={installedPackageNames}
-                    useYarn={useYarn}
-                    isInDevelopmentMode={isInDevelopmentMode}
-                    npmPackageType="plugin"
-                  />
+                  <>
+                    <Box paddingBottom={4}>
+                      <NpmPackagesFilters
+                        possibleCollections={marketplacePluginsResponse.meta.collections}
+                        possibleCategories={marketplacePluginsResponse.meta.categories}
+                      />
+                    </Box>
+
+                    <NpmPackagesGrid
+                      npmPackages={pluginSearchResults}
+                      installedPackageNames={installedPackageNames}
+                      useYarn={useYarn}
+                      isInDevelopmentMode={isInDevelopmentMode}
+                      npmPackageType="plugin"
+                    />
+                  </>
                 )}
               </TabPanel>
               {/* Providers panel */}
@@ -259,13 +265,21 @@ const MarketPlacePage = () => {
                 {searchQuery.length > 0 && !providerSearchResults.length ? (
                   <EmptyNpmPackageSearch content={emptySearchMessage} />
                 ) : (
-                  <NpmPackagesGrid
-                    npmPackages={providerSearchResults}
-                    installedPackageNames={installedPackageNames}
-                    useYarn={useYarn}
-                    isInDevelopmentMode={isInDevelopmentMode}
-                    npmPackageType="provider"
-                  />
+                  <>
+                    <Box paddingBottom={4}>
+                      <NpmPackagesFilters
+                        possibleCollections={marketplaceProvidersResponse.meta.collections}
+                      />
+                    </Box>
+
+                    <NpmPackagesGrid
+                      npmPackages={providerSearchResults}
+                      installedPackageNames={installedPackageNames}
+                      useYarn={useYarn}
+                      isInDevelopmentMode={isInDevelopmentMode}
+                      npmPackageType="provider"
+                    />
+                  </>
                 )}
               </TabPanel>
             </TabPanels>
