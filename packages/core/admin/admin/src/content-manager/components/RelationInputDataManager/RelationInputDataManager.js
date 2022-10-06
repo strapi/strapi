@@ -3,7 +3,7 @@ import React, { memo, useEffect, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 
-import { useCMEditViewDataManager, NotAllowedInput, useQueryParams } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
 import { RelationInput } from '../RelationInput';
 import { useRelation } from '../../hooks/useRelation';
@@ -31,15 +31,12 @@ export const RelationInputDataManager = ({
   const { formatMessage } = useIntl();
   const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
-  const [{ query }] = useQueryParams();
-
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
       enabled: get(initialData, name)?.count !== 0 && !!endpoints.relation,
       endpoint: endpoints.relation,
       pageParams: {
         ...defaultParams,
-        locale: query?.plugins?.i18n?.locale,
         pageSize: RELATIONS_TO_DISPLAY,
       },
     },
@@ -49,7 +46,6 @@ export const RelationInputDataManager = ({
       pageParams: {
         ...defaultParams,
         entityId: isCreatingEntry ? undefined : initialData.id,
-        locale: query?.plugins?.i18n?.locale,
         pageSize: SEARCH_RESULTS_TO_DISPLAY,
       },
     },
@@ -126,8 +122,7 @@ export const RelationInputDataManager = ({
 
   const handleOpenSearch = () => {
     searchFor('', {
-      idsToInclude:
-        !isCreatingEntry && relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
+      idsToInclude: relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
       idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
     });
   };
