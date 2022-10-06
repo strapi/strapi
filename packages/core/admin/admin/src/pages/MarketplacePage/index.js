@@ -51,10 +51,10 @@ const MarketPlacePage = () => {
   const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
-  const [npmPackageType, setNpmPackageType] = useState('plugin');
   const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
   const isOnline = useNavigatorOnLine();
   const [{ query }, setQuery] = useQueryParams();
+  const npmPackageType = query?.npmPackageType || 'plugin';
 
   useFocusWhenNavigate();
 
@@ -173,7 +173,13 @@ const MarketPlacePage = () => {
 
   const handleTabChange = (selected) => {
     const packageType = selected === 0 ? 'plugin' : 'provider';
-    setNpmPackageType(packageType);
+    setQuery({
+      // Save new tab in the query params
+      npmPackageType: packageType,
+      // Clear filters
+      collections: [],
+      categories: [],
+    });
   };
 
   // Check if plugins and providers are installed already
@@ -218,6 +224,7 @@ const MarketPlacePage = () => {
             })}
             id="tabs"
             variant="simple"
+            initialSelectedTabIndex={['plugin', 'provider'].indexOf(npmPackageType)}
             onTabChange={handleTabChange}
           >
             <Box paddingBottom={4}>
