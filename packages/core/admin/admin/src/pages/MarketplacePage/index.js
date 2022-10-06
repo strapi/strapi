@@ -29,6 +29,7 @@ import offlineCloud from '../../assets/images/icon_offline-cloud.svg';
 import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
 import MissingPluginBanner from './components/MissingPluginBanner';
 import NpmPackagesGrid from './components/NpmPackagesGrid';
+import NpmPackagesFilters from './components/NpmPackagesFilters';
 
 const matchSearch = (npmPackages, search) => {
   return matchSorter(npmPackages, search, {
@@ -234,6 +235,9 @@ const MarketPlacePage = () => {
                   ({providerSearchResults.length})
                 </Tab>
               </Tabs>
+            </Box>
+            <Box paddingBottom={4}>
+              <NpmPackagesFilters />
             </Box>
             <TabPanels>
               {/* Plugins panel */}
