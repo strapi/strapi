@@ -153,12 +153,12 @@ export const RelationInputDataManager = ({
       })} ${initialData[name]?.count !== undefined ? `(${initialData[name].count})` : ''}`}
       labelAction={labelAction}
       labelLoadMore={
-        // TODO: only display if there are more; derive from count
-        !isCreatingEntry &&
-        formatMessage({
-          id: getTrad('relation.loadMore'),
-          defaultMessage: 'Load More',
-        })
+        !isCreatingEntry
+          ? formatMessage({
+              id: getTrad('relation.loadMore'),
+              defaultMessage: 'Load More',
+            })
+          : null
       }
       listHeight={320}
       loadingMessage={() =>
