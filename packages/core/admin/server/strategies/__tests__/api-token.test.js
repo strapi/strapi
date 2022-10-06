@@ -32,16 +32,21 @@ describe('API Token Auth Strategy', () => {
             'api-token': {
               getBy,
               hash,
-              update,
             },
           },
+        },
+        query() {
+          return { update };
         },
       };
 
       const response = await apiTokenStrategy.authenticate(ctx);
 
       expect(getBy).toHaveBeenCalledWith({ accessKey: 'api-token_tests-hashed-access-key' });
-      expect(update).toHaveBeenCalledWith(apiToken.id, { lastUsedAt: expect.any(Date) });
+      expect(update).toHaveBeenCalledWith({
+        data: { lastUsedAt: expect.any(Date) },
+        where: { id: apiToken.id },
+      });
       expect(response).toStrictEqual({ authenticated: true, credentials: apiToken });
     });
 
