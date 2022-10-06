@@ -9,7 +9,7 @@ module.exports = () => ({
         'created_at',
         'createdat',
         'updated_at',
-        'updatedAt',
+        'updatedat',
         'created_by',
         'createdby',
         'updated_by',
