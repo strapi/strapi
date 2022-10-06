@@ -14,8 +14,8 @@ export const RelationItem = ({ children, disabled, endAction, style, ...props })
   return (
     <Box style={style} as="li">
       <Flex
-        paddingTop={3}
-        paddingBottom={3}
+        paddingTop={2}
+        paddingBottom={2}
         paddingLeft={4}
         paddingRight={4}
         hasRadius
