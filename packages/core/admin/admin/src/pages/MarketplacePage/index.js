@@ -10,6 +10,7 @@ import {
   LoadingIndicatorPage,
   useNotification,
   useAppInfos,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -53,6 +54,7 @@ const MarketPlacePage = () => {
   const [npmPackageType, setNpmPackageType] = useState('plugin');
   const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
   const isOnline = useNavigatorOnLine();
+  const [{ query }, setQuery] = useQueryParams();
 
   useFocusWhenNavigate();
 
@@ -236,7 +238,7 @@ const MarketPlacePage = () => {
                 </Tab>
               </Tabs>
             </Box>
-            <Box paddingBottom={4}>
+            <Flex paddingBottom={4} gap={2}>
               <NpmPackagesFilters
                 npmPackageType={npmPackageType}
                 possibleCollections={
@@ -245,8 +247,10 @@ const MarketPlacePage = () => {
                     : marketplaceProvidersResponse.meta.collections
                 }
                 possibleCategories={marketplacePluginsResponse.meta.categories}
+                query={query || {}}
+                setQuery={setQuery}
               />
-            </Box>
+            </Flex>
 
             <TabPanels>
               {/* Plugins panel */}

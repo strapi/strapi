@@ -80,17 +80,10 @@ const FiltersPopover = ({
   );
 };
 
-FiltersPopover.defaultProps = {
-  query: {},
-};
-
 FiltersPopover.propTypes = {
   onToggle: PropTypes.func.isRequired,
   source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
-  query: PropTypes.shape({
-    collections: PropTypes.arrayOf(PropTypes.string),
-    categories: PropTypes.arrayOf(PropTypes.string),
-  }),
+  query: PropTypes.object.isRequired,
   setQuery: PropTypes.func.isRequired,
   npmPackageType: PropTypes.oneOf(['plugin', 'provider']).isRequired,
   possibleCollections: PropTypes.object.isRequired,
