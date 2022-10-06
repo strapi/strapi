@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { get, toNumber } from 'lodash';
+import { get, toNumber, toLower } from 'lodash';
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from '../../../../utils/getTrad';
 
@@ -14,7 +14,7 @@ const alreadyUsedAttributeNames = (usedNames) => {
         return false;
       }
 
-      return !usedNames.includes(value);
+      return !usedNames.includes(toLower(value));
     },
   };
 };
@@ -40,7 +40,7 @@ const isNameAllowed = (reservedNames) => {
         return false;
       }
 
-      return !reservedNames.includes(value);
+      return !reservedNames.includes(toLower(value));
     },
   };
 };
