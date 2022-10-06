@@ -282,6 +282,8 @@
   "admin.pages.MarketPlacePage.missingPlugin.description": "Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!",
   "admin.pages.MarketPlacePage.filters.collections": "Collections",
   "admin.pages.MarketPlacePage.filters.collectionsSelected": "{count, plural, =0 {No collections} one {# collection} other {# collections}} selected",
+  "admin.pages.MarketPlacePage.filters.categories": "Categories",
+  "admin.pages.MarketPlacePage.filters.categoriesSelected": "{count, plural, =0 {No categories} one {# category} other {# categories}} selected",
   "anErrorOccurred": "Woops! Something went wrong. Please, try again.",
   "app.component.CopyToClipboard.label": "Copy to clipboard",
   "app.component.search.label": "Search for {target}",
