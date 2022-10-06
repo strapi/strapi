@@ -65,9 +65,9 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
 
 .c15 {
   background: #ffffff;
-  padding-top: 12px;
+  padding-top: 8px;
   padding-right: 16px;
-  padding-bottom: 12px;
+  padding-bottom: 8px;
   padding-left: 16px;
   border-radius: 4px;
   border-color: #dcdce4;
