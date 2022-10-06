@@ -229,7 +229,7 @@ export const EditAssetDialog = ({
                         {
                           label: formatMessage({
                             id: getTrad('modal.file-details.id'),
-                            defaultMessage: 'File ID',
+                            defaultMessage: 'Asset ID',
                           }),
                           value: asset.id,
                         },
