@@ -22,15 +22,19 @@ export const useRelation = (cacheKey, { relation, search }) => {
   };
 
   const fetchSearch = async ({ pageParam = 1 }) => {
-    const { data } = await axiosInstance.get(search.endpoint, {
-      params: {
-        ...(search.pageParams ?? {}),
-        ...searchParams,
-        page: pageParam,
-      },
-    });
+    try {
+      const { data } = await axiosInstance.get(search.endpoint, {
+        params: {
+          ...(search.pageParams ?? {}),
+          ...searchParams,
+          page: pageParam,
+        },
+      });
 
-    return data;
+      return data;
+    } catch (err) {
+      return null;
+    }
   };
 
   const relationsRes = useInfiniteQuery(['relation', cacheKey], fetchRelations, {
@@ -45,7 +49,7 @@ export const useRelation = (cacheKey, { relation, search }) => {
       return lastPage.pagination.page + 1;
     },
     select: (data) => ({
-      pages: data.pages.map((page) => ({ ...page, results: page.results.slice().reverse() })),
+      pages: data.pages.map((page) => ({ ...page, results: [...(page.results ?? [])].reverse() })),
     }),
   });
 
