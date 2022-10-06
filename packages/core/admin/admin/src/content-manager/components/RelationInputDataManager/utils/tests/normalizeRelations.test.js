@@ -27,8 +27,8 @@ const FIXTURE_RELATIONS = {
   },
 };
 
-describe('normalizeRelations', () => {
-  test('filters out deleted releations', () => {
+describe('RelationInputDataManager || normalizeRelations', () => {
+  test('filters out deleted relations', () => {
     expect(
       normalizeRelations(FIXTURE_RELATIONS, {
         modifiedData: { disconnect: [{ id: 1 }] },
@@ -137,7 +137,7 @@ describe('normalizeRelations', () => {
     });
   });
 
-  test('allows to connect new relations, eventhough pages is empty', () => {
+  test('allows to connect new relations, even though pages is empty', () => {
     expect(
       normalizeRelations(
         {
