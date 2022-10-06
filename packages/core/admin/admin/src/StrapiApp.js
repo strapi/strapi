@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { lightTheme, darkTheme } from '@strapi/design-system/themes';
+import { get } from 'lodash';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import isFunction from 'lodash/isFunction';
@@ -226,12 +227,20 @@ class StrapiApp {
       this.configurations.head.favicon = this.customConfigurations.head.favicon;
     }
 
-    if (this.customConfigurations?.theme?.light) {
-      merge(this.configurations.themes.light, this.customConfigurations.theme.light);
-    }
+    if (this.customConfigurations?.theme) {
+      const darkTheme = get(this.customConfigurations, 'theme.dark');
+      const lightTheme = get(this.customConfigurations, 'theme.light');
 
-    if (this.customConfigurations?.theme?.dark) {
-      merge(this.configurations.themes.dark, this.customConfigurations.theme.dark);
+      if (!darkTheme && !lightTheme) {
+        console.warn(
+          `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`
+        );
+        merge(this.configurations.themes.light, this.customConfigurations.theme);
+      }
+
+      if (lightTheme) merge(this.configurations.themes.light, lightTheme);
+
+      if (darkTheme) merge(this.configurations.themes.dark, darkTheme);
     }
 
     if (this.customConfigurations?.notifications?.releases !== undefined) {
