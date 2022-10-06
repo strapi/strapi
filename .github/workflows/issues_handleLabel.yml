@@ -1,0 +1,207 @@
+name: Issue Labeled
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  issues: write
+  pull-requests: write
+  actions: read
+  checks: read
+  contents: read
+  repository-projects: read
+  statuses: read
+
+jobs:
+  issue-labeled:
+    runs-on: ubuntu-latest
+    steps:
+      # Unable to Reproduce Tasks
+      - name: 'Comment: unable to reproduce'
+        if: "${{ github.event.label.name == 'status: can not reproduce' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            Thank you for reporting this bug, however we are unable to reproduce the issue you described given the information we have on hand. Can you please create a fresh project that you are able to reproduce the issue in, provide clear steps to reproduce this issue, and either upload this fresh project to a new GitHub repo or compress it into a `.zip` and upload it on this issue?
+
+            We would greatly appreciate your assistance with this, by working in a fresh project it will cut out any possible variables that might be unrelated.
+            Please note that issues labeled with `status: can not reproduce` will be closed in 14 days if there is no activity.
+
+            Thank you!
+
+      # Support team auto assign
+      - name: 'Assign: add random solution engineer to reproduction issues'
+        if: "${{ github.event.label.name == 'status: pending reproduction' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'add-assignees'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          assignees: 'derrickmehaffy, kasonde, bolg55'
+          random-to: 1
+
+      # v3 Legacy Issues
+      - name: 'Comment: unsupported v3 issues'
+        if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            Thank you for reporting this potential bug report, please keep in mind that we are no longer accepting bug reports unless they could be deemed high or critical severity or related to security in nature.
+            The recommended action we suggest for v3 users is to utilize the various migration resources to upgrade your package from Strapi v3 to Strapi v4:
+
+            - [Code Migration Guide](https://docs.strapi.io/developer-docs/latest/update-migration-guides/migration-guides/v4/code-migration.html) and/or [Codemods project](https://github.com/strapi/codemods)
+            - [Data Migration Guide](https://docs.strapi.io/developer-docs/latest/update-migration-guides/migration-guides/v4/data-migration.html) and/or [Data Migration Scripts](https://github.com/strapi/migration-scripts)
+            - [Plugin Migration Guide](https://docs.strapi.io/developer-docs/latest/update-migration-guides/migration-guides/v4/plugin-migration.html)
+
+            Please see our [Security file](https://github.com/strapi/strapi/security) for more information about supported versions.
+            For now this issue is marked as closed as we do not believe this issue is Critical/High Severity nor related to security.
+
+            Thank You
+      - name: 'Close: unsupported v3 issues'
+        if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'not_planned'
+
+      # Feature request redirections
+      - name: 'Comment: redirect feature request to canny'
+        if: "${{ github.event.label.name == 'issue: feature request' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            First thank you for reporting this feature need.
+            To manage feature requests and the Strapi roadmap, we are using Canny.
+            You will be able to access the Public Roadmap here: https://feedback.strapi.io.
+
+            In your message, please mention the URL of this thread in case some messages are posted there. But the most important is to have your feedback posted on our feedback/roadmap site.
+            The product team is reading EVERY comment, that really helps us to develop the project in the right direction. We are keeping all feature requests and project insights in one place, our feedback website.
+
+            In order to keep our GitHub issues clean and for valid bug reports this issue will be marked as closed, but please feel free to continue the discussion with other community members here.
+
+            Thank you for your insight and have a good day.
+      - name: 'Close: redirect feature request to canny'
+        if: "${{ github.event.label.name == 'issue: feature request' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'completed'
+
+      # Invalid bug report template actions
+      - name: 'Comment: invalid bug report template'
+        if: "${{ github.event.label.name == 'flag: invalid template' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            We ask that you please follow the [issue template](https://raw.githubusercontent.com/strapi/strapi/master/.github/ISSUE_TEMPLATE/BUG_REPORT.md).
+            A proper issue submission let's us better understand the origin of your bug and therefore help you. We will reopen your issue when we receive the issue following the template guidelines and properly fill out the template. You can see the template guidelines for bug reports [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
+
+            Please update the issue with the template and we can reopen this report.
+
+            Thank you.
+      - name: 'Close: invalid bug report template'
+        if: "${{ github.event.label.name == 'flag: invalid template' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'not_planned'
+
+      # Redirect questions to community sources
+      - name: 'Comment: redirect question to community'
+        if: "${{ github.event.label.name == 'flag: question' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            I see you are wanting to ask a question that is not really a bug report,
+
+            - questions should be directed to [our forum](https://forum.strapi.io) or our [Discord](https://discord.strapi.io)
+            - feature requests should be directed to our [feedback and feature request database](https://feedback.strapi.io)
+
+            Please see the following contributing guidelines for asking a question [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
+
+            Thank you.
+      - name: 'Close: redirect question to community'
+        if: "${{ github.event.label.name == 'flag: question' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'complete'
+
+      # Critical issue alerting
+      # - name: alert team to critical issue
+      #   if: "${{ github.event.label.name == 'severity: critical' }}"
+      #   uses: rtCamp/action-slack-notify@v2
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      #     SLACK_CHANNEL: crisis
+      #     SLACK_COLOR: bad
+      #     SLACK_TITLE: Issue marked as Critical!
+      #     SLACK_USERNAME: Strapi-Alerts
+      #     SLACK_FOOTER: Triggered by GitHub Actions
+
+      # Auto assign issues to projects based on source
+      - name: assign issues to Content squad project
+        uses: actions/add-to-project@v0.3.0
+        with:
+          project-url: https://github.com/orgs/strapi/projects/11
+          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
+          labeled: 'source: core:admin, source: core:content-manager, source: core:upload, source: plugin:i18n'
+          label-operator: OR
+      - name: assign issues to DevExp squad project
+        uses: actions/add-to-project@v0.3.0
+        with:
+          project-url: https://github.com/orgs/strapi/projects/13
+          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
+          labeled: 'source: core:content-type-builder, source: core:database, source: core:email, source: core:strapi, source: core:utils, source: plugin:graphql, source: plugin:users-permissions, source: typescript'
+          label-operator: OR
+      - name: assign issues to Expansions squad project
+        uses: actions/add-to-project@v0.3.0
+        with:
+          project-url: https://github.com/orgs/strapi/projects/4
+          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
+          labeled: 'source: marketplace, source: plugin:sentry, source: plugin:documentation'
+          label-operator: OR
