@@ -27,7 +27,7 @@ const FIXTURE_RELATIONS = {
   },
 };
 
-describe('RelationInputDataManager || normalizeRelations', () => {
+describe('RelationInputDataManager || normalizeSearchResults', () => {
   test('add publicationState attribute to each relation', () => {
     expect(normalizeSearchResults(FIXTURE_RELATIONS, {})).toStrictEqual({
       data: {
