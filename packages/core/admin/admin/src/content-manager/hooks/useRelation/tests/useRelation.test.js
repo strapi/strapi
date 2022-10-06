@@ -238,65 +238,63 @@ describe('useRelation', () => {
     });
   });
 
-  // TOFIX: 2 tests breaking (infinite loop & || time out depending on firing them alone or all at the same time)
+  test('fetch search next page, if there is one', async () => {
+    const { result, waitForNextUpdate } = await setup(undefined);
 
-  // test('fetch search next page, if there is one', async () => {
-  //   const { result, waitForNextUpdate } = await setup(undefined);
+    const spy = jest
+      .fn()
+      .mockResolvedValue({ data: { results: [], pagination: { page: 1, pageCount: 2 } } });
+    axiosInstance.get = spy;
 
-  //   const spy = jest
-  //     .fn()
-  //     .mockResolvedValue({ data: { results: [], pagination: { page: 1, pageCount: 2 } } });
-  //   axiosInstance.get = spy;
+    act(() => {
+      result.current.searchFor('something');
+    });
 
-  //   act(() => {
-  //     result.current.searchFor('something');
-  //   });
+    await waitForNextUpdate();
 
-  //   await waitForNextUpdate();
+    act(() => {
+      result.current.search.fetchNextPage();
+    });
 
-  //   act(() => {
-  //     result.current.search.fetchNextPage();
-  //   });
+    await waitForNextUpdate();
 
-  //   await waitForNextUpdate();
+    expect(spy).toBeCalledTimes(2);
+    expect(spy).toHaveBeenNthCalledWith(1, expect.any(String), {
+      params: {
+        _q: 'something',
+        limit: expect.any(Number),
+        page: 1,
+      },
+    });
+    expect(spy).toHaveBeenNthCalledWith(2, expect.any(String), {
+      params: {
+        _q: 'something',
+        limit: expect.any(Number),
+        page: 2,
+      },
+    });
+  });
 
-  //   expect(spy).toBeCalledTimes(2);
-  //   expect(spy).toHaveBeenNthCalledWith(1, expect.any(String), {
-  //     params: {
-  //       _q: 'something',
-  //       limit: expect.any(Number),
-  //       page: 1,
-  //     },
-  //   });
-  //   expect(spy).toHaveBeenNthCalledWith(2, expect.any(String), {
-  //     params: {
-  //       _q: 'something',
-  //       limit: expect.any(Number),
-  //       page: 2,
-  //     },
-  //   });
-  // });
+  test("does not fetch search next page, if there isn't one", async () => {
+    const { result, waitForNextUpdate } = await setup(undefined);
 
-  // test("does not fetch search next page, if there isn't one", async () => {
-  //   const { result, waitForNextUpdate } = await setup(undefined);
+    const spy = jest.fn().mockResolvedValue({
+      data: { results: [], pagination: { page: 1, pageCount: 1 } },
+    });
+    axiosInstance.get = spy;
 
-  //   const spy = jest.fn().mockResolvedValue({
-  //     data: { results: [], pagination: { page: 1, pageCount: 1 }, spy: 'hello' },
-  //   });
-  //   axiosInstance.get = spy;
+    act(() => {
+      result.current.searchFor('something');
+    });
 
-  //   act(() => {
-  //     result.current.searchFor('something');
-  //   });
+    await waitForNextUpdate();
 
-  //   await waitForNextUpdate();
+    act(() => {
+      result.current.search.fetchNextPage();
+    });
 
-  //   act(() => {
-  //     result.current.search.fetchNextPage();
-  //   });
+    await waitForNextUpdate();
 
-  //   await waitForNextUpdate();
-
-  //   expect(spy).toBeCalledTimes(1);
-  // });
+    expect(spy).toBeCalledTimes(1);
+  });
 });
