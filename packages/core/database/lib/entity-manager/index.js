@@ -211,12 +211,24 @@ const createEntityManager = (db) => {
       }
 
       const dataToInsert = processData(metadata, data, { withDefaults: true });
+      let id;
 
-      const res = await this.createQueryBuilder(uid).insert(dataToInsert).execute();
+      const trx = await strapi.db.transaction();
+      try {
+        const res = await this.createQueryBuilder(uid)
+          .insert(dataToInsert)
+          .transacting(trx)
+          .execute();
 
-      const id = res[0].id || res[0];
+        id = res[0].id || res[0];
 
-      await this.attachRelations(uid, id, data);
+        await this.attachRelations(uid, id, data, { transaction: trx });
+
+        await trx.commit();
+      } catch (e) {
+        await trx.rollback();
+        throw e;
+      }
 
       // TODO: in case there is no select or populate specified return the inserted data ?
       // TODO: do not trigger the findOne lifecycles ?
@@ -281,13 +293,25 @@ const createEntityManager = (db) => {
 
       const { id } = entity;
 
-      const dataToUpdate = processData(metadata, data);
+      const trx = await strapi.db.transaction();
+      try {
+        const dataToUpdate = processData(metadata, data);
 
-      if (!isEmpty(dataToUpdate)) {
-        await this.createQueryBuilder(uid).where({ id }).update(dataToUpdate).execute();
+        if (!isEmpty(dataToUpdate)) {
+          await this.createQueryBuilder(uid)
+            .where({ id })
+            .update(dataToUpdate)
+            .transacting(trx)
+            .execute();
+        }
+
+        await this.updateRelations(uid, id, data, { transaction: trx });
+
+        await trx.commit();
+      } catch (e) {
+        await trx.rollback();
+        throw e;
       }
-
-      await this.updateRelations(uid, id, data);
 
       // TODO: do not trigger the findOne lifecycles ?
       const result = await this.findOne(uid, {
@@ -348,9 +372,17 @@ const createEntityManager = (db) => {
 
       const { id } = entity;
 
-      await this.createQueryBuilder(uid).where({ id }).delete().execute();
+      const trx = await strapi.db.transaction();
+      try {
+        await this.createQueryBuilder(uid).where({ id }).delete().transacting(trx).execute();
 
-      await this.deleteRelations(uid, id);
+        await this.deleteRelations(uid, id, { transaction: trx });
+
+        await trx.commit();
+      } catch (e) {
+        await trx.rollback();
+        throw e;
+      }
 
       await db.lifecycles.run('afterDelete', uid, { params, result: entity }, states);
 
@@ -381,7 +413,7 @@ const createEntityManager = (db) => {
      * @param {object} data - data received for creation
      */
     // TODO: wrap Transaction
-    async attachRelations(uid, id, data) {
+    async attachRelations(uid, id, data, { transaction: trx }) {
       const { attributes } = db.metadata.get(uid);
 
       for (const attributeName of Object.keys(attributes)) {
@@ -409,6 +441,7 @@ const createEntityManager = (db) => {
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: id, [typeColumn.name]: uid })
               .where({ id: relId })
+              .transacting(trx)
               .execute();
           } else if (targetAttribute.relation === 'morphToMany') {
             const { joinTable } = targetAttribute;
@@ -432,7 +465,7 @@ const createEntityManager = (db) => {
               };
             });
 
-            await this.createQueryBuilder(joinTable.name).insert(rows).execute();
+            await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
           }
 
           continue;
@@ -464,9 +497,10 @@ const createEntityManager = (db) => {
             attributeName,
             joinTable,
             db,
+            transaction: trx,
           });
 
-          await this.createQueryBuilder(joinTable.name).insert(rows).execute();
+          await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
 
           continue;
         }
@@ -481,6 +515,7 @@ const createEntityManager = (db) => {
             await this.createQueryBuilder(uid)
               .where({ [attribute.joinColumn.name]: relIdsToAdd, id: { $ne: id } })
               .update({ [attribute.joinColumn.name]: null })
+              .transacting(trx)
               .execute();
           }
 
@@ -498,12 +533,14 @@ const createEntityManager = (db) => {
           await this.createQueryBuilder(target)
             .where({ [attribute.joinColumn.referencedColumn]: id })
             .update({ [attribute.joinColumn.referencedColumn]: null })
+            .transacting(trx)
             .execute();
 
           await this.createQueryBuilder(target)
             .update({ [attribute.joinColumn.referencedColumn]: id })
             // NOTE: works if it is an array or a single id
             .where({ id: relIdsToAdd })
+            .transacting(trx)
             .execute();
         }
 
@@ -518,7 +555,13 @@ const createEntityManager = (db) => {
           const relIdsToadd = toIds(relsToAdd);
 
           if (isBidirectional(attribute) && isOneToAny(attribute)) {
-            await deletePreviousOneToAnyRelations({ id, attribute, relIdsToadd, db });
+            await deletePreviousOneToAnyRelations({
+              id,
+              attribute,
+              relIdsToadd,
+              db,
+              transaction: trx,
+            });
           }
 
           // prepare new relations to insert
@@ -546,7 +589,8 @@ const createEntityManager = (db) => {
               .whereIn(inverseJoinColumn.name, relIdsToadd)
               .where(joinTable.on || {})
               .groupBy(inverseJoinColumn.name)
-              .from(joinTable.name);
+              .from(joinTable.name)
+              .transacting(trx);
 
             const maxMap = maxResults.reduce(
               (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
@@ -563,7 +607,7 @@ const createEntityManager = (db) => {
           }
 
           // insert new relations
-          await this.createQueryBuilder(joinTable.name).insert(insert).execute();
+          await this.createQueryBuilder(joinTable.name).insert(insert).transacting(trx).execute();
         }
       }
     },
@@ -578,7 +622,7 @@ const createEntityManager = (db) => {
      */
     // TODO: check relation exists (handled by FKs except for polymorphics)
     // TODO: wrap Transaction
-    async updateRelations(uid, id, data) {
+    async updateRelations(uid, id, data, { transaction: trx }) {
       const { attributes } = db.metadata.get(uid);
 
       for (const attributeName of Object.keys(attributes)) {
@@ -603,6 +647,7 @@ const createEntityManager = (db) => {
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: null, [typeColumn.name]: null })
               .where({ [idColumn.name]: id, [typeColumn.name]: uid })
+              .transacting(trx)
               .execute();
 
             if (!isNull(cleanRelationData.set)) {
@@ -610,6 +655,7 @@ const createEntityManager = (db) => {
               await this.createQueryBuilder(target)
                 .update({ [idColumn.name]: id, [typeColumn.name]: uid })
                 .where({ id: relId })
+                .transacting(trx)
                 .execute();
             }
           } else if (targetAttribute.relation === 'morphToMany') {
@@ -626,6 +672,7 @@ const createEntityManager = (db) => {
                 ...(joinTable.on || {}),
                 field: attributeName,
               })
+              .transacting(trx)
               .execute();
 
             if (isEmpty(cleanRelationData.set)) {
@@ -642,7 +689,7 @@ const createEntityManager = (db) => {
               field: attributeName,
             }));
 
-            await this.createQueryBuilder(joinTable.name).insert(rows).execute();
+            await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
           }
 
           continue;
@@ -665,6 +712,7 @@ const createEntityManager = (db) => {
               [joinColumn.name]: id,
               ...(joinTable.on || {}),
             })
+            .transacting(trx)
             .execute();
 
           if (isEmpty(cleanRelationData.set)) {
@@ -686,9 +734,10 @@ const createEntityManager = (db) => {
             attributeName,
             joinTable,
             db,
+            transaction: trx,
           });
 
-          await this.createQueryBuilder(joinTable.name).insert(rows).execute();
+          await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
 
           continue;
         }
@@ -707,6 +756,7 @@ const createEntityManager = (db) => {
           await this.createQueryBuilder(target)
             .where({ [attribute.joinColumn.referencedColumn]: id })
             .update({ [attribute.joinColumn.referencedColumn]: null })
+            .transacting(trx)
             .execute();
 
           if (!isNull(cleanRelationData.set)) {
@@ -714,6 +764,7 @@ const createEntityManager = (db) => {
             await this.createQueryBuilder(target)
               .where({ id: relIdsToAdd })
               .update({ [attribute.joinColumn.referencedColumn]: id })
+              .transacting(trx)
               .execute();
           }
         }
@@ -732,7 +783,7 @@ const createEntityManager = (db) => {
 
           // only delete relations
           if (isNull(cleanRelationData.set)) {
-            await deleteRelations({ id, attribute, db, relIdsToDelete: 'all' });
+            await deleteRelations({ id, attribute, db, relIdsToDelete: 'all', transaction: trx });
           } else {
             const isPartialUpdate = !has('set', cleanRelationData);
             let relIdsToaddOrMove;
@@ -747,7 +798,7 @@ const createEntityManager = (db) => {
               );
 
               if (!isEmpty(relIdsToDelete)) {
-                await deleteRelations({ id, attribute, db, relIdsToDelete });
+                await deleteRelations({ id, attribute, db, relIdsToDelete, transaction: trx });
               }
 
               if (isEmpty(cleanRelationData.connect)) {
@@ -764,6 +815,7 @@ const createEntityManager = (db) => {
                     [inverseJoinColumn.name]: { $in: relIdsToaddOrMove },
                   })
                   .where(joinTable.on || {})
+                  .transacting(trx)
                   .execute();
               }
 
@@ -783,6 +835,7 @@ const createEntityManager = (db) => {
                     .where({ [joinColumn.name]: id })
                     .where(joinTable.on || {})
                     .first()
+                    .transacting(trx)
                     .execute()
                 ).max;
 
@@ -805,7 +858,8 @@ const createEntityManager = (db) => {
                   .whereIn(inverseJoinColumn.name, nonExistingRelsIds)
                   .where(joinTable.on || {})
                   .groupBy(inverseJoinColumn.name)
-                  .from(joinTable.name);
+                  .from(joinTable.name)
+                  .transacting(trx);
 
                 const maxMap = maxResults.reduce(
                   (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
@@ -820,7 +874,8 @@ const createEntityManager = (db) => {
               // insert rows
               const query = this.createQueryBuilder(joinTable.name)
                 .insert(insert)
-                .onConflict(joinTable.pivotColumns);
+                .onConflict(joinTable.pivotColumns)
+                .transacting(trx);
 
               if (hasOrderColumn(attribute)) {
                 query.merge([orderColumnName]);
@@ -831,7 +886,7 @@ const createEntityManager = (db) => {
               await query.execute();
 
               // remove gap between orders
-              await cleanOrderColumns({ attribute, db, id });
+              await cleanOrderColumns({ attribute, db, id, transaction: trx });
             } else {
               if (isAnyToOne(attribute)) {
                 cleanRelationData.set = cleanRelationData.set.slice(-1);
@@ -844,6 +899,7 @@ const createEntityManager = (db) => {
                 db,
                 relIdsToDelete: 'all',
                 relIdsToNotDelete: relIdsToaddOrMove,
+                transaction: trx,
               });
 
               if (isEmpty(cleanRelationData.set)) {
@@ -873,6 +929,7 @@ const createEntityManager = (db) => {
                     [inverseJoinColumn.name]: { $in: relIdsToaddOrMove },
                   })
                   .where(joinTable.on || {})
+                  .transacting(trx)
                   .execute();
 
                 const nonExistingRelsIds = difference(
@@ -887,7 +944,8 @@ const createEntityManager = (db) => {
                   .whereIn(inverseJoinColumn.name, nonExistingRelsIds)
                   .where(joinTable.on || {})
                   .groupBy(inverseJoinColumn.name)
-                  .from(joinTable.name);
+                  .from(joinTable.name)
+                  .transacting(trx);
 
                 const maxMap = maxResults.reduce(
                   (acc, res) => Object.assign(acc, { [res[inverseJoinColumn.name]]: res.max }),
@@ -902,7 +960,8 @@ const createEntityManager = (db) => {
               // insert rows
               const query = this.createQueryBuilder(joinTable.name)
                 .insert(insert)
-                .onConflict(joinTable.pivotColumns);
+                .onConflict(joinTable.pivotColumns)
+                .transacting(trx);
 
               if (hasOrderColumn(attribute)) {
                 query.merge([orderColumnName]);
@@ -920,6 +979,7 @@ const createEntityManager = (db) => {
                 attribute,
                 relIdsToadd: relIdsToaddOrMove,
                 db,
+                transaction: trx,
               });
             }
 
@@ -930,6 +990,7 @@ const createEntityManager = (db) => {
                 attribute,
                 relIdToadd: relIdsToaddOrMove[0],
                 db,
+                transaction: trx,
               });
             }
           }
@@ -947,7 +1008,7 @@ const createEntityManager = (db) => {
      * @param {ID} id - entity ID
      */
     // TODO: wrap Transaction
-    async deleteRelations(uid, id) {
+    async deleteRelations(uid, id, { transaction: trx }) {
       const { attributes } = db.metadata.get(uid);
 
       for (const attributeName of Object.keys(attributes)) {
@@ -976,6 +1037,7 @@ const createEntityManager = (db) => {
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: null, [typeColumn.name]: null })
               .where({ [idColumn.name]: id, [typeColumn.name]: uid })
+              .transacting(trx)
               .execute();
           } else if (targetAttribute.relation === 'morphToMany') {
             const { joinTable } = targetAttribute;
@@ -991,6 +1053,7 @@ const createEntityManager = (db) => {
                 ...(joinTable.on || {}),
                 field: attributeName,
               })
+              .transacting(trx)
               .execute();
           }
 
@@ -1019,6 +1082,7 @@ const createEntityManager = (db) => {
               [joinColumn.name]: id,
               ...(joinTable.on || {}),
             })
+            .transacting(trx)
             .execute();
 
           continue;
@@ -1043,11 +1107,12 @@ const createEntityManager = (db) => {
           await this.createQueryBuilder(target)
             .where({ [attribute.joinColumn.referencedColumn]: id })
             .update({ [attribute.joinColumn.referencedColumn]: null })
+            .transacting(trx)
             .execute();
         }
 
         if (attribute.joinTable) {
-          await deleteRelations({ id, attribute, db, relIdsToDelete: 'all' });
+          await deleteRelations({ id, attribute, db, relIdsToDelete: 'all', transaction: trx });
         }
       }
     },
