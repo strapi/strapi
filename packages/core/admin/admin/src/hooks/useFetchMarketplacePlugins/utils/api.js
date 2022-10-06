@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const MARKETPLACE_API_URL = 'https://market-api-proxy.herokuapp.com';
+const MARKETPLACE_API_URL = 'https://market-api.strapi.io';
 
 const fetchMarketplacePlugins = async ({ sort = 'name:asc' } = null) => {
   const { data: response } = await axios.get(`${MARKETPLACE_API_URL}/plugins`, {

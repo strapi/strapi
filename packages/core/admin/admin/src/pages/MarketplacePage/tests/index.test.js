@@ -13,6 +13,8 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useTracking, useAppInfos } from '@strapi/helper-plugin';
+import { Router } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
@@ -47,12 +49,16 @@ const client = new QueryClient({
   },
 });
 
+const history = createMemoryHistory();
+
 const App = (
   <QueryClientProvider client={client}>
     <IntlProvider locale="en" messages={{}} textComponent="span">
-      <ThemeProvider theme={lightTheme}>
-        <MarketPlacePage />
-      </ThemeProvider>
+      <Router history={history}>
+        <ThemeProvider theme={lightTheme}>
+          <MarketPlacePage />
+        </ThemeProvider>
+      </Router>
     </IntlProvider>
   </QueryClientProvider>
 );
@@ -254,5 +260,11 @@ describe('Marketplace page', () => {
       .find((div) => div.innerHTML.includes('Rackspace'));
     const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
     expect(notInstalledText).toBeVisible();
+  });
+
+  it('Its showing the sort by menu and its options', async () => {
+    render(App);
+    const sortMenu = screen.getByText('Sort by');
+    expect(sortMenu).toBeVisible();
   });
 });
