@@ -304,7 +304,7 @@ const RelationInput = ({
                   style={style}
                 >
                   <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                    <Tooltip description={mainField ?? id}>
+                    <Tooltip description={mainField ?? `${id}`}>
                       {href ? (
                         <LinkEllipsis to={href} disabled={disabled}>
                           {mainField ?? id}
