@@ -38,6 +38,17 @@ const BoxEllipsis = styled(Box)`
   }
 `;
 
+const RemoveButton = styled.button`
+  svg path {
+    fill: ${({ theme }) => theme.colors.neutral500};
+  }
+
+  &:hover svg path,
+  &:focus svg path {
+    fill: ${({ theme }) => theme.colors.neutral600};
+  }
+`;
+
 const RelationInput = ({
   description,
   disabled,
@@ -281,14 +292,14 @@ const RelationInput = ({
                   disabled={disabled}
                   key={`relation-${name}-${id}`}
                   endAction={
-                    <button
+                    <RemoveButton
                       data-testid={`remove-relation-${id}`}
                       disabled={disabled}
                       type="button"
                       onClick={() => onRelationRemove(data[index])}
                     >
                       <Icon width="12px" as={Cross} />
-                    </button>
+                    </RemoveButton>
                   }
                   style={style}
                 >
