@@ -14,7 +14,7 @@ module.exports =
     return ratelimit.middleware({
       interval: { min: 5 },
       max: 5,
-      prefixKey: `${userEmail}${ctx.request.path}:${ctx.request.ip}`,
+      prefixKey: `${userEmail}:${ctx.request.path}:${ctx.request.ip}`,
       handler() {
         throw new RateLimitError();
       },
