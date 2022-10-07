@@ -543,17 +543,15 @@ const morphToOne = async (input, ctx) => {
 };
 
 //  TODO: Omit limit & offset to avoid needing a query per result to avoid making too many queries
-const pickPopulateParams = _.pick([
-  'select',
-  'count',
-  'where',
-  'populate',
-  'orderBy',
-  'limit',
-  'offset',
-  'filters',
-  'ordering',
-]);
+const pickPopulateParams = (populate) => {
+  const fieldsToPick = ['select', 'count', 'where', 'populate', 'orderBy', 'filters', 'ordering'];
+
+  if (populate.count !== true) {
+    fieldsToPick.push('limit', 'offset');
+  }
+
+  return _.pick(fieldsToPick, populate);
+};
 
 const applyPopulate = async (results, populate, ctx) => {
   const { db, uid, qb } = ctx;
