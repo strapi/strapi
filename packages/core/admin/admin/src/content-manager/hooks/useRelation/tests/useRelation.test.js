@@ -8,9 +8,15 @@ import { useRelation } from '../useRelation';
 jest.mock('../../../../core/utils', () => ({
   ...jest.requireActual('../../../../core/utils'),
   axiosInstance: {
-    get: jest
-      .fn()
-      .mockResolvedValue({ data: { values: [], pagination: { page: 1, pageCount: 10 } } }),
+    get: jest.fn().mockResolvedValue({
+      data: {
+        results: [
+          { id: 2, name: 'newest', publishedAt: null },
+          { id: 1, name: 'oldest', publishedAt: null },
+        ],
+        pagination: { page: 1, pageCount: 10 },
+      },
+    }),
   },
 }));
 
@@ -95,7 +101,7 @@ describe('useRelation', () => {
     });
   });
 
-  test('doesn not fetch relations if it was not enabled', async () => {
+  test('does not fetch relations if it was not enabled', async () => {
     await setup(undefined, { relation: { enabled: false } });
 
     expect(axiosInstance.get).not.toBeCalled();
@@ -119,7 +125,7 @@ describe('useRelation', () => {
   test('fetch relations next page, if there is one', async () => {
     axiosInstance.get = jest.fn().mockResolvedValue({
       data: {
-        values: [],
+        results: [],
         pagination: {
           page: 1,
           pageCount: 3,
@@ -155,7 +161,7 @@ describe('useRelation', () => {
   test("does not fetch relations next page, if there isn't one", async () => {
     axiosInstance.get = jest.fn().mockResolvedValue({
       data: {
-        values: [],
+        results: [],
         pagination: {
           page: 1,
           pageCount: 1,
@@ -191,7 +197,7 @@ describe('useRelation', () => {
 
     const spy = jest
       .fn()
-      .mockResolvedValue({ data: { values: [], pagination: { page: 1, pageCount: 2 } } });
+      .mockResolvedValue({ data: { results: [], pagination: { page: 1, pageCount: 2 } } });
     axiosInstance.get = spy;
 
     act(() => {
@@ -237,7 +243,7 @@ describe('useRelation', () => {
 
     const spy = jest
       .fn()
-      .mockResolvedValue({ data: { values: [], pagination: { page: 1, pageCount: 2 } } });
+      .mockResolvedValue({ data: { results: [], pagination: { page: 1, pageCount: 2 } } });
     axiosInstance.get = spy;
 
     act(() => {
@@ -269,12 +275,12 @@ describe('useRelation', () => {
     });
   });
 
-  test("doesn not fetch search next page, if there isn't one", async () => {
+  test("does not fetch search next page, if there isn't one", async () => {
     const { result, waitForNextUpdate } = await setup(undefined);
 
-    const spy = jest
-      .fn()
-      .mockResolvedValue({ data: { values: [], pagination: { page: 1, pageCount: 1 } } });
+    const spy = jest.fn().mockResolvedValue({
+      data: { results: [], pagination: { page: 1, pageCount: 1 } },
+    });
     axiosInstance.get = spy;
 
     act(() => {

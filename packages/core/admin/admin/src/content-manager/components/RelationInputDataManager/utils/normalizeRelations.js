@@ -2,7 +2,7 @@ import { getRelationLink } from './getRelationLink';
 
 import { PUBLICATION_STATES } from '../constants';
 
-const normalizeRelation = (relation, { shouldAddLink, mainFieldName, targetModel }) => {
+export const normalizeRelation = (relation, { shouldAddLink, mainFieldName, targetModel }) => {
   const nextRelation = { ...relation };
 
   if (shouldAddLink) {
@@ -22,6 +22,14 @@ const normalizeRelation = (relation, { shouldAddLink, mainFieldName, targetModel
   return nextRelation;
 };
 
+/*
+ * Applies some transformations to existing and new relations in order to display them correctly
+ * relations: raw relations data coming from useRelations
+ * shouldAddLink: comes from generateRelationQueryInfos, if true we display a link to the relation (TO FIX: explanation)
+ * mainFieldName: name of the main field inside the relation (e.g. text field), if no displayable main field exists (e.g. date field) we use the id of the entry
+ * targetModel: the model on which the relation is based on, used to create an URL link
+ */
+
 export const normalizeRelations = (
   relations,
   { modifiedData = {}, shouldAddLink = false, mainFieldName, targetModel }
@@ -31,7 +39,7 @@ export const normalizeRelations = (
     data: {
       pages:
         [
-          ...(relations?.data?.pages ?? []),
+          ...(relations?.data?.pages.reverse() ?? []),
           ...(modifiedData?.connect ? [{ results: modifiedData.connect }] : []),
         ]
           ?.map((page) =>
@@ -44,7 +52,6 @@ export const normalizeRelations = (
               )
               .map((relation) =>
                 normalizeRelation(relation, {
-                  modifiedData,
                   shouldAddLink,
                   mainFieldName,
                   targetModel,

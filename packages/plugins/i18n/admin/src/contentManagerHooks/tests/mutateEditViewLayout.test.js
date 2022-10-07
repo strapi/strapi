@@ -55,7 +55,7 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
   });
 
   describe('enhanceComponentsLayout', () => {
-    it('should not enhance the field when the type is not relation', () => {
+    it('should not enhance the field', () => {
       const components = {
         test: {
           test: true,
@@ -69,6 +69,10 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                 {
                   name: 'content',
                   fieldSchema: { type: 'string' },
+                },
+                {
+                  name: 'relation',
+                  fieldSchema: { type: 'relation' },
                 },
               ],
             ],
@@ -88,6 +92,10 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
                 {
                   name: 'content',
                   fieldSchema: { type: 'string' },
+                },
+                {
+                  name: 'relation',
+                  fieldSchema: { type: 'relation' },
                 },
               ],
             ],
@@ -268,6 +276,13 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
               type: 'uid',
             },
           },
+          {
+            name: 'relation',
+            size: 6,
+            fieldSchema: {
+              type: 'relation',
+            },
+          },
         ],
       ];
       const expected = [
@@ -315,10 +330,23 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
               />
             ),
           },
+          {
+            name: 'relation',
+            size: 6,
+            fieldSchema: {
+              type: 'relation',
+            },
+            labelAction: (
+              <LabelAction
+                title={{ id: localizedTrad, defaultMessage: localizedTradDefaultMessage }}
+                icon={<I18N aria-hidden />}
+              />
+            ),
+          },
         ],
       ];
 
-      expect(enhanceEditLayout(edit)).toEqual(expected);
+      expect(enhanceEditLayout(edit, 'en')).toEqual(expected);
     });
 
     it('should add the label icon to all fields with the not localized translation when i18n is disabled', () => {
@@ -340,6 +368,16 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
             fieldSchema: {
               pluginOptions: { i18n: { localized: false } },
               type: 'string',
+            },
+          },
+        ],
+        [
+          {
+            name: 'relation',
+            size: 6,
+            fieldSchema: {
+              pluginOptions: { i18n: { localized: false } },
+              type: 'relation',
             },
           },
         ],
@@ -377,9 +415,26 @@ describe('i18n | contentManagerHooks | mutateEditViewLayout', () => {
             ),
           },
         ],
+
+        [
+          {
+            name: 'relation',
+            size: 6,
+            fieldSchema: {
+              pluginOptions: { i18n: { localized: false } },
+              type: 'relation',
+            },
+            labelAction: (
+              <LabelAction
+                title={{ id: notLocalizedTrad, defaultMessage: notLocalizedTradDefaultMessage }}
+                icon={<StrikedWorld aria-hidden />}
+              />
+            ),
+          },
+        ],
       ];
 
-      expect(enhanceEditLayout(edit)).toEqual(expected);
+      expect(enhanceEditLayout(edit, 'en')).toEqual(expected);
     });
   });
 });
