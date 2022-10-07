@@ -1,28 +1,47 @@
 import React from 'react';
-import { SimpleMenu, MenuItem } from '@strapi/design-system/SimpleMenu';
+import { Select, Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
+import { Typography } from '@strapi/design-system/Typography';
+import PropTypes from 'prop-types';
 import { getTrad } from '../../../../content-manager/utils';
 
-const SortFilter = () => {
+const SortFilter = ({ value, onChange }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <SimpleMenu
-      variant="tertiary"
-      label={formatMessage({
-        id: getTrad('sort.label'),
-        defaultMessage: 'Sort by',
-      })}
+    <Select
+      id="marketplaceSortButton"
+      size="S"
+      value={value}
+      onChange={(sort) => onChange(sort)}
+      customizeContent={() => (
+        <Typography variant="pi" fontWeight="bold">
+          {formatMessage({
+            id: getTrad('admin.pages.MarketPlacePage.sort.sortBy'),
+            defaultMessage: 'Sort by',
+          })}
+        </Typography>
+      )}
     >
-      <MenuItem as={NavLink} to="/marketplace?sort=name:asc">
-        Alphabetical Order
-      </MenuItem>
-      <MenuItem as={NavLink} to="/marketplace?sort=submissionDate:desc">
-        Newest
-      </MenuItem>
-    </SimpleMenu>
+      <Option value="name:asc">
+        {formatMessage({
+          id: getTrad('admin.pages.MarketPlacePage.sort.alphabetical'),
+          defaultMessage: 'Alphabetical order',
+        })}
+      </Option>
+      <Option value="submissionDate:desc">
+        {formatMessage({
+          id: getTrad('admin.pages.MarketPlacePage.sort.newest'),
+          defaultMessage: 'Newest',
+        })}
+      </Option>
+    </Select>
   );
+};
+
+SortFilter.propTypes = {
+  value: PropTypes.oneOf([PropTypes.string, PropTypes.number]).isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 
 export default SortFilter;

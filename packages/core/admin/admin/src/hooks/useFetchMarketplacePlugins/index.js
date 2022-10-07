@@ -2,10 +2,10 @@ import { useQuery } from 'react-query';
 import { useNotification } from '@strapi/helper-plugin';
 import { fetchMarketplacePlugins } from './utils/api';
 
-const useFetchMarketplacePlugins = (notifyLoad, sort) => {
+const useFetchMarketplacePlugins = (notifyLoad, params) => {
   const toggleNotification = useNotification();
 
-  return useQuery(['list-marketplace-plugins', sort], () => fetchMarketplacePlugins({ sort }), {
+  return useQuery(['list-marketplace-plugins', params], () => fetchMarketplacePlugins(params), {
     onSuccess() {
       if (notifyLoad) {
         notifyLoad();

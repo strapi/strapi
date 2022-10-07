@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
 import matchSorter from 'match-sorter';
@@ -10,6 +10,7 @@ import {
   LoadingIndicatorPage,
   useNotification,
   useAppInfos,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -20,7 +21,6 @@ import { Typography } from '@strapi/design-system/Typography';
 import { Flex } from '@strapi/design-system/Flex';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 
-import { useLocation } from 'react-router-dom';
 import EmptyNpmPackageSearch from './components/EmptyNpmPackageSearch';
 import PageHeader from './components/PageHeader';
 import useFetchMarketplaceProviders from '../../hooks/useFetchMarketplaceProviders';
@@ -41,7 +41,6 @@ const matchSearch = (npmPackages, search) => {
       },
       { threshold: matchSorter.rankings.WORD_STARTS_WITH, key: 'attributes.description' },
     ],
-    sorter: (items) => items,
     baseSort: (a, b) => (a.index < b.index ? -1 : 1),
   });
 };
@@ -56,9 +55,8 @@ const MarketPlacePage = () => {
   const [npmPackageType, setNpmPackageType] = useState('plugin');
   const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
   const isOnline = useNavigatorOnLine();
-  const { search } = useLocation();
-  const params = useMemo(() => new URLSearchParams(search), [search]);
-  const sort = params.get('sort') || 'name:asc';
+  const [{ query }, setQuery] = useQueryParams();
+  const sort = query?.sort || 'name:asc';
 
   useFocusWhenNavigate();
 
@@ -79,11 +77,15 @@ const MarketPlacePage = () => {
     );
   };
 
+  const params = {
+    sort,
+  };
+
   const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
-    useFetchMarketplacePlugins(notifyMarketplaceLoad, sort);
+    useFetchMarketplacePlugins(notifyMarketplaceLoad, params);
 
   const { status: marketplaceProvidersStatus, data: marketplaceProvidersResponse } =
-    useFetchMarketplaceProviders(notifyMarketplaceLoad, sort);
+    useFetchMarketplaceProviders(notifyMarketplaceLoad, params);
 
   const isLoading = [marketplacePluginsStatus, marketplaceProvidersStatus].includes('loading');
 
@@ -242,9 +244,9 @@ const MarketPlacePage = () => {
                 </Tab>
               </Tabs>
             </Box>
-            <Box paddingBottom={4}>
-              <SortFilter />
-            </Box>
+            <Flex paddingBottom={4} gap={2}>
+              <SortFilter value={sort} onChange={(sort) => setQuery({ ...query, sort })} />
+            </Flex>
             <TabPanels>
               {/* Plugins panel */}
               <TabPanel>

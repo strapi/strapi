@@ -262,9 +262,28 @@ describe('Marketplace page', () => {
     expect(notInstalledText).toBeVisible();
   });
 
-  it('Its showing the sort by menu and its options', async () => {
+  it('Its showing the sort by menu', async () => {
     render(App);
     const sortMenu = screen.getByText('Sort by');
     expect(sortMenu).toBeVisible();
+  });
+
+  it('Sort select shows the correct options', async () => {
+    const { container } = render(App);
+    fireEvent.mouseDown(container.querySelector('#marketplaceSortButton'));
+
+    const alphabeticalOption = screen.getByText('Alphabetical order');
+    const newestOption = screen.getByText('Newest');
+
+    expect(alphabeticalOption).toBeVisible();
+    expect(newestOption).toBeVisible();
+  });
+
+  it('Click on sort by newest changes the url', async () => {
+    const { container, getByText } = render(App);
+    fireEvent.mouseDown(container.querySelector('#marketplaceSortButton'));
+    const newestOption = getByText('Newest').closest('li');
+    fireEvent.click(newestOption);
+    expect(history.location.search).toEqual('?sort=submissionDate:desc');
   });
 });
