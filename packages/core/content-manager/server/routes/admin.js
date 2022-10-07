@@ -184,7 +184,7 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/single-types/:model/:id/actions/numberOfDraftRelations',
+      path: '/single-types/:model/actions/numberOfDraftRelations',
       handler: 'single-types.getNumberOfDraftRelations',
       config: {
         middlewares: [routing],
