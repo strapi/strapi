@@ -177,7 +177,7 @@ module.exports = {
 
   async getNumberOfDraftRelations(ctx) {
     const { userAbility } = ctx.state;
-    const { model, id } = ctx.params;
+    const { model } = ctx.params;
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -186,8 +186,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await entityManager.findOneWithCreatorRolesAndCount(id, model);
-
+    const entity = await findEntity({}, model);
     if (!entity) {
       return ctx.notFound();
     }
@@ -196,6 +195,6 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    return entityManager.getNumberOfDraftRelations(id, model);
+    return entityManager.getNumberOfDraftRelations(entity.id, model);
   },
 };
