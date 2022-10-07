@@ -15,9 +15,6 @@ import {
 import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faDiscord } from '@fortawesome/free-brands-svg-icons';
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
 import { useNotifyAT } from '@strapi/design-system/LiveRegions';
@@ -33,8 +30,6 @@ import createProvidersArray from './utils/createProvidersArray';
 import { getTrad } from '../../utils';
 import pluginPermissions from '../../permissions';
 import FormModal from '../../components/FormModal';
-
-library.add(faDiscord, faEnvelope);
 
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();

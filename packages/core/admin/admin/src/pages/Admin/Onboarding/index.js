@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faQuestion, faTimes, faFile, faBook } from '@fortawesome/free-solid-svg-icons';
+import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
@@ -62,8 +61,6 @@ const StyledLink = styled.a`
     color: ${({ theme }) => theme.colors.neutral600};
   }
 `;
-
-library.add(faFile, faBook);
 
 const Onboarding = () => {
   const [isOpen, setIsOpen] = useState(false);
