@@ -19,7 +19,13 @@ const { createQueryBuilder } = require('../query');
  * @param {string} params.inverseRelIds - entity ids of the inverse side for which the current relations will be deleted
  * @param {string} params.db - database instance
  */
-const deletePreviousOneToAnyRelations = async ({ id, attribute, relIdsToadd, db }) => {
+const deletePreviousOneToAnyRelations = async ({
+  id,
+  attribute,
+  relIdsToadd,
+  db,
+  transaction: trx,
+}) => {
   if (!(isBidirectional(attribute) && isOneToAny(attribute))) {
     throw new Error(
       'deletePreviousOneToAnyRelations can only be called for bidirectional oneToAny relations'
@@ -35,9 +41,10 @@ const deletePreviousOneToAnyRelations = async ({ id, attribute, relIdsToadd, db 
       [joinColumn.name]: { $ne: id },
     })
     .where(joinTable.on || {})
+    .transacting(trx)
     .execute();
 
-  await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToadd });
+  await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToadd, transaction: trx });
 };
 
 /**
@@ -48,7 +55,13 @@ const deletePreviousOneToAnyRelations = async ({ id, attribute, relIdsToadd, db 
  * @param {string} params.relIdToadd - entity id of the new relation
  * @param {string} params.db - database instance
  */
-const deletePreviousAnyToOneRelations = async ({ id, attribute, relIdToadd, db }) => {
+const deletePreviousAnyToOneRelations = async ({
+  id,
+  attribute,
+  relIdToadd,
+  db,
+  transaction: trx,
+}) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
@@ -67,6 +80,7 @@ const deletePreviousAnyToOneRelations = async ({ id, attribute, relIdToadd, db }
         [inverseJoinColumn.name]: { $ne: relIdToadd },
       })
       .where(joinTable.on || {})
+      .transacting(trx)
       .execute();
 
     const relIdsToDelete = map(inverseJoinColumn.name, relsToDelete);
@@ -78,9 +92,10 @@ const deletePreviousAnyToOneRelations = async ({ id, attribute, relIdToadd, db }
         [inverseJoinColumn.name]: { $in: relIdsToDelete },
       })
       .where(joinTable.on || {})
+      .transacting(trx)
       .execute();
 
-    await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToDelete });
+    await cleanOrderColumns({ attribute, db, inverseRelIds: relIdsToDelete, transaction: trx });
 
     // handling oneToOne
   } else {
@@ -91,6 +106,7 @@ const deletePreviousAnyToOneRelations = async ({ id, attribute, relIdToadd, db }
         [inverseJoinColumn.name]: { $ne: relIdToadd },
       })
       .where(joinTable.on || {})
+      .transacting(trx)
       .execute();
   }
 };
@@ -110,6 +126,7 @@ const deleteRelations = async ({
   db,
   relIdsToNotDelete = [],
   relIdsToDelete = [],
+  transaction: trx,
 }) => {
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
@@ -131,6 +148,7 @@ const deleteRelations = async ({
         .where(joinTable.on || {})
         .orderBy('id')
         .limit(batchSize)
+        .transacting(trx)
         .execute();
       done = batchToDelete.length < batchSize;
       lastId = batchToDelete[batchToDelete.length - 1]?.id;
@@ -144,9 +162,10 @@ const deleteRelations = async ({
           [inverseJoinColumn.name]: { $in: batchIds },
         })
         .where(joinTable.on || {})
+        .transacting(trx)
         .execute();
 
-      await cleanOrderColumns({ attribute, db, id, inverseRelIds: batchIds });
+      await cleanOrderColumns({ attribute, db, id, inverseRelIds: batchIds, transaction: trx });
     }
   } else {
     await createQueryBuilder(joinTable.name, db)
@@ -157,6 +176,7 @@ const deleteRelations = async ({
         ...(all ? {} : { [inverseJoinColumn.name]: { $in: relIdsToDelete } }),
       })
       .where(joinTable.on || {})
+      .transacting(trx)
       .execute();
   }
 };
@@ -169,7 +189,7 @@ const deleteRelations = async ({
  * @param {string} params.db - database instance
  * @param {string} params.inverseRelIds - entity ids of the inverse side for which the clean will be done
  */
-const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds }) => {
+const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction: trx }) => {
   if (
     !(hasOrderColumn(attribute) && id) &&
     !(hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds))
@@ -208,31 +228,37 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds }) => {
   // https://github.com/knex/knex/issues/2504
   switch (strapi.db.dialect.client) {
     case 'mysql':
-      await db.getConnection().raw(
-        `UPDATE
-          ?? as a,
-          (
-            SELECT ${select.join(', ')}
-            FROM ??
-            WHERE ${where.join(' OR ')}
-          ) AS b
-        SET ${update.join(', ')}
-        WHERE b.id = a.id`,
-        [joinTable.name, ...selectBinding, joinTable.name, ...whereBinding, ...updateBinding]
-      );
+      await db
+        .getConnection()
+        .raw(
+          `UPDATE
+            ?? as a,
+            (
+              SELECT ${select.join(', ')}
+              FROM ??
+              WHERE ${where.join(' OR ')}
+            ) AS b
+          SET ${update.join(', ')}
+          WHERE b.id = a.id`,
+          [joinTable.name, ...selectBinding, joinTable.name, ...whereBinding, ...updateBinding]
+        )
+        .transacting(trx);
       break;
     default:
-      await db.getConnection().raw(
-        `UPDATE ?? as a
-          SET ${update.join(', ')}
-          FROM (
-            SELECT ${select.join(', ')}
-            FROM ??
-            WHERE ${where.join(' OR ')}
-          ) AS b
-          WHERE b.id = a.id`,
-        [joinTable.name, ...updateBinding, ...selectBinding, joinTable.name, ...whereBinding]
-      );
+      await db
+        .getConnection()
+        .raw(
+          `UPDATE ?? as a
+            SET ${update.join(', ')}
+            FROM (
+              SELECT ${select.join(', ')}
+              FROM ??
+              WHERE ${where.join(' OR ')}
+            ) AS b
+            WHERE b.id = a.id`,
+          [joinTable.name, ...updateBinding, ...selectBinding, joinTable.name, ...whereBinding]
+        )
+        .transacting(trx);
     /*
       `UPDATE :joinTable: as a
         SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
