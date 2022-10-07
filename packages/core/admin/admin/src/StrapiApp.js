@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { lightTheme, darkTheme } from '@strapi/design-system/themes';
-import { get } from 'lodash';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import isFunction from 'lodash/isFunction';
@@ -228,8 +227,8 @@ class StrapiApp {
     }
 
     if (this.customConfigurations?.theme) {
-      const darkTheme = get(this.customConfigurations, 'theme.dark');
-      const lightTheme = get(this.customConfigurations, 'theme.light');
+      const darkTheme = this.customConfigurations.theme.dark;
+      const lightTheme = this.customConfigurations.theme.light;
 
       if (!darkTheme && !lightTheme) {
         console.warn(
