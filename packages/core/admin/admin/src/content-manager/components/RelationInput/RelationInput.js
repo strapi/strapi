@@ -38,7 +38,7 @@ const BoxEllipsis = styled(Box)`
   }
 `;
 
-const RemoveButton = styled.button`
+const DisconnectButton = styled.button`
   svg path {
     fill: ${({ theme }) => theme.colors.neutral500};
   }
@@ -59,6 +59,7 @@ const RelationInput = ({
   label,
   labelAction,
   labelLoadMore,
+  labelDisconnectRelation,
   loadingMessage,
   onRelationAdd,
   onRelationLoadMore,
@@ -292,14 +293,15 @@ const RelationInput = ({
                   disabled={disabled}
                   key={`relation-${name}-${id}`}
                   endAction={
-                    <RemoveButton
+                    <DisconnectButton
                       data-testid={`remove-relation-${id}`}
                       disabled={disabled}
                       type="button"
                       onClick={() => onRelationRemove(data[index])}
+                      aria-label={labelDisconnectRelation}
                     >
                       <Icon width="12px" as={Cross} />
-                    </RemoveButton>
+                    </DisconnectButton>
                   }
                   style={style}
                 >
@@ -400,6 +402,7 @@ RelationInput.propTypes = {
   label: PropTypes.string.isRequired,
   labelAction: PropTypes.element,
   labelLoadMore: PropTypes.string,
+  labelDisconnectRelation: PropTypes.string.isRequired,
   loadingMessage: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   numberOfRelationsToDisplay: PropTypes.number.isRequired,

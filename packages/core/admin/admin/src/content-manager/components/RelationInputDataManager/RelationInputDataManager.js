@@ -160,6 +160,10 @@ export const RelationInputDataManager = ({
             })
           : null
       }
+      labelDisconnectRelation={formatMessage({
+        id: getTrad('relation.disconnect'),
+        defaultMessage: 'Remove',
+      })}
       listHeight={320}
       loadingMessage={() =>
         formatMessage({
