@@ -412,7 +412,6 @@ const createEntityManager = (db) => {
      * @param {ID} id - entity ID
      * @param {object} data - data received for creation
      */
-    // TODO: wrap Transaction
     async attachRelations(uid, id, data, { transaction: trx }) {
       const { attributes } = db.metadata.get(uid);
 
@@ -621,7 +620,6 @@ const createEntityManager = (db) => {
      * @param {object} data - data received for creation
      */
     // TODO: check relation exists (handled by FKs except for polymorphics)
-    // TODO: wrap Transaction
     async updateRelations(uid, id, data, { transaction: trx }) {
       const { attributes } = db.metadata.get(uid);
 
@@ -1007,7 +1005,6 @@ const createEntityManager = (db) => {
      * @param {Metadata} metadata - model metadta
      * @param {ID} id - entity ID
      */
-    // TODO: wrap Transaction
     async deleteRelations(uid, id, { transaction: trx }) {
       const { attributes } = db.metadata.get(uid);
 
