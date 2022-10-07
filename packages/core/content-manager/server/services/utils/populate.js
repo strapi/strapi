@@ -67,6 +67,15 @@ const getDeepPopulate = (
   }, {});
 };
 
+/**
+ * getDeepPopulateDraftCount works recursively on the attributes of a model
+ * creating a populate object to count all the unpublished relations within the model
+ * These relations can be direct to this content type or contained within components/dynamic zones
+ * @param {String} uid of the model
+ * @returns {Object} result
+ * @returns {Object} result.populate
+ * @returns {Boolean} result.hasRelations
+ */
 const getDeepPopulateDraftCount = (uid) => {
   const model = strapi.getModel(uid);
   let hasRelations = false;
