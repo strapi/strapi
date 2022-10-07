@@ -6,8 +6,8 @@ const FIXTURE_RELATIONS = {
       {
         results: [
           {
-            id: 1,
-            name: 'Relation 1',
+            id: 3,
+            name: 'Relation 3',
             publishedAt: '2022-08-24T09:29:11.38',
           },
 
@@ -18,8 +18,8 @@ const FIXTURE_RELATIONS = {
           },
 
           {
-            id: 3,
-            name: 'Relation 3',
+            id: 1,
+            name: 'Relation 1',
           },
         ],
       },
@@ -27,8 +27,8 @@ const FIXTURE_RELATIONS = {
   },
 };
 
-describe('normalizeRelations', () => {
-  test('filters out deleted releations', () => {
+describe('RelationInputDataManager || normalizeRelations', () => {
+  test('filters out deleted relations', () => {
     expect(
       normalizeRelations(FIXTURE_RELATIONS, {
         modifiedData: { disconnect: [{ id: 1 }] },
@@ -37,8 +37,8 @@ describe('normalizeRelations', () => {
       data: {
         pages: [
           [
+            expect.objectContaining(FIXTURE_RELATIONS.data.pages[0].results[0]),
             expect.objectContaining(FIXTURE_RELATIONS.data.pages[0].results[1]),
-            expect.objectContaining(FIXTURE_RELATIONS.data.pages[0].results[2]),
           ],
         ],
       },
@@ -85,9 +85,9 @@ describe('normalizeRelations', () => {
       data: {
         pages: [
           [
-            expect.objectContaining({ href: '/content-manager/collectionType/something/1' }),
-            expect.objectContaining({ href: '/content-manager/collectionType/something/2' }),
             expect.objectContaining({ href: '/content-manager/collectionType/something/3' }),
+            expect.objectContaining({ href: '/content-manager/collectionType/something/2' }),
+            expect.objectContaining({ href: '/content-manager/collectionType/something/1' }),
           ],
         ],
       },
@@ -137,7 +137,7 @@ describe('normalizeRelations', () => {
     });
   });
 
-  test('allows to connect new relations, eventhough pages is empty', () => {
+  test('allows to connect new relations, even though pages is empty', () => {
     expect(
       normalizeRelations(
         {
@@ -157,6 +157,61 @@ describe('normalizeRelations', () => {
               id: 1,
             }),
           ],
+        ],
+      },
+    });
+  });
+
+  test('reverse order of relations pages', () => {
+    const fixtureExtended = {
+      pages: [
+        ...FIXTURE_RELATIONS.data.pages,
+        {
+          results: [
+            {
+              id: 6,
+              name: 'Relation 6',
+              publishedAt: '2022-08-24T09:29:11.38',
+            },
+
+            {
+              id: 5,
+              name: 'Relation 5',
+              publishedAt: '',
+            },
+
+            {
+              id: 4,
+              name: 'Relation 4',
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(
+      normalizeRelations(
+        {
+          data: fixtureExtended,
+        },
+        {
+          modifiedData: { connect: [{ id: 6 }] },
+        }
+      )
+    ).toStrictEqual({
+      data: {
+        pages: [
+          [
+            expect.objectContaining({ id: 6 }),
+            expect.objectContaining({ id: 5 }),
+            expect.objectContaining({ id: 4 }),
+          ],
+          [
+            expect.objectContaining({ id: 3 }),
+            expect.objectContaining({ id: 2 }),
+            expect.objectContaining({ id: 1 }),
+          ],
+          [expect.objectContaining({ id: 6 })],
         ],
       },
     });

@@ -7,7 +7,7 @@ import { useCMEditViewDataManager, NotAllowedInput, useQueryParams } from '@stra
 
 import { RelationInput } from '../RelationInput';
 import { useRelation } from '../../hooks/useRelation';
-import { connect, select, normalizeRelations } from './utils';
+import { connect, select, normalizeRelations, normalizeSearchResults } from './utils';
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
 import { getTrad } from '../../utils';
 
@@ -194,9 +194,8 @@ export const RelationInputDataManager = ({
       }}
       relations={normalizedRelations}
       required={required}
-      searchResults={normalizeRelations(search, {
+      searchResults={normalizeSearchResults(search, {
         mainFieldName: mainField.name,
-        search: 'search',
       })}
       size={size}
     />
