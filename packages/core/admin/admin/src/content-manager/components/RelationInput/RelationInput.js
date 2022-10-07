@@ -38,6 +38,17 @@ const BoxEllipsis = styled(Box)`
   }
 `;
 
+const DisconnectButton = styled.button`
+  svg path {
+    fill: ${({ theme }) => theme.colors.neutral500};
+  }
+
+  &:hover svg path,
+  &:focus svg path {
+    fill: ${({ theme }) => theme.colors.neutral600};
+  }
+`;
+
 const RelationInput = ({
   description,
   disabled,
@@ -48,6 +59,7 @@ const RelationInput = ({
   label,
   labelAction,
   labelLoadMore,
+  labelDisconnectRelation,
   loadingMessage,
   onRelationAdd,
   onRelationLoadMore,
@@ -281,19 +293,20 @@ const RelationInput = ({
                   disabled={disabled}
                   key={`relation-${name}-${id}`}
                   endAction={
-                    <button
+                    <DisconnectButton
                       data-testid={`remove-relation-${id}`}
                       disabled={disabled}
                       type="button"
                       onClick={() => onRelationRemove(data[index])}
+                      aria-label={labelDisconnectRelation}
                     >
                       <Icon width="12px" as={Cross} />
-                    </button>
+                    </DisconnectButton>
                   }
                   style={style}
                 >
                   <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                    <Tooltip description={mainField ?? id}>
+                    <Tooltip description={mainField ?? `${id}`}>
                       {href ? (
                         <LinkEllipsis to={href} disabled={disabled}>
                           {mainField ?? id}
@@ -389,6 +402,7 @@ RelationInput.propTypes = {
   label: PropTypes.string.isRequired,
   labelAction: PropTypes.element,
   labelLoadMore: PropTypes.string,
+  labelDisconnectRelation: PropTypes.string.isRequired,
   loadingMessage: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   numberOfRelationsToDisplay: PropTypes.number.isRequired,

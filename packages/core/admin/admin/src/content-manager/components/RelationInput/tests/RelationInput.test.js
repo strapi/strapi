@@ -64,6 +64,7 @@ const setup = (props) =>
             label="Some Relation"
             labelLoadMore="Load more"
             loadingMessage={() => 'Relations are loading'}
+            labelDisconnectRelation="Remove"
             numberOfRelationsToDisplay={5}
             onRelationAdd={() => jest.fn()}
             onSearchOpen={() => jest.fn()}
