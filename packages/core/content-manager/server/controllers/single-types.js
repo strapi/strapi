@@ -195,6 +195,10 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    return entityManager.getNumberOfDraftRelations(entity.id, model);
+    const number = await entityManager.getNumberOfDraftRelations(entity.id, model);
+
+    return {
+      data: number,
+    };
   },
 };
