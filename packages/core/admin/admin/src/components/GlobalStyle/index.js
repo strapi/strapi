@@ -5,7 +5,6 @@ const loadCss = async () => {
   await import(
     /* webpackChunkName: "fontawesome-css-all" */ '@fortawesome/fontawesome-free/css/all.css'
   );
-  await import(/* webpackChunkName: "fontawesome-js" */ '@fortawesome/fontawesome-free/js/all.min');
   await import(/* webpackChunkName: "cropper-css" */ 'cropperjs/dist/cropper.css');
 };
 
