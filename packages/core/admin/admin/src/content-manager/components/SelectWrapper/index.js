@@ -129,7 +129,7 @@ function SelectWrapper({
       const params = { limit: state.limit, ...defaultParams, start: state.start };
 
       if (state.contains) {
-        params[`filters[${containsKey}][$contains]`] = state.contains;
+        params[`filters[${containsKey}][$containsi]`] = state.contains;
       }
 
       try {
