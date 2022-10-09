@@ -82,7 +82,6 @@ module.exports = ({
           test: /\.tsx?$/,
           loader: require.resolve('esbuild-loader'),
           include: [cacheDir, ...pluginsPath],
-          exclude: /node_modules/,
           options: {
             loader: 'tsx',
             target: 'es2015',
