@@ -82,6 +82,7 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
  * Validator for content type creation
  */
 const validateContentTypeInput = (data) => {
+  removeDeletedUIDTargetFields(data.contentType);
   return validateYupSchema(createContentTypeSchema(data))(data);
 };
 
