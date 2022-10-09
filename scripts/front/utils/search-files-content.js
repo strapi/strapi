@@ -1,5 +1,6 @@
 'use strict';
 
+// defining constant values using require
 const { promisify } = require('util');
 const path = require('path');
 const readFile = promisify(require('fs').readFile);
@@ -9,6 +10,7 @@ const glob = promisify(require('glob').glob);
 const chalk = require('chalk');
 
 const findFilesInDirectories = async (
+  // defining variables
   directories = [],
   matchPatterns = [],
   ignorePatterns = []
@@ -22,6 +24,7 @@ const findFilesInDirectories = async (
   return files;
 };
 
+// function for loading files in main memory
 const loadFilesInMemory = async (files) => {
   return Promise.all(
     files.map(async (file) => ({
