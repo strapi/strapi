@@ -1,6 +1,6 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { render as renderTL, fireEvent, screen, waitFor, act } from '@testing-library/react';
+import { render as renderTL, fireEvent, screen, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import LogoInput from '../index';
 
@@ -36,21 +36,6 @@ const render = (props) =>
   );
 
 describe('ApplicationsInfosPage || LogoInput', () => {
-  /**
-   * We do this because –
-   * https://github.com/facebook/jest/issues/12670
-   */
-  beforeAll(() => {
-    jest.setTimeout(30000);
-  });
-
-  /**
-   * Reset timeout to what is expected
-   */
-  afterAll(() => {
-    jest.setTimeout(5000);
-  });
-
   describe('logo input', () => {
     it('should match snapshot', () => {
       render();
@@ -289,14 +274,10 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       fireEvent.click(screen.getByText('From url'));
 
       const textInput = document.querySelector('input[name="logo-url"]');
-
-      act(() => {
-        fireEvent.change(textInput, {
-          target: {
-            value:
-              'https://storage.googleapis.com/gtv-videos-bucket/sample/images/TearsOfSteel.jpg',
-          },
-        });
+      fireEvent.change(textInput, {
+        target: {
+          value: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/TearsOfSteel.jpg',
+        },
       });
 
       fireEvent.click(screen.getByText('Next'));
