@@ -11,13 +11,11 @@ describe('CTB | components | FormModal | reducer | actions | SET_CUSTOM_FIELD_DA
       ...initialState,
       initialData: {
         type: 'string',
-        regex: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
         customField: 'plugin::color-picker.color',
         name: 'test',
       },
       modifiedData: {
         type: 'string',
-        regex: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
         customField: 'plugin::color-picker.color',
         name: 'test',
       },
@@ -28,7 +26,6 @@ describe('CTB | components | FormModal | reducer | actions | SET_CUSTOM_FIELD_DA
       isEditing: true,
       modifiedDataToSetForEditing: {
         type: 'string',
-        regex: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
         customField: 'plugin::color-picker.color',
         name: 'test',
       },
