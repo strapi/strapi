@@ -1,10 +1,8 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { render as renderTL, fireEvent, screen, waitFor, configure } from '@testing-library/react';
+import { render as renderTL, fireEvent, screen, waitFor, act } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import LogoInput from '../index';
-
-configure({ asyncUtilTimeout: 8000 });
 
 const getFakeSize = jest.fn(() => ({
   width: 500,
@@ -38,6 +36,21 @@ const render = (props) =>
   );
 
 describe('ApplicationsInfosPage || LogoInput', () => {
+  /**
+   * We do this because –
+   * https://github.com/facebook/jest/issues/12670
+   */
+  beforeAll(() => {
+    jest.setTimeout(30000);
+  });
+
+  /**
+   * Reset timeout to what is expected
+   */
+  afterAll(() => {
+    jest.setTimeout(5000);
+  });
+
   describe('logo input', () => {
     it('should match snapshot', () => {
       render();
@@ -260,7 +273,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
       fireEvent.change(textInput, {
         target: {
-          value: 'https://cdn.pixabay.com/photo/2022/01/18/07/38/cat-6946505__340.jpg',
+          value: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/TearsOfSteel.jpg',
         },
       });
 
@@ -277,10 +290,13 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
       const textInput = document.querySelector('input[name="logo-url"]');
 
-      fireEvent.change(textInput, {
-        target: {
-          value: 'https://cdn.pixabay.com/photo/2022/01/18/07/38/cat-6946505__340.jpg',
-        },
+      act(() => {
+        fireEvent.change(textInput, {
+          target: {
+            value:
+              'https://storage.googleapis.com/gtv-videos-bucket/sample/images/TearsOfSteel.jpg',
+          },
+        });
       });
 
       fireEvent.click(screen.getByText('Next'));
