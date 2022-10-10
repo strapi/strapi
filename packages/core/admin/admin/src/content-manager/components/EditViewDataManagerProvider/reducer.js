@@ -75,7 +75,7 @@ const reducer = (state, action) =>
       }
       case 'LOAD_RELATION': {
         const initialDataPath = ['initialData', ...action.keys, 'results'];
-        const modifiedDataPath = ['modifiedData', ...action.keys, 'results'];
+        const modifiedDataPath = ['modifiedData', ...action.keys];
         const { value } = action;
 
         set(draftState, initialDataPath, value);
@@ -86,36 +86,56 @@ const reducer = (state, action) =>
          * both states, to render the dirty UI state
          */
 
-        set(draftState, modifiedDataPath, value);
+        set(draftState, [...modifiedDataPath, 'results'], value);
+        set(draftState, [...modifiedDataPath, 'connect'], []);
+        set(draftState, [...modifiedDataPath, 'disconnect'], []);
 
         break;
       }
       case 'CONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
         const { value, replace = false } = action;
-        const connectedRelations = get(state, [...path, 'connect']);
         const disconnectedRelations = get(state, [...path, 'disconnect']);
+        const savedRelations = get(state, [...path, 'results']);
+        const existInSavedRelation =
+          savedRelations &&
+          savedRelations?.findIndex((savedRelations) => savedRelations.id === value.id) !== -1;
 
-        if (!connectedRelations) {
-          set(draftState, [...path, 'connect'], []);
-        }
-
-        if (replace) {
-          set(draftState, [...path, 'connect'], [value]);
-        } else {
-          const savedRelations = get(state, [...path, 'results']);
-          const existInSavedRelation =
-            savedRelations &&
-            savedRelations?.findIndex((savedRelations) => savedRelations.id === value.id) !== -1;
-
-          // we should add a relation in the connect array only if it is not an already saved relation
-          if (!existInSavedRelation) {
+        // We should add a relation in the connect array only if it is not an already saved relation
+        if (!existInSavedRelation) {
+          if (replace) {
+            set(draftState, [...path, 'connect'], [value]);
+          } else {
             const nextValue = get(draftState, [...path, 'connect']);
             nextValue.push(value);
           }
         }
 
-        if (disconnectedRelations?.length) {
+        // Disconnect array cleaning
+        if (replace) {
+          // In xToOne relations we should place the saved relation in disconnected array to not display it
+          // only needed if there is a saved relation and it is not already stored in disconnected array
+          if (savedRelations?.length && !disconnectedRelations.length) {
+            set(draftState, [...path, 'disconnect'], savedRelations);
+          }
+
+          // If the saved relation is already stored in disconnected array
+          // We should remove it when an action requires to reconnect this relation
+          // We then reset the connect/disconnect state
+          if (disconnectedRelations?.length) {
+            const existsInDisconnectedRelations =
+              disconnectedRelations.findIndex(
+                (disconnectedRelation) => disconnectedRelation?.id === value.id
+              ) > -1;
+
+            if (existsInDisconnectedRelations) {
+              set(draftState, [...path, 'disconnect'], []);
+              set(draftState, [...path, 'connect'], []);
+            }
+          }
+        } else if (disconnectedRelations?.length) {
+          // In xToMany relations, when an action requires to connect a relation
+          // We should remove this from the disconnected array if it existed in it
           const existsInDisconnect = disconnectedRelations.find(
             (disconnectValue) => disconnectValue.id === value.id
           );
@@ -131,12 +151,7 @@ const reducer = (state, action) =>
       case 'DISCONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
         const { value } = action;
-        const disconnectedRelations = get(state, [...path, 'disconnect']);
         const connectedRelations = get(state, [...path, 'connect']);
-
-        if (!disconnectedRelations) {
-          set(draftState, [...path, 'disconnect'], []);
-        }
 
         const nextValue = get(draftState, [...path, 'disconnect']);
         nextValue.push(value);
