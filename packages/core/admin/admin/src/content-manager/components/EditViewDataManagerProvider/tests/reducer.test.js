@@ -443,6 +443,63 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       });
     });
+
+    it('should reset connect/disconnect if replace is set to true and a saved relation was remove and then added again', () => {
+      const state = {
+        ...initialState,
+
+        initialData: {},
+        modifiedData: {
+          relation: {
+            connect: [],
+            disconnect: [],
+            results: [{ id: 4 }],
+          },
+        },
+      };
+
+      const action = {
+        type: 'CONNECT_RELATION',
+        keys: ['relation'],
+        value: { id: 1 },
+        replace: true,
+      };
+
+      let nextState = reducer(state, action);
+
+      expect(nextState).toEqual({
+        ...initialState,
+        componentsDataStructure: {},
+        initialData: {},
+        modifiedData: {
+          relation: {
+            connect: [{ id: 1 }],
+            disconnect: [{ id: 4 }],
+            results: [{ id: 4 }],
+          },
+        },
+      });
+
+      nextState = reducer(nextState, {
+        type: 'CONNECT_RELATION',
+        keys: ['relation'],
+        value: { id: 4 },
+        replace: true,
+      });
+
+      expect(nextState).toEqual({
+        ...initialState,
+        componentsDataStructure: {},
+        initialData: {},
+        modifiedData: {
+          relation: {
+            connect: [],
+            disconnect: [],
+            results: [{ id: 4 }],
+          },
+        },
+      });
+    });
   });
 
   describe('LOAD_RELATION', () => {
