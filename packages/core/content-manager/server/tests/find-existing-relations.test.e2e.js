@@ -193,13 +193,13 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
           expect(res.body.results).toMatchObject([
             {
               id: expect.any(Number),
-              name: 'Skate',
-              ...addPublishedAtCheck(expect.any(String)),
+              name: 'Candle',
+              ...addPublishedAtCheck(null),
             },
             {
               id: expect.any(Number),
-              name: 'Candle',
-              ...addPublishedAtCheck(null),
+              name: 'Skate',
+              ...addPublishedAtCheck(expect.any(String)),
             },
           ]);
         } else {
@@ -235,13 +235,13 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
           expect(res.body.results).toMatchObject([
             {
               id: expect.any(Number),
-              name: 'Skate',
-              ...addPublishedAtCheck(expect.any(String)),
+              name: 'Candle',
+              ...addPublishedAtCheck(null),
             },
             {
               id: expect.any(Number),
-              name: 'Candle',
-              ...addPublishedAtCheck(null),
+              name: 'Skate',
+              ...addPublishedAtCheck(expect.any(String)),
             },
           ]);
         });
@@ -267,13 +267,13 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
           expect(res.body.results).toMatchObject([
             {
               id: expect.any(Number),
-              name: 'Skate',
-              ...addPublishedAtCheck(expect.any(String)),
+              name: 'Candle',
+              ...addPublishedAtCheck(null),
             },
             {
               id: expect.any(Number),
-              name: 'Candle',
-              ...addPublishedAtCheck(null),
+              name: 'Skate',
+              ...addPublishedAtCheck(expect.any(String)),
             },
           ]);
         } else {
