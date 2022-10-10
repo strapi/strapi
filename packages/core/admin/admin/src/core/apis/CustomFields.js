@@ -19,6 +19,37 @@ const ALLOWED_TYPES = [
   'uid',
 ];
 
+const ALLOWED_ROOT_LEVEL_OPTIONS = [
+  'min',
+  'minLength',
+  'max',
+  'maxLength',
+  'required',
+  'regex',
+  'enum',
+  'unique',
+  'private',
+  'default',
+];
+
+const getOptionValidations = (options, validations = []) => {
+  options.forEach((option) => {
+    if (option.items) {
+      getOptionValidations(option.items, validations);
+    }
+
+    if (!option.name) return;
+
+    validations.push({
+      isValidOptionPath:
+        ALLOWED_ROOT_LEVEL_OPTIONS.includes(option.name) || option.name.startsWith('options'),
+      errorMessage: `'${option.name}' must be prefixed with 'options'`,
+    });
+  });
+
+  return validations;
+};
+
 class CustomFields {
   constructor() {
     this.customFields = {};
@@ -32,7 +63,8 @@ class CustomFields {
       });
     } else {
       // Handle individual custom field
-      const { name, pluginId, type, intlLabel, intlDescription, components } = customFields;
+      const { name, pluginId, type, intlLabel, intlDescription, components, options } =
+        customFields;
 
       // Ensure required attributes are provided
       invariant(name, 'A name must be provided');
@@ -54,6 +86,16 @@ class CustomFields {
         isValidObjectKey.test(name),
         `Custom field name: '${name}' is not a valid object key`
       );
+
+      // Ensure options have valid name paths
+      const allFormOptions = [...(options?.base || []), ...(options?.advanced || [])];
+
+      if (allFormOptions.length) {
+        const optionPathValidations = getOptionValidations(allFormOptions);
+        optionPathValidations.forEach(({ isValidOptionPath, errorMessage }) => {
+          invariant(isValidOptionPath, errorMessage);
+        });
+      }
 
       // When no plugin is specified, default to the global namespace
       const uid = pluginId ? `plugin::${pluginId}.${name}` : `global::${name}`;

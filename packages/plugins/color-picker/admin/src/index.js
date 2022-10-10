@@ -33,6 +33,7 @@ export default {
             },
             name: 'regex',
             type: 'text',
+            defaultValue: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
             description: {
               id: getTrad('color-picker.options.advanced.regex.description'),
               defaultMessage: 'The text of the regular expression',
@@ -47,6 +48,7 @@ export default {
               {
                 name: 'required',
                 type: 'checkbox',
+                defaultValue: true,
                 intlLabel: {
                   id: getTrad('color-picker.options.advanced.requiredField'),
                   defaultMessage: 'Required field',

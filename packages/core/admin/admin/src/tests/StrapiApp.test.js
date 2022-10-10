@@ -230,6 +230,33 @@ describe('ADMIN | StrapiApp', () => {
       });
     });
 
+    it('should register a custom field with valid options', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'optionsCustomField',
+        pluginId: 'myplugin',
+        type: 'text',
+        icon: jest.fn(),
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+        options: {
+          base: [{ name: 'regex' }],
+          advanced: [
+            { name: 'options.plop' },
+            { name: 'required' },
+            { sectionTitle: null, items: [{ name: 'options.deep' }] },
+            { sectionTitle: null, items: [{ name: 'private' }] },
+          ],
+        },
+      };
+
+      app.customFields.register(field);
+      expect(app.customFields.get('plugin::myplugin.optionsCustomField')).toEqual(field);
+    });
+
     it('should register several custom fields at once', () => {
       const app = StrapiApp({ middlewares, reducers, library });
       const fields = [
@@ -327,6 +354,34 @@ describe('ADMIN | StrapiApp', () => {
       };
 
       expect(() => app.customFields.register(field)).toThrowError(/(a|an) .* must be provided/i);
+    });
+
+    it('should validate option path names', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'test',
+        pluginId: 'myplugin',
+        type: 'text',
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+        options: {
+          base: [{ name: 'regex' }],
+          advanced: [{ name: 'plop' }],
+        },
+      };
+
+      // Test shallow value
+      expect(() => app.customFields.register(field)).toThrowError(
+        "'plop' must be prefixed with 'options'"
+      );
+      // Test deep value
+      field.options.advanced = [{ sectionTitle: null, items: [{ name: 'deep.plop' }] }];
+      expect(() => app.customFields.register(field)).toThrowError(
+        "'deep.plop' must be prefixed with 'options'"
+      );
     });
   });
 

@@ -26,6 +26,47 @@ export default {
       id: pluginId,
       name,
     });
+
+    const allTypes = [
+      'biginteger',
+      'boolean',
+      'date',
+      'datetime',
+      'decimal',
+      'email',
+      'enumeration',
+      'float',
+      'integer',
+      'json',
+      'password',
+      'richtext',
+      'string',
+      'text',
+      'time',
+      'uid',
+    ];
+
+    allTypes.forEach((type) => {
+      const customField = {
+        type,
+        pluginId: 'myplugin',
+        name: `custom${type}`,
+        intlLabel: {
+          id: 'customfieldtest',
+          defaultMessage: `custom${type}`,
+        },
+        intlDescription: {
+          id: 'customfieldtest',
+          defaultMessage: `custom${type}`,
+        },
+        components: {
+          Input: async () =>
+            import(/* webpackChunkName: "test-custom-field" */ './components/PluginIcon'),
+        },
+      };
+
+      app.customFields.register(customField);
+    });
   },
   bootstrap() {},
   async registerTrads({ locales }) {
