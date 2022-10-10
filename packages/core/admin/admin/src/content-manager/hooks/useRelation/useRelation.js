@@ -38,6 +38,7 @@ export const useRelation = (cacheKey, { relation, search }) => {
   };
 
   const relationsRes = useInfiniteQuery(['relation', cacheKey], fetchRelations, {
+    cacheTime: 0,
     enabled: relation.enabled,
     getNextPageParam(lastPage) {
       // the API may send an empty 204 response
