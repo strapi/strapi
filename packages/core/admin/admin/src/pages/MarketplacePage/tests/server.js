@@ -491,6 +491,19 @@ const handlers = [
             },
           },
         ],
+        meta: {
+          collections: {
+            'Made by official partners': 9,
+            'Made by Strapi': 13,
+            'Made by the community': 69,
+            Verified: 29,
+          },
+          categories: {
+            'Custom fields': 4,
+            Deployment: 2,
+            Monitoring: 1,
+          },
+        },
       })
     );
   }),
@@ -903,6 +916,14 @@ const handlers = [
             },
           },
         ],
+        meta: {
+          collections: {
+            'Made by official partners': 0,
+            'Made by Strapi': 6,
+            'Made by the community': 2,
+            Verified: 6,
+          },
+        },
       })
     );
   }),
