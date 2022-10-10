@@ -1172,7 +1172,7 @@ describe('Homepage', () => {
                             <a
                               aria-disabled="false"
                               class="c46 c47 c48 c49"
-                              href="https://slack.strapi.io/"
+                              href="https://discord.strapi.io/"
                               rel="noreferrer noopener"
                               target="_blank"
                             >
