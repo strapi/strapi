@@ -573,14 +573,14 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
         spacing="1"
       >
         <div
-          style="position: relative; height: 174px; overflow: auto; will-change: transform; direction: ltr;"
+          style="position: relative; height: 150px; overflow: auto; will-change: transform; direction: ltr;"
         >
           <ol
-            style="height: 174px; width: 100%;"
+            style="height: 150px; width: 100%;"
           >
             <li
               class=""
-              style="position: absolute; left: 0px; top: 0px; height: 58px; width: 100%;"
+              style="position: absolute; left: 0px; top: 0px; height: 50px; width: 100%;"
             >
               <div
                 class="c15 c16"
@@ -645,7 +645,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
             </li>
             <li
               class=""
-              style="position: absolute; left: 0px; top: 58px; height: 58px; width: 100%;"
+              style="position: absolute; left: 0px; top: 50px; height: 50px; width: 100%;"
             >
               <div
                 class="c15 c16"
@@ -704,7 +704,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
             </li>
             <li
               class=""
-              style="position: absolute; left: 0px; top: 116px; height: 58px; width: 100%;"
+              style="position: absolute; left: 0px; top: 100px; height: 50px; width: 100%;"
             >
               <div
                 class="c15 c16"

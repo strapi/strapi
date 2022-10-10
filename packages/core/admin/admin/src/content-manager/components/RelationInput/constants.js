@@ -1,1 +1,1 @@
-export const RELATION_ITEM_HEIGHT = 58;
+export const RELATION_ITEM_HEIGHT = 50;
