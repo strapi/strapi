@@ -58,7 +58,7 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
 
     case 'string':
       return (
-        <Tooltip description={<CellValue type={type} value={content} />}>
+        <Tooltip description={content}>
           <TypographyMaxWidth ellipsis textColor="neutral800">
             <CellValue type={type} value={content} />
           </TypographyMaxWidth>
