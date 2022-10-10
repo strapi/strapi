@@ -178,6 +178,25 @@ describe('Marketplace page', () => {
     expect(noResult).toBeVisible();
   });
 
+  it('shows filters popover on plugins and providers', () => {
+    render(App);
+
+    // Show collections and categories filters on plugins
+    const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
+    fireEvent.click(pluginsTab);
+    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    fireEvent.click(filtersButton);
+    screen.getByLabelText(/no collections selected/i);
+    screen.getByLabelText(/no categories selected/i);
+    fireEvent.click(filtersButton);
+
+    // Only show collections filters on providers
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    fireEvent.click(providersTab);
+    fireEvent.click(filtersButton);
+    screen.getByLabelText(/no collections selected/i);
+  });
+
   it('handles production environment', () => {
     // Simulate production environment
     useAppInfos.mockImplementationOnce(() => ({

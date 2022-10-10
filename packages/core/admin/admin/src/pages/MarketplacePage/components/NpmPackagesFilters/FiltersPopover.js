@@ -26,7 +26,7 @@ const FiltersPopover = ({
     <Popover source={source} padding={3} spacing={4} onBlur={() => {}}>
       <FocusTrap onEscape={onToggle}>
         <form onSubmit={handleSubmit}>
-          <Stack spacing={1} style={{ minWidth: 184 }}>
+          <Stack spacing={1}>
             <Box>
               <FilterSelect
                 message={formatMessage({
@@ -70,6 +70,7 @@ const FiltersPopover = ({
                       { count: values.length }
                     )
                   }
+                  name="categories"
                 />
               </Box>
             )}
