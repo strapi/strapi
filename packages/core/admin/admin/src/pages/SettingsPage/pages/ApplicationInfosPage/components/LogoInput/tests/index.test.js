@@ -1,10 +1,8 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { render as renderTL, fireEvent, screen, waitFor, configure } from '@testing-library/react';
+import { render as renderTL, fireEvent, screen, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import LogoInput from '../index';
-
-configure({ asyncUtilTimeout: 8000 });
 
 const getFakeSize = jest.fn(() => ({
   width: 500,
@@ -260,7 +258,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
       fireEvent.change(textInput, {
         target: {
-          value: 'https://cdn.pixabay.com/photo/2022/01/18/07/38/cat-6946505__340.jpg',
+          value: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/TearsOfSteel.jpg',
         },
       });
 
@@ -276,10 +274,9 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       fireEvent.click(screen.getByText('From url'));
 
       const textInput = document.querySelector('input[name="logo-url"]');
-
       fireEvent.change(textInput, {
         target: {
-          value: 'https://cdn.pixabay.com/photo/2022/01/18/07/38/cat-6946505__340.jpg',
+          value: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/TearsOfSteel.jpg',
         },
       });
 
