@@ -116,6 +116,7 @@ export const RelationInputDataManager = ({
 
   const handleSearch = (term) => {
     searchFor(term, {
+      idsToInclude: relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
       idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
     });
   };
