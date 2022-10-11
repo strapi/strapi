@@ -94,8 +94,8 @@ const reducer = (state, action) =>
         const path = ['modifiedData', ...action.keys];
         const { value, replace = false } = action;
         const connectedRelations = get(state, [...path, 'connect']);
-        const disconnectedRelations = get(state, [...path, 'disconnect']) || [];
-        const savedRelations = get(state, [...path, 'results']) || [];
+        const disconnectedRelations = get(state, [...path, 'disconnect']) ?? [];
+        const savedRelations = get(state, [...path, 'results']) ?? [];
         const existInSavedRelation =
           savedRelations?.findIndex((savedRelations) => savedRelations.id === value.id) !== -1;
 
