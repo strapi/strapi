@@ -4,6 +4,7 @@ import {
   useTracking,
   useNotification,
   useStrapiApp,
+  useCustomFields,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
@@ -11,13 +12,11 @@ import get from 'lodash/get';
 import has from 'lodash/has';
 import set from 'lodash/set';
 import toLower from 'lodash/toLower';
-import upperFirst from 'lodash/upperFirst';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { Box } from '@strapi/design-system/Box';
 import { Button } from '@strapi/design-system/Button';
 import { Divider } from '@strapi/design-system/Divider';
 import { ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system/ModalLayout';
-import { Typography } from '@strapi/design-system/Typography';
 import { Tabs, Tab, TabGroup, TabPanels, TabPanel } from '@strapi/design-system/Tabs';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
@@ -30,6 +29,7 @@ import AttributeOptions from '../AttributeOptions';
 import DraftAndPublishToggle from '../DraftAndPublishToggle';
 import FormModalHeader from '../FormModalHeader';
 import FormModalEndActions from '../FormModalEndActions';
+import FormModalSubHeader from '../FormModalSubHeader';
 
 import BooleanDefaultValueSelect from '../BooleanDefaultValueSelect';
 import BooleanRadioGroup from '../BooleanRadioGroup';
@@ -49,12 +49,7 @@ import TabForm from '../TabForm';
 import TextareaEnum from '../TextareaEnum';
 import findAttribute from '../../utils/findAttribute';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
-import {
-  canEditContentType,
-  getAttributesToDisplay,
-  getFormInputNames,
-  getModalTitleSubHeader,
-} from './utils';
+import { canEditContentType, getAttributesToDisplay, getFormInputNames } from './utils';
 import forms from './forms';
 import { createComponentUid, createUid } from './utils/createUid';
 
@@ -83,6 +78,7 @@ const FormModal = () => {
     actionType,
     attributeName,
     attributeType,
+    customFieldUid,
     categoryName,
     dynamicZoneTarget,
     forTarget,
@@ -92,6 +88,7 @@ const FormModal = () => {
     step,
     targetUid,
   } = useFormModalNavigation();
+  const customField = useCustomFields().get(customFieldUid);
 
   const tabGroupRef = useRef();
 
@@ -109,6 +106,7 @@ const FormModal = () => {
 
   const {
     addAttribute,
+    addCustomFieldAttribute,
     addCreatedComponentToDynamicZone,
     allComponentsCategories,
     changeDynamicZoneComponents,
@@ -118,6 +116,7 @@ const FormModal = () => {
     deleteCategory,
     deleteData,
     editCategory,
+    editCustomFieldAttribute,
     submitData,
     modifiedData: allDataSchema,
     nestedComponents,
@@ -299,6 +298,7 @@ const FormModal = () => {
   const isCreatingContentType = modalType === 'contentType';
   const isCreatingComponent = modalType === 'component';
   const isCreatingAttribute = modalType === 'attribute';
+  const isCreatingCustomFieldAttribute = modalType === 'customField';
   const isComponentAttribute = attributeType === 'component' && isCreatingAttribute;
   const isCreating = actionType === 'create';
   const isCreatingComponentFromAView =
@@ -339,7 +339,15 @@ const FormModal = () => {
         get(allDataSchema, [...pathToSchema, 'uid'], null),
         ctbFormsAPI
       );
-
+    } else if (isCreatingCustomFieldAttribute) {
+      schema = forms.customField.schema({
+        schemaAttributes: get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], []),
+        attributeType: customField.type,
+        reservedNames,
+        schemaData: { modifiedData, initialData },
+        ctbFormsAPI,
+        customFieldValidator: customField.options?.validator,
+      });
       // Check for validity for creating a component
       // This is happening when the user creates a component "on the fly"
       // Since we temporarily store the component info in another object
@@ -541,6 +549,30 @@ const FormModal = () => {
         return;
         // Add/edit a field to a content type
         // Add/edit a field to a created component (the end modal is not step 2)
+      } else if (isCreatingCustomFieldAttribute) {
+        const customFieldAttributeUpdate = {
+          attributeToSet: { ...modifiedData, customField: customFieldUid, type: customField.type },
+          forTarget,
+          targetUid,
+          initialAttribute: initialData,
+        };
+
+        if (actionType === 'edit') {
+          editCustomFieldAttribute(customFieldAttributeUpdate);
+        } else {
+          addCustomFieldAttribute(customFieldAttributeUpdate);
+        }
+
+        if (shouldContinue) {
+          onNavigateToChooseAttributeModal({
+            forTarget,
+            targetUid: ctTargetUid,
+          });
+        } else {
+          onCloseModal();
+        }
+
+        return;
       } else if (isCreatingAttribute && !isCreatingComponentFromAView) {
         const isDynamicZoneAttribute = attributeType === 'dynamiczone';
 
@@ -870,6 +902,7 @@ const FormModal = () => {
     extensions: ctbFormsAPI,
     forTarget,
     contentTypeSchema: allDataSchema.contentType || {},
+    customField,
   }).sections;
   const baseForm = formToDisplay.base({
     data: modifiedData,
@@ -880,13 +913,16 @@ const FormModal = () => {
     extensions: ctbFormsAPI,
     forTarget,
     contentTypeSchema: allDataSchema.contentType || {},
+    customField,
   }).sections;
 
   const baseFormInputNames = getFormInputNames(baseForm);
+
   const advancedFormInputNames = getFormInputNames(advancedForm);
   const doesBaseFormHasError = Object.keys(formErrors).some((key) =>
     baseFormInputNames.includes(key)
   );
+
   const doesAdvancedFormHasError = Object.keys(formErrors).some((key) =>
     advancedFormInputNames.includes(key)
   );
@@ -905,6 +941,7 @@ const FormModal = () => {
         forTarget={forTarget}
         targetUid={targetUid}
         attributeType={attributeType}
+        customFieldUid={customFieldUid}
       />
       {isPickingAttribute && (
         <AttributeOptions
@@ -928,29 +965,16 @@ const FormModal = () => {
               }}
             >
               <Flex justifyContent="space-between">
-                <Typography as="h2" variant="beta">
-                  {formatMessage(
-                    {
-                      id: getModalTitleSubHeader({
-                        actionType,
-                        forTarget,
-                        kind,
-                        step,
-                        modalType,
-                      }),
-                      defaultMessage: 'Add new field',
-                    },
-                    {
-                      type: upperFirst(
-                        formatMessage({
-                          id: getTrad(`attribute.${attributeType}`),
-                        })
-                      ),
-                      name: upperFirst(attributeName),
-                      step,
-                    }
-                  )}
-                </Typography>
+                <FormModalSubHeader
+                  actionType={actionType}
+                  forTarget={forTarget}
+                  kind={kind}
+                  step={step}
+                  modalType={modalType}
+                  attributeType={attributeType}
+                  attributeName={attributeName}
+                  customField={customField}
+                />
                 <Tabs>
                   <Tab hasError={doesBaseFormHasError}>
                     {formatMessage({
@@ -1009,6 +1033,7 @@ const FormModal = () => {
                 deleteComponent={deleteData}
                 categoryName={initialData.name}
                 isAttributeModal={modalType === 'attribute'}
+                isCustomFieldModal={modalType === 'customField'}
                 isComponentToDzModal={modalType === 'addComponentToDynamicZone'}
                 isComponentAttribute={attributeType === 'component'}
                 isComponentModal={modalType === 'component'}
@@ -1032,6 +1057,7 @@ const FormModal = () => {
                 onSubmitEditCategory={handleSubmit}
                 onSubmitEditComponent={handleSubmit}
                 onSubmitEditContentType={handleSubmit}
+                onSubmitEditCustomFieldAttribute={handleSubmit}
                 onSubmitEditDz={handleSubmit}
               />
             }
