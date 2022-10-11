@@ -55,23 +55,25 @@ const shopModel = {
 
 const shops = [
   {
+    name: 'mercato',
+    locale: 'it',
+  },
+  {
     name: 'market',
     locale: 'en',
   },
 ];
 
-const products = ({ shop }) => {
-  const shops = [shop[0].id];
-
+const products = ({ shop: shops }) => {
   const entries = [
     {
       name: 'pomodoro',
-      shops,
+      shops: [shops[0].id],
       locale: 'it',
     },
     {
       name: 'apple',
-      shops,
+      shops: [shops[1].id],
       locale: 'en',
     },
   ];
@@ -99,7 +101,6 @@ describe('i18n - Find existing relations', () => {
     rq = await createAuthRequest({ strapi });
 
     data.shops = await builder.sanitizedFixturesFor(shopModel.singularName, strapi);
-    console.log('data.shops', data.shops);
     data.products = await builder.sanitizedFixturesFor(productModel.singularName, strapi);
   });
 
@@ -108,24 +109,23 @@ describe('i18n - Find existing relations', () => {
     await builder.cleanup();
   });
 
-  test('Can filter on default locale', async () => {
+  test('Get Italian product for italian shop filter on any locale', async () => {
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].id}/products`,
-    });
-
-    expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toStrictEqual(pick(['id', 'name'], data.products[1]));
-  });
-
-  test('Can filter on any locale', async () => {
-    const res = await rq({
-      method: 'GET',
-      url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].id}/products`,
-      qs: { locale: 'it' },
+      url: `/content-manager/relations/api::shop.shop/${data.shops[0].id}/products`,
     });
 
     expect(res.body.results).toHaveLength(1);
     expect(res.body.results[0]).toStrictEqual(pick(['id', 'name'], data.products[0]));
+  });
+
+  test('Get english product for english shop', async () => {
+    const res = await rq({
+      method: 'GET',
+      url: `/content-manager/relations/api::shop.shop/${data.shops[1].id}/products`,
+    });
+
+    expect(res.body.results).toHaveLength(1);
+    expect(res.body.results[0]).toStrictEqual(pick(['id', 'name'], data.products[1]));
   });
 });

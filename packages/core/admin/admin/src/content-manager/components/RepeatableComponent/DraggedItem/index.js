@@ -44,6 +44,7 @@ const DragButton = styled.span`
 
 const DraggedItem = ({
   componentFieldName,
+  componentUid,
   // Errors are retrieved from the AccordionGroupCustom cloneElement
   hasErrorMessage,
   hasErrors,
@@ -265,6 +266,7 @@ const DraggedItem = ({
                       return (
                         <GridItem key={keys} col={size} s={12} xs={12}>
                           <Inputs
+                            componentUid={componentUid}
                             fieldSchema={fieldSchema}
                             keys={keys}
                             metadatas={metadatas}
@@ -287,6 +289,7 @@ const DraggedItem = ({
 };
 
 DraggedItem.defaultProps = {
+  componentUid: undefined,
   isDraggingSibling: false,
   isOpen: false,
   setIsDraggingSibling() {},
@@ -295,6 +298,7 @@ DraggedItem.defaultProps = {
 
 DraggedItem.propTypes = {
   componentFieldName: PropTypes.string.isRequired,
+  componentUid: PropTypes.string,
   hasErrorMessage: PropTypes.bool.isRequired,
   hasErrors: PropTypes.bool.isRequired,
   isDraggingSibling: PropTypes.bool,

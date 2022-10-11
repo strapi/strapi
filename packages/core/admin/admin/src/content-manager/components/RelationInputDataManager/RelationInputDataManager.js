@@ -3,15 +3,16 @@ import React, { memo, useEffect, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 
-import { useCMEditViewDataManager, NotAllowedInput, useQueryParams } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
 import { RelationInput } from '../RelationInput';
 import { useRelation } from '../../hooks/useRelation';
-import { connect, select, normalizeRelations } from './utils';
+import { connect, select, normalizeRelations, normalizeSearchResults } from './utils';
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
 import { getTrad } from '../../utils';
 
-export const RelationInputDataManger = ({
+export const RelationInputDataManager = ({
+  componentId,
   editable,
   description,
   intlLabel,
@@ -31,7 +32,6 @@ export const RelationInputDataManger = ({
   const { formatMessage } = useIntl();
   const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
-  const [{ query }] = useQueryParams();
 
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
@@ -39,7 +39,6 @@ export const RelationInputDataManger = ({
       endpoint: endpoints.relation,
       pageParams: {
         ...defaultParams,
-        locale: query?.plugins?.i18n?.locale,
         pageSize: RELATIONS_TO_DISPLAY,
       },
     },
@@ -48,8 +47,7 @@ export const RelationInputDataManger = ({
       endpoint: endpoints.search,
       pageParams: {
         ...defaultParams,
-        entityId: isCreatingEntry ? undefined : initialData.id,
-        locale: query?.plugins?.i18n?.locale,
+        entityId: isCreatingEntry ? undefined : componentId ?? initialData.id,
         pageSize: SEARCH_RESULTS_TO_DISPLAY,
       },
     },
@@ -120,12 +118,14 @@ export const RelationInputDataManger = ({
 
   const handleSearch = (term) => {
     searchFor(term, {
+      idsToInclude: relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
       idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
     });
   };
 
   const handleOpenSearch = () => {
     searchFor('', {
+      idsToInclude: relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
       idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
     });
   };
@@ -152,13 +152,17 @@ export const RelationInputDataManger = ({
       })} ${initialData[name]?.count !== undefined ? `(${initialData[name].count})` : ''}`}
       labelAction={labelAction}
       labelLoadMore={
-        // TODO: only display if there are more; derive from count
-        !isCreatingEntry &&
-        formatMessage({
-          id: getTrad('relation.loadMore'),
-          defaultMessage: 'Load More',
-        })
+        !isCreatingEntry
+          ? formatMessage({
+              id: getTrad('relation.loadMore'),
+              defaultMessage: 'Load More',
+            })
+          : null
       }
+      labelDisconnectRelation={formatMessage({
+        id: getTrad('relation.disconnect'),
+        defaultMessage: 'Remove',
+      })}
       listHeight={320}
       loadingMessage={() =>
         formatMessage({
@@ -193,16 +197,16 @@ export const RelationInputDataManger = ({
       }}
       relations={normalizedRelations}
       required={required}
-      searchResults={normalizeRelations(search, {
+      searchResults={normalizeSearchResults(search, {
         mainFieldName: mainField.name,
-        search: 'search',
       })}
       size={size}
     />
   );
 };
 
-RelationInputDataManger.defaultProps = {
+RelationInputDataManager.defaultProps = {
+  componentId: undefined,
   editable: true,
   description: '',
   labelAction: null,
@@ -211,7 +215,8 @@ RelationInputDataManger.defaultProps = {
   required: false,
 };
 
-RelationInputDataManger.propTypes = {
+RelationInputDataManager.propTypes = {
+  componentId: PropTypes.number,
   editable: PropTypes.bool,
   description: PropTypes.string,
   intlLabel: PropTypes.shape({
@@ -251,6 +256,6 @@ RelationInputDataManger.propTypes = {
   }).isRequired,
 };
 
-const Memoized = memo(RelationInputDataManger);
+const Memoized = memo(RelationInputDataManager);
 
 export default connect(Memoized, select);

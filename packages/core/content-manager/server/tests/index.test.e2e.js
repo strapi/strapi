@@ -20,7 +20,7 @@ let rq;
 const getRelations = async (modelName, field, id) => {
   const res = await rq({
     method: 'GET',
-    url: `/content-manager/collection-types/api::${modelName}.${modelName}/${id}/${field}`,
+    url: `/content-manager/relations/api::${modelName}.${modelName}/${id}/${field}`,
   });
   return res.body.results || res.body;
 };
@@ -91,15 +91,11 @@ describe('Relations', () => {
       expect(body.id).toBeDefined();
       expect(body.name).toBe('tag1');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -119,15 +115,11 @@ describe('Relations', () => {
       expect(body.id).toBeDefined();
       expect(body.name).toBe('tag2');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -147,15 +139,11 @@ describe('Relations', () => {
       expect(body.id).toBeDefined();
       expect(body.name).toBe('tag3');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -180,15 +168,11 @@ describe('Relations', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -216,15 +200,11 @@ describe('Relations', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -251,15 +231,11 @@ describe('Relations', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -282,15 +258,11 @@ describe('Relations', () => {
       expect(body.title).toBe(data.articles[0].title);
       expect(body.content).toBe(data.articles[0].content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -312,15 +284,11 @@ describe('Relations', () => {
       expect(body.title).toBe(data.articles[0].title);
       expect(body.content).toBe(data.articles[0].content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -346,15 +314,11 @@ describe('Relations', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -458,15 +422,11 @@ describe('Relations', () => {
 
       expect(body.id).toBeDefined();
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
 
@@ -502,15 +462,11 @@ describe('Relations', () => {
       expect(body.id).toBeDefined();
       expect(body.name).toBe('cat1');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -533,15 +489,11 @@ describe('Relations', () => {
       expect(body.id).toBeDefined();
       expect(body.name).toBe('cat2');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -568,15 +520,11 @@ describe('Relations', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -603,15 +551,11 @@ describe('Relations', () => {
       expect(body.title).toBe(data.articles[0].title);
       expect(body.content).toBe(data.articles[0].content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
 
@@ -640,15 +584,11 @@ describe('Relations', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
 
@@ -671,15 +611,11 @@ describe('Relations', () => {
       expect(body.title).toBe(data.articles[1].title);
       expect(body.content).toBe(data.articles[1].content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
 
@@ -704,15 +640,11 @@ describe('Relations', () => {
       expect(body.id).toBeDefined();
       expect(body.name).toBe(data.categories[0].name);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
 
@@ -737,15 +669,11 @@ describe('Relations', () => {
       expect(body.id).toBeDefined();
       expect(body.name).toBe(entry.name);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
 
@@ -755,7 +683,7 @@ describe('Relations', () => {
 
     test('Get article1 with cat3', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${data.articles[0].id}/category`,
+        url: `/content-manager/relations/api::article.article/${data.articles[0].id}/category`,
         method: 'GET',
       });
 
@@ -767,7 +695,7 @@ describe('Relations', () => {
 
     test('Get article2 with cat2', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${data.articles[1].id}/category`,
+        url: `/content-manager/relations/api::article.article/${data.articles[1].id}/category`,
         method: 'GET',
       });
 
@@ -779,7 +707,7 @@ describe('Relations', () => {
 
     test('Get cat1 without relations', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}/articles`,
+        url: `/content-manager/relations/api::category.category/${data.categories[0].id}/articles`,
         method: 'GET',
       });
 
@@ -796,7 +724,7 @@ describe('Relations', () => {
 
     test('Get cat2 with article2', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[1].id}/articles`,
+        url: `/content-manager/relations/api::category.category/${data.categories[1].id}/articles`,
         method: 'GET',
       });
 
@@ -808,7 +736,7 @@ describe('Relations', () => {
 
     test('Get cat3 with article1', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[2].id}/articles`,
+        url: `/content-manager/relations/api::category.category/${data.categories[2].id}/articles`,
         method: 'GET',
       });
 
@@ -845,15 +773,11 @@ describe('Relations', () => {
       expect(body.id).toBeDefined();
       expect(body.name).toBe('ref1');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
     });
@@ -876,15 +800,11 @@ describe('Relations', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -905,15 +825,11 @@ describe('Relations', () => {
       expect(body.title).toBe(data.articles[0].title);
       expect(body.content).toBe(data.articles[0].content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
 
@@ -940,15 +856,11 @@ describe('Relations', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       const reference = await getRelations('article', 'reference', body.id);

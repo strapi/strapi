@@ -356,6 +356,40 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(reducer(state, action)).toEqual(expected);
     });
 
+    it('should not add the relation if it already exists in results', () => {
+      const state = {
+        ...initialState,
+
+        initialData: {},
+        modifiedData: {
+          relation: {
+            connect: [],
+            results: [{ id: 1 }],
+          },
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        componentsDataStructure: {},
+        initialData: {},
+        modifiedData: {
+          relation: {
+            connect: [],
+            results: [{ id: 1 }],
+          },
+        },
+      };
+
+      const action = {
+        type: 'CONNECT_RELATION',
+        keys: ['relation'],
+        value: { id: 1 },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
     it('should overwrite existing data, when replace is set to true', () => {
       const state = {
         ...initialState,
@@ -373,6 +407,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         type: 'CONNECT_RELATION',
         keys: ['relation'],
         value: { id: 1 },
+        replace: true,
       };
 
       let nextState = reducer(state, action);

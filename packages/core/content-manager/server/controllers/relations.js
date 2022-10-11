@@ -2,8 +2,8 @@
 
 const { prop, isEmpty } = require('lodash/fp');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
+const { isAnyToMany } = require('@strapi/utils').relations;
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
-const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
 
 const { getService } = require('../utils');
 const { validateFindAvailable, validateFindExisting } = require('./validation/relations');
@@ -24,57 +24,54 @@ module.exports = {
 
     await validateFindAvailable(ctx.request.query);
 
-    const { component, entityId, idsToOmit, _q, ...query } = ctx.request.query;
+    // idsToOmit: used to exclude relations that the front already added but that were not saved yet
+    // idsToInclude: used to include relations that the front removed but not saved yes
+    const { entityId, idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
 
-    const sourceModelUid = component || model;
-
-    const sourceModel = strapi.getModel(sourceModelUid);
-    if (!sourceModel) {
+    const modelSchema = strapi.getModel(model);
+    if (!modelSchema) {
       return ctx.badRequest("The model doesn't exist");
     }
 
-    const permissionChecker = getService('permission-checker').create({
-      userAbility,
-      model,
-    });
-
-    if (permissionChecker.cannot.read()) {
-      return ctx.forbidden();
-    }
-
-    const attribute = sourceModel.attributes[targetField];
+    const attribute = modelSchema.attributes[targetField];
     if (!attribute || attribute.type !== 'relation') {
       return ctx.badRequest("This relational field doesn't exist");
     }
 
-    // TODO: find a way to check field permission for component
-    if (!component && permissionChecker.cannot.read(null, targetField)) {
-      return ctx.forbidden();
-    }
+    const isComponent = modelSchema.modelType === 'component';
 
-    if (entityId) {
-      const entityManager = getService('entity-manager');
+    // RBAC checks when it's a content-type
+    // TODO: do RBAC check for components too
+    if (!isComponent) {
+      const permissionChecker = getService('permission-checker').create({
+        userAbility,
+        model,
+      });
 
-      const entity = await entityManager.findOneWithCreatorRoles(entityId, model);
-
-      if (!entity) {
-        return ctx.notFound();
-      }
-
-      if (!component && permissionChecker.cannot.read(entity, targetField)) {
+      if (permissionChecker.cannot.read(null, targetField)) {
         return ctx.forbidden();
       }
-      // TODO: find a way to check field permission for component
-      if (component && permissionChecker.cannot.read(entity)) {
-        return ctx.forbidden();
+
+      if (entityId) {
+        const entityManager = getService('entity-manager');
+
+        const entity = await entityManager.findOneWithCreatorRoles(entityId, model);
+
+        if (!entity) {
+          return ctx.notFound();
+        }
+
+        if (permissionChecker.cannot.read(entity, targetField)) {
+          return ctx.forbidden();
+        }
       }
     }
 
     const targetedModel = strapi.getModel(attribute.target);
 
-    const modelConfig = component
-      ? await getService('components').findConfiguration(sourceModel)
-      : await getService('content-types').findConfiguration(sourceModel);
+    const modelConfig = isComponent
+      ? await getService('components').findConfiguration(modelSchema)
+      : await getService('content-types').findConfiguration(modelSchema);
     const mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
 
     const fieldsToSelect = ['id', mainField];
@@ -99,12 +96,21 @@ module.exports = {
     }
 
     if (entityId) {
-      const subQuery = strapi.db.queryBuilder(sourceModel.uid);
+      const subQuery = strapi.db.queryBuilder(modelSchema.uid);
 
       const alias = subQuery.getAlias();
 
+      const where = {
+        id: entityId,
+        [`${alias}.id`]: { $notNull: true },
+      };
+
+      if (!isEmpty(idsToInclude)) {
+        where[`${alias}.id`].$notIn = idsToInclude;
+      }
+
       const knexSubQuery = subQuery
-        .where({ id: entityId, [`${alias}.id`]: { $notNull: true } })
+        .where(where)
         .join({ alias, targetField })
         .select(`${alias}.id`)
         .getKnexQuery();
@@ -121,54 +127,48 @@ module.exports = {
 
     await validateFindExisting(ctx.request.query);
 
-    const { component, idsToOmit, _q, ...query } = ctx.request.query;
-
-    const sourceModelUid = component || model;
-
-    const sourceModel = strapi.getModel(sourceModelUid);
-    if (!sourceModel) {
+    const modelSchema = strapi.getModel(model);
+    if (!modelSchema) {
       return ctx.badRequest("The model doesn't exist");
     }
 
-    const entityManager = getService('entity-manager');
-    const permissionChecker = getService('permission-checker').create({
-      userAbility,
-      model,
-    });
-
-    if (permissionChecker.cannot.read()) {
-      return ctx.forbidden();
-    }
-
-    const attribute = sourceModel.attributes[targetField];
+    const attribute = modelSchema.attributes[targetField];
     if (!attribute || attribute.type !== 'relation') {
       return ctx.badRequest("This relational field doesn't exist");
     }
 
-    // TODO: find a way to check field permission for component
-    if (!component && permissionChecker.cannot.read(null, targetField)) {
-      return ctx.forbidden();
-    }
+    const isComponent = modelSchema.modelType === 'component';
 
-    const entity = await entityManager.findOneWithCreatorRoles(id, model);
+    // RBAC checks when it's a content-type
+    // TODO: do RBAC check for components too
+    if (!isComponent) {
+      const entityManager = getService('entity-manager');
+      const permissionChecker = getService('permission-checker').create({
+        userAbility,
+        model,
+      });
 
-    if (!entity) {
-      return ctx.notFound();
-    }
+      if (permissionChecker.cannot.read(null, targetField)) {
+        return ctx.forbidden();
+      }
 
-    if (!component && permissionChecker.cannot.read(entity, targetField)) {
-      return ctx.forbidden();
-    }
-    // TODO: find a way to check field permission for component
-    if (component && permissionChecker.cannot.read(entity)) {
-      return ctx.forbidden();
+      const entity = await entityManager.findOneWithCreatorRoles(id, model);
+
+      if (!entity) {
+        return ctx.notFound();
+      }
+
+      if (permissionChecker.cannot.read(entity, targetField)) {
+        return ctx.forbidden();
+      }
     }
 
     const targetedModel = strapi.getModel(attribute.target);
 
-    const modelConfig = component
-      ? await getService('components').findConfiguration(sourceModel)
-      : await getService('content-types').findConfiguration(sourceModel);
+    const modelConfig = isComponent
+      ? await getService('components').findConfiguration(modelSchema)
+      : await getService('content-types').findConfiguration(modelSchema);
+
     const mainField = prop(`metadatas.${targetField}.edit.mainField`, modelConfig) || 'id';
 
     const fieldsToSelect = ['id', mainField];
@@ -177,39 +177,33 @@ module.exports = {
     }
 
     const queryParams = {
-      sort: mainField,
-      ...query,
-      fields: fieldsToSelect, // cannot select other fields as the user may not have the permissions
-      filters: {}, // cannot filter for RBAC reasons
+      fields: fieldsToSelect,
     };
 
-    if (!isEmpty(idsToOmit)) {
-      addFiltersClause(queryParams, { id: { $notIn: idsToOmit } });
-    }
+    if (isAnyToMany(attribute)) {
+      const res = await strapi.entityService.loadPages(
+        model,
+        { id },
+        targetField,
+        {
+          ...queryParams,
+          ordering: 'desc',
+        },
+        {
+          page: ctx.request.query.page,
+          pageSize: ctx.request.query.pageSize,
+        }
+      );
 
-    // searching should be allowed only on mainField for permission reasons
-    if (_q) {
-      addFiltersClause(queryParams, { [mainField]: { $containsi: _q } });
-    }
-
-    const subQuery = strapi.db.queryBuilder(sourceModel.uid);
-
-    const alias = subQuery.getAlias();
-
-    const knexSubQuery = subQuery
-      .where({ id, [`${alias}.id`]: { $notNull: true } })
-      .join({ alias, targetField })
-      .select(`${alias}.id`)
-      .getKnexQuery();
-
-    addFiltersClause(queryParams, { id: { $in: knexSubQuery } });
-
-    if (MANY_RELATIONS.includes(attribute.relation)) {
-      ctx.body = await strapi.entityService.findPage(targetedModel.uid, queryParams);
+      ctx.body = res;
     } else {
-      const results = await strapi.entityService.findMany(targetedModel.uid, queryParams);
+      const result = await strapi.entityService.load(model, { id }, targetField, queryParams);
+      // const result = await strapi.db.query(sourceModelUid).load({ id }, targetField, queryParams);
       // TODO: Temporary fix (use data instead)
-      ctx.body = { results, pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 } };
+      ctx.body = {
+        results: result ? [result] : [],
+        pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 },
+      };
     }
   },
 };

@@ -49,6 +49,10 @@ const convertCountQueryParams = (countQuery) => {
   return parseType({ type: 'boolean', value: countQuery });
 };
 
+const convertOrderingQueryParams = (ordering) => {
+  return ordering;
+};
+
 /**
  * Sort query parser
  * @param {string} sortQuery - ex: id:asc,price:desc
@@ -248,7 +252,7 @@ const convertNestedPopulate = (subPopulate, schema) => {
   }
 
   // TODO: We will need to consider a way to add limitation / pagination
-  const { sort, filters, fields, populate, count } = subPopulate;
+  const { sort, filters, fields, populate, count, ordering } = subPopulate;
 
   const query = {};
 
@@ -270,6 +274,10 @@ const convertNestedPopulate = (subPopulate, schema) => {
 
   if (count) {
     query.count = convertCountQueryParams(count);
+  }
+
+  if (ordering) {
+    query.ordering = convertOrderingQueryParams(ordering);
   }
 
   return query;

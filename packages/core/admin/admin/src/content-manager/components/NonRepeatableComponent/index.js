@@ -61,6 +61,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, isNested, nam
                 return (
                   <GridItem col={size} key={fieldName} s={12} xs={12}>
                     <Inputs
+                      componentUid={componentUid}
                       keys={keys}
                       fieldSchema={fieldSchema}
                       metadatas={metadatas}

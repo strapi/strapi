@@ -123,7 +123,7 @@ const createCompoLinkModelMeta = (baseModelMeta) => {
         type: 'integer',
         column: {
           unsigned: true,
-          defaultTo: 0,
+          defaultTo: null,
         },
       },
     },
@@ -141,6 +141,11 @@ const createCompoLinkModelMeta = (baseModelMeta) => {
       {
         name: `${baseModelMeta.tableName}_entity_fk`,
         columns: ['entity_id'],
+      },
+      {
+        name: `${baseModelMeta.tableName}_unique`,
+        columns: ['entity_id', 'component_id', 'field', 'component_type'],
+        type: 'unique',
       },
     ],
     foreignKeys: [
@@ -183,6 +188,7 @@ const createDynamicZone = (attributeName, attribute, meta) => {
       orderBy: {
         order: 'asc',
       },
+      pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
     },
   });
 };
@@ -205,9 +211,11 @@ const createComponent = (attributeName, attribute, meta) => {
       on: {
         field: attributeName,
       },
+      orderColumnName: 'order',
       orderBy: {
         order: 'asc',
       },
+      pivotColumns: ['entity_id', 'component_id', 'field', 'component_type'],
     },
   });
 };
