@@ -344,9 +344,10 @@ const EditSettingsView = ({ mainLayout, components, isContentTypeView, slug, upd
           <ModalForm
             onSubmit={handleMetaSubmit}
             onToggle={handleToggleModal}
-            type={get(attributes, [metaToEdit, 'type'], '')}
             onMetaChange={handleMetaChange}
             onSizeChange={handleSizeChange}
+            type={get(attributes, [metaToEdit, 'type'], '')}
+            customFieldUid={get(attributes, [metaToEdit, 'customField'], '')}
           />
         )}
       </Main>
