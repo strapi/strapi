@@ -291,20 +291,18 @@ const deleteComponents = async (uid, entityToDelete, { loadComponents = true }) 
         continue;
       }
 
-      // Delete all the components
       if (attribute.type === 'component') {
         const { component: componentUID } = attribute;
+        await Promise.all(
+          _.castArray(value).map((subValue) => deleteComponent(componentUID, subValue))
+        );
+      } else {
+        // delete dynamic zone components
+        await Promise.all(
+          _.castArray(value).map((subValue) => deleteComponent(subValue.__component, subValue))
+        );
+      }
 
-        if (Array.isArray(value)) {
-          await Promise.all(value.map((subValue) => deleteComponent(componentUID, subValue)));
-        } else {
-          await deleteComponent(componentUID, value);
-        }
-      }
-      // Delete dynamic zone components
-      else if (Array.isArray(value)) {
-        await Promise.all(value.map((subValue) => deleteComponent(subValue.__component, subValue)));
-      }
       continue;
     }
   }
