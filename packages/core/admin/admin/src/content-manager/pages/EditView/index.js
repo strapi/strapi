@@ -1,7 +1,12 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { Suspense, memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-import { CheckPermissions, useTracking, LinkButton } from '@strapi/helper-plugin';
+import {
+  CheckPermissions,
+  LoadingIndicatorPage,
+  useTracking,
+  LinkButton,
+} from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { ContentLayout } from '@strapi/design-system/Layout';
 import { Box } from '@strapi/design-system/Box';
@@ -125,108 +130,110 @@ const EditView = ({
               <ContentLayout>
                 <Grid gap={4}>
                   <GridItem col={9} s={12}>
-                    <Stack spacing={6}>
-                      {formattedContentTypeLayout.map((row, index) => {
-                        if (isDynamicZone(row)) {
-                          const {
-                            0: {
-                              0: { name, fieldSchema, metadatas, labelAction },
-                            },
-                          } = row;
+                    <Suspense fallback={<LoadingIndicatorPage />}>
+                      <Stack spacing={6}>
+                        {formattedContentTypeLayout.map((row, index) => {
+                          if (isDynamicZone(row)) {
+                            const {
+                              0: {
+                                0: { name, fieldSchema, metadatas, labelAction },
+                              },
+                            } = row;
+
+                            return (
+                              <Box key={index}>
+                                <Grid gap={4}>
+                                  <GridItem col={12} s={12} xs={12}>
+                                    <DynamicZone
+                                      name={name}
+                                      fieldSchema={fieldSchema}
+                                      labelAction={labelAction}
+                                      metadatas={metadatas}
+                                    />
+                                  </GridItem>
+                                </Grid>
+                              </Box>
+                            );
+                          }
 
                           return (
-                            <Box key={index}>
-                              <Grid gap={4}>
-                                <GridItem col={12} s={12} xs={12}>
-                                  <DynamicZone
-                                    name={name}
-                                    fieldSchema={fieldSchema}
-                                    labelAction={labelAction}
-                                    metadatas={metadatas}
-                                  />
-                                </GridItem>
-                              </Grid>
-                            </Box>
-                          );
-                        }
+                            <Box
+                              key={index}
+                              hasRadius
+                              background="neutral0"
+                              shadow="tableShadow"
+                              paddingLeft={6}
+                              paddingRight={6}
+                              paddingTop={6}
+                              paddingBottom={6}
+                              borderColor="neutral150"
+                            >
+                              <Stack spacing={6}>
+                                {row.map((grid, gridIndex) => {
+                                  return (
+                                    <Grid gap={4} key={gridIndex}>
+                                      {grid.map(
+                                        ({
+                                          fieldSchema,
+                                          labelAction,
+                                          metadatas,
+                                          name,
+                                          size,
+                                          queryInfos,
+                                        }) => {
+                                          const isComponent = fieldSchema.type === 'component';
 
-                        return (
-                          <Box
-                            key={index}
-                            hasRadius
-                            background="neutral0"
-                            shadow="tableShadow"
-                            paddingLeft={6}
-                            paddingRight={6}
-                            paddingTop={6}
-                            paddingBottom={6}
-                            borderColor="neutral150"
-                          >
-                            <Stack spacing={6}>
-                              {row.map((grid, gridIndex) => {
-                                return (
-                                  <Grid gap={4} key={gridIndex}>
-                                    {grid.map(
-                                      ({
-                                        fieldSchema,
-                                        labelAction,
-                                        metadatas,
-                                        name,
-                                        size,
-                                        queryInfos,
-                                      }) => {
-                                        const isComponent = fieldSchema.type === 'component';
+                                          if (isComponent) {
+                                            const {
+                                              component,
+                                              max,
+                                              min,
+                                              repeatable = false,
+                                              required = false,
+                                            } = fieldSchema;
 
-                                        if (isComponent) {
-                                          const {
-                                            component,
-                                            max,
-                                            min,
-                                            repeatable = false,
-                                            required = false,
-                                          } = fieldSchema;
+                                            return (
+                                              <GridItem col={size} s={12} xs={12} key={component}>
+                                                <FieldComponent
+                                                  componentUid={component}
+                                                  labelAction={labelAction}
+                                                  isRepeatable={repeatable}
+                                                  intlLabel={{
+                                                    id: metadatas.label,
+                                                    defaultMessage: metadatas.label,
+                                                  }}
+                                                  max={max}
+                                                  min={min}
+                                                  name={name}
+                                                  required={required}
+                                                />
+                                              </GridItem>
+                                            );
+                                          }
 
                                           return (
-                                            <GridItem col={size} s={12} xs={12} key={component}>
-                                              <FieldComponent
-                                                componentUid={component}
+                                            <GridItem col={size} key={name} s={12} xs={12}>
+                                              <Inputs
+                                                size={size}
+                                                fieldSchema={fieldSchema}
+                                                keys={name}
                                                 labelAction={labelAction}
-                                                isRepeatable={repeatable}
-                                                intlLabel={{
-                                                  id: metadatas.label,
-                                                  defaultMessage: metadatas.label,
-                                                }}
-                                                max={max}
-                                                min={min}
-                                                name={name}
-                                                required={required}
+                                                metadatas={metadatas}
+                                                queryInfos={queryInfos}
                                               />
                                             </GridItem>
                                           );
                                         }
-
-                                        return (
-                                          <GridItem col={size} key={name} s={12} xs={12}>
-                                            <Inputs
-                                              size={size}
-                                              fieldSchema={fieldSchema}
-                                              keys={name}
-                                              labelAction={labelAction}
-                                              metadatas={metadatas}
-                                              queryInfos={queryInfos}
-                                            />
-                                          </GridItem>
-                                        );
-                                      }
-                                    )}
-                                  </Grid>
-                                );
-                              })}
-                            </Stack>
-                          </Box>
-                        );
-                      })}
-                    </Stack>
+                                      )}
+                                    </Grid>
+                                  );
+                                })}
+                              </Stack>
+                            </Box>
+                          );
+                        })}
+                      </Stack>
+                    </Suspense>
                   </GridItem>
                   <GridItem col={3} s={12}>
                     <Stack spacing={2}>

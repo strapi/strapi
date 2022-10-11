@@ -10,6 +10,12 @@ jest.mock('@strapi/typescript-utils', () => ({
 }));
 
 describe('getCustomAppConfigFile', () => {
+  test('It should return undefined when the src/admin does no exist', async () => {
+    const result = await getCustomAppConfigFile('/');
+
+    expect(result).toBeUndefined();
+  });
+
   test('It should return undefined when the app config file extension is not .js and useTypeScript is falsy', async () => {
     fse.readdir = jest.fn(() => {
       return ['app.example.js', 'webpack.config.js', 'app.ts', 'app.tsx'];
@@ -23,6 +29,10 @@ describe('getCustomAppConfigFile', () => {
   });
 
   test('It should return app.js when the app config file extension is not (.ts|.tsx) and useTypeScript is truthy', async () => {
+    fse.pathExistsSync = jest.fn(() => {
+      return true;
+    });
+
     fse.readdir = jest.fn(() => {
       return ['app.js', 'webpack.config.js', 'app.example.ts', 'app.example.tsx'];
     });
@@ -35,6 +45,10 @@ describe('getCustomAppConfigFile', () => {
   });
 
   test('It should return app.js when the app config file extension is .js and useTypeScript is falsy', async () => {
+    fse.pathExistsSync = jest.fn(() => {
+      return true;
+    });
+
     fse.readdir = jest.fn(() => {
       return ['app.js', 'webpack.config.js', 'app.ts', 'app.tsx'];
     });

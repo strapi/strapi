@@ -1,5 +1,6 @@
 'use strict';
 
+const { castArray, isNil } = require('lodash/fp');
 const { UnauthorizedError, ForbiddenError } = require('@strapi/utils').errors;
 const constants = require('../services/constants');
 const { getService } = require('../utils');
@@ -20,7 +21,10 @@ const extractToken = (ctx) => {
   return null;
 };
 
-/** @type {import('.').AuthenticateFunction} */
+/**
+ * Authenticate the validity of the token
+ *
+ *  @type {import('.').AuthenticateFunction} */
 const authenticate = async (ctx) => {
   const apiTokenService = getService('api-token');
   const token = extractToken(ctx);
@@ -33,33 +37,90 @@ const authenticate = async (ctx) => {
     accessKey: apiTokenService.hash(token),
   });
 
+  // token not found
   if (!apiToken) {
     return { authenticated: false };
+  }
+
+  const currentDate = new Date();
+
+  if (!isNil(apiToken.expiresAt)) {
+    const expirationDate = new Date(apiToken.expiresAt);
+    // token has expired
+    if (expirationDate < currentDate) {
+      return { authenticated: false, error: new UnauthorizedError('Token expired') };
+    }
+  }
+
+  // update lastUsedAt
+  await strapi.query('admin::api-token').update({
+    where: { id: apiToken.id },
+    data: { lastUsedAt: currentDate },
+  });
+
+  if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
+    const ability = await strapi.contentAPI.permissions.engine.generateAbility(
+      apiToken.permissions.map((action) => ({ action }))
+    );
+
+    return { authenticated: true, ability, credentials: apiToken };
   }
 
   return { authenticated: true, credentials: apiToken };
 };
 
-/** @type {import('.').VerifyFunction} */
+/**
+ * Verify the token has the required abilities for the requested scope
+ *
+ *  @type {import('.').VerifyFunction} */
 const verify = (auth, config) => {
-  const { credentials: apiToken } = auth;
+  const { credentials: apiToken, ability } = auth;
 
   if (!apiToken) {
-    throw new UnauthorizedError();
+    throw new UnauthorizedError('Token not found');
   }
 
+  const currentDate = new Date();
+
+  if (!isNil(apiToken.expiresAt)) {
+    const expirationDate = new Date(apiToken.expiresAt);
+    // token has expired
+    if (expirationDate < currentDate) {
+      throw new UnauthorizedError('Token expired');
+    }
+  }
+
+  // Full access
   if (apiToken.type === constants.API_TOKEN_TYPE.FULL_ACCESS) {
     return;
   }
 
-  /**
-   * If you don't have `full-access` you can only access `find` and `findOne`
-   * scopes. If the route has no scope, then you can't get access to it.
-   */
+  // Read only
+  if (apiToken.type === constants.API_TOKEN_TYPE.READ_ONLY) {
+    /**
+     * If you don't have `full-access` you can only access `find` and `findOne`
+     * scopes. If the route has no scope, then you can't get access to it.
+     */
+    const scopes = castArray(config.scope);
 
-  const scopes = Array.isArray(config.scope) ? config.scope : [config.scope];
-  if (config.scope && scopes.every(isReadScope)) {
-    return;
+    if (config.scope && scopes.every(isReadScope)) {
+      return;
+    }
+  }
+
+  // Custom
+  else if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
+    if (!ability) {
+      throw new ForbiddenError();
+    }
+
+    const scopes = castArray(config.scope);
+
+    const isAllowed = scopes.every((scope) => ability.can(scope));
+
+    if (isAllowed) {
+      return;
+    }
   }
 
   throw new ForbiddenError();

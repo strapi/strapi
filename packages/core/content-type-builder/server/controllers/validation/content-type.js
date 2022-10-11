@@ -36,7 +36,7 @@ const VALID_RELATIONS = {
 /**
  * Allowed types
  */
-const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone'];
+const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone', 'customField'];
 
 /**
  * Returns a yup schema to validate a content type payload
