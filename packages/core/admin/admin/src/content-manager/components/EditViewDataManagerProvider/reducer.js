@@ -75,7 +75,7 @@ const reducer = (state, action) =>
       }
       case 'LOAD_RELATION': {
         const initialDataPath = ['initialData', ...action.keys, 'results'];
-        const modifiedDataPath = ['modifiedData', ...action.keys];
+        const modifiedDataPath = ['modifiedData', ...action.keys, 'results'];
         const { value } = action;
 
         set(draftState, initialDataPath, value);
@@ -86,7 +86,7 @@ const reducer = (state, action) =>
          * both states, to render the dirty UI state
          */
 
-        set(draftState, [...modifiedDataPath, 'results'], value);
+        set(draftState, modifiedDataPath, value);
 
         break;
       }
@@ -95,9 +95,8 @@ const reducer = (state, action) =>
         const { value, replace = false } = action;
         const connectedRelations = get(state, [...path, 'connect']);
         const disconnectedRelations = get(state, [...path, 'disconnect']);
-        const savedRelations = get(state, [...path, 'results']);
+        const savedRelations = get(state, [...path, 'results']) || [];
         const existInSavedRelation =
-          savedRelations &&
           savedRelations?.findIndex((savedRelations) => savedRelations.id === value.id) !== -1;
 
         if (!connectedRelations) {
