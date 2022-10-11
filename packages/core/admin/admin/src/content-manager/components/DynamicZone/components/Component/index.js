@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, Suspense, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import isEqual from 'react-fast-compare';
@@ -8,7 +8,9 @@ import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-sys
 import { IconButton } from '@strapi/design-system/IconButton';
 import { FocusTrap } from '@strapi/design-system/FocusTrap';
 import { Box } from '@strapi/design-system/Box';
+import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
+import { Loader } from '@strapi/design-system/Loader';
 import Trash from '@strapi/icons/Trash';
 import ArrowDown from '@strapi/icons/ArrowDown';
 import ArrowUp from '@strapi/icons/ArrowUp';
@@ -147,14 +149,22 @@ const Component = ({
           />
           <AccordionContent>
             <AccordionContentRadius background="neutral0">
-              <FocusTrap onEscape={() => onToggle(index)}>
-                <FieldComponent
-                  componentUid={componentUid}
-                  icon={icon}
-                  name={`${name}.${index}`}
-                  isFromDynamicZone
-                />
-              </FocusTrap>
+              <Suspense
+                fallback={
+                  <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
+                    <Loader>Loading content.</Loader>
+                  </Flex>
+                }
+              >
+                <FocusTrap onEscape={() => onToggle(index)}>
+                  <FieldComponent
+                    componentUid={componentUid}
+                    icon={icon}
+                    name={`${name}.${index}`}
+                    isFromDynamicZone
+                  />
+                </FocusTrap>
+              </Suspense>
             </AccordionContentRadius>
           </AccordionContent>
         </Accordion>

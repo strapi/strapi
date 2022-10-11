@@ -239,4 +239,32 @@ module.exports = {
 
     ctx.body = { count };
   },
+
+  async getNumberOfDraftRelations(ctx) {
+    const { userAbility } = ctx.state;
+    const { model, id } = ctx.params;
+
+    const entityManager = getService('entity-manager');
+    const permissionChecker = getService('permission-checker').create({ userAbility, model });
+
+    if (permissionChecker.cannot.read()) {
+      return ctx.forbidden();
+    }
+
+    const entity = await entityManager.findOneWithCreatorRolesAndCount(id, model);
+
+    if (!entity) {
+      return ctx.notFound();
+    }
+
+    if (permissionChecker.cannot.read(entity)) {
+      return ctx.forbidden();
+    }
+
+    const number = await entityManager.getNumberOfDraftRelations(id, model);
+
+    return {
+      data: number,
+    };
+  },
 };

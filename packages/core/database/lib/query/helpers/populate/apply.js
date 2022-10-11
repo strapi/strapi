@@ -11,7 +11,7 @@ const { fromRow } = require('../transform');
  * @returns
  */
 const XtoOne = async (input, ctx) => {
-  const { attribute, attributeName, results, populateValue, targetMeta } = input;
+  const { attribute, attributeName, results, populateValue, targetMeta, isCount } = input;
   const { db, qb } = ctx;
 
   const fromTargetRow = (rowOrRows) => fromRow(targetMeta, rowOrRows);
@@ -60,6 +60,41 @@ const XtoOne = async (input, ctx) => {
     const referencedValues = _.uniq(
       results.map((r) => r[referencedColumnName]).filter((value) => !_.isNil(value))
     );
+
+    if (isCount) {
+      if (_.isEmpty(referencedValues)) {
+        results.forEach((result) => {
+          result[attributeName] = { count: 0 };
+        });
+        return;
+      }
+
+      const rows = await qb
+        .init(populateValue)
+        .join({
+          alias,
+          referencedTable: joinTable.name,
+          referencedColumn: joinTable.inverseJoinColumn.name,
+          rootColumn: joinTable.inverseJoinColumn.referencedColumn,
+          rootTable: qb.alias,
+          on: joinTable.on,
+        })
+        .select([joinColAlias, qb.raw('count(*) AS count')])
+        .where({ [joinColAlias]: referencedValues })
+        .groupBy(joinColAlias)
+        .execute({ mapResults: false });
+
+      const map = rows.reduce((map, row) => {
+        map[row[joinColumnName]] = { count: Number(row.count) };
+        return map;
+      }, {});
+
+      results.forEach((result) => {
+        result[attributeName] = map[result[referencedColumnName]] || { count: 0 };
+      });
+
+      return;
+    }
 
     if (_.isEmpty(referencedValues)) {
       results.forEach((result) => {
