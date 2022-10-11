@@ -577,6 +577,8 @@
   "content-manager.success.record.save": "Mentett",
   "content-manager.success.record.unpublish": "Nem közzétett",
   "content-manager.utils.data-loaded": "{number} elem sikeresen betöltődött",
+  "content-manager.popUpWarning.warning.publish-question": "Biztosan közzé akarja tenni?",
+  "content-manager.popUpwarning.warning.has-draft-relations.button-confirm": "Igen, közzététel",
   "form.button.done": "Kész",
   "global.prompt.unsaved": "Biztos, hogy elhagyja ezt az oldalt? Az összes módosítása elveszik",
   "notification.contentType.relations.conflict": "A tartalomtípusnak ellenkező kapcsolatai vannak",

@@ -1164,6 +1164,55 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
     });
   });
 
+  describe('SET_PUBLISH_CONFIRMATION', () => {
+    it('should set the publish confirmation object', () => {
+      const state = {
+        ...initialState,
+      };
+
+      const action = {
+        type: 'SET_PUBLISH_CONFIRMATION',
+        publishConfirmation: {
+          show: true,
+          draftCount: 100,
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        publishConfirmation: { ...action.publishConfirmation },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('RESET_PUBLISH_CONFIRMATION', () => {
+    it('should reset the publish confirmation object', () => {
+      const state = {
+        ...initialState,
+        publishConfirmation: {
+          show: true,
+          draftCount: 100,
+        },
+      };
+
+      const action = {
+        type: 'RESET_PUBLISH_CONFIRMATION',
+      };
+
+      const expected = {
+        ...initialState,
+        publishConfirmation: {
+          show: false,
+          draftCount: state.publishConfirmation.draftCount,
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
   describe('TRIGGER_FORM_VALIDATION', () => {
     it('should not change the shouldCheckErrors when the formErrors state is an empty object', () => {
       const state = {

@@ -425,6 +425,8 @@
   "content-manager.success.record.publish": "Pubblicato",
   "content-manager.success.record.save": "Salvato",
   "content-manager.success.record.unpublish": "Non pubblicato",
+  "content-manager.popUpWarning.warning.publish-question": "Vuoi ancora pubblicarlo?",
+  "content-manager.popUpwarning.warning.has-draft-relations.button-confirm": "Sì, pubblica",
   "form.button.done": "Fatto",
   "global.prompt.unsaved": "Sei sicuro di voler lasciare questa pagina? Tutte le modifiche effettuate verranno perse.",
   "notification.contentType.relations.conflict": "Questo Tipo di Contenuto ha delle relazioni in conflitto",
