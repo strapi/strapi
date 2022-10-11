@@ -69,8 +69,8 @@ const ModalForm = ({ queryName, onToggle }) => {
     } catch (err) {
       unlockApp();
 
-      if (err?.response?.data.message === 'Email already taken') {
-        setErrors({ email: err.response.data.message });
+      if (err?.response?.data?.error.message === 'Email already taken') {
+        setErrors({ email: err.response.data.error.message });
       }
     }
   };

@@ -28,6 +28,7 @@ const FormModalHeader = ({
   forTarget,
   modalType,
   targetUid,
+  customFieldUid,
 }) => {
   const { formatMessage } = useIntl();
   const { modifiedData } = useDataManager();
@@ -91,7 +92,7 @@ const FormModalHeader = ({
     headers.push({ label: dynamicZoneTarget });
   }
 
-  if (modalType === 'attribute') {
+  if (modalType === 'attribute' || modalType === 'customField') {
     icon = attributeType;
     headers.push({ label: attributeName });
   }
@@ -110,7 +111,7 @@ const FormModalHeader = ({
   return (
     <ModalHeader>
       <Stack horizontal spacing={3}>
-        <AttributeIcon type={icon} />
+        <AttributeIcon type={icon} customField={customFieldUid} />
 
         <Breadcrumbs label={breadcrumbsLabel}>
           {headers.map((header, index) => {
@@ -147,6 +148,7 @@ FormModalHeader.defaultProps = {
   forTarget: null,
   contentTypeKind: null,
   targetUid: null,
+  customFieldUid: null,
 };
 
 FormModalHeader.propTypes = {
@@ -159,6 +161,7 @@ FormModalHeader.propTypes = {
   forTarget: PropTypes.oneOf(['contentType', 'component', 'components']),
   modalType: PropTypes.string.isRequired,
   targetUid: PropTypes.string,
+  customFieldUid: PropTypes.string,
 };
 
 export default FormModalHeader;
