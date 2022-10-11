@@ -10,6 +10,7 @@ import {
   LoadingIndicatorPage,
   useNotification,
   useAppInfos,
+  useQueryParams,
 } from '@strapi/helper-plugin';
 import { Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Main } from '@strapi/design-system/Main';
@@ -29,6 +30,7 @@ import offlineCloud from '../../assets/images/icon_offline-cloud.svg';
 import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
 import MissingPluginBanner from './components/MissingPluginBanner';
 import NpmPackagesGrid from './components/NpmPackagesGrid';
+import NpmPackagesFilters from './components/NpmPackagesFilters';
 
 const matchSearch = (npmPackages, search) => {
   return matchSorter(npmPackages, search, {
@@ -49,9 +51,10 @@ const MarketPlacePage = () => {
   const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
-  const [npmPackageType, setNpmPackageType] = useState('plugin');
   const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
   const isOnline = useNavigatorOnLine();
+  const [{ query }, setQuery] = useQueryParams();
+  const npmPackageType = query?.npmPackageType || 'plugin';
 
   useFocusWhenNavigate();
 
@@ -170,11 +173,22 @@ const MarketPlacePage = () => {
 
   const handleTabChange = (selected) => {
     const packageType = selected === 0 ? 'plugin' : 'provider';
-    setNpmPackageType(packageType);
+    setQuery({
+      // Save new tab in the query params
+      npmPackageType: packageType,
+      // Clear filters
+      collections: [],
+      categories: [],
+    });
   };
 
   // Check if plugins and providers are installed already
   const installedPackageNames = Object.keys(dependencies);
+
+  const possibleCollections =
+    npmPackageType === 'plugin'
+      ? marketplacePluginsResponse.meta.collections
+      : marketplaceProvidersResponse.meta.collections;
 
   return (
     <Layout>
@@ -215,6 +229,7 @@ const MarketPlacePage = () => {
             })}
             id="tabs"
             variant="simple"
+            initialSelectedTabIndex={['plugin', 'provider'].indexOf(npmPackageType)}
             onTabChange={handleTabChange}
           >
             <Box paddingBottom={4}>
@@ -235,6 +250,16 @@ const MarketPlacePage = () => {
                 </Tab>
               </Tabs>
             </Box>
+            <Flex paddingBottom={4} gap={2}>
+              <NpmPackagesFilters
+                npmPackageType={npmPackageType}
+                possibleCollections={possibleCollections}
+                possibleCategories={marketplacePluginsResponse.meta.categories}
+                query={query || {}}
+                setQuery={setQuery}
+              />
+            </Flex>
+
             <TabPanels>
               {/* Plugins panel */}
               <TabPanel>
