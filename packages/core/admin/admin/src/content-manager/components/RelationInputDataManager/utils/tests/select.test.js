@@ -138,7 +138,7 @@ describe('RelationInputDataManager | select', () => {
     const { result } = await setup(SELECT_ATTR_FIXTURE);
 
     expect(result.current.queryInfos.endpoints.relation).toBe(
-      '/content-manager/collection-types/slug/2/test'
+      '/content-manager/relations/slug/2/test'
     );
   });
 
@@ -177,8 +177,60 @@ describe('RelationInputDataManager | select', () => {
 
     expect(result.current.queryInfos).toStrictEqual({
       endpoints: {
-        relation: '/content-manager/collection-types/slug/2/field-name',
+        relation: '/content-manager/relations/slug/2/field-name',
         search: '/content-manager/relations/slug/field-name',
+      },
+    });
+  });
+
+  test('returns endpoints with component model and id in case of a relation in a single component', async () => {
+    useCMEditViewDataManager.mockReturnValueOnce({
+      ...CM_DATA_FIXTURE,
+      isCreatingEntry: false,
+      initialData: {
+        singleComp: {
+          id: 1,
+        },
+      },
+    });
+
+    const { result } = await setup({
+      ...SELECT_ATTR_FIXTURE,
+      name: 'singleComp.field-name',
+      componentUid: 'basic.comp-relation',
+    });
+
+    expect(result.current.queryInfos).toStrictEqual({
+      endpoints: {
+        relation: '/content-manager/relations/basic.comp-relation/1/field-name',
+        search: '/content-manager/relations/basic.comp-relation/field-name',
+      },
+    });
+  });
+
+  test('returns endpoints with component model and id in case of a relation in a rep or dz component', async () => {
+    useCMEditViewDataManager.mockReturnValueOnce({
+      ...CM_DATA_FIXTURE,
+      isCreatingEntry: false,
+      initialData: {
+        repComp: [
+          {
+            id: 1,
+          },
+        ],
+      },
+    });
+
+    const { result } = await setup({
+      ...SELECT_ATTR_FIXTURE,
+      name: 'repComp.0.field-name',
+      componentUid: 'basic.comp-relation',
+    });
+
+    expect(result.current.queryInfos).toStrictEqual({
+      endpoints: {
+        relation: '/content-manager/relations/basic.comp-relation/1/field-name',
+        search: '/content-manager/relations/basic.comp-relation/field-name',
       },
     });
   });

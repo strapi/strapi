@@ -12,6 +12,7 @@ import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } f
 import { getTrad } from '../../utils';
 
 export const RelationInputDataManager = ({
+  componentId,
   editable,
   description,
   intlLabel,
@@ -31,6 +32,7 @@ export const RelationInputDataManager = ({
   const { formatMessage } = useIntl();
   const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
+
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
       enabled: get(initialData, name)?.count !== 0 && !!endpoints.relation,
@@ -45,7 +47,7 @@ export const RelationInputDataManager = ({
       endpoint: endpoints.search,
       pageParams: {
         ...defaultParams,
-        entityId: isCreatingEntry ? undefined : initialData.id,
+        entityId: isCreatingEntry ? undefined : componentId ?? initialData.id,
         pageSize: SEARCH_RESULTS_TO_DISPLAY,
       },
     },
@@ -203,6 +205,7 @@ export const RelationInputDataManager = ({
 };
 
 RelationInputDataManager.defaultProps = {
+  componentId: undefined,
   editable: true,
   description: '',
   labelAction: null,
@@ -212,6 +215,7 @@ RelationInputDataManager.defaultProps = {
 };
 
 RelationInputDataManager.propTypes = {
+  componentId: PropTypes.number,
   editable: PropTypes.bool,
   description: PropTypes.string,
   intlLabel: PropTypes.shape({
