@@ -110,8 +110,7 @@ const getComponents = async (uid, entity) => {
   const componentAttributes = getComponentAttributes(strapi.getModel(uid));
 
   if (_.isEmpty(componentAttributes)) return {};
-  const components = await strapi.query(uid).load(entity, componentAttributes);
-  return { id: entity?.id, ...components };
+  return strapi.query(uid).load(entity, componentAttributes);
 };
 
 /*
@@ -275,46 +274,37 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
   }
 };
 
-const deleteComponents = async (uid, entityToDelete) => {
+const deleteComponents = async (uid, entityToDelete, { loadComponents = true }) => {
   const { attributes = {} } = strapi.getModel(uid);
 
   for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
-    if (attribute.type === 'component') {
-      const { component: componentUID } = attribute;
+    if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
+      let value = entityToDelete[attributeName];
 
-      // Load attribute value if it's not already loaded
-      const value =
-        entityToDelete[attributeName] ||
-        (await strapi.query(uid).load(entityToDelete, attributeName));
+      if (!value && loadComponents) {
+        value = await strapi.query(uid).load(entityToDelete, attributeName);
+      }
 
       if (!value) {
         continue;
       }
 
-      if (Array.isArray(value)) {
-        await Promise.all(value.map((subValue) => deleteComponent(componentUID, subValue)));
-      } else {
-        await deleteComponent(componentUID, value);
+      // Delete all the components
+      if (attribute.type === 'component') {
+        const { component: componentUID } = attribute;
+
+        if (Array.isArray(value)) {
+          await Promise.all(value.map((subValue) => deleteComponent(componentUID, subValue)));
+        } else {
+          await deleteComponent(componentUID, value);
+        }
       }
-
-      continue;
-    }
-
-    if (attribute.type === 'dynamiczone') {
-      const value =
-        entityToDelete[attributeName] ||
-        (await strapi.query(uid).load(entityToDelete, attributeName));
-
-      if (!value) {
-        continue;
-      }
-
-      if (Array.isArray(value)) {
+      // Delete dynamic zone components
+      else if (Array.isArray(value)) {
         await Promise.all(value.map((subValue) => deleteComponent(subValue.__component, subValue)));
       }
-
       continue;
     }
   }
