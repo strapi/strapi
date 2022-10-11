@@ -185,6 +185,11 @@ const MarketPlacePage = () => {
   // Check if plugins and providers are installed already
   const installedPackageNames = Object.keys(dependencies);
 
+  const possibleCollections =
+    npmPackageType === 'plugin'
+      ? marketplacePluginsResponse.meta.collections
+      : marketplaceProvidersResponse.meta.collections;
+
   return (
     <Layout>
       <Main>
@@ -248,11 +253,7 @@ const MarketPlacePage = () => {
             <Flex paddingBottom={4} gap={2}>
               <NpmPackagesFilters
                 npmPackageType={npmPackageType}
-                possibleCollections={
-                  npmPackageType === 'plugin'
-                    ? marketplacePluginsResponse.meta.collections
-                    : marketplaceProvidersResponse.meta.collections
-                }
+                possibleCollections={possibleCollections}
                 possibleCategories={marketplacePluginsResponse.meta.categories}
                 query={query || {}}
                 setQuery={setQuery}
