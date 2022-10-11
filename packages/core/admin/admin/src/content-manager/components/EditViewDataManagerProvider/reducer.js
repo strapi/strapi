@@ -94,7 +94,7 @@ const reducer = (state, action) =>
         const path = ['modifiedData', ...action.keys];
         const { value, replace = false } = action;
         const connectedRelations = get(state, [...path, 'connect']);
-        const disconnectedRelations = get(state, [...path, 'disconnect']);
+        const disconnectedRelations = get(state, [...path, 'disconnect']) || [];
         const savedRelations = get(state, [...path, 'results']) || [];
         const existInSavedRelation =
           savedRelations?.findIndex((savedRelations) => savedRelations.id === value.id) !== -1;
@@ -117,14 +117,14 @@ const reducer = (state, action) =>
         if (replace) {
           // In xToOne relations we should place the saved relation in disconnected array to not display it
           // only needed if there is a saved relation and it is not already stored in disconnected array
-          if (savedRelations?.length && !disconnectedRelations?.length) {
+          if (savedRelations.length && !disconnectedRelations.length) {
             set(draftState, [...path, 'disconnect'], savedRelations);
           }
 
           // If the saved relation is stored in disconnected array
           // We should remove it when an action requires to reconnect this relation
           // We then reset the connect/disconnect state
-          if (disconnectedRelations?.length) {
+          if (disconnectedRelations.length) {
             const existsInDisconnectedRelations =
               disconnectedRelations.findIndex(
                 (disconnectedRelation) => disconnectedRelation?.id === value.id
@@ -135,7 +135,7 @@ const reducer = (state, action) =>
               set(draftState, [...path, 'connect'], []);
             }
           }
-        } else if (disconnectedRelations?.length) {
+        } else if (disconnectedRelations.length) {
           // In xToMany relations, when an action requires to connect a relation
           // We should remove it from the disconnected array if it existed in it
           const existsInDisconnect = disconnectedRelations.find(
