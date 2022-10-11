@@ -24,6 +24,13 @@ const {
 const { pickSelectionParams } = require('./params');
 const { applyTransforms } = require('./attributes');
 
+const transformLoadParamsToQuery = (uid, field, params = {}, pagination = {}) => {
+  return {
+    ...transformParamsToQuery(uid, { populate: { [field]: params } }).populate[field],
+    ...pagination,
+  };
+};
+
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
@@ -246,38 +253,14 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 
   load(uid, entity, field, params = {}) {
-    const { attributes } = strapi.getModel(uid);
-
-    const attribute = attributes[field];
-
-    const loadParams = {};
-
-    switch (attribute.type) {
-      case 'relation': {
-        Object.assign(loadParams, transformParamsToQuery(attribute.target, params));
-        break;
-      }
-      case 'component': {
-        Object.assign(loadParams, transformParamsToQuery(attribute.component, params));
-        break;
-      }
-      case 'dynamiczone': {
-        Object.assign(loadParams, transformParamsToQuery(null, params));
-        break;
-      }
-      case 'media': {
-        Object.assign(loadParams, transformParamsToQuery('plugin::upload.file', params));
-        break;
-      }
-      default: {
-        break;
-      }
+    if (!_.isString(field)) {
+      throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }
 
-    return db.query(uid).load(entity, field, loadParams);
+    return db.query(uid).load(entity, field, transformLoadParamsToQuery(uid, field, params));
   },
 
-  loadPages(uid, entity, field, params = {}) {
+  loadPages(uid, entity, field, params = {}, pagination = {}) {
     if (!_.isString(field)) {
       throw new Error(`Invalid load. Expected "${field}" to be a string`);
     }
@@ -289,7 +272,9 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       throw new Error(`Invalid load. Expected "${field}" to be an anyToMany relational attribute`);
     }
 
-    return db.query(uid).loadPages(entity, field, transformParamsToQuery(attribute.target, params));
+    const query = transformLoadParamsToQuery(uid, field, params, pagination);
+
+    return db.query(uid).loadPages(entity, field, query);
   },
 });
 

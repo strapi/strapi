@@ -192,12 +192,19 @@ module.exports = {
     };
 
     if (isAnyToMany(attribute)) {
-      const res = await strapi.entityService.loadPages(sourceModelUid, { id }, targetField, {
-        ...queryParams,
-        page: query.page,
-        pageSize: query.pageSize,
-        ordering: 'desc',
-      });
+      const res = await strapi.entityService.loadPages(
+        sourceModelUid,
+        { id },
+        targetField,
+        {
+          ...queryParams,
+          ordering: 'desc',
+        },
+        {
+          page: query.page,
+          pageSize: query.pageSize,
+        }
+      );
 
       ctx.body = res;
     } else {
