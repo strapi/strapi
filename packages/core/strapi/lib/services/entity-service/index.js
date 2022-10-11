@@ -214,14 +214,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       return null;
     }
 
-    const componentsToDelete = await getComponents(uid, entityToDelete).then((x) =>
-      _.omitBy(_.isNill, x)
-    );
+    const componentsToDelete = await getComponents(uid, entityToDelete);
 
     await db.query(uid).delete({ where: { id: entityToDelete.id } });
-    if (!_.isEmpty(componentsToDelete)) {
-      await deleteComponents(uid, { ...entityToDelete, ...componentsToDelete });
-    }
+    await deleteComponents(uid, componentsToDelete);
 
     await this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
@@ -242,9 +238,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     }
 
     const componentsToDelete = await Promise.all(
-      entitiesToDelete.map((entityToDelete) =>
-        getComponents(uid, entityToDelete).then((x) => _.omitBy(_.isNill, x))
-      )
+      entitiesToDelete.map((entityToDelete) => getComponents(uid, entityToDelete))
     );
 
     const deletedEntities = await db.query(uid).deleteMany(query);
