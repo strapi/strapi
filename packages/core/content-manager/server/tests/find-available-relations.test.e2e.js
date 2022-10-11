@@ -171,6 +171,124 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
   });
 
   describe('findAvailable', () => {
+    describe('On a content-type', () => {
+      test('Fail when entity is not found', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/content-manager/relations/api::shop.shop/products_ow',
+          qs: {
+            entityId: 99999,
+          },
+        });
+
+        expect(res.status).toBe(404);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: 'Not Found',
+            name: 'NotFoundError',
+            status: 404,
+          },
+        });
+      });
+
+      test("Fail when the field doesn't exist", async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/content-manager/relations/api::shop.shop/unkown',
+        });
+
+        expect(res.status).toBe(400);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: "This relational field doesn't exist",
+            name: 'BadRequestError',
+            status: 400,
+          },
+        });
+      });
+
+      test('Fail when the field exists but is not a relational field', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/content-manager/relations/api::shop.shop/name',
+        });
+
+        expect(res.status).toBe(400);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: "This relational field doesn't exist",
+            name: 'BadRequestError',
+            status: 400,
+          },
+        });
+      });
+    });
+
+    describe('On a component', () => {
+      test('Fail when the component is not found', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/content-manager/relations/default.compo/compo_products_ow',
+          qs: {
+            entityId: 99999,
+          },
+        });
+
+        expect(res.status).toBe(404);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: 'Not Found',
+            name: 'NotFoundError',
+            status: 404,
+          },
+        });
+      });
+
+      test("Fail when the field doesn't exist", async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/content-manager/relations/default.compo/unknown',
+        });
+
+        expect(res.status).toBe(400);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: "This relational field doesn't exist",
+            name: 'BadRequestError',
+            status: 400,
+          },
+        });
+      });
+
+      test('Fail when the field exists but is not a relational field', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/content-manager/relations/default.compo/name',
+        });
+
+        expect(res.status).toBe(400);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: "This relational field doesn't exist",
+            name: 'BadRequestError',
+            status: 400,
+          },
+        });
+      });
+    });
+
     describe.each([
       ['products_ow', false],
       ['products_oo', false],
