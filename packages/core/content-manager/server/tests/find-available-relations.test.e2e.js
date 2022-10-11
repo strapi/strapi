@@ -180,25 +180,25 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
       ['products_mw', false],
       ['compo_products_ow', true],
       ['compo_products_mw', true],
-    ])('Relation not in a component (%s)', (fieldName, isComponent) => {
+    ])('Relation (%s) (is in component: %s)', (fieldName, isComponent) => {
       let entityId;
       let entityIdEmptyShop;
+      let modelUID;
 
       beforeAll(() => {
         entityId = isComponent ? data.shops[0].myCompo.id : data.shops[0].id;
         entityIdEmptyShop = isComponent ? data.shops[1].myCompo.id : data.shops[1].id;
+        modelUID = isComponent ? 'default.compo' : 'api::shop.shop';
       });
 
       test('Can retrieve available relation(s) for an entity that have some relations', async () => {
         let res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/api::shop.shop/${fieldName}`,
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
           qs: {
             entityId,
-            ...(isComponent ? { component: 'default.compo' } : {}),
           },
         });
-
         expect(res.status).toBe(200);
 
         expect(res.body.results).toMatchObject([
@@ -212,11 +212,10 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
         // can omitIds
         res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/api::shop.shop/${fieldName}`,
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
           qs: {
             entityId,
             idsToOmit: [data.products[1].id],
-            ...(isComponent ? { component: 'default.compo' } : {}),
           },
         });
 
@@ -226,10 +225,9 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
       test("Can retrieve available relation(s) for an entity that don't have relations yet", async () => {
         let res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/api::shop.shop/${fieldName}`,
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
           qs: {
             entityId: entityIdEmptyShop,
-            ...(isComponent ? { component: 'default.compo' } : {}),
           },
         });
 
@@ -251,11 +249,10 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
         // can omitIds
         res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/api::shop.shop/${fieldName}`,
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
           qs: {
             entityId,
             idsToOmit: [data.products[1].id],
-            ...(isComponent ? { component: 'default.compo' } : {}),
           },
         });
 
@@ -265,10 +262,7 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
       test('Can retrieve available relation(s) without entity', async () => {
         let res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/api::shop.shop/${fieldName}`,
-          qs: {
-            ...(isComponent ? { component: 'default.compo' } : {}),
-          },
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
         });
 
         expect(res.status).toBe(200);
@@ -289,10 +283,9 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
         // can omitIds
         res = await rq({
           method: 'GET',
-          url: `/content-manager/relations/api::shop.shop/${fieldName}`,
+          url: `/content-manager/relations/${modelUID}/${fieldName}`,
           qs: {
             idsToOmit: [data.products[0].id],
-            ...(isComponent ? { component: 'default.compo' } : {}),
           },
         });
 
@@ -311,11 +304,10 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
         test("search ''", async () => {
           const res = await rq({
             method: 'GET',
-            url: `/content-manager/relations/api::shop.shop/${fieldName}`,
+            url: `/content-manager/relations/${modelUID}/${fieldName}`,
             qs: {
               _q: '',
               ...(withEntity ? { entityId } : {}),
-              ...(isComponent ? { component: 'default.compo' } : {}),
             },
           });
 
@@ -331,11 +323,10 @@ describe.each([[false], [true]])('Relations, with d&p: %p', (withDraftAndPublish
         test("search 'Can'", async () => {
           const res = await rq({
             method: 'GET',
-            url: `/content-manager/relations/api::shop.shop/${fieldName}`,
+            url: `/content-manager/relations/${modelUID}/${fieldName}`,
             qs: {
               _q: 'Can',
               ...(withEntity ? { entityId } : {}),
-              ...(isComponent ? { component: 'default.compo' } : {}),
             },
           });
 

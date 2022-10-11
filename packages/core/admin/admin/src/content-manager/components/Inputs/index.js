@@ -24,6 +24,7 @@ import {
 
 function Inputs({
   allowedFields,
+  componentUid,
   fieldSchema,
   formErrors,
   isCreatingEntry,
@@ -228,6 +229,7 @@ function Inputs({
       <RelationInputDataManager
         {...metadatas}
         {...fieldSchema}
+        componentUid={componentUid}
         description={
           metadatas.description
             ? formatMessage({
@@ -301,6 +303,7 @@ function Inputs({
 }
 
 Inputs.defaultProps = {
+  componentUid: undefined,
   formErrors: {},
   labelAction: undefined,
   size: undefined,
@@ -310,6 +313,7 @@ Inputs.defaultProps = {
 
 Inputs.propTypes = {
   allowedFields: PropTypes.array.isRequired,
+  componentUid: PropTypes.string,
   fieldSchema: PropTypes.object.isRequired,
   formErrors: PropTypes.object,
   keys: PropTypes.string.isRequired,
