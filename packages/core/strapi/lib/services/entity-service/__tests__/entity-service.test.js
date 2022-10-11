@@ -3,6 +3,7 @@
 jest.mock('bcryptjs', () => ({ hashSync: () => 'secret-password' }));
 
 const { EventEmitter } = require('events');
+const { ApplicationError } = require('@strapi/utils').errors;
 const createEntityService = require('..');
 const entityValidator = require('../../entity-validator');
 
@@ -81,50 +82,107 @@ describe('Entity service', () => {
   describe('Create', () => {
     describe('assign default values', () => {
       let instance;
+      const entityUID = 'api::entity.entity';
+      const relationUID = 'api::relation.relation';
 
       beforeAll(() => {
-        const fakeQuery = {
-          count: jest.fn(() => 0),
-          create: jest.fn(({ data }) => data),
-        };
-
-        const fakeModel = {
-          kind: 'contentType',
-          modelName: 'test-model',
-          privateAttributes: [],
-          options: {},
-          attributes: {
-            attrStringDefaultRequired: { type: 'string', default: 'default value', required: true },
-            attrStringDefault: { type: 'string', default: 'default value' },
-            attrBoolDefaultRequired: { type: 'boolean', default: true, required: true },
-            attrBoolDefault: { type: 'boolean', default: true },
-            attrIntDefaultRequired: { type: 'integer', default: 1, required: true },
-            attrIntDefault: { type: 'integer', default: 1 },
-            attrEnumDefaultRequired: {
-              type: 'enumeration',
-              enum: ['a', 'b', 'c'],
-              default: 'a',
-              required: true,
+        const fakeEntities = {
+          [relationUID]: {
+            1: {
+              id: 1,
+              Name: 'TestRelation',
+              createdAt: '2022-09-28T15:11:22.995Z',
+              updatedAt: '2022-09-29T09:01:02.949Z',
+              publishedAt: null,
             },
-            attrEnumDefault: {
-              type: 'enumeration',
-              enum: ['a', 'b', 'c'],
-              default: 'b',
+            2: {
+              id: 2,
+              Name: 'TestRelation2',
+              createdAt: '2022-09-28T15:11:22.995Z',
+              updatedAt: '2022-09-29T09:01:02.949Z',
+              publishedAt: null,
             },
-            attrPassword: { type: 'password' },
           },
         };
 
+        const fakeModel = {
+          [entityUID]: {
+            uid: entityUID,
+            kind: 'contentType',
+            modelName: 'test-model',
+            privateAttributes: [],
+            options: {},
+            attributes: {
+              attrStringDefaultRequired: {
+                type: 'string',
+                default: 'default value',
+                required: true,
+              },
+              attrStringDefault: { type: 'string', default: 'default value' },
+              attrBoolDefaultRequired: { type: 'boolean', default: true, required: true },
+              attrBoolDefault: { type: 'boolean', default: true },
+              attrIntDefaultRequired: { type: 'integer', default: 1, required: true },
+              attrIntDefault: { type: 'integer', default: 1 },
+              attrEnumDefaultRequired: {
+                type: 'enumeration',
+                enum: ['a', 'b', 'c'],
+                default: 'a',
+                required: true,
+              },
+              attrEnumDefault: {
+                type: 'enumeration',
+                enum: ['a', 'b', 'c'],
+                default: 'b',
+              },
+              attrPassword: { type: 'password' },
+              attrRelation: {
+                type: 'relation',
+                relation: 'oneToMany',
+                target: relationUID,
+                mappedBy: 'entity',
+              },
+            },
+          },
+          [relationUID]: {
+            uid: relationUID,
+            kind: 'contentType',
+            modelName: 'relation',
+            attributes: {
+              Name: {
+                type: 'string',
+                default: 'default value',
+                required: true,
+              },
+            },
+          },
+        };
+        const fakeQuery = (uid) => ({
+          count: jest.fn(() => 0),
+          create: jest.fn(({ data }) => data),
+          findWithCount: jest.fn(({ where }) => {
+            const ret = [];
+            where.id.$in.forEach((id) => {
+              const entity = fakeEntities[uid][id];
+              if (!entity) return;
+              ret.push(entity);
+            });
+            return [ret, ret.length];
+          }),
+        });
+
         const fakeDB = {
-          query: jest.fn(() => fakeQuery),
+          query: jest.fn((uid) => fakeQuery(uid)),
         };
 
-        const fakeStrapi = {
-          getModel: jest.fn(() => fakeModel),
+        global.strapi = {
+          getModel: jest.fn((uid) => {
+            return fakeModel[uid];
+          }),
+          db: fakeDB,
         };
 
         instance = createEntityService({
-          strapi: fakeStrapi,
+          strapi: global.strapi,
           db: fakeDB,
           eventHub: new EventEmitter(),
           entityValidator,
@@ -134,7 +192,7 @@ describe('Entity service', () => {
       test('should create record with all default attributes', async () => {
         const data = {};
 
-        await expect(instance.create('test-model', { data })).resolves.toMatchObject({
+        await expect(instance.create(entityUID, { data })).resolves.toMatchObject({
           attrStringDefaultRequired: 'default value',
           attrStringDefault: 'default value',
           attrBoolDefaultRequired: true,
@@ -154,7 +212,7 @@ describe('Entity service', () => {
           attrEnumDefault: 'c',
         };
 
-        await expect(instance.create('test-model', { data })).resolves.toMatchObject({
+        await expect(instance.create(entityUID, { data })).resolves.toMatchObject({
           attrStringDefault: 'my value',
           attrBoolDefault: false,
           attrIntDefault: 2,
@@ -179,10 +237,62 @@ describe('Entity service', () => {
           attrPassword: 'fooBar',
         };
 
-        await expect(instance.create('test-model', { data })).resolves.toMatchObject({
+        await expect(instance.create(entityUID, { data })).resolves.toMatchObject({
           ...data,
           attrPassword: 'secret-password',
         });
+      });
+
+      test('should create record with valid relation', async () => {
+        const data = {
+          attrStringDefaultRequired: 'my value',
+          attrStringDefault: 'my value',
+          attrBoolDefaultRequired: true,
+          attrBoolDefault: true,
+          attrIntDefaultRequired: 10,
+          attrIntDefault: 10,
+          attrEnumDefaultRequired: 'c',
+          attrEnumDefault: 'a',
+          attrPassword: 'fooBar',
+          attrRelation: {
+            connect: [
+              {
+                id: 1,
+              },
+            ],
+          },
+        };
+
+        const res = instance.create(entityUID, { data });
+
+        await expect(res).resolves.toMatchObject({
+          ...data,
+          attrPassword: 'secret-password',
+        });
+      });
+
+      test('should fail to create a record with an invalid relation', async () => {
+        const data = {
+          attrStringDefaultRequired: 'my value',
+          attrStringDefault: 'my value',
+          attrBoolDefaultRequired: true,
+          attrBoolDefault: true,
+          attrIntDefaultRequired: 10,
+          attrIntDefault: 10,
+          attrEnumDefaultRequired: 'c',
+          attrEnumDefault: 'a',
+          attrPassword: 'fooBar',
+          attrRelation: {
+            connect: [
+              {
+                id: 3,
+              },
+            ],
+          },
+        };
+
+        const res = instance.create(entityUID, { data });
+        await expect(res).rejects.toThrow(ApplicationError);
       });
     });
   });
@@ -193,25 +303,36 @@ describe('Entity service', () => {
 
       const entityUID = 'api::entity.entity';
       const relationUID = 'api::relation.relation';
+
       const fakeEntities = {
-        0: {
-          id: 0,
-          Name: 'TestEntity',
-          createdAt: '2022-09-28T15:11:22.995Z',
-          updatedAt: '2022-09-29T09:01:02.949Z',
-          publishedAt: null,
+        [entityUID]: {
+          0: {
+            id: 0,
+            Name: 'TestEntity',
+            createdAt: '2022-09-28T15:11:22.995Z',
+            updatedAt: '2022-09-29T09:01:02.949Z',
+            publishedAt: null,
+          },
         },
-        1: {
-          id: 1,
-          Name: 'TestRelation',
-          createdAt: '2022-09-28T15:11:22.995Z',
-          updatedAt: '2022-09-29T09:01:02.949Z',
-          publishedAt: null,
+        [relationUID]: {
+          1: {
+            id: 1,
+            Name: 'TestRelation',
+            createdAt: '2022-09-28T15:11:22.995Z',
+            updatedAt: '2022-09-29T09:01:02.949Z',
+            publishedAt: null,
+          },
+          2: {
+            id: 2,
+            Name: 'TestRelation2',
+            createdAt: '2022-09-28T15:11:22.995Z',
+            updatedAt: '2022-09-29T09:01:02.949Z',
+            publishedAt: null,
+          },
         },
-        2: null,
       };
-      beforeAll(() => {
-        const fakeModel = {
+      const fakeModel = {
+        [entityUID]: {
           kind: 'collectionType',
           modelName: 'entity',
           collectionName: 'entity',
@@ -233,41 +354,56 @@ describe('Entity service', () => {
               target: relationUID,
               mappedBy: 'entity',
             },
-            updatedBy: {
-              type: 'relation',
-              relation: 'oneToOne',
-              target: 'admin::user',
-              configurable: false,
-              writable: false,
-              visible: false,
-              useJoinTable: false,
-              private: true,
+          },
+        },
+        [relationUID]: {
+          kind: 'contentType',
+          modelName: 'relation',
+          attributes: {
+            Name: {
+              type: 'string',
+              default: 'default value',
+              required: true,
             },
           },
-        };
+        },
+      };
 
-        const fakeQuery = {
-          findOne: jest.fn(({ where }) => fakeEntities[where.id]),
+      beforeAll(() => {
+        const fakeQuery = (key) => ({
+          findOne: jest.fn(({ where }) => fakeEntities[key][where.id]),
+          findWithCount: jest.fn(({ where }) => {
+            const ret = [];
+            where.id.$in.forEach((id) => {
+              const entity = fakeEntities[key][id];
+              if (!entity) return;
+              ret.push(entity);
+            });
+            return [ret, ret.length];
+          }),
           update: jest.fn(({ where }) => ({
-            ...fakeEntities[where.id],
+            ...fakeEntities[key][where.id],
             addresses: {
               count: 1,
             },
           })),
-        };
+        });
 
         const fakeDB = {
-          query: jest.fn(() => fakeQuery),
+          query: jest.fn((key) => fakeQuery(key)),
         };
 
-        const fakeStrapi = {
-          getModel: jest.fn(() => fakeModel),
+        global.strapi = {
+          getModel: jest.fn((uid) => {
+            return fakeModel[uid];
+          }),
+          db: fakeDB,
         };
 
         instance = createEntityService({
-          strapi: fakeStrapi,
+          strapi: global.strapi,
           db: fakeDB,
-          eventHub: null, // bypass event emission for update tests
+          eventHub: new EventEmitter(),
           entityValidator,
         });
       });
@@ -278,7 +414,7 @@ describe('Entity service', () => {
         ).toBeNull();
       });
 
-      test('should successfully update with an existing relation', async () => {
+      test('should successfully update an existing relation', async () => {
         const data = {
           Name: 'TestEntry',
           addresses: {
@@ -288,10 +424,9 @@ describe('Entity service', () => {
               },
             ],
           },
-          updatedBy: 1,
         };
         expect(await instance.update(entityUID, 0, { data })).toMatchObject({
-          ...fakeEntities[0],
+          ...fakeEntities[entityUID][0],
           addresses: {
             count: 1,
           },
@@ -304,14 +439,14 @@ describe('Entity service', () => {
           addresses: {
             connect: [
               {
-                id: 2,
+                id: 3,
               },
             ],
           },
-          updatedBy: 1,
         };
 
-        await expect(instance.update(entityUID, 0, { data })).rejects.toThrow();
+        const res = instance.update(entityUID, 0, { data });
+        await expect(res).rejects.toThrow(ApplicationError);
       });
     });
   });

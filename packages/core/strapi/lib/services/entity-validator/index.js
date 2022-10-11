@@ -5,6 +5,7 @@
 
 'use strict';
 
+const { isEmpty, uniqBy, castArray, isNil } = require('lodash');
 const { has, assoc, prop, isObject } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const validators = require('./validators');
@@ -204,6 +205,107 @@ const createModelValidator =
     return yup.object().shape(schema);
   };
 
+/**
+ * Builds a map containing all the media and relations being associated with an entity
+ * @param {String} uid of the model
+ * @param {Object} data
+ * @param {Map} relationsMap to be updated and returned
+ * @returns
+ */
+const buildRelationsMap = (uid, data, relationsMap = new Map()) => {
+  const currentModel = strapi.getModel(uid);
+  if (isEmpty(currentModel)) return;
+
+  Object.keys(currentModel.attributes).forEach((attributeName) => {
+    const attribute = currentModel.attributes[attributeName];
+    const value = data[attributeName];
+    if (isEmpty(value) || isNil(value)) {
+      return;
+    }
+    switch (attribute.type) {
+      case 'relation': {
+        if (!attribute.target) {
+          break;
+        }
+
+        // If the attribute type is a relation keep track of all
+        // associations being made with relations. These will later be checked
+        // against the DB to confirm they exist
+        let directValue = [];
+        if (Array.isArray(value)) {
+          directValue = value.map((v) => ({ id: v }));
+        }
+        relationsMap.set(
+          attribute.target,
+          (relationsMap.get(attribute.target) || []).concat(
+            ...(value.connect || value.set || directValue)
+          )
+        );
+        break;
+      }
+      case 'media': {
+        // For media attribute types keep track of all media associated with
+        // this entity. These will later be checked against the DB to confirm
+        // they exist
+        const mediaUID = 'plugin::upload.file';
+        castArray(value).forEach((v) =>
+          relationsMap.set(mediaUID, [...(relationsMap.get(mediaUID) || []), { id: v.id || v }])
+        );
+        break;
+      }
+      case 'component': {
+        return castArray(value).forEach((componentValue) =>
+          buildRelationsMap(attribute.component, componentValue, relationsMap)
+        );
+      }
+      case 'dynamiczone': {
+        return value.forEach((dzValue) =>
+          buildRelationsMap(dzValue.__component, dzValue, relationsMap)
+        );
+      }
+      default:
+        break;
+    }
+  });
+
+  return relationsMap;
+};
+
+/**
+ * Iterate through the relations map and validate that every relation or media
+ * mentioned exists
+ */
+const checkRelationsExist = async (relationsMap = new Map()) => {
+  const promises = [];
+  for (const [key, value] of relationsMap) {
+    const evaluate = async () => {
+      const uniqueValues = uniqBy(value, `id`);
+      // eslint-disable-next-line no-unused-vars
+      const [entities, count] = await strapi.db.query(key).findWithCount({
+        where: {
+          id: {
+            $in: uniqueValues.map((v) => Number(v.id)),
+          },
+        },
+      });
+
+      if (count !== uniqueValues.length) {
+        const missingEntities = uniqueValues.filter(
+          (value) => !entities.find((entity) => entity.id === value.id)
+        );
+        throw new ValidationError(
+          `Relations of type ${key} associated with this entity do not exist. IDs: ${missingEntities
+            .map((entity) => entity.id)
+            .join(',')}`
+        );
+      }
+    };
+    promises.push(evaluate());
+  }
+
+  return Promise.all(promises);
+};
+
 const createValidateEntity =
   (createOrUpdate) =>
   async (model, data, { isDraft = false } = {}, entity = null) => {
@@ -222,7 +324,20 @@ const createValidateEntity =
         entity,
       },
       { isDraft }
-    ).required();
+    )
+      .test('relations-test', 'check that all relations exist', async function (data) {
+        try {
+          await checkRelationsExist(buildRelationsMap(model.uid, data) || new Map());
+        } catch (e) {
+          return this.createError({
+            path: this.path,
+            message: e.message,
+          });
+        }
+        return true;
+      })
+      .required();
+
     return validateYupSchema(validator, { strict: false, abortEarly: false })(data);
   };
 

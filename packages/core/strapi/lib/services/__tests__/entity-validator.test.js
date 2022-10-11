@@ -10,6 +10,7 @@ describe('Entity validator', () => {
           errors: {
             badRequest: jest.fn(),
           },
+          getModel: () => ({}),
         };
 
         const model = {
@@ -88,6 +89,7 @@ describe('Entity validator', () => {
           errors: {
             badRequest: jest.fn(),
           },
+          getModel: () => ({}),
         };
 
         const model = {
@@ -164,6 +166,7 @@ describe('Entity validator', () => {
           errors: {
             badRequest: jest.fn(),
           },
+          getModel: () => ({}),
         };
 
         const model = {
@@ -203,6 +206,7 @@ describe('Entity validator', () => {
           errors: {
             badRequest: jest.fn(),
           },
+          getModel: () => ({}),
         };
 
         const model = {
@@ -329,6 +333,7 @@ describe('Entity validator', () => {
           errors: {
             badRequest: jest.fn(),
           },
+          getModel: () => ({}),
         };
 
         const model = {
@@ -469,6 +474,7 @@ describe('Entity validator', () => {
           errors: {
             badRequest: jest.fn(),
           },
+          getModel: () => ({}),
         };
 
         const model = {

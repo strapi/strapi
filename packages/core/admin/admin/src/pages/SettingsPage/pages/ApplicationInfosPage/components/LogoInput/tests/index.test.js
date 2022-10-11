@@ -260,7 +260,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
       fireEvent.change(textInput, {
         target: {
-          value: 'https://cdn.pixabay.com/photo/2022/01/18/07/38/cat-6946505__340.jpg',
+          value: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/TearsOfSteel.jpg',
         },
       });
 
@@ -279,7 +279,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
       fireEvent.change(textInput, {
         target: {
-          value: 'https://cdn.pixabay.com/photo/2022/01/18/07/38/cat-6946505__340.jpg',
+          value: 'https://storage.googleapis.com/gtv-videos-bucket/sample/images/TearsOfSteel.jpg',
         },
       });
 
