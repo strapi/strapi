@@ -110,7 +110,7 @@ const getComponents = async (uid, entity) => {
   const componentAttributes = getComponentAttributes(strapi.getModel(uid));
 
   if (_.isEmpty(componentAttributes)) return {};
-  const components = strapi.query(uid).load(entity, componentAttributes);
+  const components = await strapi.query(uid).load(entity, componentAttributes);
   return { id: entity?.id, ...components };
 };
 
