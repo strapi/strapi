@@ -8,7 +8,7 @@ import nameToSlug from '../../utils/nameToSlug';
 import { createComponentUid } from './utils/createUid';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
 import * as actions from './constants';
-import { getCustomFieldDefaultOptions } from './utils/getCustomFieldDefaultOptions';
+import { customFieldDefaultOptionsReducer } from './utils/customFieldDefaultOptionsReducer';
 
 const initialState = {
   formErrors: {},
@@ -308,7 +308,7 @@ const reducer = (state = initialState, action) =>
           ...(customField?.options?.advanced || []),
         ];
 
-        const optionDefaults = getCustomFieldDefaultOptions(allOptions);
+        const optionDefaults = allOptions.reduce(customFieldDefaultOptionsReducer, []);
 
         if (optionDefaults.length) {
           optionDefaults.forEach(({ name, defaultValue }) =>

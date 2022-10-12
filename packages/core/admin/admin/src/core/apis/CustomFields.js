@@ -32,22 +32,25 @@ const ALLOWED_ROOT_LEVEL_OPTIONS = [
   'default',
 ];
 
-const getOptionValidations = (options, validations = []) => {
-  options.forEach((option) => {
-    if (option.items) {
-      getOptionValidations(option.items, validations);
-    }
+const optionValidationsReducer = (acc, option) => {
+  if (option.items) {
+    return option.items.reduce(optionValidationsReducer, acc);
+  }
 
-    if (!option.name) return;
-
-    validations.push({
+  if (!option.name) {
+    acc.push({
+      isValidOptionPath: false,
+      errorMessage: "The 'name' property is required on an options object",
+    });
+  } else {
+    acc.push({
       isValidOptionPath:
         ALLOWED_ROOT_LEVEL_OPTIONS.includes(option.name) || option.name.startsWith('options'),
-      errorMessage: `'${option.name}' must be prefixed with 'options'`,
+      errorMessage: `'${option.name}' must be prefixed with 'options.'`,
     });
-  });
+  }
 
-  return validations;
+  return acc;
 };
 
 class CustomFields {
@@ -91,7 +94,7 @@ class CustomFields {
       const allFormOptions = [...(options?.base || []), ...(options?.advanced || [])];
 
       if (allFormOptions.length) {
-        const optionPathValidations = getOptionValidations(allFormOptions);
+        const optionPathValidations = allFormOptions.reduce(optionValidationsReducer, []);
         optionPathValidations.forEach(({ isValidOptionPath, errorMessage }) => {
           invariant(isValidOptionPath, errorMessage);
         });

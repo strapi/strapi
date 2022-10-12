@@ -375,12 +375,34 @@ describe('ADMIN | StrapiApp', () => {
 
       // Test shallow value
       expect(() => app.customFields.register(field)).toThrowError(
-        "'plop' must be prefixed with 'options'"
+        "'plop' must be prefixed with 'options.'"
       );
       // Test deep value
       field.options.advanced = [{ sectionTitle: null, items: [{ name: 'deep.plop' }] }];
       expect(() => app.customFields.register(field)).toThrowError(
-        "'deep.plop' must be prefixed with 'options'"
+        "'deep.plop' must be prefixed with 'options.'"
+      );
+    });
+
+    it('requires options to have a name property', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const field = {
+        name: 'test',
+        pluginId: 'myplugin',
+        type: 'text',
+        intlLabel: { id: 'foo', defaultMessage: 'foo' },
+        intlDescription: { id: 'foo', defaultMessage: 'foo' },
+        components: {
+          Input: jest.fn(),
+        },
+        options: {
+          base: [{ name: 'regex' }],
+          advanced: [{ boom: 'kapow' }],
+        },
+      };
+
+      expect(() => app.customFields.register(field)).toThrowError(
+        "The 'name' property is required on an options object"
       );
     });
   });
