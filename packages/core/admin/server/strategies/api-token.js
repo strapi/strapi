@@ -53,8 +53,9 @@ const authenticate = async (ctx) => {
   }
 
   // update lastUsedAt
-  await apiTokenService.update(apiToken.id, {
-    lastUsedAt: currentDate,
+  await strapi.query('admin::api-token').update({
+    where: { id: apiToken.id },
+    data: { lastUsedAt: currentDate },
   });
 
   if (apiToken.type === constants.API_TOKEN_TYPE.CUSTOM) {
