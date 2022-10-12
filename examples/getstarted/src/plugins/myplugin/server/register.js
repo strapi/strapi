@@ -21,9 +21,10 @@ module.exports = ({ strapi }) => {
   ];
 
   allTypes.forEach((type) => {
+    const upcasedType = type.charAt(0).toUpperCase() + type.slice(1);
     strapi.customFields.register({
       type,
-      name: `custom${type}`,
+      name: `custom${upcasedType}`,
       plugin: 'myplugin',
     });
   });

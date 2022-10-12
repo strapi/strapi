@@ -47,17 +47,18 @@ export default {
     ];
 
     allTypes.forEach((type) => {
+      const upcasedType = type.charAt(0).toUpperCase() + type.slice(1);
       const customField = {
         type,
         pluginId: 'myplugin',
-        name: `custom${type}`,
+        name: `custom${upcasedType}`,
         intlLabel: {
           id: 'customfieldtest',
-          defaultMessage: `custom${type}`,
+          defaultMessage: `custom${upcasedType}`,
         },
         intlDescription: {
           id: 'customfieldtest',
-          defaultMessage: `custom${type}`,
+          defaultMessage: `custom${upcasedType}`,
         },
         components: {
           Input: async () =>
