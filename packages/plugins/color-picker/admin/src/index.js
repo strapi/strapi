@@ -48,7 +48,6 @@ export default {
               {
                 name: 'required',
                 type: 'checkbox',
-                defaultValue: true,
                 intlLabel: {
                   id: getTrad('color-picker.options.advanced.requiredField'),
                   defaultMessage: 'Required field',
