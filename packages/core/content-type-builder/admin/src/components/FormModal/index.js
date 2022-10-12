@@ -275,6 +275,8 @@ const FormModal = () => {
             customField,
             isEditing: actionType === 'edit',
             modifiedDataToSetForEditing: attributeToEdit,
+            // NOTE: forTarget is used in the i18n middleware
+            forTarget,
           });
         } else {
           dispatch({
