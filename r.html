@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        h1{
+            color: red;
+            border: double;
+            border-color: green;
+            border-radius: 3cm;
+            padding: 10px;
+        }
+        form{
+            font-size: larger;
+        }
+        body{
+            background-color: antiquewhite;
+        }
+        input{
+            text-align: justify;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align:center;">Javascript Form</h1>
+    <form action="reg.html" name="register">
+        <h1>Personal Details</h1>
+        Name : <input type="text" name="nname"><p id="nval" style="display:inline;"></p> <br>
+        Email id : <input type="text" name="ename"><p id="eval" style="display:inline;"></p> <br>
+        Mobile No: <input type="text" name="mname"><p id="mval" style="display:inline;"></p> <br>
+        Date Of Birth: <input type="text" name="dname"><p id="dval" style="display:inline;"></p> <br>
+
+        <h1>Educational Details</h1>
+        XI Marks: <input type="text" name="Iname"><p id="Ival"  style="display:inline;"></p> <br>
+        XII Marks: <input type="text" name="IIname"><p id="IIval"  style="display:inline;"></p> <br>
+        Educational Qualification: <input type="text" name="Ename"><p id="Eval" style="display:inline;"></p><br>
+
+        <h1>Card Details</h1>
+        Card No : <input type="text" name="Cname"><p id="Cval" style="display:inline;"></p><br>
+        <br>
+        <h1>Submit</h1>
+        <input type="submit" id="btn" value="Submit" disabled>
+    </form>
+    <script>
+
+        var n=document.getElementById("nval");
+        var e=document.getElementById("eval");
+        var m=document.getElementById("mval");
+        var d=document.getElementById("dval");
+        var I=document.getElementById("Ival");
+        var II=document.getElementById("IIval");
+        var E=document.getElementById("Eval");
+        var C=document.getElementById("Cval");
+
+        // Personal details
+        document.forms["register"]["nname"].addEventListener("blur",ch_name);
+        document.forms["register"]["ename"].addEventListener("blur",ch_email);
+        document.forms["register"]["mname"].addEventListener("blur",ch_mobile);
+        document.forms["register"]["dname"].addEventListener("blur",ch_date);
+
+        document.forms["register"]["nname"].addEventListener("focus",d_name);
+        document.forms["register"]["ename"].addEventListener("focus",d_email);
+        document.forms["register"]["mname"].addEventListener("focus",d_mobile);
+        document.forms["register"]["dname"].addEventListener("focus",d_date);
+
+        // Educational Details
+        document.forms["register"]["Iname"].addEventListener("blur",ch_XI);
+        document.forms["register"]["IIname"].addEventListener("blur",ch_XII);
+
+
+        document.forms["register"]["Iname"].addEventListener("focus",d_XI);
+        document.forms["register"]["IIname"].addEventListener("focus",d_XII);
+
+        // Card Details
+        document.forms["register"]["Ename"].addEventListener("blur",ch_E);
+        document.forms["register"]["Ename"].addEventListener("focus",d_E);
+
+        document.forms["register"]["Cname"].addEventListener("blur",ch_C);
+        document.forms["register"]["Cname"].addEventListener("focus",d_C);
+
+        // checking all validation
+        var name_valid=false, email_valid=false, mobile_valid=false ,dob_valid=false,
+        I_valid=false , II_valid=false ,E_valid=false,C_valid=false;
+
+
+        let formelems = document.forms["register"].elements;
+        
+        for (var i = 0; i < formelems.length; i++) {
+                    formelems[i].addEventListener("blur",checkAll);
+                    
+        }
+        function checkAll(){
+            if(name_valid && email_valid && mobile_valid && dob_valid && I_valid && II_valid && E_valid && C_valid)
+            {
+                document.getElementById("btn").disabled = false;
+            }
+        }
+
+
+        // blur functions
+        function containsAnyLetter(str) {
+            return /[a-zA-Z]/.test(str);
+        }
+        function containsNumber(str) {
+             return /\d/.test(str);
+        }
+        function contains_SC(str){
+            var i=0,j;
+            for(i=0;i<str.length;i++){
+                if(str.charAt(i)=='@'||str.charAt(i)=='!'||str.charAt(i)=='#'||str.charAt(i)=='$'){
+                    return true;
+                }
+            }
+            return false;
+        }
+        function ch_name(){
+            let s=document.forms["register"]["nname"].value;
+            if(containsNumber(s)){
+                n.innerHTML="enter a valid name";
+                n.style.color="red";
+            }
+            else if(contains_SC(s)){
+                n.innerHTML="enter a valid name";
+                n.style.color="red";
+            }
+            else if(s==""){
+                n.innerHTML="enter a valid name";
+                n.style.color="red";
+            }
+            else{
+                name_valid=true;
+                n.innerHTML="";
+            }
+        }
+
+        function ch_email(){
+            let s=document.forms["register"]["ename"].value;
+                if(s.endsWith("@gmail.com")){
+                        e.innerHTML="";
+                        email_valid=true;
+                    }
+                else{
+                    e.innerHTML="enter the valid email";
+                    e.style.color="red";
+                }
+            }
+        
+
+        function ch_mobile(){
+            let s=document.forms["register"]["mname"].value;
+            if(s.startsWith('7')||s.startsWith('8')||s.startsWith('9')){
+                if(s.length==10){
+                    if(!containsAnyLetter(s)){
+                         m.innerHTML="";
+                         mobile_valid=true;
+                    }
+                    else{
+                        m.innerHTML="enter a valid mobile no";
+                        m.style.color="red";
+                    }     
+                }
+                else {
+                    m.innerHTML="enter a valid mobile no";
+                    m.style.color="red";
+                }
+            }
+            else{
+                m.innerHTML="enter a valid mobile no";
+                m.style.color="red";
+            }
+        }
+        function ch_date(){
+            let s=document.forms["register"]["dname"].value;
+            var today = new Date();
+            var birthDate = new Date(s);
+            var age = today.getFullYear() - birthDate.getFullYear();
+            c=age;
+            var m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) 
+            {
+                age--;
+            }
+            if(age>18 && age<25){
+                dob_valid=true;
+                d.innerHTML="";
+            }
+            else{
+                d.innerHTML="enter a valid date ";
+                d.style.color="red";
+            }
+        }
+
+        function ch_XI(){
+            let s=(document.forms["register"]["Iname"].value);
+            if(containsAnyLetter(s) || s==""){
+                I.innerHTML="enter valid marks";
+                I.style.color="red";
+            }
+            else{
+                if((s.length>2 || s=="100")){
+                I.innerHTML="enter valid marks";
+                I.style.color="red";
+                }
+                else{
+                I_valid=true;
+                I.innerHTML="";
+                }
+            }
+        }
+        function ch_XII(){
+            let s=(document.forms["register"]["IIname"].value);
+            if(containsAnyLetter(s) || s==""){
+                II.innerHTML="enter valid marks";
+                II.style.color="red";
+            }
+            else{
+                if((s.length>2 || s=="100")){
+                II.innerHTML="enter valid marks";
+                II.style.color="red";
+                }
+                else{
+                II.innerHTML="";
+                II_valid=true;
+                }
+            }
+        }
+
+        function ch_E(){
+            let s=(document.forms["register"]["Ename"].value);
+            if(containsAnyLetter(s)){
+                if(containsNumber(s)){
+                E.innerHTML="enter valid educational details";
+                E.style.color="red";
+                }
+                else{
+                E.innerHTML="";
+                E_valid=true;
+                }
+            }
+            else{
+                E.innerHTML="enter valid educational details";
+                E.style.color="red";
+            }
+        }
+
+        function ch_C(){
+            let s=(document.forms["register"]["Cname"].value);
+            if(containsAnyLetter(s)){
+                console.log("hh");
+                C.innerHTML="enter valid card no";
+                C.style.color="red";
+            }
+            else{
+                console.log(s.length);
+                if(s.length==12){
+                    C.innerHTML="";
+                    C_valid=true;
+                }
+                else{
+                    console.log("hh1");
+                C.innerHTML="enter valid card no";
+                C.style.color="red";
+                }
+            }
+        }
+        
+        // focus functions
+        function d_name(){
+                n.innerHTML = "Name should not contain any special character or number.";
+                n.style.color = "green";
+            }
+        function d_mobile(){
+                m.innerHTML = "Mobile No should be 10 digits and should only contain number .";
+                m.style.color = "green";
+            } 
+        function d_email(){
+                e.innerHTML = "email should be of form @gmail.com";
+                e.style.color = "green";
+            } 
+        function d_date(){
+                d.innerHTML = "Age should be greater than 18 and less than 25.";
+                d.style.color = "green";
+            }
+        
+        function d_XI(){
+                I.innerHTML = "marks should be from 0 to 100.";
+                I.style.color = "green";
+        }
+
+        function d_XII(){
+                II.innerHTML = "marks should be from 0 to 100.";
+                II.style.color = "green";
+        }
+        function d_E(){
+                E.innerHTML = "enter your educational qualification.";
+                E.style.color = "green";
+        }
+        function d_C(){
+                C.innerHTML = "card no should be of 12 digits.";
+                C.style.color = "green";
+        }
+    
+    </script>
+    
+</body>
+</html>
