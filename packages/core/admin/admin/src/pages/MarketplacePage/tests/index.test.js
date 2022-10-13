@@ -262,15 +262,16 @@ describe('Marketplace page', () => {
     expect(notInstalledText).toBeVisible();
   });
 
-  it('Its showing the sort by menu', async () => {
+  it('shows the sort by menu', async () => {
     render(App);
     const sortMenu = screen.getByText('Sort by');
     expect(sortMenu).toBeVisible();
   });
 
   it('Sort select shows the correct options', async () => {
-    const { container } = render(App);
-    fireEvent.mouseDown(container.querySelector('#marketplaceSortButton'));
+    render(App);
+    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    fireEvent.mouseDown(sortButton);
 
     const alphabeticalOption = screen.getByText('Alphabetical order');
     const newestOption = screen.getByText('Newest');
