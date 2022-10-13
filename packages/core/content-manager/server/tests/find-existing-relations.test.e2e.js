@@ -203,7 +203,7 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
             },
           ]);
         } else {
-          expect(res.body.results[0]).toMatchObject({
+          expect(res.body.data).toMatchObject({
             id: expect.any(Number),
             name: 'Skate',
             ...addPublishedAtCheck(expect.any(String)),
@@ -218,7 +218,11 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
         });
 
         expect(res.status).toBe(200);
-        expect(res.body.results).toHaveLength(0);
+        if (isManyRelation) {
+          expect(res.body.results).toHaveLength(0);
+        } else {
+          expect(res.body.data).toBe(null);
+        }
       });
 
       if (isManyRelation) {
@@ -274,7 +278,7 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
             },
           ]);
         } else {
-          expect(res.body.results[0]).toMatchObject({
+          expect(res.body.data).toMatchObject({
             id: expect.any(Number),
             name: 'Skate',
             ...addPublishedAtCheck(expect.any(String)),
