@@ -23,7 +23,10 @@ const types = require('../types');
 const { createField } = require('../fields');
 const { createQueryBuilder } = require('../query');
 const { createRepository } = require('./entity-repository');
-const { deleteRelatedMorphOneRelationsAfterMorphToManyUpdate } = require('./morph-relations');
+const {
+  deleteRelatedMorphOneRelationsAfterMorphToManyUpdate,
+  cleanMorphOrderColumns,
+} = require('./morph-relations');
 const {
   isBidirectional,
   isAnyToOne,
@@ -685,6 +688,9 @@ const createEntityManager = (db) => {
 
             const { idColumn, typeColumn } = morphColumn;
 
+            const relsToAdd = cleanRelationData.set || cleanRelationData.connect;
+            const relIdsToadd = toIds(relsToAdd);
+
             await this.createQueryBuilder(joinTable.name)
               .delete()
               .where({
@@ -696,23 +702,50 @@ const createEntityManager = (db) => {
               .transacting(trx)
               .execute();
 
-            if (isEmpty(cleanRelationData.set)) {
+            await cleanMorphOrderColumns({
+              id,
+              uid,
+              attributeName,
+              targetAttribute,
+              db,
+              transaction: trx,
+            });
+
+            if (isEmpty(relsToAdd)) {
               continue;
             }
 
-            const rows = cleanRelationData.set.map((data, idx) => ({
+            const insert = relsToAdd.map((data) => ({
               [joinColumn.name]: data.id,
               [idColumn.name]: id,
               [typeColumn.name]: uid,
               ...(joinTable.on || {}),
               ...(data.__pivot || {}),
-              order: idx + 1,
               field: attributeName,
             }));
 
-            await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
-          }
+            // get order value from max value
+            const maxOrder = await db
+              .getConnection()
+              .select(joinColumn.name)
+              .max('order', { as: 'max' })
+              .whereIn(joinColumn.name, relIdsToadd)
+              .where(joinTable.on || {}) // What was this again 😅?
+              .groupBy(joinColumn.name)
+              .from(joinTable.name)
+              .transacting(trx);
 
+            const maxMap = maxOrder.reduce((acc, curr) => {
+              acc[curr[joinColumn.name]] = curr.max;
+              return acc;
+            }, {});
+
+            insert.forEach((rel) => {
+              rel.order = (maxMap[rel[joinColumn.name]] || 0) + 1;
+            });
+
+            await this.createQueryBuilder(joinTable.name).insert(insert).transacting(trx).execute();
+          }
           continue;
         }
 
