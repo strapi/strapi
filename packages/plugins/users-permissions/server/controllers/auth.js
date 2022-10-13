@@ -144,7 +144,7 @@ module.exports = {
       throw new ValidationError('Passwords do not match');
     }
 
-    const user = await strapi
+    let user = await strapi
       .query('plugin::users-permissions.user')
       .findOne({ where: { resetPasswordToken: code } });
 
@@ -152,12 +152,17 @@ module.exports = {
       throw new ValidationError('Incorrect code provided');
     }
 
-    await getService('user').edit(user.id, {
-      resetPasswordToken: null,
-      password,
-    });
+    let data = { password, resetPasswordToken: null };
+
+    const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
+    const settings = await pluginStore.get({ key: 'advanced' });
+
+    if (!user.confirmed && settings.email_confirmation)
+      data = { ...data, confirmed: true, confirmationToken: null };
 
     // Update the user.
+    user = await getService('user').edit(user.id, data);
+
     ctx.send({
       jwt: getService('jwt').issue({ id: user.id }),
       user: await sanitizeUser(user, ctx),
