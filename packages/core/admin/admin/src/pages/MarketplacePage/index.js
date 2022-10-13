@@ -30,7 +30,7 @@ import offlineCloud from '../../assets/images/icon_offline-cloud.svg';
 import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
 import MissingPluginBanner from './components/MissingPluginBanner';
 import NpmPackagesGrid from './components/NpmPackagesGrid';
-import SortFilter from './components/SortFilter';
+import SortSelect from './components/SortSelect';
 
 const matchSearch = (npmPackages, search) => {
   return matchSorter(npmPackages, search, {
@@ -245,7 +245,7 @@ const MarketPlacePage = () => {
               </Tabs>
             </Box>
             <Flex paddingBottom={4} gap={2}>
-              <SortFilter value={sort} onChange={(sort) => setQuery({ ...query, sort })} />
+              <SortSelect value={sort} onChange={(sort) => setQuery({ sort })} />
             </Flex>
             <TabPanels>
               {/* Plugins panel */}
