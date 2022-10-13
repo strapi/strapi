@@ -86,6 +86,27 @@ describe('useRelation', () => {
     });
   });
 
+  test('fetch and normalize relations for xToOne', async () => {
+    const FIXTURE = {
+      id: 1,
+      title: 'xToOne relation',
+    };
+
+    axiosInstance.get = jest.fn().mockResolvedValueOnce({
+      data: {
+        data: FIXTURE,
+      },
+    });
+
+    const { result, waitForNextUpdate } = await setup(undefined);
+
+    await waitForNextUpdate();
+
+    expect(result.current.relations.isSuccess).toBe(true);
+    expect(result.current.relations.data.pages[0].results[0]).toStrictEqual(FIXTURE);
+    expect(result.current.relations.data.pages[0]?.data).toBeUndefined();
+  });
+
   test('fetch relations with different limit', async () => {
     const { waitForNextUpdate } = await setup(undefined, {
       relation: { pageParams: { limit: 5 } },
@@ -123,7 +144,7 @@ describe('useRelation', () => {
   });
 
   test('fetch relations next page, if there is one', async () => {
-    axiosInstance.get = jest.fn().mockResolvedValue({
+    axiosInstance.get = jest.fn().mockResolvedValueOnce({
       data: {
         results: [],
         pagination: {
@@ -159,7 +180,7 @@ describe('useRelation', () => {
   });
 
   test("does not fetch relations next page, if there isn't one", async () => {
-    axiosInstance.get = jest.fn().mockResolvedValue({
+    axiosInstance.get = jest.fn().mockResolvedValueOnce({
       data: {
         results: [],
         pagination: {
@@ -278,7 +299,7 @@ describe('useRelation', () => {
   test("does not fetch search next page, if there isn't one", async () => {
     const { result, waitForNextUpdate } = await setup(undefined);
 
-    const spy = jest.fn().mockResolvedValue({
+    const spy = jest.fn().mockResolvedValueOnce({
       data: { results: [], pagination: { page: 1, pageCount: 1 } },
     });
     axiosInstance.get = spy;

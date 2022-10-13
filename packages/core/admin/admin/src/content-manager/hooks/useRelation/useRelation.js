@@ -41,8 +41,13 @@ export const useRelation = (cacheKey, { relation, search }) => {
     cacheTime: 0,
     enabled: relation.enabled,
     getNextPageParam(lastPage) {
-      // the API may send an empty 204 response
-      if (!lastPage || lastPage.pagination.page >= lastPage.pagination.pageCount) {
+      const isXToOneRelation = !lastPage?.pagination;
+
+      if (
+        !lastPage || // the API may send an empty 204 response
+        isXToOneRelation || // xToOne relations do not have a pagination
+        lastPage.pagination.page >= lastPage.pagination.pageCount
+      ) {
         return undefined;
       }
 
@@ -50,7 +55,29 @@ export const useRelation = (cacheKey, { relation, search }) => {
       return lastPage.pagination.page + 1;
     },
     select: (data) => ({
-      pages: data.pages.map((page) => ({ ...page, results: [...(page.results ?? [])].reverse() })),
+      ...data,
+      pages: data.pages.map((page) => {
+        if (!page) {
+          return page;
+        }
+
+        const { data, results, pagination } = page;
+        const isXToOneRelation = !!data;
+        let normalizedResults = [];
+
+        // xToOne relations return an object, which we normalize so that relations
+        // always have the same shape
+        if (isXToOneRelation) {
+          normalizedResults = [data];
+        } else if (results) {
+          normalizedResults = results.reverse();
+        }
+
+        return {
+          pagination,
+          results: normalizedResults,
+        };
+      }),
     }),
   });
 
