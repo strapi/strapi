@@ -234,4 +234,48 @@ describe('RelationInputDataManager | select', () => {
       },
     });
   });
+
+  test('returns a component ID', async () => {
+    useCMEditViewDataManager.mockReturnValueOnce({
+      ...CM_DATA_FIXTURE,
+      isCreatingEntry: false,
+      initialData: {
+        repComp: [
+          {
+            id: 1,
+          },
+        ],
+      },
+    });
+
+    const { result } = await setup({
+      ...SELECT_ATTR_FIXTURE,
+      name: 'repComp.0.field-name',
+      componentUid: 'basic.comp-relation',
+    });
+
+    expect(result.current.componentId).toBe(1);
+  });
+
+  test('does not return a component ID if no component UID was passed', async () => {
+    useCMEditViewDataManager.mockReturnValueOnce({
+      ...CM_DATA_FIXTURE,
+      isCreatingEntry: false,
+      initialData: {
+        repComp: [
+          {
+            id: 1,
+          },
+        ],
+      },
+    });
+
+    const { result } = await setup({
+      ...SELECT_ATTR_FIXTURE,
+      name: 'repComp.0.field-name',
+      componentUid: null,
+    });
+
+    expect(result.current.componentId).toBeUndefined();
+  });
 });
