@@ -274,7 +274,7 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
   }
 };
 
-const deleteComponents = async (uid, entityToDelete, { loadComponents = true }) => {
+const deleteComponents = async (uid, entityToDelete, { loadComponents = true } = {}) => {
   const { attributes = {} } = strapi.getModel(uid);
 
   for (const attributeName of Object.keys(attributes)) {
