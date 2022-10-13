@@ -28,7 +28,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepublish": "tsc -p tsconfig.json"
+    "watch": "yarn build -w"
   },
   "directories": {
     "lib": "./dist"
