@@ -10,15 +10,15 @@ interface IProvider {
 
   bootstrap?(): Promise<void> | void;
   close?(): Promise<void> | void;
-  getMetadata(): IMetadata | Promise<IMetadata>;
+  getMetadata(): IMetadata | null | Promise<IMetadata | null>;
 }
 
 export interface ISourceProvider extends IProvider {
   // Getters for the source's transfer streams
-  streamEntities?(): PipelineSource | Promise<PipelineSource>;
-  streamLinks?(): PipelineSource | Promise<PipelineSource>;
-  streamMedia?(): PipelineSource | Promise<PipelineSource>;
-  streamConfiguration?(): PipelineSource | Promise<PipelineSource>;
+  streamEntities?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
+  streamLinks?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
+  streamMedia?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
+  streamConfiguration?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
 }
 
 export interface IDestinationProvider extends IProvider {
@@ -28,8 +28,8 @@ export interface IDestinationProvider extends IProvider {
   rollback?<T extends Error = Error>(e: T): void | Promise<void>;
 
   // Getters for the destination's transfer streams
-  getEntitiesStream?(): PipelineDestination | Promise<PipelineDestination>;
-  getLinksStream?(): PipelineDestination | Promise<PipelineDestination>;
-  getMediaStream?(): PipelineDestination | Promise<PipelineDestination>;
-  getConfigurationStream?(): PipelineDestination | Promise<PipelineDestination>;
+  getEntitiesStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
+  getLinksStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
+  getMediaStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
+  getConfigurationStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
 }
