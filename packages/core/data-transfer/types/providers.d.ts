@@ -1,5 +1,6 @@
 import { Stream } from './utils';
 import { IMetadata } from './common-entities';
+import { PipelineSource, PipelineDestination } from 'stream';
 
 type ProviderType = 'source' | 'destination';
 
@@ -14,10 +15,10 @@ interface IProvider {
 
 export interface ISourceProvider extends IProvider {
   // Getters for the source's transfer streams
-  streamEntities?(): Stream | Promise<Stream>;
-  streamLinks?(): Stream | Promise<Stream>;
-  streamMedia?(): Stream | Promise<Stream>;
-  streamConfiguration?(): Stream | Promise<Stream>;
+  streamEntities?(): PipelineSource | Promise<PipelineSource>;
+  streamLinks?(): PipelineSource | Promise<PipelineSource>;
+  streamMedia?(): PipelineSource | Promise<PipelineSource>;
+  streamConfiguration?(): PipelineSource | Promise<PipelineSource>;
 }
 
 export interface IDestinationProvider extends IProvider {
@@ -27,8 +28,8 @@ export interface IDestinationProvider extends IProvider {
   rollback?<T extends Error = Error>(e: T): void | Promise<void>;
 
   // Getters for the destination's transfer streams
-  getEntitiesStream?(): Stream | Promise<Stream>;
-  getLinksStream?(): Stream | Promise<Stream>;
-  getMediaStream?(): Stream | Promise<Stream>;
-  getConfigurationStream?(): Stream | Promise<Stream>;
+  getEntitiesStream?(): PipelineDestination | Promise<PipelineDestination>;
+  getLinksStream?(): PipelineDestination | Promise<PipelineDestination>;
+  getMediaStream?(): PipelineDestination | Promise<PipelineDestination>;
+  getConfigurationStream?(): PipelineDestination | Promise<PipelineDestination>;
 }

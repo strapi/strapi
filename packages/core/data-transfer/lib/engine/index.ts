@@ -7,7 +7,7 @@ import {
   ITransferEngineOptions,
 } from '../../types';
 
-export class TransferEngine implements ITransferEngine {
+class TransferEngine implements ITransferEngine {
   sourceProvider: ISourceProvider;
   destinationProvider: IDestinationProvider;
   options: ITransferEngineOptions;
@@ -141,28 +141,26 @@ export class TransferEngine implements ITransferEngine {
     // }
     // return new Promise((resolve, reject) => {
     //   pipeline(
-    //     // We might want to use a json-chain's Chain here since they allow transforms
-    //     // streams as regular functions (that allows object as parameter & return type)
     //     inStream,
-    //     // chain([
-    //     //   (data) => {
-    //     //     console.log('hello', data);
-    //     //     return data;
-    //     //   },
-    //     // ]),
+    //     chain([
+    //       (data) => {
+    //         console.log('hello', data);
+    //         return data;
+    //       },
+    //     ]),
     //     outStream,
-    //     (e: NodeJS.ErrnoException | null, value: unknown) => {
+    //     (e: NodeJS.ErrnoException | null) => {
     //       if (e) {
     //         console.log('Something wrong happened', e);
-    //         reject(e);
-    //         return;
+    //         return reject(e);
     //       }
-    //       console.log('value', value);
     //       console.log('All the entities have been transferred');
     //       resolve();
     //     }
     //   );
     // });
+    console.log('transferEntities not yet implemented');
+    return new Promise((resolve) => resolve());
   }
 
   async transferLinks(): Promise<void> {
@@ -210,3 +208,11 @@ export class TransferEngine implements ITransferEngine {
     return new Promise((resolve) => resolve());
   }
 }
+
+export const createTransferEngine = <T extends ISourceProvider, U extends IDestinationProvider>(
+  sourceProvider: T,
+  destinationProvider: U,
+  options: ITransferEngineOptions
+): TransferEngine => {
+  return new TransferEngine(sourceProvider, destinationProvider, options);
+};
