@@ -281,7 +281,12 @@ const deleteComponents = async (uid, entityToDelete, { loadComponents = true }) 
     const attribute = attributes[attributeName];
 
     if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
-      let value = entityToDelete[attributeName];
+      let value;
+      if (loadComponents) {
+        value = await strapi.query(uid).load(entityToDelete, attributeName);
+      } else {
+        value = entityToDelete[attributeName];
+      }
 
       if (!value && loadComponents) {
         value = await strapi.query(uid).load(entityToDelete, attributeName);
