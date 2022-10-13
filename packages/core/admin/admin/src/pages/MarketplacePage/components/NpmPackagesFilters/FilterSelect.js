@@ -1,0 +1,37 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Select, Option } from '@strapi/design-system/Select';
+
+const FilterSelect = ({ message, value, onChange, possibleFilters, onClear, customizeContent }) => {
+  return (
+    <Select
+      aria-label={message}
+      placeholder={message}
+      size="M"
+      onChange={onChange}
+      onClear={onClear}
+      value={value}
+      customizeContent={customizeContent}
+      multi
+    >
+      {Object.entries(possibleFilters).map(([filterName, count]) => {
+        return (
+          <Option key={filterName} value={filterName}>
+            {filterName} ({count})
+          </Option>
+        );
+      })}
+    </Select>
+  );
+};
+
+FilterSelect.propTypes = {
+  message: PropTypes.string.isRequired,
+  value: PropTypes.array.isRequired,
+  onChange: PropTypes.func.isRequired,
+  possibleFilters: PropTypes.object.isRequired,
+  onClear: PropTypes.func.isRequired,
+  customizeContent: PropTypes.func.isRequired,
+};
+
+export default FilterSelect;

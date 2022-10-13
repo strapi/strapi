@@ -31,6 +31,7 @@ import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
 import MissingPluginBanner from './components/MissingPluginBanner';
 import NpmPackagesGrid from './components/NpmPackagesGrid';
 import SortSelect from './components/SortSelect';
+import NpmPackagesFilters from './components/NpmPackagesFilters';
 
 const matchSearch = (npmPackages, search) => {
   return matchSorter(npmPackages, search, {
@@ -52,13 +53,17 @@ const MarketPlacePage = () => {
   const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
-  const [npmPackageType, setNpmPackageType] = useState('plugin');
   const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
   const isOnline = useNavigatorOnLine();
   const [{ query }, setQuery] = useQueryParams();
   const sort = query?.sort || 'name:asc';
+  const npmPackageType = query?.npmPackageType || 'plugin';
 
   useFocusWhenNavigate();
+
+  const params = {
+    sort,
+  };
 
   const marketplaceTitle = formatMessage({
     id: 'global.marketplace',
@@ -75,10 +80,6 @@ const MarketPlacePage = () => {
         { target: marketplaceTitle }
       )
     );
-  };
-
-  const params = {
-    sort,
   };
 
   const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
@@ -179,11 +180,24 @@ const MarketPlacePage = () => {
 
   const handleTabChange = (selected) => {
     const packageType = selected === 0 ? 'plugin' : 'provider';
-    setNpmPackageType(packageType);
+    setQuery({
+      // Save new tab in the query params
+      npmPackageType: packageType,
+      // Clear filters
+      collections: [],
+      categories: [],
+      // Reset sort
+      sort: 'name:asc',
+    });
   };
 
   // Check if plugins and providers are installed already
   const installedPackageNames = Object.keys(dependencies);
+
+  const possibleCollections =
+    npmPackageType === 'plugin'
+      ? marketplacePluginsResponse.meta.collections
+      : marketplaceProvidersResponse.meta.collections;
 
   return (
     <Layout>
@@ -224,6 +238,7 @@ const MarketPlacePage = () => {
             })}
             id="tabs"
             variant="simple"
+            initialSelectedTabIndex={['plugin', 'provider'].indexOf(npmPackageType)}
             onTabChange={handleTabChange}
           >
             <Box paddingBottom={4}>
@@ -246,7 +261,15 @@ const MarketPlacePage = () => {
             </Box>
             <Flex paddingBottom={4} gap={2}>
               <SortSelect value={sort} onChange={(sort) => setQuery({ sort })} />
+              <NpmPackagesFilters
+                npmPackageType={npmPackageType}
+                possibleCollections={possibleCollections}
+                possibleCategories={marketplacePluginsResponse.meta.categories}
+                query={query || {}}
+                setQuery={setQuery}
+              />
             </Flex>
+
             <TabPanels>
               {/* Plugins panel */}
               <TabPanel>

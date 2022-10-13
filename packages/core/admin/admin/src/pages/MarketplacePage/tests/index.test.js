@@ -54,11 +54,11 @@ const history = createMemoryHistory();
 const App = (
   <QueryClientProvider client={client}>
     <IntlProvider locale="en" messages={{}} textComponent="span">
-      <Router history={history}>
-        <ThemeProvider theme={lightTheme}>
+      <ThemeProvider theme={lightTheme}>
+        <Router history={history}>
           <MarketPlacePage />
-        </ThemeProvider>
-      </Router>
+        </Router>
+      </ThemeProvider>
     </IntlProvider>
   </QueryClientProvider>
 );
@@ -71,19 +71,47 @@ describe('Marketplace page', () => {
   afterAll(() => server.close());
 
   it('renders and matches the plugin tab snapshot', async () => {
+    // Check snapshot
     const { container, getByTestId, getByRole } = render(App);
     await waitForElementToBeRemoved(() => getByTestId('loader'));
     await waitFor(() => expect(getByRole('heading', { name: /marketplace/i })).toBeInTheDocument());
 
     expect(container.firstChild).toMatchSnapshot();
+
+    // Make sure it defaults to the plugins tab
+    const button = screen.getByRole('tab', { selected: true });
+    const pluginsTabActive = getByText(button, /plugins/i);
+
+    const tabPanel = screen.getByRole('tabpanel');
+    const pluginCardText = getByText(tabPanel, 'Comments');
+    const providerCardText = queryByText(tabPanel, 'Cloudinary');
+    const submitPluginText = queryByText(container, 'Submit plugin');
+
+    expect(pluginsTabActive).not.toBe(null);
+    expect(pluginCardText).toBeVisible();
+    expect(submitPluginText).toBeVisible();
+    expect(providerCardText).toEqual(null);
   });
 
-  it('renders and matches the provider tab snapshot', async () => {
+  it('renders and matches the provider tab snapshot', () => {
+    // Make sure it switches to the providers tab
     const { container, getByRole } = render(App);
-    await waitFor(() => expect(getByRole('heading', { name: /marketplace/i })).toBeInTheDocument());
-    const providersTab = screen.getByRole('tab', { selected: false });
+    const providersTab = getByRole('tab', { name: /providers/i });
     fireEvent.click(providersTab);
+    const button = getByRole('tab', { selected: true });
+    const providersTabActive = getByText(button, /Providers/i);
 
+    const tabPanel = getByRole('tabpanel');
+    const providerCardText = getByText(tabPanel, 'Cloudinary');
+    const pluginCardText = queryByText(tabPanel, 'Comments');
+    const submitProviderText = queryByText(container, 'Submit provider');
+
+    expect(providersTabActive).not.toBe(null);
+    expect(providerCardText).toBeVisible();
+    expect(submitProviderText).toBeVisible();
+    expect(pluginCardText).toEqual(null);
+
+    // Check snapshot
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -96,9 +124,12 @@ describe('Marketplace page', () => {
     expect(trackUsage).toHaveBeenCalledTimes(1);
   });
 
-  it('should return plugin search results matching the query', async () => {
+  it('should return plugin search results matching the query', () => {
     const { container } = render(App);
-    const input = await getByPlaceholderText(container, 'Search');
+    const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
+    fireEvent.click(pluginsTab);
+
+    const input = getByPlaceholderText(container, 'Search');
     fireEvent.change(input, { target: { value: 'comment' } });
     const match = screen.getByText('Comments');
     const notMatch = screen.queryByText('Sentry');
@@ -109,12 +140,12 @@ describe('Marketplace page', () => {
     expect(provider).toEqual(null);
   });
 
-  it('should return provider search results matching the query', async () => {
+  it('should return provider search results matching the query', () => {
     const { container } = render(App);
-    const providersTab = screen.getByRole('tab', { selected: false });
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
     fireEvent.click(providersTab);
 
-    const input = await getByPlaceholderText(container, 'Search');
+    const input = getByPlaceholderText(container, 'Search');
     fireEvent.change(input, { target: { value: 'cloudina' } });
     const match = screen.getByText('Cloudinary');
     const notMatch = screen.queryByText('Mailgun');
@@ -125,9 +156,9 @@ describe('Marketplace page', () => {
     expect(plugin).toEqual(null);
   });
 
-  it('should return empty plugin search results given a bad query', async () => {
+  it('should return empty plugin search results given a bad query', () => {
     const { container } = render(App);
-    const input = await getByPlaceholderText(container, 'Search');
+    const input = getByPlaceholderText(container, 'Search');
     const badQuery = 'asdf';
     fireEvent.change(input, { target: { value: badQuery } });
     const noResult = screen.getByText(`No result for "${badQuery}"`);
@@ -135,16 +166,35 @@ describe('Marketplace page', () => {
     expect(noResult).toBeVisible();
   });
 
-  it('should return empty provider search results given a bad query', async () => {
+  it('should return empty provider search results given a bad query', () => {
     const { container } = render(App);
-    const providersTab = screen.getByRole('tab', { selected: false });
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
     fireEvent.click(providersTab);
-    const input = await getByPlaceholderText(container, 'Search');
+    const input = getByPlaceholderText(container, 'Search');
     const badQuery = 'asdf';
     fireEvent.change(input, { target: { value: badQuery } });
     const noResult = screen.getByText(`No result for "${badQuery}"`);
 
     expect(noResult).toBeVisible();
+  });
+
+  it('shows filters popover on plugins and providers', () => {
+    render(App);
+
+    // Show collections and categories filters on plugins
+    const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
+    fireEvent.click(pluginsTab);
+    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    fireEvent.click(filtersButton);
+    screen.getByLabelText(/no collections selected/i);
+    screen.getByLabelText(/no categories selected/i);
+    fireEvent.click(filtersButton);
+
+    // Only show collections filters on providers
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    fireEvent.click(providersTab);
+    fireEvent.click(filtersButton);
+    screen.getByLabelText(/no collections selected/i);
   });
 
   it('handles production environment', () => {
@@ -187,41 +237,7 @@ describe('Marketplace page', () => {
     expect(offlineText).toBeVisible();
   });
 
-  it('defaults to plugins tab', async () => {
-    const { container } = render(App);
-    const button = screen.getByRole('tab', { selected: true });
-    const pluginsTabActive = await getByText(button, /Plugins/i);
-
-    const tabPanel = screen.getByRole('tabpanel');
-    const pluginCardText = await getByText(tabPanel, 'Comments');
-    const providerCardText = await queryByText(tabPanel, 'Cloudinary');
-    const submitPluginText = await queryByText(container, 'Submit plugin');
-
-    expect(pluginsTabActive).not.toBe(null);
-    expect(pluginCardText).toBeVisible();
-    expect(submitPluginText).toBeVisible();
-    expect(providerCardText).toEqual(null);
-  });
-
-  it('switches to providers tab', async () => {
-    const { container } = render(App);
-    const providersTab = screen.getByRole('tab', { selected: false });
-    fireEvent.click(providersTab);
-    const button = screen.getByRole('tab', { selected: true });
-    const providersTabActive = await getByText(button, /Providers/i);
-
-    const tabPanel = screen.getByRole('tabpanel');
-    const providerCardText = await getByText(tabPanel, 'Cloudinary');
-    const pluginCardText = await queryByText(tabPanel, 'Comments');
-    const submitProviderText = await queryByText(container, 'Submit provider');
-
-    expect(providersTabActive).not.toBe(null);
-    expect(providerCardText).toBeVisible();
-    expect(submitProviderText).toBeVisible();
-    expect(pluginCardText).toEqual(null);
-  });
-
-  it('shows the installed text for installed plugins', async () => {
+  it('shows the installed text for installed plugins', () => {
     render(App);
     const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
     fireEvent.click(pluginsTab);
@@ -241,7 +257,7 @@ describe('Marketplace page', () => {
     expect(notInstalledText).toBeVisible();
   });
 
-  it('shows the installed text for installed providers', async () => {
+  it('shows the installed text for installed providers', () => {
     // Open providers tab
     render(App);
     const providersTab = screen.getByRole('tab', { name: /providers/i });
@@ -262,13 +278,13 @@ describe('Marketplace page', () => {
     expect(notInstalledText).toBeVisible();
   });
 
-  it('shows the sort by menu', async () => {
+  it('shows the sort by menu', () => {
     render(App);
     const sortMenu = screen.getByText('Sort by');
     expect(sortMenu).toBeVisible();
   });
 
-  it('Sort select shows the correct options', async () => {
+  it('Sort select shows the correct options', () => {
     render(App);
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
     fireEvent.mouseDown(sortButton);
@@ -280,11 +296,12 @@ describe('Marketplace page', () => {
     expect(newestOption).toBeVisible();
   });
 
-  it('Click on sort by newest changes the url', async () => {
-    const { container, getByText } = render(App);
-    fireEvent.mouseDown(container.querySelector('#marketplaceSortButton'));
-    const newestOption = getByText('Newest').closest('li');
+  it('Click on sort by newest changes the url', () => {
+    render(App);
+    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    fireEvent.mouseDown(sortButton);
+    const newestOption = screen.getByText('Newest').closest('li');
     fireEvent.click(newestOption);
-    expect(history.location.search).toEqual('?sort=submissionDate:desc');
+    expect(history.location.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc');
   });
 });
