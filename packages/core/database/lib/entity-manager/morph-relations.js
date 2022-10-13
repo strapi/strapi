@@ -58,6 +58,85 @@ const deleteRelatedMorphOneRelationsAfterMorphToManyUpdate = async (
   }
 };
 
+const cleanMorphOrderColumns = async ({
+  uid,
+  attributeName,
+  targetAttribute,
+  db,
+  transaction: trx,
+}) => {
+  const { joinTable } = targetAttribute;
+  const { joinColumn, morphColumn } = joinTable;
+  const { typeColumn } = morphColumn;
+
+  const update = [];
+  const updateBinding = [];
+  const select = ['??'];
+  const selectBinding = ['id'];
+  const where = [];
+  const whereBinding = [];
+
+  update.push('?? = b.src_order');
+  updateBinding.push('order');
+  select.push('ROW_NUMBER() OVER (PARTITION BY ?? ORDER BY ??) AS src_order');
+  selectBinding.push(joinColumn.name, 'order');
+  where.push('?? = ?');
+  whereBinding.push(typeColumn.name, uid);
+  where.push('?? = ?');
+  whereBinding.push('field', attributeName);
+
+  // raw query as knex doesn't allow updating from a subquery
+  // https://github.com/knex/knex/issues/2504
+  switch (strapi.db.dialect.client) {
+    case 'mysql':
+      await db
+        .getConnection()
+        .raw(
+          `UPDATE
+            ?? as a,
+            (
+              SELECT ${select.join(', ')}
+              FROM ??
+              WHERE ${where.join(' AND ')}
+            ) AS b
+          SET ${update.join(', ')}
+          WHERE b.id = a.id`,
+          [joinTable.name, ...selectBinding, joinTable.name, ...whereBinding, ...updateBinding]
+        )
+        .transacting(trx);
+      break;
+    default:
+      await db
+        .getConnection()
+        .raw(
+          `UPDATE ?? as a
+            SET ${update.join(', ')}
+            FROM (
+              SELECT ${select.join(', ')}
+              FROM ??
+              WHERE ${where.join(' AND ')}
+            ) AS b
+            WHERE b.id = a.id`,
+          [joinTable.name, ...updateBinding, ...selectBinding, joinTable.name, ...whereBinding]
+        )
+        .transacting(trx);
+    /*
+      `UPDATE :joinTable: as a
+        SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
+        FROM (
+          SELECT
+            id,
+            ROW_NUMBER() OVER ( PARTITION BY :joinColumn: ORDER BY :orderColumn:) AS src_order,
+            ROW_NUMBER() OVER ( PARTITION BY :inverseJoinColumn: ORDER BY :inverseOrderColumn:) AS inv_order
+          FROM :joinTable:
+          WHERE (:joinColumn: = :id) AND (:typeColum: = :uid) AND (:field: = :attributeName:)),
+        ) AS b
+        WHERE b.id = a.id`
+    */
+  }
+};
+
 module.exports = {
   deleteRelatedMorphOneRelationsAfterMorphToManyUpdate,
+  cleanMorphOrderColumns,
 };
