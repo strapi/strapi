@@ -44,6 +44,9 @@ const SortSelect = ({ sortQuery, setQuery }) => {
   const handleBlur = (e) => {
     e.preventDefault();
 
+    // Do nothing the button will toggle the popover
+    if (e.relatedTarget === buttonRef.current) return;
+
     if (!e.currentTarget.contains(e.relatedTarget)) {
       setIsVisible(false);
     }
