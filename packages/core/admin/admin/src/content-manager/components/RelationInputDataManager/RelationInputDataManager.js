@@ -12,6 +12,7 @@ import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } f
 import { getTrad } from '../../utils';
 
 export const RelationInputDataManager = ({
+  error,
   componentId,
   editable,
   description,
@@ -143,6 +144,7 @@ export const RelationInputDataManager = ({
 
   return (
     <RelationInput
+      error={error}
       description={description}
       disabled={isDisabled}
       id={name}
@@ -208,6 +210,7 @@ export const RelationInputDataManager = ({
 RelationInputDataManager.defaultProps = {
   componentId: undefined,
   editable: true,
+  error: undefined,
   description: '',
   labelAction: null,
   isFieldAllowed: true,
@@ -218,6 +221,11 @@ RelationInputDataManager.defaultProps = {
 RelationInputDataManager.propTypes = {
   componentId: PropTypes.number,
   editable: PropTypes.bool,
+  error: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
   description: PropTypes.string,
   intlLabel: PropTypes.shape({
     id: PropTypes.string.isRequired,
