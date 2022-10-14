@@ -1,0 +1,53 @@
+{
+  "name": "@strapi/data-transfer",
+  "version": "4.4.3",
+  "description": "Data transfer capabilities for Strapi",
+  "keywords": [
+    "strapi",
+    "data",
+    "transfer",
+    "import",
+    "export",
+    "backup",
+    "restore"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "yarn build -w"
+  },
+  "directories": {
+    "lib": "./dist"
+  },
+  "dependencies": {
+    "@strapi/logger": "4.4.3",
+    "chalk": "4.1.2",
+    "prettier": "2.7.1",
+    "stream-chain": "2.2.5",
+    "stream-json": "1.7.4",
+    "tar": "6.1.11"
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "1.0.3",
+    "@types/stream-chain": "2.0.1",
+    "typescript": "4.8.4"
+  },
+  "engines": {
+    "node": ">=14.19.1 <=18.x.x",
+    "npm": ">=6.0.0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["ESNEXT"],
+    "skipLibCheck": true,
+    "outDir": "dist"
+  },
+  "include": ["types", "lib/**/*.ts"],
+  "exclude": ["node_modules"]
+}
