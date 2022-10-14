@@ -60,10 +60,6 @@ const MarketPlacePage = () => {
 
   useFocusWhenNavigate();
 
-  const params = {
-    sort: query?.sort || 'name:asc',
-  };
-
   const marketplaceTitle = formatMessage({
     id: 'global.marketplace',
     defaultMessage: 'Marketplace',
@@ -81,11 +77,19 @@ const MarketPlacePage = () => {
     );
   };
 
-  const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
-    useFetchMarketplacePlugins(notifyMarketplaceLoad, params);
-
+  const providerParams = {
+    collections: query?.collections || [],
+    sort: query?.sort || 'name:asc',
+  };
   const { status: marketplaceProvidersStatus, data: marketplaceProvidersResponse } =
-    useFetchMarketplaceProviders(notifyMarketplaceLoad, params);
+    useFetchMarketplaceProviders(notifyMarketplaceLoad, providerParams);
+
+  const pluginParams = {
+    ...providerParams,
+    categories: query?.categories || [],
+  };
+  const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
+    useFetchMarketplacePlugins(notifyMarketplaceLoad, pluginParams);
 
   const isLoading = [marketplacePluginsStatus, marketplaceProvidersStatus].includes('loading');
 
