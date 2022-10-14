@@ -58,6 +58,36 @@ const deleteRelatedMorphOneRelationsAfterMorphToManyUpdate = async (
   }
 };
 
+const deleteMorphRelations = async ({
+  id,
+  uid,
+  attributeName,
+  targetAttribute,
+  db,
+  relIdsToDelete = [],
+  transaction: trx,
+}) => {
+  const { joinTable } = targetAttribute;
+  const { joinColumn, morphColumn } = joinTable;
+  const { idColumn, typeColumn } = morphColumn;
+  const all = relIdsToDelete === 'all';
+
+  await createQueryBuilder(joinTable.name, db)
+    .delete()
+    .where({
+      [idColumn.name]: id,
+      [typeColumn.name]: uid,
+      field: attributeName,
+      ...(all ? {} : { [joinColumn.name]: { $in: relIdsToDelete } }),
+    })
+    .transacting(trx)
+    .execute();
+
+  if (!all) {
+    await cleanMorphOrderColumns({ uid, attributeName, targetAttribute, db, transaction: trx });
+  }
+};
+
 const cleanMorphOrderColumns = async ({
   uid,
   attributeName,
@@ -139,4 +169,5 @@ const cleanMorphOrderColumns = async ({
 module.exports = {
   deleteRelatedMorphOneRelationsAfterMorphToManyUpdate,
   cleanMorphOrderColumns,
+  deleteMorphRelations,
 };

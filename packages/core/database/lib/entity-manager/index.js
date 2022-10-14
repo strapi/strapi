@@ -25,7 +25,7 @@ const { createQueryBuilder } = require('../query');
 const { createRepository } = require('./entity-repository');
 const {
   deleteRelatedMorphOneRelationsAfterMorphToManyUpdate,
-  cleanMorphOrderColumns,
+  deleteMorphRelations,
 } = require('./morph-relations');
 const {
   isBidirectional,
@@ -688,28 +688,37 @@ const createEntityManager = (db) => {
 
             const { idColumn, typeColumn } = morphColumn;
 
+            const isPartialUpdate = !has('set', cleanRelationData);
             const relsToAdd = cleanRelationData.set || cleanRelationData.connect;
             const relIdsToadd = toIds(relsToAdd);
 
-            await this.createQueryBuilder(joinTable.name)
-              .delete()
-              .where({
-                [idColumn.name]: id,
-                [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
-                field: attributeName,
-              })
-              .transacting(trx)
-              .execute();
-
-            await cleanMorphOrderColumns({
-              id,
-              uid,
-              attributeName,
-              targetAttribute,
-              db,
-              transaction: trx,
-            });
+            if (isPartialUpdate) {
+              // Calculate relations to delete
+              const relIdsToDelete = toIds(
+                differenceWith(isEqual, cleanRelationData.disconnect, relsToAdd)
+              );
+              if (!isEmpty(relIdsToDelete)) {
+                await deleteMorphRelations({
+                  id,
+                  uid,
+                  attributeName,
+                  targetAttribute,
+                  db,
+                  relIdsToDelete,
+                  transaction: trx,
+                });
+              }
+            } else {
+              await deleteMorphRelations({
+                id,
+                uid,
+                attributeName,
+                targetAttribute,
+                db,
+                relIdsToDelete: 'all',
+                transaction: trx,
+              });
+            }
 
             if (isEmpty(relsToAdd)) {
               continue;
@@ -730,7 +739,7 @@ const createEntityManager = (db) => {
               .select(joinColumn.name)
               .max('order', { as: 'max' })
               .whereIn(joinColumn.name, relIdsToadd)
-              .where(joinTable.on || {}) // What was this again 😅?
+              .where(joinTable.on || {})
               .groupBy(joinColumn.name)
               .from(joinTable.name)
               .transacting(trx);
