@@ -23,7 +23,9 @@ const types = require('../types');
 const { createField } = require('../fields');
 const { createQueryBuilder } = require('../query');
 const { createRepository } = require('./entity-repository');
-const { deleteRelatedMorphOneRelationsAfterMorphToManyUpdate } = require('./morph-relations');
+const {
+  deleteRelatedMorphOneRelationsAfterMorphToManyUpdate,
+} = require('./relations/morph-relations');
 const {
   isBidirectional,
   isAnyToOne,
@@ -36,7 +38,7 @@ const {
   deletePreviousAnyToOneRelations,
   deleteRelations,
   cleanOrderColumns,
-} = require('./regular-relations');
+} = require('./relations/regular-relations');
 const {
   attachMorphToOneRelation,
   updateMorphOneToManyRelation,

@@ -8,8 +8,8 @@ const {
   isAnyToOne,
   hasOrderColumn,
   hasInverseOrderColumn,
-} = require('../metadata/relations');
-const { createQueryBuilder } = require('../query');
+} = require('../../metadata/relations');
+const { createQueryBuilder } = require('../../query');
 
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.

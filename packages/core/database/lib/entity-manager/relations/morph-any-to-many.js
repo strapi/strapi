@@ -12,7 +12,7 @@ One example of a morph anyToMany relationship is a multiple media attribute in a
 
 const { isEmpty, differenceWith, isEqual, has } = require('lodash/fp');
 const { createQueryBuilder } = require('../../query');
-const { deleteMorphRelations } = require('../morph-relations');
+const { deleteMorphRelations } = require('./morph-relations');
 const { toIds } = require('./utils');
 
 /**

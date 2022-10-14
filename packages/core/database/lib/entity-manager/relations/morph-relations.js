@@ -1,7 +1,7 @@
 'use strict';
 
 const { groupBy, pipe, mapValues, map, isEmpty } = require('lodash/fp');
-const { createQueryBuilder } = require('../query');
+const { createQueryBuilder } = require('../../query');
 
 const getMorphToManyRowsLinkedToMorphOne = (rows, { uid, attributeName, typeColumn, db }) =>
   rows.filter((row) => {
