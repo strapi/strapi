@@ -40,7 +40,7 @@ async function getRelationIdsMaxOrder(joinTable, relIdsToadd, { db, trx }) {
 }
 
 /**
- * Create entity with a morph one to many relation
+ * Create entity with a morph any to many relation
  *
  * @param {string} uid - entity uid
  * @param {ID} id - entity id on which the relation for entity relIdToadd is created
@@ -49,7 +49,7 @@ async function getRelationIdsMaxOrder(joinTable, relIdsToadd, { db, trx }) {
  * @param {object} relationData - all relations to connect
  * @param {object} { db, trx }
  */
-async function attachMorphToOneRelation(
+async function attachMorphAnyToOneRelation(
   uid,
   id,
   attributeName,
@@ -92,7 +92,7 @@ async function attachMorphToOneRelation(
 }
 
 /**
- * Update entity with a morph one to many relation
+ * Update entity with a morph any to many relation
  *
  * @param {string} uid - entity uid
  * @param {ID} id - entity id on which the relation for entity relIdToadd is created
@@ -101,7 +101,7 @@ async function attachMorphToOneRelation(
  * @param {object} relationData - all relations to connect and disconnect to entity id
  * @param {object} { db, trx }
  */
-async function updateMorphOneToManyRelation(
+async function updateMorphAnyToManyRelation(
   uid,
   id,
   attributeName,
@@ -168,6 +168,6 @@ async function updateMorphOneToManyRelation(
 }
 
 module.exports = {
-  attachMorphToOneRelation,
-  updateMorphOneToManyRelation,
+  attachMorphAnyToOneRelation,
+  updateMorphAnyToManyRelation,
 };

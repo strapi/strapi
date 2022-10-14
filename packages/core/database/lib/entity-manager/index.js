@@ -40,8 +40,8 @@ const {
   cleanOrderColumns,
 } = require('./relations/regular-relations');
 const {
-  attachMorphToOneRelation,
-  updateMorphOneToManyRelation,
+  attachMorphAnyToOneRelation,
+  updateMorphAnyToManyRelation,
 } = require('./relations/morph-any-to-many');
 
 const toId = (value) => value.id || value;
@@ -448,7 +448,7 @@ const createEntityManager = (db) => {
               .transacting(trx)
               .execute();
           } else if (targetAttribute.relation === 'morphToMany') {
-            await attachMorphToOneRelation(
+            await attachMorphAnyToOneRelation(
               uid,
               id,
               attributeName,
@@ -651,7 +651,7 @@ const createEntityManager = (db) => {
                 .execute();
             }
           } else if (targetAttribute.relation === 'morphToMany') {
-            await updateMorphOneToManyRelation(
+            await updateMorphAnyToManyRelation(
               uid,
               id,
               attributeName,
