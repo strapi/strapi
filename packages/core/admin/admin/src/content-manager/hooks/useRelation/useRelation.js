@@ -56,28 +56,30 @@ export const useRelation = (cacheKey, { relation, search }) => {
     },
     select: (data) => ({
       ...data,
-      pages: data.pages.map((page) => {
-        if (!page) {
-          return page;
-        }
+      pages: data.pages
+        .map((page) => {
+          if (!page) {
+            return page;
+          }
 
-        const { data, results, pagination } = page;
-        const isXToOneRelation = !!data;
-        let normalizedResults = [];
+          const { data, results, pagination } = page;
+          const isXToOneRelation = !!data;
+          let normalizedResults = [];
 
-        // xToOne relations return an object, which we normalize so that relations
-        // always have the same shape
-        if (isXToOneRelation) {
-          normalizedResults = [data];
-        } else if (results) {
-          normalizedResults = results.reverse();
-        }
+          // xToOne relations return an object, which we normalize so that relations
+          // always have the same shape
+          if (isXToOneRelation) {
+            normalizedResults = [data];
+          } else if (results) {
+            normalizedResults = [...results].reverse();
+          }
 
-        return {
-          pagination,
-          results: normalizedResults,
-        };
-      }),
+          return {
+            pagination,
+            results: normalizedResults,
+          };
+        })
+        .reverse(),
     }),
   });
 

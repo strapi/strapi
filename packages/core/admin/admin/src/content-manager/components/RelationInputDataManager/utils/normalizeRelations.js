@@ -39,7 +39,7 @@ export const normalizeRelations = (
     data: {
       pages:
         [
-          ...(relations?.data?.pages.reverse() ?? []),
+          ...(relations?.data?.pages ?? []),
           ...(modifiedData?.connect ? [{ results: modifiedData.connect }] : []),
         ]
           ?.map((page) =>
