@@ -5453,10 +5453,10 @@
   optionalDependencies:
     typescript "^4.6.2"
 
-"@strapi/icons@1.2.3":
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.2.3.tgz#5999417e5643ee33e0177577003ddd8e8c53907b"
-  integrity sha512-vBvOl5sW4GKQAbna3aAhWi2HWOEZ9/v22iX5jG+0vqAwKdRGWaTBkMIYnw0UhKLUbVX3W+P+ViAtIbUycoLelg==
+"@strapi/icons@1.2.5":
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.2.5.tgz#957ab7a336cb2b3ad5a4e1deec3257b41622337f"
+  integrity sha512-7c3vzMqmm4Xfms47mEJu8F1pV1Eizxrn/sND6WEdizc/S2sRhnye3axaHH4xtncqapB1NKUIUb2z5Bl0Xn+WCw==
   dependencies:
     rimraf "^3.0.2"
 
@@ -17874,8 +17874,6 @@ path-case@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/path-case/-/path-case-2.1.1.tgz#94b8037c372d3fe2906e465bb45e25d226e8eea5"
   integrity sha1-lLgDfDctP+KQbkZbtF4l0ibo7qU=
-  dependencies:
-    no-case "^2.2.0"
 
 path-dirname@^1.0.0:
   version "1.0.2"
