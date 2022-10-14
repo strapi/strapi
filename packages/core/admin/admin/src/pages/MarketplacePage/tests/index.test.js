@@ -280,17 +280,17 @@ describe('Marketplace page', () => {
 
   it('shows the sort by menu', () => {
     render(App);
-    const sortMenu = screen.getByText('Sort by');
-    expect(sortMenu).toBeVisible();
+    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    expect(sortButton).toBeVisible();
   });
 
   it('shows the correct options on sort select', () => {
     render(App);
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
-    fireEvent.mouseDown(sortButton);
+    fireEvent.click(sortButton);
 
-    const alphabeticalOption = screen.getByText('Alphabetical order');
-    const newestOption = screen.getByText('Newest');
+    const alphabeticalOption = screen.getByRole('option', { name: 'Alphabetical order' });
+    const newestOption = screen.getByRole('option', { name: 'Newest' });
 
     expect(alphabeticalOption).toBeVisible();
     expect(newestOption).toBeVisible();
@@ -299,8 +299,8 @@ describe('Marketplace page', () => {
   it('sort by newest changes the url on click', () => {
     render(App);
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
-    fireEvent.mouseDown(sortButton);
-    const newestOption = screen.getByText('Newest').closest('li');
+    fireEvent.click(sortButton);
+    const newestOption = screen.getByRole('option', { name: 'Newest' });
     fireEvent.click(newestOption);
     expect(history.location.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc');
   });

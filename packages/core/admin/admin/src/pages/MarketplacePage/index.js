@@ -56,13 +56,12 @@ const MarketPlacePage = () => {
   const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
   const isOnline = useNavigatorOnLine();
   const [{ query }, setQuery] = useQueryParams();
-  const sort = query?.sort || 'name:asc';
   const npmPackageType = query?.npmPackageType || 'plugin';
 
   useFocusWhenNavigate();
 
   const params = {
-    sort,
+    sort: query?.sort || 'name:asc',
   };
 
   const marketplaceTitle = formatMessage({
@@ -260,7 +259,7 @@ const MarketPlacePage = () => {
               </Tabs>
             </Box>
             <Flex paddingBottom={4} gap={2}>
-              <SortSelect value={sort} onChange={(sort) => setQuery({ sort })} />
+              <SortSelect sortQuery={query?.sort} setQuery={setQuery} />
               <NpmPackagesFilters
                 npmPackageType={npmPackageType}
                 possibleCollections={possibleCollections}
