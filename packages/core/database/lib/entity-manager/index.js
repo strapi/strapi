@@ -476,7 +476,7 @@ const createEntityManager = (db) => {
               .select(joinColumn.name)
               .max('order', { as: 'max' })
               .whereIn(joinColumn.name, relIdsToadd)
-              .where(joinTable.on || {}) // What was this again 😅?
+              .where(joinTable.on || {})
               .groupBy(joinColumn.name)
               .from(joinTable.name)
               .transacting(trx);
