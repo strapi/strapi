@@ -1,22 +1,24 @@
 'use strict';
 
 const {
-  LocalFileDestinationProvider,
-  LocalFileSourceProvider,
-  TransferEngine,
+  createLocalFileSourceProvider,
+  createLocalStrapiDestinationProvider,
+  createTransferEngine,
 } = require('@strapi/data-transfer');
 
 module.exports = async () => {
-  const engine = new TransferEngine(
-    // From file
-    new LocalFileSourceProvider({ backupFilePath: './backup.tar.gz' }),
-    // To file
-    new LocalFileDestinationProvider({ backupFilePath: 'backup-destination' }),
-    {
-      strategy: 'restore',
-      versionMatching: 'ignore',
-    }
-  );
+  const source = createLocalFileSourceProvider({ backupFilePath: './backup.tar.gz' });
+
+  const destination = createLocalStrapiDestinationProvider({
+    getStrapi() {
+      return strapi().load();
+    },
+  });
+
+  const engine = createTransferEngine(source, destination, {
+    strategy: 'restore',
+    versionMatching: 'ignore',
+  });
 
   await engine.transfer();
 };
