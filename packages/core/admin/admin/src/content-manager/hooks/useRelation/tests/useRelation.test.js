@@ -107,6 +107,49 @@ describe('useRelation', () => {
     expect(result.current.relations.data.pages[0]?.data).toBeUndefined();
   });
 
+  test('fetch relations, reverse inner pages and outer pages', async () => {
+    const FIRST_PAGE_FIXTURE = [
+      { id: 1, name: 'newest', publishedAt: null },
+      { id: 2, name: 'sibling newest', publishedAt: null },
+    ];
+
+    axiosInstance.get = jest.fn().mockResolvedValueOnce({
+      data: {
+        results: FIRST_PAGE_FIXTURE,
+        pagination: { page: 1, pageCount: 10 },
+      },
+    });
+
+    const { result, waitForNextUpdate } = await setup(undefined);
+
+    await waitForNextUpdate();
+
+    const SECOND_PAGE_FIXTURE = [
+      { id: 3, name: 'sibling oldest', publishedAt: null },
+      { id: 4, name: 'oldest', publishedAt: null },
+    ];
+
+    axiosInstance.get = jest.fn().mockResolvedValueOnce({
+      data: {
+        results: SECOND_PAGE_FIXTURE,
+        pagination: { page: 1, pageCount: 10 },
+      },
+    });
+
+    act(() => {
+      result.current.relations.fetchNextPage();
+    });
+
+    await waitForNextUpdate();
+
+    expect(result.current.relations.data.pages[0].results).toStrictEqual(
+      [...SECOND_PAGE_FIXTURE].reverse()
+    );
+    expect(result.current.relations.data.pages[1].results).toStrictEqual(
+      [...FIRST_PAGE_FIXTURE].reverse()
+    );
+  });
+
   test('fetch relations with different limit', async () => {
     const { waitForNextUpdate } = await setup(undefined, {
       relation: { pageParams: { limit: 5 } },
