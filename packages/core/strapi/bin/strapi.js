@@ -7,7 +7,7 @@
 const _ = require('lodash');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
-const { Command } = require('commander');
+const { Command, Option } = require('commander');
 
 const program = new Command();
 
@@ -254,5 +254,114 @@ program
   .option('--verbose', `Display more information about the types generation`, false)
   .option('-s, --silent', `Run the generation silently, without any output`, false)
   .action(getLocalScript('ts/generate-types'));
+
+// `$ strapi export`
+// // Will be used for the options that accept a list
+// const listOption = (value) => {
+//   return value.split(',');
+// };
+
+program
+  .command('export')
+  .description('Export data from Strapi to file')
+  // .option('--config <configFile>', 'Path to the config file')
+  .option(
+    '--output <outputFilename>',
+    'Filename to output (without extension) [Default: "strapi-{timestamp}.gz"]'
+  )
+  // .addOption(new Option('--sourceUrl', 'Remote url to use instead of local instance of Strapi'))
+  // .addOption(new Option('--sourceToken', 'Auth token for remote Strapi')) // required if sourceUrl is set
+  .addOption(new Option('--encrypt', 'encrypt output file', true))
+  .addOption(new Option('--compress', 'compress content', true))
+  // .addOption(new Option('--archive', 'combine into one gzip file', true)) // for now we REQUIRE this to be true
+  .addOption(new Option('--key', 'prompt for password to encrypt with'))
+  // .addOption(new Option('--key, -k <keyfile>', 'path to keyfile to encrypt with')) // for now we will only use passwords
+  // .addOption(
+  //   new Option(
+  //     '--only <data,to,include>',
+  //     'Comma-separated list of data to include (webhooks, content, localmedia, providermedia, config)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+  //     listOption
+  //   )
+  // )
+  // .addOption(
+  //   new Option(
+  //     '--exclude <data,to,exclude>',
+  //     'Comma-separated list of data to exclude (webhooks,content,localmedia,providermedia,config,relations)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+  //     listOption
+  //   )
+  // )
+  // .addOption(
+  //   new Option('--encryptionCipher <crypto cipher>', 'node crypto cipher to use', 'aes-256') // .choices(crypto.getCiphers())
+  // )
+  // .addOption(
+  //   new Option('--encryptionHash <crypto hash>', 'node crypto hash to use', 'sha-256') // .choices(crypto.getHashes())
+  // )
+  // .addOption(
+  //   new Option('--split <max MB per file>', 'split exported file when exceeding max filesize in MB')
+  // )
+  .action(require('../lib/commands/transfer/export'));
+
+// `$ strapi import`
+program
+  .command('import')
+  .description('Import data from file to Strapi')
+  // TODO: Final version should be possible to provide all options on the CLI instead of config file
+  // .option('--config <configFile>', 'Path to the config file')
+  .option('--input <input filename>', 'Path to the file to be imported')
+  // .addOption(
+  //   new Option('--destinationUrl', 'Remote url to use instead of local instance of Strapi') // required if remote === true
+  // )
+  // .addOption(
+  //   new Option('--destinationToken', 'Auth token for remote Strapi') // required if remote === true
+  // )
+  // .addOption(
+  //   new Option('--destinationAllowInsecure', 'Bypass check for https on remote destination', false)
+  // )
+  // .addOption(
+  //   new Option('--conflictStrategy <conflictStrategy>', 'Which strategy to use for ID conflicts')
+  //     .choices(['restore', 'abort', 'replace', 'keep'])
+  //     .default('keep')
+  // )
+  // .addOption(
+  //   new Option(
+  //     '--only <data,to,include>',
+  //     'Comma-separated list of data to include (webhooks,content,localmedia,providermedia,config)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+  //     listOption
+  //   )
+  // )
+  // .addOption(
+  //   new Option(
+  //     '--exclude <data,to,exclude>',
+  //     'Comma-separated list of data to exclude (webhooks,content,localmedia,providermedia,config,relations)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+  //     listOption
+  //   )
+  // )
+  // .addOption(
+  //   new Option(
+  //     '--schemaComparison <schemaComparison>',
+  //     'exact requires every field to match, strict requires Strapi version and schemas to match, subset requires source schema to exist in destination, bypass skips checks'
+  //   )
+  //     .choices(['exact', 'strict', 'subset', 'bypass'])
+  //     .default('exact')
+  // )
+  // .addOption(
+  //   new Option(
+  //     '--requireEmptyDestination',
+  //     'Require the destination to not contain any entities before starting',
+  //     true
+  //   )
+  // )
+  // We do not need a compressed content option. We autodetect by "brute force"; try reading the file and within a few bytes it will fail and we try the other method
+  // .addOption(new Option('--decompress', 'decompress content', true)) // we should be able to autodetect
+  // A --decrypt option is superfluous. If user provides a password, we try it. Otherwise it fails and we notify user.
+  .addOption(new Option('-password, -p', 'prompt for password'))
+  // .addOption(
+  //   new Option(
+  //     '--encryptionCipher <crypto cipher>',
+  //     'node crypto cipher to use for decryption',
+  //     'aes-256'
+  //   ) // .choices(crypto.getCiphers())
+  // )
+  .action(require('../lib/commands/transfer/import'));
 
 program.parseAsync(process.argv);
