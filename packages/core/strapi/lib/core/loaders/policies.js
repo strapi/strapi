@@ -19,7 +19,6 @@ module.exports = async function loadPolicies(strapi) {
   for (const fd of paths) {
     const { name } = fd;
     const fullPath = join(dir, name);
-    console.log(name);
     if (fd.isFile() && !name.endsWith('.test.js') && extname(name) === '.js') {
       const key = basename(name, '.js');
       policies[key] = importDefault(fullPath);
