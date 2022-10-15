@@ -144,6 +144,7 @@ const loadDir = async (dir) => {
 };
 
 const loadFile = (file) => {
+  if (file.endsWith('.test.js')) return {};
   const ext = extname(file);
 
   switch (ext) {
