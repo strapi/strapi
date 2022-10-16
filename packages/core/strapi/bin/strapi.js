@@ -267,7 +267,7 @@ program
   // .option('--config <configFile>', 'Path to the config file')
   .option(
     '--output <outputFilename>',
-    'Filename to output (without extension) [Default: "strapi-{timestamp}.gz"]'
+    'Filename to output (without extension) [Default: "export_{yyyymmddHHMMSS}[.tar.gz][.gpg]"]'
   )
   // .addOption(new Option('--sourceUrl', 'Remote url to use instead of local instance of Strapi'))
   // .addOption(new Option('--sourceToken', 'Auth token for remote Strapi')) // required if sourceUrl is set
