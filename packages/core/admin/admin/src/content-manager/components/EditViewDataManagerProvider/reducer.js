@@ -3,7 +3,6 @@ import unset from 'lodash/unset';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import take from 'lodash/take';
-import pull from 'lodash/pull';
 import { moveFields } from './utils';
 import { getMaxTempKey } from '../../utils';
 
@@ -78,11 +77,14 @@ const reducer = (state, action) =>
         break;
       }
       case 'LOAD_RELATION': {
-        const initialDataPath = ['initialData', ...action.keys, 'results'];
-        const modifiedDataPath = ['modifiedData', ...action.keys, 'results'];
+        const initialDataPath = ['initialData', ...action.keys];
+        const modifiedDataPath = ['modifiedData', ...action.keys];
         const { value } = action;
 
-        set(draftState, initialDataPath, value);
+        const initialDataRelations = get(state, initialDataPath);
+        const modifiedDataRelations = get(state, modifiedDataPath);
+
+        set(draftState, initialDataPath, [...value, ...initialDataRelations]);
 
         /**
          * We need to set the value also on modifiedData, because initialData
@@ -90,98 +92,128 @@ const reducer = (state, action) =>
          * both states, to render the dirty UI state
          */
 
-        set(draftState, modifiedDataPath, value);
+        set(draftState, modifiedDataPath, [...value, ...modifiedDataRelations]);
 
         break;
       }
       case 'CONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
-        const { value, replace = false } = action;
-        const connectedRelations = get(state, [...path, 'connect']);
-        const disconnectedRelations = get(state, [...path, 'disconnect']) ?? [];
-        const savedRelations = get(state, [...path, 'results']) ?? [];
-        const existInSavedRelation =
-          savedRelations?.findIndex((savedRelations) => savedRelations.id === value.id) !== -1;
+        const { value } = action;
 
-        if (!connectedRelations) {
-          set(draftState, [...path, 'connect'], []);
-        }
+        const modifiedDataRelations = get(state, path);
+        const newRelations = [...modifiedDataRelations, value];
+        set(draftState, path, newRelations);
 
-        // We should add a relation in the connect array only if it is not an already saved relation
-        if (!existInSavedRelation) {
-          if (replace) {
-            set(draftState, [...path, 'connect'], [value]);
-          } else {
-            const nextValue = get(draftState, [...path, 'connect']);
-            nextValue.push(value);
-          }
-        }
+        // const connectedRelations = get(state, [...path, 'connect']);
+        // const disconnectedRelations = get(state, [...path, 'disconnect']) ?? [];
+        // const savedRelations = get(state, [...path, 'results']) ?? [];
+        // const existInSavedRelation =
+        //   savedRelations?.findIndex((savedRelations) => savedRelations.id === value.id) !== -1;
 
-        // Disconnect array handling
-        if (replace) {
-          // In xToOne relations we should place the saved relation in disconnected array to not display it
-          // only needed if there is a saved relation and it is not already stored in disconnected array
-          if (savedRelations.length && !disconnectedRelations.length) {
-            set(draftState, [...path, 'disconnect'], savedRelations);
-          }
+        // if (!connectedRelations) {
+        //   set(draftState, [...path, 'connect'], []);
+        // }
 
-          // If the saved relation is stored in disconnected array
-          // We should remove it when an action requires to reconnect this relation
-          // We then reset the connect/disconnect state
-          if (disconnectedRelations.length) {
-            const existsInDisconnectedRelations =
-              disconnectedRelations.findIndex(
-                (disconnectedRelation) => disconnectedRelation?.id === value.id
-              ) > -1;
+        // // We should add a relation in the connect array only if it is not an already saved relation
+        // if (!existInSavedRelation) {
+        //   if (replace) {
+        //     set(draftState, [...path, 'connect'], [value]);
+        //   } else {
+        //     const nextValue = get(draftState, [...path, 'connect']);
+        //     nextValue.push(value);
+        //   }
+        // }
 
-            if (existsInDisconnectedRelations) {
-              set(draftState, [...path, 'disconnect'], []);
-              set(draftState, [...path, 'connect'], []);
-            }
-          }
-        } else if (disconnectedRelations.length) {
-          // In xToMany relations, when an action requires to connect a relation
-          // We should remove it from the disconnected array if it existed in it
-          const existsInDisconnect = disconnectedRelations.find(
-            (disconnectValue) => disconnectValue.id === value.id
-          );
+        // // Disconnect array handling
+        // if (replace) {
+        //   // In xToOne relations we should place the saved relation in disconnected array to not display it
+        //   // only needed if there is a saved relation and it is not already stored in disconnected array
+        //   if (savedRelations.length && !disconnectedRelations.length) {
+        //     set(draftState, [...path, 'disconnect'], savedRelations);
+        //   }
 
-          if (existsInDisconnect) {
-            const newDisconnectArray = pull([...disconnectedRelations], existsInDisconnect);
-            set(draftState, [...path, 'disconnect'], newDisconnectArray);
-          }
-        }
+        //   // If the saved relation is stored in disconnected array
+        //   // We should remove it when an action requires to reconnect this relation
+        //   // We then reset the connect/disconnect state
+        //   if (disconnectedRelations.length) {
+        //     const existsInDisconnectedRelations =
+        //       disconnectedRelations.findIndex(
+        //         (disconnectedRelation) => disconnectedRelation?.id === value.id
+        //       ) > -1;
+
+        //     if (existsInDisconnectedRelations) {
+        //       set(draftState, [...path, 'disconnect'], []);
+        //       set(draftState, [...path, 'connect'], []);
+        //     }
+        //   }
+        // } else if (disconnectedRelations.length) {
+        //   // In xToMany relations, when an action requires to connect a relation
+        //   // We should remove it from the disconnected array if it existed in it
+        //   const existsInDisconnect = disconnectedRelations.find(
+        //     (disconnectValue) => disconnectValue.id === value.id
+        //   );
+
+        //   if (existsInDisconnect) {
+        //     const newDisconnectArray = pull([...disconnectedRelations], existsInDisconnect);
+        //     set(draftState, [...path, 'disconnect'], newDisconnectArray);
+        //   }
+        // }
 
         break;
       }
       case 'DISCONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
-        const { value } = action;
-        const connectedRelations = get(state, [...path, 'connect']);
-        const disconnectedRelations = get(state, [...path, 'disconnect']);
+        const { id } = action;
+        const modifiedDataRelation = get(state, [...path]);
 
-        if (!disconnectedRelations) {
-          set(draftState, [...path, 'disconnect'], []);
-        }
+        /**
+         * TODO: before merge make this performant (e.g. 1000 relations === long time)
+         */
+        const newRelations = modifiedDataRelation.filter((rel) => rel.id !== id);
 
-        const nextValue = get(draftState, [...path, 'disconnect']);
-        nextValue.push(value);
+        set(draftState, path, newRelations);
 
-        if (connectedRelations?.length) {
-          const existsInConnect = connectedRelations.find(
-            (connectValue) => connectValue.id === value.id
-          );
+        // const connectedRelations = get(state, [...path, 'connect']);
+        // const disconnectedRelations = get(state, [...path, 'disconnect']);
 
-          if (existsInConnect) {
-            const newConnectArray = pull([...connectedRelations], existsInConnect);
-            set(draftState, [...path, 'connect'], newConnectArray);
-          }
-        }
+        // if (!disconnectedRelations) {
+        //   set(draftState, [...path, 'disconnect'], []);
+        // }
+
+        // const nextValue = get(draftState, [...path, 'disconnect']);
+        // nextValue.push(value);
+
+        // if (connectedRelations?.length) {
+        //   const existsInConnect = connectedRelations.find(
+        //     (connectValue) => connectValue.id === value.id
+        //   );
+
+        //   if (existsInConnect) {
+        //     const newConnectArray = pull([...connectedRelations], existsInConnect);
+        //     set(draftState, [...path, 'connect'], newConnectArray);
+        //   }
+        // }
 
         break;
       }
       case 'INIT_FORM': {
         const { initialValues, relationalFields = [] } = action;
+
+        // TODO: initialValues shouldn't hold any value for relational fields?
+        // relation should only holds an array which will be populated in RelationInputDataManager component
+        // count can be deduced from pagination.total there
+
+        // const moBis = {
+        //   ...relationalFields.reduce((acc, name) => {
+        //     const { connect, disconnect, ...currentState } = state.modifiedData?.[name] ?? {};
+
+        //     acc[name] = {
+        //       ...(currentState ?? {}),
+        //     };
+
+        //     return acc;
+        //   }, {}),
+        // };
 
         draftState.formErrors = {};
 
@@ -201,10 +233,7 @@ const reducer = (state, action) =>
            */
 
           ...relationalFields.reduce((acc, name) => {
-            acc[name] = {
-              ...(state.initialData?.[name] ?? {}),
-              ...(initialValues?.[name] ?? {}),
-            };
+            acc[name] = [...(state.initialData?.[name] ?? [])];
 
             return acc;
           }, {}),
@@ -230,12 +259,7 @@ const reducer = (state, action) =>
            */
 
           ...relationalFields.reduce((acc, name) => {
-            const { connect, disconnect, ...currentState } = state.modifiedData?.[name] ?? {};
-
-            acc[name] = {
-              ...(currentState ?? {}),
-              ...(initialValues?.[name] ?? {}),
-            };
+            acc[name] = [...(state.initialData?.[name] ?? [])];
 
             return acc;
           }, {}),

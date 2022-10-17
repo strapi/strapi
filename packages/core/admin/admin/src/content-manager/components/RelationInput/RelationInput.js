@@ -84,7 +84,7 @@ const RelationInput = ({
     data: { pages },
   } = searchResults;
 
-  const relations = useMemo(() => paginatedRelations.data.pages.flat(), [paginatedRelations]);
+  const relations = useMemo(() => paginatedRelations.data, [paginatedRelations]);
   const totalNumberOfRelations = relations.length ?? 0;
 
   const dynamicListHeight = useMemo(
@@ -347,18 +347,14 @@ const RelationInput = ({
 };
 
 const ReactQueryRelationResult = PropTypes.shape({
-  data: PropTypes.shape({
-    pages: PropTypes.arrayOf(
-      PropTypes.arrayOf(
-        PropTypes.shape({
-          href: PropTypes.string,
-          id: PropTypes.number.isRequired,
-          publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-          mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        })
-      )
-    ),
-  }),
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      href: PropTypes.string,
+      id: PropTypes.number.isRequired,
+      publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+      mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    })
+  ),
   hasNextPage: PropTypes.bool,
   isFetchingNextPage: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,

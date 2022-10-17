@@ -55,13 +55,14 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
         case 'relation':
           // Instead of the full relation object, we only want to send its ID
           // and need to clean-up the connect|disconnect arrays
-          cleanedData = Object.entries(value).reduce((acc, [key, value]) => {
-            if (['connect', 'disconnect'].includes(key)) {
-              acc[key] = value.map((currentValue) => ({ id: currentValue.id }));
-            }
+          // cleanedData = Object.entries(value).reduce((acc, [key, value]) => {
+          //   if (['connect', 'disconnect'].includes(key)) {
+          //     acc[key] = value.map((currentValue) => ({ id: currentValue.id }));
+          //   }
 
-            return acc;
-          }, {});
+          //   return acc;
+          // }, {});
+          console.log(value)
           break;
 
         case 'dynamiczone':

@@ -7,7 +7,7 @@ import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin
 
 import { RelationInput } from '../RelationInput';
 import { useRelation } from '../../hooks/useRelation';
-import { connect, select, normalizeRelations, normalizeSearchResults } from './utils';
+import { connect, select, normalizeSearchResults } from './utils';
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
 import { getTrad } from '../../utils';
 
@@ -35,12 +35,19 @@ export const RelationInputDataManager = ({
     useCMEditViewDataManager();
 
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
+    name,
     relation: {
       enabled: get(initialData, name)?.count !== 0 && !!endpoints.relation,
       endpoint: endpoints.relation,
       pageParams: {
         ...defaultParams,
         pageSize: RELATIONS_TO_DISPLAY,
+      },
+      onLoadRelationsCallback: loadRelation,
+      normalizeArguments: {
+        mainFieldName: mainField.name,
+        shouldAddLink: shouldDisplayRelationLink,
+        targetModel,
       },
     },
 
@@ -55,34 +62,6 @@ export const RelationInputDataManager = ({
   });
 
   const relationsFromModifiedData = get(modifiedData, name);
-  const stringifiedRelations = JSON.stringify(relations);
-  const normalizedRelations = useMemo(
-    () =>
-      normalizeRelations(relations, {
-        modifiedData: relationsFromModifiedData,
-        mainFieldName: mainField.name,
-        shouldAddLink: shouldDisplayRelationLink,
-        targetModel,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      stringifiedRelations,
-      modifiedData,
-      name,
-      mainField.name,
-      shouldDisplayRelationLink,
-      targetModel,
-    ]
-  );
-
-  useEffect(() => {
-    if (relations.status === 'success') {
-      loadRelation({
-        target: { name, value: normalizedRelations.data.pages.flat() },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadRelation, relations.status, stringifiedRelations, name]);
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const isSingleRelation = [
@@ -197,7 +176,8 @@ export const RelationInputDataManager = ({
           defaultMessage: 'Published',
         }),
       }}
-      relations={normalizedRelations}
+      // TODO: pass only what is needed
+      relations={{ ...relations, data: relationsFromModifiedData }}
       required={required}
       searchResults={normalizeSearchResults(search, {
         mainFieldName: mainField.name,
