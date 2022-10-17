@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Box } from '@strapi/design-system/Box';
@@ -18,6 +19,10 @@ const FilterTag = ({ name, handleRemove }) => {
   );
 };
 
+const ButtonToggle = styled(Button)`
+  height: ${({ theme }) => theme.sizes.input.S};
+`;
+
 const NpmPackagesFilters = ({
   possibleCollections,
   possibleCategories,
@@ -34,7 +39,7 @@ const NpmPackagesFilters = ({
   return (
     <>
       <Box paddingTop={1} paddingBottom={1}>
-        <Button
+        <ButtonToggle
           variant="tertiary"
           ref={buttonRef}
           startIcon={<Filter />}
@@ -42,7 +47,7 @@ const NpmPackagesFilters = ({
           size="S"
         >
           {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
-        </Button>
+        </ButtonToggle>
         {isVisible && (
           <FiltersPopover
             onToggle={handleToggle}

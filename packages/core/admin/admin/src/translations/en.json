@@ -283,6 +283,8 @@
   "admin.pages.MarketPlacePage.sort.sortBy": "Sort by",
   "admin.pages.MarketPlacePage.sort.alphabetical": "Alphabetical order",
   "admin.pages.MarketPlacePage.sort.newest": "Newest",
+  "admin.pages.MarketPlacePage.sort.alphabetical.selected": "Sort by alphabetical order",
+  "admin.pages.MarketPlacePage.sort.newest.selected": "Sort by newest",
   "admin.pages.MarketPlacePage.filters.collections": "Collections",
   "admin.pages.MarketPlacePage.filters.collectionsSelected": "{count, plural, =0 {No collections} one {# collection} other {# collections}} selected",
   "admin.pages.MarketPlacePage.filters.categories": "Categories",

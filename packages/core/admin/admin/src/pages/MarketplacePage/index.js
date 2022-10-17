@@ -259,7 +259,7 @@ const MarketPlacePage = () => {
               </Tabs>
             </Box>
             <Flex paddingBottom={4} gap={2}>
-              <SortSelect sortQuery={query?.sort} setQuery={setQuery} />
+              <SortSelect sortQuery={query?.sort || 'name:asc'} setQuery={setQuery} />
               <NpmPackagesFilters
                 npmPackageType={npmPackageType}
                 possibleCollections={possibleCollections}
