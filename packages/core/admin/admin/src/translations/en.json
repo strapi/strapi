@@ -280,7 +280,6 @@
   "admin.pages.MarketPlacePage.tab-group.label": "Plugins and Providers for Strapi",
   "admin.pages.MarketPlacePage.missingPlugin.title": "Missing a plugin?",
   "admin.pages.MarketPlacePage.missingPlugin.description": "Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!",
-  "admin.pages.MarketPlacePage.sort.sortBy": "Sort by",
   "admin.pages.MarketPlacePage.sort.alphabetical": "Alphabetical order",
   "admin.pages.MarketPlacePage.sort.newest": "Newest",
   "admin.pages.MarketPlacePage.sort.alphabetical.selected": "Sort by alphabetical order",
