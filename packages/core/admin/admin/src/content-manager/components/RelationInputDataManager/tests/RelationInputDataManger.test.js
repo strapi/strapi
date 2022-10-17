@@ -162,6 +162,33 @@ describe('RelationInputDataManager', () => {
     expect(container.querySelector('input')).toHaveAttribute('disabled');
   });
 
+  test('Passes down defaultParams to the relation and search endpoints', async () => {
+    setup({
+      queryInfos: {
+        defaultParams: {
+          something: true,
+        },
+        shouldDisplayRelationLink: true,
+      },
+    });
+
+    expect(useRelation).toBeCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        search: expect.objectContaining({
+          pageParams: expect.objectContaining({
+            something: true,
+          }),
+        }),
+        relation: expect.objectContaining({
+          pageParams: expect.objectContaining({
+            something: true,
+          }),
+        }),
+      })
+    );
+  });
+
   test('Sets the disabled prop for non editable relations (edit entity)', async () => {
     const { container } = setup({
       editable: false,
