@@ -32,34 +32,13 @@ export const normalizeRelation = (relation, { shouldAddLink, mainFieldName, targ
 
 export const normalizeRelations = (
   relations,
-  { modifiedData = {}, shouldAddLink = false, mainFieldName, targetModel }
+  { shouldAddLink = false, mainFieldName, targetModel }
 ) => {
-  return {
-    ...relations,
-    data: {
-      pages:
-        [
-          ...(relations?.data?.pages.reverse() ?? []),
-          ...(modifiedData?.connect ? [{ results: modifiedData.connect }] : []),
-        ]
-          ?.map((page) =>
-            page?.results
-              .filter(
-                (relation) =>
-                  !modifiedData?.disconnect?.find(
-                    (disconnectRelation) => disconnectRelation.id === relation.id
-                  )
-              )
-              .map((relation) =>
-                normalizeRelation(relation, {
-                  shouldAddLink,
-                  mainFieldName,
-                  targetModel,
-                })
-              )
-              .filter(Boolean)
-          )
-          ?.filter((page) => page.length > 0) ?? [],
-    },
-  };
+  return [...(relations ?? [])]?.map((relation) =>
+    normalizeRelation(relation, {
+      shouldAddLink,
+      mainFieldName,
+      targetModel,
+    })
+  );
 };

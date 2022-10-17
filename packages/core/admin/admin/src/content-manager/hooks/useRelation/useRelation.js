@@ -1,11 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useInfiniteQuery } from 'react-query';
 
 import { axiosInstance } from '../../../core/utils';
 
-export const useRelation = (cacheKey, { relation, search }) => {
+import { normalizeRelations } from '../../components/RelationInputDataManager/utils';
+
+export const useRelation = (cacheKey, { name, relation, search }) => {
   const [searchParams, setSearchParams] = useState({});
 
+  /**
+   * This runs in `useInfiniteQuery` to actually fetch the data
+   */
   const fetchRelations = async ({ pageParam = 1 }) => {
     try {
       const { data } = await axiosInstance.get(relation?.endpoint, {
@@ -36,6 +41,8 @@ export const useRelation = (cacheKey, { relation, search }) => {
       return null;
     }
   };
+
+  const { onLoadRelationsCallback, normalizeArguments } = relation;
 
   const relationsRes = useInfiniteQuery(['relation', cacheKey], fetchRelations, {
     cacheTime: 0,
@@ -80,6 +87,22 @@ export const useRelation = (cacheKey, { relation, search }) => {
       }),
     }),
   });
+
+  const { status, data } = relationsRes;
+
+  useEffect(() => {
+    if (status === 'success' && data && data.pages?.at(-1)?.results) {
+      // everytime we fetch, we normalize prior to adding to redux
+      const normalizedResults = normalizeRelations(data.pages?.at(-1)?.results, normalizeArguments);
+
+      // this is loadRelation from EditViewDataManagerProvider
+      onLoadRelationsCallback({
+        target: { name, value: normalizedResults },
+      });
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, onLoadRelationsCallback, name]);
 
   const searchRes = useInfiniteQuery(
     ['relation', cacheKey, 'search', JSON.stringify(searchParams)],

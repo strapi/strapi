@@ -170,12 +170,12 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const connectRelation = useCallback(({ target: { name, value, replace } }) => {
+  const connectRelation = useCallback(({ name, value }) => {
+    // TODO: replace xToOne
     dispatch({
       type: 'CONNECT_RELATION',
       keys: name.split('.'),
       value,
-      replace,
     });
   }, []);
 
@@ -462,11 +462,11 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const disconnectRelation = useCallback(({ target: { name, value } }) => {
+  const disconnectRelation = useCallback(({ name, id }) => {
     dispatch({
       type: 'DISCONNECT_RELATION',
       keys: name.split('.'),
-      value,
+      id,
     });
   }, []);
 
