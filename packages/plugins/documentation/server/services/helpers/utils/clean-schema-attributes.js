@@ -97,7 +97,7 @@ const cleanSchemaAttributes = (
         const rawComponentSchema = {
           type: 'object',
           properties: {
-            ...(isRequest ? {} : { id: { type: 'number' } }),
+            ...(isRequest ? {} : { id: { type: 'string' } }),
             ...cleanSchemaAttributes(componentAttributes, {
               typeMap,
               isRequest,
@@ -128,7 +128,7 @@ const cleanSchemaAttributes = (
           const rawComponentSchema = {
             type: 'object',
             properties: {
-              ...(isRequest ? {} : { id: { type: 'number' } }),
+              ...(isRequest ? {} : { id: { type: 'string' } }),
               __component: { type: 'string' },
               ...cleanSchemaAttributes(componentAttributes, {
                 typeMap,

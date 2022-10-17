@@ -102,7 +102,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c13 .sc-gJbFto {
+.c13 .sc-kBzgEd {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -172,7 +172,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c25 .sc-gJbFto {
+.c25 .sc-kBzgEd {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -293,7 +293,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
 .c46 {
   -webkit-animation: gzYjWD 1s infinite linear;
   animation: gzYjWD 1s infinite linear;
-  will-change: transform;
 }
 
 .c10 {

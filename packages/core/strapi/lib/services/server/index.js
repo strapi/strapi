@@ -9,7 +9,6 @@ const { createContentAPI } = require('./content-api');
 const registerAllRoutes = require('./register-routes');
 const registerApplicationMiddlewares = require('./register-middlewares');
 const createKoaApp = require('./koa');
-const requestCtx = require('../request-context');
 
 const healthCheck = async (ctx) => {
   ctx.set('strapi', 'You are so French!');
@@ -33,8 +32,6 @@ const createServer = (strapi) => {
     proxy: strapi.config.get('server.proxy'),
     keys: strapi.config.get('server.app.keys'),
   });
-
-  app.use((ctx, next) => requestCtx.run(ctx, () => next()));
 
   const router = new Router();
 

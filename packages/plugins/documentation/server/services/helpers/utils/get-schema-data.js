@@ -15,7 +15,7 @@ module.exports = (isListOfEntities, attributes) => {
       items: {
         type: 'object',
         properties: {
-          id: { type: 'number' },
+          id: { type: 'string' },
           attributes: { type: 'object', properties: attributes },
         },
       },
@@ -25,7 +25,7 @@ module.exports = (isListOfEntities, attributes) => {
   return {
     type: 'object',
     properties: {
-      id: { type: 'number' },
+      id: { type: 'string' },
       attributes: { type: 'object', properties: attributes },
     },
   };

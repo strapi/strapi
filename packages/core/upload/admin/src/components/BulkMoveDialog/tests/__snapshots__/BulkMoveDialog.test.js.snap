@@ -94,7 +94,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c25 .sc-kBzgEd {
+.c25 .sc-ezHhwS {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -164,7 +164,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c28 .sc-kBzgEd {
+.c28 .sc-ezHhwS {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;

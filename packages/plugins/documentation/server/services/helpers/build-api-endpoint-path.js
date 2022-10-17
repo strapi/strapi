@@ -46,7 +46,7 @@ const getPathParams = (routePath) => {
         description: '',
         deprecated: false,
         required: true,
-        schema: { type: 'number' },
+        schema: { type: 'string' },
       };
     });
 };

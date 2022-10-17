@@ -1,7 +1,7 @@
 {
   "name": "kitchensink",
   "private": true,
-  "version": "4.3.9",
+  "version": "4.3.8",
   "description": "A Strapi application.",
   "scripts": {
     "develop": "strapi develop",
@@ -12,10 +12,10 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/provider-email-mailgun": "4.3.9",
-    "@strapi/provider-upload-aws-s3": "4.3.9",
-    "@strapi/provider-upload-cloudinary": "4.3.9",
-    "@strapi/strapi": "4.3.9",
+    "@strapi/provider-email-mailgun": "4.3.8",
+    "@strapi/provider-upload-aws-s3": "4.3.8",
+    "@strapi/provider-upload-cloudinary": "4.3.8",
+    "@strapi/strapi": "4.3.8",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
     "passport-google-oauth2": "0.2.0",

@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { ThemeToggleContext } from '../../contexts';
 
@@ -14,33 +14,22 @@ const getDefaultTheme = () => {
   const browserTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   const persistedTheme = localStorage.getItem(THEME_KEY);
 
-  if (!persistedTheme) {
-    localStorage.setItem(THEME_KEY, browserTheme);
-  }
-
   return persistedTheme || browserTheme;
 };
 
 const ThemeToggleProvider = ({ children, themes }) => {
   const [currentTheme, setCurrentTheme] = useState(getDefaultTheme());
 
-  const handleChangeTheme = useCallback(
-    (nextTheme) => {
-      setCurrentTheme(nextTheme);
-      localStorage.setItem(THEME_KEY, nextTheme);
-    },
-    [setCurrentTheme]
+  const handleChangeTheme = (nextTheme) => {
+    setCurrentTheme(nextTheme);
+    localStorage.setItem(THEME_KEY, nextTheme);
+  };
+
+  return (
+    <ThemeToggleContext.Provider value={{ currentTheme, onChangeTheme: handleChangeTheme, themes }}>
+      {children}
+    </ThemeToggleContext.Provider>
   );
-
-  const themeValues = useMemo(() => {
-    return {
-      currentTheme,
-      onChangeTheme: handleChangeTheme,
-      themes,
-    };
-  }, [currentTheme, handleChangeTheme, themes]);
-
-  return <ThemeToggleContext.Provider value={themeValues}>{children}</ThemeToggleContext.Provider>;
 };
 
 ThemeToggleProvider.propTypes = {

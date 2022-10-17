@@ -81,15 +81,4 @@ module.exports = [
       type: 'string',
     },
   },
-  {
-    name: 'filters',
-    in: 'query',
-    description: 'Filters to apply',
-    deprecated: false,
-    required: false,
-    schema: {
-      type: 'object',
-    },
-    style: 'deepObject',
-  },
 ];

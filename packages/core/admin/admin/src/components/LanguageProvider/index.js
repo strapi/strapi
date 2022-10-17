@@ -21,7 +21,6 @@ const LanguageProvider = ({ children, localeNames, messages }) => {
   useEffect(() => {
     // Set user language in local storage.
     window.localStorage.setItem(localStorageKey, locale);
-    document.documentElement.setAttribute('lang', locale);
   }, [locale]);
 
   const changeLocale = (locale) => {

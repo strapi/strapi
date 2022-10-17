@@ -147,7 +147,7 @@
             "deprecated": false,
             "required": true,
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           }
         ],
