@@ -982,7 +982,7 @@ const createEntityManager = (db) => {
             }
 
             // Delete the previous relations for anyToOne relations
-            if (isBidirectional(attribute) && isAnyToOne(attribute)) {
+            if (isAnyToOne(attribute)) {
               await deletePreviousAnyToOneRelations({
                 id,
                 attribute,
