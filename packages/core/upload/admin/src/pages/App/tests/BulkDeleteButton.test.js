@@ -9,6 +9,21 @@ import { BulkDeleteButton } from '../components/BulkDeleteButton';
 import { useBulkRemove } from '../../../hooks/useBulkRemove';
 
 jest.mock('../../../hooks/useBulkRemove');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: jest.fn().mockReturnValue({ push() {} }),
+  useLocation: jest.fn().mockReturnValue({ pathname: '' }),
+}));
+
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useQueryParams: jest
+    .fn()
+    .mockReturnValue([
+      { query: { page: '', pageSize: '', assetsCount: '' }, rawQuery: '' },
+      jest.fn(),
+    ]),
+}));
 
 const setup = (
   props = {
@@ -56,6 +71,11 @@ describe('BulkDeleteButton', () => {
       selected: [{ type: 'asset' }],
     });
     const removeSpy = jest.fn().mockResolvedValueOnce({});
+    const push = jest.fn();
+    const stringify = jest.fn();
+    const page = 2;
+    const pageSize = 10;
+    const pathname = '/plugins/upload';
 
     useBulkRemove.mockReturnValueOnce({
       isLoading: false,
@@ -74,6 +94,9 @@ describe('BulkDeleteButton', () => {
     });
 
     expect(removeSpy).toBeCalledWith([{ type: 'asset' }]);
+    waitFor(() =>
+      expect(push({ pathname, search: stringify({ page, pageSize }) })).toBeCalledTimes(1)
+    );
     waitFor(() => expect(onSuccessSpy).toBeCalledTimes(1));
   });
 });

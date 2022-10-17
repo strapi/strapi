@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'; // useState
+import React, { useState, useRef, useEffect } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { useLocation, useHistory } from 'react-router-dom';
@@ -126,6 +126,15 @@ export const MediaLibrary = () => {
 
     setShowEditFolderDialog((prev) => !prev);
   };
+
+  useEffect(() => {
+    if (assetCount > 0) {
+      setQuery({
+        ...query,
+        assetCount,
+      });
+    }
+  }, [assetCount, query, setQuery]);
 
   const handleChangeSort = (value) => {
     trackUsage('didSortMediaLibraryElements', {
