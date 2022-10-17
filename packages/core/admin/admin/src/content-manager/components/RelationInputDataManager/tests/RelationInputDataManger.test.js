@@ -35,9 +35,16 @@ jest.mock('../../../hooks/useRelation', () => ({
                 title: 'Relation 2',
               },
             ],
+
+            pagination: {
+              page: 1,
+              pageCount: 2,
+            },
           },
         ],
       },
+      fetchNextPage: jest.fn(),
+      hasNextPage: true,
       isFetchingNextPage: false,
       isLoading: false,
       isSuccess: true,
@@ -269,16 +276,35 @@ describe('RelationInputDataManager', () => {
     );
   });
 
-  test('Search relations', async () => {});
+  test('Do not render Load More when an entity is created', async () => {
+    const { queryByText } = setup();
 
-  test('Load more', async () => {
-    const { container } = setup();
+    expect(await queryByText('Load More')).not.toBeInTheDocument();
+  });
 
-    fireEvent.change(container.querySelector('input[name=relation]'), {
-      target: { value: 'search' },
+  test('Load more entities', async () => {
+    const { relations } = useRelation();
+
+    useCMEditViewDataManager.mockReturnValueOnce({
+      isCreatingEntry: false,
+      createActionAllowedFields: ['relation'],
+      readActionAllowedFields: ['relation'],
+      updateActionAllowedFields: ['relation'],
+      slug: 'test',
+      initialData: {},
+      loadRelation: jest.fn(),
     });
 
-    screen.logTestingPlaygroundURL();
+    const { queryByText } = setup();
+    const loadMoreNode = await queryByText('Load More');
+
+    expect(loadMoreNode).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.click(loadMoreNode);
+    });
+
+    expect(relations.fetchNextPage).toBeCalledTimes(1);
   });
 
   test('Open search', async () => {
