@@ -7,9 +7,11 @@ const { Command } = require('commander');
 
 const packageJSON = require('../../package.json');
 
-const program = new Command();
+const runCommand = async (nodeProcess = process, command = new Command()) => {
+  const exitWithCode = (code) => {
+    nodeProcess.exit(code);
+  };
 
-const runCommand = async (nodeProcess = process) => {
   const checkCwdIsStrapiApp = (name) => {
     const logErrorAndExit = () => {
       console.log(
@@ -17,7 +19,7 @@ const runCommand = async (nodeProcess = process) => {
           `strapi ${name}`
         )} in a Strapi project. Make sure you are in the right directory.`
       );
-      nodeProcess.exit(1);
+      exitWithCode(1);
     };
 
     try {
@@ -42,7 +44,7 @@ const runCommand = async (nodeProcess = process) => {
             name
           )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
         );
-        nodeProcess.exit(1);
+        exitWithCode(1);
       }
 
       const script = require(cmdPath);
@@ -53,34 +55,34 @@ const runCommand = async (nodeProcess = process) => {
         })
         .catch((error) => {
           console.error(error);
-          nodeProcess.exit(1);
+          exitWithCode(1);
         });
     };
 
   // Initial program setup
-  program.storeOptionsAsProperties(false).allowUnknownOption(true);
+  command.storeOptionsAsProperties(false).allowUnknownOption(true);
 
-  program.helpOption('-h, --help', 'Display help for command');
-  program.addHelpCommand('help [command]', 'Display help for command');
+  command.helpOption('-h, --help', 'Display help for command');
+  command.addHelpCommand('help [command]', 'Display help for command');
 
   // `$ strapi version` (--version synonym)
-  program.version(packageJSON.version, '-v, --version', 'Output the version number');
-  program
+  command.version(packageJSON.version, '-v, --version', 'Output the version number');
+  command
     .command('version')
     .description('Output the version of Strapi')
     .action(() => {
       nodeProcess.stdout.write(`${packageJSON.version}\n`);
-      nodeProcess.exit(0);
+      exitWithCode(0);
     });
 
   // `$ strapi console`
-  program
+  command
     .command('console')
     .description('Open the Strapi framework console')
     .action(getLocalScript('console'));
 
   // `$ strapi new`
-  program
+  command
     .command('new <directory>')
     .option('--no-run', 'Do not start the application after it is created')
     .option('--use-npm', 'Force usage of npm instead of yarn to create the project')
@@ -100,13 +102,13 @@ const runCommand = async (nodeProcess = process) => {
     .action(require('./new'));
 
   // `$ strapi start`
-  program
+  command
     .command('start')
     .description('Start your Strapi application')
     .action(getLocalScript('start'));
 
   // `$ strapi develop`
-  program
+  command
     .command('develop')
     .alias('dev')
     .option('--no-build', 'Disable build')
@@ -117,7 +119,7 @@ const runCommand = async (nodeProcess = process) => {
     .action(getLocalScript('develop'));
 
   // $ strapi generate
-  program
+  command
     .command('generate')
     .description('Launch the interactive API generator')
     .action(() => {
@@ -127,38 +129,38 @@ const runCommand = async (nodeProcess = process) => {
     });
 
   // `$ strapi generate:template <directory>`
-  program
+  command
     .command('templates:generate <directory>')
     .description('Generate template from Strapi project')
     .action(getLocalScript('generate-template'));
 
-  program
+  command
     .command('build')
     .option('--no-optimization', 'Build the admin app without optimizing assets')
     .description('Build the strapi admin app')
     .action(getLocalScript('build'));
 
   // `$ strapi install`
-  program
+  command
     .command('install [plugins...]')
     .description('Install a Strapi plugin')
     .action(getLocalScript('install'));
 
   // `$ strapi uninstall`
-  program
+  command
     .command('uninstall [plugins...]')
     .description('Uninstall a Strapi plugin')
     .option('-d, --delete-files', 'Delete files', false)
     .action(getLocalScript('uninstall'));
 
   //   `$ strapi watch-admin`
-  program
+  command
     .command('watch-admin')
     .option('--browser <name>', 'Open the browser', true)
     .description('Start the admin development server')
     .action(getLocalScript('watchAdmin'));
 
-  program
+  command
     .command('configuration:dump')
     .alias('config:dump')
     .description('Dump configurations of your application')
@@ -166,7 +168,7 @@ const runCommand = async (nodeProcess = process) => {
     .option('-p, --pretty', 'Format the output JSON with indentation and line breaks', false)
     .action(getLocalScript('configurationDump'));
 
-  program
+  command
     .command('configuration:restore')
     .alias('config:restore')
     .description('Restore configurations of your application')
@@ -175,7 +177,7 @@ const runCommand = async (nodeProcess = process) => {
     .action(getLocalScript('configurationRestore'));
 
   // Admin
-  program
+  command
     .command('admin:create-user')
     .alias('admin:create')
     .description('Create a new admin')
@@ -185,7 +187,7 @@ const runCommand = async (nodeProcess = process) => {
     .option('-l, --lastname <last name>', 'Last name of the new admin')
     .action(getLocalScript('admin-create'));
 
-  program
+  command
     .command('admin:reset-user-password')
     .alias('admin:reset-password')
     .description("Reset an admin user's password")
@@ -193,54 +195,54 @@ const runCommand = async (nodeProcess = process) => {
     .option('-p, --password <password>', 'New password for the user')
     .action(getLocalScript('admin-reset'));
 
-  program
+  command
     .command('routes:list')
     .description('List all the application routes')
     .action(getLocalScript('routes/list'));
 
-  program
+  command
     .command('middlewares:list')
     .description('List all the application middlewares')
     .action(getLocalScript('middlewares/list'));
 
-  program
+  command
     .command('policies:list')
     .description('List all the application policies')
     .action(getLocalScript('policies/list'));
 
-  program
+  command
     .command('content-types:list')
     .description('List all the application content-types')
     .action(getLocalScript('content-types/list'));
 
-  program
+  command
     .command('hooks:list')
     .description('List all the application hooks')
     .action(getLocalScript('hooks/list'));
 
-  program
+  command
     .command('services:list')
     .description('List all the application services')
     .action(getLocalScript('services/list'));
 
-  program
+  command
     .command('controllers:list')
     .description('List all the application controllers')
     .action(getLocalScript('controllers/list'));
 
   //    `$ strapi opt-out-telemetry`
-  program
+  command
     .command('telemetry:disable')
     .description('Disable anonymous telemetry and metadata sending to Strapi analytics')
     .action(getLocalScript('opt-out-telemetry'));
 
   //    `$ strapi opt-in-telemetry`
-  program
+  command
     .command('telemetry:enable')
     .description('Enable anonymous telemetry and metadata sending to Strapi analytics')
     .action(getLocalScript('opt-in-telemetry'));
 
-  program
+  command
     .command('ts:generate-types')
     .description(`Generate TypeScript typings for your schemas`)
     .option(
@@ -252,7 +254,7 @@ const runCommand = async (nodeProcess = process) => {
     .option('-s, --silent', `Run the generation silently, without any output`, false)
     .action(getLocalScript('ts/generate-types'));
 
-  return program.parseAsync(nodeProcess.argv);
+  return command.parseAsync(nodeProcess.argv);
 };
 
 module.exports = {
