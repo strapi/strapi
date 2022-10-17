@@ -211,7 +211,6 @@ describe('CM API', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      // only xToMany relations are populated and counted
       expect(res.body).toMatchObject({
         age: 25,
         id: 1,
@@ -219,6 +218,8 @@ describe('CM API', () => {
         stamps: { count: 2 },
         stamps_m2m: { count: 1 },
         stamps_one_many: { count: 0 },
+        stamps_one_one: { count: 1 },
+        stamps_one_way: { count: 1 },
         createdBy: null,
         updatedBy: null,
       });

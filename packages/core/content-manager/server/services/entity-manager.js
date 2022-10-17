@@ -82,7 +82,7 @@ module.exports = ({ strapi }) => ({
   },
 
   findOneWithCreatorRolesAndCount(id, uid, populate) {
-    const counterPopulate = getDeepPopulate(uid, populate, { onlyMany: true, countMany: true });
+    const counterPopulate = getDeepPopulate(uid, populate, { countMany: true, countOne: true });
     const params = { populate: addCreatedByRolesPopulate(counterPopulate) };
 
     return strapi.entityService.findOne(uid, id, params);
@@ -114,7 +114,7 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data: publishData,
-      populate: getDeepPopulate(uid, null, { onlyMany: true, countMany: true }),
+      populate: getDeepPopulate(uid, null, { countMany: true, countOne: true }),
     };
 
     return strapi.entityService.create(uid, params);
@@ -125,14 +125,14 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data: publishData,
-      populate: getDeepPopulate(uid, null, { onlyMany: true, countMany: true }),
+      populate: getDeepPopulate(uid, null, { countMany: true, countOne: true }),
     };
 
     return strapi.entityService.update(uid, entity.id, params);
   },
 
   delete(entity, uid) {
-    const params = { populate: getDeepPopulate(uid, null, { onlyMany: true, countMany: true }) };
+    const params = { populate: getDeepPopulate(uid, null, { countMany: true, countOne: true }) };
 
     return strapi.entityService.delete(uid, entity.id, params);
   },
@@ -161,7 +161,7 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data,
-      populate: getDeepPopulate(uid, null, { onlyMany: true, countMany: true }),
+      populate: getDeepPopulate(uid, null, { countMany: true, countOne: true }),
     };
 
     return strapi.entityService.update(uid, entity.id, params);
@@ -176,7 +176,7 @@ module.exports = ({ strapi }) => ({
 
     const params = {
       data,
-      populate: getDeepPopulate(uid, null, { onlyMany: true, countMany: true }),
+      populate: getDeepPopulate(uid, null, { countMany: true, countOne: true }),
     };
 
     return strapi.entityService.update(uid, entity.id, params);
