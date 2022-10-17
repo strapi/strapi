@@ -9,7 +9,7 @@ const packageJSON = require('../../package.json');
 
 const program = new Command();
 
-const runCommand = (nodeProcess) => {
+const runCommand = async (nodeProcess = process) => {
   const checkCwdIsStrapiApp = (name) => {
     const logErrorAndExit = () => {
       console.log(
@@ -252,7 +252,7 @@ const runCommand = (nodeProcess) => {
     .option('-s, --silent', `Run the generation silently, without any output`, false)
     .action(getLocalScript('ts/generate-types'));
 
-  program.parseAsync(nodeProcess.argv);
+  return program.parseAsync(nodeProcess.argv);
 };
 
 module.exports = {
