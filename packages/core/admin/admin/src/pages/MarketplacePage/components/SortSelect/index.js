@@ -9,7 +9,7 @@ const SelectWrapper = styled(Box)`
   font-weight: ${({ theme }) => theme.fontWeights.semiBold};
 
   span {
-    font-size: ${({ theme }) => theme.spaces[3]};
+    font-size: ${({ theme }) => theme.fontSizes[1]};
   }
 `;
 

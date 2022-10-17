@@ -1032,7 +1032,7 @@ exports[`Marketplace page renders and matches the plugin tab snapshot 1`] = `
 }
 
 .c38 span {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .c54 {
@@ -3075,7 +3075,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
 }
 
 .c38 span {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .c54 {
