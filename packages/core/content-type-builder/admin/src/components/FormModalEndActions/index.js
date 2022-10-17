@@ -17,6 +17,7 @@ const FormModalEndActions = ({
   deleteComponent,
   deleteContentType,
   isAttributeModal,
+  isCustomFieldModal,
   isComponentAttribute,
   isComponentToDzModal,
   isContentTypeModal,
@@ -40,6 +41,7 @@ const FormModalEndActions = ({
   onSubmitEditCategory,
   onSubmitEditComponent,
   onSubmitEditContentType,
+  onSubmitEditCustomFieldAttribute,
   onSubmitEditDz,
 }) => {
   const { formatMessage } = useIntl();
@@ -383,6 +385,42 @@ const FormModalEndActions = ({
     );
   }
 
+  if (isCustomFieldModal) {
+    return (
+      <>
+        <Button
+          type={isEditingAttribute ? 'button' : 'submit'}
+          variant="secondary"
+          onClick={(e) => {
+            e.preventDefault();
+
+            onSubmitEditCustomFieldAttribute(e, true);
+          }}
+          startIcon={<Plus />}
+        >
+          {formatMessage({
+            id: getTrad('form.button.add-field'),
+            defaultMessage: 'Add another field',
+          })}
+        </Button>
+        <Button
+          type={isEditingAttribute ? 'submit' : 'button'}
+          variant="default"
+          onClick={(e) => {
+            e.preventDefault();
+
+            onSubmitEditCustomFieldAttribute(e, false);
+          }}
+        >
+          {formatMessage({
+            id: 'global.finish',
+            defaultMessage: 'Finish',
+          })}
+        </Button>
+      </>
+    );
+  }
+
   return null;
 };
 
@@ -396,6 +434,7 @@ FormModalEndActions.propTypes = {
   deleteComponent: PropTypes.func.isRequired,
   deleteContentType: PropTypes.func.isRequired,
   isAttributeModal: PropTypes.bool.isRequired,
+  isCustomFieldModal: PropTypes.bool.isRequired,
   isComponentAttribute: PropTypes.bool.isRequired,
   isComponentModal: PropTypes.bool.isRequired,
   isComponentToDzModal: PropTypes.bool.isRequired,
@@ -419,6 +458,7 @@ FormModalEndActions.propTypes = {
   onSubmitEditCategory: PropTypes.func.isRequired,
   onSubmitEditComponent: PropTypes.func.isRequired,
   onSubmitEditContentType: PropTypes.func.isRequired,
+  onSubmitEditCustomFieldAttribute: PropTypes.func.isRequired,
   onSubmitEditDz: PropTypes.func.isRequired,
 };
 

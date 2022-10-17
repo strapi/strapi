@@ -32,7 +32,7 @@ describe('ImageAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c26 {
+      .c29 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -42,10 +42,6 @@ describe('ImageAssetCard', () => {
         padding: 0;
         position: absolute;
         width: 1px;
-      }
-
-      .c17 {
-        padding-top: 4px;
       }
 
       .c0 {
@@ -58,29 +54,29 @@ describe('ImageAssetCard', () => {
         height: 100%;
       }
 
-      .c3 {
+      .c4 {
         position: start;
       }
 
-      .c8 {
+      .c9 {
         position: end;
       }
 
-      .c14 {
+      .c17 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c22 {
+      .c25 {
         background: #f6f6f9;
         padding: 4px;
         border-radius: 4px;
         min-width: 20px;
       }
 
-      .c1 {
+      .c2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -98,7 +94,7 @@ describe('ImageAssetCard', () => {
         justify-content: center;
       }
 
-      .c4 {
+      .c5 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -112,7 +108,7 @@ describe('ImageAssetCard', () => {
         flex-direction: row;
       }
 
-      .c15 {
+      .c18 {
         -webkit-align-items: flex-start;
         -webkit-box-align: flex-start;
         -ms-flex-align: flex-start;
@@ -126,7 +122,7 @@ describe('ImageAssetCard', () => {
         flex-direction: row;
       }
 
-      .c23 {
+      .c26 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -144,28 +140,28 @@ describe('ImageAssetCard', () => {
         justify-content: center;
       }
 
-      .c5 > * {
+      .c6 > * {
         margin-left: 0;
         margin-right: 0;
       }
 
-      .c5 > * + * {
+      .c6 > * + * {
         margin-left: 8px;
       }
 
-      .c6 {
+      .c7 {
         position: absolute;
         top: 12px;
         left: 12px;
       }
 
-      .c9 {
+      .c11 {
         position: absolute;
         top: 12px;
         right: 12px;
       }
 
-      .c13 {
+      .c16 {
         margin: 0;
         padding: 0;
         max-height: 100%;
@@ -173,7 +169,7 @@ describe('ImageAssetCard', () => {
         object-fit: contain;
       }
 
-      .c12 {
+      .c15 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -189,20 +185,20 @@ describe('ImageAssetCard', () => {
         border-top-right-radius: 4px;
       }
 
-      .c18 {
+      .c21 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c19 {
+      .c22 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c25 {
+      .c28 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -210,18 +206,18 @@ describe('ImageAssetCard', () => {
         text-transform: uppercase;
       }
 
-      .c21 {
+      .c24 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c24 {
+      .c27 {
         margin-left: 4px;
       }
 
-      .c7 {
+      .c8 {
         margin: 0;
         height: 18px;
         min-width: 18px;
@@ -232,12 +228,12 @@ describe('ImageAssetCard', () => {
         cursor: pointer;
       }
 
-      .c7:checked {
+      .c8:checked {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c7:checked:after {
+      .c8:checked:after {
         content: '';
         display: block;
         position: relative;
@@ -251,21 +247,21 @@ describe('ImageAssetCard', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c7:checked:disabled:after {
+      .c8:checked:disabled:after {
         background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
       }
 
-      .c7:disabled {
+      .c8:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c7:indeterminate {
+      .c8:indeterminate {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c7:indeterminate:after {
+      .c8:indeterminate:after {
         content: '';
         display: block;
         position: relative;
@@ -280,25 +276,29 @@ describe('ImageAssetCard', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c7:indeterminate:disabled {
+      .c8:indeterminate:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c7:indeterminate:disabled:after {
+      .c8:indeterminate:disabled:after {
         background-color: #8e8ea9;
       }
 
-      .c16 {
+      .c19 {
         word-break: break-all;
       }
 
-      .c2 {
+      .c3 {
         position: relative;
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c10 {
+      .c20 {
+        padding-top: 4px;
+      }
+
+      .c13 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -312,21 +312,21 @@ describe('ImageAssetCard', () => {
         outline: none;
       }
 
-      .c10 svg {
+      .c13 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c10 svg > g,
-      .c10 svg path {
+      .c13 svg > g,
+      .c13 svg path {
         fill: #ffffff;
       }
 
-      .c10[aria-disabled='true'] {
+      .c13[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c10:after {
+      .c13:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -341,11 +341,11 @@ describe('ImageAssetCard', () => {
         border: 2px solid transparent;
       }
 
-      .c10:focus-visible {
+      .c13:focus-visible {
         outline: none;
       }
 
-      .c10:focus-visible:after {
+      .c13:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -356,7 +356,7 @@ describe('ImageAssetCard', () => {
         border: 2px solid #4945ff;
       }
 
-      .c11 {
+      .c14 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -373,62 +373,81 @@ describe('ImageAssetCard', () => {
         width: 2rem;
       }
 
-      .c11 svg > g,
-      .c11 svg path {
+      .c14 svg > g,
+      .c14 svg path {
         fill: #8e8ea9;
       }
 
-      .c11:hover svg > g,
-      .c11:hover svg path {
+      .c14:hover svg > g,
+      .c14:hover svg path {
         fill: #666687;
       }
 
-      .c11:active svg > g,
-      .c11:active svg path {
+      .c14:active svg > g,
+      .c14:active svg path {
         fill: #a5a5ba;
       }
 
-      .c11[aria-disabled='true'] {
+      .c14[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c11[aria-disabled='true'] svg path {
+      .c14[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c20 {
+      .c23 {
         text-transform: uppercase;
+      }
+
+      .c12 {
+        opacity: 0;
+      }
+
+      .c12:focus-within {
+        opacity: 1;
+      }
+
+      .c1 {
+        cursor: pointer;
+      }
+
+      .c1:hover .c10 {
+        opacity: 1;
       }
 
       <div>
         <article
           aria-labelledby="card-1-title"
-          class="c0"
+          class="c0 c1"
           height="100%"
-          tabindex="0"
+          role="button"
+          tabindex="-1"
         >
           <div
-            class="c1 c2"
+            class="c2 c3"
           >
-            <div
-              class="c3 c4 c5 c6"
-              spacing="2"
-            >
-              <input
-                aria-labelledby="card-1-title"
-                class="c7"
-                type="checkbox"
-              />
+            <div>
+              <div
+                class="c4 c5 c6 c7"
+                spacing="2"
+              >
+                <input
+                  aria-labelledby="card-1-title"
+                  class="c8"
+                  type="checkbox"
+                />
+              </div>
             </div>
             <div
-              class="c8 c4 c5 c9"
+              class="c9 c5 c6 c10 c11 c12"
               spacing="2"
             >
               <span>
                 <button
                   aria-disabled="false"
                   aria-labelledby="tooltip-1"
-                  class="c10 c11"
+                  class="c13 c14"
                   tabindex="0"
                   type="button"
                 >
@@ -450,40 +469,40 @@ describe('ImageAssetCard', () => {
               </span>
             </div>
             <div
-              class="c12"
+              class="c15"
             >
               <img
                 alt=""
                 aria-hidden="true"
-                class="c13"
+                class="c16"
                 src="http://somewhere.com/hello.png?width=40&height=40"
               />
             </div>
           </div>
           <div
-            class="c14"
+            class="c17"
           >
             <div
-              class="c15"
+              class="c18"
             >
               <div
-                class="c16"
+                class="c19"
               >
                 <div
-                  class="c17"
+                  class="c20"
                 >
                   <h2
-                    class="c18"
+                    class="c21"
                     id="card-1-title"
                   >
                     hello.png
                   </h2>
                 </div>
                 <div
-                  class="c19"
+                  class="c22"
                 >
                   <span
-                    class="c20"
+                    class="c23"
                   >
                     png
                   </span>
@@ -491,13 +510,13 @@ describe('ImageAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c21"
+                class="c24"
               >
                 <div
-                  class="c22 c23 c24"
+                  class="c25 c26 c27"
                 >
                   <span
-                    class="c25"
+                    class="c28"
                   >
                     Image
                   </span>
@@ -507,7 +526,7 @@ describe('ImageAssetCard', () => {
           </div>
         </article>
         <div
-          class="c26"
+          class="c29"
         >
           <p
             aria-live="polite"

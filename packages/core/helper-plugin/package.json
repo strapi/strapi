@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.3.8",
+  "version": "4.4.3",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -44,6 +44,7 @@
     "@fortawesome/free-brands-svg-icons": "^5.15.2",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@strapi/design-system": "1.2.5",
     "axios": "0.27.2",
     "date-fns": "2.29.2",
     "formik": "^2.2.6",
@@ -77,8 +78,8 @@
     "@storybook/builder-webpack5": "6.5.9",
     "@storybook/manager-webpack5": "6.4.10",
     "@storybook/react": "^6.5.10",
-    "@strapi/design-system": "1.2.2",
-    "@strapi/icons": "1.2.2",
+    "@strapi/design-system": "1.2.5",
+    "@strapi/icons": "1.2.5",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
     "babel-loader": "^8.2.5",

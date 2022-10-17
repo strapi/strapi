@@ -62,6 +62,15 @@ async function initProject(projectName, program) {
     await checkInstallPath(resolve(projectName));
   }
 
+  const programFlags = program.options
+    .reduce((acc, { short, long }) => [...acc, short, long], [])
+    .filter(Boolean);
+
+  if (program.template && programFlags.includes(program.template)) {
+    console.error(`${program.template} is not a valid template`);
+    process.exit(1);
+  }
+
   const hasDatabaseOptions = databaseOptions.some((opt) => program[opt]);
 
   if (program.quickstart && hasDatabaseOptions) {
