@@ -381,7 +381,6 @@ const update = async (id, attributes) => {
 
   const updatedToken = await strapi.query('admin::api-token').update({
     select: SELECT_FIELDS,
-    populate: POPULATE_FIELDS,
     where: { id },
     data: omit('permissions', attributes),
   });

@@ -79,7 +79,7 @@ const socialLinks = [
   },
   {
     name: 'Discord',
-    link: 'https://slack.strapi.io/',
+    link: 'https://discord.strapi.io/',
     icon: <StyledDiscord />,
     alt: 'discord',
   },
