@@ -61,9 +61,9 @@ const RelationInput = ({
   labelLoadMore,
   labelDisconnectRelation,
   loadingMessage,
-  onRelationAdd,
+  onRelationConnect,
   onRelationLoadMore,
-  onRelationRemove,
+  onRelationDisconnect,
   onSearchClose,
   onSearchNextPage,
   onSearchOpen,
@@ -234,7 +234,7 @@ const RelationInput = ({
               loadingMessage={loadingMessage}
               onChange={(relation) => {
                 setValue(null);
-                onRelationAdd(relation);
+                onRelationConnect(relation);
 
                 // scroll to the end of the list
                 if (relations.length > 0) {
@@ -297,7 +297,7 @@ const RelationInput = ({
                       data-testid={`remove-relation-${id}`}
                       disabled={disabled}
                       type="button"
-                      onClick={() => onRelationRemove(data[index])}
+                      onClick={() => onRelationDisconnect(data[index])}
                       aria-label={labelDisconnectRelation}
                     >
                       <Icon width="12px" as={Cross} />
@@ -406,8 +406,8 @@ RelationInput.propTypes = {
   loadingMessage: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   numberOfRelationsToDisplay: PropTypes.number.isRequired,
-  onRelationAdd: PropTypes.func.isRequired,
-  onRelationRemove: PropTypes.func.isRequired,
+  onRelationConnect: PropTypes.func.isRequired,
+  onRelationDisconnect: PropTypes.func.isRequired,
   onRelationLoadMore: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
   onSearchNextPage: PropTypes.func.isRequired,

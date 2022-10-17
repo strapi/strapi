@@ -105,11 +105,11 @@ export const RelationInputDataManager = ({
     return !editable;
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
-  const handleRelationAdd = (relation) => {
+  const handleRelationConnect = (relation) => {
     connectRelation({ target: { name, value: relation, replace: isSingleRelation } });
   };
 
-  const handleRelationRemove = (relation) => {
+  const handleRelationDisconnect = (relation) => {
     disconnectRelation({ target: { name, value: relation } });
   };
 
@@ -139,7 +139,7 @@ export const RelationInputDataManager = ({
     (!isFieldAllowed && isCreatingEntry) ||
     (!isCreatingEntry && !isFieldAllowed && !isFieldReadable)
   ) {
-    return <NotAllowedInput intlLabel={intlLabel} labelAction={labelAction} />;
+    return <NotAllowedInput name={name} intlLabel={intlLabel} labelAction={labelAction} />;
   }
 
   return (
@@ -174,8 +174,8 @@ export const RelationInputDataManager = ({
       }
       name={name}
       numberOfRelationsToDisplay={RELATIONS_TO_DISPLAY}
-      onRelationAdd={(relation) => handleRelationAdd(relation)}
-      onRelationRemove={(relation) => handleRelationRemove(relation)}
+      onRelationConnect={(relation) => handleRelationConnect(relation)}
+      onRelationDisconnect={(relation) => handleRelationDisconnect(relation)}
       onRelationLoadMore={() => handleRelationLoadMore()}
       onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
