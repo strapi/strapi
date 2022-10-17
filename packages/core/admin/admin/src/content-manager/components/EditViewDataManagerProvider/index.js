@@ -46,6 +46,10 @@ const EditViewDataManagerProvider = ({
   status,
   updateActionAllowedFields,
 }) => {
+  /**
+   * TODO: this should be moved into the global reducer
+   * to match ever other reducer in the CM.
+   */
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const {
     formErrors,
@@ -287,12 +291,12 @@ const EditViewDataManagerProvider = ({
   );
 
   const createFormData = useCallback(
-    (data) => {
+    (modifiedData, initialData) => {
       // First we need to remove the added keys needed for the dnd
-      const preparedData = removeKeyInObject(cloneDeep(data), '__temp_key__');
+      const preparedData = removeKeyInObject(cloneDeep(modifiedData), '__temp_key__');
       // Then we need to apply our helper
       const cleanedData = cleanData(
-        preparedData,
+        { browserState: preparedData, serverState: initialData },
         currentContentTypeLayout,
         allLayoutData.components
       );
@@ -331,7 +335,7 @@ const EditViewDataManagerProvider = ({
 
       try {
         if (isEmpty(errors)) {
-          const formData = createFormData(modifiedData);
+          const formData = createFormData(modifiedData, initialData);
 
           if (isCreatingEntry) {
             await onPost(formData, trackerProperty);
@@ -351,7 +355,16 @@ const EditViewDataManagerProvider = ({
         errors,
       });
     },
-    [createFormData, isCreatingEntry, modifiedData, onPost, onPut, trackerProperty, yupSchema]
+    [
+      createFormData,
+      isCreatingEntry,
+      modifiedData,
+      initialData,
+      onPost,
+      onPut,
+      trackerProperty,
+      yupSchema,
+    ]
   );
 
   const handlePublish = useCallback(async () => {
