@@ -1,13 +1,13 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen, act } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { useRelation } from '../../../hooks/useRelation';
 
-import { beforeEach } from 'jest-circus';
 import { RelationInputDataManager } from '..';
 
 const queryClient = new QueryClient({
@@ -45,8 +45,27 @@ jest.mock('../../../hooks/useRelation', () => ({
     },
 
     search: {
+      data: {
+        pages: [
+          {
+            results: [
+              {
+                id: 11,
+                title: 'Search 1',
+              },
+
+              {
+                id: 22,
+                title: 'Search 2',
+              },
+            ],
+          },
+        ],
+      },
+      isFetchingNextPage: false,
       isLoading: false,
-      isSuccess: false,
+      isSuccess: true,
+      status: 'success',
     },
 
     searchFor: jest.fn(),
@@ -55,7 +74,7 @@ jest.mock('../../../hooks/useRelation', () => ({
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useCMEditViewDataManager: jest.fn().mockImplementation(() => ({
+  useCMEditViewDataManager: jest.fn().mockReturnValue({
     isCreatingEntry: true,
     createActionAllowedFields: ['relation'],
     readActionAllowedFields: ['relation'],
@@ -63,7 +82,9 @@ jest.mock('@strapi/helper-plugin', () => ({
     slug: 'test',
     initialData: {},
     loadRelation: jest.fn(),
-  })),
+    connectRelation: jest.fn(),
+    disconnectRelation: jest.fn(),
+  }),
 }));
 
 const setup = (props) =>
@@ -105,7 +126,7 @@ const setup = (props) =>
   );
 
 describe('RelationInputDataManager', () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.restoreAllMocks();
   });
 
@@ -227,5 +248,84 @@ describe('RelationInputDataManager', () => {
     // ever relation has an associated tooltip
     expect(nodes.length).toBe(2);
     expect(nodes[0]).toBeInTheDocument();
+  });
+
+  test('Disconnect new entity', async () => {
+    const { disconnectRelation } = useCMEditViewDataManager();
+    const { findByTestId } = setup();
+
+    await act(async () => {
+      fireEvent.click(await findByTestId('remove-relation-1'));
+    });
+
+    expect(disconnectRelation).toBeCalledWith(
+      expect.objectContaining({
+        target: expect.objectContaining({
+          value: expect.objectContaining({
+            id: 1,
+          }),
+        }),
+      })
+    );
+  });
+
+  test('Search relations', async () => {});
+
+  test('Load more', async () => {
+    const { container } = setup();
+
+    fireEvent.change(container.querySelector('input[name=relation]'), {
+      target: { value: 'search' },
+    });
+
+    screen.logTestingPlaygroundURL();
+  });
+
+  test('Open search', async () => {
+    const { searchFor } = useRelation();
+    const { container } = setup();
+
+    act(() => {
+      const target = container.querySelector('input');
+      fireEvent.keyDown(target, { key: 'ArrowDown', code: 'ArrowDown' });
+    });
+
+    screen.logTestingPlaygroundURL();
+
+    expect(searchFor).toBeCalledWith('', { idsToInclude: undefined, idsToOmit: undefined });
+  });
+
+  test('Connect new entity', async () => {
+    const { connectRelation } = useCMEditViewDataManager();
+    const { container, findByText } = setup({
+      mainField: {
+        name: 'title',
+        schema: {
+          type: 'relation',
+        },
+      },
+    });
+
+    act(() => {
+      fireEvent.change(container.querySelector('input'), {
+        target: { value: 'search' },
+      });
+    });
+
+    const searchResult = await findByText('Search 1');
+
+    act(() => {
+      fireEvent.click(searchResult);
+    });
+
+    expect(connectRelation).toBeCalledWith(
+      expect.objectContaining({
+        target: expect.objectContaining({
+          value: expect.objectContaining({
+            id: 11,
+          }),
+        }),
+      })
+    );
   });
 });
