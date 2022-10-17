@@ -2,7 +2,7 @@
 
 const path = require('path');
 const { propOr, isArray, isNil } = require('lodash/fp');
-const importDefault = require('../../utils/import-default');
+const importDefault = require('@strapi/utils/lib/import-default');
 
 const getMiddlewareConfig = propOr([], 'config.middlewares');
 

@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const { templateConfiguration, env } = require('@strapi/utils');
 
-const importDefault = require('../../utils/import-default');
+const importDefault = require('@strapi/utils/lib/import-default');
 
 const loadJsFile = (file) => {
   try {
