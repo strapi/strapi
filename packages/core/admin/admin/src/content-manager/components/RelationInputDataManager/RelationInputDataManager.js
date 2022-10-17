@@ -1,15 +1,19 @@
 import PropTypes from 'prop-types';
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
+import pick from 'lodash/pick';
 
 import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
 import { RelationInput } from '../RelationInput';
+
 import { useRelation } from '../../hooks/useRelation';
-import { connect, select, normalizeSearchResults } from './utils';
-import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
+
 import { getTrad } from '../../utils';
+
+import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
+import { connect, select, normalizeSearchResults, diffRelations } from './utils';
 
 export const RelationInputDataManager = ({
   error,
@@ -61,7 +65,7 @@ export const RelationInputDataManager = ({
     },
   });
 
-  const relationsFromModifiedData = get(modifiedData, name);
+  const relationsFromModifiedData = get(modifiedData, name) ?? [];
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const isSingleRelation = [
@@ -96,19 +100,19 @@ export const RelationInputDataManager = ({
     relations.fetchNextPage();
   };
 
-  const handleSearch = (term) => {
+  const handleSearch = (term = '') => {
+    const [connected, disconnected] = diffRelations(
+      relationsFromModifiedData,
+      get(initialData, name)
+    );
+
     searchFor(term, {
-      idsToInclude: relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
-      idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
+      idsToInclude: disconnected,
+      idsToOmit: connected,
     });
   };
 
-  const handleOpenSearch = () => {
-    searchFor('', {
-      idsToInclude: relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
-      idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
-    });
-  };
+  const handleOpenSearch = () => handleSearch();
 
   const handleSearchMore = () => {
     search.fetchNextPage();
@@ -176,8 +180,14 @@ export const RelationInputDataManager = ({
           defaultMessage: 'Published',
         }),
       }}
-      // TODO: pass only what is needed
-      relations={{ ...relations, data: relationsFromModifiedData }}
+      relations={pick(
+        { ...relations, data: relationsFromModifiedData },
+        'data',
+        'hasNextPage',
+        'isFetchingNextPage',
+        'isLoading',
+        'isSucess'
+      )}
       required={required}
       searchResults={normalizeSearchResults(search, {
         mainFieldName: mainField.name,
