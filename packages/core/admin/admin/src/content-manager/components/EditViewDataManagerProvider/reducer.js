@@ -196,74 +196,42 @@ const reducer = (state, action) =>
 
         break;
       }
+      /**
+       * This action will be called when you open your entry (first load)
+       * but also every time you press publish.
+       */
       case 'INIT_FORM': {
         const { initialValues, relationalFields = [] } = action;
 
-        // TODO: initialValues shouldn't hold any value for relational fields?
-        // relation should only holds an array which will be populated in RelationInputDataManager component
-        // count can be deduced from pagination.total there
+        /**
+         * initialValues[relationFieldName] will always be {count: number}
+         * Therefore we reset these bits of state to the correct data type
+         * which is an array. Hence why we replace those fields.
+         */
+        const resetRelationsData = relationalFields.reduce((acc, current) => {
+          /**
+           * this will be null on initial load, however subsequent calls
+           * will have data in them correlating to the names of the relational fields.
+           */
+          if (state.modifiedData) {
+            acc[current] = state.modifiedData[current];
+          } else {
+            acc[current] = [];
+          }
 
-        // const moBis = {
-        //   ...relationalFields.reduce((acc, name) => {
-        //     const { connect, disconnect, ...currentState } = state.modifiedData?.[name] ?? {};
-
-        //     acc[name] = {
-        //       ...(currentState ?? {}),
-        //     };
-
-        //     return acc;
-        //   }, {}),
-        // };
-
-        draftState.formErrors = {};
+          return acc;
+        }, {});
 
         draftState.initialData = {
           ...initialValues,
-
-          /**
-           * The state we keep in the client for relations looks like:
-           *
-           * {
-           *   count: <int>
-           *   results: [<Relation>]
-           * }
-           *
-           * The content API only returns { count: <int> }, which is why
-           * we need to extend the existing state rather than overwriting it.
-           */
-
-          ...relationalFields.reduce((acc, name) => {
-            acc[name] = [...(state.initialData?.[name] ?? [])];
-
-            return acc;
-          }, {}),
+          ...resetRelationsData,
         };
-
         draftState.modifiedData = {
           ...initialValues,
-
-          /**
-           * The client sends the following to the content API:
-           *
-           * {
-           *   connect: [<Relation>],
-           *   disconnect: [<Relation>]
-           * }
-           *
-           * but receives only { count: <int> } in return. After save/ publish
-           * we have to:
-           *
-           * 1) reset the connect/ disconnect arrays
-           * 2) extend the existing state with the API response, so that `count`
-           *    stays in sync
-           */
-
-          ...relationalFields.reduce((acc, name) => {
-            acc[name] = [...(state.initialData?.[name] ?? [])];
-
-            return acc;
-          }, {}),
+          ...resetRelationsData,
         };
+
+        draftState.formErrors = {};
 
         draftState.modifiedDZName = null;
         draftState.shouldCheckErrors = false;

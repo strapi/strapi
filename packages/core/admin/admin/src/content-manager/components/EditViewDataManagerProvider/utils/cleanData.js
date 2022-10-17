@@ -4,14 +4,31 @@ import isObject from 'lodash/isObject';
 
 /* eslint-disable indent */
 
-const cleanData = (retrievedData, currentSchema, componentsSchema) => {
+/**
+ *
+ * @param {{ browserState: object, serverState: object }} browserState – the modifiedData from REDUX, serverStaet - the initialData from REDUX
+ * @param {object} currentSchema
+ * @param {object} componentsSchema
+ * @returns
+ */
+const cleanData = ({ browserState, serverState }, currentSchema, componentsSchema) => {
   const getType = (schema, attrName) => get(schema, ['attributes', attrName, 'type'], '');
   const getOtherInfos = (schema, arr) => get(schema, ['attributes', ...arr], '');
 
-  const recursiveCleanData = (data, schema) => {
-    return Object.keys(data).reduce((acc, current) => {
+  /**
+   *
+   * @param {object} browserState – the modifiedData from REDUX
+   * @param {object} serverState – the initialData from REDUX
+   * @param {*} schema
+   * @returns
+   */
+  const recursiveCleanData = (browserState, serverState, schema) => {
+    return Object.keys(browserState).reduce((acc, current) => {
       const attrType = getType(schema, current);
-      const value = get(data, current);
+
+      // This is the field value
+      const value = get(browserState, current);
+      const oldValue = get(serverState, current);
       const component = getOtherInfos(schema, [current, 'component']);
       const isRepeatable = getOtherInfos(schema, [current, 'repeatable']);
       let cleanedData;
@@ -52,18 +69,36 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
 
           break;
 
-        case 'relation':
-          // Instead of the full relation object, we only want to send its ID
-          // and need to clean-up the connect|disconnect arrays
-          // cleanedData = Object.entries(value).reduce((acc, [key, value]) => {
-          //   if (['connect', 'disconnect'].includes(key)) {
-          //     acc[key] = value.map((currentValue) => ({ id: currentValue.id }));
-          //   }
+        case 'relation': {
+          /**
+           * Instead of the full relation object, we only want to send its ID
+           */
+          const currentRelationIds = value.map((relation) => ({ id: relation.id }));
+          const oldRelationsIds = oldValue.map((relation) => ({ id: relation.id }));
 
-          //   return acc;
-          // }, {});
-          console.log(value)
+          /**
+           * connectedRelations are the items that are in the browserState
+           * array but not in the serverState
+           */
+          const connectedRelations = currentRelationIds.filter(
+            (rel) => !oldRelationsIds.some((oldRel) => oldRel.id === rel.id)
+          );
+
+          /**
+           * disconnectedRelations are the items that are in the serverState but
+           * are no longer in the browserState
+           */
+          const disconnectedRelations = oldRelationsIds.filter(
+            (rel) => !currentRelationIds.some((currRel) => currRel.id === rel.id)
+          );
+
+          cleanedData = {
+            disconnect: disconnectedRelations,
+            connect: connectedRelations,
+          };
+
           break;
+        }
 
         case 'dynamiczone':
           cleanedData = value.map((componentData) => {
@@ -85,7 +120,7 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
     }, {});
   };
 
-  return recursiveCleanData(retrievedData, currentSchema);
+  return recursiveCleanData(browserState, serverState, currentSchema);
 };
 
 // TODO: check which parts are still needed: I suspect the
