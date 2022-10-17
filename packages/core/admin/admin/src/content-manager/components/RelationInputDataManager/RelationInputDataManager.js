@@ -221,11 +221,7 @@ RelationInputDataManager.defaultProps = {
 RelationInputDataManager.propTypes = {
   componentId: PropTypes.number,
   editable: PropTypes.bool,
-  error: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-    values: PropTypes.object,
-  }),
+  error: PropTypes.string,
   description: PropTypes.string,
   intlLabel: PropTypes.shape({
     id: PropTypes.string.isRequired,
