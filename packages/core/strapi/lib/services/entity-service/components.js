@@ -288,10 +288,6 @@ const deleteComponents = async (uid, entityToDelete, { loadComponents = true } =
         value = entityToDelete[attributeName];
       }
 
-      if (!value && loadComponents) {
-        value = await strapi.query(uid).load(entityToDelete, attributeName);
-      }
-
       if (!value) {
         continue;
       }
