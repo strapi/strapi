@@ -7,6 +7,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
+import { beforeEach } from 'jest-circus';
 import { RelationInputDataManager } from '..';
 
 const queryClient = new QueryClient({
@@ -26,6 +27,12 @@ jest.mock('../../../hooks/useRelation', () => ({
             results: [
               {
                 id: 1,
+                title: 'Relation 1',
+              },
+
+              {
+                id: 2,
+                title: 'Relation 2',
               },
             ],
           },
@@ -38,9 +45,8 @@ jest.mock('../../../hooks/useRelation', () => ({
     },
 
     search: {
-      data: {},
       isLoading: false,
-      isSuccess: true,
+      isSuccess: false,
     },
 
     searchFor: jest.fn(),
@@ -99,6 +105,10 @@ const setup = (props) =>
   );
 
 describe('RelationInputDataManager', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
   test('Does pass through props from the CM', async () => {
     const { findByText } = setup();
 
@@ -160,5 +170,62 @@ describe('RelationInputDataManager', () => {
     expect(container.querySelector('input')).toHaveAttribute('disabled');
   });
 
-  test('Normalizes relations', () => {});
+  test('Renders <NotAllowedInput /> if entity is created and field is not allowed', async () => {
+    useCMEditViewDataManager.mockReturnValueOnce({
+      isCreatingEntry: true,
+      createActionAllowedFields: [],
+      readActionAllowedFields: [],
+      updateActionAllowedFields: [],
+      slug: 'test',
+      initialData: {},
+      loadRelation: jest.fn(),
+    });
+
+    const { container } = setup({
+      isFieldReadable: true,
+    });
+
+    expect(container.querySelector('input')).toHaveAttribute(
+      'placeholder',
+      'No permissions to see this field'
+    );
+  });
+
+  test('Renders <NotAllowedInput /> if entity is edited and field is not allowed and not readable', async () => {
+    useCMEditViewDataManager.mockReturnValueOnce({
+      isCreatingEntry: false,
+      createActionAllowedFields: [],
+      readActionAllowedFields: [],
+      updateActionAllowedFields: [],
+      slug: 'test',
+      initialData: {},
+      loadRelation: jest.fn(),
+    });
+
+    const { container } = setup();
+
+    expect(container.querySelector('input')).toHaveAttribute(
+      'placeholder',
+      'No permissions to see this field'
+    );
+  });
+
+  // we can assume relations have been normalized properly, if the title
+  // attribute was copied into the mainField of a relation and rendered
+  test('Normalizes relations', async () => {
+    const { findAllByText } = setup({
+      mainField: {
+        name: 'title',
+        schema: {
+          type: 'relation',
+        },
+      },
+    });
+
+    const nodes = await findAllByText('Relation 1');
+
+    // ever relation has an associated tooltip
+    expect(nodes.length).toBe(2);
+    expect(nodes[0]).toBeInTheDocument();
+  });
 });
