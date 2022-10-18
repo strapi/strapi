@@ -160,7 +160,7 @@ const reducer = (state, action) =>
            * this will be null on initial load, however subsequent calls
            * will have data in them correlating to the names of the relational fields.
            */
-          if (state.modifiedData) {
+          if (state.modifiedData && Array.isArray(state.modifiedData[current])) {
             acc[current] = state.modifiedData[current];
           } else {
             acc[current] = [];

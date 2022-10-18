@@ -4,7 +4,8 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
   test('should parse json value', () => {
     const result = cleanData(
       {
-        jsonTest: '{\n  "cat": "michka"\n}',
+        browserState: { jsonTest: '{\n  "cat": "michka"\n}' },
+        serverState: {},
       },
       {
         attributes: {
@@ -26,7 +27,10 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
   test('should parse time value', () => {
     const result = cleanData(
       {
-        timeTest: '11:38',
+        browserState: {
+          timeTest: '11:38',
+        },
+        serverState: {},
       },
       {
         attributes: {
@@ -48,23 +52,26 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
   test('should parse media value by multiple type', () => {
     const result = cleanData(
       {
-        singleMediaTest: {
-          id: 60,
-          name: 'cat.png',
-          url: '/uploads/cat.png',
+        browserState: {
+          singleMediaTest: {
+            id: 60,
+            name: 'cat.png',
+            url: '/uploads/cat.png',
+          },
+          multipleMediaTest: [
+            {
+              id: 52,
+              name: 'cat.png',
+              url: '/uploads/cat.png',
+            },
+            {
+              id: 58,
+              name: 'cat.png',
+              url: '/uploads/cat.png',
+            },
+          ],
         },
-        multipleMediaTest: [
-          {
-            id: 52,
-            name: 'cat.png',
-            url: '/uploads/cat.png',
-          },
-          {
-            id: 58,
-            name: 'cat.png',
-            url: '/uploads/cat.png',
-          },
-        ],
+        serverState: {},
       },
       {
         attributes: {
@@ -95,20 +102,23 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
   test('should parse component values recursively', () => {
     const result = cleanData(
       {
-        singleComponentTest: {
-          name: 'single',
-          time: '11:38',
+        browserState: {
+          singleComponentTest: {
+            name: 'single',
+            time: '11:38',
+          },
+          repComponentTest: [
+            {
+              name: 'rep1',
+              time: '11:39',
+            },
+            {
+              name: 'rep2',
+              time: '11:40',
+            },
+          ],
         },
-        repComponentTest: [
-          {
-            name: 'rep1',
-            time: '11:39',
-          },
-          {
-            name: 'rep2',
-            time: '11:40',
-          },
-        ],
+        serverState: {},
       },
       {
         attributes: {
@@ -139,10 +149,10 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
     );
 
     const expected = {
-      singleComponentTest: { name: 'single', time: '11:38:00' },
+      singleComponentTest: { name: 'single', time: '11:38' },
       repComponentTest: [
-        { name: 'rep1', time: '11:39:00' },
-        { name: 'rep2', time: '11:40:00' },
+        { name: 'rep1', time: '11:39' },
+        { name: 'rep2', time: '11:40' },
       ],
     };
 
@@ -152,12 +162,15 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
   test('should parse dynamic zone values recursively', () => {
     const result = cleanData(
       {
-        dynamicZoneTest: [
-          {
-            __component: 'basic.rep',
-            time: '00:02',
-          },
-        ],
+        browserState: {
+          dynamicZoneTest: [
+            {
+              __component: 'basic.rep',
+              time: '00:02',
+            },
+          ],
+        },
+        serverState: {},
       },
       {
         attributes: {
@@ -178,18 +191,19 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       }
     );
 
-    const expected = { dynamicZoneTest: [{ __component: 'basic.rep', time: '00:02:00' }] };
+    const expected = { dynamicZoneTest: [{ __component: 'basic.rep', time: '00:02' }] };
 
     expect(result).toEqual(expected);
   });
 
-  test('should cleanup relations properly and only send the ID attribute', () => {
+  test('given that the browserState for relation is completely different to the serverState for relation the return value should disconnect and connect', () => {
     const result = cleanData(
       {
-        relation: {
-          count: 10,
-          connect: [{ id: 1, something: true }],
-          disconnect: [{ id: 2, something: true }],
+        browserState: {
+          relation: [{ id: 1, something: true }],
+        },
+        serverState: {
+          relation: [{ id: 2, something: true }],
         },
       },
       {
@@ -206,6 +220,61 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       relation: {
         connect: [{ id: 1 }],
         disconnect: [{ id: 2 }],
+      },
+    });
+  });
+
+  test('given that the browserState includes a relation that is not in the server state we should return a connect of length one', () => {
+    const result = cleanData(
+      {
+        browserState: {
+          relation: [{ id: 1, something: true }],
+        },
+        serverState: {
+          relation: [],
+        },
+      },
+      {
+        attributes: {
+          relation: {
+            type: 'relation',
+          },
+        },
+      },
+      {}
+    );
+
+    expect(result).toStrictEqual({
+      relation: {
+        connect: [{ id: 1 }],
+        disconnect: [],
+      },
+    });
+  });
+  test('given that the browserState does not include a relation that is in the server state we should return a disconnect of length one', () => {
+    const result = cleanData(
+      {
+        browserState: {
+          relation: [],
+        },
+        serverState: {
+          relation: [{ id: 1, something: true }],
+        },
+      },
+      {
+        attributes: {
+          relation: {
+            type: 'relation',
+          },
+        },
+      },
+      {}
+    );
+
+    expect(result).toStrictEqual({
+      relation: {
+        disconnect: [{ id: 1 }],
+        connect: [],
       },
     });
   });
