@@ -82,7 +82,7 @@ async function attachMorphAnyToOneRelation(
   });
 
   // get order value from max value
-  const maxOrderMap = getRelationIdsMaxOrder(joinTable, relIdsToadd, { db, trx });
+  const maxOrderMap = await getRelationIdsMaxOrder(joinTable, relIdsToadd, { db, trx });
 
   insert.forEach((rel) => {
     rel.order = (maxOrderMap[rel[joinColumn.name]] || 0) + 1;
