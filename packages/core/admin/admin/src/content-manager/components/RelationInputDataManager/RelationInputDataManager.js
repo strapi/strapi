@@ -12,6 +12,7 @@ import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } f
 import { getTrad } from '../../utils';
 
 export const RelationInputDataManager = ({
+  error,
   componentId,
   editable,
   description,
@@ -104,11 +105,11 @@ export const RelationInputDataManager = ({
     return !editable;
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
-  const handleRelationAdd = (relation) => {
+  const handleRelationConnect = (relation) => {
     connectRelation({ target: { name, value: relation, replace: isSingleRelation } });
   };
 
-  const handleRelationRemove = (relation) => {
+  const handleRelationDisconnect = (relation) => {
     disconnectRelation({ target: { name, value: relation } });
   };
 
@@ -138,11 +139,12 @@ export const RelationInputDataManager = ({
     (!isFieldAllowed && isCreatingEntry) ||
     (!isCreatingEntry && !isFieldAllowed && !isFieldReadable)
   ) {
-    return <NotAllowedInput intlLabel={intlLabel} labelAction={labelAction} />;
+    return <NotAllowedInput name={name} intlLabel={intlLabel} labelAction={labelAction} />;
   }
 
   return (
     <RelationInput
+      error={error}
       description={description}
       disabled={isDisabled}
       id={name}
@@ -172,8 +174,8 @@ export const RelationInputDataManager = ({
       }
       name={name}
       numberOfRelationsToDisplay={RELATIONS_TO_DISPLAY}
-      onRelationAdd={(relation) => handleRelationAdd(relation)}
-      onRelationRemove={(relation) => handleRelationRemove(relation)}
+      onRelationConnect={(relation) => handleRelationConnect(relation)}
+      onRelationDisconnect={(relation) => handleRelationDisconnect(relation)}
       onRelationLoadMore={() => handleRelationLoadMore()}
       onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
@@ -208,6 +210,7 @@ export const RelationInputDataManager = ({
 RelationInputDataManager.defaultProps = {
   componentId: undefined,
   editable: true,
+  error: undefined,
   description: '',
   labelAction: null,
   isFieldAllowed: true,
@@ -218,6 +221,7 @@ RelationInputDataManager.defaultProps = {
 RelationInputDataManager.propTypes = {
   componentId: PropTypes.number,
   editable: PropTypes.bool,
+  error: PropTypes.string,
   description: PropTypes.string,
   intlLabel: PropTypes.shape({
     id: PropTypes.string.isRequired,
