@@ -98,11 +98,19 @@ const reducer = (state, action) =>
       }
       case 'CONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
-        const { value } = action;
+        const { value, isSingleRelation } = action;
 
-        const modifiedDataRelations = get(state, path);
-        const newRelations = [...modifiedDataRelations, value];
-        set(draftState, path, newRelations);
+        /**
+         * If the field is a single relation field we don't want to append
+         * we just want to replace the value.
+         */
+        if (isSingleRelation) {
+          set(draftState, path, [value]);
+        } else {
+          const modifiedDataRelations = get(state, path);
+          const newRelations = [...modifiedDataRelations, value];
+          set(draftState, path, newRelations);
+        }
 
         // const connectedRelations = get(state, [...path, 'connect']);
         // const disconnectedRelations = get(state, [...path, 'disconnect']) ?? [];
