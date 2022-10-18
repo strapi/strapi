@@ -1,6 +1,6 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { fireEvent, render, screen, act } from '@testing-library/react';
+import { fireEvent, render, act } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -21,28 +21,6 @@ const queryClient = new QueryClient({
 jest.mock('../../../hooks/useRelation', () => ({
   useRelation: jest.fn().mockReturnValue({
     relations: {
-      data: {
-        pages: [
-          {
-            results: [
-              {
-                id: 1,
-                title: 'Relation 1',
-              },
-
-              {
-                id: 2,
-                title: 'Relation 2',
-              },
-            ],
-
-            pagination: {
-              page: 1,
-              pageCount: 2,
-            },
-          },
-        ],
-      },
       fetchNextPage: jest.fn(),
       hasNextPage: true,
       isFetchingNextPage: false,
@@ -87,7 +65,36 @@ jest.mock('@strapi/helper-plugin', () => ({
     readActionAllowedFields: ['relation'],
     updateActionAllowedFields: ['relation'],
     slug: 'test',
-    initialData: {},
+    initialData: {
+      relation: [
+        {
+          id: 1,
+          mainField: 'Relation 1',
+          name: 'Relation 1',
+        },
+
+        {
+          id: 2,
+          mainField: 'Relation 2',
+          name: 'Relation 2',
+        },
+      ],
+    },
+    modifiedData: {
+      relation: [
+        {
+          id: 1,
+          mainField: 'Relation 1',
+          name: 'Relation 1',
+        },
+
+        {
+          id: 2,
+          mainField: 'Relation 2',
+          name: 'Relation 2',
+        },
+      ],
+    },
     loadRelation: jest.fn(),
     connectRelation: jest.fn(),
     disconnectRelation: jest.fn(),
@@ -225,7 +232,10 @@ describe('RelationInputDataManager', () => {
     expect(container.querySelector('input')).toHaveAttribute('disabled');
   });
 
-  test('Stores the loaded translations in the store', async () => {
+  /**
+   * TODO: this needs to be moved to `useRelation` hook.
+   */
+  test.skip('Stores the loaded relations in the store', async () => {
     const { loadRelation } = useCMEditViewDataManager();
 
     setup();
@@ -307,11 +317,7 @@ describe('RelationInputDataManager', () => {
 
     expect(disconnectRelation).toBeCalledWith(
       expect.objectContaining({
-        target: expect.objectContaining({
-          value: expect.objectContaining({
-            id: 1,
-          }),
-        }),
+        id: 1,
       })
     );
   });
@@ -356,9 +362,7 @@ describe('RelationInputDataManager', () => {
       fireEvent.keyDown(target, { key: 'ArrowDown', code: 'ArrowDown' });
     });
 
-    screen.logTestingPlaygroundURL();
-
-    expect(searchFor).toBeCalledWith('', { idsToInclude: undefined, idsToOmit: undefined });
+    expect(searchFor).toBeCalledWith('', { idsToInclude: [], idsToOmit: [] });
   });
 
   test('Connect new entity', async () => {
@@ -386,10 +390,10 @@ describe('RelationInputDataManager', () => {
 
     expect(connectRelation).toBeCalledWith(
       expect.objectContaining({
-        target: expect.objectContaining({
-          value: expect.objectContaining({
-            id: 11,
-          }),
+        name: expect.any(String),
+        isSingleRelation: expect.any(Boolean),
+        value: expect.objectContaining({
+          id: 11,
         }),
       })
     );
