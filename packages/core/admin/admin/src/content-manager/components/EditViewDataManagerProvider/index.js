@@ -174,12 +174,15 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const connectRelation = useCallback(({ name, value }) => {
-    // TODO: replace xToOne
+  /**
+   * @type {({ name: string, value: Relation, isSingleRelation: boolean}) => void}
+   */
+  const connectRelation = useCallback(({ name, value, isSingleRelation }) => {
     dispatch({
       type: 'CONNECT_RELATION',
       keys: name.split('.'),
       value,
+      isSingleRelation,
     });
   }, []);
 

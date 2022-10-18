@@ -88,8 +88,8 @@ export const RelationInputDataManager = ({
     return !editable;
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
-  const handleRelationConnect = (relation) => {
-    connectRelation({ target: { name, value: relation, replace: isSingleRelation } });
+  const handleRelationAdd = (relation) => {
+    connectRelation({ name, value: relation, isSingleRelation });
   };
 
   const handleRelationDisconnect = (relation) => {
