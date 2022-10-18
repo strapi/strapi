@@ -125,7 +125,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 1px solid #4945ff;
       }
 
-      .c12 .sc-kBzgEd {
+      .c12 .sc-gJbFto {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -208,8 +208,8 @@ describe('CONTENT MANAGER | EditView | Header', () => {
 
       .c5 {
         color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c3 {

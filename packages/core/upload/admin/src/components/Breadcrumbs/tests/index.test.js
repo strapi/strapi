@@ -40,7 +40,7 @@ const setup = (props) =>
       <MemoryRouter>
         <IntlProvider locale="en" messages={{}}>
           <ThemeProvider theme={lightTheme}>
-            <Breadcrumbs breadcrumbs={defaultBreadcrumbs} as="nav" {...props} />
+            <Breadcrumbs breadcrumbs={defaultBreadcrumbs} label="Navigation" as="nav" {...props} />
           </ThemeProvider>
         </IntlProvider>
       </MemoryRouter>

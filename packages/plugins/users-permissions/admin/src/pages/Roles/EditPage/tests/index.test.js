@@ -542,8 +542,8 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c6 {
         color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c4 {
@@ -851,7 +851,7 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c49:hover:not([aria-disabled='true']) .sc-OVzLa {
+      .c49:hover:not([aria-disabled='true']) .sc-dTBbbW {
         color: #271fe0;
       }
 
@@ -1263,7 +1263,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                   class="c60 c61"
                                 >
                                   <span
-                                    class="c60 sc-OVzLa c62"
+                                    class="c60 sc-dTBbbW c62"
                                     id="accordion-label-accordion-1"
                                   >
                                     Address

@@ -49,6 +49,14 @@ const ApiTokenListView = () => {
     push({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
   }, [push]);
 
+  const headers = tableHeaders.map((header) => ({
+    ...header,
+    metadatas: {
+      ...header.metadatas,
+      label: formatMessage(header.metadatas.label),
+    },
+  }));
+
   const {
     data: apiTokens,
     status,
@@ -120,7 +128,7 @@ const ApiTokenListView = () => {
             <LinkButton
               data-testid="create-api-token-button"
               startIcon={<Plus />}
-              size="L"
+              size="S"
               onClick={() => trackUsage('willAddTokenFromList')}
               to="/settings/api-tokens/create"
             >
@@ -136,18 +144,19 @@ const ApiTokenListView = () => {
         {!canRead && <NoPermissions />}
         {shouldDisplayDynamicTable && (
           <DynamicTable
-            headers={tableHeaders}
+            headers={headers}
             contentType="api-tokens"
             rows={apiTokens}
-            withBulkActions={canDelete || canUpdate}
+            withBulkActions={canDelete || canUpdate || canRead}
             isLoading={isLoading}
             onConfirmDelete={(id) => deleteMutation.mutateAsync(id)}
           >
             <TableRows
+              canRead={canRead}
               canDelete={canDelete}
               canUpdate={canUpdate}
               rows={apiTokens}
-              withBulkActions={canDelete || canUpdate}
+              withBulkActions={canDelete || canUpdate || canRead}
             />
           </DynamicTable>
         )}

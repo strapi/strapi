@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SelectTree renders 1`] = `
-Object {
+{
   "asFragment": [Function],
   "baseElement": .c3 {
   border: 0;
@@ -146,7 +146,7 @@ Object {
           class=" css-1hb7zxy-IndicatorsContainer"
         >
           <button
-            class="sc-eBTqsU sc-ksDcAU sc-bJcRwn elEUJG hjqBQK ddQtUR"
+            class="sc-iseIHH sc-jgaZKu sc-chKlql iQNAGU kJneHl kQZEGc"
             type="button"
           >
             <svg
@@ -168,7 +168,7 @@ Object {
       </div>
     </div>
     <div
-      class="sc-cxpSdN hEuJJy"
+      class="sc-llYSUQ PCyKi"
     >
       <p
         aria-live="polite"

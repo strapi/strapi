@@ -97,7 +97,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c13 .sc-kBzgEd {
+.c13 .sc-gJbFto {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -177,7 +177,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c16 .sc-kBzgEd {
+.c16 .sc-gJbFto {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -286,6 +286,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
 .c46 {
   -webkit-animation: gzYjWD 1s infinite linear;
   animation: gzYjWD 1s infinite linear;
+  will-change: transform;
 }
 
 .c10 {
@@ -618,8 +619,8 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
 
 .c6 {
   color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c4 {

@@ -206,6 +206,9 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
     uid: joinTableName,
     tableName: joinTableName,
     attributes: {
+      id: {
+        type: 'increments',
+      },
       [joinColumnName]: {
         type: 'integer',
         column: {
@@ -404,6 +407,9 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
     uid: joinTableName,
     tableName: joinTableName,
     attributes: {
+      id: {
+        type: 'increments',
+      },
       [joinColumnName]: {
         type: 'integer',
         column: {

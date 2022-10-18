@@ -12,11 +12,11 @@ Object.defineProperty(global, 'strapi', {
     strapiInstance = value;
 
     strapiInstance.plugin = (name) => strapiInstance.plugins[name];
-    _.mapValues(strapi.plugins, (plugin) => {
-      plugin.controller = (name) => plugin.controllers[name];
-      plugin.service = (name) => plugin.services[name];
-      plugin.contentType = (name) => plugin.contentTypes[name];
-      plugin.policy = (name) => plugin.policies[name];
+    _.mapValues(strapi.plugins, (acc) => {
+      acc.controller = (name) => acc.controllers[name];
+      acc.service = (name) => acc.services[name];
+      acc.contentType = (name) => acc.contentTypes[name];
+      acc.policy = (name) => acc.policies[name];
     });
 
     strapiInstance.service = (name = '') => {

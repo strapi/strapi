@@ -151,6 +151,7 @@ describe('Content manager | App | main', () => {
       .c35 {
         -webkit-animation: gzYjWD 1s infinite linear;
         animation: gzYjWD 1s infinite linear;
+        will-change: transform;
       }
 
       .c33 {

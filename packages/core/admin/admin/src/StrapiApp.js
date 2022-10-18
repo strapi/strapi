@@ -8,7 +8,7 @@ import invariant from 'invariant';
 import { Helmet } from 'react-helmet';
 import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
-import { Plugin } from './core/apis';
+import { customFields, Plugin } from './core/apis';
 import App from './pages/App';
 import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
 import MenuLogo from './assets/images/logo_strapi_menu.png';
@@ -22,6 +22,7 @@ import {
 } from './exposedHooks';
 import injectionZones from './injectionZones';
 import favicon from './favicon.ico';
+import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
 
 class StrapiApp {
   constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
@@ -47,6 +48,7 @@ class StrapiApp {
     this.admin = {
       injectionZones,
     };
+    this.customFields = customFields;
 
     this.menu = [];
     this.settings = {
@@ -280,17 +282,7 @@ class StrapiApp {
 
   async initialize() {
     Object.keys(this.appPlugins).forEach((plugin) => {
-      this.appPlugins[plugin].register({
-        addComponents: this.addComponents,
-        addCorePluginMenuLink: this.addCorePluginMenuLink,
-        addFields: this.addFields,
-        addMenuLink: this.addMenuLink,
-        addMiddlewares: this.addMiddlewares,
-        addReducers: this.addReducers,
-        createHook: this.createHook,
-        createSettingSection: this.createSettingSection,
-        registerPlugin: this.registerPlugin,
-      });
+      this.appPlugins[plugin].register(this);
     });
   }
 
@@ -430,6 +422,7 @@ class StrapiApp {
         authLogo={this.configurations.authLogo}
         components={components}
         fields={fields}
+        customFields={this.customFields}
         localeNames={localeNames}
         getAdminInjectedComponents={this.getAdminInjectedComponents}
         getPlugin={this.getPlugin}
@@ -457,6 +450,7 @@ class StrapiApp {
                 href: this.configurations.head.favicon,
               },
             ]}
+            htmlAttributes={{ lang: localStorage.getItem(localStorageKey) || 'en' }}
           />
           <BrowserRouter basename={basename}>
             <App store={store} />

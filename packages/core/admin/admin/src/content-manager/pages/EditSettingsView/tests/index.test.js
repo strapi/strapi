@@ -88,13 +88,13 @@ describe('EditSettingsView', () => {
       expect(screen.getByText('Configure the view - Address')).toBeInTheDocument()
     );
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   it('should add relation', async () => {
     const history = createMemoryHistory();
 
-    const { container } = render(makeApp(history), { container: document.body });
+    const { container } = render(makeApp(history));
 
     await waitFor(() =>
       expect(screen.getByText('Configure the view - Address')).toBeInTheDocument()
@@ -113,7 +113,7 @@ describe('EditSettingsView', () => {
   it('should add field', async () => {
     const history = createMemoryHistory();
 
-    const { container } = render(makeApp(history), { container: document.body });
+    const { container } = render(makeApp(history));
 
     await waitFor(() =>
       expect(screen.getByText('Configure the view - Address')).toBeInTheDocument()

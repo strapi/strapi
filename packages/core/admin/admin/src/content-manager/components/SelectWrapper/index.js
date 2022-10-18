@@ -129,7 +129,7 @@ function SelectWrapper({
       const params = { limit: state.limit, ...defaultParams, start: state.start };
 
       if (state.contains) {
-        params[`filters[${containsKey}][$contains]`] = state.contains;
+        params[`filters[${containsKey}][$containsi]`] = state.contains;
       }
 
       try {
@@ -282,6 +282,12 @@ function SelectWrapper({
         isDisabled={isDisabled}
         isLoading={isLoading}
         isClearable
+        loadingMessage={() =>
+          formatMessage({
+            id: getTrad('DynamicTable.relation-loading'),
+            defaultMessage: 'Relations are loading',
+          })
+        }
         mainField={mainField}
         move={moveRelation}
         name={name}

@@ -15,9 +15,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
   useFocusWhenNavigate: jest.fn(),
-  useRBAC: jest.fn(() => ({
-    allowedActions: { canCreate: true, canDelete: true, canRead: true, canUpdate: true },
-  })),
+  useRBAC: jest.fn(),
   useGuidedTour: jest.fn(() => ({
     startSection: jest.fn(),
   })),
@@ -73,6 +71,15 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   });
 
   it('should show a list of api tokens', async () => {
+    useRBAC.mockImplementation(() => ({
+      allowedActions: {
+        canCreate: true,
+        canDelete: true,
+        canRead: true,
+        canUpdate: true,
+        canRegenerate: true,
+      },
+    }));
     const history = createMemoryHistory();
     history.push('/settings/api-tokens');
     const app = makeApp(history);
@@ -362,8 +369,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
 
       .c37 {
         color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c35 {
@@ -422,8 +429,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       .c10 {
         font-weight: 600;
         color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
       .c8 {
@@ -489,7 +496,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       }
 
       .c6 {
-        padding: 10px 16px;
+        padding: 8px 16px;
         background: #4945ff;
         border: 1px solid #4945ff;
         border-radius: 4px;
@@ -631,7 +638,8 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         fill: #8e8ea9;
       }
 
-      .c36:hover svg path {
+      .c36:hover svg path,
+      .c36:focus svg path {
         fill: #32324d;
       }
 
@@ -726,6 +734,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                       <th
                         aria-colindex="1"
                         class="c21"
+                        tabindex="0"
                       >
                         <div
                           class="c22"
@@ -735,7 +744,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                               aria-labelledby="tooltip-1"
                               class="c23"
                               label="Name"
-                              tabindex="0"
+                              tabindex="-1"
                             >
                               Name
                             </span>
@@ -748,7 +757,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                                 aria-disabled="false"
                                 aria-labelledby="tooltip-1"
                                 class="c25 c26"
-                                tabindex="0"
+                                tabindex="-1"
                                 type="button"
                               >
                                 <svg
@@ -804,10 +813,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             <span
                               aria-labelledby="tooltip-5"
                               class="c23"
-                              label="Token type"
+                              label="Created at"
                               tabindex="-1"
                             >
-                              Token type
+                              Created at
                             </span>
                           </span>
                           <span
@@ -826,10 +835,10 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                             <span
                               aria-labelledby="tooltip-7"
                               class="c23"
-                              label="Created at"
+                              label="Last used"
                               tabindex="-1"
                             >
-                              Created at
+                              Last used
                             </span>
                           </span>
                           <span
@@ -895,17 +904,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         <span
                           class="c33"
                         >
-                          Type unknown
-                        </span>
-                      </td>
-                      <td
-                        aria-colindex="4"
-                        class="c21"
-                        tabindex="-1"
-                      >
-                        <span
-                          class="c33"
-                        >
                           <time
                             datetime="2021-11-15T00:00:00.000Z"
                             title="11/15/2021 12:00 AM"
@@ -915,8 +913,14 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                         </span>
                       </td>
                       <td
+                        aria-colindex="4"
+                        class="c21"
+                        tabindex="-1"
+                      />
+                      <td
                         aria-colindex="5"
                         class="c21"
+                        tabindex="-1"
                       >
                         <div
                           class="c34"
@@ -956,6 +960,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
                                 aria-disabled="false"
                                 aria-labelledby="tooltip-3"
                                 class="c25 c26"
+                                name="delete"
                                 tabindex="-1"
                                 type="button"
                               >
@@ -988,8 +993,14 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   });
 
   it('should not show the create button when the user does not have the rights to create', async () => {
-    useRBAC.mockImplementationOnce(() => ({
-      allowedActions: { canCreate: false, canDelete: true, canRead: true, canUpdate: true },
+    useRBAC.mockImplementation(() => ({
+      allowedActions: {
+        canCreate: false,
+        canDelete: true,
+        canRead: true,
+        canUpdate: true,
+        canRegenerate: true,
+      },
     }));
 
     const history = createMemoryHistory();
@@ -998,5 +1009,47 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
     const { queryByTestId } = render(app);
 
     await waitFor(() => expect(queryByTestId('create-api-token-button')).not.toBeInTheDocument());
+  });
+
+  it('should show the delete button when the user have the rights to delete', async () => {
+    useRBAC.mockImplementation(() => ({
+      allowedActions: {
+        canCreate: false,
+        canDelete: true,
+        canRead: true,
+        canUpdate: false,
+        canRegenerate: false,
+      },
+    }));
+    const history = createMemoryHistory();
+    history.push('/settings/api-tokens');
+    const app = makeApp(history);
+
+    const { container } = render(app);
+
+    await waitFor(() => {
+      expect(container.querySelector('button[name="delete"]')).toBeInTheDocument();
+    });
+  });
+
+  it('should show the read button when the user have the rights to read and not to update', async () => {
+    useRBAC.mockImplementation(() => ({
+      allowedActions: {
+        canCreate: false,
+        canDelete: true,
+        canRead: true,
+        canUpdate: false,
+        canRegenerate: false,
+      },
+    }));
+    const history = createMemoryHistory();
+    history.push('/settings/api-tokens');
+    const app = makeApp(history);
+
+    const { container } = render(app);
+
+    await waitFor(() => {
+      expect(container.querySelector('a[title*="Read"]')).toBeInTheDocument();
+    });
   });
 });

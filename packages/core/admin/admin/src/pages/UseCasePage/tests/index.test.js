@@ -8,7 +8,7 @@ import UseCasePage from '../index';
 
 jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale() {},
-  localeNames: ['en'],
+  localeNames: { en: 'English' },
   messages: ['test'],
 }));
 jest.mock('../../../hooks/useConfigurations', () => () => ({
@@ -171,7 +171,7 @@ describe('Admin | UseCasePage', () => {
         width: 100%;
       }
 
-      .c35 .sc-ezHhwS {
+      .c35 .sc-kBzgEd {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -734,11 +734,14 @@ describe('Admin | UseCasePage', () => {
                   aria-expanded="false"
                   aria-haspopup="true"
                   class="c2 c3"
+                  label="English"
                   type="button"
                 >
                   <span
                     class="c4 c5"
-                  />
+                  >
+                    English
+                  </span>
                   <div
                     aria-hidden="true"
                     class="c6 c7"
