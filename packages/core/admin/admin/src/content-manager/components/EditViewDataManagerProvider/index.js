@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-constructed-context-values */
 import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
@@ -570,23 +571,21 @@ const EditViewDataManagerProvider = ({
         publishConfirmation,
       }}
     >
-      <>
-        {isLoadingForData || (!isCreatingEntry && !initialData.id) ? (
-          <Main aria-busy="true">
-            <LoadingIndicatorPage />
-          </Main>
-        ) : (
-          <>
-            <Prompt
-              when={!isEqual(modifiedData, initialData)}
-              message={formatMessage({ id: 'global.prompt.unsaved' })}
-            />
-            <form noValidate onSubmit={handleSubmit}>
-              {children}
-            </form>
-          </>
-        )}
-      </>
+      {isLoadingForData || (!isCreatingEntry && !initialData.id) ? (
+        <Main aria-busy="true">
+          <LoadingIndicatorPage />
+        </Main>
+      ) : (
+        <>
+          <Prompt
+            when={!isEqual(modifiedData, initialData)}
+            message={formatMessage({ id: 'global.prompt.unsaved' })}
+          />
+          <form noValidate onSubmit={handleSubmit}>
+            {children}
+          </form>
+        </>
+      )}
     </ContentManagerEditViewDataManagerContext.Provider>
   );
 };

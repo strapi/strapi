@@ -84,7 +84,7 @@ const RelationInput = ({
     data: { pages },
   } = searchResults;
 
-  const relations = useMemo(() => paginatedRelations.data, [paginatedRelations]);
+  const relations = paginatedRelations.data;
   const totalNumberOfRelations = relations.length ?? 0;
 
   const dynamicListHeight = useMemo(
