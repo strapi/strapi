@@ -7,47 +7,40 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { RelationInput } from '../index';
 
 const FIXTURES_RELATIONS = {
-  data: {
-    pages: [
-      [
-        {
-          id: 1,
-          href: '/',
-          mainField: 'Relation 1',
-          publicationState: 'draft',
-        },
-        {
-          id: 2,
-          href: '',
-          mainField: 'Relation 2',
-          publicationState: 'published',
-        },
-        {
-          id: 3,
-          href: '',
-          mainField: 'Relation 3',
-          publicationState: false,
-        },
-      ],
-    ],
-  },
+  data: [
+    {
+      id: 1,
+      href: '/',
+      mainField: 'Relation 1',
+      publicationState: 'draft',
+    },
+    {
+      id: 2,
+      href: '',
+      mainField: 'Relation 2',
+      publicationState: 'published',
+    },
+    {
+      id: 3,
+      href: '',
+      mainField: 'Relation 3',
+      publicationState: false,
+    },
+  ],
   isLoading: false,
   isSuccess: true,
   hasNextPage: true,
+  isFetchingNextPage: false,
 };
 
 const FIXTURES_SEARCH = {
-  data: {
-    pages: [
-      [
-        {
-          id: 4,
-          mainField: 'Relation 4',
-          publicationState: 'draft',
-        },
-      ],
-    ],
-  },
+  data: [
+    {
+      id: 4,
+      mainField: 'Relation 4',
+      publicationState: 'draft',
+    },
+  ],
   isLoading: false,
   isSuccess: true,
 };
@@ -173,7 +166,7 @@ describe('Content-Manager || RelationInput', () => {
 
   describe('States', () => {
     test('should display search loading state', () => {
-      setup({ searchResults: { data: { pages: [] }, isLoading: true, isSuccess: true } });
+      setup({ searchResults: { data: [], isLoading: true, isSuccess: true } });
 
       fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
 
@@ -182,7 +175,13 @@ describe('Content-Manager || RelationInput', () => {
 
     test('should display load more button loading if loading is true', () => {
       setup({
-        relations: { data: { pages: [] }, isLoading: true, isSuccess: true, hasNextPage: true },
+        relations: {
+          data: [],
+          isLoading: true,
+          isSuccess: true,
+          hasNextPage: true,
+          isFetchingNextPage: false,
+        },
       });
 
       expect(screen.getByRole('button', { name: /load more/i })).toHaveAttribute(
@@ -193,7 +192,13 @@ describe('Content-Manager || RelationInput', () => {
 
     test('should not display load more button loading if there is no next page', () => {
       setup({
-        relations: { data: { pages: [] }, isLoading: false, isSuccess: true, hasNextPage: false },
+        relations: {
+          data: [],
+          isLoading: false,
+          isSuccess: true,
+          hasNextPage: false,
+          isFetchingNextPage: false,
+        },
       });
 
       expect(screen.queryByText('Load more')).not.toBeInTheDocument();
@@ -201,7 +206,13 @@ describe('Content-Manager || RelationInput', () => {
 
     test('should display load more button loading if there is no next page but loading is true', () => {
       setup({
-        relations: { data: { pages: [] }, isLoading: true, isSuccess: true, hasNextPage: false },
+        relations: {
+          data: [],
+          isLoading: true,
+          isSuccess: true,
+          hasNextPage: false,
+          isFetchingNextPage: false,
+        },
       });
 
       expect(screen.getByRole('button', { name: /load more/i })).toHaveAttribute(
