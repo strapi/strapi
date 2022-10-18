@@ -91,7 +91,7 @@ function App() {
           try {
             const deviceId = await getUID();
 
-            fetch('https://analytics.strapi.io/track', {
+            await fetch('https://analytics.strapi.io/track', {
               method: 'POST',
               body: JSON.stringify({
                 event: 'didInitializeAdministration',
