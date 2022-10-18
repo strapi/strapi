@@ -42,7 +42,7 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
     }
   };
 
-  const { onLoadRelationsCallback, normalizeArguments } = relation;
+  const { onLoadRelationsCallback, normalizeArguments = {} } = relation;
 
   const relationsRes = useInfiniteQuery(['relation', cacheKey], fetchRelations, {
     cacheTime: 0,
@@ -91,7 +91,7 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
   const { status, data } = relationsRes;
 
   useEffect(() => {
-    if (status === 'success' && data && data.pages?.at(-1)?.results) {
+    if (status === 'success' && data && data.pages?.at(-1)?.results && onLoadRelationsCallback) {
       // everytime we fetch, we normalize prior to adding to redux
       const normalizedResults = normalizeRelations(data.pages?.at(-1)?.results, normalizeArguments);
 

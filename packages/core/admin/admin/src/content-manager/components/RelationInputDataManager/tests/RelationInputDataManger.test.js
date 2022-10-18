@@ -232,22 +232,6 @@ describe('RelationInputDataManager', () => {
     expect(container.querySelector('input')).toHaveAttribute('disabled');
   });
 
-  /**
-   * TODO: this needs to be moved to `useRelation` hook.
-   */
-  test.skip('Stores the loaded relations in the store', async () => {
-    const { loadRelation } = useCMEditViewDataManager();
-
-    setup();
-
-    expect(loadRelation).toBeCalledWith({
-      target: {
-        name: 'relation',
-        value: [expect.objectContaining({ id: 1 }), expect.objectContaining({ id: 2 })],
-      },
-    });
-  });
-
   test('Renders <NotAllowedInput /> if entity is created and field is not allowed', async () => {
     useCMEditViewDataManager.mockReturnValueOnce({
       isCreatingEntry: true,
