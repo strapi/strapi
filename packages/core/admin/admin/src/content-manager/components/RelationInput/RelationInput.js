@@ -80,9 +80,7 @@ const RelationInput = ({
   const outerListRef = useRef();
   const [overflow, setOverflow] = useState('');
 
-  const {
-    data: { pages },
-  } = searchResults;
+  const { data } = searchResults;
 
   const relations = paginatedRelations.data;
   const totalNumberOfRelations = relations.length ?? 0;
@@ -102,12 +100,12 @@ const RelationInput = ({
 
   const options = useMemo(
     () =>
-      pages.flat().map((result) => ({
+      data.flat().map((result) => ({
         ...result,
         value: result.id,
         label: result.mainField,
       })),
-    [pages]
+    [data]
   );
 
   useEffect(() => {
@@ -362,17 +360,14 @@ const ReactQueryRelationResult = PropTypes.shape({
 });
 
 const ReactQuerySearchResult = PropTypes.shape({
-  data: PropTypes.shape({
-    pages: PropTypes.arrayOf(
-      PropTypes.arrayOf(
-        PropTypes.shape({
-          id: PropTypes.number.isRequired,
-          mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-          publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-        })
-      )
-    ),
-  }),
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      href: PropTypes.string,
+      mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+    })
+  ),
   hasNextPage: PropTypes.bool,
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
@@ -386,8 +381,8 @@ RelationInput.defaultProps = {
   labelLoadMore: null,
   onSearchClose: undefined,
   required: false,
-  relations: [],
-  searchResults: [],
+  relations: { data: [] },
+  searchResults: { data: [] },
 };
 
 RelationInput.propTypes = {
