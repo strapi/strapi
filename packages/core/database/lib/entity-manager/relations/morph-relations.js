@@ -72,16 +72,14 @@ const deleteMorphRelations = async ({
   const { idColumn, typeColumn } = morphColumn;
   const all = relIdsToDelete === 'all';
 
-  await createQueryBuilder(joinTable.name, db)
-    .delete()
-    .where({
-      [idColumn.name]: id,
-      [typeColumn.name]: uid,
-      field: attributeName,
-      ...(all ? {} : { [joinColumn.name]: { $in: relIdsToDelete } }),
-    })
-    .transacting(trx)
-    .execute();
+  const where = {
+    [idColumn.name]: id,
+    ...(all ? {} : { [joinColumn.name]: { $in: relIdsToDelete } }),
+  };
+  if (uid) where[typeColumn.name] = uid;
+  if (attributeName) where.field = attributeName;
+
+  await createQueryBuilder(joinTable.name, db).delete().where(where).transacting(trx).execute();
 
   if (!all) {
     await cleanMorphOrderColumns({ uid, attributeName, targetAttribute, db, transaction: trx });

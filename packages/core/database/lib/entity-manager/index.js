@@ -25,6 +25,7 @@ const { createQueryBuilder } = require('../query');
 const { createRepository } = require('./entity-repository');
 const {
   deleteRelatedMorphOneRelationsAfterMorphToManyUpdate,
+  deleteMorphRelations,
 } = require('./relations/morph-relations');
 const {
   isBidirectional,
@@ -1010,21 +1011,14 @@ const createEntityManager = (db) => {
               .transacting(trx)
               .execute();
           } else if (targetAttribute.relation === 'morphToMany') {
-            const { joinTable } = targetAttribute;
-            const { morphColumn } = joinTable;
-
-            const { idColumn, typeColumn } = morphColumn;
-
-            await this.createQueryBuilder(joinTable.name)
-              .delete()
-              .where({
-                [idColumn.name]: id,
-                [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
-                field: attributeName,
-              })
-              .transacting(trx)
-              .execute();
+            await deleteMorphRelations({
+              id,
+              uid,
+              attribute,
+              targetAttribute,
+              db,
+              transaction: trx,
+            });
           }
 
           continue;
@@ -1043,18 +1037,7 @@ const createEntityManager = (db) => {
             delete links
         */
         if (attribute.relation === 'morphToMany') {
-          const { joinTable } = attribute;
-          const { joinColumn } = joinTable;
-
-          await this.createQueryBuilder(joinTable.name)
-            .delete()
-            .where({
-              [joinColumn.name]: id,
-              ...(joinTable.on || {}),
-            })
-            .transacting(trx)
-            .execute();
-
+          await deleteMorphRelations({ id, targetAttribute: attribute, db, transaction: trx });
           continue;
         }
 
