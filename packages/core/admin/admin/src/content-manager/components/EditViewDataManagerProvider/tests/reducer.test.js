@@ -258,46 +258,13 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
   });
 
   describe('CONNECT_RELATION', () => {
-    it('should create connect array in modifiedData', () => {
-      const state = {
-        ...initialState,
-
-        initialData: {},
-        modifiedData: {
-          relation: {},
-        },
-      };
-
-      const expected = {
-        ...initialState,
-        componentsDataStructure: {},
-        initialData: {},
-        modifiedData: {
-          relation: {
-            connect: [{ id: 1 }],
-          },
-        },
-      };
-
-      const action = {
-        type: 'CONNECT_RELATION',
-        keys: ['relation'],
-        value: { id: 1 },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
     it('should add a relation in the modifiedData', () => {
       const state = {
         ...initialState,
 
         initialData: {},
         modifiedData: {
-          relation: {
-            connect: [],
-            disconnect: [],
-          },
+          relation: [],
         },
       };
 
@@ -306,78 +273,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         componentsDataStructure: {},
         initialData: {},
         modifiedData: {
-          relation: {
-            connect: [{ id: 1 }],
-            disconnect: [],
-          },
-        },
-      };
-
-      const action = {
-        type: 'CONNECT_RELATION',
-        keys: ['relation'],
-        value: { id: 1 },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('should remove the relation from disconnect and add the relation to connect', () => {
-      const state = {
-        ...initialState,
-
-        initialData: {},
-        modifiedData: {
-          relation: {
-            connect: [],
-            disconnect: [{ id: 1 }],
-          },
-        },
-      };
-
-      const expected = {
-        ...initialState,
-        componentsDataStructure: {},
-        initialData: {},
-        modifiedData: {
-          relation: {
-            connect: [{ id: 1 }],
-            disconnect: [],
-          },
-        },
-      };
-
-      const action = {
-        type: 'CONNECT_RELATION',
-        keys: ['relation'],
-        value: { id: 1 },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('should not add the relation if it already exists in results', () => {
-      const state = {
-        ...initialState,
-
-        initialData: {},
-        modifiedData: {
-          relation: {
-            connect: [],
-            results: [{ id: 1 }],
-          },
-        },
-      };
-
-      const expected = {
-        ...initialState,
-        componentsDataStructure: {},
-        initialData: {},
-        modifiedData: {
-          relation: {
-            connect: [],
-            results: [{ id: 1 }],
-          },
+          relation: [{ id: 1 }],
         },
       };
 
@@ -396,10 +292,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
         initialData: {},
         modifiedData: {
-          relation: {
-            connect: [],
-            disconnect: [],
-          },
+          relation: [],
         },
       };
 
@@ -407,7 +300,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         type: 'CONNECT_RELATION',
         keys: ['relation'],
         value: { id: 1 },
-        replace: true,
+        isSingleRelation: true,
       };
 
       let nextState = reducer(state, action);
@@ -417,10 +310,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         componentsDataStructure: {},
         initialData: {},
         modifiedData: {
-          relation: {
-            connect: [{ id: 1 }],
-            disconnect: [],
-          },
+          relation: [{ id: 1 }],
         },
       });
 
@@ -428,7 +318,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         type: 'CONNECT_RELATION',
         keys: ['relation'],
         value: { id: 2 },
-        replace: true,
+        isSingleRelation: true,
       });
 
       expect(nextState).toEqual({
@@ -436,77 +326,22 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         componentsDataStructure: {},
         initialData: {},
         modifiedData: {
-          relation: {
-            connect: [{ id: 2 }],
-            disconnect: [],
-          },
-        },
-      });
-    });
-
-    it('should reset connect/disconnect if replace is set to true and a saved relation was remove and then added again', () => {
-      const state = {
-        ...initialState,
-
-        initialData: {},
-        modifiedData: {
-          relation: {
-            connect: [],
-            disconnect: [],
-            results: [{ id: 4 }],
-          },
-        },
-      };
-
-      const action = {
-        type: 'CONNECT_RELATION',
-        keys: ['relation'],
-        value: { id: 1 },
-        replace: true,
-      };
-
-      let nextState = reducer(state, action);
-
-      expect(nextState).toEqual({
-        ...initialState,
-        componentsDataStructure: {},
-        initialData: {},
-        modifiedData: {
-          relation: {
-            connect: [{ id: 1 }],
-            disconnect: [{ id: 4 }],
-            results: [{ id: 4 }],
-          },
-        },
-      });
-
-      nextState = reducer(nextState, {
-        type: 'CONNECT_RELATION',
-        keys: ['relation'],
-        value: { id: 4 },
-        replace: true,
-      });
-
-      expect(nextState).toEqual({
-        ...initialState,
-        componentsDataStructure: {},
-        initialData: {},
-        modifiedData: {
-          relation: {
-            connect: [],
-            disconnect: [],
-            results: [{ id: 4 }],
-          },
+          relation: [{ id: 2 }],
         },
       });
     });
   });
 
   describe('LOAD_RELATION', () => {
-    it.skip('should add loaded relations to initalData', () => {
+    it('should add loaded relations to initalData & modifiedState', () => {
       const state = {
         ...initialState,
-        initialData: {},
+        initialData: {
+          relation: [],
+        },
+        modifiedData: {
+          relation: [],
+        },
       };
 
       let nextState = reducer(state, {
@@ -518,15 +353,10 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(nextState).toStrictEqual({
         ...initialState,
         initialData: {
-          relation: {
-            results: [{ id: 1 }],
-          },
+          relation: [{ id: 1 }],
         },
         modifiedData: {
-          relation: {
-            connect: [],
-            disconnect: [],
-          },
+          relation: [{ id: 1 }],
         },
       });
 
@@ -539,112 +369,82 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       ).toStrictEqual({
         ...initialState,
         initialData: {
-          relation: { results: [{ id: 2 }, { id: 1 }] },
+          relation: [{ id: 2 }, { id: 1 }],
         },
         modifiedData: {
-          relation: {
-            connect: [],
-            disconnect: [],
-          },
+          relation: [{ id: 2 }, { id: 1 }],
+        },
+      });
+    });
+
+    it('should not add the new relations if the last relation of the passed value is the same as the current initialDatas last relation', () => {
+      const state = {
+        ...initialState,
+        initialData: {
+          relation: [],
+        },
+        modifiedData: {
+          relation: [],
+        },
+      };
+
+      let nextState = reducer(state, {
+        type: 'LOAD_RELATION',
+        keys: ['relation'],
+        value: [{ id: 1 }],
+      });
+
+      expect(nextState).toStrictEqual({
+        ...initialState,
+        initialData: {
+          relation: [{ id: 1 }],
+        },
+        modifiedData: {
+          relation: [{ id: 1 }],
+        },
+      });
+
+      expect(
+        reducer(nextState, {
+          type: 'LOAD_RELATION',
+          keys: ['relation'],
+          value: [{ id: 1 }],
+        })
+      ).toStrictEqual({
+        ...initialState,
+        initialData: {
+          relation: [{ id: 1 }],
+        },
+        modifiedData: {
+          relation: [{ id: 1 }],
         },
       });
     });
   });
 
   describe('DISCONNECT_RELATION', () => {
-    it('should create disconnect array in modifiedData', () => {
-      const state = {
-        ...initialState,
-
-        initialData: {},
-        modifiedData: {
-          relation: {},
-        },
-      };
-
-      const expected = {
-        ...initialState,
-        componentsDataStructure: {},
-        initialData: {},
-        modifiedData: {
-          relation: {
-            disconnect: [{ id: 1 }],
-          },
-        },
-      };
-
-      const action = {
-        type: 'DISCONNECT_RELATION',
-        keys: ['relation'],
-        value: { id: 1 },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
     it('should remove a relation from modifiedData', () => {
       const state = {
         ...initialState,
-
-        initialData: {},
+        initialData: { relation: [{ id: 1 }] },
         modifiedData: {
-          relation: {
-            connect: [],
-            disconnect: [],
-          },
+          relation: [{ id: 1 }],
         },
       };
 
       const expected = {
         ...initialState,
         componentsDataStructure: {},
-        initialData: {},
+        initialData: { relation: [{ id: 1 }] },
         modifiedData: {
-          relation: {
-            connect: [],
-            disconnect: [{ id: 1 }],
-          },
+          relation: [],
         },
       };
 
       const action = {
         type: 'DISCONNECT_RELATION',
         keys: ['relation'],
-        value: { id: 1 },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('should remove the relation from connect and add it to connect', () => {
-      const state = {
-        ...initialState,
-
-        initialData: {},
-        modifiedData: {
-          relation: {
-            connect: [{ id: 1 }],
-            disconnect: [],
-          },
-        },
-      };
-
-      const expected = {
-        ...initialState,
-        componentsDataStructure: {},
-        initialData: {},
-        modifiedData: {
-          relation: {
-            connect: [],
-            disconnect: [{ id: 1 }],
-          },
-        },
-      };
-
-      const action = {
-        type: 'DISCONNECT_RELATION',
-        keys: ['relation'],
-        value: { id: 1 },
+        id: 1,
       };
 
       expect(reducer(state, action)).toEqual(expected);
@@ -678,56 +478,20 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(reducer(state, action)).toEqual(expected);
     });
 
-    it('should take relational fields into account, when setting the state', () => {
-      const state = {
-        ...initialState,
-        formErrors: true,
-        initialData: {
-          relation: {
-            something: true,
-          },
-        },
-        modifiedData: true,
-        modifiedDZName: true,
-        shouldCheckErrors: true,
-      };
-      const expected = {
-        ...initialState,
-        formErrors: {},
-        initialData: { ok: true, relation: { something: true, count: 10 } },
-        modifiedData: { ok: true, relation: { count: 10 } },
-        modifiedDZName: null,
-        shouldCheckErrors: false,
-      };
-
-      const action = {
-        type: 'INIT_FORM',
-        initialValues: { ok: true, relation: { count: 10 } },
-        relationalFields: ['relation'],
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('should reset connect/ disconnect for relational fields', () => {
+    it('should create an array per relational field passed as the initialValues', () => {
       const state = {
         ...initialState,
         formErrors: true,
         initialData: {},
-        modifiedData: {
-          relation: {
-            connect: [{ id: 1 }],
-            disconnect: [{ id: 2 }],
-          },
-        },
+        modifiedData: {},
         modifiedDZName: true,
         shouldCheckErrors: true,
       };
       const expected = {
         ...initialState,
         formErrors: {},
-        initialData: { ok: true, relation: { count: 10 } },
-        modifiedData: { ok: true, relation: { count: 10 } },
+        initialData: { ok: true, relation: [] },
+        modifiedData: { ok: true, relation: [] },
         modifiedDZName: null,
         shouldCheckErrors: false,
       };
