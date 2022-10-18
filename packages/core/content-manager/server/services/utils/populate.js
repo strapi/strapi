@@ -10,7 +10,7 @@ const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 const getDeepPopulate = (
   uid,
   populate,
-  { onlyMany = false, countMany = false, maxLevel = Infinity } = {},
+  { countMany = false, countOne = false, maxLevel = Infinity } = {},
   level = 1
 ) => {
   if (populate) {
@@ -31,9 +31,10 @@ const getDeepPopulate = (
       // always populate createdBy, updatedBy, localizations etc.
       if (!isVisibleAttribute(model, attributeName)) {
         populateAcc[attributeName] = true;
-      } else if (!onlyMany || isManyRelation) {
-        // Only populate one level of relations
-        populateAcc[attributeName] = countMany && isManyRelation ? { count: true } : true;
+      } else if ((isManyRelation && countMany) || (!isManyRelation && countOne)) {
+        populateAcc[attributeName] = { count: true };
+      } else {
+        populateAcc[attributeName] = true;
       }
     }
 
@@ -42,7 +43,7 @@ const getDeepPopulate = (
         populate: getDeepPopulate(
           attribute.component,
           null,
-          { onlyMany, countMany, maxLevel },
+          { countOne, countMany, maxLevel },
           level + 1
         ),
       };
@@ -57,7 +58,7 @@ const getDeepPopulate = (
         populate: (attribute.components || []).reduce((acc, componentUID) => {
           return merge(
             acc,
-            getDeepPopulate(componentUID, null, { onlyMany, countMany, maxLevel }, level + 1)
+            getDeepPopulate(componentUID, null, { countOne, countMany, maxLevel }, level + 1)
           );
         }, {}),
       };

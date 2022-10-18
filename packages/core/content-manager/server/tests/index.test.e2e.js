@@ -949,9 +949,7 @@ describe('Relations', () => {
         method: 'GET',
       });
 
-      if (!foundReference.tag || Object.keys(foundReference.tag).length === 0) return;
-
-      expect(foundReference.tag).toBe(null);
+      expect(foundReference.tag.count).toBe(0);
     });
   });
 });
