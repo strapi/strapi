@@ -4,4 +4,4 @@
 
 const { runCommand } = require('../lib/commands');
 
-runCommand(process);
+runCommand(process.argv);

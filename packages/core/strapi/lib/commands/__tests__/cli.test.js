@@ -9,7 +9,8 @@ const makeArgv = (...args) => {
 };
 
 describe('strapi command', () => {
-  const exit = jest.fn();
+  const exit = jest.spyOn(process, 'exit').mockImplementation(() => {});
+  // const exit = jest.fn();
   const stdoutWrite = jest.fn();
   const writeOut = jest.fn();
   const writeErr = jest.fn();
@@ -30,17 +31,7 @@ describe('strapi command', () => {
     const cmd = 'wrongCommand';
     const errString = `error: unknown command '${cmd}'`;
     expect(async () => {
-      await runCommand(
-        {
-          // ...process,
-          argv: makeArgv(cmd),
-          exit,
-          stdout: {
-            write: stdoutWrite,
-          },
-        },
-        command
-      );
+      await runCommand(makeArgv(cmd), command);
     }).rejects.toThrow(errString);
 
     expect(writeErr).toHaveBeenCalled();
@@ -50,17 +41,7 @@ describe('strapi command', () => {
   });
 
   it('--version outputs version', async () => {
-    await runCommand(
-      {
-        // ...process,
-        argv: makeArgv('version'),
-        exit,
-        stdout: {
-          write: stdoutWrite,
-        },
-      },
-      command
-    );
+    await runCommand(makeArgv('version'), command);
 
     expect(exit).toHaveBeenCalledWith(0);
   });

@@ -7,9 +7,9 @@ const { Command } = require('commander');
 
 const packageJSON = require('../../package.json');
 
-const runCommand = async (nodeProcess = process, command = new Command()) => {
+const runCommand = async (argv, command = new Command()) => {
   const exitWithCode = (code) => {
-    nodeProcess.exit(code);
+    process.exit(code);
   };
 
   const checkCwdIsStrapiApp = (name) => {
@@ -23,7 +23,7 @@ const runCommand = async (nodeProcess = process, command = new Command()) => {
     };
 
     try {
-      const pkgJSON = require(`${nodeProcess.cwd()}/package.json`);
+      const pkgJSON = require(`${process.cwd()}/package.json`);
       if (!_.has(pkgJSON, 'dependencies.@strapi/strapi')) {
         logErrorAndExit(name);
       }
@@ -71,7 +71,7 @@ const runCommand = async (nodeProcess = process, command = new Command()) => {
     .command('version')
     .description('Output the version of Strapi')
     .action(() => {
-      nodeProcess.stdout.write(`${packageJSON.version}\n`);
+      process.stdout.write(`${packageJSON.version}\n`);
       exitWithCode(0);
     });
 
@@ -124,7 +124,7 @@ const runCommand = async (nodeProcess = process, command = new Command()) => {
     .description('Launch the interactive API generator')
     .action(() => {
       checkCwdIsStrapiApp('generate');
-      nodeProcess.argv.splice(2, 1);
+      argv.splice(2, 1);
       require('@strapi/generators').runCLI();
     });
 
@@ -254,7 +254,7 @@ const runCommand = async (nodeProcess = process, command = new Command()) => {
     .option('-s, --silent', `Run the generation silently, without any output`, false)
     .action(getLocalScript('ts/generate-types'));
 
-  return command.parseAsync(nodeProcess.argv);
+  return command.parseAsync(argv);
 };
 
 module.exports = {
