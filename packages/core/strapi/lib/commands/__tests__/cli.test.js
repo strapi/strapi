@@ -20,7 +20,10 @@ describe('strapi command', () => {
     command = new Command();
     exit.mockReset();
     stdoutWrite.mockReset();
-    command.exitOverride();
+    writeOut.mockReset();
+    writeErr.mockReset();
+
+    // Set configureOutput instead of mocking stdout so it works even if output is changed in the future
     command.configureOutput({
       writeOut,
       writeErr,
@@ -30,9 +33,10 @@ describe('strapi command', () => {
   it('throws on invalid command', async () => {
     const cmd = 'wrongCommand';
     const errString = `error: unknown command '${cmd}'`;
-    expect(async () => {
-      await runCommand(makeArgv(cmd), command);
-    }).rejects.toThrow(errString);
+
+    await runCommand(makeArgv(cmd), command);
+
+    expect(exit).toHaveBeenCalledWith(1);
 
     expect(writeErr).toHaveBeenCalled();
 
