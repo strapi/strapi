@@ -1448,7 +1448,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                   class="c56"
                                   id="select-2-content"
                                 >
-                                  id
+                                  hey
                                 </span>
                               </div>
                             </div>
@@ -1605,7 +1605,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           spacing="3"
                         >
                           <span
-                            aria-label="Move id"
+                            aria-label="Move hey"
                             class="c75 c76 c77"
                             draggable="true"
                             type="button"
@@ -1657,7 +1657,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           class="c79 c66"
                         >
                           <button
-                            aria-label="Edit id"
+                            aria-label="Edit hey"
                             class="c76"
                             type="button"
                           >
@@ -1677,7 +1677,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             </svg>
                           </button>
                           <button
-                            aria-label="Delete id"
+                            aria-label="Delete hey"
                             class="c76"
                             data-testid="delete-id"
                             type="button"
