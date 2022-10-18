@@ -284,7 +284,7 @@ describe('Marketplace page', () => {
     expect(sortButton).toBeVisible();
   });
 
-  it('shows the correct options on sort select', async () => {
+  it('shows the correct options on sort select', () => {
     render(App);
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
     fireEvent.mouseDown(sortButton);
@@ -296,7 +296,7 @@ describe('Marketplace page', () => {
     expect(newestOption).toBeVisible();
   });
 
-  it('sorting by newest changes the url on click', async () => {
+  it('changes the url on sort option select', () => {
     render(App);
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
     fireEvent.mouseDown(sortButton);
