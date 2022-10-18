@@ -7,7 +7,7 @@ const { Command } = require('commander');
 
 const packageJSON = require('../../package.json');
 
-const runCommand = async (argv, command = new Command()) => {
+const runStrapiCommand = async (argv, command = new Command()) => {
   const exitWithCode = (code) => {
     process.exit(code);
   };
@@ -258,5 +258,5 @@ const runCommand = async (argv, command = new Command()) => {
 };
 
 module.exports = {
-  runCommand,
+  runStrapiCommand,
 };

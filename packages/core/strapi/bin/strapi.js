@@ -2,6 +2,6 @@
 
 'use strict';
 
-const { runCommand } = require('../lib/commands');
+const { runStrapiCommand } = require('../lib/commands');
 
-runCommand(process.argv);
+runStrapiCommand(process.argv);
