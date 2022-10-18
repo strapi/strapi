@@ -32,7 +32,7 @@ export const normalizeRelation = (relation, { shouldAddLink, mainFieldName, targ
 
 export const normalizeRelations = (
   relations,
-  { shouldAddLink = false, mainFieldName, targetModel }
+  { shouldAddLink = false, mainFieldName, targetModel } = {}
 ) => {
   return [...(relations ?? [])]?.map((relation) =>
     normalizeRelation(relation, {
