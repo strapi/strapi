@@ -8,10 +8,10 @@ const useTracking = () => {
   const { uuid, telemetryProperties } = useContext(TrackingContext);
   const appInfo = useAppInfos();
 
-  trackRef.current = (event, properties) => {
+  trackRef.current = async (event, properties) => {
     if (uuid) {
       try {
-        axios.post('https://analytics.strapi.io/track', {
+        await axios.post('https://analytics.strapi.io/track', {
           event,
           properties: {
             ...telemetryProperties,
