@@ -25,8 +25,7 @@ const { createQueryBuilder } = require('../query');
 const { createRepository } = require('./entity-repository');
 const {
   deleteRelatedMorphOneRelationsAfterMorphToManyUpdate,
-  deleteMorphRelations,
-} = require('./morph-relations');
+} = require('./relations/morph-relations');
 const {
   isBidirectional,
   isAnyToOne,
@@ -39,7 +38,11 @@ const {
   deletePreviousAnyToOneRelations,
   deleteRelations,
   cleanOrderColumns,
-} = require('./regular-relations');
+} = require('./relations/regular-relations');
+const {
+  attachMorphAnyToOneRelation,
+  updateMorphAnyToManyRelation,
+} = require('./relations/morph-any-to-many');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -431,7 +434,6 @@ const createEntityManager = (db) => {
 
         if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
           const { target, morphBy } = attribute;
-
           const targetAttribute = db.metadata.get(target).attributes[morphBy];
 
           if (targetAttribute.relation === 'morphToOne') {
@@ -446,51 +448,17 @@ const createEntityManager = (db) => {
               .transacting(trx)
               .execute();
           } else if (targetAttribute.relation === 'morphToMany') {
-            const { joinTable } = targetAttribute;
-            const { joinColumn, morphColumn } = joinTable;
-
-            const { idColumn, typeColumn } = morphColumn;
-
-            const relsToAdd = cleanRelationData.set || cleanRelationData.connect;
-            const relIdsToadd = toIds(relsToAdd);
-
-            if (isEmpty(relIdsToadd)) {
-              continue;
-            }
-
-            // Prepare new relations to insert
-            const insert = relsToAdd.map((data) => {
-              return {
-                [joinColumn.name]: data.id,
-                [idColumn.name]: id,
-                [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
-                ...(data.__pivot || {}),
-                field: attributeName,
-              };
-            });
-
-            // get order value from max value
-            const maxOrder = await db
-              .getConnection()
-              .select(joinColumn.name)
-              .max('order', { as: 'max' })
-              .whereIn(joinColumn.name, relIdsToadd)
-              .where(joinTable.on || {})
-              .groupBy(joinColumn.name)
-              .from(joinTable.name)
-              .transacting(trx);
-
-            const maxMap = maxOrder.reduce((acc, curr) => {
-              acc[curr[joinColumn.name]] = curr.max;
-              return acc;
-            }, {});
-
-            insert.forEach((rel) => {
-              rel.order = (maxMap[rel[joinColumn.name]] || 0) + 1;
-            });
-
-            await this.createQueryBuilder(joinTable.name).insert(insert).transacting(trx).execute();
+            await attachMorphAnyToOneRelation(
+              uid,
+              id,
+              attributeName,
+              targetAttribute,
+              cleanRelationData,
+              {
+                db,
+                trx,
+              }
+            );
           }
 
           continue;
@@ -683,77 +651,17 @@ const createEntityManager = (db) => {
                 .execute();
             }
           } else if (targetAttribute.relation === 'morphToMany') {
-            const { joinTable } = targetAttribute;
-            const { joinColumn, morphColumn } = joinTable;
-
-            const { idColumn, typeColumn } = morphColumn;
-
-            const isPartialUpdate = !has('set', cleanRelationData);
-            const relsToAdd = cleanRelationData.set || cleanRelationData.connect;
-            const relIdsToadd = toIds(relsToAdd);
-
-            if (isPartialUpdate) {
-              // Calculate relations to delete
-              const relIdsToDelete = toIds(
-                differenceWith(isEqual, cleanRelationData.disconnect, relsToAdd)
-              );
-              if (!isEmpty(relIdsToDelete)) {
-                await deleteMorphRelations({
-                  id,
-                  uid,
-                  attributeName,
-                  targetAttribute,
-                  db,
-                  relIdsToDelete,
-                  transaction: trx,
-                });
-              }
-            } else {
-              await deleteMorphRelations({
-                id,
-                uid,
-                attributeName,
-                targetAttribute,
+            await updateMorphAnyToManyRelation(
+              uid,
+              id,
+              attributeName,
+              targetAttribute,
+              cleanRelationData,
+              {
+                trx,
                 db,
-                relIdsToDelete: 'all',
-                transaction: trx,
-              });
-            }
-
-            if (isEmpty(relsToAdd)) {
-              continue;
-            }
-
-            const insert = relsToAdd.map((data) => ({
-              [joinColumn.name]: data.id,
-              [idColumn.name]: id,
-              [typeColumn.name]: uid,
-              ...(joinTable.on || {}),
-              ...(data.__pivot || {}),
-              field: attributeName,
-            }));
-
-            // get order value from max value
-            const maxOrder = await db
-              .getConnection()
-              .select(joinColumn.name)
-              .max('order', { as: 'max' })
-              .whereIn(joinColumn.name, relIdsToadd)
-              .where(joinTable.on || {})
-              .groupBy(joinColumn.name)
-              .from(joinTable.name)
-              .transacting(trx);
-
-            const maxMap = maxOrder.reduce((acc, curr) => {
-              acc[curr[joinColumn.name]] = curr.max;
-              return acc;
-            }, {});
-
-            insert.forEach((rel) => {
-              rel.order = (maxMap[rel[joinColumn.name]] || 0) + 1;
-            });
-
-            await this.createQueryBuilder(joinTable.name).insert(insert).transacting(trx).execute();
+              }
+            );
           }
           continue;
         }
