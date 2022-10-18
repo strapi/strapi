@@ -8,36 +8,32 @@ const makeArgv = (...args) => {
   return ['node', path.resolve(__dirname, __filename), ...args];
 };
 
-/**
- * Catch Commander errors and send them to the process arg instead of current node process
- * @param {CommanderError} commanderError
- */
-// command.exitOverride((commanderError) => {
-//   console.log('would exit with', commanderError.exitCode);
-//   // nodeProcess.exit(commanderError.code);
-// });
-
 describe('strapi command', () => {
   const exit = jest.fn();
   const stdoutWrite = jest.fn();
+  const writeOut = jest.fn();
+  const writeErr = jest.fn();
   let command;
 
   beforeEach(() => {
     command = new Command();
     exit.mockReset();
     stdoutWrite.mockReset();
-    command.exitOverride(() => {
-      console.log('OVERRIDE');
-    });
     command.exitOverride();
+    command.configureOutput({
+      writeOut,
+      writeErr,
+    });
   });
 
   it('throws on invalid command', async () => {
+    const cmd = 'wrongCommand';
+    const errString = `error: unknown command '${cmd}'`;
     expect(async () => {
       await runCommand(
         {
           // ...process,
-          argv: makeArgv('verssaion'),
+          argv: makeArgv(cmd),
           exit,
           stdout: {
             write: stdoutWrite,
@@ -45,7 +41,12 @@ describe('strapi command', () => {
         },
         command
       );
-    }).rejects.toThrow();
+    }).rejects.toThrow(errString);
+
+    expect(writeErr).toHaveBeenCalled();
+
+    // trim to ignore newlines
+    expect(writeErr.mock.calls[0][0].trim()).toEqual(errString);
   });
 
   it('--version outputs version', async () => {
