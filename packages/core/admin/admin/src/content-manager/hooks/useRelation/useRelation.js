@@ -77,7 +77,7 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
         if (isXToOneRelation) {
           normalizedResults = [data];
         } else if (results) {
-          normalizedResults = results.reverse();
+          normalizedResults = [...results].reverse();
         }
 
         return {
