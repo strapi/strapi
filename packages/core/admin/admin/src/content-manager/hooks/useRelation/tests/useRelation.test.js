@@ -73,7 +73,7 @@ function setup(args, name = 'test') {
 }
 
 describe('useRelation', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
@@ -105,6 +105,8 @@ describe('useRelation', () => {
   });
 
   test('fetch and normalize relations for xToOne', async () => {
+    const onLoadRelationsCallbackMock = jest.fn();
+
     const FIXTURE = {
       id: 1,
       title: 'xToOne relation',
@@ -116,13 +118,22 @@ describe('useRelation', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = await setup();
+    const { result, waitFor } = await setup({
+      relation: {
+        onLoadRelationsCallback: onLoadRelationsCallbackMock,
+      },
+    });
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.relations.isSuccess).toBe(true));
 
-    expect(result.current.relations.isSuccess).toBe(true);
-    expect(result.current.relations.data.pages[0].results[0]).toStrictEqual(FIXTURE);
-    expect(result.current.relations.data.pages[0]?.data).toBeUndefined();
+    await waitFor(() =>
+      expect(onLoadRelationsCallbackMock).toBeCalledWith({
+        target: {
+          name: 'test',
+          value: [expect.objectContaining({ id: 1 })],
+        },
+      })
+    );
   });
 
   test('fetch relations with different limit', async () => {
