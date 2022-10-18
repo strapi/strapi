@@ -1290,6 +1290,29 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                               </div>
                             </div>
                           </div>
+                          <div
+                            class="c13"
+                          >
+                            <div
+                              class=""
+                            >
+                              <div
+                                class="c25 c28"
+                                spacing="1"
+                              >
+                                <span
+                                  class="c29"
+                                >
+                                  Asset ID
+                                </span>
+                                <span
+                                  class="c30"
+                                >
+                                  8
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       <div>

@@ -56,6 +56,5 @@
     "displayName": "Content Type Builder",
     "description": "Modelize the data structure of your API. Create new fields and relations in just a minute. The files are automatically created and updated in your project.",
     "kind": "plugin"
-  },
-  "gitHead": "f99314ead7f0fdf82b921b9d8f0282a91e952ca8"
+  }
 }

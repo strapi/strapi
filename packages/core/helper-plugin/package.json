@@ -78,8 +78,8 @@
     "@storybook/builder-webpack5": "6.5.9",
     "@storybook/manager-webpack5": "6.4.10",
     "@storybook/react": "^6.5.10",
-    "@strapi/design-system": "1.2.3",
-    "@strapi/icons": "1.2.3",
+    "@strapi/design-system": "1.2.5",
+    "@strapi/icons": "1.2.5",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
     "babel-loader": "^8.2.5",
@@ -101,6 +101,5 @@
         ]
       }
     }
-  },
-  "gitHead": "f99314ead7f0fdf82b921b9d8f0282a91e952ca8"
+  }
 }
