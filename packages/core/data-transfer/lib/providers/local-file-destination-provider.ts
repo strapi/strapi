@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import zip from 'zlib';
 import { Duplex } from 'stream';
-import { chain } from 'stream-chain';
+import { chain, Writable } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
 import { IDestinationProvider, ProviderType, Stream } from '../../types';
@@ -148,12 +148,12 @@ export class LocalFileDestinationProvider implements IDestinationProvider {
 const createMultiFilesWriteStream = (
   filePathFactory: (index?: number) => string,
   maxFileSize?: number
-): WritableStream => {
+): Stream => {
   let fileIndex = 0;
   let fileSize = 0;
   let maxSize = maxFileSize;
 
-  let writeStream: Duplex;
+  let writeStream: fs.WriteStream;
 
   const createIndexedWriteStream = () => fs.createWriteStream(filePathFactory(fileIndex));
 
@@ -175,7 +175,7 @@ const createMultiFilesWriteStream = (
 
       // Check that by adding this new chunk of data, we
       // are not going to reach the maximum file size.
-      if (fileSize + chunk.length > maxSize) {
+      if (maxSize && (fileSize + chunk.length > maxSize)) {
         // Update the counters' value
         fileIndex++;
         fileSize = 0;
