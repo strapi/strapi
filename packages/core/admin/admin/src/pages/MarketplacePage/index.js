@@ -50,7 +50,7 @@ const MarketPlacePage = () => {
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
   const [npmPackageType, setNpmPackageType] = useState('plugin');
-  const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
+  const { autoReload: isInDevelopmentMode, dependencies, useYarn, strapiVersion } = useAppInfos();
   const isOnline = useNavigatorOnLine();
 
   useFocusWhenNavigate();
@@ -247,6 +247,7 @@ const MarketPlacePage = () => {
                     useYarn={useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
                     npmPackageType="plugin"
+                    strapiAppVersion={strapiVersion}
                   />
                 )}
               </TabPanel>
