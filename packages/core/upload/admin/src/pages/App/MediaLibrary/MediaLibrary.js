@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react'; // useState
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
+import { stringify } from 'qs';
+
 import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
@@ -22,25 +24,26 @@ import { Typography } from '@strapi/design-system/Typography';
 import { GridItem } from '@strapi/design-system/Grid';
 import { Flex } from '@strapi/design-system/Flex';
 import Pencil from '@strapi/icons/Pencil';
-import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
-import { EditFolderDialog } from '../../components/EditFolderDialog';
-import { EditAssetDialog } from '../../components/EditAssetDialog';
-import { AssetList } from '../../components/AssetList';
-import { FolderList } from '../../components/FolderList';
-import SortPicker from '../../components/SortPicker';
-import { useAssets } from '../../hooks/useAssets';
-import { useFolders } from '../../hooks/useFolders';
-import { getTrad, containsAssetFilter, getBreadcrumbDataML, getFolderURL } from '../../utils';
-import { PaginationFooter } from '../../components/PaginationFooter';
-import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { useFolder } from '../../hooks/useFolder';
+import Cog from '@strapi/icons/Cog';
+import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
+import { EditFolderDialog } from '../../../components/EditFolderDialog';
+import { EditAssetDialog } from '../../../components/EditAssetDialog';
+import { AssetList } from '../../../components/AssetList';
+import { FolderList } from '../../../components/FolderList';
+import SortPicker from '../../../components/SortPicker';
+import { useAssets } from '../../../hooks/useAssets';
+import { useFolders } from '../../../hooks/useFolders';
+import { getTrad, containsAssetFilter, getBreadcrumbDataML, getFolderURL } from '../../../utils';
+import { PaginationFooter } from '../../../components/PaginationFooter';
+import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { useFolder } from '../../../hooks/useFolder';
 import { BulkActions } from './components/BulkActions';
 import {
   FolderCard,
   FolderCardBody,
   FolderCardCheckbox,
   FolderCardBodyAction,
-} from '../../components/FolderCard';
+} from '../../../components/FolderCard';
 import { Filters } from './components/Filters';
 import { Header } from './components/Header';
 import { EmptyOrNoPermissions } from './components/EmptyOrNoPermissions';
@@ -55,7 +58,15 @@ const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
 `;
 
-export const MediaLibrary = () => {
+const CTVBox = styled(Box)`
+  svg {
+    path {
+      fill: ${({ theme }) => theme.colors.neutral900};
+    }
+  }
+`;
+
+const MediaLibrary = () => {
   const { push } = useHistory();
   const {
     canRead,
@@ -203,14 +214,37 @@ export const MediaLibrary = () => {
             </>
           }
           endActions={
-            <SearchURLQuery
-              label={formatMessage({
-                id: getTrad('search.label'),
-                defaultMessage: 'Search for an asset',
-              })}
-              trackedEvent="didSearchMediaLibraryElements"
-              trackedEventDetails={{ location: 'upload' }}
-            />
+            <>
+              {/* TODO permissions for media CTV? */}
+              {/* <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}> */}
+              <CTVBox paddingTop={1} paddingBottom={1}>
+                <IconButton
+                  onClick={() => {
+                    trackUsage('willEditMediaLibraryLayout');
+                    console.log('click');
+                  }}
+                  forwardedAs={ReactRouterLink}
+                  to={{
+                    pathname: `${pathname}/configuration`,
+                    search: stringify(query, { encode: false }),
+                  }}
+                  icon={<Cog />}
+                  label={formatMessage({
+                    id: 'app.links.configure-view',
+                    defaultMessage: 'Configure the view',
+                  })}
+                />
+              </CTVBox>
+              {/* </CheckPermissions> */}
+              <SearchURLQuery
+                label={formatMessage({
+                  id: getTrad('search.label'),
+                  defaultMessage: 'Search for an asset',
+                })}
+                trackedEvent="didSearchMediaLibraryElements"
+                trackedEventDetails={{ location: 'upload' }}
+              />
+            </>
           }
         />
 
@@ -390,3 +424,4 @@ export const MediaLibrary = () => {
     </Layout>
   );
 };
+export default MediaLibrary;

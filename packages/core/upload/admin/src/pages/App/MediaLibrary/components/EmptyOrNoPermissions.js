@@ -6,8 +6,8 @@ import { Button } from '@strapi/design-system/Button';
 import EmptyPermissions from '@strapi/icons/EmptyPermissions';
 import Plus from '@strapi/icons/Plus';
 
-import { EmptyAssets } from '../../../components/EmptyAssets';
-import { getTrad } from '../../../utils';
+import { EmptyAssets } from '../../../../components/EmptyAssets';
+import { getTrad } from '../../../../utils';
 
 const getContentIntlMessage = ({ isFiltering, canCreate, canRead }) => {
   if (isFiltering) {

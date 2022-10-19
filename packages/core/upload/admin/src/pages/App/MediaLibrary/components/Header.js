@@ -10,9 +10,9 @@ import { Stack } from '@strapi/design-system/Stack';
 import { Link } from '@strapi/design-system/Link';
 import ArrowLeft from '@strapi/icons/ArrowLeft';
 import Plus from '@strapi/icons/Plus';
-import { getTrad } from '../../../utils';
-import { FolderDefinition, BreadcrumbsDefinition } from '../../../constants';
-import { Breadcrumbs } from '../../../components/Breadcrumbs';
+import { getTrad } from '../../../../utils';
+import { FolderDefinition, BreadcrumbsDefinition } from '../../../../constants';
+import { Breadcrumbs } from '../../../../components/Breadcrumbs';
 
 export const Header = ({
   breadcrumbs,

@@ -6,9 +6,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 
 import { BulkDeleteButton } from '../components/BulkDeleteButton';
-import { useBulkRemove } from '../../../hooks/useBulkRemove';
+import { useBulkRemove } from '../../../../hooks/useBulkRemove';
 
-jest.mock('../../../hooks/useBulkRemove');
+jest.mock('../../../../hooks/useBulkRemove');
 
 const setup = (
   props = {

@@ -4,8 +4,8 @@ import { useIntl } from 'react-intl';
 import { Stack } from '@strapi/design-system/Stack';
 import { Typography } from '@strapi/design-system/Typography';
 
-import { AssetDefinition, FolderDefinition } from '../../../constants';
-import getTrad from '../../../utils/getTrad';
+import { AssetDefinition, FolderDefinition } from '../../../../constants';
+import getTrad from '../../../../utils/getTrad';
 import { BulkDeleteButton } from './BulkDeleteButton';
 import { BulkMoveButton } from './BulkMoveButton';
 

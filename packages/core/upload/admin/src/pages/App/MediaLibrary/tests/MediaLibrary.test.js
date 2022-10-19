@@ -6,11 +6,11 @@ import { useSelectionState, useQueryParams, TrackingProvider } from '@strapi/hel
 import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 
-import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import { useFolders } from '../../../hooks/useFolders';
-import { useAssets } from '../../../hooks/useAssets';
-import { useFolder } from '../../../hooks/useFolder';
-import { MediaLibrary } from '../MediaLibrary';
+import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
+import { useFolders } from '../../../../hooks/useFolders';
+import { useAssets } from '../../../../hooks/useAssets';
+import { useFolder } from '../../../../hooks/useFolder';
+import MediaLibrary from '../MediaLibrary';
 
 const FIXTURE_ASSET_PAGINATION = {
   pageCount: 1,
@@ -53,10 +53,10 @@ const FIXTURE_ASSETS = [
   },
 ];
 
-jest.mock('../../../hooks/useMediaLibraryPermissions');
-jest.mock('../../../hooks/useFolders');
-jest.mock('../../../hooks/useFolder');
-jest.mock('../../../hooks/useAssets');
+jest.mock('../../../../hooks/useMediaLibraryPermissions');
+jest.mock('../../../../hooks/useFolders');
+jest.mock('../../../../hooks/useFolder');
+jest.mock('../../../../hooks/useAssets');
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useRBAC: jest.fn(),
@@ -66,8 +66,8 @@ jest.mock('@strapi/helper-plugin', () => ({
     .fn()
     .mockReturnValue([[], { selectOne: jest.fn(), selectAll: jest.fn() }]),
 }));
-jest.mock('../../../utils', () => ({
-  ...jest.requireActual('../../../utils'),
+jest.mock('../../../../utils', () => ({
+  ...jest.requireActual('../../../../utils'),
   getTrad: (x) => x,
 }));
 

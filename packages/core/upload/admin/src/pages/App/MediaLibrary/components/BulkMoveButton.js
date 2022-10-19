@@ -4,8 +4,8 @@ import { useIntl } from 'react-intl';
 import { Button } from '@strapi/design-system/Button';
 import Folder from '@strapi/icons/Folder';
 
-import { BulkMoveDialog } from '../../../components/BulkMoveDialog';
-import { AssetDefinition, FolderDefinition } from '../../../constants';
+import { BulkMoveDialog } from '../../../../components/BulkMoveDialog';
+import { AssetDefinition, FolderDefinition } from '../../../../constants';
 
 export const BulkMoveButton = ({ selected, onSuccess, currentFolder }) => {
   const { formatMessage } = useIntl();

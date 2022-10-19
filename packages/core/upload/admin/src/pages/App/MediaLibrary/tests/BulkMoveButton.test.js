@@ -7,10 +7,10 @@ import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 
 import { BulkMoveButton } from '../components/BulkMoveButton';
-import { useBulkMove } from '../../../hooks/useBulkMove';
+import { useBulkMove } from '../../../../hooks/useBulkMove';
 
-jest.mock('../../../hooks/useBulkMove');
-jest.mock('../../../hooks/useFolderStructure');
+jest.mock('../../../../hooks/useBulkMove');
+jest.mock('../../../../hooks/useFolderStructure');
 
 const FIXTURE_SELECTION = [
   {

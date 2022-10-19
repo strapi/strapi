@@ -3,9 +3,9 @@ import { Button } from '@strapi/design-system/Button';
 import { useQueryParams, useTracking } from '@strapi/helper-plugin';
 import FilterIcon from '@strapi/icons/Filter';
 import { useIntl } from 'react-intl';
-import FilterList from '../../../components/FilterList';
-import FilterPopover from '../../../components/FilterPopover';
-import displayedFilters from '../../../utils/displayedFilters';
+import FilterList from '../../../../components/FilterList';
+import FilterPopover from '../../../../components/FilterPopover';
+import displayedFilters from '../../../../utils/displayedFilters';
 
 export const Filters = () => {
   const buttonRef = useRef(null);

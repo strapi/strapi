@@ -5,8 +5,8 @@ import { Button } from '@strapi/design-system/Button';
 import Trash from '@strapi/icons/Trash';
 import { ConfirmDialog } from '@strapi/helper-plugin';
 
-import { AssetDefinition, FolderDefinition } from '../../../constants';
-import { useBulkRemove } from '../../../hooks/useBulkRemove';
+import { AssetDefinition, FolderDefinition } from '../../../../constants';
+import { useBulkRemove } from '../../../../hooks/useBulkRemove';
 
 export const BulkDeleteButton = ({ selected, onSuccess }) => {
   const { formatMessage } = useIntl();

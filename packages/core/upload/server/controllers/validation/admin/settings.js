@@ -7,4 +7,11 @@ const settingsSchema = yup.object({
   responsiveDimensions: yup.boolean().required(),
 });
 
-module.exports = validateYupSchema(settingsSchema);
+const configSchema = yup.object({
+  pageSize: yup.number().required(),
+});
+
+module.exports = {
+  settings: validateYupSchema(settingsSchema),
+  config: validateYupSchema(configSchema),
+};
