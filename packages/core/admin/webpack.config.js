@@ -49,6 +49,14 @@ module.exports = ({
       ]
     : [];
 
+  /**
+   * converts the full path to just the plugin path
+   * e.g. `/Users/username/strapi/node_modules/@scope/plugin-name`
+   * to `@scope/plugin-name`
+   */
+  const tsxPlugins = pluginsPath.map((dir) => dir.split('node_modules/')[1]).join('|');
+  const excludeRegex = new RegExp(`node_modules/(?!(${tsxPlugins}))`);
+
   return {
     mode: isProduction ? 'production' : 'development',
     bail: !!isProduction,
@@ -82,7 +90,7 @@ module.exports = ({
           test: /\.tsx?$/,
           loader: require.resolve('esbuild-loader'),
           include: [cacheDir, ...pluginsPath],
-          exclude: /node_modules/,
+          exclude: excludeRegex,
           options: {
             loader: 'tsx',
             target: 'es2015',
