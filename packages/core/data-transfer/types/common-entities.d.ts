@@ -139,7 +139,7 @@ interface ICircularLink extends IDefaultLink {
  * Link from a content type to a component
  */
 interface IComponentLink extends IDefaultLink {
-  kind: 'component.basic';
+  kind: 'relation.component';
 
   right: {
     /**
@@ -166,7 +166,7 @@ interface IComponentLink extends IDefaultLink {
  * Very similar to the component link but with a different name
  */
 interface IDynamicZoneLink extends IDefaultLink {
-  kind: 'dynamiczone.basic';
+  kind: 'relation.dynamiczone';
 
   right: {
     /**
