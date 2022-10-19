@@ -83,7 +83,7 @@ FormHead.propTypes = {
 };
 
 FormHead.defaultProps = {
-  apiToken: {},
+  apiToken: undefined,
 };
 
 export default FormHead;
