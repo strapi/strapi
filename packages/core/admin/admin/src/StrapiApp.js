@@ -227,7 +227,19 @@ class StrapiApp {
     }
 
     if (this.customConfigurations?.theme) {
-      merge(this.configurations.themes.light, this.customConfigurations.theme);
+      const darkTheme = this.customConfigurations.theme.dark;
+      const lightTheme = this.customConfigurations.theme.light;
+
+      if (!darkTheme && !lightTheme) {
+        console.warn(
+          `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`
+        );
+        merge(this.configurations.themes.light, this.customConfigurations.theme);
+      }
+
+      if (lightTheme) merge(this.configurations.themes.light, lightTheme);
+
+      if (darkTheme) merge(this.configurations.themes.dark, darkTheme);
     }
 
     if (this.customConfigurations?.notifications?.releases !== undefined) {
