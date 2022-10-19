@@ -90,6 +90,20 @@ const contentTypeSchemaValidator = yup.object().shape({
 
         return true;
       },
+    }).test({
+      name: 'uniqueAttributeNames',
+      message: 'Attribute names must be unique',
+      test(attributes) {
+        const attributeNames = Object.keys(attributes);
+        const duplicates = _.uniq(attributeNames.map((name) => name.toLocaleLowerCase()).filter((name, index, names) => names.indexOf(name) !== index));
+        if (duplicates.length) {
+          const message = `Attribute names must be unique. The following attributes are duplicated: ${duplicates.join(
+            ', '
+          )}`;
+          return this.createError({ message });
+        }
+        return true;
+      },
     }),
   }),
   actions: yup.object().onlyContainsFunctions(),
