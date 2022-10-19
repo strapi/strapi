@@ -158,11 +158,27 @@ const createScalarAttributeValidator = (createOrUpdate) => (metas, options) => {
   return validator;
 };
 
+const createMediaAttributeValidator = (createOrUpdate) => (metas, options) => {
+  let validator;
+
+  if (metas.attr.multiple) {
+    validator = yup.array().of(yup.mixed());
+  } else {
+    validator = yup.mixed();
+  }
+
+  validator = addRequiredValidation(createOrUpdate)(validator, {
+    attr: { required: !options.isDraft && metas.attr.required },
+  });
+
+  return validator;
+};
+
 const createAttributeValidator = (createOrUpdate) => (metas, options) => {
   let validator;
 
   if (isMediaAttribute(metas.attr)) {
-    validator = yup.mixed();
+    validator = createMediaAttributeValidator(createOrUpdate)(metas, options);
   } else if (isScalarAttribute(metas.attr)) {
     validator = createScalarAttributeValidator(createOrUpdate)(metas, options);
   } else {
