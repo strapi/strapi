@@ -289,6 +289,20 @@ const reducer = (state = initialState, action) =>
 
         break;
       }
+      case actions.SET_CUSTOM_FIELD_DATA_SCHEMA: {
+        const { customField, isEditing, modifiedDataToSetForEditing, options = {} } = action;
+
+        if (isEditing) {
+          draftState.modifiedData = modifiedDataToSetForEditing;
+          draftState.initialData = modifiedDataToSetForEditing;
+
+          break;
+        }
+
+        draftState.modifiedData = { ...options, type: customField.type };
+
+        break;
+      }
       case actions.SET_DYNAMIC_ZONE_DATA_SCHEMA: {
         draftState.modifiedData = action.attributeToEdit;
         draftState.initialData = action.attributeToEdit;

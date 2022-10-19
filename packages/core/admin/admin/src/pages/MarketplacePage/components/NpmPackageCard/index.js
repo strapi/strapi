@@ -32,6 +32,7 @@ const NpmPackageCard = ({
   useYarn,
   isInDevelopmentMode,
   npmPackageType,
+  strapiAppVersion,
 }) => {
   const { attributes } = npmPackage;
   const { formatMessage } = useIntl();
@@ -139,6 +140,9 @@ const NpmPackageCard = ({
           isInstalled={isInstalled}
           isInDevelopmentMode={isInDevelopmentMode}
           commandToCopy={commandToCopy}
+          strapiAppVersion={strapiAppVersion}
+          strapiPeerDepVersion={attributes.strapiVersion}
+          pluginName={attributes.name}
         />
       </Stack>
     </Flex>
@@ -147,6 +151,7 @@ const NpmPackageCard = ({
 
 NpmPackageCard.defaultProps = {
   isInDevelopmentMode: false,
+  strapiAppVersion: null,
 };
 
 NpmPackageCard.propTypes = {
@@ -164,12 +169,14 @@ NpmPackageCard.propTypes = {
       validated: PropTypes.bool.isRequired,
       madeByStrapi: PropTypes.bool.isRequired,
       strapiCompatibility: PropTypes.oneOf(['v3', 'v4']),
+      strapiVersion: PropTypes.string,
     }).isRequired,
   }).isRequired,
   isInstalled: PropTypes.bool.isRequired,
   useYarn: PropTypes.bool.isRequired,
   isInDevelopmentMode: PropTypes.bool,
   npmPackageType: PropTypes.string.isRequired,
+  strapiAppVersion: PropTypes.string,
 };
 
 export default NpmPackageCard;
