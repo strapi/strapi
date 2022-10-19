@@ -21,7 +21,7 @@ import {
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
 import injectionZones from './injectionZones';
-import favicon from './favicon.ico';
+import favicon from './favicon.png';
 import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
 
 class StrapiApp {

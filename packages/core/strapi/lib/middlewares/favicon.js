@@ -5,7 +5,7 @@ const { defaultsDeep } = require('lodash/fp');
 const favicon = require('koa-favicon');
 
 const defaults = {
-  path: 'favicon.ico',
+  path: 'favicon.png',
   maxAge: 86400000,
 };
 
