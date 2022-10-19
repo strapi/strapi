@@ -1,34 +1,35 @@
 'use strict';
 
-// const {
-//   createLocalFileSourceProvider,
-//   createLocalStrapiDestinationProvider,
-//   createTransferEngine,
-// } = require('@strapi/data-transfer');
+const {
+  createLocalFileSourceProvider,
+  createLocalStrapiDestinationProvider,
+  createTransferEngine,
+} = require('@strapi/data-transfer');
 
 module.exports = async () => {
   console.log('Importing data...');
-  // const source = createLocalFileSourceProvider({ backupFilePath: './backup.tar.gz' });
+  const source = createLocalFileSourceProvider({ backupFilePath: './backup.tar.gz' });
 
-  // const destination = createLocalStrapiDestinationProvider({
-  //   getStrapi() {
-  //     return strapi().load();
-  //   },
-  // });
+  const destination = createLocalStrapiDestinationProvider({
+    getStrapi() {
+      return strapi().load();
+    },
+  });
 
-  // const engine = createTransferEngine(source, destination, {
-  //   strategy: 'restore',
-  //   versionMatching: 'ignore',
-  // });
+  const engine = createTransferEngine(source, destination, {
+    strategy: 'restore',
+    versionMatching: 'ignore',
+  });
 
-  // await engine.transfer();
-  const { success } = { success: false };
-
-  if (success) {
+  try {
+    const result = await engine.transfer();
     console.log('Import process has been completed successfully!');
-    process.exit(0);
-  }
 
-  console.log('Import process failed unexpectedly');
-  process.exit(1);
+    // TODO: this won't dump the entire results, we will print a pretty summary
+    console.log('Results:', result);
+    process.exit(0);
+  } catch (e) {
+    console.log('Import process failed unexpectedly');
+    process.exit(1);
+  }
 };
