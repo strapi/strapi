@@ -39,6 +39,10 @@ export interface ILocalFileSourceProviderOptions {
   compressed?: boolean;
 }
 
+export const createLocalFileSourceProvider = (options: ILocalFileSourceProviderOptions) => {
+  return new LocalFileSourceProvider(options);
+};
+
 class LocalFileSourceProvider implements ISourceProvider {
   type: ProviderType = 'source';
   name: string = 'source::local-file';
@@ -197,7 +201,3 @@ class LocalFileSourceProvider implements ISourceProvider {
     });
   }
 }
-
-export const createLocalFileSourceProvider = (options: ILocalFileSourceProviderOptions) => {
-  return new LocalFileSourceProvider(options);
-};
