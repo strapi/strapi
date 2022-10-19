@@ -1448,7 +1448,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                   class="c56"
                                   id="select-2-content"
                                 >
-                                  hey
+                                  id
                                 </span>
                               </div>
                             </div>
@@ -1605,7 +1605,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           spacing="3"
                         >
                           <span
-                            aria-label="Move hey"
+                            aria-label="Move id"
                             class="c75 c76 c77"
                             draggable="true"
                             type="button"
@@ -1650,14 +1650,14 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           <span
                             class="c24 c78"
                           >
-                            hey
+                            id
                           </span>
                         </div>
                         <div
                           class="c79 c66"
                         >
                           <button
-                            aria-label="Edit hey"
+                            aria-label="Edit id"
                             class="c76"
                             type="button"
                           >
@@ -1677,7 +1677,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                             </svg>
                           </button>
                           <button
-                            aria-label="Delete hey"
+                            aria-label="Delete id"
                             class="c76"
                             data-testid="delete-id"
                             type="button"
@@ -3517,7 +3517,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           <span
                             class="c24 c78"
                           >
-                            hey
+                            id
                           </span>
                         </div>
                         <div
@@ -3680,7 +3680,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           spacing="3"
                         >
                           <span
-                            aria-label="Move cover"
+                            aria-label="Move Cover"
                             class="c75 c76 c77"
                             draggable="true"
                             type="button"
@@ -3725,14 +3725,14 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           <span
                             class="c24 c78"
                           >
-                            michka
+                            Cover
                           </span>
                         </div>
                         <div
                           class="c79 c66"
                         >
                           <button
-                            aria-label="Edit cover"
+                            aria-label="Edit Cover"
                             class="c76"
                             type="button"
                           >
@@ -3752,7 +3752,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             </svg>
                           </button>
                           <button
-                            aria-label="Delete cover"
+                            aria-label="Delete Cover"
                             class="c76"
                             data-testid="delete-cover"
                             type="button"
