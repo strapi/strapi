@@ -7,15 +7,15 @@ module.exports = () => ({
       attributes: [
         'id',
         'created_at',
-        'createdat',
+        'createdAt',
         'updated_at',
-        'updatedat',
+        'updatedAt',
         'created_by',
-        'createdby',
+        'createdBy',
         'updated_by',
-        'updatedby',
+        'updatedBy',
         'published_at',
-        'publishedat',
+        'publishedAt',
       ],
     };
     // strapi.db.getReservedNames();
