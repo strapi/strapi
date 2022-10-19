@@ -3,6 +3,8 @@ import unset from 'lodash/unset';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import take from 'lodash/take';
+import cloneDeep from 'lodash/cloneDeep';
+
 import { moveFields } from './utils';
 import { getMaxTempKey } from '../../utils';
 
@@ -113,13 +115,13 @@ const reducer = (state, action) =>
       }
       case 'CONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
-        const { value, isSingleRelation } = action;
+        const { value, toOneRelation } = action;
 
         /**
          * If the field is a single relation field we don't want to append
          * we just want to replace the value.
          */
-        if (isSingleRelation) {
+        if (toOneRelation) {
           set(draftState, path, [value]);
         } else {
           const modifiedDataRelations = get(state, path);
@@ -151,32 +153,34 @@ const reducer = (state, action) =>
         const { initialValues, relationalFields = [] } = action;
 
         /**
-         * initialValues[relationFieldName] will always be {count: number}
+         * You can't mutate an actions value.
+         * and spreading an object only clones
+         * the first level, the deeply nested values
+         * are a reference.
+         */
+        const data = cloneDeep(initialValues);
+
+        /**
+         * initialValues[relationFieldName] won't be an array which is what we're expecting
          * Therefore we reset these bits of state to the correct data type
          * which is an array. Hence why we replace those fields.
          */
-        const resetRelationsData = relationalFields.reduce((acc, current) => {
+        const mergeDataWithPreparedRelations = relationalFields.reduce((acc, current) => {
           /**
            * this will be null on initial load, however subsequent calls
            * will have data in them correlating to the names of the relational fields.
            */
-          if (state.modifiedData && Array.isArray(state.modifiedData[current])) {
-            acc[current] = state.modifiedData[current];
+          if (state.modifiedData && Array.isArray(get(state.modifiedData, current))) {
+            set(acc, current, get(state.modifiedData, current));
           } else {
-            acc[current] = [];
+            set(acc, current, []);
           }
 
           return acc;
-        }, {});
+        }, data);
 
-        draftState.initialData = {
-          ...initialValues,
-          ...resetRelationsData,
-        };
-        draftState.modifiedData = {
-          ...initialValues,
-          ...resetRelationsData,
-        };
+        draftState.initialData = mergeDataWithPreparedRelations;
+        draftState.modifiedData = mergeDataWithPreparedRelations;
 
         draftState.formErrors = {};
 

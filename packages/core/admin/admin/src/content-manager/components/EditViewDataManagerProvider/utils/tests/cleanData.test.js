@@ -159,6 +159,106 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
     expect(result).toEqual(expected);
   });
 
+  test('should parse component values with relations recursively', () => {
+    const result = cleanData(
+      {
+        browserState: {
+          component: {
+            relation: [{ id: 1, something: true }],
+          },
+        },
+        serverState: {
+          component: {
+            relation: [],
+          },
+        },
+      },
+      {
+        attributes: {
+          component: {
+            type: 'component',
+            repeatable: false,
+            component: 'basic.relation',
+          },
+        },
+      },
+      {
+        'basic.relation': {
+          attributes: {
+            relation: {
+              type: 'relation',
+            },
+          },
+        },
+      }
+    );
+    expect(result).toEqual({
+      component: {
+        relation: {
+          connect: [{ id: 1 }],
+          disconnect: [],
+        },
+      },
+    });
+  });
+
+  test('should parse deeply nested component values with relations recursively', () => {
+    const result = cleanData(
+      {
+        browserState: {
+          component: {
+            component2: {
+              relation: [{ id: 1, something: true }],
+            },
+          },
+        },
+        serverState: {
+          component: {
+            component2: {
+              relation: [],
+            },
+          },
+        },
+      },
+      {
+        attributes: {
+          component: {
+            type: 'component',
+            repeatable: false,
+            component: 'basic.nested',
+          },
+        },
+      },
+      {
+        'basic.relation': {
+          attributes: {
+            relation: {
+              type: 'relation',
+            },
+          },
+        },
+        'basic.nested': {
+          attributes: {
+            component2: {
+              type: 'component',
+              component: 'basic.relation',
+            },
+          },
+        },
+      }
+    );
+    expect(result).toEqual({
+      component: {
+        component2: {
+          relation: {
+            connect: [{ id: 1 }],
+            disconnect: [],
+          },
+        },
+      },
+    });
+  });
+
   test('should parse dynamic zone values recursively', () => {
     const result = cleanData(
       {
@@ -251,6 +351,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       },
     });
   });
+
   test('given that the browserState does not include a relation that is in the server state we should return a disconnect of length one', () => {
     const result = cleanData(
       {
