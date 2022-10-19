@@ -9,7 +9,7 @@ import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 import { Tooltip } from '@strapi/design-system/Tooltip';
 
-import { getTrad } from '../../utils';
+import { getTrad } from '../../../utils';
 
 const StyledBullet = styled.div`
   flex-shrink: 0;
@@ -42,7 +42,7 @@ export const Option = (props) => {
       <Component {...props}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
-          <Tooltip description={props.data.label ?? '-'}>
+          <Tooltip description={mainField ?? id}>
             <Typography ellipsis>{mainField ?? id}</Typography>
           </Tooltip>
         </Flex>
