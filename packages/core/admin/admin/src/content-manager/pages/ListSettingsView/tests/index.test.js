@@ -60,13 +60,13 @@ const layout = {
     },
     cover: {
       list: {
-        label: 'michka',
+        label: 'Cover',
         sortable: false,
       },
     },
     id: {
       list: {
-        label: 'hey',
+        label: 'id',
         sortable: true,
       },
     },
@@ -153,9 +153,9 @@ describe('ADMIN | CM | LV | Configure the view', () => {
 
     fireEvent.mouseDown(screen.getByTestId('add-field'));
 
-    await waitFor(() => expect(screen.getByText('cover')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Cover')).toBeInTheDocument());
 
-    fireEvent.mouseDown(screen.getByText('cover'));
+    fireEvent.mouseDown(screen.getByText('Cover'));
     fireEvent.mouseDown(screen.getByTestId('add-field'));
 
     expect(container).toMatchSnapshot();

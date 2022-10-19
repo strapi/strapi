@@ -7,8 +7,9 @@ import PropTypes from 'prop-types';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 
-import { getTrad } from '../../../utils';
+import { getTrad } from '../../utils';
 
 const StyledBullet = styled.div`
   flex-shrink: 0;
@@ -41,7 +42,9 @@ export const Option = (props) => {
       <Component {...props}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
-          <Typography ellipsis>{mainField ?? id}</Typography>
+          <Tooltip description={props.data.label ?? '-'}>
+            <Typography ellipsis>{mainField ?? id}</Typography>
+          </Tooltip>
         </Flex>
       </Component>
     );

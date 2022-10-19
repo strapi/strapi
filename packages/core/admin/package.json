@@ -54,7 +54,7 @@
     "@strapi/babel-plugin-switch-ee-ce": "4.4.3",
     "@strapi/design-system": "1.2.5",
     "@strapi/helper-plugin": "4.4.3",
-    "@strapi/icons": "1.2.3",
+    "@strapi/icons": "1.2.5",
     "@strapi/permissions": "4.4.3",
     "@strapi/typescript-utils": "4.4.3",
     "@strapi/utils": "4.4.3",
