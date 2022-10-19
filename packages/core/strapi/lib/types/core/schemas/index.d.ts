@@ -99,6 +99,11 @@ export interface ContentTypeSchema extends Schema {
   modelType: 'contentType';
 
   /**
+   * Unique identifier of the schema
+   */
+  uid: string;
+
+  /**
    * Determine the type of the content type (single-type or collection-type)
    */
   kind: ContentTypeKind;
