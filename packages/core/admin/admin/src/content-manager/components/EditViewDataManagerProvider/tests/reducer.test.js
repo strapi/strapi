@@ -286,7 +286,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(reducer(state, action)).toEqual(expected);
     });
 
-    it('should overwrite existing data, when replace is set to true', () => {
+    it('should overwrite existing data, when toOneRelation is set to true', () => {
       const state = {
         ...initialState,
 
@@ -300,7 +300,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         type: 'CONNECT_RELATION',
         keys: ['relation'],
         value: { id: 1 },
-        isSingleRelation: true,
+        toOneRelation: true,
       };
 
       let nextState = reducer(state, action);
@@ -318,7 +318,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         type: 'CONNECT_RELATION',
         keys: ['relation'],
         value: { id: 2 },
-        isSingleRelation: true,
+        toOneRelation: true,
       });
 
       expect(nextState).toEqual({
@@ -500,6 +500,49 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         type: 'INIT_FORM',
         initialValues: { ok: true, relation: { count: 10 } },
         relationalFields: ['relation'],
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should create an array per relational field even when the relationalFields path is nested', () => {
+      const state = {
+        ...initialState,
+        formErrors: true,
+        initialData: {},
+        modifiedData: {},
+        modifiedDZName: true,
+        shouldCheckErrors: true,
+      };
+      const expected = {
+        ...initialState,
+        formErrors: {},
+        initialData: {
+          ok: true,
+          relation: [],
+          component: {
+            field1: {
+              field2: [],
+            },
+          },
+        },
+        modifiedData: {
+          ok: true,
+          relation: [],
+          component: {
+            field1: {
+              field2: [],
+            },
+          },
+        },
+        modifiedDZName: null,
+        shouldCheckErrors: false,
+      };
+
+      const action = {
+        type: 'INIT_FORM',
+        initialValues: { ok: true, relation: { count: 10 }, component: null },
+        relationalFields: ['relation', 'component.field1.field2'],
       };
 
       expect(reducer(state, action)).toEqual(expected);

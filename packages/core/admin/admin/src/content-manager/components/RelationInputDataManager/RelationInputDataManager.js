@@ -68,7 +68,7 @@ export const RelationInputDataManager = ({
   const relationsFromModifiedData = get(modifiedData, name) ?? [];
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
-  const isSingleRelation = [
+  const toOneRelation = [
     'oneWay',
     'oneToOne',
     'manyToOne',
@@ -89,7 +89,7 @@ export const RelationInputDataManager = ({
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
   const handleRelationConnect = (relation) => {
-    connectRelation({ name, value: relation, isSingleRelation });
+    connectRelation({ name, value: relation, toOneRelation });
   };
 
   const handleRelationDisconnect = (relation) => {

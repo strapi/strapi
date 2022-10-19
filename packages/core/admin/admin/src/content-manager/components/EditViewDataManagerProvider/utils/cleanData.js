@@ -58,13 +58,19 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
           if (isRepeatable) {
             cleanedData = value
               ? value.map((data) => {
-                  const subCleanedData = recursiveCleanData(data, componentsSchema[component]);
+                  const subCleanedData = recursiveCleanData(
+                    data,
+                    oldValue,
+                    componentsSchema[component]
+                  );
 
                   return subCleanedData;
                 })
               : value;
           } else {
-            cleanedData = value ? recursiveCleanData(value, componentsSchema[component]) : value;
+            cleanedData = value
+              ? recursiveCleanData(value, oldValue, componentsSchema[component])
+              : value;
           }
 
           break;

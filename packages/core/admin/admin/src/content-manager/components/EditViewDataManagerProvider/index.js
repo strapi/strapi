@@ -22,6 +22,7 @@ import {
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema } from './utils';
+import { recursivelyFindRelationPaths } from './utils/recursivelyFindRelationPaths';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -142,10 +143,18 @@ const EditViewDataManagerProvider = ({
     });
   }, [componentsDataStructure, contentTypeDataStructure]);
 
+  const { components } = allLayoutData;
+
   useEffect(() => {
-    if (initialValues) {
-      const relationalFields = Object.keys(initialValues).filter(
-        (key) => currentContentTypeLayout?.attributes[key]?.type === 'relation'
+    if (initialValues && currentContentTypeLayout?.attributes) {
+      /**
+       * This will return an array of paths:
+       * ['many_to_one', 'one_to_many', 'one_to_one']
+       * it can also return a path to a relation:
+       * ['relation_component.categories']
+       */
+      const relationalFields = recursivelyFindRelationPaths(components)(
+        currentContentTypeLayout.attributes
       );
 
       dispatch({
@@ -154,7 +163,7 @@ const EditViewDataManagerProvider = ({
         relationalFields,
       });
     }
-  }, [initialValues, currentContentTypeLayout]);
+  }, [initialValues, currentContentTypeLayout, components]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
     trackUsageRef.current('didAddComponentToDynamicZone');
@@ -178,12 +187,12 @@ const EditViewDataManagerProvider = ({
   /**
    * @type {({ name: string, value: Relation, isSingleRelation: boolean}) => void}
    */
-  const connectRelation = useCallback(({ name, value, isSingleRelation }) => {
+  const connectRelation = useCallback(({ name, value, toOneRelation }) => {
     dispatch({
       type: 'CONNECT_RELATION',
       keys: name.split('.'),
       value,
-      isSingleRelation,
+      toOneRelation,
     });
   }, []);
 
