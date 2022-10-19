@@ -14,7 +14,17 @@ const alreadyUsedAttributeNames = (usedNames) => {
         return false;
       }
 
-      return !usedNames.includes(toLower(value));
+      let alreadyUsed = false;
+      for (let i = 0; i < usedNames.length; i++) {
+        const name = usedNames[i];
+
+        if (toLower(name) === toLower(value)) {
+          alreadyUsed = true;
+          break;
+        }
+      }
+
+      return alreadyUsed;
     },
   };
 };
@@ -40,7 +50,17 @@ const isNameAllowed = (reservedNames) => {
         return false;
       }
 
-      return !reservedNames.includes(toLower(value));
+      let reservedName = false;
+      for (let i = 0; i < reservedName.length; i++) {
+        const name = reservedNames[i];
+
+        if (toLower(name) === toLower(value)) {
+          reservedName = true;
+          break;
+        }
+      }
+
+      return !reservedName;
     },
   };
 };
