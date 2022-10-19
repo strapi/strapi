@@ -1,9 +1,9 @@
 'use strict';
 
 const { join } = require('path');
-const _ = require('lodash');
 const { pathExists } = require('fs-extra');
 const loadFiles = require('../../load/load-files');
+const { createComponent } = require('../domain/component');
 
 module.exports = async (strapi) => {
   if (!(await pathExists(strapi.dirs.dist.components))) {
@@ -15,6 +15,7 @@ module.exports = async (strapi) => {
   return Object.keys(map).reduce((acc, category) => {
     Object.keys(map[category]).forEach((key) => {
       const schema = map[category][key];
+      const uid = `${category}.${key}`;
 
       if (!schema.collectionName) {
         // NOTE: We're using the filepath from the app directory instead of the dist for information purpose
@@ -25,16 +26,7 @@ module.exports = async (strapi) => {
         );
       }
 
-      const uid = `${category}.${key}`;
-
-      acc[uid] = Object.assign(schema, {
-        __schema__: _.cloneDeep(schema),
-        uid,
-        category,
-        modelType: 'component',
-        modelName: key,
-        globalId: schema.globalId || _.upperFirst(_.camelCase(`component_${uid}`)),
-      });
+      acc[uid] = createComponent(uid, category, key, schema);
     });
 
     return acc;

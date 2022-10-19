@@ -1,19 +1,22 @@
 'use strict';
 
-const { cloneDeep, camelCase } = require('lodash/fp');
+const { cloneDeep, camelCase, upperFirst } = require('lodash/fp');
 const { validateComponentDefinition } = require('./validator');
 
-const createComponent = (definition = {}) => {
-  validateComponentDefinition(definition);
+const createComponent = (uid, category, key, definition = {}) => {
+  try {
+    validateComponentDefinition(definition);
+  } catch (e) {
+    throw new Error(`Component Definition is invalid for component::${uid}'.\n${e.errors}`);
+  }
 
-  const createdComponent = cloneDeep(definition);
-  const category = camelCase(definition.info.category);
-
-  const uid = `${category}.${definition.info.singularModelName}`;
-
-  Object.assign(createdComponent, {
+  const createdComponent = Object.assign(definition, {
+    __schema__: cloneDeep(definition),
     uid,
     category,
+    modelType: 'component',
+    modelName: key,
+    globalId: definition.globalId || upperFirst(camelCase(`component_${uid}`)),
   });
 
   return createdComponent;
