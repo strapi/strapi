@@ -46,7 +46,7 @@
     "@casl/ability": "^5.4.3",
     "@fingerprintjs/fingerprintjs": "3.3.3",
     "@fortawesome/fontawesome-free": "^5.15.3",
-    "@fortawesome/fontawesome-svg-core": "6.1.2",
+    "@fortawesome/fontawesome-svg-core": "6.2.0",
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.2.0",
