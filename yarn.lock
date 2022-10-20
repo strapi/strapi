@@ -6277,17 +6277,33 @@
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.1.tgz#20f18294f797f2209b5f65c8e3b5c8e8261d127c"
   integrity sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==
 
-"@types/stream-chain@2.0.1":
+"@types/stream-chain@*", "@types/stream-chain@2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/stream-chain/-/stream-chain-2.0.1.tgz#4d3cc47a32609878bc188de0bae420bcfd3bf1f5"
   integrity sha512-D+Id9XpcBpampptkegH7WMsEk6fUdf9LlCIX7UhLydILsqDin4L0QT7ryJR0oycwC7OqohIzdfcMHVZ34ezNGg==
   dependencies:
     "@types/node" "*"
 
+"@types/stream-json@1.7.2":
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/@types/stream-json/-/stream-json-1.7.2.tgz#8d7f1cc3a37a9a402a4af284348499cdf5e28248"
+  integrity sha512-i4LE2aWVb1R3p/Z6S6Sw9kmmOs4Drhg0SybZUyfM499I1c8p7MUKZHs4Sg9jL5eu4mDmcgfQ6eGIG3+rmfUWYw==
+  dependencies:
+    "@types/node" "*"
+    "@types/stream-chain" "*"
+
 "@types/tapable@^1", "@types/tapable@^1.0.5":
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-1.0.8.tgz#b94a4391c85666c7b73299fd3ad79d4faa435310"
   integrity sha512-ipixuVrh2OdNmauvtT51o3d8z12p6LtFW9in7U79der/kwejjdNchQC5UMn5u/KxNoM7VHHOs/l8KS8uHxhODQ==
+
+"@types/tar@6.1.3":
+  version "6.1.3"
+  resolved "https://registry.yarnpkg.com/@types/tar/-/tar-6.1.3.tgz#46a2ce7617950c4852dfd7e9cd41aa8161b9d750"
+  integrity sha512-YzDOr5kdAeqS8dcO6NTTHTMJ44MUCBDoLEIyPtwEn7PssKqUYL49R1iCVJPeiPzPlKi6DbH33eZkpeJ27e4vHg==
+  dependencies:
+    "@types/node" "*"
+    minipass "^3.3.5"
 
 "@types/testing-library__jest-dom@^5.9.1":
   version "5.14.5"
@@ -16287,6 +16303,13 @@ minipass@^3.0.0, minipass@^3.1.0, minipass@^3.1.1, minipass@^3.1.3, minipass@^3.
   version "3.3.4"
   resolved "https://registry.yarnpkg.com/minipass/-/minipass-3.3.4.tgz#ca99f95dd77c43c7a76bf51e6d200025eee0ffae"
   integrity sha512-I9WPbWHCGu8W+6k1ZiGpPu0GkoKBeorkfKNuAFBNS1HNFJvke82sxvI5bzcCNpWPorkOO5QQ+zomzzwRxejXiw==
+  dependencies:
+    yallist "^4.0.0"
+
+minipass@^3.3.5:
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-3.3.5.tgz#6da7e53a48db8a856eeb9153d85b230a2119e819"
+  integrity sha512-rQ/p+KfKBkeNwo04U15i+hOwoVBVmekmm/HcfTkTN2t9pbQKCMm4eN5gFeqgrrSp/kH/7BYYhTIHOxGqzbBPaA==
   dependencies:
     yallist "^4.0.0"
 
