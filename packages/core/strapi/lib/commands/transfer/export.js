@@ -33,8 +33,12 @@ module.exports = async (args) => {
   });
 
   try {
-    const { path } = await engine.transfer();
-    console.log('Export process has been completed successfully! Export archive is in %s', path);
+    const result = await engine.transfer();
+    if (!result?.path) throw new Error('Export file not created');
+    console.log(
+      'Export process has been completed successfully! Export archive is in %s',
+      result.path
+    );
     process.exit(0);
   } catch (e) {
     console.error('Export process failed unexpectedly:', e.toString());
