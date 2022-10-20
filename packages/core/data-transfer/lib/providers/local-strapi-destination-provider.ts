@@ -10,7 +10,11 @@ interface ILocalStrapiDestinationProviderOptions {
 // const log = createLogger();
 const log = console;
 
-export class LocalStrapiDestinationProvider implements IDestinationProvider {
+export const createLocalStrapiDestinationProvider = (options: ILocalStrapiDestinationProviderOptions) => {
+  return new LocalStrapiDestinationProvider(options);
+};
+
+class LocalStrapiDestinationProvider implements IDestinationProvider {
   name: string = 'destination::local-strapi';
   type: ProviderType = 'destination';
 

@@ -16,7 +16,12 @@ export interface ILocalFileDestinationProviderOptions {
   encryptionKey?: string;
 }
 
-export class LocalFileDestinationProvider implements IDestinationProvider {
+export const createLocalFileDestinationProvider = (options: ILocalFileDestinationProviderOptions) => {
+  return new LocalFileDestinationProvider(options);
+};
+
+
+class LocalFileDestinationProvider implements IDestinationProvider {
   name: string = 'destination::local-file';
   type: ProviderType = 'destination';
   options: ILocalFileDestinationProviderOptions;
