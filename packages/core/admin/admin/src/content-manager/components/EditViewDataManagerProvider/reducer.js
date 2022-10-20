@@ -185,8 +185,6 @@ const reducer = (state, action) =>
          */
         const data = cloneDeep(initialValues);
 
-        console.log('data', data);
-
         /**
          * relationalFields won't be an array which is what we're expecting
          * Therefore we reset these bits of state to the correct data type
@@ -198,16 +196,13 @@ const reducer = (state, action) =>
           .reduce((acc, currentPaths) => {
             const [componentName] = currentPaths;
 
-            // const initialRepeatableValue =
-            //   state.modifiedData && Array.isArray(get(state.modifiedData, componentName))
-            //     ? get(state.modifiedData, componentName)
-            //     : get(acc, componentName);
-
-            /**
-             * This currently should only be ran on `repeatable` fields.
-             * You probably could make it work with any and all relational fields.
-             */
-            if (repeatableFields.includes(componentName)) {
+            if (state.modifiedData && Array.isArray(get(state.modifiedData, componentName))) {
+              /**
+               * this will be null on initial load, however subsequent calls
+               * will have data in them correlating to the names of the relational fields.
+               */
+              set(acc, componentName, get(state.modifiedData, componentName));
+            } else if (repeatableFields.includes(componentName)) {
               /**
                * if the componentName is a repeatable field we collect the list of paths e.g.
                * ["repeatable_single_component_relation","categories"] and then reduce this
@@ -215,20 +210,12 @@ const reducer = (state, action) =>
                */
               const findleaf = findLeafByPath(currentPaths.slice(-1)[0]);
               currentPaths.reduce(findleaf, acc);
-            } else if (state.modifiedData && Array.isArray(get(state.modifiedData, currentPaths))) {
-              /**
-               * this will be null on initial load, however subsequent calls
-               * will have data in them correlating to the names of the relational fields.
-               */
-              set(acc, currentPaths, get(state.modifiedData, currentPaths));
             } else {
               set(acc, currentPaths, []);
             }
 
             return acc;
           }, data);
-
-        console.log('mergeDataWithPreparedRelations', mergeDataWithPreparedRelations);
 
         draftState.initialData = mergeDataWithPreparedRelations;
         draftState.modifiedData = mergeDataWithPreparedRelations;
