@@ -1,6 +1,6 @@
-import { recursivelyFindRelationPaths } from '../recursivelyFindRelationPaths';
+import { recursivelyFindPathsBasedOnCondition } from '../recursivelyFindPathsBasedOnCondition';
 
-describe('recursivelyFindRelationPaths', () => {
+describe('recursivelyFindPathsBasedOnCondition', () => {
   test('given that there are no relational fields in the attributes it should return an empty array', () => {
     const components = {};
     const attributes = {
@@ -12,7 +12,10 @@ describe('recursivelyFindRelationPaths', () => {
       },
     };
 
-    const actual = recursivelyFindRelationPaths(components)(attributes);
+    const actual = recursivelyFindPathsBasedOnCondition(
+      components,
+      (value) => value.type === 'relation'
+    )(attributes);
 
     expect(actual).toEqual([]);
   });
@@ -31,7 +34,10 @@ describe('recursivelyFindRelationPaths', () => {
       },
     };
 
-    const actual = recursivelyFindRelationPaths(components)(attributes);
+    const actual = recursivelyFindPathsBasedOnCondition(
+      components,
+      (value) => value.type === 'relation'
+    )(attributes);
 
     expect(actual).toEqual(['field2', 'field3']);
   });
@@ -59,7 +65,10 @@ describe('recursivelyFindRelationPaths', () => {
       },
     };
 
-    const actual = recursivelyFindRelationPaths(components)(attributes);
+    const actual = recursivelyFindPathsBasedOnCondition(
+      components,
+      (value) => value.type === 'relation'
+    )(attributes);
 
     expect(actual).toEqual([]);
   });
@@ -87,7 +96,10 @@ describe('recursivelyFindRelationPaths', () => {
       },
     };
 
-    const actual = recursivelyFindRelationPaths(components)(attributes);
+    const actual = recursivelyFindPathsBasedOnCondition(
+      components,
+      (value) => value.type === 'relation'
+    )(attributes);
 
     expect(actual).toEqual(['field2.field2']);
   });
@@ -123,7 +135,10 @@ describe('recursivelyFindRelationPaths', () => {
       },
     };
 
-    const actual = recursivelyFindRelationPaths(components)(attributes);
+    const actual = recursivelyFindPathsBasedOnCondition(
+      components,
+      (value) => value.type === 'relation'
+    )(attributes);
 
     expect(actual).toEqual(['field2.field2.field1']);
   });
@@ -167,7 +182,10 @@ describe('recursivelyFindRelationPaths', () => {
       },
     };
 
-    const actual = recursivelyFindRelationPaths(components)(attributes);
+    const actual = recursivelyFindPathsBasedOnCondition(
+      components,
+      (value) => value.type === 'relation'
+    )(attributes);
 
     expect(actual).toEqual(['field2.field2.field1.field1']);
   });
@@ -214,8 +232,43 @@ describe('recursivelyFindRelationPaths', () => {
       },
     };
 
-    const actual = recursivelyFindRelationPaths(components)(attributes);
+    const actual = recursivelyFindPathsBasedOnCondition(
+      components,
+      (value) => value.type === 'relation'
+    )(attributes);
 
     expect(actual).toEqual(['field1', 'field2.field2.field1.field1', 'field2.field3']);
+  });
+
+  test.skip('given that there is a component field in the attributes which has a relational field but the component is repeatable it should return an empty array', () => {
+    const components = {
+      component1: {
+        attributes: {
+          field1: {
+            type: 'string',
+          },
+          field2: {
+            type: 'relation',
+          },
+        },
+      },
+    };
+    const attributes = {
+      field1: {
+        type: 'string',
+      },
+      field2: {
+        type: 'component',
+        component: 'component1',
+        repeatable: true,
+      },
+    };
+
+    const actual = recursivelyFindPathsBasedOnCondition(
+      components,
+      (value) => value.type === 'relation'
+    )(attributes);
+
+    expect(actual).toEqual([]);
   });
 });

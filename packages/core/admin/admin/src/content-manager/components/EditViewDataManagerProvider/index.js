@@ -21,8 +21,7 @@ import {
 
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
-import { cleanData, createYupSchema } from './utils';
-import { recursivelyFindRelationPaths } from './utils/recursivelyFindRelationPaths';
+import { cleanData, createYupSchema, recursivelyFindPathsBasedOnCondition } from './utils';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -153,14 +152,21 @@ const EditViewDataManagerProvider = ({
        * it can also return a path to a relation:
        * ['relation_component.categories']
        */
-      const relationalFields = recursivelyFindRelationPaths(components)(
-        currentContentTypeLayout.attributes
-      );
+      const relationalFields = recursivelyFindPathsBasedOnCondition(
+        components,
+        (value) => value.type === 'relation'
+      )(currentContentTypeLayout.attributes);
+
+      const repeatableFields = recursivelyFindPathsBasedOnCondition(
+        components,
+        (value) => value.type === 'component' && value.repeatable
+      )(currentContentTypeLayout.attributes);
 
       dispatch({
         type: 'INIT_FORM',
         initialValues,
         relationalFields,
+        repeatableFields,
       });
     }
   }, [initialValues, currentContentTypeLayout, components]);
@@ -205,11 +211,12 @@ const EditViewDataManagerProvider = ({
   }, []);
 
   const addRepeatableComponentToField = useCallback(
-    (keys, componentUid, shouldCheckErrors = false) => {
+    (keys, componentLayoutData, components, shouldCheckErrors = false) => {
       dispatch({
         type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
         keys: keys.split('.'),
-        componentUid,
+        componentLayoutData,
+        allComponents: components,
         shouldCheckErrors,
       });
     },
@@ -357,6 +364,7 @@ const EditViewDataManagerProvider = ({
           }
         }
       } catch (err) {
+        console.log(err);
         errors = {
           ...errors,
           ...getAPIInnerErrors(err, { getTrad }),
