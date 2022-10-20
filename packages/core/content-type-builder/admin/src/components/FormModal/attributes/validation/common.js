@@ -14,17 +14,7 @@ const alreadyUsedAttributeNames = (usedNames) => {
         return false;
       }
 
-      let alreadyUsed = false;
-      for (let i = 0; i < usedNames.length; i++) {
-        const name = usedNames[i];
-
-        if (toLower(name) === toLower(value)) {
-          alreadyUsed = true;
-          break;
-        }
-      }
-
-      return alreadyUsed;
+      return !usedNames.map(toLower).includes(toLower(value));
     },
   };
 };
