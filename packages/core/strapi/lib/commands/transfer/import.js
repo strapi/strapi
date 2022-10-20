@@ -8,8 +8,11 @@ const {
 
 module.exports = async () => {
   console.log('Importing data...');
+
+  // From file
   const source = createLocalFileSourceProvider({ backupFilePath: './backup.tar.gz' });
 
+  // To Strapi
   const destination = createLocalStrapiDestinationProvider({
     getStrapi() {
       return strapi().load();
