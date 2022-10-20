@@ -164,6 +164,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it.todo('should add a repeatable field and correctly set up the relational field');
   });
 
   describe('ADD_COMPONENT_TO_DYNAMIC_ZONE', () => {
@@ -543,6 +545,156 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         type: 'INIT_FORM',
         initialValues: { ok: true, relation: { count: 10 }, component: null },
         relationalFields: ['relation', 'component.field1.field2'],
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should deeply create an array for a relational field even inside a repeatable component', () => {
+      const initialValues = {
+        categories: 'my_category',
+        repeatable_nested_component_relation: [
+          {
+            id: 2,
+            simple: {
+              id: 16,
+              my_name: null,
+              categories: {
+                count: 1,
+              },
+            },
+            __temp_key__: 0,
+          },
+        ],
+        repeatable_single_component_relation: [
+          {
+            id: 15,
+            my_name: null,
+            categories: {
+              count: 2,
+            },
+            __temp_key__: 0,
+          },
+        ],
+        repeatable_repeatable_nested_component: [
+          {
+            id: 1,
+            repeatable_simple: [
+              {
+                id: 17,
+                my_name: null,
+                categories: {
+                  count: 2,
+                },
+                __temp_key__: 0,
+              },
+            ],
+            __temp_key__: 0,
+          },
+        ],
+      };
+
+      const state = {
+        ...initialState,
+        formErrors: true,
+        initialData: {},
+        modifiedData: {},
+        modifiedDZName: true,
+        shouldCheckErrors: true,
+      };
+
+      const expected = {
+        ...initialState,
+        formErrors: {},
+        initialData: {
+          categories: 'my_category',
+          repeatable_nested_component_relation: [
+            {
+              id: 2,
+              simple: {
+                id: 16,
+                my_name: null,
+                categories: [],
+              },
+              __temp_key__: 0,
+            },
+          ],
+          repeatable_single_component_relation: [
+            {
+              id: 15,
+              my_name: null,
+              categories: [],
+              __temp_key__: 0,
+            },
+          ],
+          repeatable_repeatable_nested_component: [
+            {
+              id: 1,
+              repeatable_simple: [
+                {
+                  id: 17,
+                  my_name: null,
+                  categories: [],
+                  __temp_key__: 0,
+                },
+              ],
+              __temp_key__: 0,
+            },
+          ],
+        },
+        modifiedData: {
+          categories: 'my_category',
+          repeatable_nested_component_relation: [
+            {
+              id: 2,
+              simple: {
+                id: 16,
+                my_name: null,
+                categories: [],
+              },
+              __temp_key__: 0,
+            },
+          ],
+          repeatable_single_component_relation: [
+            {
+              id: 15,
+              my_name: null,
+              categories: [],
+              __temp_key__: 0,
+            },
+          ],
+          repeatable_repeatable_nested_component: [
+            {
+              id: 1,
+              repeatable_simple: [
+                {
+                  id: 17,
+                  my_name: null,
+                  categories: [],
+                  __temp_key__: 0,
+                },
+              ],
+              __temp_key__: 0,
+            },
+          ],
+        },
+        modifiedDZName: null,
+        shouldCheckErrors: false,
+      };
+
+      const action = {
+        type: 'INIT_FORM',
+        initialValues,
+        relationalFields: [
+          'repeatable_nested_component_relation.simple.categories',
+          'repeatable_single_component_relation.categories',
+          'repeatable_repeatable_nested_component.repeatable_simple.categories',
+        ],
+        repeatableFields: [
+          'repeatable_nested_component_relation',
+          'repeatable_single_component_relation',
+          'repeatable_repeatable_nested_component',
+        ],
       };
 
       expect(reducer(state, action)).toEqual(expected);

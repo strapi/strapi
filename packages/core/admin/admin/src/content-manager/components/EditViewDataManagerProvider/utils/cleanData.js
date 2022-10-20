@@ -57,10 +57,10 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
         case 'component':
           if (isRepeatable) {
             cleanedData = value
-              ? value.map((data) => {
+              ? value.map((data, index) => {
                   const subCleanedData = recursiveCleanData(
                     data,
-                    oldValue,
+                    (oldValue ?? [])[index],
                     componentsSchema[component]
                   );
 
@@ -80,7 +80,13 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
            * Instead of the full relation object, we only want to send its ID
            */
           const currentRelationIds = value.map((relation) => ({ id: relation.id }));
-          const oldRelationsIds = oldValue.map((relation) => ({ id: relation.id }));
+          /**
+           * Because of how repeatable components work when you dig into them the server
+           * will have no object to compare too therefore no relation array will be setup
+           * because the component has not been initialised, therefore we can safely assume
+           * it needs to be added and provide a default empty array.
+           */
+          const oldRelationsIds = (oldValue ?? []).map((relation) => ({ id: relation.id }));
 
           /**
            * connectedRelations are the items that are in the browserState

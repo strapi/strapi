@@ -5,7 +5,7 @@ import set from 'lodash/set';
 import take from 'lodash/take';
 import cloneDeep from 'lodash/cloneDeep';
 
-import { moveFields } from './utils';
+import { findLeafByPath, moveFields, recursivelyFindPathsBasedOnCondition } from './utils';
 import { getMaxTempKey } from '../../utils';
 
 const initialState = {
@@ -36,22 +36,47 @@ const reducer = (state, action) =>
         break;
       }
       case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
-        let currentValue = get(state, ['modifiedData', ...action.keys], []).slice();
+        const { keys, allComponents, componentLayoutData, shouldCheckErrors } = action;
+        const currentValue = get(state, ['modifiedData', ...keys], []);
+
+        const relationPaths = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'relation'
+        )(componentLayoutData.attributes);
+
+        const repeatableFields = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'component' && value.repeatable
+        )(componentLayoutData.attributes);
 
         const defaultDataStructure = {
-          ...state.componentsDataStructure[action.componentUid],
+          ...state.componentsDataStructure[componentLayoutData.componentUid],
           __temp_key__: getMaxTempKey(currentValue) + 1,
         };
 
-        if (Array.isArray(currentValue)) {
-          currentValue.push(defaultDataStructure);
-        } else {
-          currentValue = [defaultDataStructure];
-        }
+        const componentDataStructure = relationPaths.reduce((acc, current) => {
+          const [componentName] = current.split('.');
 
-        set(draftState, ['modifiedData', ...action.keys], currentValue);
+          /**
+           * Why do we do this? Because if a repeatable component
+           * has another repeatable component inside of it we
+           * don't need to attach the array at this point because that will be
+           * done again deeper in the nest.
+           */
+          if (!repeatableFields.includes(componentName)) {
+            set(acc, current, []);
+          }
 
-        if (action.shouldCheckErrors) {
+          return acc;
+        }, defaultDataStructure);
+
+        const newValue = Array.isArray(currentValue)
+          ? [...currentValue, componentDataStructure]
+          : [componentDataStructure];
+
+        set(draftState, ['modifiedData', ...keys], newValue);
+
+        if (shouldCheckErrors) {
           draftState.shouldCheckErrors = !state.shouldCheckErrors;
         }
 
@@ -150,7 +175,7 @@ const reducer = (state, action) =>
        * but also every time you press publish.
        */
       case 'INIT_FORM': {
-        const { initialValues, relationalFields = [] } = action;
+        const { initialValues, relationalFields = [], repeatableFields = [] } = action;
 
         /**
          * You can't mutate an actions value.
@@ -160,24 +185,50 @@ const reducer = (state, action) =>
          */
         const data = cloneDeep(initialValues);
 
+        console.log('data', data);
+
         /**
-         * initialValues[relationFieldName] won't be an array which is what we're expecting
+         * relationalFields won't be an array which is what we're expecting
          * Therefore we reset these bits of state to the correct data type
          * which is an array. Hence why we replace those fields.
+         *
          */
-        const mergeDataWithPreparedRelations = relationalFields.reduce((acc, current) => {
-          /**
-           * this will be null on initial load, however subsequent calls
-           * will have data in them correlating to the names of the relational fields.
-           */
-          if (state.modifiedData && Array.isArray(get(state.modifiedData, current))) {
-            set(acc, current, get(state.modifiedData, current));
-          } else {
-            set(acc, current, []);
-          }
+        const mergeDataWithPreparedRelations = relationalFields
+          .map((path) => path.split('.'))
+          .reduce((acc, currentPaths) => {
+            const [componentName] = currentPaths;
 
-          return acc;
-        }, data);
+            // const initialRepeatableValue =
+            //   state.modifiedData && Array.isArray(get(state.modifiedData, componentName))
+            //     ? get(state.modifiedData, componentName)
+            //     : get(acc, componentName);
+
+            /**
+             * This currently should only be ran on `repeatable` fields.
+             * You probably could make it work with any and all relational fields.
+             */
+            if (repeatableFields.includes(componentName)) {
+              /**
+               * if the componentName is a repeatable field we collect the list of paths e.g.
+               * ["repeatable_single_component_relation","categories"] and then reduce this
+               * recursively
+               */
+              const findleaf = findLeafByPath(currentPaths.slice(-1)[0]);
+              currentPaths.reduce(findleaf, acc);
+            } else if (state.modifiedData && Array.isArray(get(state.modifiedData, currentPaths))) {
+              /**
+               * this will be null on initial load, however subsequent calls
+               * will have data in them correlating to the names of the relational fields.
+               */
+              set(acc, currentPaths, get(state.modifiedData, currentPaths));
+            } else {
+              set(acc, currentPaths, []);
+            }
+
+            return acc;
+          }, data);
+
+        console.log('mergeDataWithPreparedRelations', mergeDataWithPreparedRelations);
 
         draftState.initialData = mergeDataWithPreparedRelations;
         draftState.modifiedData = mergeDataWithPreparedRelations;
