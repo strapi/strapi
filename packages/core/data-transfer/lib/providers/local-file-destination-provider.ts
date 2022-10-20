@@ -17,7 +17,7 @@ export interface ILocalFileDestinationProviderOptions {
 }
 
 export class LocalFileDestinationProvider implements IDestinationProvider {
-  name: string = 'provider::destination.local-file';
+  name: string = 'destination::local-file';
   type: ProviderType = 'destination';
   options: ILocalFileDestinationProviderOptions;
 

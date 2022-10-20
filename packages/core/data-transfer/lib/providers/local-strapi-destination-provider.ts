@@ -1,16 +1,17 @@
-import { createLogger } from '@strapi/logger';
+// import { createLogger } from '@strapi/logger';
 import chalk from 'chalk';
-import { Duplex } from 'stream';
-import type { IDestinationProvider, IMetadata, ProviderType, Stream } from '../../types';
+import { Duplex } from 'stream-chain';
+import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
 
 interface ILocalStrapiDestinationProviderOptions {
   getStrapi(): Promise<Strapi.Strapi>;
 }
 
-const log = createLogger();
+// const log = createLogger();
+const log = console;
 
 export class LocalStrapiDestinationProvider implements IDestinationProvider {
-  name: string = 'provider::destination.local-strapi';
+  name: string = 'destination::local-strapi';
   type: ProviderType = 'destination';
 
   options: ILocalStrapiDestinationProviderOptions;
@@ -25,17 +26,18 @@ export class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async close(): Promise<void> {
-    await this.strapi.destroy?.();
+    await this.strapi?.destroy?.();
   }
 
+  // TODO
   getMetadata(): IMetadata | Promise<IMetadata> {
-    return null;
+    return {};
   }
 
-  getEntitiesStream(): Stream {
+  getEntitiesStream(): Duplex {
     const self = this;
 
-    return new Writable({
+    return new Duplex({
       objectMode: true,
       async write(entity, _encoding, callback) {
         if (!self.strapi) {
@@ -46,12 +48,12 @@ export class LocalStrapiDestinationProvider implements IDestinationProvider {
 
         try {
           await strapi.entityService.create(uid, { data });
-        } catch (e) {
+        } catch (e:any) { // TODO: remove "any" cast
           log.warn(
             chalk.bold(`Failed to import ${chalk.yellowBright(uid)} (${chalk.greenBright(id)})`)
           );
           e.details.errors
-            .map((err, i) => {
+            .map((err:any, i:number) => { // TODO: add correct error type
               const info = {
                 uid: chalk.yellowBright(`[${uid}]`),
                 path: chalk.blueBright(`[${err.path.join('.')}]`),
@@ -61,7 +63,7 @@ export class LocalStrapiDestinationProvider implements IDestinationProvider {
 
               return `(${i}) ${info.uid}${info.id}${info.path}: ${info.message}`;
             })
-            .forEach((message) => log.warn(message));
+            .forEach((message:string) => log.warn(message));
         } finally {
           callback();
         }
