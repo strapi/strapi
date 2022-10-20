@@ -50,61 +50,68 @@ const contentTypeSchemaValidator = yup.object().shape({
         pluralName: yup.string().isKebabCase().required(),
       })
       .required(),
-    attributes: yup.object().test({
-      name: 'valuesCollide',
-      message: 'Some values collide when normalized',
-      test(attributes) {
-        for (const attrName of Object.keys(attributes)) {
-          const attr = attributes[attrName];
-          if (attr.type === 'enumeration') {
-            const regressedValues = attr.enum.map(toRegressedEnumValue);
+    attributes: yup
+      .object()
+      .test({
+        name: 'valuesCollide',
+        message: 'Some values collide when normalized',
+        test(attributes) {
+          for (const attrName of Object.keys(attributes)) {
+            const attr = attributes[attrName];
+            if (attr.type === 'enumeration') {
+              const regressedValues = attr.enum.map(toRegressedEnumValue);
 
-            // should match the GraphQL regex
-            if (!regressedValues.every((value) => GRAPHQL_ENUM_REGEX.test(value))) {
-              const message = `Invalid enumeration value. Values should have at least one alphabetical character preceeding the first occurence of a number. Update your enumeration '${attrName}'.`;
+              // should match the GraphQL regex
+              if (!regressedValues.every((value) => GRAPHQL_ENUM_REGEX.test(value))) {
+                const message = `Invalid enumeration value. Values should have at least one alphabetical character preceeding the first occurence of a number. Update your enumeration '${attrName}'.`;
 
-              return this.createError({ message });
-            }
+                return this.createError({ message });
+              }
 
-            // should not contain empty values
-            if (regressedValues.some((value) => value === '')) {
-              return this.createError({
-                message: `At least one value of the enumeration '${attrName}' appears to be empty. Only alphanumerical characters are taken into account.`,
-              });
-            }
+              // should not contain empty values
+              if (regressedValues.some((value) => value === '')) {
+                return this.createError({
+                  message: `At least one value of the enumeration '${attrName}' appears to be empty. Only alphanumerical characters are taken into account.`,
+                });
+              }
 
-            // should not collide
-            const duplicates = _.uniq(
-              regressedValues.filter((value, index, values) => values.indexOf(value) !== index)
-            );
+              // should not collide
+              const duplicates = _.uniq(
+                regressedValues.filter((value, index, values) => values.indexOf(value) !== index)
+              );
 
-            if (duplicates.length) {
-              const message = `Some enumeration values of the field '${attrName}' collide when normalized: ${duplicates.join(
-                ', '
-              )}. Please modify your enumeration.`;
+              if (duplicates.length) {
+                const message = `Some enumeration values of the field '${attrName}' collide when normalized: ${duplicates.join(
+                  ', '
+                )}. Please modify your enumeration.`;
 
-              return this.createError({ message });
+                return this.createError({ message });
+              }
             }
           }
-        }
 
-        return true;
-      },
-    }).test({
-      name: 'uniqueAttributeNames',
-      message: 'Attribute names must be unique',
-      test(attributes) {
-        const attributeNames = Object.keys(attributes);
-        const duplicates = _.uniq(attributeNames.map((name) => name.toLocaleLowerCase()).filter((name, index, names) => names.indexOf(name) !== index));
-        if (duplicates.length) {
-          const message = `Attribute names must be unique. The following attributes are duplicated: ${duplicates.join(
-            ', '
-          )}`;
-          return this.createError({ message });
-        }
-        return true;
-      },
-    }),
+          return true;
+        },
+      })
+      .test({
+        name: 'uniqueAttributeNames',
+        message: 'Attribute names must be unique',
+        test(attributes) {
+          const attributeNames = Object.keys(attributes);
+          const duplicates = _.uniq(
+            attributeNames
+              .map((name) => name.toLocaleLowerCase())
+              .filter((name, index, names) => names.indexOf(name) !== index)
+          );
+          if (duplicates.length) {
+            const message = `Attribute names must be unique. The following attributes are duplicated: ${duplicates.join(
+              ', '
+            )}`;
+            return this.createError({ message });
+          }
+          return true;
+        },
+      }),
   }),
   actions: yup.object().onlyContainsFunctions(),
   lifecycles: yup.object().shape(lifecyclesShape).noUnknown(),
