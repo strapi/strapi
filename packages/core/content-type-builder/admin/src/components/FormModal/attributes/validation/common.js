@@ -40,17 +40,7 @@ const isNameAllowed = (reservedNames) => {
         return false;
       }
 
-      let reservedName = false;
-      for (let i = 0; i < reservedName.length; i++) {
-        const name = reservedNames[i];
-
-        if (toLower(name) === toLower(value)) {
-          reservedName = true;
-          break;
-        }
-      }
-
-      return !reservedName;
+      return !reservedNames.map(toLower).includes(toLower(value));
     },
   };
 };
