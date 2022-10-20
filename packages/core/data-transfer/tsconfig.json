@@ -4,7 +4,8 @@
     "strict": true,
     "lib": ["ESNEXT"],
     "skipLibCheck": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "declaration": true
   },
   "include": ["types", "lib/**/*.ts"],
   "exclude": ["node_modules"]
