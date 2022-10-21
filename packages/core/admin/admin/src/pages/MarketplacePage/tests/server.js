@@ -48,6 +48,7 @@ const handlers = [
               validated: false,
               madeByStrapi: false,
               strapiCompatibility: 'v3',
+              strapiVersion: '^4.0.0',
             },
           },
           {
@@ -221,6 +222,7 @@ const handlers = [
               validated: false,
               madeByStrapi: false,
               strapiCompatibility: 'v4',
+              strapiVersion: '4.x.x',
             },
           },
           {
@@ -291,6 +293,7 @@ const handlers = [
               validated: true,
               madeByStrapi: false,
               strapiCompatibility: 'v4',
+              strapiVersion: 'Contact developer',
             },
           },
           {
@@ -362,6 +365,7 @@ const handlers = [
               validated: false,
               madeByStrapi: false,
               strapiCompatibility: 'v4',
+              strapiVersion: '^3.4.2',
             },
           },
           {
@@ -404,6 +408,7 @@ const handlers = [
               validated: true,
               madeByStrapi: true,
               strapiCompatibility: 'v4',
+              strapiVersion: '^4.0.7',
             },
           },
           {
@@ -446,6 +451,7 @@ const handlers = [
               validated: true,
               madeByStrapi: false,
               strapiCompatibility: 'v3',
+              strapiVersion: '^4.3.0',
             },
           },
           {
@@ -488,6 +494,7 @@ const handlers = [
               validated: false,
               madeByStrapi: false,
               strapiCompatibility: 'v4',
+              strapiVersion: '4.0.7',
             },
           },
         ],
