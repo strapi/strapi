@@ -4,8 +4,13 @@ import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { useRBAC } from '@strapi/helper-plugin';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
+
 import { ProvidersPage } from '../index';
 import server from './server';
+
+library.add(faEnvelope);
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
