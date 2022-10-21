@@ -59,6 +59,7 @@ const MarketPlacePage = () => {
   const isOnline = useNavigatorOnLine();
 
   const npmPackageType = query?.npmPackageType || 'plugin';
+  const [selectedTab, setSelectedTab] = useState(npmPackageType);
 
   useFocusWhenNavigate();
 
@@ -177,13 +178,14 @@ const MarketPlacePage = () => {
 
   const handleTabChange = (selected) => {
     const selectedTab = selected === 0 ? 'plugin' : 'provider';
+    setSelectedTab(selectedTab);
 
     if (tabQuery[selectedTab] && Object.keys(tabQuery[selectedTab]).length) {
       setQuery({ ...tabQuery[selectedTab] });
     } else {
       setQuery(
         {
-          npmPackageType: selectedTab,
+          npmPackageType: null,
           // Clear filters
           collections: [],
           categories: [],
@@ -194,11 +196,12 @@ const MarketPlacePage = () => {
     }
   };
 
+  console.log(tabQuery);
   // Check if plugins and providers are installed already
   const installedPackageNames = Object.keys(dependencies);
 
   const possibleCollections =
-    npmPackageType === 'plugin'
+    selectedTab === 'plugin'
       ? marketplacePluginsResponse.meta.collections
       : marketplaceProvidersResponse.meta.collections;
   const possibleCategories = marketplacePluginsResponse.meta.categories;
@@ -212,7 +215,7 @@ const MarketPlacePage = () => {
             defaultMessage: 'Marketplace - Plugins',
           })}
         />
-        <PageHeader isOnline={isOnline} npmPackageType={npmPackageType} />
+        <PageHeader isOnline={isOnline} npmPackageType={selectedTab} />
         <ContentLayout>
           <Box width="25%" paddingBottom={4}>
             <Searchbar
@@ -242,7 +245,7 @@ const MarketPlacePage = () => {
             })}
             id="tabs"
             variant="simple"
-            initialSelectedTabIndex={['plugin', 'provider'].indexOf(npmPackageType)}
+            initialSelectedTabIndex={['plugin', 'provider'].indexOf(selectedTab)}
             onTabChange={handleTabChange}
           >
             <Box paddingBottom={4}>
@@ -268,10 +271,10 @@ const MarketPlacePage = () => {
                 sortQuery={query?.sort || 'name:asc'}
                 setQuery={setQuery}
                 setTabQuery={setTabQuery}
-                npmPackageType={npmPackageType}
+                npmPackageType={selectedTab}
               />
               <NpmPackagesFilters
-                npmPackageType={npmPackageType}
+                npmPackageType={selectedTab}
                 possibleCollections={possibleCollections}
                 possibleCategories={possibleCategories}
                 query={query || {}}

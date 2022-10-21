@@ -19,6 +19,19 @@ const FiltersPopover = ({
 }) => {
   const { formatMessage } = useIntl();
 
+  const handleFilterChange = (update) => {
+    setQuery(update);
+    setTabQuery((prev) => ({
+      ...prev,
+      [npmPackageType]: { ...prev[npmPackageType], ...update },
+    }));
+  };
+
+  const handleFilterClear = (filterType) => {
+    setQuery({ [filterType]: [] }, 'remove');
+    setTabQuery((prev) => ({ ...prev, [npmPackageType]: {} }));
+  };
+
   return (
     <Popover source={source} padding={3} spacing={4} onBlur={() => {}}>
       <FocusTrap onEscape={onToggle}>
@@ -32,13 +45,9 @@ const FiltersPopover = ({
               value={query?.collections || []}
               onChange={(newCollections) => {
                 const update = { collections: newCollections, npmPackageType };
-                setQuery(update);
-                setTabQuery((prev) => ({ ...prev, [npmPackageType]: update }));
+                handleFilterChange(update);
               }}
-              onClear={() => {
-                setQuery({ collections: [] }, 'remove');
-                setTabQuery((prev) => ({ ...prev, [npmPackageType]: {} }));
-              }}
+              onClear={() => handleFilterClear('collections')}
               possibleFilters={possibleCollections}
               customizeContent={(values) =>
                 formatMessage(
@@ -62,13 +71,9 @@ const FiltersPopover = ({
                 value={query?.categories || []}
                 onChange={(newCategories) => {
                   const update = { categories: newCategories, npmPackageType };
-                  setQuery(update);
-                  setTabQuery((prev) => ({ ...prev, [npmPackageType]: update }));
+                  handleFilterChange(update);
                 }}
-                onClear={() => {
-                  setQuery({ categories: [] }, 'remove');
-                  setTabQuery((prev) => ({ ...prev, [npmPackageType]: {} }));
-                }}
+                onClear={() => handleFilterClear('categories')}
                 possibleFilters={possibleCategories}
                 customizeContent={(values) =>
                   formatMessage(

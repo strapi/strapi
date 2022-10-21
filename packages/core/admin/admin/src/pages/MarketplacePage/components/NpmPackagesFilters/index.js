@@ -37,6 +37,18 @@ const NpmPackagesFilters = ({
 
   const handleToggle = () => setIsVisible((prev) => !prev);
 
+  const handleTagRemove = (tagToRemove, filterType) => {
+    const update = {
+      [filterType]: query[filterType].filter((previousTag) => previousTag !== tagToRemove),
+    };
+
+    setQuery(update);
+    setTabQuery((prev) => ({
+      ...prev,
+      [npmPackageType]: { ...prev[npmPackageType], ...update },
+    }));
+  };
+
   return (
     <>
       <Box paddingTop={1} paddingBottom={1}>
@@ -66,18 +78,7 @@ const NpmPackagesFilters = ({
         <FilterTag
           name={collection}
           key={collection}
-          handleRemove={() => {
-            const update = {
-              collections: query.collections.filter(
-                (previousCollection) => previousCollection !== collection
-              ),
-            };
-            setQuery(update);
-            setTabQuery((prev) => ({
-              ...prev,
-              [npmPackageType]: { ...prev[npmPackageType], ...update },
-            }));
-          }}
+          handleRemove={() => handleTagRemove(collection, 'collections')}
         />
       ))}
       {npmPackageType === 'plugin' &&
@@ -85,18 +86,7 @@ const NpmPackagesFilters = ({
           <FilterTag
             name={category}
             key={category}
-            handleRemove={() => {
-              const update = {
-                collections: query.categories.filter(
-                  (previousCategory) => previousCategory !== category
-                ),
-              };
-              setQuery(update);
-              setTabQuery((prev) => ({
-                ...prev,
-                [npmPackageType]: { ...prev[npmPackageType], ...update },
-              }));
-            }}
+            handleRemove={() => handleTagRemove(category, 'categories')}
           />
         ))}
     </>

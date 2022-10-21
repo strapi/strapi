@@ -303,6 +303,6 @@ describe('Marketplace page', () => {
 
     const newestOption = screen.getByRole('option', { name: 'Newest' });
     fireEvent.click(newestOption);
-    expect(history.location.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc');
+    expect(history.location.search).toEqual('?sort=submissionDate:desc');
   });
 });
