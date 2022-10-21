@@ -11,7 +11,7 @@ const handlers = [
         discord: {
           callback: '/auth/discord/callback',
           enabled: false,
-          icon: 'discord',
+          icon: 'envelope',
           key: '',
           scope: ['identify', 'email'],
           secret: '',
