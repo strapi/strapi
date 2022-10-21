@@ -54,12 +54,16 @@ const MarketPlacePage = () => {
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
   const [{ query }, setQuery] = useQueryParams();
-  const [tabQuery, setTabQuery] = useState({ plugin: { ...query }, provider: { ...query } });
+
   const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
   const isOnline = useNavigatorOnLine();
 
   const npmPackageType = query?.npmPackageType || 'plugin';
-  const [selectedTab, setSelectedTab] = useState(npmPackageType);
+  console.log({ npmPackageType });
+  const [tabQuery, setTabQuery] = useState({
+    plugin: npmPackageType === 'plugin' ? { ...query } : {},
+    provider: npmPackageType === 'provider' ? { ...query } : {},
+  });
 
   useFocusWhenNavigate();
 
@@ -178,30 +182,32 @@ const MarketPlacePage = () => {
 
   const handleTabChange = (selected) => {
     const selectedTab = selected === 0 ? 'plugin' : 'provider';
-    setSelectedTab(selectedTab);
+    // {plugin: {}, provider: {}}
+    const hasTabQuery = tabQuery[selectedTab] && Object.keys(tabQuery[selectedTab]).length;
 
-    if (tabQuery[selectedTab] && Object.keys(tabQuery[selectedTab]).length) {
-      setQuery({ ...tabQuery[selectedTab] });
+    if (hasTabQuery) {
+      console.log('getting the tab queries');
+      setQuery({ ...tabQuery[selectedTab], npmPackageType: selectedTab });
     } else {
-      setQuery(
-        {
-          npmPackageType: null,
-          // Clear filters
-          collections: [],
-          categories: [],
-          sort: null,
-        },
-        'remove'
-      );
+      console.log('refresh params');
+
+      setQuery({
+        npmPackageType: selectedTab,
+        // Clear filters
+        collections: [],
+        categories: [],
+        sort: 'name:asc',
+      });
     }
   };
 
   console.log(tabQuery);
+
   // Check if plugins and providers are installed already
   const installedPackageNames = Object.keys(dependencies);
 
   const possibleCollections =
-    selectedTab === 'plugin'
+    npmPackageType === 'plugin'
       ? marketplacePluginsResponse.meta.collections
       : marketplaceProvidersResponse.meta.collections;
   const possibleCategories = marketplacePluginsResponse.meta.categories;
@@ -215,7 +221,7 @@ const MarketPlacePage = () => {
             defaultMessage: 'Marketplace - Plugins',
           })}
         />
-        <PageHeader isOnline={isOnline} npmPackageType={selectedTab} />
+        <PageHeader isOnline={isOnline} npmPackageType={npmPackageType} />
         <ContentLayout>
           <Box width="25%" paddingBottom={4}>
             <Searchbar
@@ -245,7 +251,7 @@ const MarketPlacePage = () => {
             })}
             id="tabs"
             variant="simple"
-            initialSelectedTabIndex={['plugin', 'provider'].indexOf(selectedTab)}
+            initialSelectedTabIndex={['plugin', 'provider'].indexOf(npmPackageType)}
             onTabChange={handleTabChange}
           >
             <Box paddingBottom={4}>
@@ -271,10 +277,10 @@ const MarketPlacePage = () => {
                 sortQuery={query?.sort || 'name:asc'}
                 setQuery={setQuery}
                 setTabQuery={setTabQuery}
-                npmPackageType={selectedTab}
+                npmPackageType={npmPackageType}
               />
               <NpmPackagesFilters
-                npmPackageType={selectedTab}
+                npmPackageType={npmPackageType}
                 possibleCollections={possibleCollections}
                 possibleCategories={possibleCategories}
                 query={query || {}}

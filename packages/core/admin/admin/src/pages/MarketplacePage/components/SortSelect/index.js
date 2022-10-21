@@ -50,7 +50,7 @@ const SortSelect = ({ sortQuery, setQuery, setTabQuery, npmPackageType }) => {
           setQuery({ sort: sortName });
           setTabQuery((prev) => ({
             ...prev,
-            [npmPackageType]: { ...prev[npmPackageType], sort: sortName, npmPackageType },
+            [npmPackageType]: { ...prev[npmPackageType], sort: sortName },
           }));
         }}
       >

@@ -44,7 +44,7 @@ const FiltersPopover = ({
               })}
               value={query?.collections || []}
               onChange={(newCollections) => {
-                const update = { collections: newCollections, npmPackageType };
+                const update = { collections: newCollections };
                 handleFilterChange(update);
               }}
               onClear={() => handleFilterClear('collections')}
@@ -70,7 +70,7 @@ const FiltersPopover = ({
                 })}
                 value={query?.categories || []}
                 onChange={(newCategories) => {
-                  const update = { categories: newCategories, npmPackageType };
+                  const update = { categories: newCategories };
                   handleFilterChange(update);
                 }}
                 onClear={() => handleFilterClear('categories')}
