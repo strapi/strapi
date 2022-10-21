@@ -387,4 +387,6 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
   test.todo(
     'given that the browserState does not include a repeatable component with a relation inside that component that the serverState has, we should return a disconnect of length one'
   );
+
+  test.todo('dynamic zones');
 });

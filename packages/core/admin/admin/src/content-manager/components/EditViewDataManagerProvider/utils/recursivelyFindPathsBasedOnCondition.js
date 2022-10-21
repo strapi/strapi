@@ -32,14 +32,23 @@ const recursivelyFindPathsBasedOnConditionSetup = (components, predicate = () =>
       } else if (value.type === 'component') {
         const componentAttributes = components[value.component].attributes;
 
-        const relationalAttributesInComponent =
-          recursivelyFindPathsBasedOnCondition(componentAttributes);
+        const attributesInComponent = recursivelyFindPathsBasedOnCondition(componentAttributes);
 
-        const relationalAttributesInComponentPaths = relationalAttributesInComponent.map(
-          (path) => `${key}.${path}`
-        );
+        const attributesInComponentPaths = attributesInComponent.map((path) => `${key}.${path}`);
 
-        acc = [...acc, relationalAttributesInComponentPaths];
+        acc = [...acc, attributesInComponentPaths];
+      } else if (value.type === 'dynamiczone') {
+        const dynamicComponents = value.components;
+
+        const attributesInDynamicComponents = dynamicComponents
+          .flatMap((componentName) =>
+            recursivelyFindPathsBasedOnCondition({
+              [componentName]: { type: 'component', component: componentName },
+            })
+          )
+          .map((path) => `${key}.${path}`);
+
+        acc = [...acc, attributesInDynamicComponents];
       }
 
       return acc.flat();

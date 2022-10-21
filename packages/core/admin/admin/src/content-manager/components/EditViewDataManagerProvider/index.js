@@ -146,6 +146,7 @@ const EditViewDataManagerProvider = ({
 
   useEffect(() => {
     if (initialValues && currentContentTypeLayout?.attributes) {
+      console.log({ currentContentTypeLayout: currentContentTypeLayout.attributes, components });
       /**
        * This will return an array of paths:
        * ['many_to_one', 'one_to_many', 'one_to_one']
@@ -162,25 +163,40 @@ const EditViewDataManagerProvider = ({
         (value) => value.type === 'component' && value.repeatable
       )(currentContentTypeLayout.attributes);
 
+      const dynamicZones = recursivelyFindPathsBasedOnCondition(
+        components,
+        (value) => value.type === 'dynamiczone'
+      )(currentContentTypeLayout.attributes);
+
+      console.log(relationalFields, repeatableFields, dynamicZones);
+
       dispatch({
         type: 'INIT_FORM',
         initialValues,
         relationalFields,
         repeatableFields,
+        dynamicZones,
       });
     }
   }, [initialValues, currentContentTypeLayout, components]);
 
-  const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
-    trackUsageRef.current('didAddComponentToDynamicZone');
+  const dispatchAddComponent = useCallback(
+    (type) =>
+      (keys, componentLayoutData, components, shouldCheckErrors = false) => {
+        trackUsageRef.current('didAddComponentToDynamicZone');
 
-    dispatch({
-      type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
-      keys: keys.split('.'),
-      componentUid,
-      shouldCheckErrors,
-    });
-  }, []);
+        dispatch({
+          type,
+          keys: keys.split('.'),
+          componentLayoutData,
+          allComponents: components,
+          shouldCheckErrors,
+        });
+      },
+    []
+  );
+
+  const addComponentToDynamicZone = dispatchAddComponent('ADD_COMPONENT_TO_DYNAMIC_ZONE');
 
   const addNonRepeatableComponentToField = useCallback((keys, componentUid) => {
     dispatch({
@@ -210,18 +226,7 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const addRepeatableComponentToField = useCallback(
-    (keys, componentLayoutData, components, shouldCheckErrors = false) => {
-      dispatch({
-        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
-        keys: keys.split('.'),
-        componentLayoutData,
-        allComponents: components,
-        shouldCheckErrors,
-      });
-    },
-    []
-  );
+  const addRepeatableComponentToField = dispatchAddComponent('ADD_REPEATABLE_COMPONENT_TO_FIELD');
 
   const yupSchema = useMemo(() => {
     const options = { isCreatingEntry, isDraft: shouldNotRunValidations, isFromComponent: false };
