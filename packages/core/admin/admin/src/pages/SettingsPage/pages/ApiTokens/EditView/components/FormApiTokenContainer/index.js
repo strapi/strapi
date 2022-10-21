@@ -111,7 +111,7 @@ const FormApiTokenContainer = ({
                 id: 'Settings.apiTokens.form.duration',
                 defaultMessage: 'Token duration',
               })}
-              value={values.lifespan}
+              value={values.lifespan !== null ? values.lifespan : '0'}
               error={
                 errors.lifespan
                   ? formatMessage(
