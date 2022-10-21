@@ -183,7 +183,7 @@ const MarketPlacePage = () => {
     } else {
       setQuery(
         {
-          npmPackageType: null,
+          npmPackageType: selectedTab,
           // Clear filters
           collections: [],
           categories: [],
@@ -194,7 +194,6 @@ const MarketPlacePage = () => {
     }
   };
 
-  console.log(tabQuery);
   // Check if plugins and providers are installed already
   const installedPackageNames = Object.keys(dependencies);
 
@@ -266,7 +265,7 @@ const MarketPlacePage = () => {
             </Box>
             <Flex paddingBottom={4} gap={2}>
               <SortSelect
-                sortQuery={query?.sort}
+                sortQuery={query?.sort || 'name:asc'}
                 setQuery={setQuery}
                 setTabQuery={setTabQuery}
                 npmPackageType={npmPackageType}

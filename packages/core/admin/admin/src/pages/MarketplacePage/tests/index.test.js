@@ -287,7 +287,7 @@ describe('Marketplace page', () => {
   it('shows the correct options on sort select', () => {
     render(App);
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
-    fireEvent.click(sortButton);
+    fireEvent.mouseDown(sortButton);
 
     const alphabeticalOption = screen.getByRole('option', { name: 'Alphabetical order' });
     const newestOption = screen.getByRole('option', { name: 'Newest' });
@@ -296,10 +296,11 @@ describe('Marketplace page', () => {
     expect(newestOption).toBeVisible();
   });
 
-  it('sort by newest changes the url on click', () => {
+  it('changes the url on sort option select', () => {
     render(App);
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
-    fireEvent.click(sortButton);
+    fireEvent.mouseDown(sortButton);
+
     const newestOption = screen.getByRole('option', { name: 'Newest' });
     fireEvent.click(newestOption);
     expect(history.location.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc');

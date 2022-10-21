@@ -1,137 +1,75 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
+import styled from 'styled-components';
+import { Select, Option } from '@strapi/design-system/Select';
+import { Box } from '@strapi/design-system/Box';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Option } from '@strapi/design-system/Select';
-import { Popover } from '@strapi/design-system/Popover';
-import { Button } from '@strapi/design-system/Button';
-import { FocusTrap } from '@strapi/design-system/FocusTrap';
-import CarretDown from '@strapi/icons/CarretDown';
-import styled from 'styled-components';
 
-const SortOption = styled(Option)`
-  list-style-type: none;
-`;
+const SelectWrapper = styled(Box)`
+  font-weight: ${({ theme }) => theme.fontWeights.semiBold};
 
-const SortToggleButton = styled(Button)`
-  svg {
-    width: ${({ theme }) => theme.spaces[2]};
-    height: ${({ theme }) => theme.spaces[1]};
-  }
-
-  svg > path {
-    fill: ${({ theme }) => theme.colors.neutral500};
+  span {
+    font-size: ${({ theme }) => theme.fontSizes[1]};
   }
 `;
 
 const SortSelect = ({ sortQuery, setQuery, setTabQuery, npmPackageType }) => {
   const { formatMessage } = useIntl();
-  const buttonRef = useRef();
-  const [isVisible, setIsVisible] = useState(false);
 
   const sortTypes = {
     'name:asc': {
-      id: 'admin.pages.MarketPlacePage.sort.alphabetical',
-      defaultMessage: 'Alphabetical order',
+      selected: {
+        id: 'admin.pages.MarketPlacePage.sort.alphabetical.selected',
+        defaultMessage: 'Sort by alphabetical order',
+      },
+      option: {
+        id: 'admin.pages.MarketPlacePage.sort.alphabetical',
+        defaultMessage: 'Alphabetical order',
+      },
     },
     'submissionDate:desc': {
-      id: 'admin.pages.MarketPlacePage.sort.newest',
-      defaultMessage: 'Newest',
+      selected: {
+        id: 'admin.pages.MarketPlacePage.sort.newest.selected',
+        defaultMessage: 'Sort by newest',
+      },
+      option: {
+        id: 'admin.pages.MarketPlacePage.sort.newest',
+        defaultMessage: 'Newest',
+      },
     },
-  };
-
-  const handleToggle = () => setIsVisible((prev) => !prev);
-
-  const handleBlur = (e) => {
-    e.preventDefault();
-
-    if (!e.currentTarget.contains(e.relatedTarget)) {
-      setIsVisible(false);
-    }
-  };
-
-  const handleSortClick = (sortName) => {
-    setQuery({ sort: sortName });
-    setTabQuery((prev) => ({
-      ...prev,
-      [npmPackageType]: { ...prev[npmPackageType], sort: sortName, npmPackageType },
-    }));
-    handleToggle();
-  };
-
-  const computeSortMessage = (sortName) => {
-    const defaultSortLabel = formatMessage({
-      id: 'admin.pages.MarketPlacePage.sort.sortBy',
-      defaultMessage: 'Sort by',
-    });
-
-    if (sortName) {
-      const sortInfo = sortTypes[sortName];
-      const message = formatMessage({
-        id: sortInfo.id,
-        defaultMessage: sortInfo.defaultMessage,
-      });
-
-      return `${defaultSortLabel}: ${message}`;
-    }
-
-    return defaultSortLabel;
   };
 
   return (
-    <>
-      <SortToggleButton
-        aria-label={computeSortMessage(sortQuery)}
-        aria-controls="sort-by-values"
-        aria-haspopup="dialog"
-        aria-expanded={isVisible}
-        aria-disabled={false}
-        onClick={handleToggle}
-        variant="tertiary"
-        ref={buttonRef}
-        endIcon={<CarretDown aria-hidden />}
+    <SelectWrapper>
+      <Select
         size="S"
+        id="sort-by-select"
+        value={sortQuery}
+        customizeContent={() => formatMessage(sortTypes[sortQuery].selected)}
+        onChange={(sortName) => {
+          setQuery({ sort: sortName });
+          setTabQuery((prev) => ({
+            ...prev,
+            [npmPackageType]: { ...prev[npmPackageType], sort: sortName, npmPackageType },
+          }));
+        }}
       >
-        {computeSortMessage(sortQuery)}
-      </SortToggleButton>
-      {isVisible && (
-        <Popover
-          role="dialog"
-          id="sort-by-values"
-          onBlur={handleBlur}
-          source={buttonRef}
-          spacing={4}
-        >
-          <FocusTrap onEscape={handleToggle}>
-            {Object.entries(sortTypes).map(([sortName, sortInfo], index) => {
-              const { id, defaultMessage } = sortInfo;
-
-              return (
-                <SortOption
-                  key={sortName}
-                  value={sortName}
-                  selected={sortQuery === sortName}
-                  onClick={() => handleSortClick(sortName)}
-                  tabIndex={index}
-                >
-                  {formatMessage({ id, defaultMessage })}
-                </SortOption>
-              );
-            })}
-          </FocusTrap>
-        </Popover>
-      )}
-    </>
+        {Object.entries(sortTypes).map(([sortName, messages]) => {
+          return (
+            <Option key={sortName} value={sortName}>
+              {formatMessage(messages.option)}
+            </Option>
+          );
+        })}
+      </Select>
+    </SelectWrapper>
   );
 };
 
-SortSelect.defaultProps = {
-  sortQuery: undefined,
-};
-
 SortSelect.propTypes = {
+  sortQuery: PropTypes.string.isRequired,
   setQuery: PropTypes.func.isRequired,
   setTabQuery: PropTypes.func.isRequired,
-  sortQuery: PropTypes.string,
   npmPackageType: PropTypes.string.isRequired,
 };
 
