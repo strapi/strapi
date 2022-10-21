@@ -2979,14 +2979,14 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
               aria-disabled="false"
               aria-expanded="false"
               aria-haspopup="dialog"
-              aria-label="Sort by: Alphabetical order"
+              aria-label="Sort by"
               class="c38 c39 c40"
               type="button"
             >
               <span
                 class="c41 c42"
               >
-                Sort by: Alphabetical order
+                Sort by
               </span>
               <div
                 aria-hidden="true"

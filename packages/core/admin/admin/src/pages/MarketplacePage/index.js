@@ -53,9 +53,11 @@ const MarketPlacePage = () => {
   const trackUsageRef = useRef(trackUsage);
   const toggleNotification = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
+  const [{ query }, setQuery] = useQueryParams();
+  const [tabQuery, setTabQuery] = useState({ plugin: { ...query }, provider: { ...query } });
   const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
   const isOnline = useNavigatorOnLine();
-  const [{ query }, setQuery] = useQueryParams();
+
   const npmPackageType = query?.npmPackageType || 'plugin';
 
   useFocusWhenNavigate();
@@ -77,19 +79,11 @@ const MarketPlacePage = () => {
     );
   };
 
-  const providerParams = {
-    collections: query?.collections || [],
-    sort: query?.sort || 'name:asc',
-  };
   const { status: marketplaceProvidersStatus, data: marketplaceProvidersResponse } =
-    useFetchMarketplaceProviders(notifyMarketplaceLoad, providerParams);
+    useFetchMarketplaceProviders(notifyMarketplaceLoad, tabQuery.provider);
 
-  const pluginParams = {
-    ...providerParams,
-    categories: query?.categories || [],
-  };
   const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
-    useFetchMarketplacePlugins(notifyMarketplaceLoad, pluginParams);
+    useFetchMarketplacePlugins(notifyMarketplaceLoad, tabQuery.plugin);
 
   const isLoading = [marketplacePluginsStatus, marketplaceProvidersStatus].includes('loading');
 
@@ -182,18 +176,25 @@ const MarketPlacePage = () => {
   );
 
   const handleTabChange = (selected) => {
-    const packageType = selected === 0 ? 'plugin' : 'provider';
-    setQuery({
-      // Save new tab in the query params
-      npmPackageType: packageType,
-      // Clear filters
-      collections: [],
-      categories: [],
-      // Reset sort
-      sort: 'name:asc',
-    });
+    const selectedTab = selected === 0 ? 'plugin' : 'provider';
+
+    if (tabQuery[selectedTab] && Object.keys(tabQuery[selectedTab]).length) {
+      setQuery({ ...tabQuery[selectedTab] });
+    } else {
+      setQuery(
+        {
+          npmPackageType: null,
+          // Clear filters
+          collections: [],
+          categories: [],
+          sort: null,
+        },
+        'remove'
+      );
+    }
   };
 
+  console.log(tabQuery);
   // Check if plugins and providers are installed already
   const installedPackageNames = Object.keys(dependencies);
 
@@ -201,6 +202,7 @@ const MarketPlacePage = () => {
     npmPackageType === 'plugin'
       ? marketplacePluginsResponse.meta.collections
       : marketplaceProvidersResponse.meta.collections;
+  const possibleCategories = marketplacePluginsResponse.meta.categories;
 
   return (
     <Layout>
@@ -263,13 +265,19 @@ const MarketPlacePage = () => {
               </Tabs>
             </Box>
             <Flex paddingBottom={4} gap={2}>
-              <SortSelect sortQuery={query?.sort} setQuery={setQuery} />
+              <SortSelect
+                sortQuery={query?.sort}
+                setQuery={setQuery}
+                setTabQuery={setTabQuery}
+                npmPackageType={npmPackageType}
+              />
               <NpmPackagesFilters
                 npmPackageType={npmPackageType}
                 possibleCollections={possibleCollections}
-                possibleCategories={marketplacePluginsResponse.meta.categories}
+                possibleCategories={possibleCategories}
                 query={query || {}}
                 setQuery={setQuery}
+                setTabQuery={setTabQuery}
               />
             </Flex>
 

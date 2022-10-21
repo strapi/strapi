@@ -24,6 +24,7 @@ const NpmPackagesFilters = ({
   npmPackageType,
   query,
   setQuery,
+  setTabQuery,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const buttonRef = useRef();
@@ -49,6 +50,7 @@ const NpmPackagesFilters = ({
             source={buttonRef}
             query={query}
             setQuery={setQuery}
+            setTabQuery={setTabQuery}
             possibleCollections={possibleCollections}
             possibleCategories={possibleCategories}
             npmPackageType={npmPackageType}
@@ -59,13 +61,18 @@ const NpmPackagesFilters = ({
         <FilterTag
           name={collection}
           key={collection}
-          handleRemove={() =>
-            setQuery({
+          handleRemove={() => {
+            const update = {
               collections: query.collections.filter(
                 (previousCollection) => previousCollection !== collection
               ),
-            })
-          }
+            };
+            setQuery(update);
+            setTabQuery((prev) => ({
+              ...prev,
+              [npmPackageType]: { ...prev[npmPackageType], ...update },
+            }));
+          }}
         />
       ))}
       {npmPackageType === 'plugin' &&
@@ -73,13 +80,18 @@ const NpmPackagesFilters = ({
           <FilterTag
             name={category}
             key={category}
-            handleRemove={() =>
-              setQuery({
-                categories: query.categories.filter(
+            handleRemove={() => {
+              const update = {
+                collections: query.categories.filter(
                   (previousCategory) => previousCategory !== category
                 ),
-              })
-            }
+              };
+              setQuery(update);
+              setTabQuery((prev) => ({
+                ...prev,
+                [npmPackageType]: { ...prev[npmPackageType], ...update },
+              }));
+            }}
           />
         ))}
     </>
@@ -97,6 +109,7 @@ NpmPackagesFilters.propTypes = {
   possibleCategories: PropTypes.object.isRequired,
   query: PropTypes.object.isRequired,
   setQuery: PropTypes.func.isRequired,
+  setTabQuery: PropTypes.func.isRequired,
 };
 
 export default NpmPackagesFilters;

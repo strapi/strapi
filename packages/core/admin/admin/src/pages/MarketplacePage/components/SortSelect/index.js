@@ -23,7 +23,7 @@ const SortToggleButton = styled(Button)`
   }
 `;
 
-const SortSelect = ({ sortQuery, setQuery }) => {
+const SortSelect = ({ sortQuery, setQuery, setTabQuery, npmPackageType }) => {
   const { formatMessage } = useIntl();
   const buttonRef = useRef();
   const [isVisible, setIsVisible] = useState(false);
@@ -51,6 +51,10 @@ const SortSelect = ({ sortQuery, setQuery }) => {
 
   const handleSortClick = (sortName) => {
     setQuery({ sort: sortName });
+    setTabQuery((prev) => ({
+      ...prev,
+      [npmPackageType]: { ...prev[npmPackageType], sort: sortName, npmPackageType },
+    }));
     handleToggle();
   };
 
@@ -126,7 +130,9 @@ SortSelect.defaultProps = {
 
 SortSelect.propTypes = {
   setQuery: PropTypes.func.isRequired,
+  setTabQuery: PropTypes.func.isRequired,
   sortQuery: PropTypes.string,
+  npmPackageType: PropTypes.string.isRequired,
 };
 
 export default SortSelect;
