@@ -18,6 +18,9 @@ import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
 
+const GITHUB_STARS = 12;
+const WEEKLY_DOWNLOADS = 135;
+
 const toggleNotification = jest.fn();
 
 jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
@@ -300,9 +303,9 @@ describe('Marketplace page', () => {
     const documentationCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Documentation'));
-    const githubStars = queryByText(documentationCard, 12);
+    const githubStars = queryByText(documentationCard, GITHUB_STARS);
     expect(githubStars).toBeVisible();
-    const weeklyDownloads = queryByText(documentationCard, 135);
+    const weeklyDownloads = queryByText(documentationCard, WEEKLY_DOWNLOADS);
     expect(weeklyDownloads).toBeVisible();
   });
 
@@ -314,9 +317,9 @@ describe('Marketplace page', () => {
     const cloudinaryCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Cloudinary'));
-    const githubStars = queryByText(cloudinaryCard, 12);
+    const githubStars = queryByText(cloudinaryCard, GITHUB_STARS);
     expect(githubStars).toBeVisible();
-    const weeklyDownloads = queryByText(cloudinaryCard, 135);
+    const weeklyDownloads = queryByText(cloudinaryCard, WEEKLY_DOWNLOADS);
     expect(weeklyDownloads).toBeVisible();
   });
 });
