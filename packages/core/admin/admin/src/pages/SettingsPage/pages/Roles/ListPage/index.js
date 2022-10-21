@@ -168,7 +168,7 @@ const RoleListPage = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {sortedRoles?.map((role) => (
+            {sortedRoles?.map((role, rowIndex) => (
               <RoleRow
                 key={role.id}
                 id={role.id}
@@ -176,6 +176,7 @@ const RoleListPage = () => {
                 description={role.description}
                 usersCount={role.usersCount}
                 icons={getIcons(role)}
+                rowIndex={rowIndex + 1}
               />
             ))}
           </Tbody>
