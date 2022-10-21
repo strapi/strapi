@@ -29,7 +29,9 @@ const recursivelyFindPathsBasedOnConditionSetup = (components, predicate = () =>
     return Object.entries(attributes).reduce((acc, [key, value]) => {
       if (predicate(value)) {
         acc = [...acc, key];
-      } else if (value.type === 'component') {
+      }
+
+      if (value.type === 'component') {
         const componentAttributes = components[value.component].attributes;
 
         const attributesInComponent = recursivelyFindPathsBasedOnCondition(componentAttributes);
