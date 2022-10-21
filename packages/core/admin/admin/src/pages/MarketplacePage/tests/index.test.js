@@ -291,4 +291,32 @@ describe('Marketplace page', () => {
       'Unable to verify compatibility with your Strapi version: "4.1.0"'
     );
   });
+
+  it('shows github stars and weekly downloads count for each plugin', () => {
+    render(App);
+    const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
+    fireEvent.click(pluginsTab);
+
+    const documentationCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Documentation'));
+    const githubStars = queryByText(documentationCard, 12);
+    expect(githubStars).toBeVisible();
+    const weeklyDownloads = queryByText(documentationCard, 135);
+    expect(weeklyDownloads).toBeVisible();
+  });
+
+  it('shows github stars and weekly downloads count for each provider', () => {
+    render(App);
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    fireEvent.click(providersTab);
+
+    const cloudinaryCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Cloudinary'));
+    const githubStars = queryByText(cloudinaryCard, 12);
+    expect(githubStars).toBeVisible();
+    const weeklyDownloads = queryByText(cloudinaryCard, 135);
+    expect(weeklyDownloads).toBeVisible();
+  });
 });
