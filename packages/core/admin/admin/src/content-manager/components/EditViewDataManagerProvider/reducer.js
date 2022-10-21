@@ -56,11 +56,11 @@ const reducer = (state, action) =>
         const defaultDataStructure =
           action.type === 'ADD_COMPONENT_TO_DYNAMIC_ZONE'
             ? {
-                ...state.componentsDataStructure[componentLayoutData.componentUid],
+                ...state.componentsDataStructure[componentLayoutData.uid],
                 __component: componentLayoutData.uid,
               }
             : {
-                ...state.componentsDataStructure[componentLayoutData.componentUid],
+                ...state.componentsDataStructure[componentLayoutData.uid],
                 __temp_key__: getMaxTempKey(currentValue) + 1,
               };
 
