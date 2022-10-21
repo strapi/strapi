@@ -231,7 +231,7 @@ export const EditAssetDialog = ({
                             id: getTrad('modal.file-details.id'),
                             defaultMessage: 'Asset ID',
                           }),
-                          value: asset.id,
+                          value: `${asset.id}`,
                         },
                       ]}
                     />
