@@ -37,6 +37,11 @@ const reducer = (state, action) =>
       }
       case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
         const { keys, allComponents, componentLayoutData, shouldCheckErrors } = action;
+
+        if (shouldCheckErrors) {
+          draftState.shouldCheckErrors = !state.shouldCheckErrors;
+        }
+
         const currentValue = get(state, ['modifiedData', ...keys], []);
 
         const relationPaths = recursivelyFindPathsBasedOnCondition(
@@ -76,30 +81,57 @@ const reducer = (state, action) =>
 
         set(draftState, ['modifiedData', ...keys], newValue);
 
+        break;
+      }
+      case 'ADD_COMPONENT_TO_DYNAMIC_ZONE': {
+        const { keys, allComponents, componentLayoutData, shouldCheckErrors } = action;
+
+        draftState.modifiedDZName = keys[0];
+
         if (shouldCheckErrors) {
           draftState.shouldCheckErrors = !state.shouldCheckErrors;
         }
 
-        break;
-      }
-      case 'ADD_COMPONENT_TO_DYNAMIC_ZONE': {
-        draftState.modifiedDZName = action.keys[0];
+        const currentValue = get(state, ['modifiedData', ...keys], []);
 
-        if (action.shouldCheckErrors) {
-          draftState.shouldCheckErrors = !state.shouldCheckErrors;
-        }
+        const relationPaths = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'relation'
+        )(componentLayoutData.attributes);
+
+        const repeatableFields = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'component' && value.repeatable
+        )(componentLayoutData.attributes);
 
         const defaultDataStructure = {
-          ...state.componentsDataStructure[action.componentUid],
-          __component: action.componentUid,
+          ...state.componentsDataStructure[componentLayoutData.componentUid],
+          __component: componentLayoutData.uid,
         };
 
-        const currentValue = get(state, ['modifiedData', ...action.keys], null);
-        const updatedValue = currentValue
-          ? [...currentValue, defaultDataStructure]
-          : [defaultDataStructure];
+        console.log(defaultDataStructure, componentLayoutData);
 
-        set(draftState, ['modifiedData', ...action.keys], updatedValue);
+        const componentDataStructure = relationPaths.reduce((acc, current) => {
+          const [componentName] = current.split('.');
+
+          /**
+           * Why do we do this? Because if a repeatable component
+           * has another repeatable component inside of it we
+           * don't need to attach the array at this point because that will be
+           * done again deeper in the nest.
+           */
+          if (!repeatableFields.includes(componentName)) {
+            set(acc, current, []);
+          }
+
+          return acc;
+        }, defaultDataStructure);
+
+        const newValue = Array.isArray(currentValue)
+          ? [...currentValue, componentDataStructure]
+          : [componentDataStructure];
+
+        set(draftState, ['modifiedData', ...keys], newValue);
 
         break;
       }
@@ -175,7 +207,12 @@ const reducer = (state, action) =>
        * but also every time you press publish.
        */
       case 'INIT_FORM': {
-        const { initialValues, relationalFields = [], repeatableFields = [] } = action;
+        const {
+          initialValues,
+          relationalFields = [],
+          repeatableFields = [],
+          dynamicZones = [],
+        } = action;
 
         /**
          * You can't mutate an actions value.
@@ -184,6 +221,8 @@ const reducer = (state, action) =>
          * are a reference.
          */
         const data = cloneDeep(initialValues);
+
+        console.log('data', initialValues);
 
         /**
          * relationalFields won't be an array which is what we're expecting
@@ -202,9 +241,12 @@ const reducer = (state, action) =>
                * will have data in them correlating to the names of the relational fields.
                */
               set(acc, componentName, get(state.modifiedData, componentName));
-            } else if (repeatableFields.includes(componentName)) {
+            } else if (
+              repeatableFields.includes(componentName) ||
+              dynamicZones.includes(componentName)
+            ) {
               /**
-               * if the componentName is a repeatable field we collect the list of paths e.g.
+               * if the componentName is a repeatable field or dynamic zone we collect the list of paths e.g.
                * ["repeatable_single_component_relation","categories"] and then reduce this
                * recursively
                */
@@ -216,6 +258,8 @@ const reducer = (state, action) =>
 
             return acc;
           }, data);
+
+        console.log('mergeDataWithPreparedRelations', mergeDataWithPreparedRelations);
 
         draftState.initialData = mergeDataWithPreparedRelations;
         draftState.modifiedData = mergeDataWithPreparedRelations;

@@ -113,9 +113,10 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
         }
 
         case 'dynamiczone':
-          cleanedData = value.map((componentData) => {
+          cleanedData = value.map((componentData, index) => {
             const subCleanedData = recursiveCleanData(
               componentData,
+              oldValue[index],
               componentsSchema[componentData.__component]
             );
 

@@ -699,6 +699,10 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it.todo('repeatable zones');
+
+    it.todo('dynamic zone');
   });
 
   describe('MOVE_COMPONENT_FIELD', () => {
