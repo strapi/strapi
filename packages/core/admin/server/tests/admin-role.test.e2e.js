@@ -82,7 +82,7 @@ describe('Role CRUD End to End', () => {
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body.data)).toBe(true);
-      expect(res.body.data).toHaveLength(5);
+      expect(res.body.data).toHaveLength(6);
       res.body.data
         .filter((p) => !p.action.includes('plugin::upload'))
         .forEach((permission) => {
@@ -98,7 +98,7 @@ describe('Role CRUD End to End', () => {
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body.data)).toBe(true);
-      expect(res.body.data).toHaveLength(5);
+      expect(res.body.data).toHaveLength(6);
       res.body.data
         .filter((p) => !p.action.includes('plugin::upload'))
         .forEach((permission) => {
