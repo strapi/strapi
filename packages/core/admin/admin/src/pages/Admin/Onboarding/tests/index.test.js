@@ -2,7 +2,11 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faFile, faBook } from '@fortawesome/free-solid-svg-icons';
 import Onboarding from '../index';
+
+library.add(faBook, faFile);
 
 jest.mock('../../../../hooks', () => ({
   useConfigurations: jest.fn(() => {
