@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTracking } from '@strapi/helper-plugin';
 
 import { stringify } from 'qs';
+import { useConfig } from './useConfig';
 
 const useModalQueryParams = (initialState) => {
   const { trackUsage } = useTracking();
+  const {
+    config: { isLoading, isError, data: config },
+  } = useConfig();
+
   const [queryObject, setQueryObject] = useState({
     page: 1,
     sort: 'updatedAt:DESC',
@@ -14,6 +19,17 @@ const useModalQueryParams = (initialState) => {
     },
     ...initialState,
   });
+
+  useEffect(() => {
+    if (isLoading || isError) {
+      return;
+    }
+    setQueryObject((prevQuery) => ({
+      ...prevQuery,
+      sort: config.sort,
+      pageSize: config.pageSize,
+    }));
+  }, [isLoading, isError, config]);
 
   const handleChangeFilters = (nextFilters) => {
     trackUsage('didFilterMediaLibraryElements', {
