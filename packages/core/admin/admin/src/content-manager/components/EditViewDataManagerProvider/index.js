@@ -146,7 +146,6 @@ const EditViewDataManagerProvider = ({
 
   useEffect(() => {
     if (initialValues && currentContentTypeLayout?.attributes) {
-      console.log({ currentContentTypeLayout: currentContentTypeLayout.attributes, components });
       /**
        * This will return an array of paths:
        * ['many_to_one', 'one_to_many', 'one_to_one']
@@ -167,8 +166,6 @@ const EditViewDataManagerProvider = ({
         components,
         (value) => value.type === 'dynamiczone'
       )(currentContentTypeLayout.attributes);
-
-      console.log(relationalFields, repeatableFields, dynamicZones);
 
       dispatch({
         type: 'INIT_FORM',

@@ -5,7 +5,11 @@ import set from 'lodash/set';
 import take from 'lodash/take';
 import cloneDeep from 'lodash/cloneDeep';
 
-import { findLeafByPath, moveFields, recursivelyFindPathsBasedOnCondition } from './utils';
+import {
+  findLeafByPathAndReplace,
+  moveFields,
+  recursivelyFindPathsBasedOnCondition,
+} from './utils';
 import { getMaxTempKey } from '../../utils';
 
 const initialState = {
@@ -35,6 +39,7 @@ const reducer = (state, action) =>
 
         break;
       }
+      case 'ADD_COMPONENT_TO_DYNAMIC_ZONE':
       case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
         const { keys, allComponents, componentLayoutData, shouldCheckErrors } = action;
 
@@ -42,58 +47,23 @@ const reducer = (state, action) =>
           draftState.shouldCheckErrors = !state.shouldCheckErrors;
         }
 
-        const currentValue = get(state, ['modifiedData', ...keys], []);
-
-        const relationPaths = recursivelyFindPathsBasedOnCondition(
-          allComponents,
-          (value) => value.type === 'relation'
-        )(componentLayoutData.attributes);
-
-        const repeatableFields = recursivelyFindPathsBasedOnCondition(
-          allComponents,
-          (value) => value.type === 'component' && value.repeatable
-        )(componentLayoutData.attributes);
-
-        const defaultDataStructure = {
-          ...state.componentsDataStructure[componentLayoutData.componentUid],
-          __temp_key__: getMaxTempKey(currentValue) + 1,
-        };
-
-        const componentDataStructure = relationPaths.reduce((acc, current) => {
-          const [componentName] = current.split('.');
-
-          /**
-           * Why do we do this? Because if a repeatable component
-           * has another repeatable component inside of it we
-           * don't need to attach the array at this point because that will be
-           * done again deeper in the nest.
-           */
-          if (!repeatableFields.includes(componentName)) {
-            set(acc, current, []);
-          }
-
-          return acc;
-        }, defaultDataStructure);
-
-        const newValue = Array.isArray(currentValue)
-          ? [...currentValue, componentDataStructure]
-          : [componentDataStructure];
-
-        set(draftState, ['modifiedData', ...keys], newValue);
-
-        break;
-      }
-      case 'ADD_COMPONENT_TO_DYNAMIC_ZONE': {
-        const { keys, allComponents, componentLayoutData, shouldCheckErrors } = action;
-
-        draftState.modifiedDZName = keys[0];
-
-        if (shouldCheckErrors) {
-          draftState.shouldCheckErrors = !state.shouldCheckErrors;
+        if (action.type === 'ADD_COMPONENT_TO_DYNAMIC_ZONE') {
+          draftState.modifiedDZName = keys[0];
         }
 
         const currentValue = get(state, ['modifiedData', ...keys], []);
 
+        const defaultDataStructure =
+          action.type === 'ADD_COMPONENT_TO_DYNAMIC_ZONE'
+            ? {
+                ...state.componentsDataStructure[componentLayoutData.componentUid],
+                __component: componentLayoutData.uid,
+              }
+            : {
+                ...state.componentsDataStructure[componentLayoutData.componentUid],
+                __temp_key__: getMaxTempKey(currentValue) + 1,
+              };
+
         const relationPaths = recursivelyFindPathsBasedOnCondition(
           allComponents,
           (value) => value.type === 'relation'
@@ -103,13 +73,6 @@ const reducer = (state, action) =>
           allComponents,
           (value) => value.type === 'component' && value.repeatable
         )(componentLayoutData.attributes);
-
-        const defaultDataStructure = {
-          ...state.componentsDataStructure[componentLayoutData.componentUid],
-          __component: componentLayoutData.uid,
-        };
-
-        console.log(defaultDataStructure, componentLayoutData);
 
         const componentDataStructure = relationPaths.reduce((acc, current) => {
           const [componentName] = current.split('.');
@@ -135,6 +98,7 @@ const reducer = (state, action) =>
 
         break;
       }
+
       case 'LOAD_RELATION': {
         const initialDataPath = ['initialData', ...action.keys];
         const modifiedDataPath = ['modifiedData', ...action.keys];
@@ -222,8 +186,6 @@ const reducer = (state, action) =>
          */
         const data = cloneDeep(initialValues);
 
-        console.log('data', initialValues);
-
         /**
          * relationalFields won't be an array which is what we're expecting
          * Therefore we reset these bits of state to the correct data type
@@ -250,7 +212,7 @@ const reducer = (state, action) =>
                * ["repeatable_single_component_relation","categories"] and then reduce this
                * recursively
                */
-              const findleaf = findLeafByPath(currentPaths.slice(-1)[0]);
+              const findleaf = findLeafByPathAndReplace(currentPaths.slice(-1)[0], []);
               currentPaths.reduce(findleaf, acc);
             } else {
               set(acc, currentPaths, []);
@@ -258,8 +220,6 @@ const reducer = (state, action) =>
 
             return acc;
           }, data);
-
-        console.log('mergeDataWithPreparedRelations', mergeDataWithPreparedRelations);
 
         draftState.initialData = mergeDataWithPreparedRelations;
         draftState.modifiedData = mergeDataWithPreparedRelations;
