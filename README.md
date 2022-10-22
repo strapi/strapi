@@ -37,7 +37,7 @@
 
 <br>
 
-Strapi is a free and open-source headless CMS delivering your content anywhere you need.
+Strapi is a free and open-source headless CMS delivering your content anywhere you need .
 
 - **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
 - **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Render, Netlify, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
