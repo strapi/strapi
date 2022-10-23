@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Typography } from '@strapi/design-system/Typography';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 import Media from './Media';
 import MultipleMedias from './MultipleMedias';
 import RelationMultiple from './RelationMultiple';
@@ -54,6 +55,15 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
       }
 
       return <SingleComponent value={content} metadatas={metadatas} />;
+
+    case 'string':
+      return (
+        <Tooltip description={content}>
+          <TypographyMaxWidth ellipsis textColor="neutral800">
+            <CellValue type={type} value={content} />
+          </TypographyMaxWidth>
+        </Tooltip>
+      );
 
     default:
       return (
