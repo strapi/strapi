@@ -45,9 +45,10 @@ const resizeFileTo = async (file, options, { name, hash }) => {
   const filePath = join(file.tmpWorkingDirectory, hash);
   const { sizeOptimization = false } = await getService('upload').getSettings();
   const { format } = await getMetadata(file);
+  const formatOptions = strapi.config.get(`plugin.upload.formats[${format}]`, { quality: sizeOptimization ? 80 : 100 });
   const transformer = sharp();
 
-  transformer[format]({ quality: sizeOptimization ? 80 : 100 });
+  transformer[format](formatOptions);
 
   await writeStreamToFile(file.getStream().pipe(transformer.resize(options)), filePath);
   const newFile = {
