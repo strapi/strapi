@@ -230,9 +230,14 @@ paths:
     post:
       tags:
         - Relational fields
-      description: Fetch list of possible related content
+      description: Get available entries to add to a relational field
       parameters:
-        - $ref: '#/components/parameters/model'
+        - in: path
+          name: model
+          schema:
+            type: string
+          required: true
+          description: Content type uid or component uid depending on what holds the relation
         - in: path
           name: targetField
           schema:
@@ -240,20 +245,42 @@ paths:
           required: true
           description: Name of the field in the model that holds the relation
         - in: query
-          name: _component
+          name: entityId
           schema:
             type: string
-          description: Component uid if the targetField is in a component
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                idsToOmit:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/id'
+          description: Id of the entry or the component, used to omit already existing relations (if the entity already exists)
+        - in: query
+          name: idsToOmit
+          schema:
+            type: array
+            items:
+              type: string
+              name: id
+          description: Used to omit ids of client-side selected relations (for entities that haven’t been created in the DB yet)
+        - in: query
+          name: idsToInclude
+          schema:
+            type: array
+            items:
+              type: string
+              name: id
+          description: Used to include ids of client-side unselected relations (for entities that haven’t been removed from the DB yet)
+        - in: query
+          name: _q
+          schema:
+            type: string
+          description: Search among the available relations (against the main field only)
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Page number to fetch
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          description: Page size to fetch
+
       responses:
         200:
           description: Returns a list of sanitized entries based of the relational attribute info
@@ -264,23 +291,105 @@ paths:
                 items:
                   type: object
                   properties:
-                    id:
-                      $ref: '#/components/schemas/id'
-                    '[primaryKey]':
-                      oneOf:
-                        - type: string
-                        - type: integer
-                    '[mainField]':
-                      type: string
-                      description: Value of the mainField of the entry
-                    publishedAt:
-                      type: date
+                    results:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            $ref: '#/components/schemas/id'
+                          '[mainField]':
+                            type: string
+                            description: Value of the mainField of the entry
+                          publishedAt:
+                            type: date
+                    pagination:
+                      $ref: '#/components/schemas/pagination'
+
+  /content-manager/relations/{model}/{id}/{targetField}:
+    post:
+      tags:
+        - Relational fields
+      description: Get existing entries for a relational field of an entry
+      parameters:
+        - in: path
+          name: model
+          schema:
+            type: string
+          required: true
+          description: Content type uid or component uid depending on what holds the relation
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Id of the entity (entry or component) that holds the relation
+        - in: path
+          name: targetField
+          schema:
+            type: string
+          required: true
+          description: Name of the field in the model that holds the relation
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Page number to fetch
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          description: Page size to fetch
+
+      responses:
+        200:
+          description: Returns a list of sanitized entries based of the relational attribute info
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - type: object
+                      properties:
+                        results:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                $ref: '#/components/schemas/id'
+                              '[mainField]':
+                                type: string
+                                description: Value of the mainField of the entry
+                              publishedAt:
+                                type: date
+                        pagination:
+                          $ref: '#/components/schemas/pagination'
+                    - type: object
+                      properties:
+                        data:
+                          type: object
+                          properties:
+                            id:
+                              $ref: '#/components/schemas/id'
+                            '[mainField]':
+                              type: string
+                              description: Value of the mainField of the entry
+                            publishedAt:
+                              type: date
+
   # Collection type
   /content-manager/collection-types/{model}:
     get:
       tags:
         - Collection Types content management
-      description: Get a list of entries
+      description: |
+        Get a list of entries
+
+        All components and dynamic zones along with relations (1 level only) are automatically populated.
+
+        xToMany relations are counted (exemple: { count: 4 }).
       parameters:
         - $ref: '#/components/parameters/model'
       responses:
@@ -342,7 +451,12 @@ paths:
     get:
       tags:
         - Collection Types content management
-      description: Get one entry
+      description: |
+        Get one entry
+
+        All components and dynamic zones along with relations (1 level only) are automatically populated.
+
+        All relations are counted (exemple: { count: 4 }).
       parameters:
         - $ref: '#/components/parameters/model'
         - $ref: '#/components/parameters/entity-id'
@@ -421,6 +535,23 @@ paths:
                     properties:
                       publishedAt:
                         type: datetime
+  /content-manager/collection-types/{model}/{id}/actions/numberOfDraftRelations:
+    get:
+      tags:
+        - Collection Types content management
+      description: Get the number of relations of that entry that are in draft
+      parameters:
+        - $ref: '#/components/parameters/model'
+        - $ref: '#/components/parameters/entity-id'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: integer
   # Single type
   /content-manager/single-types/{model}:
     get:
@@ -501,13 +632,29 @@ paths:
                       publishedAt:
                         type: datetime
                         nullable: true
+  /content-manager/single-types/{model}/actions/numberOfDraftRelations:
+    get:
+      tags:
+        - Single Types content management
+      description: Get the number of relations of that entry that are in draft
+      parameters:
+        - $ref: '#/components/parameters/model'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: integer
 
 components:
   schemas:
     id:
       oneOf:
-        - type: string
         - type: integer
+        - type: string
 
     pagination:
       type: object
