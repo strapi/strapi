@@ -1,9 +1,9 @@
 'use strict';
 
-const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createContentAPIRequest } = require('../../../../../test/helpers/request');
-const modelsUtils = require('../../../../../test/helpers/models');
+const { createTestBuilder } = require('../../../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
+const { createAuthRequest } = require('../../../../../../test/helpers/request');
+const modelsUtils = require('../../../../../../test/helpers/models');
 
 let strapi;
 let rq;
@@ -112,24 +112,33 @@ const shopModel = {
   pluralName: 'shops',
 };
 
-const createEntry = async (pluralName, data, populate) => {
+const createEntry = async (singularName, data, populate) => {
   const { body } = await rq({
     method: 'POST',
-    url: `/${pluralName}`,
-    body: { data },
+    url: `/content-manager/collection-types/api::${singularName}.${singularName}`,
+    body: data,
     qs: { populate },
   });
-  return body.data;
+  return body;
 };
 
-const updateEntry = async (pluralName, id, data, populate) => {
+const updateEntry = async (singularName, id, data, populate) => {
   const { body } = await rq({
     method: 'PUT',
-    url: `/${pluralName}/${id}`,
-    body: { data },
+    url: `/content-manager/collection-types/api::${singularName}.${singularName}/${id}`,
+    body: data,
     qs: { populate },
   });
-  return body.data;
+  return body;
+};
+
+const getRelations = async (uid, field, id) => {
+  const res = await rq({
+    method: 'GET',
+    url: `/content-manager/relations/${uid}/${id}/${field}`,
+  });
+
+  return res.body;
 };
 
 describe('Relations', () => {
@@ -141,11 +150,11 @@ describe('Relations', () => {
     await modelsUtils.modifyComponent(compo(true));
 
     strapi = await createStrapiInstance();
-    rq = await createContentAPIRequest({ strapi });
+    rq = await createAuthRequest({ strapi });
 
-    const createdProduct1 = await createEntry('products', { name: 'Skate' });
-    const createdProduct2 = await createEntry('products', { name: 'Candle' });
-    const createdProduct3 = await createEntry('products', { name: 'Mug' });
+    const createdProduct1 = await createEntry('product', { name: 'Skate' });
+    const createdProduct2 = await createEntry('product', { name: 'Candle' });
+    const createdProduct3 = await createEntry('product', { name: 'Mug' });
 
     data.products.push(createdProduct1);
     data.products.push(createdProduct2);
@@ -173,7 +182,7 @@ describe('Relations', () => {
           const manyRelations = mode === 'object' ? [{ id: id1 }, { id: id2 }] : [id1, id2];
 
           const shop = await createEntry(
-            'shops',
+            'shop',
             {
               name: 'Cazotte Shop',
               products_ow: { [connectOrSet]: oneRelation },
@@ -190,20 +199,30 @@ describe('Relations', () => {
             populateShop
           );
 
-          expect(shop).toMatchObject({
-            attributes: {
-              myCompo: {
-                compo_products_mw: { data: [{ id: id1 }, { id: id2 }] },
-                compo_products_ow: { data: { id: id1 } },
-              },
-              products_mm: { data: [{ id: id1 }, { id: id2 }] },
-              products_mo: { data: { id: id1 } },
-              products_mw: { data: [{ id: id1 }, { id: id2 }] },
-              products_om: { data: [{ id: id1 }, { id: id2 }] },
-              products_oo: { data: { id: id1 } },
-              products_ow: { data: { id: id1 } },
-            },
-          });
+          let res;
+          res = await getRelations('default.compo', 'compo_products_mw', shop.myCompo.id);
+          expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+          res = await getRelations('default.compo', 'compo_products_ow', shop.myCompo.id);
+          expect(res.data).toMatchObject({ id: id1 });
+
+          res = await getRelations('api::shop.shop', 'products_mm', shop.id);
+          expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+          res = await getRelations('api::shop.shop', 'products_mo', shop.id);
+          expect(res.data).toMatchObject({ id: id1 });
+
+          res = await getRelations('api::shop.shop', 'products_mw', shop.id);
+          expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+          res = await getRelations('api::shop.shop', 'products_om', shop.id);
+          expect(res.results).toMatchObject([{ id: id2 }, { id: id1 }]);
+
+          res = await getRelations('api::shop.shop', 'products_oo', shop.id);
+          expect(res.data).toMatchObject({ id: id1 });
+
+          res = await getRelations('api::shop.shop', 'products_ow', shop.id);
+          expect(res.data).toMatchObject({ id: id1 });
         });
 
         test('In reversed order', async () => {
@@ -212,7 +231,7 @@ describe('Relations', () => {
           manyRelations.reverse();
 
           const shop = await createEntry(
-            'shops',
+            'shop',
             {
               name: 'Cazotte Shop',
               products_ow: { [connectOrSet]: oneRelation },
@@ -229,20 +248,30 @@ describe('Relations', () => {
             populateShop
           );
 
-          expect(shop).toMatchObject({
-            attributes: {
-              myCompo: {
-                compo_products_mw: { data: [{ id: id2 }, { id: id1 }] },
-                compo_products_ow: { data: { id: id1 } },
-              },
-              products_mm: { data: [{ id: id2 }, { id: id1 }] },
-              products_mo: { data: { id: id1 } },
-              products_mw: { data: [{ id: id2 }, { id: id1 }] },
-              products_om: { data: [{ id: id2 }, { id: id1 }] },
-              products_oo: { data: { id: id1 } },
-              products_ow: { data: { id: id1 } },
-            },
-          });
+          let res;
+          res = await getRelations('default.compo', 'compo_products_mw', shop.myCompo.id);
+          expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }]);
+
+          res = await getRelations('default.compo', 'compo_products_ow', shop.myCompo.id);
+          expect(res.data).toMatchObject({ id: id1 });
+
+          res = await getRelations('api::shop.shop', 'products_mm', shop.id);
+          expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }]);
+
+          res = await getRelations('api::shop.shop', 'products_mo', shop.id);
+          expect(res.data).toMatchObject({ id: id1 });
+
+          res = await getRelations('api::shop.shop', 'products_mw', shop.id);
+          expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }]);
+
+          res = await getRelations('api::shop.shop', 'products_om', shop.id);
+          expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }]);
+
+          res = await getRelations('api::shop.shop', 'products_oo', shop.id);
+          expect(res.data).toMatchObject({ id: id1 });
+
+          res = await getRelations('api::shop.shop', 'products_ow', shop.id);
+          expect(res.data).toMatchObject({ id: id1 });
         });
       });
     }
@@ -255,7 +284,7 @@ describe('Relations', () => {
     ])('ids being %s', (name, mode) => {
       test('Adding id3', async () => {
         const createdShop = await createEntry(
-          'shops',
+          'shop',
           {
             name: 'Cazotte Shop',
             products_ow: { connect: [id1] },
@@ -275,7 +304,7 @@ describe('Relations', () => {
         const relationToAdd = mode === 'object' ? [{ id: id3 }] : [id3];
 
         const updatedShop = await updateEntry(
-          'shops',
+          'shop',
           createdShop.id,
           {
             name: 'Cazotte Shop',
@@ -286,7 +315,7 @@ describe('Relations', () => {
             products_mm: { connect: relationToAdd },
             products_mw: { connect: relationToAdd },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.myCompo.id,
               compo_products_ow: { connect: relationToAdd },
               compo_products_mw: { connect: relationToAdd },
             },
@@ -294,25 +323,35 @@ describe('Relations', () => {
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
-          attributes: {
-            myCompo: {
-              compo_products_mw: { data: [{ id: id1 }, { id: id2 }, { id: id3 }] },
-              compo_products_ow: { data: { id: id3 } },
-            },
-            products_mm: { data: [{ id: id1 }, { id: id2 }, { id: id3 }] },
-            products_mo: { data: { id: id3 } },
-            products_mw: { data: [{ id: id1 }, { id: id2 }, { id: id3 }] },
-            products_om: { data: [{ id: id1 }, { id: id2 }, { id: id3 }] },
-            products_oo: { data: { id: id3 } },
-            products_ow: { data: { id: id3 } },
-          },
-        });
+        let res;
+        res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }, { id: id1 }]);
+
+        res = await getRelations('default.compo', 'compo_products_ow', updatedShop.myCompo.id);
+        expect(res.data).toMatchObject({ id: id3 });
+
+        res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }, { id: id1 }]);
+
+        res = await getRelations('api::shop.shop', 'products_mo', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id3 });
+
+        res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }, { id: id1 }]);
+
+        res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }, { id: id1 }]);
+
+        res = await getRelations('api::shop.shop', 'products_oo', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id3 });
+
+        res = await getRelations('api::shop.shop', 'products_ow', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id3 });
       });
 
       test('Adding id3 & removing id1', async () => {
         const createdShop = await createEntry(
-          'shops',
+          'shop',
           {
             name: 'Cazotte Shop',
             products_ow: { connect: [id1] },
@@ -333,7 +372,7 @@ describe('Relations', () => {
         const relationToRemove = mode === 'object' ? [{ id: id1 }] : [id1];
 
         const updatedShop = await updateEntry(
-          'shops',
+          'shop',
           createdShop.id,
           {
             name: 'Cazotte Shop',
@@ -344,7 +383,7 @@ describe('Relations', () => {
             products_mm: { connect: relationToAdd, disconnect: relationToRemove },
             products_mw: { connect: relationToAdd, disconnect: relationToRemove },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.myCompo.id,
               compo_products_ow: { connect: relationToAdd, disconnect: relationToRemove },
               compo_products_mw: { connect: relationToAdd, disconnect: relationToRemove },
             },
@@ -352,25 +391,35 @@ describe('Relations', () => {
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
-          attributes: {
-            myCompo: {
-              compo_products_mw: { data: [{ id: id2 }, { id: id3 }] },
-              compo_products_ow: { data: { id: id3 } },
-            },
-            products_mm: { data: [{ id: id2 }, { id: id3 }] },
-            products_mo: { data: { id: id3 } },
-            products_mw: { data: [{ id: id2 }, { id: id3 }] },
-            products_om: { data: [{ id: id2 }, { id: id3 }] },
-            products_oo: { data: { id: id3 } },
-            products_ow: { data: { id: id3 } },
-          },
-        });
+        let res;
+        res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }]);
+
+        res = await getRelations('default.compo', 'compo_products_ow', updatedShop.myCompo.id);
+        expect(res.data).toMatchObject({ id: id3 });
+
+        res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }]);
+
+        res = await getRelations('api::shop.shop', 'products_mo', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id3 });
+
+        res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }]);
+
+        res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }]);
+
+        res = await getRelations('api::shop.shop', 'products_oo', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id3 });
+
+        res = await getRelations('api::shop.shop', 'products_ow', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id3 });
       });
 
       test('Adding id3 & removing id1, id3 (should still add id3)', async () => {
         const createdShop = await createEntry(
-          'shops',
+          'shop',
           {
             name: 'Cazotte Shop',
             products_ow: { connect: [id1] },
@@ -391,7 +440,7 @@ describe('Relations', () => {
         const relationToRemove = mode === 'object' ? [{ id: id1 }, { id: id3 }] : [id1, id3];
 
         const updatedShop = await updateEntry(
-          'shops',
+          'shop',
           createdShop.id,
           {
             name: 'Cazotte Shop',
@@ -402,7 +451,7 @@ describe('Relations', () => {
             products_mm: { connect: relationToAdd, disconnect: relationToRemove },
             products_mw: { connect: relationToAdd, disconnect: relationToRemove },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.myCompo.id,
               compo_products_ow: { connect: relationToAdd, disconnect: relationToRemove },
               compo_products_mw: { connect: relationToAdd, disconnect: relationToRemove },
             },
@@ -410,25 +459,35 @@ describe('Relations', () => {
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
-          attributes: {
-            myCompo: {
-              compo_products_mw: { data: [{ id: id2 }, { id: id3 }] },
-              compo_products_ow: { data: { id: id3 } },
-            },
-            products_mm: { data: [{ id: id2 }, { id: id3 }] },
-            products_mo: { data: { id: id3 } },
-            products_mw: { data: [{ id: id2 }, { id: id3 }] },
-            products_om: { data: [{ id: id2 }, { id: id3 }] },
-            products_oo: { data: { id: id3 } },
-            products_ow: { data: { id: id3 } },
-          },
-        });
+        let res;
+        res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }]);
+
+        res = await getRelations('default.compo', 'compo_products_ow', updatedShop.myCompo.id);
+        expect(res.data).toMatchObject({ id: id3 });
+
+        res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }]);
+
+        res = await getRelations('api::shop.shop', 'products_mo', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id3 });
+
+        res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }]);
+
+        res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id3 }, { id: id2 }]);
+
+        res = await getRelations('api::shop.shop', 'products_oo', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id3 });
+
+        res = await getRelations('api::shop.shop', 'products_ow', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id3 });
       });
 
       test('Change relation order from id1, id2, id3 to id3, id2, id1', async () => {
         const createdShop = await createEntry(
-          'shops',
+          'shop',
           {
             name: 'Cazotte Shop',
             products_om: { connect: [id1, id2, id3] },
@@ -445,7 +504,7 @@ describe('Relations', () => {
           mode === 'object' ? [{ id: id3 }, { id: id2 }, { id: id1 }] : [id3, id2, id1];
 
         const updatedShop = await updateEntry(
-          'shops',
+          'shop',
           createdShop.id,
           {
             name: 'Cazotte Shop',
@@ -453,28 +512,30 @@ describe('Relations', () => {
             products_mm: { connect: relationToChange },
             products_mw: { connect: relationToChange },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.myCompo.id,
               compo_products_mw: { connect: relationToChange },
             },
           },
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
-          attributes: {
-            myCompo: {
-              compo_products_mw: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
-            },
-            products_mm: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
-            products_mw: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
-            products_om: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
-          },
-        });
+        let res;
+        res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
+        expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }, { id: id3 }]);
+
+        res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }, { id: id3 }]);
+
+        res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }, { id: id3 }]);
+
+        res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }, { id: id3 }]);
       });
 
       test('Change relation order by putting id2 at the end', async () => {
         const createdShop = await createEntry(
-          'shops',
+          'shop',
           {
             name: 'Cazotte Shop',
             products_om: { connect: [id1, id2, id3] },
@@ -490,7 +551,7 @@ describe('Relations', () => {
         const relationToChange = mode === 'object' ? [{ id: id2 }] : [id2];
 
         const updatedShop = await updateEntry(
-          'shops',
+          'shop',
           createdShop.id,
           {
             name: 'Cazotte Shop',
@@ -498,28 +559,30 @@ describe('Relations', () => {
             products_mm: { connect: relationToChange },
             products_mw: { connect: relationToChange },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.myCompo.id,
               compo_products_mw: { connect: relationToChange },
             },
           },
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
-          attributes: {
-            myCompo: {
-              compo_products_mw: { data: [{ id: id1 }, { id: id3 }, { id: id2 }] },
-            },
-            products_mm: { data: [{ id: id1 }, { id: id3 }, { id: id2 }] },
-            products_mw: { data: [{ id: id1 }, { id: id3 }, { id: id2 }] },
-            products_om: { data: [{ id: id1 }, { id: id3 }, { id: id2 }] },
-          },
-        });
+        let res;
+        res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
+        expect(res.results).toMatchObject([{ id: id2 }, { id: id3 }, { id: id1 }]);
+
+        res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id2 }, { id: id3 }, { id: id1 }]);
+
+        res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id2 }, { id: id3 }, { id: id1 }]);
+
+        res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id2 }, { id: id3 }, { id: id1 }]);
       });
 
       test('Change relation order by putting id2, id1 at the end', async () => {
         const createdShop = await createEntry(
-          'shops',
+          'shop',
           {
             name: 'Cazotte Shop',
             products_om: { connect: [id1, id2, id3] },
@@ -535,7 +598,7 @@ describe('Relations', () => {
         const relationToChange = mode === 'object' ? [{ id: id2 }, { id: id1 }] : [id2, id1];
 
         const updatedShop = await updateEntry(
-          'shops',
+          'shop',
           createdShop.id,
           {
             name: 'Cazotte Shop',
@@ -543,23 +606,25 @@ describe('Relations', () => {
             products_mm: { connect: relationToChange },
             products_mw: { connect: relationToChange },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.myCompo.id,
               compo_products_mw: { connect: relationToChange },
             },
           },
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
-          attributes: {
-            myCompo: {
-              compo_products_mw: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
-            },
-            products_mm: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
-            products_mw: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
-            products_om: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
-          },
-        });
+        let res;
+        res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
+        expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }, { id: id3 }]);
+
+        res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }, { id: id3 }]);
+
+        res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }, { id: id3 }]);
+
+        res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id1 }, { id: id2 }, { id: id3 }]);
       });
     });
   });
@@ -571,7 +636,7 @@ describe('Relations', () => {
     ])('ids being %s', (name, mode) => {
       test('Remove all relations id1, id2, id3', async () => {
         const createdShop = await createEntry(
-          'shops',
+          'shop',
           {
             name: 'Cazotte Shop',
             products_ow: { connect: [id1] },
@@ -593,7 +658,7 @@ describe('Relations', () => {
           mode === 'object' ? [{ id: id3 }, { id: id2 }, { id: id1 }] : [id3, id2, id1];
 
         const updatedShop = await updateEntry(
-          'shops',
+          'shop',
           createdShop.id,
           {
             name: 'Cazotte Shop',
@@ -604,7 +669,7 @@ describe('Relations', () => {
             products_mm: { disconnect: relationsToDisconnectMany },
             products_mw: { disconnect: relationsToDisconnectMany },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.myCompo.id,
               compo_products_ow: { disconnect: relationsToDisconnectOne },
               compo_products_mw: { disconnect: relationsToDisconnectMany },
             },
@@ -612,25 +677,35 @@ describe('Relations', () => {
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
-          attributes: {
-            myCompo: {
-              compo_products_ow: { data: null },
-              compo_products_mw: { data: [] },
-            },
-            products_ow: { data: null },
-            products_oo: { data: null },
-            products_mo: { data: null },
-            products_mm: { data: [] },
-            products_mw: { data: [] },
-            products_om: { data: [] },
-          },
-        });
+        let res;
+        res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
+        expect(res.results).toMatchObject([]);
+
+        res = await getRelations('default.compo', 'compo_products_ow', updatedShop.myCompo.id);
+        expect(res.data).toBe(null);
+
+        res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
+        expect(res.results).toMatchObject([]);
+
+        res = await getRelations('api::shop.shop', 'products_mo', updatedShop.id);
+        expect(res.data).toBe(null);
+
+        res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
+        expect(res.results).toMatchObject([]);
+
+        res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
+        expect(res.results).toMatchObject([]);
+
+        res = await getRelations('api::shop.shop', 'products_oo', updatedShop.id);
+        expect(res.data).toBe(null);
+
+        res = await getRelations('api::shop.shop', 'products_ow', updatedShop.id);
+        expect(res.data).toBe(null);
       });
 
       test("Remove relations that doesn't exist doesn't fail", async () => {
         const createdShop = await createEntry(
-          'shops',
+          'shop',
           {
             name: 'Cazotte Shop',
             products_ow: { connect: [id1] },
@@ -651,7 +726,7 @@ describe('Relations', () => {
           mode === 'object' ? [{ id: id3 }, { id: id2 }, { id: 9999 }] : [id3, id2, 9999];
 
         const updatedShop = await updateEntry(
-          'shops',
+          'shop',
           createdShop.id,
           {
             name: 'Cazotte Shop',
@@ -662,7 +737,7 @@ describe('Relations', () => {
             products_mm: { disconnect: relationsToDisconnectMany },
             products_mw: { disconnect: relationsToDisconnectMany },
             myCompo: {
-              id: createdShop.attributes.myCompo.id,
+              id: createdShop.myCompo.id,
               compo_products_ow: { disconnect: relationsToDisconnectMany },
               compo_products_mw: { disconnect: relationsToDisconnectMany },
             },
@@ -670,20 +745,30 @@ describe('Relations', () => {
           populateShop
         );
 
-        expect(updatedShop).toMatchObject({
-          attributes: {
-            myCompo: {
-              compo_products_ow: { data: { id: id1 } },
-              compo_products_mw: { data: [{ id: id1 }] },
-            },
-            products_ow: { data: { id: id1 } },
-            products_oo: { data: { id: id1 } },
-            products_mo: { data: { id: id1 } },
-            products_mm: { data: [{ id: id1 }] },
-            products_mw: { data: [{ id: id1 }] },
-            products_om: { data: [{ id: id1 }] },
-          },
-        });
+        let res;
+        res = await getRelations('default.compo', 'compo_products_mw', updatedShop.myCompo.id);
+        expect(res.results).toMatchObject([{ id: id1 }]);
+
+        res = await getRelations('default.compo', 'compo_products_ow', updatedShop.myCompo.id);
+        expect(res.data).toMatchObject({ id: id1 });
+
+        res = await getRelations('api::shop.shop', 'products_mm', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id1 }]);
+
+        res = await getRelations('api::shop.shop', 'products_mo', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id1 });
+
+        res = await getRelations('api::shop.shop', 'products_mw', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id1 }]);
+
+        res = await getRelations('api::shop.shop', 'products_om', updatedShop.id);
+        expect(res.results).toMatchObject([{ id: id1 }]);
+
+        res = await getRelations('api::shop.shop', 'products_oo', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id1 });
+
+        res = await getRelations('api::shop.shop', 'products_ow', updatedShop.id);
+        expect(res.data).toMatchObject({ id: id1 });
       });
     });
   });
