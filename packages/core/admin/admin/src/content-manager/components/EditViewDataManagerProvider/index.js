@@ -366,7 +366,6 @@ const EditViewDataManagerProvider = ({
           }
         }
       } catch (err) {
-        console.log(err);
         errors = {
           ...errors,
           ...getAPIInnerErrors(err, { getTrad }),
