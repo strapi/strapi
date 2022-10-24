@@ -9,6 +9,8 @@ const strapi = require('../../Strapi');
 
 const getDefaultExportBackupName = () => `strapi-backup`;
 
+const logger = console;
+
 module.exports = async (args) => {
   if (!args.output) {
     Object.assign(args, { output: getDefaultExportBackupName() });
@@ -34,14 +36,14 @@ module.exports = async (args) => {
 
   try {
     const result = await engine.transfer();
-    if (!result?.path) throw new Error('Export file not created');
-    console.log(
+    if (!result?.destination?.path) throw new Error('Export file not created');
+    logger.log(
       'Export process has been completed successfully! Export archive is in %s',
-      result.path
+      result.destination.path
     );
     process.exit(0);
   } catch (e) {
-    console.error('Export process failed unexpectedly:', e.toString());
+    logger.error('Export process failed unexpectedly:', e.toString());
     process.exit(1);
   }
 };
