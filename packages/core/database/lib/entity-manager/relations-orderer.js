@@ -29,11 +29,11 @@ const _ = require('lodash/fp');
  *   in the positional attributes & the last relation in the database.
  *
  */
-class FractionalOrderer {
+class RelationsOrderer {
   /**
-   * @param {*} initArr - array of relations to initialize the class with
-   * @param {*} idColumn - the column name of the id
-   * @param {*} orderColumn - the column name of the order
+   * @param {Array<*>} initArr - array of relations to initialize the class with
+   * @param {string} idColumn - the column name of the id
+   * @param {string} orderColumn - the column name of the order
    */
   constructor(initArr, idColumn, orderColumn) {
     this.arr = _.castArray(initArr || []).map((r) => ({
@@ -45,17 +45,17 @@ class FractionalOrderer {
 
   _updateRelationOrder(r) {
     let idx;
-    if (r.position.before) {
+    if (r.position?.before) {
       const { idx: _idx, relation } = this.findRelation(r.position.before);
       if (relation.init) r.order = relation.order - 0.5;
       else r.order = relation.order;
       idx = _idx;
-    } else if (r.position.after) {
+    } else if (r.position?.after) {
       const { idx: _idx, relation } = this.findRelation(r.position.after);
       if (relation.init) r.order = relation.order + 0.5;
       else r.order = relation.order;
       idx = _idx + 1;
-    } else if (r.position.start) {
+    } else if (r.position?.start) {
       r.order = 0.5;
       idx = 0;
     } else {
@@ -120,4 +120,4 @@ class FractionalOrderer {
   }
 }
 
-module.exports = FractionalOrderer;
+module.exports = RelationsOrderer;

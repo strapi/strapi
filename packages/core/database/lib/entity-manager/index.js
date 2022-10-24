@@ -38,7 +38,7 @@ const {
   deleteRelations,
   cleanOrderColumns,
 } = require('./regular-relations');
-const FractionalOrderer = require('./relationsOrderer');
+const FractionalOrderer = require('./relations-orderer');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
