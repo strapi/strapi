@@ -35,13 +35,13 @@
     "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
     "lint": "npm-run-all -p lint:code lint:css",
     "lint:code": "eslint .",
-    "lint:css": "stylelint packages/**/admin/src/**/*.js",
+    "lint:css": "stylelint packages/**/admin/src/**/*.{js,ts}",
     "lint:fix": "eslint --fix .",
     "lint:other": "npm run prettier:other -- --check",
     "format": "npm-run-all -p format:*",
     "format:code": "npm run prettier:code -- --write",
     "format:other": "npm run prettier:other -- --write",
-    "prettier:code": "prettier \"**/*.js\"",
+    "prettier:code": "prettier \"**/*.{js,ts}\"",
     "prettier:other": "prettier \"**/*.{md,css,scss,yaml,yml}\"",
     "test:clean": "rimraf ./coverage",
     "test:front": "npm run test:clean && cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -56,10 +56,10 @@
     "doc:api": "node scripts/open-api/serve.js"
   },
   "lint-staged": {
-    "*.{js,md,css,scss,yaml,yml}": [
+    "*.{js,ts,md,css,scss,yaml,yml}": [
       "prettier --write"
     ],
-    "*.js": [
+    "*.{js,ts}": [
       "eslint --fix"
     ]
   },

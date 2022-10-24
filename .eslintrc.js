@@ -7,15 +7,24 @@ const frontPaths = [
   'test/config/front/**/*.js',
 ];
 
+const backendRules = require('./.eslintrc.back.js');
+
 module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
   },
   overrides: [
     {
-      files: ['packages/**/*.js', 'test/**/*.js', 'scripts/**/*.js'],
+      files: [
+        'packages/**/*.js',
+        'test/**/*.js',
+        'scripts/**/*.js',
+        'packages/**/*.ts',
+        'test/**/*.ts',
+        'scripts/**/*.ts',
+      ],
       excludedFiles: frontPaths,
-      ...require('./.eslintrc.back.js'),
+      ...backendRules,
     },
     {
       files: frontPaths,
