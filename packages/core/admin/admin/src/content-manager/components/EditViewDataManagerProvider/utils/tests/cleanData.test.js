@@ -149,10 +149,10 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
     );
 
     const expected = {
-      singleComponentTest: { name: 'single', time: '11:38' },
+      singleComponentTest: { name: 'single', time: '11:38:00' },
       repComponentTest: [
-        { name: 'rep1', time: '11:39' },
-        { name: 'rep2', time: '11:40' },
+        { name: 'rep1', time: '11:39:00' },
+        { name: 'rep2', time: '11:40:00' },
       ],
     };
 
@@ -270,7 +270,14 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             },
           ],
         },
-        serverState: {},
+        serverState: {
+          dynamicZoneTest: [
+            {
+              __component: 'basic.rep',
+              time: '00:02',
+            },
+          ],
+        },
       },
       {
         attributes: {
@@ -291,7 +298,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       }
     );
 
-    const expected = { dynamicZoneTest: [{ __component: 'basic.rep', time: '00:02' }] };
+    const expected = { dynamicZoneTest: [{ __component: 'basic.rep', time: '00:02:00' }] };
 
     expect(result).toEqual(expected);
   });
