@@ -65,10 +65,8 @@ const deletePreviousAnyToOneRelations = async ({
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn } = joinTable;
 
-  if (!(isBidirectional(attribute) && isAnyToOne(attribute))) {
-    throw new Error(
-      'deletePreviousAnyToOneRelations can only be called for bidirectional anyToOne relations'
-    );
+  if (!isAnyToOne(attribute)) {
+    throw new Error('deletePreviousAnyToOneRelations can only be called for anyToOne relations');
   }
   // handling manyToOne
   if (isManyToAny(attribute)) {
