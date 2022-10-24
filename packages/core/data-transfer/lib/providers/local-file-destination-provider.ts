@@ -5,7 +5,7 @@ import { Duplex } from 'stream';
 import { chain, Writable } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import { IDestinationProvider, ProviderType, Stream } from '../../types';
+import type { IDestinationProvider, ProviderType, Stream } from '../../types';
 // import { encrypt } from '../encryption';
 
 export interface ILocalFileDestinationProviderOptions {
@@ -16,10 +16,11 @@ export interface ILocalFileDestinationProviderOptions {
   encryptionKey?: string;
 }
 
-export const createLocalFileDestinationProvider = (options: ILocalFileDestinationProviderOptions) => {
+export const createLocalFileDestinationProvider = (
+  options: ILocalFileDestinationProviderOptions
+) => {
   return new LocalFileDestinationProvider(options);
 };
-
 
 class LocalFileDestinationProvider implements IDestinationProvider {
   name: string = 'destination::local-file';
@@ -180,7 +181,7 @@ const createMultiFilesWriteStream = (
 
       // Check that by adding this new chunk of data, we
       // are not going to reach the maximum file size.
-      if (maxSize && (fileSize + chunk.length > maxSize)) {
+      if (maxSize && fileSize + chunk.length > maxSize) {
         // Update the counters' value
         fileIndex++;
         fileSize = 0;
