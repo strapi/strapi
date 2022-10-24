@@ -859,7 +859,7 @@ const createEntityManager = (db) => {
                 if (!adjacentRelations.find((r) => r[orderColumnName] === maxOrder.max)) {
                   adjacentRelations.push({
                     [inverseJoinColumn.name]: -1,
-                    [joinTable.orderColumnName]: maxOrder.max,
+                    [joinTable.orderColumnName]: maxOrder.max || 0,
                   });
                 }
 
