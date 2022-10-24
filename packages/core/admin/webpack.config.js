@@ -13,6 +13,7 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
+const createPluginsExcludePath = require('./utils/create-plugins-exclude-path');
 
 const EE_REGEX = /from.* ['"]ee_else_ce\//;
 
@@ -49,13 +50,7 @@ module.exports = ({
       ]
     : [];
 
-  /**
-   * converts the full path to just the plugin path
-   * e.g. `/Users/username/strapi/node_modules/@scope/plugin-name`
-   * to `@scope/plugin-name`
-   */
-  const tsxPlugins = pluginsPath.map((dir) => dir.split('node_modules/')[1]).join('|');
-  const excludeRegex = new RegExp(`node_modules/(?!(${tsxPlugins}))`);
+  const excludeRegex = createPluginsExcludePath(pluginsPath);
 
   return {
     mode: isProduction ? 'production' : 'development',
