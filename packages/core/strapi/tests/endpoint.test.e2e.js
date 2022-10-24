@@ -163,9 +163,7 @@ describe('Create Strapi API End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(JSON.parse(res.error.text).error.message).toContain(
-        `Relations of type api::tag.tag associated with this entity do not exist. IDs: ${entry.tags.join(
-          ','
-        )}`
+        `1 relation(s) of type api::tag.tag associated with this entity do not exist`
       );
     });
 
@@ -243,9 +241,7 @@ describe('Create Strapi API End to End', () => {
 
       expect(res.statusCode).toBe(400);
       expect(JSON.parse(res.error.text).error.message).toContain(
-        `Relations of type api::tag.tag associated with this entity do not exist. IDs: ${entry.tags.join(
-          ','
-        )}`
+        `3 relation(s) of type api::tag.tag associated with this entity do not exist`
       );
     });
 

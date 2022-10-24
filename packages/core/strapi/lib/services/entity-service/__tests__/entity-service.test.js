@@ -157,16 +157,15 @@ describe('Entity service', () => {
           },
         };
         const fakeQuery = (uid) => ({
-          count: jest.fn(() => 0),
           create: jest.fn(({ data }) => data),
-          findWithCount: jest.fn(({ where }) => {
-            const ret = [];
+          count: jest.fn(({ where }) => {
+            let ret = 0;
             where.id.$in.forEach((id) => {
               const entity = fakeEntities[uid][id];
               if (!entity) return;
-              ret.push(entity);
+              ret += 1;
             });
-            return [ret, ret.length];
+            return ret;
           }),
         });
 
@@ -372,14 +371,14 @@ describe('Entity service', () => {
       beforeAll(() => {
         const fakeQuery = (key) => ({
           findOne: jest.fn(({ where }) => fakeEntities[key][where.id]),
-          findWithCount: jest.fn(({ where }) => {
-            const ret = [];
+          count: jest.fn(({ where }) => {
+            let ret = 0;
             where.id.$in.forEach((id) => {
               const entity = fakeEntities[key][id];
               if (!entity) return;
-              ret.push(entity);
+              ret += 1;
             });
-            return [ret, ret.length];
+            return ret;
           }),
           update: jest.fn(({ where }) => ({
             ...fakeEntities[key][where.id],
