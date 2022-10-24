@@ -83,7 +83,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     ];
 
     // Compression
-    if (this.options.compression?.enabled) {
+    if (this.options.compression.enabled) {
       streams.push(zip.createGzip());
     }
 
@@ -129,7 +129,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     ];
 
     // Compression
-    if (options.compression?.enabled) {
+    if (options.compression.enabled) {
       streams.push(zip.createGzip());
     }
 
@@ -139,7 +139,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     // }
 
     // FS write stream
-    streams.push(createMultiFilesWriteStream(filePathFactory, options.file?.maxSize));
+    streams.push(createMultiFilesWriteStream(filePathFactory, options.file.maxSize));
 
     return chain(streams);
   }
