@@ -9,17 +9,29 @@ import { IDestinationProvider, ProviderType, Stream } from '../../types';
 // import { encrypt } from '../encryption';
 
 export interface ILocalFileDestinationProviderOptions {
-  backupFilePath: string;
-
   // Encryption
-  encrypted?: boolean;
-  encryptionKey?: string;
+  encryption: {
+    enabled: boolean;
+    key: string;
+  };
+
+  // Compressions
+  compression: {
+    enabled: boolean;
+  };
+
+  // File
+  file: {
+    path: string;
+    maxSize?: number;
+  };
 }
 
-export const createLocalFileDestinationProvider = (options: ILocalFileDestinationProviderOptions) => {
+export const createLocalFileDestinationProvider = (
+  options: ILocalFileDestinationProviderOptions
+) => {
   return new LocalFileDestinationProvider(options);
 };
-
 
 class LocalFileDestinationProvider implements IDestinationProvider {
   name: string = 'destination::local-file';
@@ -31,7 +43,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   bootstrap(): void | Promise<void> {
-    const rootDir = this.options.backupFilePath;
+    const rootDir = this.options.file.path;
     const dirExists = fs.existsSync(rootDir);
 
     if (dirExists) {
@@ -46,7 +58,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   rollback(): void | Promise<void> {
-    fs.rmSync(this.options.backupFilePath, { force: true, recursive: true });
+    fs.rmSync(this.options.file.path, { force: true, recursive: true });
   }
 
   getMetadata() {
@@ -54,23 +66,10 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   getEntitiesStream(): Duplex {
-    const options = {
-      encryption: {
-        enabled: true,
-        key: 'Hello World!',
-      },
-      compression: {
-        enabled: false,
-      },
-      file: {
-        maxSize: 100000,
-      },
-    };
-
     const filePathFactory = (fileIndex: number = 0) => {
       return path.join(
         // Backup path
-        this.options.backupFilePath,
+        this.options.file.path,
         // "entities/" directory
         'entities',
         // "entities_00000.jsonl" file
@@ -84,7 +83,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     ];
 
     // Compression
-    if (options.compression?.enabled) {
+    if (this.options.compression?.enabled) {
       streams.push(zip.createGzip());
     }
 
@@ -94,7 +93,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     // }
 
     // FS write stream
-    streams.push(createMultiFilesWriteStream(filePathFactory, options.file?.maxSize));
+    streams.push(createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize));
 
     return chain(streams);
   }
@@ -116,7 +115,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const filePathFactory = (fileIndex: number = 0) => {
       return path.join(
         // Backup path
-        this.options.backupFilePath,
+        this.options.file.path,
         // "links/" directory
         'links',
         // "links_00000.jsonl" file
@@ -180,7 +179,7 @@ const createMultiFilesWriteStream = (
 
       // Check that by adding this new chunk of data, we
       // are not going to reach the maximum file size.
-      if (maxSize && (fileSize + chunk.length > maxSize)) {
+      if (maxSize && fileSize + chunk.length > maxSize) {
         // Update the counters' value
         fileIndex++;
         fileSize = 0;

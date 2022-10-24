@@ -12,21 +12,29 @@ const getDefaultExportBackupName = () => `strapi-backup`;
 const logger = console;
 
 module.exports = async (args) => {
-  if (!args.output) {
-    Object.assign(args, { output: getDefaultExportBackupName() });
-  }
-
   // From strapi
-  const source = createLocalStrapiSourceProvider({
+  const inputOptions = {
     getStrapi() {
       return strapi().load();
     },
-  });
+  };
+  const source = createLocalStrapiSourceProvider(inputOptions);
 
   // To file
-  const destination = createLocalFileDestinationProvider({
-    backupFilePath: args.output,
-  });
+  const outputOptions = {
+    file: {
+      path: args.output || getDefaultExportBackupName(),
+    },
+    encryption: {
+      enabled: args.encrypt,
+      key: args.key,
+    },
+    compression: {
+      enabled: args.compress,
+    },
+  };
+
+  const destination = createLocalFileDestinationProvider(outputOptions);
 
   // create transfer engine
   const engine = createTransferEngine(source, destination, {
