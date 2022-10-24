@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Marketplace page renders and matches the snapshot 1`] = `
+exports[`Providers tab renders and matches the providers tab snapshot 1`] = `
 .c17 {
   padding-bottom: 16px;
   width: 25%;
@@ -25,21 +25,21 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   padding-top: 16px;
 }
 
-.c68 {
+.c69 {
   padding-top: 8px;
 }
 
-.c78 {
+.c68 {
   margin-left: 4px;
   width: 24px;
   height: auto;
 }
 
-.c79 {
+.c77 {
   padding-left: 16px;
 }
 
-.c82 {
+.c81 {
   padding-top: 32px;
 }
 
@@ -188,7 +188,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   fill: #32324d;
 }
 
-.c75 {
+.c76 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -200,7 +200,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c75 .c55 {
+.c76 .c55 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -211,62 +211,62 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c75 .c58 {
+.c76 .c58 {
   color: #ffffff;
 }
 
-.c75[aria-disabled='true'] {
+.c76[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c75[aria-disabled='true'] .c58 {
+.c76[aria-disabled='true'] .c58 {
   color: #666687;
 }
 
-.c75[aria-disabled='true'] svg > g,
-.c75[aria-disabled='true'] svg path {
+.c76[aria-disabled='true'] svg > g,
+.c76[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c75[aria-disabled='true']:active {
+.c76[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c75[aria-disabled='true']:active .c58 {
+.c76[aria-disabled='true']:active .c58 {
   color: #666687;
 }
 
-.c75[aria-disabled='true']:active svg > g,
-.c75[aria-disabled='true']:active svg path {
+.c76[aria-disabled='true']:active svg > g,
+.c76[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c75:hover {
+.c76:hover {
   background-color: #ffffff;
 }
 
-.c75:active {
+.c76:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c75:active .c58 {
+.c76:active .c58 {
   color: #4945ff;
 }
 
-.c75:active svg > g,
-.c75:active svg path {
+.c76:active svg > g,
+.c76:active svg path {
   fill: #4945ff;
 }
 
-.c75 .c58 {
+.c76 .c58 {
   color: #271fe0;
 }
 
-.c75 svg > g,
-.c75 svg path {
+.c76 svg > g,
+.c76 svg path {
   fill: #271fe0;
 }
 
@@ -285,14 +285,14 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   height: 100%;
 }
 
-.c83 {
+.c82 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c84 {
+.c83 {
   background: #f6ecfc;
   padding: 12px;
   border-radius: 4px;
@@ -345,30 +345,25 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c76 {
-  color: #328048;
-  margin-left: 8px;
-}
-
-.c80 {
+.c78 {
   color: #328048;
   margin-right: 8px;
   width: 12;
   height: 12;
 }
 
-.c90 {
+.c89 {
   color: #666687;
   margin-left: 8px;
   width: 12px;
   height: 12px;
 }
 
-.c77 path {
+.c79 path {
   fill: #328048;
 }
 
-.c91 path {
+.c90 path {
   fill: #666687;
 }
 
@@ -664,11 +659,11 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   width: 100%;
 }
 
-.c71 {
+.c72 {
   padding-top: 24px;
 }
 
-.c72 {
+.c73 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -682,7 +677,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   flex-direction: row;
 }
 
-.c86 {
+.c85 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -696,17 +691,17 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   flex-direction: column;
 }
 
-.c87 > * {
+.c86 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c73 > * {
+.c74 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c73 > * + * {
+.c74 > * + * {
   margin-left: 8px;
 }
 
@@ -717,20 +712,20 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   line-height: 1.25;
 }
 
-.c69 {
+.c70 {
   color: #666687;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c81 {
+.c80 {
   font-weight: 600;
   color: #328048;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c88 {
+.c87 {
   font-weight: 500;
   color: #32324d;
   font-size: 0.75rem;
@@ -748,7 +743,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   padding-right: 8px;
 }
 
-.c74 {
+.c75 {
   padding-left: 8px;
 }
 
@@ -889,16 +884,16 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   fill: #32324d;
 }
 
-.c85 {
+.c84 {
   margin-right: 24px;
 }
 
-.c85 svg {
+.c84 svg {
   width: 2rem;
   height: 2rem;
 }
 
-.c89 {
+.c88 {
   word-break: break-all;
 }
 
@@ -977,7 +972,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   outline: none;
 }
 
-.c33 {
+.c35 {
   color: #4945ff;
   font-weight: 600;
   font-size: 0.6875rem;
@@ -985,7 +980,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   text-transform: uppercase;
 }
 
-.c35 {
+.c33 {
   color: #666687;
   font-weight: 600;
   font-size: 0.6875rem;
@@ -997,11 +992,11 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   padding: 16px;
 }
 
-.c32 {
+.c34 {
   border-bottom: 2px solid #4945ff;
 }
 
-.c34 {
+.c32 {
   border-bottom: 2px solid transparent;
 }
 
@@ -1020,7 +1015,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
   max-width: 100%;
 }
 
-.c70 {
+.c71 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -1085,7 +1080,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
             <a
               aria-disabled="false"
               class="c8 c9 c10"
-              href="https://market.strapi.io/submit-plugin"
+              href="https://market.strapi.io/submit-provider"
               rel="noreferrer noopener"
               target="_blank"
             >
@@ -1111,7 +1106,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
               <span
                 class="c13 c14"
               >
-                Submit plugin
+                Submit provider
               </span>
             </a>
           </div>
@@ -1195,13 +1190,12 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
               role="tablist"
             >
               <button
-                aria-controls="tabs-0-tabpanel"
                 aria-disabled="false"
-                aria-selected="true"
+                aria-selected="false"
                 class="c30"
                 id="tabs-0-tab"
                 role="tab"
-                tabindex="0"
+                tabindex="-1"
                 type="button"
               >
                 <div
@@ -1219,12 +1213,13 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                 </div>
               </button>
               <button
+                aria-controls="tabs-1-tabpanel"
                 aria-disabled="false"
-                aria-selected="false"
+                aria-selected="true"
                 class="c30"
                 id="tabs-1-tab"
                 role="tab"
-                tabindex="-1"
+                tabindex="0"
                 type="button"
               >
                 <div
@@ -1349,8 +1344,8 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
           </div>
           <div>
             <div
-              aria-labelledby="tabs-0-tab"
-              id="tabs-0-tabpanel"
+              aria-labelledby="tabs-1-tab"
+              id="tabs-1-tabpanel"
               role="tabpanel"
               tabindex="0"
             >
@@ -1373,10 +1368,10 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                         class=""
                       >
                         <img
-                          alt="Comments logo"
+                          alt="Amazon Ses logo"
                           class="c64"
                           height="11"
-                          src="https://dl.airtable.com/.attachments/eb4cd59876565af77c9c3e5966b59f10/2111bfc8/vl_strapi-comments.png"
+                          src="https://dl.airtable.com/.attachments/04be9ade6077d029a9d4108cd2f47c8e/f5fe8d67/amazonSES.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=0561c26f91b25e21"
                           width="11"
                         />
                         <div
@@ -1388,390 +1383,16 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                             <div
                               class="c67"
                             >
-                              Comments
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c68"
-                        >
-                          <p
-                            class="c69 c70"
-                          >
-                            Powerful Strapi based comments moderation tool for you and your users
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c71 c72 c73"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Comments"
-                          class="c8 c9 c10"
-                          href="https://market.strapi.io/plugins/strapi-plugin-comments"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c13 c14"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c11 c74"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c52 c75"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c55 c56 c57"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c58 c59"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c61"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c62 c63"
-                      data-testid="npm-package-card"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Config Sync logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/e23a7231d12cce89cb4b05cbfe759d45/96f5f496/Screenshot2021-12-09at22.15.37.png"
-                          width="11"
-                        />
-                        <div
-                          class="c65"
-                        >
-                          <h3
-                            class="c66"
-                          >
-                            <div
-                              class="c67"
-                            >
-                              Config Sync
+                              Amazon Ses
                               <span>
                                 <div
-                                  aria-describedby="tooltip-1"
-                                  class="c67"
-                                  tabindex="0"
-                                >
-                                  <svg
-                                    class="c76 c77"
-                                    fill="none"
-                                    height="1em"
-                                    viewBox="0 0 24 24"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clip-rule="evenodd"
-                                      d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12zm-1.438-11.066L16.158 7.5 18 9.245l-7.438 7.18-4.462-4.1 1.84-1.745 2.622 2.354z"
-                                      fill="#212134"
-                                      fill-rule="evenodd"
-                                    />
-                                  </svg>
-                                </div>
-                              </span>
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c68"
-                        >
-                          <p
-                            class="c69 c70"
-                          >
-                            Migrate your config data across environments using the CLI or Strapi admin panel.
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c71 c72 c73"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Config Sync"
-                          class="c8 c9 c10"
-                          href="https://market.strapi.io/plugins/strapi-plugin-config-sync"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c13 c14"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c11 c74"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c52 c75"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c55 c56 c57"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c58 c59"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c61"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c62 c63"
-                      data-testid="npm-package-card"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Content Versioning logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/0b86f18e2606ed7f53bd54d536a1bea5/13a87f30/Artboard7copy.png"
-                          width="11"
-                        />
-                        <div
-                          class="c65"
-                        >
-                          <h3
-                            class="c66"
-                          >
-                            <div
-                              class="c67"
-                            >
-                              Content Versioning
-                            </div>
-                          </h3>
-                        </div>
-                        <div
-                          class="c68"
-                        >
-                          <p
-                            class="c69 c70"
-                          >
-                            This plugin enables you to versioning Content Types. It allows multiple draft versions✅ Keeps history of all changes (with time travel) ✅ 
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="c71 c72 c73"
-                        spacing="2"
-                        style="align-self: flex-end;"
-                      >
-                        <a
-                          aria-disabled="false"
-                          aria-label="Learn more about Content Versioning"
-                          class="c8 c9 c10"
-                          href="https://market.strapi.io/plugins/@notum-cz-strapi-plugin-content-versioning"
-                          rel="noreferrer noopener"
-                          target="_blank"
-                        >
-                          <span
-                            class="c13 c14"
-                          >
-                            Learn more
-                          </span>
-                          <div
-                            aria-hidden="true"
-                            class="c11 c74"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </div>
-                        </a>
-                        <button
-                          aria-disabled="false"
-                          class="c52 c75"
-                          type="button"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="c55 c56 c57"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
-                          <span
-                            class="c58 c59"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c61"
-                >
-                  <div
-                    class=""
-                    style="height: 100%;"
-                  >
-                    <div
-                      class="c62 c63"
-                      data-testid="npm-package-card"
-                      height="100%"
-                    >
-                      <div
-                        class=""
-                      >
-                        <img
-                          alt="Documentation logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/b6998ac52e8b0460b8a14ced8074b788/2a4d4a90/swagger.png"
-                          width="11"
-                        />
-                        <div
-                          class="c65"
-                        >
-                          <h3
-                            class="c66"
-                          >
-                            <div
-                              class="c67"
-                            >
-                              Documentation
-                              <span>
-                                <div
-                                  aria-describedby="tooltip-3"
+                                  aria-describedby="tooltip-5"
                                   class="c67"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c78"
+                                    class="c68"
                                     height="auto"
                                     src="IMAGE_MOCK"
                                     width="6"
@@ -1782,25 +1403,25 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                           </h3>
                         </div>
                         <div
-                          class="c68"
+                          class="c69"
                         >
                           <p
-                            class="c69 c70"
+                            class="c70 c71"
                           >
-                            Create an OpenAPI Document and visualize your API with SWAGGER UI
+                            Amazon Ses provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c71 c72 c73"
+                        class="c72 c73 c74"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
                           aria-disabled="false"
-                          aria-label="Learn more about Documentation"
+                          aria-label="Learn more about Amazon Ses"
                           class="c8 c9 c10"
-                          href="https://market.strapi.io/plugins/@strapi-plugin-documentation"
+                          href="https://market.strapi.io/providers/@strapi-provider-email-amazon-ses"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
@@ -1811,7 +1432,271 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c11 c74"
+                            class="c11 c75"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                fill="#32324D"
+                              />
+                            </svg>
+                          </div>
+                        </a>
+                        <button
+                          aria-disabled="false"
+                          class="c52 c76"
+                          type="button"
+                        >
+                          <div
+                            aria-hidden="true"
+                            class="c55 c56 c57"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </div>
+                          <span
+                            class="c58 c59"
+                          >
+                            Copy install command
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c61"
+                >
+                  <div
+                    class=""
+                    style="height: 100%;"
+                  >
+                    <div
+                      class="c62 c63"
+                      data-testid="npm-package-card"
+                      height="100%"
+                    >
+                      <div
+                        class=""
+                      >
+                        <img
+                          alt="AWS S3 logo"
+                          class="c64"
+                          height="11"
+                          src="https://dl.airtable.com/.attachments/e24c0ef99b1e952cbf0c8cbeed8cc24f/da30ba27/Amazon-S3-Logo.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=953eaf833eba09a2"
+                          width="11"
+                        />
+                        <div
+                          class="c65"
+                        >
+                          <h3
+                            class="c66"
+                          >
+                            <div
+                              class="c67"
+                            >
+                              AWS S3
+                              <span>
+                                <div
+                                  aria-describedby="tooltip-7"
+                                  class="c67"
+                                  tabindex="0"
+                                >
+                                  <img
+                                    alt="Made by Strapi"
+                                    class="c68"
+                                    height="auto"
+                                    src="IMAGE_MOCK"
+                                    width="6"
+                                  />
+                                </div>
+                              </span>
+                            </div>
+                          </h3>
+                        </div>
+                        <div
+                          class="c69"
+                        >
+                          <p
+                            class="c70 c71"
+                          >
+                            AWS S3 provider for Strapi uploads
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="c72 c73 c74"
+                        spacing="2"
+                        style="align-self: flex-end;"
+                      >
+                        <a
+                          aria-disabled="false"
+                          aria-label="Learn more about AWS S3"
+                          class="c8 c9 c10"
+                          href="https://market.strapi.io/providers/@strapi-provider-upload-aws-s3"
+                          rel="noreferrer noopener"
+                          target="_blank"
+                        >
+                          <span
+                            class="c13 c14"
+                          >
+                            Learn more
+                          </span>
+                          <div
+                            aria-hidden="true"
+                            class="c11 c75"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                fill="#32324D"
+                              />
+                            </svg>
+                          </div>
+                        </a>
+                        <button
+                          aria-disabled="false"
+                          class="c52 c76"
+                          type="button"
+                        >
+                          <div
+                            aria-hidden="true"
+                            class="c55 c56 c57"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </div>
+                          <span
+                            class="c58 c59"
+                          >
+                            Copy install command
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c61"
+                >
+                  <div
+                    class=""
+                    style="height: 100%;"
+                  >
+                    <div
+                      class="c62 c63"
+                      data-testid="npm-package-card"
+                      height="100%"
+                    >
+                      <div
+                        class=""
+                      >
+                        <img
+                          alt="Cloudinary logo"
+                          class="c64"
+                          height="11"
+                          src="https://dl.airtable.com/.attachments/74df39c3715a78589be1cbff69009dc2/14734e59/cloudinary.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=d82f74e2c1563864"
+                          width="11"
+                        />
+                        <div
+                          class="c65"
+                        >
+                          <h3
+                            class="c66"
+                          >
+                            <div
+                              class="c67"
+                            >
+                              Cloudinary
+                              <span>
+                                <div
+                                  aria-describedby="tooltip-9"
+                                  class="c67"
+                                  tabindex="0"
+                                >
+                                  <img
+                                    alt="Made by Strapi"
+                                    class="c68"
+                                    height="auto"
+                                    src="IMAGE_MOCK"
+                                    width="6"
+                                  />
+                                </div>
+                              </span>
+                            </div>
+                          </h3>
+                        </div>
+                        <div
+                          class="c69"
+                        >
+                          <p
+                            class="c70 c71"
+                          >
+                            Cloudinary provider for Strapi uploads
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="c72 c73 c74"
+                        spacing="2"
+                        style="align-self: flex-end;"
+                      >
+                        <a
+                          aria-disabled="false"
+                          aria-label="Learn more about Cloudinary"
+                          class="c8 c9 c10"
+                          href="https://market.strapi.io/providers/@strapi-provider-upload-cloudinary"
+                          rel="noreferrer noopener"
+                          target="_blank"
+                        >
+                          <span
+                            class="c13 c14"
+                          >
+                            Learn more
+                          </span>
+                          <div
+                            aria-hidden="true"
+                            class="c11 c75"
                           >
                             <svg
                               fill="none"
@@ -1828,10 +1713,10 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                           </div>
                         </a>
                         <div
-                          class="c79"
+                          class="c77"
                         >
                           <svg
-                            class="c80 c77"
+                            class="c78 c79"
                             fill="none"
                             height="12"
                             viewBox="0 0 24 24"
@@ -1844,7 +1729,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                             />
                           </svg>
                           <span
-                            class="c81"
+                            class="c80"
                           >
                             Installed
                           </span>
@@ -1869,10 +1754,10 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                         class=""
                       >
                         <img
-                          alt="Transformer logo"
+                          alt="Local Upload logo"
                           class="c64"
                           height="11"
-                          src="https://dl.airtable.com/.attachments/5ffd1782a2fabf423ccd6f56c562f31a/b8f8598f/transformer-logo.png"
+                          src="https://dl.airtable.com/.attachments/6707fcab8f5530214160bacf6f4369ec/9ed22aaf/typeplaceholderversion1.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=35d9e0bb75e4528a"
                           width="11"
                         />
                         <div
@@ -1884,30 +1769,45 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                             <div
                               class="c67"
                             >
-                              Transformer
+                              Local Upload
+                              <span>
+                                <div
+                                  aria-describedby="tooltip-11"
+                                  class="c67"
+                                  tabindex="0"
+                                >
+                                  <img
+                                    alt="Made by Strapi"
+                                    class="c68"
+                                    height="auto"
+                                    src="IMAGE_MOCK"
+                                    width="6"
+                                  />
+                                </div>
+                              </span>
                             </div>
                           </h3>
                         </div>
                         <div
-                          class="c68"
+                          class="c69"
                         >
                           <p
-                            class="c69 c70"
+                            class="c70 c71"
                           >
-                            A plugin for Strapi Headless CMS that provides the ability to transform the API response. 
+                            Local upload provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c71 c72 c73"
+                        class="c72 c73 c74"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
                         <a
                           aria-disabled="false"
-                          aria-label="Learn more about Transformer"
+                          aria-label="Learn more about Local Upload"
                           class="c8 c9 c10"
-                          href="https://market.strapi.io/plugins/strapi-plugin-transformer"
+                          href="https://market.strapi.io/providers/@strapi-provider-upload-local"
                           rel="noreferrer noopener"
                           target="_blank"
                         >
@@ -1918,7 +1818,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c11 c74"
+                            class="c11 c75"
                           >
                             <svg
                               fill="none"
@@ -1936,7 +1836,667 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c52 c75"
+                          class="c52 c76"
+                          type="button"
+                        >
+                          <div
+                            aria-hidden="true"
+                            class="c55 c56 c57"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </div>
+                          <span
+                            class="c58 c59"
+                          >
+                            Copy install command
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c61"
+                >
+                  <div
+                    class=""
+                    style="height: 100%;"
+                  >
+                    <div
+                      class="c62 c63"
+                      data-testid="npm-package-card"
+                      height="100%"
+                    >
+                      <div
+                        class=""
+                      >
+                        <img
+                          alt="Mailgun logo"
+                          class="c64"
+                          height="11"
+                          src="https://dl.airtable.com/.attachments/73118ab0aea4d9eae66edc18a1db4982/808842ba/mailgun-logo-5388F66106-seeklogo_com.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=2e2e9ecb19e752ca"
+                          width="11"
+                        />
+                        <div
+                          class="c65"
+                        >
+                          <h3
+                            class="c66"
+                          >
+                            <div
+                              class="c67"
+                            >
+                              Mailgun
+                              <span>
+                                <div
+                                  aria-describedby="tooltip-13"
+                                  class="c67"
+                                  tabindex="0"
+                                >
+                                  <img
+                                    alt="Made by Strapi"
+                                    class="c68"
+                                    height="auto"
+                                    src="IMAGE_MOCK"
+                                    width="6"
+                                  />
+                                </div>
+                              </span>
+                            </div>
+                          </h3>
+                        </div>
+                        <div
+                          class="c69"
+                        >
+                          <p
+                            class="c70 c71"
+                          >
+                            Mailgun provider for Strapi
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="c72 c73 c74"
+                        spacing="2"
+                        style="align-self: flex-end;"
+                      >
+                        <a
+                          aria-disabled="false"
+                          aria-label="Learn more about Mailgun"
+                          class="c8 c9 c10"
+                          href="https://market.strapi.io/providers/@strapi-provider-email-mailgun"
+                          rel="noreferrer noopener"
+                          target="_blank"
+                        >
+                          <span
+                            class="c13 c14"
+                          >
+                            Learn more
+                          </span>
+                          <div
+                            aria-hidden="true"
+                            class="c11 c75"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                fill="#32324D"
+                              />
+                            </svg>
+                          </div>
+                        </a>
+                        <button
+                          aria-disabled="false"
+                          class="c52 c76"
+                          type="button"
+                        >
+                          <div
+                            aria-hidden="true"
+                            class="c55 c56 c57"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </div>
+                          <span
+                            class="c58 c59"
+                          >
+                            Copy install command
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c61"
+                >
+                  <div
+                    class=""
+                    style="height: 100%;"
+                  >
+                    <div
+                      class="c62 c63"
+                      data-testid="npm-package-card"
+                      height="100%"
+                    >
+                      <div
+                        class=""
+                      >
+                        <img
+                          alt="Nodemailer logo"
+                          class="c64"
+                          height="11"
+                          src="https://dl.airtable.com/.attachments/73bea518f68fc312ec15a4a988da3bbc/4c024fea/Nodemailer.jpeg?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=a5dec98be44fa4e6"
+                          width="11"
+                        />
+                        <div
+                          class="c65"
+                        >
+                          <h3
+                            class="c66"
+                          >
+                            <div
+                              class="c67"
+                            >
+                              Nodemailer
+                              <span>
+                                <div
+                                  aria-describedby="tooltip-15"
+                                  class="c67"
+                                  tabindex="0"
+                                >
+                                  <img
+                                    alt="Made by Strapi"
+                                    class="c68"
+                                    height="auto"
+                                    src="IMAGE_MOCK"
+                                    width="6"
+                                  />
+                                </div>
+                              </span>
+                            </div>
+                          </h3>
+                        </div>
+                        <div
+                          class="c69"
+                        >
+                          <p
+                            class="c70 c71"
+                          >
+                            Nodemailer provider for Strapi
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="c72 c73 c74"
+                        spacing="2"
+                        style="align-self: flex-end;"
+                      >
+                        <a
+                          aria-disabled="false"
+                          aria-label="Learn more about Nodemailer"
+                          class="c8 c9 c10"
+                          href="https://market.strapi.io/providers/@strapi-provider-email-nodemailer"
+                          rel="noreferrer noopener"
+                          target="_blank"
+                        >
+                          <span
+                            class="c13 c14"
+                          >
+                            Learn more
+                          </span>
+                          <div
+                            aria-hidden="true"
+                            class="c11 c75"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                fill="#32324D"
+                              />
+                            </svg>
+                          </div>
+                        </a>
+                        <button
+                          aria-disabled="false"
+                          class="c52 c76"
+                          type="button"
+                        >
+                          <div
+                            aria-hidden="true"
+                            class="c55 c56 c57"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </div>
+                          <span
+                            class="c58 c59"
+                          >
+                            Copy install command
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c61"
+                >
+                  <div
+                    class=""
+                    style="height: 100%;"
+                  >
+                    <div
+                      class="c62 c63"
+                      data-testid="npm-package-card"
+                      height="100%"
+                    >
+                      <div
+                        class=""
+                      >
+                        <img
+                          alt="Rackspace logo"
+                          class="c64"
+                          height="11"
+                          src="https://dl.airtable.com/.attachments/f1e20497044cc6035f43b94f46bd5381/c78cbd9f/rackspace-logo.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=641682ec9adc2d1c"
+                          width="11"
+                        />
+                        <div
+                          class="c65"
+                        >
+                          <h3
+                            class="c66"
+                          >
+                            <div
+                              class="c67"
+                            >
+                              Rackspace
+                              <span>
+                                <div
+                                  aria-describedby="tooltip-17"
+                                  class="c67"
+                                  tabindex="0"
+                                >
+                                  <img
+                                    alt="Made by Strapi"
+                                    class="c68"
+                                    height="auto"
+                                    src="IMAGE_MOCK"
+                                    width="6"
+                                  />
+                                </div>
+                              </span>
+                            </div>
+                          </h3>
+                        </div>
+                        <div
+                          class="c69"
+                        >
+                          <p
+                            class="c70 c71"
+                          >
+                            Rackspace provider for Strapi uploads
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="c72 c73 c74"
+                        spacing="2"
+                        style="align-self: flex-end;"
+                      >
+                        <a
+                          aria-disabled="false"
+                          aria-label="Learn more about Rackspace"
+                          class="c8 c9 c10"
+                          href="https://market.strapi.io/providers/@strapi-provider-upload-rackspace"
+                          rel="noreferrer noopener"
+                          target="_blank"
+                        >
+                          <span
+                            class="c13 c14"
+                          >
+                            Learn more
+                          </span>
+                          <div
+                            aria-hidden="true"
+                            class="c11 c75"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                fill="#32324D"
+                              />
+                            </svg>
+                          </div>
+                        </a>
+                        <button
+                          aria-disabled="false"
+                          class="c52 c76"
+                          type="button"
+                        >
+                          <div
+                            aria-hidden="true"
+                            class="c55 c56 c57"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </div>
+                          <span
+                            class="c58 c59"
+                          >
+                            Copy install command
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c61"
+                >
+                  <div
+                    class=""
+                    style="height: 100%;"
+                  >
+                    <div
+                      class="c62 c63"
+                      data-testid="npm-package-card"
+                      height="100%"
+                    >
+                      <div
+                        class=""
+                      >
+                        <img
+                          alt="SendGrid logo"
+                          class="c64"
+                          height="11"
+                          src="https://dl.airtable.com/.attachments/c09bfc173321ee79a972a10735ed6cf7/4e0a5321/sendgrid-logo-7574E52082-seeklogo_com.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=1ff0a128488e143f"
+                          width="11"
+                        />
+                        <div
+                          class="c65"
+                        >
+                          <h3
+                            class="c66"
+                          >
+                            <div
+                              class="c67"
+                            >
+                              SendGrid
+                              <span>
+                                <div
+                                  aria-describedby="tooltip-19"
+                                  class="c67"
+                                  tabindex="0"
+                                >
+                                  <img
+                                    alt="Made by Strapi"
+                                    class="c68"
+                                    height="auto"
+                                    src="IMAGE_MOCK"
+                                    width="6"
+                                  />
+                                </div>
+                              </span>
+                            </div>
+                          </h3>
+                        </div>
+                        <div
+                          class="c69"
+                        >
+                          <p
+                            class="c70 c71"
+                          >
+                            SendGrid provider for Strapi
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="c72 c73 c74"
+                        spacing="2"
+                        style="align-self: flex-end;"
+                      >
+                        <a
+                          aria-disabled="false"
+                          aria-label="Learn more about SendGrid"
+                          class="c8 c9 c10"
+                          href="https://market.strapi.io/providers/@strapi-provider-email-sendgrid"
+                          rel="noreferrer noopener"
+                          target="_blank"
+                        >
+                          <span
+                            class="c13 c14"
+                          >
+                            Learn more
+                          </span>
+                          <div
+                            aria-hidden="true"
+                            class="c11 c75"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                fill="#32324D"
+                              />
+                            </svg>
+                          </div>
+                        </a>
+                        <button
+                          aria-disabled="false"
+                          class="c52 c76"
+                          type="button"
+                        >
+                          <div
+                            aria-hidden="true"
+                            class="c55 c56 c57"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                fill="#212134"
+                              />
+                            </svg>
+                          </div>
+                          <span
+                            class="c58 c59"
+                          >
+                            Copy install command
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c61"
+                >
+                  <div
+                    class=""
+                    style="height: 100%;"
+                  >
+                    <div
+                      class="c62 c63"
+                      data-testid="npm-package-card"
+                      height="100%"
+                    >
+                      <div
+                        class=""
+                      >
+                        <img
+                          alt="Sendmail logo"
+                          class="c64"
+                          height="11"
+                          src="https://dl.airtable.com/.attachments/0f14c78742105dffd36d6e253612f992/2f0e8605/sendmail-logo-png-transparent.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=65d4bd3786c6b0a2"
+                          width="11"
+                        />
+                        <div
+                          class="c65"
+                        >
+                          <h3
+                            class="c66"
+                          >
+                            <div
+                              class="c67"
+                            >
+                              Sendmail
+                              <span>
+                                <div
+                                  aria-describedby="tooltip-21"
+                                  class="c67"
+                                  tabindex="0"
+                                >
+                                  <img
+                                    alt="Made by Strapi"
+                                    class="c68"
+                                    height="auto"
+                                    src="IMAGE_MOCK"
+                                    width="6"
+                                  />
+                                </div>
+                              </span>
+                            </div>
+                          </h3>
+                        </div>
+                        <div
+                          class="c69"
+                        >
+                          <p
+                            class="c70 c71"
+                          >
+                            Sendmail provider for Strapi
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="c72 c73 c74"
+                        spacing="2"
+                        style="align-self: flex-end;"
+                      >
+                        <a
+                          aria-disabled="false"
+                          aria-label="Learn more about Sendmail"
+                          class="c8 c9 c10"
+                          href="https://market.strapi.io/providers/@strapi-provider-email-sendmail"
+                          rel="noreferrer noopener"
+                          target="_blank"
+                        >
+                          <span
+                            class="c13 c14"
+                          >
+                            Learn more
+                          </span>
+                          <div
+                            aria-hidden="true"
+                            class="c11 c75"
+                          >
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M16.235 2.824a1.412 1.412 0 010-2.824h6.353C23.368 0 24 .633 24 1.412v6.353a1.412 1.412 0 01-2.823 0V4.82l-8.179 8.178a1.412 1.412 0 01-1.996-1.996l8.178-8.178h-2.945zm4.942 10.588a1.412 1.412 0 012.823 0v9.176c0 .78-.632 1.412-1.412 1.412H1.412C.632 24 0 23.368 0 22.588V1.412C0 .632.632 0 1.412 0h9.176a1.412 1.412 0 010 2.824H2.824v18.353h18.353v-7.765z"
+                                fill="#32324D"
+                              />
+                            </svg>
+                          </div>
+                        </a>
+                        <button
+                          aria-disabled="false"
+                          class="c52 c76"
                           type="button"
                         >
                           <div
@@ -1975,7 +2535,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
           </div>
         </div>
         <div
-          class="c82"
+          class="c81"
         >
           <a
             href="https://strapi.canny.io/plugin-requests"
@@ -1984,10 +2544,10 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
             target="_blank"
           >
             <div
-              class="c83 c67"
+              class="c82 c67"
             >
               <div
-                class="c84 c67 c85"
+                class="c83 c67 c84"
               >
                 <svg
                   fill="none"
@@ -2009,18 +2569,18 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                 </svg>
               </div>
               <div
-                class="c86 c87"
+                class="c85 c86"
               >
                 <div
                   class="c67"
                 >
                   <span
-                    class="c88 c89"
+                    class="c87 c88"
                   >
                     Documentation
                   </span>
                   <svg
-                    class="c90 c91"
+                    class="c89 c90"
                     fill="none"
                     height="3"
                     viewBox="0 0 24 24"
@@ -2034,7 +2594,7 @@ exports[`Marketplace page renders and matches the snapshot 1`] = `
                   </svg>
                 </div>
                 <span
-                  class="c69"
+                  class="c70"
                 >
                   Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!
                 </span>
