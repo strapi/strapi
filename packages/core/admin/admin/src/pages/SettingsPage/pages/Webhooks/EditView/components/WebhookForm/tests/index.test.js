@@ -39,6 +39,9 @@ describe('Create Webhook', () => {
         isTriggerIdle={false}
         isDraftAndPublishEvents={false}
         triggerWebhook={triggerWebhook}
+        data={{
+          name: '',
+        }}
       />
     );
 
@@ -59,6 +62,9 @@ describe('Create Webhook', () => {
         isTriggerIdle={false}
         isDraftAndPublishEvents={false}
         triggerWebhook={triggerWebhook}
+        data={{
+          name: '',
+        }}
       />
     );
 
