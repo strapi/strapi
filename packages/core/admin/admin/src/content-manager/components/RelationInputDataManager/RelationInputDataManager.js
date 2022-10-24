@@ -186,7 +186,7 @@ export const RelationInputDataManager = ({
         'hasNextPage',
         'isFetchingNextPage',
         'isLoading',
-        'isSucess'
+        'isSuccess'
       )}
       required={required}
       searchResults={normalizeSearchResults(search, {
