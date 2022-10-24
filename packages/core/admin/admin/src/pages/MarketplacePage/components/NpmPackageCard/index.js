@@ -77,7 +77,7 @@ const NpmPackageCard = ({
             width={11}
             height={11}
           />
-          <PackageStats githubStars={12} weeklyDownloads={135} />
+          <PackageStats githubStars={12} weeklyDownloads={135} npmPackageType={npmPackageType} />
         </Flex>
         <Box paddingTop={4}>
           <Typography as="h3" variant="delta">
