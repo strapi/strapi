@@ -276,7 +276,7 @@ program
   .addOption(new Option('--compress', 'compress content').default(true))
   .addOption(new Option('--no-compress', 'compress content'))
   // .addOption(new Option('--archive', 'combine into one gzip file', true)) // for now we REQUIRE this to be true
-  .addOption(new Option('--key', 'prompt for password to encrypt with'))
+  .addOption(new Option('--key', 'provide encryption key in command instead of using a prompt'))
   // .addOption(new Option('--key, -k <keyfile>', 'path to keyfile to encrypt with')) // for now we will only use passwords
   // .addOption(
   //   new Option(
