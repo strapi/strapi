@@ -7,6 +7,7 @@ const {
   // TODO: we need to solve this issue with typescript modules
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
+const inquirer = require('inquirer');
 const strapi = require('../../Strapi');
 
 const getDefaultExportBackupName = () => `strapi-backup`;
@@ -23,6 +24,31 @@ module.exports = async (args) => {
   const source = createLocalStrapiSourceProvider(inputOptions);
 
   // To file
+  if (args.encrypt) {
+    if (!args.key) {
+      try {
+        const answers = await inquirer.prompt([
+          {
+            type: 'password',
+            message: 'Please enter an encryption key',
+            name: 'key',
+            validate(key) {
+              if (key.length > 1) return true;
+
+              return 'Key must be present when using the encrypt option';
+            },
+          },
+        ]);
+        Object.assign(args, { key: answers.key });
+      } catch (e) {
+        throw new Error('Error reading encryption key');
+      }
+    }
+    if (!args.key) {
+      throw new Error('Key must be present when using the encrypt option');
+    }
+  }
+
   const outputOptions = {
     file: {
       path: args.output || getDefaultExportBackupName(),
