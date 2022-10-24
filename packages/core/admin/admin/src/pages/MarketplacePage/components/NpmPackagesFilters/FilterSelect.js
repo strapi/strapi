@@ -3,6 +3,10 @@ import PropTypes from 'prop-types';
 import { Select, Option } from '@strapi/design-system/Select';
 
 const FilterSelect = ({ message, value, onChange, possibleFilters, onClear, customizeContent }) => {
+  const computeFilterMessage = (filterName, count) => {
+    return `${filterName} (${count})`;
+  };
+
   return (
     <Select
       aria-label={message}
@@ -17,7 +21,7 @@ const FilterSelect = ({ message, value, onChange, possibleFilters, onClear, cust
       {Object.entries(possibleFilters).map(([filterName, count]) => {
         return (
           <Option key={filterName} value={filterName}>
-            {filterName} ({count})
+            {computeFilterMessage(filterName, count)}
           </Option>
         );
       })}

@@ -11,10 +11,10 @@ import {
 } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useTracking, useAppInfos } from '@strapi/helper-plugin';
+import { Router } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
@@ -276,5 +276,33 @@ describe('Marketplace page', () => {
       .find((div) => div.innerHTML.includes('Rackspace'));
     const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
     expect(notInstalledText).toBeVisible();
+  });
+
+  it('shows the sort by menu', () => {
+    render(App);
+    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    expect(sortButton).toBeVisible();
+  });
+
+  it('shows the correct options on sort select', () => {
+    render(App);
+    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    fireEvent.mouseDown(sortButton);
+
+    const alphabeticalOption = screen.getByRole('option', { name: 'Alphabetical order' });
+    const newestOption = screen.getByRole('option', { name: 'Newest' });
+
+    expect(alphabeticalOption).toBeVisible();
+    expect(newestOption).toBeVisible();
+  });
+
+  it('changes the url on sort option select', () => {
+    render(App);
+    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    fireEvent.mouseDown(sortButton);
+
+    const newestOption = screen.getByRole('option', { name: 'Newest' });
+    fireEvent.click(newestOption);
+    expect(history.location.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc');
   });
 });

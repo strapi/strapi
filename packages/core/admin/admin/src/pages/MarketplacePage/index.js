@@ -30,6 +30,7 @@ import offlineCloud from '../../assets/images/icon_offline-cloud.svg';
 import useNavigatorOnLine from '../../hooks/useNavigatorOnLine';
 import MissingPluginBanner from './components/MissingPluginBanner';
 import NpmPackagesGrid from './components/NpmPackagesGrid';
+import SortSelect from './components/SortSelect';
 import NpmPackagesFilters from './components/NpmPackagesFilters';
 
 const matchSearch = (npmPackages, search) => {
@@ -41,6 +42,7 @@ const matchSearch = (npmPackages, search) => {
       },
       { threshold: matchSorter.rankings.WORD_STARTS_WITH, key: 'attributes.description' },
     ],
+    baseSort: (a, b) => (a.index < b.index ? -1 : 1),
   });
 };
 
@@ -57,6 +59,10 @@ const MarketPlacePage = () => {
   const npmPackageType = query?.npmPackageType || 'plugin';
 
   useFocusWhenNavigate();
+
+  const params = {
+    sort: query?.sort || 'name:asc',
+  };
 
   const marketplaceTitle = formatMessage({
     id: 'global.marketplace',
@@ -76,10 +82,10 @@ const MarketPlacePage = () => {
   };
 
   const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
-    useFetchMarketplacePlugins(notifyMarketplaceLoad);
+    useFetchMarketplacePlugins(notifyMarketplaceLoad, params);
 
   const { status: marketplaceProvidersStatus, data: marketplaceProvidersResponse } =
-    useFetchMarketplaceProviders(notifyMarketplaceLoad);
+    useFetchMarketplaceProviders(notifyMarketplaceLoad, params);
 
   const isLoading = [marketplacePluginsStatus, marketplaceProvidersStatus].includes('loading');
 
@@ -179,6 +185,8 @@ const MarketPlacePage = () => {
       // Clear filters
       collections: [],
       categories: [],
+      // Reset sort
+      sort: 'name:asc',
     });
   };
 
@@ -251,6 +259,7 @@ const MarketPlacePage = () => {
               </Tabs>
             </Box>
             <Flex paddingBottom={4} gap={2}>
+              <SortSelect sortQuery={query?.sort || 'name:asc'} setQuery={setQuery} />
               <NpmPackagesFilters
                 npmPackageType={npmPackageType}
                 possibleCollections={possibleCollections}
