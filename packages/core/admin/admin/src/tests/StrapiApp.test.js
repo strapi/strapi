@@ -13,45 +13,7 @@ describe('ADMIN | StrapiApp', () => {
     const app = StrapiApp({ middlewares, reducers, library });
     const { container } = render(app.render());
 
-    expect(container.firstChild).toMatchInlineSnapshot(`
-      .c0 {
-        margin-left: -250px;
-        position: fixed;
-        left: 50%;
-        top: 2.875rem;
-        z-index: 10;
-        width: 31.25rem;
-      }
-
-      .c1 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c2 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c2 > * + * {
-        margin-top: 8px;
-      }
-
-      <div
-        class="c0 c1 c2"
-        spacing="2"
-        width="31.25rem"
-      />
-    `);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should create a valid store', () => {
@@ -495,7 +457,33 @@ describe('ADMIN | StrapiApp', () => {
       expect(app.configurations.head.favicon).toBe('fr');
     });
 
-    it('should override the theme', () => {
+    it('should override the light theme', () => {
+      const adminConfig = {
+        config: { theme: { light: { colors: { red: 'black' } } } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.themes.light.colors.red).toBe('black');
+    });
+
+    it('should override the dark theme', () => {
+      const adminConfig = {
+        config: { theme: { dark: { colors: { red: 'black' } } } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.themes.dark.colors.red).toBe('black');
+    });
+
+    it('should override the light theme with a legacy syntax (without light or dark keys) and log a warning', () => {
+      const origalConsoleWarning = console.warn;
+
+      console.warn = jest.fn();
+
       const adminConfig = {
         config: { theme: { colors: { red: 'black' } } },
       };
@@ -504,6 +492,9 @@ describe('ADMIN | StrapiApp', () => {
       app.createCustomConfigurations();
 
       expect(app.configurations.themes.light.colors.red).toBe('black');
+      expect(console.warn).toBeCalledTimes(1);
+
+      console.warn = origalConsoleWarning;
     });
 
     it('should override the tutorials', () => {
