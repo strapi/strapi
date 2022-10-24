@@ -5,7 +5,8 @@
     "lib": ["ESNEXT"],
     "skipLibCheck": true,
     "outDir": "dist",
-    "declaration": true
+    "declaration": true,
+    "sourceMap": true
   },
   "include": ["types", "lib/**/*.ts"],
   "exclude": ["node_modules"]
