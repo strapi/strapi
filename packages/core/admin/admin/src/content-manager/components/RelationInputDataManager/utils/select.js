@@ -1,9 +1,16 @@
 import { useMemo } from 'react';
+import get from 'lodash/get';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 import { getRequestUrl } from '../../../utils';
 
-function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, queryInfos }) {
+function useSelect({
+  componentUid,
+  isUserAllowedToEditField,
+  isUserAllowedToReadField,
+  name,
+  queryInfos,
+}) {
   const {
     isCreatingEntry,
     createActionAllowedFields,
@@ -11,7 +18,6 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, q
     updateActionAllowedFields,
     slug,
     initialData,
-    isSingleType,
   } = useCMEditViewDataManager();
 
   const isFieldAllowed = useMemo(() => {
@@ -40,25 +46,42 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name, q
     return allowedFields.includes(name);
   }, [isCreatingEntry, isUserAllowedToReadField, name, readActionAllowedFields]);
 
-  // /content-manager/[collection-type]/[content-type]/[id]/[field-name]
-  const relationFetchEndpoint = useMemo(() => {
-    const collectionTypePrefix = isSingleType ? 'single-types' : 'collection-types';
+  const fieldNameKeys = name.split('.');
+  let componentId;
 
+  if (componentUid) {
+    componentId = get(initialData, fieldNameKeys.slice(0, -1))?.id;
+  }
+
+  // /content-manager/relations/[model]/[id]/[field-name]
+  const relationFetchEndpoint = useMemo(() => {
     if (isCreatingEntry) {
       return null;
     }
 
-    return getRequestUrl(
-      `${collectionTypePrefix}/${slug}/${initialData.id}/${name.split('.').at(-1)}`
-    );
-  }, [isCreatingEntry, slug, initialData, name, isSingleType]);
+    if (componentUid) {
+      // repeatable components and dz are dynamically created
+      // if no componentId exists in initialData it means that the user just created it
+      // there then are no relations to request
+      return componentId
+        ? getRequestUrl(`relations/${componentUid}/${componentId}/${fieldNameKeys.at(-1)}`)
+        : null;
+    }
 
-  // /content-manager/relations/[content-type]/[field-name]
+    return getRequestUrl(`relations/${slug}/${initialData.id}/${name.split('.').at(-1)}`);
+  }, [isCreatingEntry, componentUid, slug, initialData.id, name, componentId, fieldNameKeys]);
+
+  // /content-manager/relations/[model]/[field-name]
   const relationSearchEndpoint = useMemo(() => {
+    if (componentUid) {
+      return getRequestUrl(`relations/${componentUid}/${name.split('.').at(-1)}`);
+    }
+
     return getRequestUrl(`relations/${slug}/${name.split('.').at(-1)}`);
-  }, [slug, name]);
+  }, [componentUid, slug, name]);
 
   return {
+    componentId,
     queryInfos: {
       ...queryInfos,
       endpoints: {

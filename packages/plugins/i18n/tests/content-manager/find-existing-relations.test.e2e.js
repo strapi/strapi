@@ -112,7 +112,7 @@ describe('i18n - Find existing relations', () => {
   test('Get Italian product for italian shop filter on any locale', async () => {
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].id}/products`,
+      url: `/content-manager/relations/api::shop.shop/${data.shops[0].id}/products`,
     });
 
     expect(res.body.results).toHaveLength(1);
@@ -122,7 +122,7 @@ describe('i18n - Find existing relations', () => {
   test('Get english product for english shop', async () => {
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::shop.shop/${data.shops[1].id}/products`,
+      url: `/content-manager/relations/api::shop.shop/${data.shops[1].id}/products`,
     });
 
     expect(res.body.results).toHaveLength(1);

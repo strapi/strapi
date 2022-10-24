@@ -25,6 +25,10 @@ const defaultProps = {
   onPublish: jest.fn(),
   onUnpublish: jest.fn(),
   status: 'resolved',
+  publishConfirmation: {
+    show: false,
+    draftCount: 0,
+  },
 };
 
 const makeApp = (props = defaultProps) => {

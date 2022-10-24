@@ -636,6 +636,8 @@
   "content-manager.success.record.unpublish": "Cofnięto publikację",
   "content-manager.utils.data-loaded": "Udało się załadować wpis/wpisy.",
   "content-manager.apiError.This attribute must be unique": "{field} musi być unikalne",
+  "content-manager.popUpWarning.warning.publish-question": "Czy nadal chcesz to opublikować?",
+  "content-manager.popUpwarning.warning.has-draft-relations.button-confirm": "Tak, opublikuj",
   "form.button.continue": "Dalej",
   "form.button.done": "Gotowe",
   "global.actions": "Akcje",

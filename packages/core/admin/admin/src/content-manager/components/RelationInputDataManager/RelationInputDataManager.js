@@ -12,6 +12,8 @@ import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } f
 import { getTrad } from '../../utils';
 
 export const RelationInputDataManager = ({
+  error,
+  componentId,
   editable,
   description,
   intlLabel,
@@ -31,6 +33,7 @@ export const RelationInputDataManager = ({
   const { formatMessage } = useIntl();
   const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
+
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     relation: {
       enabled: get(initialData, name)?.count !== 0 && !!endpoints.relation,
@@ -45,7 +48,7 @@ export const RelationInputDataManager = ({
       endpoint: endpoints.search,
       pageParams: {
         ...defaultParams,
-        entityId: isCreatingEntry ? undefined : initialData.id,
+        entityId: isCreatingEntry ? undefined : componentId ?? initialData.id,
         pageSize: SEARCH_RESULTS_TO_DISPLAY,
       },
     },
@@ -102,11 +105,11 @@ export const RelationInputDataManager = ({
     return !editable;
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
-  const handleRelationAdd = (relation) => {
+  const handleRelationConnect = (relation) => {
     connectRelation({ target: { name, value: relation, replace: isSingleRelation } });
   };
 
-  const handleRelationRemove = (relation) => {
+  const handleRelationDisconnect = (relation) => {
     disconnectRelation({ target: { name, value: relation } });
   };
 
@@ -116,6 +119,7 @@ export const RelationInputDataManager = ({
 
   const handleSearch = (term) => {
     searchFor(term, {
+      idsToInclude: relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
       idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
     });
   };
@@ -135,11 +139,12 @@ export const RelationInputDataManager = ({
     (!isFieldAllowed && isCreatingEntry) ||
     (!isCreatingEntry && !isFieldAllowed && !isFieldReadable)
   ) {
-    return <NotAllowedInput intlLabel={intlLabel} labelAction={labelAction} />;
+    return <NotAllowedInput name={name} intlLabel={intlLabel} labelAction={labelAction} />;
   }
 
   return (
     <RelationInput
+      error={error}
       description={description}
       disabled={isDisabled}
       id={name}
@@ -169,8 +174,8 @@ export const RelationInputDataManager = ({
       }
       name={name}
       numberOfRelationsToDisplay={RELATIONS_TO_DISPLAY}
-      onRelationAdd={(relation) => handleRelationAdd(relation)}
-      onRelationRemove={(relation) => handleRelationRemove(relation)}
+      onRelationConnect={(relation) => handleRelationConnect(relation)}
+      onRelationDisconnect={(relation) => handleRelationDisconnect(relation)}
       onRelationLoadMore={() => handleRelationLoadMore()}
       onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
@@ -203,7 +208,9 @@ export const RelationInputDataManager = ({
 };
 
 RelationInputDataManager.defaultProps = {
+  componentId: undefined,
   editable: true,
+  error: undefined,
   description: '',
   labelAction: null,
   isFieldAllowed: true,
@@ -212,7 +219,9 @@ RelationInputDataManager.defaultProps = {
 };
 
 RelationInputDataManager.propTypes = {
+  componentId: PropTypes.number,
   editable: PropTypes.bool,
+  error: PropTypes.string,
   description: PropTypes.string,
   intlLabel: PropTypes.shape({
     id: PropTypes.string.isRequired,

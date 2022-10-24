@@ -633,6 +633,8 @@
   "content-manager.plugin.description.short": "Veure, editar i eliminar informació de la base de dades de manera ràpida.",
   "content-manager.popUpWarning.bodyMessage.contentType.delete": "Esteu segur de voler eliminar aquest registre?",
   "content-manager.popUpWarning.bodyMessage.contentType.delete.all": "Esteu segur de voler eliminar aquests registres?",
+  "content-manager.popUpWarning.warning.publish-question": "Encara vols publicar-ho?",
+  "content-manager.popUpwarning.warning.has-draft-relations.button-confirm": "Sí, publicar",
   "content-manager.popover.display-relations.label": "Mostrar relacions",
   "content-manager.success.record.delete": "Eliminat",
   "content-manager.success.record.publish": "Publicat",

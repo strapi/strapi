@@ -577,6 +577,8 @@
   "content-manager.success.record.save": "保存",
   "content-manager.success.record.unpublish": "Unpublished",
   "content-manager.utils.data-loaded": "The {number, plural, =1 {entry has} other {entries have}} successfully been loaded",
+  "content-manager.popUpWarning.warning.publish-question": "Do you still want to publish?",
+  "content-manager.popUpwarning.warning.has-draft-relations.button-confirm": "Yes, publish",
   "form.button.done": "完了",
   "global.prompt.unsaved": "ページから離れてもいいですか？編集中のものは全て失われます",
   "notification.contentType.relations.conflict": "コンテンツタイプがリレーションと競合しています",

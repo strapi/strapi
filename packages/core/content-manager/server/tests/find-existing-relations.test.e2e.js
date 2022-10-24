@@ -173,116 +173,229 @@ describe.each([false, true])('Relations, with d&p: %s', (withDraftAndPublish) =>
     await builder.cleanup();
   });
   describe('findExisting', () => {
-    describe.each([
-      ['products_ow', false],
-      ['products_oo', false],
-      ['products_mo', false],
-      ['products_om', true],
-      ['products_mm', true],
-      ['products_mw', true],
-    ])('Relation not in a component (%s)', (fieldName, isManyRelation) => {
-      test('Can retrieve the relation(s) for an entity that have some relations', async () => {
+    describe('On a content-type', () => {
+      test('Fail when entity is not found', async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].id}/${fieldName}`,
+          url: `/content-manager/relations/api::shop.shop/999999/products_ow`,
         });
 
-        expect(res.status).toBe(200);
-
-        if (isManyRelation) {
-          expect(res.body.results).toMatchObject([
-            {
-              id: expect.any(Number),
-              name: 'Skate',
-              ...addPublishedAtCheck(expect.any(String)),
-            },
-            {
-              id: expect.any(Number),
-              name: 'Candle',
-              ...addPublishedAtCheck(null),
-            },
-          ]);
-        } else {
-          expect(res.body.results[0]).toMatchObject({
-            id: expect.any(Number),
-            name: 'Skate',
-            ...addPublishedAtCheck(expect.any(String)),
-          });
-        }
+        expect(res.status).toBe(404);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: 'Not Found',
+            name: 'NotFoundError',
+            status: 404,
+          },
+        });
       });
 
-      test("Can retrieve the relation(s) for an entity that don't have relations yet", async () => {
+      test("Fail when the field doesn't exist", async () => {
         const res = await rq({
           method: 'GET',
-          url: `/content-manager/collection-types/api::shop.shop/${data.shops[1].id}/${fieldName}`,
+          url: `/content-manager/relations/api::shop.shop/${data.shops[0].id}/unkown`,
         });
 
-        expect(res.status).toBe(200);
-        expect(res.body.results).toHaveLength(0);
+        expect(res.status).toBe(400);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: "This relational field doesn't exist",
+            name: 'BadRequestError',
+            status: 400,
+          },
+        });
       });
 
-      if (isManyRelation) {
-        test("Can search ''", async () => {
+      test('Fail when the field exists but is not a relational field', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/api::shop.shop/${data.shops[0].id}/name`,
+        });
+
+        expect(res.status).toBe(400);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: "This relational field doesn't exist",
+            name: 'BadRequestError',
+            status: 400,
+          },
+        });
+      });
+
+      describe.each([
+        ['one-way', 'products_ow', false],
+        ['one-one', 'products_oo', false],
+        ['many-to-one', 'products_mo', false],
+        ['one-to-many', 'products_om', true],
+        ['many-many', 'products_mm', true],
+        ['many-way', 'products_mw', true],
+      ])('%s relation (%s)', (relationType, fieldName, isManyRelation) => {
+        test('Can retrieve the relation(s) for an entity that have some relations', async () => {
           const res = await rq({
             method: 'GET',
-            url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].id}/${fieldName}`,
-            qs: {
-              _q: '',
-            },
+            url: `/content-manager/relations/api::shop.shop/${data.shops[0].id}/${fieldName}`,
           });
 
           expect(res.status).toBe(200);
-          expect(res.body.results).toMatchObject([
-            {
+
+          if (isManyRelation) {
+            expect(res.body.results).toMatchObject([
+              {
+                id: expect.any(Number),
+                name: 'Candle',
+                ...addPublishedAtCheck(null),
+              },
+              {
+                id: expect.any(Number),
+                name: 'Skate',
+                ...addPublishedAtCheck(expect.any(String)),
+              },
+            ]);
+          } else {
+            expect(res.body.data).toMatchObject({
               id: expect.any(Number),
               name: 'Skate',
               ...addPublishedAtCheck(expect.any(String)),
-            },
-            {
-              id: expect.any(Number),
-              name: 'Candle',
-              ...addPublishedAtCheck(null),
-            },
-          ]);
-        });
-      }
-    });
-
-    describe.each([
-      ['compo_products_ow', false],
-      ['compo_products_mw', true],
-    ])('Relation in a component (%s)', (fieldName, isManyRelation) => {
-      test('Can retrieve the relation(s)', async () => {
-        const res = await rq({
-          method: 'GET',
-          url: `/content-manager/collection-types/api::shop.shop/${data.shops[0].myCompo.id}/${fieldName}`,
-          qs: {
-            component: 'default.compo',
-          },
+            });
+          }
         });
 
-        expect(res.status).toBe(200);
+        test("Can retrieve the relation(s) for an entity that don't have relations yet", async () => {
+          const res = await rq({
+            method: 'GET',
+            url: `/content-manager/relations/api::shop.shop/${data.shops[1].id}/${fieldName}`,
+          });
+
+          expect(res.status).toBe(200);
+          if (isManyRelation) {
+            expect(res.body.results).toHaveLength(0);
+          } else {
+            expect(res.body.data).toBe(null);
+          }
+        });
 
         if (isManyRelation) {
-          expect(res.body.results).toMatchObject([
-            {
+          test("Can search ''", async () => {
+            const res = await rq({
+              method: 'GET',
+              url: `/content-manager/relations/api::shop.shop/${data.shops[0].id}/${fieldName}`,
+              qs: {
+                _q: '',
+              },
+            });
+
+            expect(res.status).toBe(200);
+            expect(res.body.results).toMatchObject([
+              {
+                id: expect.any(Number),
+                name: 'Candle',
+                ...addPublishedAtCheck(null),
+              },
+              {
+                id: expect.any(Number),
+                name: 'Skate',
+                ...addPublishedAtCheck(expect.any(String)),
+              },
+            ]);
+          });
+        }
+      });
+    });
+
+    describe('On a component', () => {
+      test('Fail when the component is not found', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/default.compo/999999/compo_products_ow`,
+        });
+
+        expect(res.status).toBe(404);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: 'Not Found',
+            name: 'NotFoundError',
+            status: 404,
+          },
+        });
+      });
+
+      test("Fail when the field doesn't exist", async () => {
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/default.compo/${data.shops[0].myCompo.id}/unknown`,
+        });
+
+        expect(res.status).toBe(400);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: "This relational field doesn't exist",
+            name: 'BadRequestError',
+            status: 400,
+          },
+        });
+      });
+
+      test('Fail when the field exists but is not a relational field', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: `/content-manager/relations/default.compo/${data.shops[0].myCompo.id}/name`,
+        });
+
+        expect(res.status).toBe(400);
+        expect(res.body).toMatchObject({
+          data: null,
+          error: {
+            details: {},
+            message: "This relational field doesn't exist",
+            name: 'BadRequestError',
+            status: 400,
+          },
+        });
+      });
+
+      describe.each([
+        ['one-way', 'compo_products_ow', false],
+        ['many-way', 'compo_products_mw', true],
+      ])('%s relation (%s)', (relationType, fieldName, isManyRelation) => {
+        test('Can retrieve the relation(s)', async () => {
+          const res = await rq({
+            method: 'GET',
+            url: `/content-manager/relations/default.compo/${data.shops[0].myCompo.id}/${fieldName}`,
+          });
+
+          expect(res.status).toBe(200);
+
+          if (isManyRelation) {
+            expect(res.body.results).toMatchObject([
+              {
+                id: expect.any(Number),
+                name: 'Candle',
+                ...addPublishedAtCheck(null),
+              },
+              {
+                id: expect.any(Number),
+                name: 'Skate',
+                ...addPublishedAtCheck(expect.any(String)),
+              },
+            ]);
+          } else {
+            expect(res.body.data).toMatchObject({
               id: expect.any(Number),
               name: 'Skate',
               ...addPublishedAtCheck(expect.any(String)),
-            },
-            {
-              id: expect.any(Number),
-              name: 'Candle',
-              ...addPublishedAtCheck(null),
-            },
-          ]);
-        } else {
-          expect(res.body.results[0]).toMatchObject({
-            id: expect.any(Number),
-            name: 'Skate',
-            ...addPublishedAtCheck(expect.any(String)),
-          });
-        }
+            });
+          }
+        });
       });
     });
   });

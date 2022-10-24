@@ -47,7 +47,6 @@ const createComponents = async (uid, data) => {
           componentValue.map((value) => createComponent(componentUID, value))
         );
 
-        // TODO: add order
         componentBody[attributeName] = components.map(({ id }) => {
           return {
             id,

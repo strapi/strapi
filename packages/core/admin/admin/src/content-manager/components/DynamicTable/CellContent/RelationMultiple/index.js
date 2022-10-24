@@ -31,9 +31,10 @@ const fetchRelation = async (endPoint, notifyStatus) => {
 const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, contentType }) => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
-  const relationFetchEndpoint = useMemo(() => {
-    return getRequestUrl(`collection-types/${contentType.uid}/${entityId}/${name.split('.')[0]}`);
-  }, [entityId, name, contentType]);
+  const relationFetchEndpoint = useMemo(
+    () => getRequestUrl(`relations/${contentType.uid}/${entityId}/${name.split('.')[0]}`),
+    [entityId, name, contentType]
+  );
   const [isOpen, setIsOpen] = useState(false);
 
   const Label = (
@@ -106,7 +107,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, conte
                   defaultMessage: 'This relation contains more entities than displayed',
                 })}
               >
-                <Typography>...</Typography>
+                <Typography>…</Typography>
               </MenuItem>
             )}
           </>

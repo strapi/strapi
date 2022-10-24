@@ -84,19 +84,15 @@ module.exports = {
       path: '/relations/:model/:targetField',
       handler: 'relations.findAvailable',
       config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'plugin::content-manager.hasPermissions',
-            config: {
-              actions: [
-                'plugin::content-manager.explorer.create',
-                'plugin::content-manager.explorer.update',
-              ],
-              hasAtLeastOne: true,
-            },
-          },
-        ],
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/relations/:model/:id/:targetField',
+      handler: 'relations.findExisting',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
       },
     },
     {
@@ -184,23 +180,8 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/single-types/:model/:id/:targetField',
-      handler: 'relations.findExisting',
-      config: {
-        middlewares: [routing],
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'plugin::content-manager.hasPermissions',
-            config: { actions: ['plugin::content-manager.explorer.read'] },
-          },
-        ],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/collection-types/:model/:id/:targetField',
-      handler: 'relations.findExisting',
+      path: '/single-types/:model/actions/numberOfDraftRelations',
+      handler: 'single-types.getNumberOfDraftRelations',
       config: {
         middlewares: [routing],
         policies: [
@@ -330,6 +311,21 @@ module.exports = {
           {
             name: 'plugin::content-manager.hasPermissions',
             config: { actions: ['plugin::content-manager.explorer.delete'] },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/collection-types/:model/:id/actions/numberOfDraftRelations',
+      handler: 'collection-types.getNumberOfDraftRelations',
+      config: {
+        middlewares: [routing],
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'plugin::content-manager.hasPermissions',
+            config: { actions: ['plugin::content-manager.explorer.read'] },
           },
         ],
       },

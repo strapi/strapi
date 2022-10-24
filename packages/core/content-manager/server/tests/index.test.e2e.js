@@ -20,9 +20,10 @@ let rq;
 const getRelations = async (modelName, field, id) => {
   const res = await rq({
     method: 'GET',
-    url: `/content-manager/collection-types/api::${modelName}.${modelName}/${id}/${field}`,
+    url: `/content-manager/relations/api::${modelName}.${modelName}/${id}/${field}`,
   });
-  return res.body.results || res.body;
+
+  return res.body;
 };
 
 const deleteFixtures = async () => {
@@ -177,7 +178,7 @@ describe('Relations', () => {
       });
       expect(body.publishedAt).toBeUndefined();
 
-      const tags = await getRelations('article', 'tags', body.id);
+      const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(0);
     });
 
@@ -209,7 +210,7 @@ describe('Relations', () => {
       });
       expect(body.publishedAt).toBeUndefined();
 
-      const tags = await getRelations('article', 'tags', body.id);
+      const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(1);
       expect(tags[0].id).toBe(data.tags[0].id);
     });
@@ -240,7 +241,7 @@ describe('Relations', () => {
       });
       expect(body.publishedAt).toBeUndefined();
 
-      const tags = await getRelations('article', 'tags', body.id);
+      const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(1);
       expect(tags[0].id).toBe(data.tags[1].id);
     });
@@ -267,7 +268,7 @@ describe('Relations', () => {
       });
       expect(body.publishedAt).toBeUndefined();
 
-      const tags = await getRelations('article', 'tags', body.id);
+      const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(3);
     });
 
@@ -293,7 +294,7 @@ describe('Relations', () => {
       });
       expect(body.publishedAt).toBeUndefined();
 
-      const tags = await getRelations('article', 'tags', body.id);
+      const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(2);
     });
 
@@ -323,7 +324,7 @@ describe('Relations', () => {
       });
       expect(body.publishedAt).toBeUndefined();
 
-      const tags = await getRelations('article', 'tags', body.id);
+      const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(0);
     });
 
@@ -430,7 +431,7 @@ describe('Relations', () => {
         username: null,
       });
 
-      const tags = await getRelations('articlewithtag', 'tags', body.id);
+      const tags = (await getRelations('articlewithtag', 'tags', body.id)).results;
       expect(tags.length).toBe(1);
       expect(tags[0].id).toBe(data.tags[0].id);
     });
@@ -471,7 +472,7 @@ describe('Relations', () => {
       });
       expect(body.publishedAt).toBeUndefined();
 
-      const articles = await getRelations('category', 'articles', body.id);
+      const articles = (await getRelations('category', 'articles', body.id)).results;
       expect(articles.length).toBe(0);
     });
 
@@ -497,7 +498,7 @@ describe('Relations', () => {
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
-      const articles = await getRelations('category', 'articles', body.id);
+      const articles = (await getRelations('category', 'articles', body.id)).results;
       expect(articles.length).toBe(0);
     });
 
@@ -529,11 +530,11 @@ describe('Relations', () => {
       });
       expect(body.publishedAt).toBeUndefined();
 
-      const tags = await getRelations('article', 'tags', body.id);
+      const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(0);
 
-      const category = await getRelations('article', 'category', body.id);
-      expect(category[0].name).toBe(data.categories[0].name);
+      const category = (await getRelations('article', 'category', body.id)).data;
+      expect(category.name).toBe(data.categories[0].name);
     });
 
     test('Update article1 with cat2', async () => {
@@ -559,11 +560,11 @@ describe('Relations', () => {
         username: null,
       });
 
-      const tags = await getRelations('article', 'tags', body.id);
+      const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(0);
 
-      const category = await getRelations('article', 'category', body.id);
-      expect(category[0].name).toBe(data.categories[1].name);
+      const category = (await getRelations('article', 'category', body.id)).data;
+      expect(category.name).toBe(data.categories[1].name);
     });
 
     test('Create article2', async () => {
@@ -592,7 +593,7 @@ describe('Relations', () => {
         username: null,
       });
 
-      const tags = await getRelations('article', 'tags', body.id);
+      const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(0);
     });
 
@@ -619,11 +620,11 @@ describe('Relations', () => {
         username: null,
       });
 
-      const tags = await getRelations('article', 'tags', body.id);
+      const tags = (await getRelations('article', 'tags', body.id)).results;
       expect(tags.length).toBe(0);
 
-      const category = await getRelations('article', 'category', body.id);
-      expect(category[0].name).toBe(data.categories[1].name);
+      const category = (await getRelations('article', 'category', body.id)).data;
+      expect(category.name).toBe(data.categories[1].name);
     });
 
     test('Update cat1 with article1', async () => {
@@ -648,7 +649,7 @@ describe('Relations', () => {
         username: null,
       });
 
-      const articles = await getRelations('category', 'articles', body.id);
+      const articles = (await getRelations('category', 'articles', body.id)).results;
       expect(articles.length).toBe(1);
     });
 
@@ -677,37 +678,31 @@ describe('Relations', () => {
         username: null,
       });
 
-      const articles = await getRelations('category', 'articles', body.id);
+      const articles = (await getRelations('category', 'articles', body.id)).results;
       expect(articles.length).toBe(1);
     });
 
     test('Get article1 with cat3', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${data.articles[0].id}/category`,
+        url: `/content-manager/relations/api::article.article/${data.articles[0].id}/category`,
         method: 'GET',
       });
 
-      expect(body).toMatchObject({
-        results: [{ name: 'cat3' }],
-        pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 },
-      });
+      expect(body).toMatchObject({ data: { name: 'cat3' } });
     });
 
     test('Get article2 with cat2', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${data.articles[1].id}/category`,
+        url: `/content-manager/relations/api::article.article/${data.articles[1].id}/category`,
         method: 'GET',
       });
 
-      expect(body).toMatchObject({
-        results: [{ name: 'cat2' }],
-        pagination: { page: 1, pageSize: 5, pageCount: 1, total: 1 },
-      });
+      expect(body).toMatchObject({ data: { name: 'cat2' } });
     });
 
     test('Get cat1 without relations', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}/articles`,
+        url: `/content-manager/relations/api::category.category/${data.categories[0].id}/articles`,
         method: 'GET',
       });
 
@@ -724,7 +719,7 @@ describe('Relations', () => {
 
     test('Get cat2 with article2', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[1].id}/articles`,
+        url: `/content-manager/relations/api::category.category/${data.categories[1].id}/articles`,
         method: 'GET',
       });
 
@@ -736,7 +731,7 @@ describe('Relations', () => {
 
     test('Get cat3 with article1', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[2].id}/articles`,
+        url: `/content-manager/relations/api::category.category/${data.categories[2].id}/articles`,
         method: 'GET',
       });
 
@@ -833,8 +828,8 @@ describe('Relations', () => {
         username: null,
       });
 
-      const reference = await getRelations('article', 'reference', body.id);
-      expect(reference[0].id).toBe(data.references[0].id);
+      const reference = (await getRelations('article', 'reference', body.id)).data;
+      expect(reference.id).toBe(data.references[0].id);
     });
 
     test('Create article2 with ref1', async () => {
@@ -863,8 +858,8 @@ describe('Relations', () => {
         id: 1,
         username: null,
       });
-      const reference = await getRelations('article', 'reference', body.id);
-      expect(reference[0].id).toBe(data.references[0].id);
+      const reference = (await getRelations('article', 'reference', body.id)).data;
+      expect(reference.id).toBe(data.references[0].id);
     });
   });
 
@@ -889,8 +884,8 @@ describe('Relations', () => {
 
       expect(createdReference.id).toBeDefined();
 
-      const tag = await getRelations('reference', 'tag', createdReference.id);
-      expect(tag[0].id).toBe(createdTag.id);
+      const tag = (await getRelations('reference', 'tag', createdReference.id)).data;
+      expect(tag.id).toBe(createdTag.id);
     });
 
     test('Detach Tag to a Reference', async () => {
@@ -911,8 +906,8 @@ describe('Relations', () => {
         },
       });
 
-      let tag = await getRelations('reference', 'tag', createdReference.id);
-      expect(tag[0].id).toBe(createdTag.id);
+      let tag = (await getRelations('reference', 'tag', createdReference.id)).data;
+      expect(tag.id).toBe(createdTag.id);
 
       const { body: referenceToUpdate } = await rq({
         url: `/content-manager/collection-types/api::reference.reference/${createdReference.id}`,
@@ -922,7 +917,7 @@ describe('Relations', () => {
         },
       });
 
-      tag = await getRelations('reference', 'tag', referenceToUpdate.id);
+      tag = (await getRelations('reference', 'tag', referenceToUpdate.id)).results;
       expect(isEmpty(tag)).toBe(true);
     });
 
@@ -954,9 +949,7 @@ describe('Relations', () => {
         method: 'GET',
       });
 
-      if (!foundReference.tag || Object.keys(foundReference.tag).length === 0) return;
-
-      expect(foundReference.tag).toBe(null);
+      expect(foundReference.tag.count).toBe(0);
     });
   });
 });

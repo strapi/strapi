@@ -66,10 +66,10 @@ const setup = (props) =>
             loadingMessage={() => 'Relations are loading'}
             labelDisconnectRelation="Remove"
             numberOfRelationsToDisplay={5}
-            onRelationAdd={() => jest.fn()}
+            onRelationConnect={() => jest.fn()}
             onSearchOpen={() => jest.fn()}
             onSearchClose={() => jest.fn()}
-            onRelationRemove={() => jest.fn()}
+            onRelationDisconnect={() => jest.fn()}
             onRelationLoadMore={() => jest.fn()}
             onSearch={() => jest.fn()}
             onSearchNextPage={() => jest.fn()}
@@ -113,10 +113,10 @@ describe('Content-Manager || RelationInput', () => {
       expect(spy).toHaveBeenCalled();
     });
 
-    test('should call onRelationAdd and onSearchClose', () => {
+    test('should call onRelationConnect and onSearchClose', () => {
       const onAddSpy = jest.fn();
       const onCloseSpy = jest.fn();
-      setup({ onRelationAdd: onAddSpy, onSearchClose: onCloseSpy });
+      setup({ onRelationConnect: onAddSpy, onSearchClose: onCloseSpy });
 
       fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
       expect(screen.getByText('Relation 4')).toBeInTheDocument();
@@ -127,9 +127,9 @@ describe('Content-Manager || RelationInput', () => {
       expect(onCloseSpy).toHaveBeenCalled();
     });
 
-    test('should call onRelationRemove', () => {
+    test('should call onRelationDisconnect', () => {
       const spy = jest.fn();
-      setup({ onRelationRemove: spy });
+      setup({ onRelationDisconnect: spy });
 
       fireEvent.click(screen.getByTestId('remove-relation-1'));
 
