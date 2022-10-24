@@ -4,6 +4,7 @@ const {
   createLocalFileDestinationProvider,
   createLocalStrapiSourceProvider,
   createTransferEngine,
+  // TODO: we need to solve this issue with typescript modules
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
 const strapi = require('../../Strapi');
