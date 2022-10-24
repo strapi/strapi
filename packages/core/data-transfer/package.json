@@ -28,7 +28,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "watch": "yarn build -w"
+    "watch": "yarn build -w",
+    "test:unit": "jest --verbose"
   },
   "directories": {
     "lib": "./dist"
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@tsconfig/node16": "1.0.3",
+    "@types/jest": "29.2.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.2",
     "@types/tar": "6.1.3",
