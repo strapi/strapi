@@ -375,7 +375,7 @@ describe('RelationInputDataManager', () => {
     expect(connectRelation).toBeCalledWith(
       expect.objectContaining({
         name: expect.any(String),
-        isSingleRelation: expect.any(Boolean),
+        toOneRelation: expect.any(Boolean),
         value: expect.objectContaining({
           id: 11,
         }),
