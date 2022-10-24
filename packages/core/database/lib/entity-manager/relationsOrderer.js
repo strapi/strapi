@@ -18,7 +18,6 @@ class FractionalOrderer {
 
   _updateRelationOrder(r) {
     let idx;
-    // TODO: Throw if the relation does not exist
     if (r.position.before) {
       const { idx: _idx, relation } = this.findRelation(r.position.before);
       if (relation.init) r.order = relation.order - 0.5;
@@ -53,10 +52,17 @@ class FractionalOrderer {
     _.castArray(relations).forEach((relation) => {
       this.disconnect(relation);
 
-      const { relation: _relation, idx } = this._updateRelationOrder(relation);
-
-      // Add to the chunk
-      this.arr.splice(idx, 0, _relation);
+      try {
+        const { relation: _relation, idx } = this._updateRelationOrder(relation);
+        // Add to the chunk
+        this.arr.splice(idx, 0, _relation);
+      } catch (err) {
+        throw new Error(
+          `Could not connect ${relation.id}, position ${JSON.stringify(
+            relation.position
+          )} is invalid`
+        );
+      }
     });
     return this;
   }
