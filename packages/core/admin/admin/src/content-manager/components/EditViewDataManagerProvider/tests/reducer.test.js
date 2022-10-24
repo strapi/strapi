@@ -42,10 +42,24 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
   describe('ADD_REPEATABLE_COMPONENT_TO_FIELD', () => {
     it('should add a repeatable field with the correct __temp_key__ to the modifiedData when the leaf is an empty Array', () => {
+      const components = {
+        'blog.simple': {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
       const state = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
@@ -60,7 +74,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       const expected = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
@@ -74,7 +88,18 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       const action = {
         type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
-        componentUid: 'blog.compo',
+        componentLayoutData: {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+        allComponents: components,
         keys: ['component_field'],
         shouldCheckErrors: false,
       };
@@ -83,10 +108,24 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
     });
 
     it('should add a repeatable field with the correct __temp_key__ to the modifiedData when the leaf is not an empty Array', () => {
+      const components = {
+        'blog.simple': {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
       const state = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
@@ -101,7 +140,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       const expected = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
@@ -119,7 +158,18 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       const action = {
         type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
-        componentUid: 'blog.compo',
+        componentLayoutData: {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+        allComponents: components,
         keys: ['component_field'],
         shouldCheckErrors: true,
       };
@@ -128,10 +178,24 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
     });
 
     it('should add a repeatable field to the modifiedData when the leaf is not defined', () => {
+      const components = {
+        'blog.simple': {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
       const state = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
@@ -144,7 +208,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       const expected = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
@@ -157,7 +221,18 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       const action = {
         type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
-        componentUid: 'blog.compo',
+        componentLayoutData: {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+        allComponents: components,
         keys: ['component_field'],
         shouldCheckErrors: false,
       };
@@ -165,16 +240,206 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(reducer(state, action)).toEqual(expected);
     });
 
-    it.todo('should add a repeatable field and correctly set up the relational field');
+    it('should add a repeatable field and correctly set up the relational field', () => {
+      const components = {
+        'blog.simple': {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            relation: {
+              type: 'relation',
+            },
+          },
+        },
+      };
+
+      const state = {
+        ...initialState,
+        initialData: {
+          name: 'name',
+          component_field: [],
+        },
+        modifiedData: {
+          name: 'name',
+          component_field: [],
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        initialData: {
+          name: 'name',
+          component_field: [],
+        },
+        modifiedData: {
+          name: 'name',
+          component_field: [{ relation: [], __temp_key__: 0 }],
+        },
+      };
+
+      const action = {
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        componentLayoutData: {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            relation: {
+              type: 'relation',
+            },
+          },
+        },
+        allComponents: components,
+        keys: ['component_field'],
+        shouldCheckErrors: false,
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should add a repeatable field and not set up the relational field if its a nested repeatable field until the component with the relation is added', () => {
+      const components = {
+        'basic.simple': {
+          uid: 'basic.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            categories: {
+              type: 'relation',
+            },
+            my_name: {
+              type: 'string',
+            },
+          },
+        },
+        'basic.repetable-repeatble-relation': {
+          uid: 'basic.repetable-repeatble-relation',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            repeatable_simple: {
+              type: 'component',
+              repeatable: true,
+              component: 'basic.simple',
+            },
+          },
+        },
+      };
+
+      const state = {
+        ...initialState,
+        initialData: {
+          name: 'name',
+          repeatable_repeatable_nested_component: [],
+        },
+        modifiedData: {
+          name: 'name',
+          repeatable_repeatable_nested_component: [],
+        },
+      };
+
+      const stateAfterAddingRepeatable1 = reducer(state, {
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        keys: ['repeatable_repeatable_nested_component'],
+        componentLayoutData: {
+          uid: 'basic.repetable-repeatble-relation',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            repeatable_simple: {
+              type: 'component',
+              repeatable: true,
+              component: 'basic.simple',
+            },
+          },
+        },
+        allComponents: components,
+        shouldCheckErrors: false,
+      });
+
+      expect(stateAfterAddingRepeatable1).toEqual({
+        ...initialState,
+        initialData: {
+          name: 'name',
+          repeatable_repeatable_nested_component: [],
+        },
+        modifiedData: {
+          name: 'name',
+          repeatable_repeatable_nested_component: [{ __temp_key__: 0 }],
+        },
+      });
+
+      const stateAfterAddingRepeatable2 = reducer(stateAfterAddingRepeatable1, {
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        keys: ['repeatable_repeatable_nested_component', '0', 'repeatable_simple'],
+        componentLayoutData: {
+          uid: 'basic.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            categories: {
+              type: 'relation',
+            },
+            my_name: {
+              type: 'string',
+            },
+          },
+        },
+        allComponents: components,
+        shouldCheckErrors: false,
+      });
+
+      expect(stateAfterAddingRepeatable2).toEqual({
+        ...initialState,
+        initialData: {
+          name: 'name',
+          repeatable_repeatable_nested_component: [],
+        },
+        modifiedData: {
+          name: 'name',
+          repeatable_repeatable_nested_component: [
+            {
+              __temp_key__: 0,
+              repeatable_simple: [
+                {
+                  __temp_key__: 0,
+                  categories: [],
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
   });
 
   describe('ADD_COMPONENT_TO_DYNAMIC_ZONE', () => {
     it('should add a component in a DZ to the modifiedData when the DZ is not defined', () => {
+      const components = {
+        'blog.simple': {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
       const state = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
-          'default.test': { ok: true },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
@@ -187,22 +452,32 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       const expected = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
-          'default.test': { ok: true },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
         },
         modifiedData: {
           name: 'name',
-          dz: [{ ok: true, __component: 'default.test' }],
+          dz: [{ name: 'test', __component: 'blog.simple' }],
         },
         modifiedDZName: 'dz',
       };
 
       const action = {
         type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
-        componentUid: 'default.test',
+        componentLayoutData: {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+        allComponents: components,
         keys: ['dz'],
         shouldCheckErrors: false,
       };
@@ -211,37 +486,49 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
     });
 
     it('should add a component to a DZ to the modifiedData when the DZ is defined', () => {
+      const components = {
+        'blog.simple': {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
       const state = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
-          'default.test': { ok: true },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
-          dz: [{ name: 'test', __component: 'blog.compo' }],
+          dz: [{ name: 'test', __component: 'blog.simple' }],
         },
         modifiedData: {
           name: 'name',
-          dz: [{ name: 'test', __component: 'blog.compo' }],
+          dz: [{ name: 'test', __component: 'blog.simple' }],
         },
       };
 
       const expected = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
-          'default.test': { ok: true },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
-          dz: [{ name: 'test', __component: 'blog.compo' }],
+          dz: [{ name: 'test', __component: 'blog.simple' }],
         },
         modifiedData: {
           name: 'name',
           dz: [
-            { name: 'test', __component: 'blog.compo' },
-            { ok: true, __component: 'default.test' },
+            { name: 'test', __component: 'blog.simple' },
+            { name: 'test', __component: 'blog.simple' },
           ],
         },
         modifiedDZName: 'dz',
@@ -250,9 +537,78 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       const action = {
         type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
-        componentUid: 'default.test',
+        componentLayoutData: {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+        allComponents: components,
         keys: ['dz'],
         shouldCheckErrors: true,
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should add a component field and correctly set up the relational field if that component contains a relational field', () => {
+      const components = {
+        'blog.relation': {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            relation: {
+              type: 'relation',
+            },
+          },
+        },
+      };
+
+      const state = {
+        ...initialState,
+        initialData: {
+          name: 'name',
+        },
+        modifiedData: {
+          name: 'name',
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        initialData: {
+          name: 'name',
+        },
+        modifiedData: {
+          name: 'name',
+          dz: [{ relation: [], __component: 'blog.relation' }],
+        },
+        modifiedDZName: 'dz',
+      };
+
+      const action = {
+        type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
+        componentLayoutData: {
+          uid: 'blog.relation',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            relation: {
+              type: 'relation',
+            },
+          },
+        },
+        allComponents: components,
+        keys: ['dz'],
+        shouldCheckErrors: false,
       };
 
       expect(reducer(state, action)).toEqual(expected);
@@ -480,153 +836,217 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       expect(reducer(state, action)).toEqual(expected);
     });
 
-    it('should create an array per relational field passed as the initialValues', () => {
-      const state = {
-        ...initialState,
-        formErrors: true,
-        initialData: {},
-        modifiedData: {},
-        modifiedDZName: true,
-        shouldCheckErrors: true,
-      };
-      const expected = {
-        ...initialState,
-        formErrors: {},
-        initialData: { ok: true, relation: [] },
-        modifiedData: { ok: true, relation: [] },
-        modifiedDZName: null,
-        shouldCheckErrors: false,
-      };
+    describe('relation fields', () => {
+      it('should create an array per relational field passed as the initialValues', () => {
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+        const expected = {
+          ...initialState,
+          formErrors: {},
+          initialData: { ok: true, relation: [] },
+          modifiedData: { ok: true, relation: [] },
+          modifiedDZName: null,
+          shouldCheckErrors: false,
+        };
 
-      const action = {
-        type: 'INIT_FORM',
-        initialValues: { ok: true, relation: { count: 10 } },
-        relationalFields: ['relation'],
-      };
+        const action = {
+          type: 'INIT_FORM',
+          initialValues: { ok: true, relation: { count: 10 } },
+          relationalFields: ['relation'],
+        };
 
-      expect(reducer(state, action)).toEqual(expected);
-    });
+        expect(reducer(state, action)).toEqual(expected);
+      });
 
-    it('should create an array per relational field even when the relationalFields path is nested', () => {
-      const state = {
-        ...initialState,
-        formErrors: true,
-        initialData: {},
-        modifiedData: {},
-        modifiedDZName: true,
-        shouldCheckErrors: true,
-      };
-      const expected = {
-        ...initialState,
-        formErrors: {},
-        initialData: {
-          ok: true,
-          relation: [],
-          component: {
-            field1: {
-              field2: [],
-            },
-          },
-        },
-        modifiedData: {
-          ok: true,
-          relation: [],
-          component: {
-            field1: {
-              field2: [],
-            },
-          },
-        },
-        modifiedDZName: null,
-        shouldCheckErrors: false,
-      };
-
-      const action = {
-        type: 'INIT_FORM',
-        initialValues: { ok: true, relation: { count: 10 }, component: null },
-        relationalFields: ['relation', 'component.field1.field2'],
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('should deeply create an array for a relational field even inside a repeatable component', () => {
-      const initialValues = {
-        categories: 'my_category',
-        repeatable_nested_component_relation: [
-          {
-            id: 2,
-            simple: {
-              id: 16,
-              my_name: null,
-              categories: {
-                count: 1,
+      it('should create an array per relational field even when the relationalFields path is nested', () => {
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+        const expected = {
+          ...initialState,
+          formErrors: {},
+          initialData: {
+            ok: true,
+            relation: [],
+            component: {
+              field1: {
+                field2: [],
               },
             },
-            __temp_key__: 0,
           },
-        ],
-        repeatable_single_component_relation: [
-          {
-            id: 15,
-            my_name: null,
-            categories: {
-              count: 2,
+          modifiedData: {
+            ok: true,
+            relation: [],
+            component: {
+              field1: {
+                field2: [],
+              },
             },
-            __temp_key__: 0,
           },
-        ],
-        repeatable_repeatable_nested_component: [
-          {
-            id: 1,
-            repeatable_simple: [
+          modifiedDZName: null,
+          shouldCheckErrors: false,
+        };
+
+        const action = {
+          type: 'INIT_FORM',
+          initialValues: { ok: true, relation: { count: 10 }, component: null },
+          relationalFields: ['relation', 'component.field1.field2'],
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+    });
+
+    describe('repeatable components', () => {
+      it('should create an array for a relational field', () => {
+        const initialValues = {
+          categories: 'my_category',
+          repeatable_single_component_relation: [
+            {
+              id: 15,
+              my_name: null,
+              categories: {
+                count: 2,
+              },
+              __temp_key__: 0,
+            },
+          ],
+        };
+
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+
+        const expected = {
+          ...initialState,
+          formErrors: {},
+          initialData: {
+            categories: 'my_category',
+            repeatable_single_component_relation: [
               {
-                id: 17,
+                id: 15,
+                my_name: null,
+                categories: [],
+                __temp_key__: 0,
+              },
+            ],
+          },
+          modifiedData: {
+            categories: 'my_category',
+            repeatable_single_component_relation: [
+              {
+                id: 15,
+                my_name: null,
+                categories: [],
+                __temp_key__: 0,
+              },
+            ],
+          },
+          modifiedDZName: null,
+          shouldCheckErrors: false,
+        };
+
+        const action = {
+          type: 'INIT_FORM',
+          initialValues,
+          relationalFields: ['repeatable_single_component_relation.categories'],
+          repeatableFields: ['repeatable_single_component_relation'],
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+
+      it('should create an array for a relational field inside a component', () => {
+        const initialValues = {
+          categories: 'my_category',
+          repeatable_nested_component_relation: [
+            {
+              id: 2,
+              simple: {
+                id: 16,
                 my_name: null,
                 categories: {
-                  count: 2,
+                  count: 1,
+                },
+              },
+              __temp_key__: 0,
+            },
+          ],
+        };
+
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+
+        const expected = {
+          ...initialState,
+          formErrors: {},
+          initialData: {
+            categories: 'my_category',
+            repeatable_nested_component_relation: [
+              {
+                id: 2,
+                simple: {
+                  id: 16,
+                  my_name: null,
+                  categories: [],
                 },
                 __temp_key__: 0,
               },
             ],
-            __temp_key__: 0,
           },
-        ],
-      };
-
-      const state = {
-        ...initialState,
-        formErrors: true,
-        initialData: {},
-        modifiedData: {},
-        modifiedDZName: true,
-        shouldCheckErrors: true,
-      };
-
-      const expected = {
-        ...initialState,
-        formErrors: {},
-        initialData: {
-          categories: 'my_category',
-          repeatable_nested_component_relation: [
-            {
-              id: 2,
-              simple: {
-                id: 16,
-                my_name: null,
-                categories: [],
+          modifiedData: {
+            categories: 'my_category',
+            repeatable_nested_component_relation: [
+              {
+                id: 2,
+                simple: {
+                  id: 16,
+                  my_name: null,
+                  categories: [],
+                },
+                __temp_key__: 0,
               },
-              __temp_key__: 0,
-            },
-          ],
-          repeatable_single_component_relation: [
-            {
-              id: 15,
-              my_name: null,
-              categories: [],
-              __temp_key__: 0,
-            },
-          ],
+            ],
+          },
+          modifiedDZName: null,
+          shouldCheckErrors: false,
+        };
+
+        const action = {
+          type: 'INIT_FORM',
+          initialValues,
+          relationalFields: ['repeatable_nested_component_relation.simple.categories'],
+          repeatableFields: ['repeatable_nested_component_relation'],
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+
+      it('should create an array for a relational field inside a repeatable component which is inside a repeatable component', () => {
+        const initialValues = {
+          categories: 'my_category',
           repeatable_repeatable_nested_component: [
             {
               id: 1,
@@ -634,75 +1054,311 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
                 {
                   id: 17,
                   my_name: null,
-                  categories: [],
+                  categories: {
+                    count: 2,
+                  },
                   __temp_key__: 0,
                 },
               ],
               __temp_key__: 0,
             },
           ],
-        },
-        modifiedData: {
-          categories: 'my_category',
-          repeatable_nested_component_relation: [
-            {
-              id: 2,
-              simple: {
-                id: 16,
-                my_name: null,
-                categories: [],
+        };
+
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+
+        const expected = {
+          ...initialState,
+          formErrors: {},
+          initialData: {
+            categories: 'my_category',
+            repeatable_repeatable_nested_component: [
+              {
+                id: 1,
+                repeatable_simple: [
+                  {
+                    id: 17,
+                    my_name: null,
+                    categories: [],
+                    __temp_key__: 0,
+                  },
+                ],
+                __temp_key__: 0,
               },
-              __temp_key__: 0,
-            },
-          ],
-          repeatable_single_component_relation: [
-            {
-              id: 15,
-              my_name: null,
-              categories: [],
-              __temp_key__: 0,
-            },
-          ],
-          repeatable_repeatable_nested_component: [
-            {
-              id: 1,
-              repeatable_simple: [
-                {
-                  id: 17,
-                  my_name: null,
-                  categories: [],
-                  __temp_key__: 0,
-                },
-              ],
-              __temp_key__: 0,
-            },
-          ],
-        },
-        modifiedDZName: null,
-        shouldCheckErrors: false,
-      };
+            ],
+          },
+          modifiedData: {
+            categories: 'my_category',
+            repeatable_repeatable_nested_component: [
+              {
+                id: 1,
+                repeatable_simple: [
+                  {
+                    id: 17,
+                    my_name: null,
+                    categories: [],
+                    __temp_key__: 0,
+                  },
+                ],
+                __temp_key__: 0,
+              },
+            ],
+          },
+          modifiedDZName: null,
+          shouldCheckErrors: false,
+        };
 
-      const action = {
-        type: 'INIT_FORM',
-        initialValues,
-        relationalFields: [
-          'repeatable_nested_component_relation.simple.categories',
-          'repeatable_single_component_relation.categories',
-          'repeatable_repeatable_nested_component.repeatable_simple.categories',
-        ],
-        repeatableFields: [
-          'repeatable_nested_component_relation',
-          'repeatable_single_component_relation',
-          'repeatable_repeatable_nested_component',
-        ],
-      };
+        const action = {
+          type: 'INIT_FORM',
+          initialValues,
+          relationalFields: ['repeatable_repeatable_nested_component.repeatable_simple.categories'],
+          repeatableFields: ['repeatable_repeatable_nested_component'],
+        };
 
-      expect(reducer(state, action)).toEqual(expected);
+        expect(reducer(state, action)).toEqual(expected);
+      });
     });
 
-    it.todo('repeatable zones');
+    describe('dynamic zones', () => {
+      it('should create an array for a relational field', () => {
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
 
-    it.todo('dynamic zone');
+        const expected = {
+          ...initialState,
+          formErrors: {},
+          initialData: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.simple',
+                id: 36,
+                my_name: null,
+                categories: [],
+              },
+            ],
+          },
+          modifiedData: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.simple',
+                id: 36,
+                my_name: null,
+                categories: [],
+              },
+            ],
+          },
+          modifiedDZName: null,
+          shouldCheckErrors: false,
+        };
+
+        const action = {
+          type: 'INIT_FORM',
+          initialValues: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.simple',
+                id: 36,
+                my_name: null,
+                categories: {
+                  count: 1,
+                },
+              },
+            ],
+          },
+          relationalFields: ['dynamic_relations.basic.simple.categories'],
+          dynamicZones: ['dynamic_relations'],
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+
+      it('should create an array for a relational field inside a nested component', () => {
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+
+        const expected = {
+          ...initialState,
+          formErrors: {},
+          initialData: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.nested-simple',
+                id: 7,
+                simple: {
+                  id: 47,
+                  my_name: null,
+                  categories: [],
+                },
+              },
+            ],
+          },
+          modifiedData: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.nested-simple',
+                id: 7,
+                simple: {
+                  id: 47,
+                  my_name: null,
+                  categories: [],
+                },
+              },
+            ],
+          },
+          modifiedDZName: null,
+          shouldCheckErrors: false,
+        };
+
+        const action = {
+          type: 'INIT_FORM',
+          initialValues: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.nested-simple',
+                id: 7,
+                simple: {
+                  id: 47,
+                  my_name: null,
+                  categories: {
+                    count: 1,
+                  },
+                },
+              },
+            ],
+          },
+          relationalFields: ['dynamic_relations.basic.nested-simple.simple.categories'],
+          dynamicZones: ['dynamic_relations'],
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+
+      it('should create an array for a relational field inside a repeatable field', () => {
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+
+        const expected = {
+          ...initialState,
+          formErrors: {},
+          initialData: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.repetable-repeatble-relation',
+                id: 5,
+                repeatable_simple: [
+                  {
+                    id: 48,
+                    my_name: null,
+                    categories: [],
+                    __temp_key__: 0,
+                  },
+                  {
+                    id: 49,
+                    my_name: null,
+                    categories: [],
+                    __temp_key__: 1,
+                  },
+                ],
+              },
+            ],
+          },
+          modifiedData: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.repetable-repeatble-relation',
+                id: 5,
+                repeatable_simple: [
+                  {
+                    id: 48,
+                    my_name: null,
+                    categories: [],
+                    __temp_key__: 0,
+                  },
+                  {
+                    id: 49,
+                    my_name: null,
+                    categories: [],
+                    __temp_key__: 1,
+                  },
+                ],
+              },
+            ],
+          },
+          modifiedDZName: null,
+          shouldCheckErrors: false,
+        };
+
+        const action = {
+          type: 'INIT_FORM',
+          initialValues: {
+            ok: true,
+            dynamic_relations: [
+              {
+                __component: 'basic.repetable-repeatble-relation',
+                id: 5,
+                repeatable_simple: [
+                  {
+                    id: 48,
+                    my_name: null,
+                    categories: {
+                      count: 1,
+                    },
+                    __temp_key__: 0,
+                  },
+                  {
+                    id: 49,
+                    my_name: null,
+                    categories: {
+                      count: 1,
+                    },
+                    __temp_key__: 1,
+                  },
+                ],
+              },
+            ],
+          },
+          relationalFields: [
+            'dynamic_relations.basic.repetable-repeatble-relation.repeatable_simple.categories',
+          ],
+          dynamicZones: ['dynamic_relations'],
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+    });
   });
 
   describe('MOVE_COMPONENT_FIELD', () => {
