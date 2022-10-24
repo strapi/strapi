@@ -77,7 +77,10 @@ const toAssocs = (data) => {
   }
 
   return {
-    connect: toIdArray(data?.connect),
+    connect: toIdArray(data?.connect).map((elm) => ({
+      id: elm.id,
+      position: elm.position ? elm.position : { end: true },
+    })),
     disconnect: toIdArray(data?.disconnect),
   };
 };
@@ -834,7 +837,11 @@ const createEntityManager = (db) => {
                   .where({
                     [joinColumn.name]: id,
                     [inverseJoinColumn.name]: {
-                      $in: compact(cleanRelationData.connect.map((r) => r.after || r.before)),
+                      $in: compact(
+                        cleanRelationData.connect.map(
+                          (r) => r.position?.after || r.position?.before
+                        )
+                      ),
                     },
                   })
                   .transacting(trx)

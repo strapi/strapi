@@ -19,17 +19,17 @@ class FractionalOrderer {
   _updateRelationOrder(r) {
     let idx;
     // TODO: Throw if the relation does not exist
-    if (r.before) {
-      const { idx: _idx, relation } = this.findRelation(r.before);
+    if (r.position.before) {
+      const { idx: _idx, relation } = this.findRelation(r.position.before);
       if (relation.init) r.order = relation.order - 0.5;
       else r.order = relation.order;
       idx = _idx;
-    } else if (r.after) {
-      const { idx: _idx, relation } = this.findRelation(r.after);
+    } else if (r.position.after) {
+      const { idx: _idx, relation } = this.findRelation(r.position.after);
       if (relation.init) r.order = relation.order + 0.5;
       else r.order = relation.order;
       idx = _idx + 1;
-    } else if (r.start) {
+    } else if (r.position.start) {
       r.order = 0.5;
       idx = 0;
     } else {
