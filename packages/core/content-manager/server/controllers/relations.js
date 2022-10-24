@@ -65,6 +65,15 @@ module.exports = {
           return ctx.forbidden();
         }
       }
+    } else {
+      // eslint-disable-next-line no-lonely-if
+      if (entityId) {
+        const entity = await strapi.entityService.findOne(model, entityId);
+
+        if (!entity) {
+          return ctx.notFound();
+        }
+      }
     }
 
     const targetedModel = strapi.getModel(attribute.target);
@@ -160,6 +169,12 @@ module.exports = {
 
       if (permissionChecker.cannot.read(entity, targetField)) {
         return ctx.forbidden();
+      }
+    } else {
+      const entity = await strapi.entityService.findOne(model, id);
+
+      if (!entity) {
+        return ctx.notFound();
       }
     }
 
