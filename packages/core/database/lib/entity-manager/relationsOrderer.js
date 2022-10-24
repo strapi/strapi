@@ -2,12 +2,39 @@
 
 const _ = require('lodash/fp');
 
-// TODO: Document this class properly
-/* Constraints:
-  - Expects you will never connect a relation before / after one that does not exist
-  - Expect the last initArr element to be the last relation in the database
-*/
+/**
+ * Responsible for calculating the relations order when connecting them.
+ *
+ * The connect method takes an array of relations with positional attributes:
+ * - before: the id of the relation to connect before
+ * - after: the id of the relation to connect after
+ * - end: it should be at the end
+ * - start: it should be at the start
+ *
+ * Example:
+ *  - Having a connect array like:
+ *      [  { id: 4, before: 2 }, { id: 4, before: 3}, {id: 5, before: 4} ]
+ * - With the initial relations:
+ *      [ { id: 2, order: 4 }, { id: 3, order: 10 } ]
+ * - Step by step, going through the connect array, the array of relations would be:
+ *      [ { id: 4, order: 3.5 }, { id: 2, order: 4 }, { id: 3, order: 10 } ]
+ *      [ { id: 2, order: 4 }, { id: 4, order: 3.5 }, { id: 3, order: 10 } ]
+ *      [ { id: 2, order: 4 }, {id: 5, order: 3.5},  { id: 4, order: 3.5 }, { id: 3, order: 10 } ]
+ * - The final step would be to recalculate fractional order values.
+ *      [ { id: 2, order: 4 }, {id: 5, order: 3.33},  { id: 4, order: 3.66 }, { id: 3, order: 10 } ]
+ *
+ * Constraints:
+ * - Expects you will never connect a relation before / after one that does not exist
+ * - Expect the last initArr to have any relations referenced
+ *   in the positional attributes & the last relation in the database.
+ *
+ */
 class FractionalOrderer {
+  /**
+   * @param {*} initArr - array of relations to initialize the class with
+   * @param {*} idColumn - the column name of the id
+   * @param {*} orderColumn - the column name of the order
+   */
   constructor(initArr, idColumn, orderColumn) {
     this.arr = _.castArray(initArr || []).map((r) => ({
       init: true,
