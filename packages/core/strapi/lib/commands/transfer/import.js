@@ -4,6 +4,7 @@ const {
   createLocalFileSourceProvider,
   createLocalStrapiDestinationProvider,
   createTransferEngine,
+  // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
 
 module.exports = async () => {
