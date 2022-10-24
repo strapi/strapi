@@ -28,7 +28,7 @@ const PackageStats = ({ githubStars, weeklyDownloads, npmPackageType }) => {
           <p
             aria-label={formatMessage(
               {
-                id: 'admin.pages.MarketPlacePage[{package}].githubStars',
+                id: `admin.pages.MarketPlacePage.${npmPackageType}.githubStars`,
                 defaultMessage: `This {package} was starred {starsCount} on GitHub`,
               },
               {
@@ -48,7 +48,7 @@ const PackageStats = ({ githubStars, weeklyDownloads, npmPackageType }) => {
       <p
         aria-label={formatMessage(
           {
-            id: `admin.pages.MarketPlacePage[{package}].downloads`,
+            id: `admin.pages.MarketPlacePage.${npmPackageType}.downloads`,
             defaultMessage: `This {package} has {downloadsCount} weekly downloads`,
           },
           {
