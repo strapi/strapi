@@ -59,7 +59,7 @@ const MarketPlacePage = () => {
   const isOnline = useNavigatorOnLine();
 
   const npmPackageType = query?.npmPackageType || 'plugin';
-  console.log({ npmPackageType });
+
   const [tabQuery, setTabQuery] = useState({
     plugin: npmPackageType === 'plugin' ? { ...query } : {},
     provider: npmPackageType === 'provider' ? { ...query } : {},
@@ -182,15 +182,11 @@ const MarketPlacePage = () => {
 
   const handleTabChange = (selected) => {
     const selectedTab = selected === 0 ? 'plugin' : 'provider';
-    // {plugin: {}, provider: {}}
     const hasTabQuery = tabQuery[selectedTab] && Object.keys(tabQuery[selectedTab]).length;
 
     if (hasTabQuery) {
-      console.log('getting the tab queries');
       setQuery({ ...tabQuery[selectedTab], npmPackageType: selectedTab });
     } else {
-      console.log('refresh params');
-
       setQuery({
         npmPackageType: selectedTab,
         // Clear filters
@@ -200,8 +196,6 @@ const MarketPlacePage = () => {
       });
     }
   };
-
-  console.log(tabQuery);
 
   // Check if plugins and providers are installed already
   const installedPackageNames = Object.keys(dependencies);
