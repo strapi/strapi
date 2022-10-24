@@ -1366,5 +1366,271 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         expect(reducer(state, action)).toEqual(expected);
       });
     });
+
+    describe('Editing a relation and preserve plugin options', () => {
+      it('Should save pluginOptions if the relation is a one side relation (oneWay, manyWay)', () => {
+        const contentTypeUID = 'api::category.category';
+        const updatedTargetUID = 'api::address.address';
+        const contentType = {
+          uid: contentTypeUID,
+          schema: {
+            name: 'address',
+            description: '',
+            connection: 'default',
+            collectionName: '',
+            attributes: [
+              { name: 'postal_code', type: 'string' },
+              {
+                name: 'one_way',
+                relation: 'oneToOne',
+                targetAttribute: null,
+                target: contentTypeUID,
+                type: 'relation',
+              },
+              {
+                name: 'category',
+                relation: 'oneToOne',
+                target: 'api::category.category',
+                targetAttribute: null,
+                type: 'relation',
+              },
+              {
+                name: 'cover',
+                type: 'media',
+                multiple: false,
+                required: false,
+              },
+            ],
+          },
+        };
+        const state = {
+          ...initialState,
+          components: {},
+          initialComponents: {},
+          contentTypes: { [contentTypeUID]: contentType },
+          initialContentTypes: { [contentTypeUID]: contentType },
+          modifiedData: {
+            components: {},
+            contentType,
+          },
+        };
+
+        const action = {
+          type: EDIT_ATTRIBUTE,
+          attributeToSet: {
+            relation: 'oneToOne',
+            targetAttribute: null,
+            target: updatedTargetUID,
+            type: 'relation',
+            name: 'one_way',
+            pluginOptions: {
+              myplugin: {
+                example: 'first',
+              },
+            },
+          },
+          forTarget: 'contentType',
+          targetUid: contentTypeUID,
+          initialAttribute: {
+            relation: 'oneToOne',
+            targetAttribute: null,
+            target: contentTypeUID,
+            type: 'relation',
+            name: 'one_way',
+          },
+          shouldAddComponentToData: false,
+        };
+        const expected = {
+          ...initialState,
+          components: {},
+          initialComponents: {},
+          contentTypes: { [contentTypeUID]: contentType },
+          initialContentTypes: { [contentTypeUID]: contentType },
+          modifiedData: {
+            components: {},
+            contentType: {
+              ...contentType,
+              schema: {
+                ...contentType.schema,
+                attributes: [
+                  { name: 'postal_code', type: 'string' },
+                  {
+                    name: 'one_way',
+                    relation: 'oneToOne',
+                    targetAttribute: null,
+                    target: updatedTargetUID,
+                    type: 'relation',
+                    pluginOptions: {
+                      myplugin: {
+                        example: 'first',
+                      },
+                    },
+                  },
+                  {
+                    name: 'category',
+                    relation: 'oneToOne',
+                    target: 'api::category.category',
+                    targetAttribute: null,
+                    type: 'relation',
+                  },
+                  {
+                    name: 'cover',
+                    type: 'media',
+                    multiple: false,
+                    required: false,
+                  },
+                ],
+              },
+            },
+          },
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+
+      it('Should preserve plugin options on the opposite attribute if the target is a the same content type and the nature is not a one side relation (oneToOne, ...)', () => {
+        const contentTypeUID = 'api::address.address';
+        const contentType = {
+          uid: contentTypeUID,
+          schema: {
+            name: 'address',
+            description: '',
+            connection: 'default',
+            collectionName: '',
+            attributes: [
+              { name: 'postal_code', type: 'string' },
+              {
+                name: 'one_to_many',
+                relation: 'oneToMany',
+                targetAttribute: 'many_to_one',
+                target: contentTypeUID,
+                type: 'relation',
+              },
+              {
+                name: 'many_to_one',
+                relation: 'manyToOne',
+                targetAttribute: 'one_to_many',
+                target: contentTypeUID,
+                type: 'relation',
+                pluginOptions: {
+                  myplugin: {
+                    example: 'first',
+                  },
+                },
+              },
+              {
+                name: 'category',
+                relation: 'oneToOne',
+                target: 'api::category.category',
+                targetAttribute: null,
+                type: 'relation',
+              },
+              {
+                name: 'cover',
+                type: 'media',
+                multiple: false,
+                required: false,
+              },
+            ],
+          },
+        };
+        const state = {
+          ...initialState,
+          components: {},
+          initialComponents: {},
+          contentTypes: { [contentTypeUID]: contentType },
+          initialContentTypes: { [contentTypeUID]: contentType },
+          modifiedData: {
+            components: {},
+            contentType,
+          },
+        };
+
+        const action = {
+          type: EDIT_ATTRIBUTE,
+          attributeToSet: {
+            relation: 'oneToMany',
+            targetAttribute: 'many_to_one',
+            target: contentTypeUID,
+            type: 'relation',
+            name: 'one_to_many',
+            pluginOptions: {
+              myplugin: {
+                example: 'first',
+              },
+            },
+          },
+          forTarget: 'contentType',
+          targetUid: contentTypeUID,
+          initialAttribute: {
+            relation: 'oneToMany',
+            targetAttribute: 'many_to_one',
+            target: contentTypeUID,
+            type: 'relation',
+            name: 'one_to_many',
+          },
+          shouldAddComponentToData: false,
+        };
+
+        const expected = {
+          ...initialState,
+          components: {},
+          initialComponents: {},
+          contentTypes: { [contentTypeUID]: contentType },
+          initialContentTypes: { [contentTypeUID]: contentType },
+          modifiedData: {
+            components: {},
+            contentType: {
+              ...contentType,
+              schema: {
+                ...contentType.schema,
+                attributes: [
+                  { name: 'postal_code', type: 'string' },
+                  {
+                    name: 'one_to_many',
+                    relation: 'oneToMany',
+                    targetAttribute: 'many_to_one',
+                    target: contentTypeUID,
+                    type: 'relation',
+                    pluginOptions: {
+                      myplugin: {
+                        example: 'first',
+                      },
+                    },
+                  },
+                  {
+                    name: 'many_to_one',
+                    relation: 'manyToOne',
+                    targetAttribute: 'one_to_many',
+                    target: contentTypeUID,
+                    type: 'relation',
+                    pluginOptions: {
+                      myplugin: {
+                        example: 'first',
+                      },
+                    },
+                  },
+                  {
+                    name: 'category',
+                    relation: 'oneToOne',
+                    target: 'api::category.category',
+                    targetAttribute: null,
+                    type: 'relation',
+                  },
+                  {
+                    name: 'cover',
+                    type: 'media',
+                    multiple: false,
+                    required: false,
+                  },
+                ],
+              },
+            },
+          },
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+    });
   });
 });

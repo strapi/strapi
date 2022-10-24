@@ -311,6 +311,10 @@ const reducer = (state = initialState, action) =>
           toSet.private = rest.private;
         }
 
+        if (rest.pluginOptions) {
+          toSet.pluginOptions = rest.pluginOptions;
+        }
+
         const currentAttributeIndex = updatedAttributes.findIndex(
           ({ name }) => name === initialAttribute.name
         );
@@ -323,6 +327,7 @@ const reducer = (state = initialState, action) =>
         let oppositeAttributeNameToRemove = null;
         let oppositeAttributeNameToUpdate = null;
         let oppositeAttributeToCreate = null;
+        let initialOppositeAttribute = null;
 
         const currentUid = get(state, ['modifiedData', ...pathToDataToEdit, 'uid']);
         const didChangeTargetRelation = initialAttribute.target !== rest.target;
@@ -378,6 +383,29 @@ const reducer = (state = initialState, action) =>
           updatedAttributes.splice(indexToRemove, 1);
         }
 
+        // In order to preserve plugin options need to get the initial opposite attribute settings
+        if (!shouldRemoveOppositeAttributeBecauseOfTargetChange) {
+          const initialTargetContentType = get(state, [
+            'initialContentTypes',
+            initialAttribute.target,
+          ]);
+
+          if (initialTargetContentType) {
+            const oppositeAttributeIndex = findAttributeIndex(
+              initialTargetContentType,
+              initialAttribute.targetAttribute
+            );
+
+            initialOppositeAttribute = get(state, [
+              'initialContentTypes',
+              initialAttribute.target,
+              'schema',
+              'attributes',
+              oppositeAttributeIndex,
+            ]);
+          }
+        }
+
         // Create the opposite attribute
         if (
           shouldCreateOppositeAttributeBecauseOfRelationTypeChange ||
@@ -393,6 +421,10 @@ const reducer = (state = initialState, action) =>
 
           if (rest.private) {
             oppositeAttributeToCreate.private = rest.private;
+          }
+
+          if (initialOppositeAttribute && initialOppositeAttribute.pluginOptions) {
+            oppositeAttributeToCreate.pluginOptions = initialOppositeAttribute.pluginOptions;
           }
 
           const indexOfInitialAttribute = updatedAttributes.findIndex(
@@ -422,6 +454,10 @@ const reducer = (state = initialState, action) =>
 
           if (rest.private) {
             oppositeAttributeToCreate.private = rest.private;
+          }
+
+          if (initialOppositeAttribute && initialOppositeAttribute.pluginOptions) {
+            oppositeAttributeToCreate.pluginOptions = initialOppositeAttribute.pluginOptions;
           }
 
           if (oppositeAttributeNameToUpdate) {
