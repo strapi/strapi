@@ -3,6 +3,7 @@
 const {
   isUndefined,
   castArray,
+  compact,
   isNil,
   has,
   isString,
@@ -37,6 +38,7 @@ const {
   deleteRelations,
   cleanOrderColumns,
 } = require('./regular-relations');
+const FractionalOrderer = require('./relationsOrderer');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -827,18 +829,43 @@ const createEntityManager = (db) => {
 
               // add order value
               if (hasOrderColumn(attribute)) {
-                const orderMax = (
-                  await this.createQueryBuilder(joinTable.name)
-                    .max(orderColumnName)
-                    .where({ [joinColumn.name]: id })
-                    .where(joinTable.on || {})
-                    .first()
-                    .transacting(trx)
-                    .execute()
-                ).max;
+                // TODO : Merge with the one below
+                const adjacentRelations = await this.createQueryBuilder(joinTable.name)
+                  .where({
+                    [joinColumn.name]: id,
+                    [inverseJoinColumn.name]: {
+                      $in: compact(cleanRelationData.connect.map((r) => r.after || r.before)),
+                    },
+                  })
+                  .transacting(trx)
+                  .execute();
 
-                insert.forEach((row, idx) => {
-                  row[orderColumnName] = orderMax + idx + 1;
+                const maxOrder = await this.createQueryBuilder(joinTable.name)
+                  .max(orderColumnName)
+                  .where({ [joinColumn.name]: id })
+                  .where(joinTable.on || {})
+                  .first()
+                  .transacting(trx)
+                  .execute();
+
+                // If maxOrder.max value is not in adjacentRelations, it means that the last relation
+                if (!adjacentRelations.find((r) => r[orderColumnName] === maxOrder.max)) {
+                  adjacentRelations.push({
+                    [inverseJoinColumn.name]: -1,
+                    [joinTable.orderColumnName]: maxOrder.max,
+                  });
+                }
+
+                const orderMap = new FractionalOrderer(
+                  adjacentRelations,
+                  inverseJoinColumn.name,
+                  joinTable.orderColumnName
+                )
+                  .connect(cleanRelationData.connect)
+                  .getOrderMap();
+
+                insert.forEach((row) => {
+                  row[orderColumnName] = orderMap[row[inverseJoinColumn.name]];
                 });
               }
 
