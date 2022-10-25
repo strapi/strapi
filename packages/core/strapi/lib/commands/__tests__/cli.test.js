@@ -2,7 +2,7 @@
 
 const { Command } = require('commander');
 const path = require('path');
-const { runCommand } = require('../index');
+const { runStrapiCommand } = require('../index');
 
 const makeArgv = (...args) => {
   return ['node', path.resolve(__dirname, __filename), ...args];
@@ -34,7 +34,7 @@ describe('strapi command', () => {
     const cmd = 'wrongCommand';
     const errString = `error: unknown command '${cmd}'`;
 
-    await runCommand(makeArgv(cmd), command);
+    await runStrapiCommand(makeArgv(cmd), command);
 
     expect(exit).toHaveBeenCalledWith(1);
 
@@ -45,7 +45,7 @@ describe('strapi command', () => {
   });
 
   it('--version outputs version', async () => {
-    await runCommand(makeArgv('version'), command);
+    await runStrapiCommand(makeArgv('version'), command);
 
     expect(exit).toHaveBeenCalledWith(0);
   });
