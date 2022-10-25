@@ -11,6 +11,8 @@ const { Command, Option } = require('commander');
 
 const program = new Command();
 
+const { parseType } = require('@strapi/utils/lib');
+const inquirer = require('inquirer');
 const packageJSON = require('../package.json');
 
 const checkCwdIsStrapiApp = (name) => {
@@ -256,6 +258,13 @@ program
   .action(getLocalScript('ts/generate-types'));
 
 // `$ strapi export`
+const parseBool = (arg) => {
+  try {
+    return parseType({ type: 'boolean', value: arg });
+  } catch (e) {
+    return false;
+  }
+};
 // // Will be used for the options that accept a list
 // const listOption = (value) => {
 //   return value.split(',');
@@ -264,20 +273,25 @@ program
 program
   .command('export')
   .description('Export data from Strapi to file')
-  // .option('--config <configFile>', 'Path to the config file')
   .option(
     '--output <outputFilename>',
     'Filename to output (without extension) [Default: "export_{yyyymmddHHMMSS}[.tar.gz][.gpg]"]'
   )
+  .addOption(
+    new Option('--encrypt [boolean]', 'encrypt output file').default(true).argParser(parseBool)
+  ) // TODO: we need to decide what string values evaluate to true/false
+  .addOption(new Option('--no-encrypt', 'do not encrypt output file'))
+  .addOption(
+    new Option('--compress [boolean]', 'compress content').default(true).argParser(parseBool)
+  )
+  // TODO: we need to decide what string values evaluate to true/false
+  .addOption(new Option('--no-compress', 'do not compress content'))
+  .addOption(new Option('--key', 'provide encryption key in command instead of using a prompt'))
+  // Options we plan to add in the future:
+  // .option('--config <configFile>', 'Path to the config file')
   // .addOption(new Option('--sourceUrl', 'Remote url to use instead of local instance of Strapi'))
   // .addOption(new Option('--sourceToken', 'Auth token for remote Strapi')) // required if sourceUrl is set
-  .addOption(new Option('--encrypt', 'encrypt output file').default(true))
-  .addOption(new Option('--no-encrypt', 'do not encrypt output file'))
-  .addOption(new Option('--compress', 'compress content').default(true))
-  .addOption(new Option('--no-compress', 'do not compress content'))
   // .addOption(new Option('--archive', 'combine into one gzip file', true)) // for now we REQUIRE this to be true
-  .addOption(new Option('--key', 'provide encryption key in command instead of using a prompt'))
-  // .addOption(new Option('--key, -k <keyfile>', 'path to keyfile to encrypt with')) // for now we will only use passwords
   // .addOption(
   //   new Option(
   //     '--only <data,to,include>',
@@ -301,6 +315,37 @@ program
   // .addOption(
   //   new Option('--split <max MB per file>', 'split exported file when exceeding max filesize in MB')
   // )
+  .hook('preAction', async (thisCommand) => {
+    const opts = thisCommand.opts();
+
+    // if encrypt is set but we have no key, prompt for it
+    if (opts.encrypt && !opts.key) {
+      try {
+        const answers = await inquirer.prompt([
+          {
+            type: 'password',
+            message: 'Please enter an encryption key',
+            name: 'key',
+            validate(key) {
+              if (key.length > 0) return true;
+
+              return 'Key must be present when using the encrypt option';
+            },
+          },
+        ]);
+        opts.key = answers.key;
+      } catch (e) {
+        console.error('Failed to get encryption key');
+        console.error('Export process failed unexpectedly');
+        process.exit(1);
+      }
+      if (!opts.key) {
+        console.error('Failed to get encryption key');
+        console.error('Export process failed unexpectedly');
+        process.exit(1);
+      }
+    }
+  })
   .action(require('../lib/commands/transfer/export'));
 
 // `$ strapi import`
