@@ -114,7 +114,7 @@ const EventInput = ({ isDraftAndPublish }) => {
               if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
                 return (
                   <td
-                    key={header}
+                    key={header.id}
                     title={formatMessage({
                       id: 'Settings.webhooks.event.publish-tooltip',
                       defaultMessage:
@@ -129,7 +129,7 @@ const EventInput = ({ isDraftAndPublish }) => {
               }
 
               return (
-                <td key={header}>
+                <td key={header.id}>
                   <Typography variant="sigma" textColor="neutral600">
                     {formatMessage(header)}
                   </Typography>
