@@ -5,7 +5,7 @@ import { Readable, Duplex, PassThrough } from 'stream';
 /**
  * Generate and consume content-types streams in order to stream each entity individually
  */
-export const createEntitiesStream = async (strapi: Strapi.Strapi): Promise<Duplex> => {
+export const createEntitiesStream = (strapi: Strapi.Strapi): Duplex => {
   const contentTypes: ContentTypeSchema[] = Object.values(strapi.contentTypes);
 
   async function* contentTypeStreamGenerator() {
