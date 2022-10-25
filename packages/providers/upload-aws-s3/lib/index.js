@@ -10,21 +10,25 @@ const _ = require('lodash');
 const AWS = require('aws-sdk');
 
 module.exports = {
-  init({baseUrl = null, rootPath = null, s3Options, ...legacyS3Options}) {
-    if(legacyS3Options && process.env.NODE_ENV !== 'production')
-      console.log("S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. You wrap them inside the 's3Options:{}' property.")
+  init({ baseUrl = null, rootPath = null, s3Options, ...legacyS3Options }) {
+    if (legacyS3Options && process.env.NODE_ENV !== 'production')
+      process.emitWarning(
+        "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. You wrap them inside the 's3Options:{}' property."
+      );
 
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
       ...s3Options,
-      ...legacyS3Options
+      ...legacyS3Options,
     });
+
+    const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
 
     const upload = (file, customParams = {}) =>
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
         const path = file.path ? `${file.path}/` : '';
-        const fileKey = `${rootPath ? rootPath.replace(/\/+$/, "") + "/" : ""}${path}${file.hash}${file.ext}`
+        const fileKey = `${filePrefix}${path}${file.hash}${file.ext}`;
 
         S3.upload(
           {
@@ -58,9 +62,10 @@ module.exports = {
         return new Promise((resolve, reject) => {
           // delete file on S3 bucket
           const path = file.path ? `${file.path}/` : '';
+          const fileKey = `${filePrefix}${path}${file.hash}${file.ext}`;
           S3.deleteObject(
             {
-              Key: `${rootPath}${path}${file.hash}${file.ext}`,
+              Key: fileKey,
               ...customParams,
             },
             (err) => {
