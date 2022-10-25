@@ -29,6 +29,8 @@ npm install @strapi/provider-upload-aws-s3 --save
 
 See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
 
+If you're using the bucket as a CDN and deliver the content on a custom domain, you can get use of the `baseUrl` and `rootPath` properties to configure how your assets' urls will be saved inside Strapi.
+
 ### Provider Configuration
 
 `./config/plugins.js`
@@ -40,11 +42,15 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'aws-s3',
       providerOptions: {
-        accessKeyId: env('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: env('AWS_ACCESS_SECRET'),
-        region: env('AWS_REGION'),
-        params: {
-          Bucket: env('AWS_BUCKET'),
+        baseUrl: env('CDN_URL'),
+        rootPath: env('CDN_ROOT_PATH'),
+        s3Options: {
+          accessKeyId: env('AWS_ACCESS_KEY_ID'),
+          secretAccessKey: env('AWS_ACCESS_SECRET'),
+          region: env('AWS_REGION'),
+          params: {
+            Bucket: env('AWS_BUCKET'),
+          },
         },
       },
       actionOptions: {
