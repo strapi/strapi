@@ -40,7 +40,7 @@ module.exports = {
 
     if (deletedFiles.length + deletedFolders.length > 1) {
       strapi.telemetry.send('didBulkDeleteMediaLibraryElements', {
-        groupProperties: {
+        eventProperties: {
           rootFolderNumber: deletedFolders.length,
           rootAssetNumber: deletedFiles.length,
           totalFolderNumber,

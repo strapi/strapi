@@ -1,14 +1,12 @@
 'use strict';
 
-const hash = require('hash.js');
+const crypto = require('crypto');
 
 const generateAdminUserHash = (ctx) => {
-  if (!ctx?.state?.user) return '';
-  try {
-    return hash.sha256().update(ctx.state.user.email).digest('hex');
-  } catch (error) {
+  if (!ctx?.state?.user) {
     return '';
   }
+  return crypto.createHash('sha256').update(ctx.state.user.email).digest('hex');
 };
 
 module.exports = {
