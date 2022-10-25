@@ -29,11 +29,16 @@ module.exports = {
 
     const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
 
+    function getFileKey(file) {
+      const path = file.path ? `${file.path}/` : '';
+
+      return `${filePrefix}${path}${file.hash}${file.ext}`;
+    }
+
     const upload = (file, customParams = {}) =>
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
-        const path = file.path ? `${file.path}/` : '';
-        const fileKey = `${filePrefix}${path}${file.hash}${file.ext}`;
+        const fileKey = getFileKey(file);
         S3.upload(
           {
             Key: fileKey,
@@ -70,8 +75,7 @@ module.exports = {
       delete(file, customParams = {}) {
         return new Promise((resolve, reject) => {
           // delete file on S3 bucket
-          const path = file.path ? `${file.path}/` : '';
-          const fileKey = `${filePrefix}${path}${file.hash}${file.ext}`;
+          const fileKey = getFileKey(file);
           S3.deleteObject(
             {
               Key: fileKey,
