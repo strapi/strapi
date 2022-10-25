@@ -84,6 +84,7 @@ class RelationsOrderer {
         // Add to the chunk
         this.arr.splice(idx, 0, _relation);
       } catch (err) {
+        strapi.log.error(err);
         throw new Error(
           `Could not connect ${relation.id}, position ${JSON.stringify(
             relation.position
