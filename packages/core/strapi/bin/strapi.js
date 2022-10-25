@@ -279,12 +279,11 @@ program
   )
   .addOption(
     new Option('--encrypt [boolean]', 'encrypt output file').default(true).argParser(parseBool)
-  ) // TODO: we need to decide what string values evaluate to true/false
+  )
   .addOption(new Option('--no-encrypt', 'do not encrypt output file'))
   .addOption(
     new Option('--compress [boolean]', 'compress content').default(true).argParser(parseBool)
   )
-  // TODO: we need to decide what string values evaluate to true/false
   .addOption(new Option('--no-compress', 'do not compress content'))
   .addOption(new Option('--key', 'provide encryption key in command instead of using a prompt'))
   // Options we plan to add in the future:
