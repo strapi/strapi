@@ -1631,6 +1631,304 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
 
         expect(reducer(state, action)).toEqual(expected);
       });
+
+      it('Should save pluginOptions if the relation is nested inside a component', () => {
+        const contentTypeUID = 'api::address.address';
+        const componentUID = 'default.dish';
+        const contentType = {
+          uid: contentTypeUID,
+          schema: {
+            name: 'address',
+            description: '',
+            connection: 'default',
+            collectionName: '',
+            attributes: [
+              {
+                name: 'dishes',
+                component: componentUID,
+                type: 'component',
+                repeatable: true,
+              },
+              { name: 'dynamiczone', type: 'dynamiczone', components: [componentUID] },
+            ],
+          },
+        };
+        const component = {
+          uid: componentUID,
+          category: 'default',
+          schema: {
+            icon: 'book',
+            name: 'dish',
+            description: '',
+            connection: 'default',
+            collectionName: 'components_dishes',
+            attributes: [
+              {
+                name: 'name',
+                type: 'string',
+                required: true,
+                default: 'My super dish',
+              },
+              {
+                name: 'description',
+                type: 'text',
+              },
+              {
+                name: 'price',
+                type: 'float',
+              },
+              {
+                name: 'category',
+                relation: 'oneToOne',
+                target: 'api::category.category',
+                targetAttribute: null,
+                type: 'relation',
+              },
+            ],
+          },
+        };
+
+        const state = {
+          ...initialState,
+          components: { [componentUID]: component },
+          initialComponents: { [componentUID]: component },
+          contentTypes: { [contentTypeUID]: contentType },
+          initialContentTypes: { [contentTypeUID]: contentType },
+          modifiedData: {
+            components: { [componentUID]: component },
+            contentType,
+          },
+        };
+
+        const action = {
+          type: EDIT_ATTRIBUTE,
+          attributeToSet: {
+            name: 'category',
+            relation: 'oneToOne',
+            target: 'api::category.category',
+            targetAttribute: null,
+            type: 'relation',
+            pluginOptions: {
+              myplugin: {
+                example: 'first',
+              },
+            },
+          },
+          forTarget: 'components',
+          targetUid: componentUID,
+          initialAttribute: {
+            name: 'category',
+            relation: 'oneToOne',
+            target: 'api::category.category',
+            targetAttribute: null,
+            type: 'relation',
+          },
+          shouldAddComponentToData: false,
+        };
+
+        const expected = {
+          ...initialState,
+          components: { [componentUID]: component },
+          initialComponents: { [componentUID]: component },
+          contentTypes: { [contentTypeUID]: contentType },
+          initialContentTypes: { [contentTypeUID]: contentType },
+          modifiedData: {
+            components: {
+              [componentUID]: {
+                ...component,
+                schema: {
+                  ...component.schema,
+                  attributes: [
+                    {
+                      name: 'name',
+                      type: 'string',
+                      required: true,
+                      default: 'My super dish',
+                    },
+                    {
+                      name: 'description',
+                      type: 'text',
+                    },
+                    {
+                      name: 'price',
+                      type: 'float',
+                    },
+                    {
+                      name: 'category',
+                      relation: 'oneToOne',
+                      target: 'api::category.category',
+                      targetAttribute: null,
+                      type: 'relation',
+                      pluginOptions: {
+                        myplugin: {
+                          example: 'first',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            contentType,
+          },
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+
+      it('Should preserve pluginOptions if the relation is nested inside a component', () => {
+        const contentTypeUID = 'api::address.address';
+        const componentUID = 'default.dish';
+        const contentType = {
+          uid: contentTypeUID,
+          schema: {
+            name: 'address',
+            description: '',
+            connection: 'default',
+            collectionName: '',
+            attributes: [
+              {
+                name: 'dishes',
+                component: componentUID,
+                type: 'component',
+                repeatable: true,
+              },
+              { name: 'dynamiczone', type: 'dynamiczone', components: [componentUID] },
+            ],
+          },
+        };
+        const component = {
+          uid: componentUID,
+          category: 'default',
+          schema: {
+            icon: 'book',
+            name: 'dish',
+            description: '',
+            connection: 'default',
+            collectionName: 'components_dishes',
+            attributes: [
+              {
+                name: 'name',
+                type: 'string',
+                required: true,
+                default: 'My super dish',
+              },
+              {
+                name: 'description',
+                type: 'text',
+              },
+              {
+                name: 'price',
+                type: 'float',
+              },
+              {
+                name: 'category',
+                relation: 'oneToOne',
+                target: 'api::category.category',
+                targetAttribute: null,
+                type: 'relation',
+                pluginOptions: {
+                  myplugin: {
+                    example: 'first',
+                  },
+                },
+              },
+            ],
+          },
+        };
+
+        const state = {
+          ...initialState,
+          components: { [componentUID]: component },
+          initialComponents: { [componentUID]: component },
+          contentTypes: { [contentTypeUID]: contentType },
+          initialContentTypes: { [contentTypeUID]: contentType },
+          modifiedData: {
+            components: { [componentUID]: component },
+            contentType,
+          },
+        };
+
+        const action = {
+          type: EDIT_ATTRIBUTE,
+          attributeToSet: {
+            name: 'category-new',
+            relation: 'oneToOne',
+            target: 'api::category.category',
+            targetAttribute: null,
+            type: 'relation',
+            pluginOptions: {
+              myplugin: {
+                example: 'first',
+              },
+            },
+          },
+          forTarget: 'components',
+          targetUid: componentUID,
+          initialAttribute: {
+            name: 'category',
+            relation: 'oneToOne',
+            target: 'api::category.category',
+            targetAttribute: null,
+            type: 'relation',
+            pluginOptions: {
+              myplugin: {
+                example: 'first',
+              },
+            },
+          },
+          shouldAddComponentToData: false,
+        };
+
+        const expected = {
+          ...initialState,
+          components: { [componentUID]: component },
+          initialComponents: { [componentUID]: component },
+          contentTypes: { [contentTypeUID]: contentType },
+          initialContentTypes: { [contentTypeUID]: contentType },
+          modifiedData: {
+            components: {
+              [componentUID]: {
+                ...component,
+                schema: {
+                  ...component.schema,
+                  attributes: [
+                    {
+                      name: 'name',
+                      type: 'string',
+                      required: true,
+                      default: 'My super dish',
+                    },
+                    {
+                      name: 'description',
+                      type: 'text',
+                    },
+                    {
+                      name: 'price',
+                      type: 'float',
+                    },
+                    {
+                      name: 'category-new',
+                      relation: 'oneToOne',
+                      target: 'api::category.category',
+                      targetAttribute: null,
+                      type: 'relation',
+                      pluginOptions: {
+                        myplugin: {
+                          example: 'first',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            contentType,
+          },
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
     });
   });
 });
