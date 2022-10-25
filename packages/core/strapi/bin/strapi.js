@@ -262,7 +262,8 @@ const parseBool = (arg) => {
   try {
     return parseType({ type: 'boolean', value: arg });
   } catch (e) {
-    return false;
+    console.error(e.message);
+    process.exit(1);
   }
 };
 // // Will be used for the options that accept a list
@@ -273,19 +274,21 @@ const parseBool = (arg) => {
 program
   .command('export')
   .description('Export data from Strapi to file')
-  .option(
-    '--output <outputFilename>',
-    'Filename to output (without extension) [Default: "export_{yyyymmddHHMMSS}[.tar.gz][.gpg]"]'
+  .addOption(
+    new Option(
+      '--output <outputFilename>',
+      'Filename to output (without extension) [Default: "export_{yyyymmddHHMMSS}[.tar.gz][.gpg]"]'
+    )
   )
   .addOption(
-    new Option('--encrypt [boolean]', 'encrypt output file').default(true).argParser(parseBool)
+    new Option('--encrypt [boolean]', 'Encrypt output file').default(true).argParser(parseBool)
   )
-  .addOption(new Option('--no-encrypt', 'do not encrypt output file'))
   .addOption(
-    new Option('--compress [boolean]', 'compress content').default(true).argParser(parseBool)
+    new Option('--compress [boolean]', 'Compress output file using gz')
+      .default(true)
+      .argParser(parseBool)
   )
-  .addOption(new Option('--no-compress', 'do not compress content'))
-  .addOption(new Option('--key', 'provide encryption key in command instead of using a prompt'))
+  .addOption(new Option('--key', 'Provide encryption key in command instead of using a prompt'))
   // Options we plan to add in the future:
   // .option('--config <configFile>', 'Path to the config file')
   // .addOption(new Option('--sourceUrl', 'Remote url to use instead of local instance of Strapi'))
