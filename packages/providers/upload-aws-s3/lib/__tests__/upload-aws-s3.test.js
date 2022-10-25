@@ -56,5 +56,47 @@ describe('AWS-S3 provider', () => {
       expect(file.url).toBeDefined();
       expect(file.url).toEqual('https://uri.test');
     });
+
+    test('Should prepend the baseUrl to the url of the file object', async () => {
+      const providerInstance = awsProvider.init({ baseUrl: 'https://cdn.test' });
+
+      S3InstanceMock.upload.mockImplementationOnce((params, callback) =>
+        callback(null, { Location: 'https://validurl.test' })
+      );
+      const file = {
+        path: 'tmp/test',
+        hash: 'test',
+        ext: '.json',
+        mime: 'application/json',
+        buffer: '',
+      };
+
+      await providerInstance.upload(file);
+
+      expect(S3InstanceMock.upload).toBeCalled();
+      expect(file.url).toBeDefined();
+      expect(file.url).toEqual('https://cdn.test/tmp/test/test.json');
+    });
+
+    test('Should prepend the baseUrl and rootPath to the url of the file object', async () => {
+      const providerInstance = awsProvider.init({ baseUrl: 'https://cdn.test', rootPath: 'dir/' });
+
+      S3InstanceMock.upload.mockImplementationOnce((params, callback) =>
+        callback(null, { Location: 'https://validurl.test' })
+      );
+      const file = {
+        path: 'tmp/test',
+        hash: 'test',
+        ext: '.json',
+        mime: 'application/json',
+        buffer: '',
+      };
+
+      await providerInstance.upload(file);
+
+      expect(S3InstanceMock.upload).toBeCalled();
+      expect(file.url).toBeDefined();
+      expect(file.url).toEqual('https://cdn.test/dir/tmp/test/test.json');
+    });
   });
 });
