@@ -9,10 +9,10 @@ const useTracking = () => {
   const appInfo = useAppInfos();
   const adminUserId = appInfo?.adminUserId;
 
-  trackRef.current = (event, properties) => {
-    if (uuid) {
+  trackRef.current = async (event, properties) => {
+    if (uuid && !window.strapi.telemetryDisabled) {
       try {
-        axios.post(
+        await axios.post(
           'https://analytics.strapi.io/api/v2/track',
           {
             event,
@@ -20,7 +20,11 @@ const useTracking = () => {
             deviceId,
             eventProperties: { ...properties },
             userProperties: {},
-            groupProperties: { ...telemetryProperties, projectId: uuid },
+            groupProperties: {
+              ...telemetryProperties,
+              projectId: uuid,
+              projectType: window.strapi.projectType,
+            },
           },
           {
             headers: { 'Content-Type': 'application/json' },
