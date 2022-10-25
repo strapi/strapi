@@ -1,4 +1,4 @@
-import { Duplex } from 'stream-chain';
+import { Duplex } from 'stream';
 import { isEmpty, castArray, concat, set } from 'lodash/fp';
 import type { RelationsType } from '@strapi/strapi';
 import { ILink } from '../../../types';

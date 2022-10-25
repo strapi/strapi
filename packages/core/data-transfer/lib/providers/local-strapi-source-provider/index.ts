@@ -31,15 +31,11 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   async close(): Promise<void> {
-    if (!this.strapi) {
-      return;
-    }
-
     const { autoDestroy } = this.options;
 
     // Basically `!== false` but more deterministic
     if (autoDestroy === undefined || autoDestroy === true) {
-      await this.strapi.destroy();
+      await this.strapi?.destroy();
     }
   }
 
@@ -55,7 +51,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
     return chain([
       // Entities stream
-      await createEntitiesStream(this.strapi),
+      createEntitiesStream(this.strapi),
       // Transform stream
       createEntitiesTransformStream(),
     ]);
