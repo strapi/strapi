@@ -17,7 +17,7 @@ function assertUrlProtocol(url) {
 module.exports = {
   init({ baseUrl = null, rootPath = null, s3Options, ...legacyS3Options }) {
     if (legacyS3Options && process.env.NODE_ENV !== 'production')
-      console.log(
+      process.emitWarning(
         "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. You wrap them inside the 's3Options:{}' property."
       );
 
@@ -27,13 +27,13 @@ module.exports = {
       ...legacyS3Options,
     });
 
+    const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
+
     const upload = (file, customParams = {}) =>
       new Promise((resolve, reject) => {
         // upload file on S3 bucket
         const path = file.path ? `${file.path}/` : '';
-        const fileKey = `${rootPath ? `${rootPath.replace(/\/+$/, '')}/` : ''}${path}${file.hash}${
-          file.ext
-        }`;
+        const fileKey = `${filePrefix}${path}${file.hash}${file.ext}`;
         S3.upload(
           {
             Key: fileKey,
@@ -71,9 +71,10 @@ module.exports = {
         return new Promise((resolve, reject) => {
           // delete file on S3 bucket
           const path = file.path ? `${file.path}/` : '';
+          const fileKey = `${filePrefix}${path}${file.hash}${file.ext}`;
           S3.deleteObject(
             {
-              Key: `${rootPath}${path}${file.hash}${file.ext}`,
+              Key: fileKey,
               ...customParams,
             },
             (err) => {
