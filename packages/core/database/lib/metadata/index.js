@@ -120,7 +120,7 @@ const createCompoLinkModelMeta = (baseModelMeta) => {
         type: 'string',
       },
       order: {
-        type: 'integer',
+        type: 'float',
         column: {
           unsigned: true,
           defaultTo: null,
