@@ -93,7 +93,7 @@ function App() {
           setTelemetryProperties(properties);
 
           try {
-            fetch('https://analytics.strapi.io/api/v2/track', {
+            await fetch('https://analytics.strapi.io/api/v2/track', {
               method: 'POST',
               body: JSON.stringify({
                 // This event is anonymous

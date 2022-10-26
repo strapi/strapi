@@ -25,6 +25,7 @@ function setup(props) {
                 telemetryProperties: {
                   nestedProperty: true,
                 },
+                deviceId: 'someTestDeviceId',
                 ...props,
               }}
             >
@@ -45,21 +46,33 @@ describe('useTracking', () => {
   test('Call trackUsage() with all attributes', async () => {
     useAppInfos.mockReturnValue({
       currentEnvironment: 'testing',
+      adminUserId: 'someTestUserId',
     });
 
     const { result } = await setup();
 
     result.current.trackUsage('event', { trackingProperty: true });
 
-    expect(axios.post).toBeCalledWith(expect.any(String), {
-      event: 'event',
-      uuid: 1,
-      properties: expect.objectContaining({
-        environment: 'testing',
-        nestedProperty: true,
-        trackingProperty: true,
-      }),
-    });
+    expect(axios.post).toBeCalledWith(
+      expect.any(String),
+      {
+        adminUserId: 'someTestUserId',
+        deviceId: 'someTestDeviceId',
+        event: 'event',
+        eventProperties: {
+          trackingProperty: true,
+        },
+        groupProperties: {
+          nestedProperty: true,
+          projectId: 1,
+          projectType: 'Community',
+        },
+        userProperties: {},
+      },
+      {
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   });
 
   test('Do not track if it has been disabled', async () => {

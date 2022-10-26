@@ -1,12 +1,22 @@
-const hash = require('hash.js');
+function bufferToHex(buffer) {
+  return [...new Uint8Array(buffer)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 
-const hashAdminUserEmail = (payload) => {
+async function digestMessage(message) {
+  const msgUint8 = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+
+  return bufferToHex(hashBuffer);
+}
+
+const hashAdminUserEmail = async (payload) => {
   try {
-    const adminUserEmailHash = hash.sha256().update(payload.email).digest('hex');
-
-    return adminUserEmailHash;
+    return await digestMessage(payload.email);
   } catch (error) {
-    return '';
+    // not a secure context
+    const hash = import('hash.js');
+
+    return hash.sha256().update(payload.email).digest('hex');
   }
 };
 
