@@ -11,21 +11,23 @@ const makeArgv = (...args) => {
 describe('strapi command', () => {
   const exit = jest.spyOn(process, 'exit').mockImplementation(() => {});
   const stdoutWrite = jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
-  const writeOut = jest.fn();
-  const writeErr = jest.fn();
+  const stderrWrite = jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
+  const commanderWriteOut = jest.fn();
+  const commanderWriteErr = jest.fn();
   let command;
 
   beforeEach(() => {
     command = new Command();
     exit.mockReset();
     stdoutWrite.mockReset();
-    writeOut.mockReset();
-    writeErr.mockReset();
+    stderrWrite.mockReset();
+    commanderWriteOut.mockReset();
+    commanderWriteErr.mockReset();
 
-    // Set configureOutput instead of mocking stdout so it works even if output is changed in the future
+    // Add mocks for commander output, which we can't control
     command.configureOutput({
-      writeOut,
-      writeErr,
+      writeOut: commanderWriteOut,
+      writeErr: commanderWriteErr,
     });
   });
 
@@ -37,10 +39,9 @@ describe('strapi command', () => {
 
     expect(exit).toHaveBeenCalledWith(1);
 
-    expect(writeErr).toHaveBeenCalled();
-
     // trim to ignore newlines
-    expect(writeErr.mock.calls[0][0].trim()).toEqual(errString);
+    expect(commanderWriteErr).toHaveBeenCalledTimes(1);
+    expect(commanderWriteErr.mock.calls[0][0].trim()).toEqual(errString);
   });
 
   it('--version outputs version', async () => {
