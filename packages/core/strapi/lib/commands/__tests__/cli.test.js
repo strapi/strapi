@@ -10,8 +10,7 @@ const makeArgv = (...args) => {
 
 describe('strapi command', () => {
   const exit = jest.spyOn(process, 'exit').mockImplementation(() => {});
-  // const exit = jest.fn();
-  const stdoutWrite = jest.fn();
+  const stdoutWrite = jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
   const writeOut = jest.fn();
   const writeErr = jest.fn();
   let command;
@@ -47,6 +46,8 @@ describe('strapi command', () => {
   it('--version outputs version', async () => {
     await runStrapiCommand(makeArgv('version'), command);
 
+    expect(stdoutWrite).toHaveBeenCalledTimes(1);
+    expect(stdoutWrite.mock.calls[0][0].trim()).toEqual(require('../../../package.json').version);
     expect(exit).toHaveBeenCalledWith(0);
   });
 });
