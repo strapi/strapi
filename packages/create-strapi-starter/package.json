@@ -21,7 +21,7 @@
     "commander": "7.1.0",
     "execa": "5.0.0",
     "fs-extra": "9.1.0",
-    "git-url-parse": "11.4.4",
+    "git-url-parse": "^13.1.0",
     "inquirer": "8.1.0",
     "js-yaml": "4.1.0",
     "node-fetch": "^2.6.1",

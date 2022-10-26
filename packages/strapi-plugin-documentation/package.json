@@ -23,7 +23,7 @@
     "jsonwebtoken": "^8.1.0",
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
-    "moment": "^2.29.1",
+    "moment": "^2.29.4",
     "path-to-regexp": "^3.1.0",
     "react": "^16.14.0",
     "react-copy-to-clipboard": "^5.0.3",
@@ -37,7 +37,7 @@
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
     "strapi-helper-plugin": "3.6.10",
-    "swagger-ui-dist": "3.47.1"
+    "swagger-ui-dist": "4.15.1"
   },
   "repository": {
     "type": "git",
