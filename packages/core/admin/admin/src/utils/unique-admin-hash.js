@@ -14,7 +14,7 @@ const hashAdminUserEmail = async (payload) => {
     return await digestMessage(payload.email);
   } catch (error) {
     // not a secure context
-    const hash = import('hash.js');
+    const hash = await import('hash.js');
 
     return hash.sha256().update(payload.email).digest('hex');
   }
