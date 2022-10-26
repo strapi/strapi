@@ -423,13 +423,13 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
         type: 'increments',
       },
       [joinColumnName]: {
-        type: 'float',
+        type: 'integer',
         column: {
           unsigned: true,
         },
       },
       [inverseJoinColumnName]: {
-        type: 'float',
+        type: 'integer',
         column: {
           unsigned: true,
         },
