@@ -59,9 +59,9 @@ class RelationsOrderer {
       r.order = 0.5;
       idx = 0;
     } else {
-      const lastRelation = this.arr.at(-1);
+      const lastRelation = this.arr[this.arr.length - 1];
       // TODO: Use a big number instead of lastRelation.order
-      if (lastRelation.init) r.order = lastRelation.order + 0.5;
+      if (lastRelation?.init) r.order = lastRelation.order + 0.5;
       else r.order = lastRelation.order;
       idx = this.arr.length;
     }
@@ -112,7 +112,7 @@ class RelationsOrderer {
     return _(this.arr)
       .groupBy('order')
       .reduce((acc, relations) => {
-        if (relations.at(0).init) return acc;
+        if (relations[0]?.init) return acc;
         relations.forEach((relation, idx) => {
           acc[relation.id] = Math.floor(relation.order) + (idx + 1) / (relations.length + 1);
         });
