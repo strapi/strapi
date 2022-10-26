@@ -9,7 +9,7 @@ async function digestMessage(message) {
   return bufferToHex(hashBuffer);
 }
 
-const hashAdminUserEmail = async (payload) => {
+export default async function hashAdminUserEmail(payload) {
   try {
     return await digestMessage(payload.email);
   } catch (error) {
@@ -18,6 +18,4 @@ const hashAdminUserEmail = async (payload) => {
 
     return hash.sha256().update(payload.email).digest('hex');
   }
-};
-
-module.exports = hashAdminUserEmail;
+}
