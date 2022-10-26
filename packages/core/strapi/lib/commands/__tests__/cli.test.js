@@ -11,19 +11,15 @@ const makeArgv = (...args) => {
 describe('strapi command', () => {
   const exit = jest.spyOn(process, 'exit').mockImplementation(() => {});
   const stdoutWrite = jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
-  const stderrWrite = jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
+  // const stderrWrite = jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
   const commanderWriteOut = jest.fn();
   const commanderWriteErr = jest.fn();
   let command;
 
   beforeEach(() => {
-    command = new Command();
-    exit.mockReset();
-    stdoutWrite.mockReset();
-    stderrWrite.mockReset();
-    commanderWriteOut.mockReset();
-    commanderWriteErr.mockReset();
+    jest.clearAllMocks();
 
+    command = new Command();
     // Add mocks for commander output, which we can't control
     command.configureOutput({
       writeOut: commanderWriteOut,
