@@ -5,9 +5,6 @@ import type {
   ITransferEngineOptions,
 } from '../../types';
 
-import { pipeline } from 'stream';
-import { chain } from 'stream-chain';
-
 class TransferEngine implements ITransferEngine {
   sourceProvider: ISourceProvider;
   destinationProvider: IDestinationProvider;

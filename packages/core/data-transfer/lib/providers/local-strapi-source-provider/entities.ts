@@ -10,10 +10,13 @@ export const createEntitiesStream = (strapi: Strapi.Strapi): Duplex => {
 
   async function* contentTypeStreamGenerator() {
     for (const contentType of contentTypes) {
-      // TODO: Replace with the correct API when we'll have it
-      const stream: Readable = await strapi.entityService.stream(contentType.uid, {
-        populate: getContentTypeEntitiesPopulateAttributes(contentType),
-      });
+      const stream: Readable = strapi.db
+        // Create a query builder instance (default type is 'select')
+        .queryBuilder(contentType.uid)
+        // Apply the populate
+        .populate(getPopulateAttributes(contentType))
+        // Get a readable stream
+        .stream();
 
       yield { contentType, stream };
     }
@@ -53,7 +56,7 @@ export const createEntitiesTransformStream = (): PassThrough => {
 /**
  * Get the list of attributes that needs to be populated for the entities streaming
  */
-const getContentTypeEntitiesPopulateAttributes = (contentType: ContentTypeSchema) => {
+const getPopulateAttributes = (contentType: ContentTypeSchema) => {
   const { attributes } = contentType;
 
   return Object.keys(attributes).filter((key) =>
