@@ -144,7 +144,6 @@ class ReadableStrapiQuery extends Readable {
     this[knexPerformingQuery] = false;
 
     // Tell ._destroy() that it's now safe to close the db connection
-    // Q: Should we push & return entities anyway or should we assume that the user wanted to abort the query?
     if (this.destroyed) {
       this.emit(knexQueryDone);
       return;
