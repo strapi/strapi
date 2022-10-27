@@ -7,10 +7,12 @@
 const _ = require('lodash');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
-const { Command } = require('commander');
+const { Command, Option } = require('commander');
 
 const program = new Command();
 
+const { parseType } = require('@strapi/utils/lib');
+const inquirer = require('inquirer');
 const packageJSON = require('../package.json');
 
 const checkCwdIsStrapiApp = (name) => {
@@ -254,5 +256,161 @@ program
   .option('--verbose', `Display more information about the types generation`, false)
   .option('-s, --silent', `Run the generation silently, without any output`, false)
   .action(getLocalScript('ts/generate-types'));
+
+// `$ strapi export`
+const parseBool = (arg) => {
+  try {
+    return parseType({ type: 'boolean', value: arg });
+  } catch (e) {
+    console.error(e.message);
+    process.exit(1);
+  }
+};
+// // Will be used for the options that accept a list
+// const listOption = (value) => {
+//   return value.split(',');
+// };
+
+program
+  .command('export')
+  .description('Export data from Strapi to file')
+  .addOption(
+    new Option(
+      '--output <outputFilename>',
+      'Filename to output (without extension) [Default: "export_{yyyymmddHHMMSS}[.tar.gz][.gpg]"]'
+    )
+  )
+  .addOption(
+    new Option('--encrypt [boolean]', 'Encrypt output file').default(true).argParser(parseBool)
+  )
+  .addOption(
+    new Option('--compress [boolean]', 'Compress output file using gz')
+      .default(true)
+      .argParser(parseBool)
+  )
+  .addOption(new Option('--key', 'Provide encryption key in command instead of using a prompt'))
+  // Options we plan to add in the future:
+  // .option('--config <configFile>', 'Path to the config file')
+  // .addOption(new Option('--sourceUrl', 'Remote url to use instead of local instance of Strapi'))
+  // .addOption(new Option('--sourceToken', 'Auth token for remote Strapi')) // required if sourceUrl is set
+  // .addOption(new Option('--archive', 'combine into one gzip file', true)) // for now we REQUIRE this to be true
+  // .addOption(
+  //   new Option(
+  //     '--only <data,to,include>',
+  //     'Comma-separated list of data to include (webhooks, content, localmedia, providermedia, config)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+  //     listOption
+  //   )
+  // )
+  // .addOption(
+  //   new Option(
+  //     '--exclude <data,to,exclude>',
+  //     'Comma-separated list of data to exclude (webhooks,content,localmedia,providermedia,config,relations)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+  //     listOption
+  //   )
+  // )
+  // .addOption(
+  //   new Option('--encryptionCipher <crypto cipher>', 'node crypto cipher to use', 'aes-256') // .choices(crypto.getCiphers())
+  // )
+  // .addOption(
+  //   new Option('--encryptionHash <crypto hash>', 'node crypto hash to use', 'sha-256') // .choices(crypto.getHashes())
+  // )
+  // .addOption(
+  //   new Option('--split <max MB per file>', 'split exported file when exceeding max filesize in MB')
+  // )
+  .hook('preAction', async (thisCommand) => {
+    const opts = thisCommand.opts();
+
+    // if encrypt is set but we have no key, prompt for it
+    if (opts.encrypt && !opts.key) {
+      try {
+        const answers = await inquirer.prompt([
+          {
+            type: 'password',
+            message: 'Please enter an encryption key',
+            name: 'key',
+            validate(key) {
+              if (key.length > 0) return true;
+
+              return 'Key must be present when using the encrypt option';
+            },
+          },
+        ]);
+        opts.key = answers.key;
+      } catch (e) {
+        console.error('Failed to get encryption key');
+        console.error('Export process failed unexpectedly');
+        process.exit(1);
+      }
+      if (!opts.key) {
+        console.error('Failed to get encryption key');
+        console.error('Export process failed unexpectedly');
+        process.exit(1);
+      }
+    }
+  })
+  .action(require('../lib/commands/transfer/export'));
+
+// `$ strapi import`
+// program
+//   .command('import')
+//   .description('Import data from file to Strapi')
+//   // TODO: Final version should be possible to provide all options on the CLI instead of config file
+//   // .option('--config <configFile>', 'Path to the config file')
+//   .option('--input <input filename>', 'Path to the file to be imported')
+//   // .addOption(
+//   //   new Option('--destinationUrl', 'Remote url to use instead of local instance of Strapi') // required if remote === true
+//   // )
+//   // .addOption(
+//   //   new Option('--destinationToken', 'Auth token for remote Strapi') // required if remote === true
+//   // )
+//   // .addOption(
+//   //   new Option('--destinationAllowInsecure', 'Bypass check for https on remote destination', false)
+//   // )
+//   // .addOption(
+//   //   new Option('--conflictStrategy <conflictStrategy>', 'Which strategy to use for ID conflicts')
+//   //     .choices(['restore', 'abort', 'replace', 'keep'])
+//   //     .default('keep')
+//   // )
+//   // .addOption(
+//   //   new Option(
+//   //     '--only <data,to,include>',
+//   //     'Comma-separated list of data to include (webhooks,content,localmedia,providermedia,config)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+//   //     listOption
+//   //   )
+//   // )
+//   // .addOption(
+//   //   new Option(
+//   //     '--exclude <data,to,exclude>',
+//   //     'Comma-separated list of data to exclude (webhooks,content,localmedia,providermedia,config,relations)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+//   //     listOption
+//   //   )
+//   // )
+//   // .addOption(
+//   //   new Option(
+//   //     '--schemaComparison <schemaComparison>',
+//   //     'exact requires every field to match, strict requires Strapi version and schemas to match, subset requires source schema to exist in destination, bypass skips checks'
+//   //   )
+//   //     .choices(['exact', 'strict', 'subset', 'bypass'])
+//   //     .default('exact')
+//   // )
+//   // .addOption(
+//   //   new Option(
+//   //     '--requireEmptyDestination',
+//   //     'Require the destination to not contain any entities before starting',
+//   //     true
+//   //   )
+//   // )
+//   // We do not need a compressed content option. We autodetect by "brute force"; try reading the file and within a few bytes it will fail and we try the other method
+//   // .addOption(new Option('--decompress', 'decompress content', true)) // we should be able to autodetect
+//   // A --decrypt option is superfluous. If user provides a password, we try it. Otherwise it fails and we notify user.
+//   .addOption(new Option('-password, -p', 'prompt for password'))
+//   // .addOption(
+//   //   new Option(
+//   //     '--encryptionCipher <crypto cipher>',
+//   //     'node crypto cipher to use for decryption',
+//   //     'aes-256'
+//   //   ) // .choices(crypto.getCiphers())
+//   // )
+//   .action(require('../lib/commands/transfer/import'));
 
 program.parseAsync(process.argv);
