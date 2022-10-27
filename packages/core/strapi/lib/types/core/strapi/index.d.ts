@@ -2,8 +2,8 @@ import type Koa from 'koa';
 import { Database } from '@strapi/database';
 
 import type { StringMap } from './utils';
-import type { GenericController } from '../../../core-api/controller'
-import type { GenericService } from '../../../core-api/service'
+import type { GenericController } from '../../../core-api/controller';
+import type { GenericService } from '../../../core-api/service';
 
 // TODO move custom fields types to a separate file
 interface CustomFieldServerOptions {
@@ -93,8 +93,15 @@ export interface Strapi {
   contentType(uid: string): any;
 
   /**
+   * Getter for the Strapi component container
+   *
+   * It returns all the registered components
+   */
+  readonly components: any;
+
+  /**
    * The custom fields registry
-   * 
+   *
    * It returns the custom fields interface
    */
   readonly customFields: CustomFields;
@@ -360,7 +367,6 @@ export interface Strapi {
    * Strapi logger used to send errors, warning or information messages
    */
   log: any;
-
 
   /**
    * Used to manage cron within Strapi
