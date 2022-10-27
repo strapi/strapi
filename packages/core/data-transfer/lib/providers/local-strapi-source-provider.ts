@@ -118,7 +118,7 @@ const createMultiContentTypesStream = async (strapi: Strapi.Strapi): Promise<Dup
 /**
  * Generate an entity stream for a given content type
  */
-const getContentTypeStream = async (strapi: Strapi.Strapi, contentType: ContentTypeSchema) => {
+const getContentTypeStream = (strapi: Strapi.Strapi, contentType: ContentTypeSchema) => {
   const { attributes } = contentType;
 
   const populateAttributes = Object.keys(attributes).filter((key) =>
