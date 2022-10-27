@@ -41,11 +41,19 @@ const databases = {
   },
 };
 
+const jestCmd =
+  'jest --config jest.config.api.js --verbose --runInBand --forceExit --detectOpenHandles'.split(
+    ' '
+  );
+
 const runAllTests = async (args) => {
-  return execa('yarn', ['test:e2e', ...args], {
+  console.log(args);
+  return execa('yarn', [...jestCmd, ...args], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
     env: {
+      // if STRAPI_LICENSE is in the env the test will run in ee automatically
+      STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
       FORCE_COLOR: 1,
       ENV_PATH: process.env.ENV_PATH,
       JWT_SECRET: 'aSecret',
@@ -53,10 +61,12 @@ const runAllTests = async (args) => {
   });
 };
 
-const main = async (database, args) => {
+const main = async ({ database, generateApp }, args) => {
   try {
-    await cleanTestApp(appName);
-    await generateTestApp({ appName, database });
+    if (generateApp) {
+      await cleanTestApp(appName);
+      await generateTestApp({ appName, database });
+    }
 
     await runAllTests(args).catch(() => {
       process.stdout.write('Tests failed\n', () => {
@@ -74,6 +84,9 @@ const main = async (database, args) => {
 };
 
 yargs
+  .parserConfiguration({
+    'unknown-options-as-args': true,
+  })
   .command(
     '$0',
     'run end to end tests',
@@ -84,11 +97,13 @@ yargs
         choices: Object.keys(databases),
         default: 'sqlite',
       });
+
+      yarg.boolean('generate-app');
     },
     (argv) => {
-      const { database, _: args } = argv;
+      const { database, generateApp = true } = argv;
 
-      main(databases[database], args);
+      main({ generateApp, database: databases[database] }, argv._);
     }
   )
   .help()
