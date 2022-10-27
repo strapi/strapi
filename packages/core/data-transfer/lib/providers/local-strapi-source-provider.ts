@@ -115,15 +115,21 @@ const createMultiContentTypesStream = async (strapi: Strapi.Strapi): Promise<Dup
   });
 };
 
+const getPopulateAttributesFromContentType = (contentType: ContentTypeSchema) => {
+  const { attributes } = contentType;
+
+  const fieldsToPopulate = Object.keys(attributes).filter((key) =>
+    ['component', 'dynamiczone'].includes(attributes[key].type)
+  );
+
+  return fieldsToPopulate;
+};
+
 /**
  * Generate an entity stream for a given content type
  */
 const getContentTypeStream = async (strapi: Strapi.Strapi, contentType: ContentTypeSchema) => {
-  const { attributes } = contentType;
-
-  const populateAttributes = Object.keys(attributes).filter((key) =>
-    ['component', 'dynamiczone'].includes(attributes[key].type)
-  );
+  const populateAttributes = getPopulateAttributesFromContentType(contentType);
 
   return strapi.entityService.stream(contentType.uid, { populate: populateAttributes });
 };

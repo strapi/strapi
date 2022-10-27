@@ -11,7 +11,9 @@ interface ILocalStrapiDestinationProviderOptions {
 // const log = createLogger();
 const log = console;
 
-export const createLocalStrapiDestinationProvider = (options: ILocalStrapiDestinationProviderOptions) => {
+export const createLocalStrapiDestinationProvider = (
+  options: ILocalStrapiDestinationProviderOptions
+) => {
   return new LocalStrapiDestinationProvider(options);
 };
 
@@ -53,12 +55,14 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
         try {
           await strapi.entityService.create(uid, { data });
-        } catch (e:any) { // TODO: remove "any" cast
+        } catch (e: any) {
+          // TODO: remove "any" cast
           log.warn(
             chalk.bold(`Failed to import ${chalk.yellowBright(uid)} (${chalk.greenBright(id)})`)
           );
           e.details.errors
-            .map((err:any, i:number) => { // TODO: add correct error type
+            .map((err: any, i: number) => {
+              // TODO: add correct error type
               const info = {
                 uid: chalk.yellowBright(`[${uid}]`),
                 path: chalk.blueBright(`[${err.path.join('.')}]`),
@@ -68,7 +72,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
               return `(${i}) ${info.uid}${info.id}${info.path}: ${info.message}`;
             })
-            .forEach((message:string) => log.warn(message));
+            .forEach((message: string) => log.warn(message));
         } finally {
           callback();
         }
