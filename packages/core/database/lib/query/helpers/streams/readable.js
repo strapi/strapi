@@ -28,7 +28,7 @@ class ReadableStrapiQuery extends Readable {
     this._offset = isFinite(offset) ? offset : 0;
 
     // Max amount of entities to fetch, force null as undefined value
-    this._limit = isFinite(limit) ? limit : 0;
+    this._limit = isFinite(limit) ? limit : null;
 
     // Total amount of entities fetched
     this._fetched = 0;
@@ -126,12 +126,12 @@ class ReadableStrapiQuery extends Readable {
       const { populate } = this._qb.state;
 
       // Apply populate if needed
-      if (populate && results) {
+      if (populate) {
         await applyPopulate(results, populate, { qb: this._qb, uid: this._uid, db: this._db });
       }
 
       // Map results if asked to
-      if (this._mapResults && results) {
+      if (this._mapResults) {
         results = fromRow(this._meta, results);
       }
 
