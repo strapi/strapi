@@ -32,7 +32,7 @@ describe('Local Strapi Source Provider', () => {
       await provider.bootstrap();
       await provider.close();
 
-      expect(destroy).toHaveBeenCalled();
+      expect(destroy).toHaveBeenCalledTimes(1);
     });
 
     test('Should destroy the strapi instance if autoDestroy is true ', async () => {
@@ -46,7 +46,21 @@ describe('Local Strapi Source Provider', () => {
       await provider.bootstrap();
       await provider.close();
 
-      expect(destroy).toHaveBeenCalled();
+      expect(destroy).toHaveBeenCalledTimes(1);
+    });
+
+    test('Should destroy the strapi instance if autoDestroy is false ', async () => {
+      const destroy = jest.fn();
+
+      const provider = createLocalStrapiSourceProvider({
+        getStrapi: getStrapiFactory({ destroy }),
+        autoDestroy: false,
+      });
+
+      await provider.bootstrap();
+      await provider.close();
+
+      expect(destroy).not.toHaveBeenCalled();
     });
   });
 
