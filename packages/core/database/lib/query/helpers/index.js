@@ -7,4 +7,5 @@ module.exports = {
   ...require('./populate'),
   ...require('./where'),
   ...require('./transform'),
+  ...require('./streams'),
 };

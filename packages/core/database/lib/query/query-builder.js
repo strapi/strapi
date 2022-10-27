@@ -2,6 +2,7 @@
 
 const _ = require('lodash/fp');
 
+const { DatabaseError } = require('../errors');
 const helpers = require('./helpers');
 
 const createQueryBuilder = (uid, db) => {
@@ -408,6 +409,16 @@ const createQueryBuilder = (uid, db) => {
       } catch (error) {
         db.dialect.transformErrors(error);
       }
+    },
+
+    stream({ mapResults = true } = {}) {
+      if (state.type === 'select') {
+        return new helpers.ReadableQuery({ qb: this, db, uid, mapResults });
+      }
+
+      throw new DatabaseError(
+        `query-builder.stream() has been called with an unsupported query type: "${state.type}"`
+      );
     },
   };
 };

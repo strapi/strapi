@@ -125,5 +125,13 @@ const getContentTypeStream = async (strapi: Strapi.Strapi, contentType: ContentT
     ['component', 'dynamiczone'].includes(attributes[key].type)
   );
 
-  return strapi.entityService.stream(contentType.uid, { populate: populateAttributes });
+  return (
+    strapi.db
+      // Create a query builder instance (default type is 'select')
+      .queryBuilder(contentType.uid)
+      // Apply the populate
+      .populate(populateAttributes)
+      // Get a readable stream
+      .stream()
+  );
 };

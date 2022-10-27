@@ -31,8 +31,7 @@ type AttributeOperators<T, K extends keyof T> = {
 
 export type WhereParams<T> = {
   [K in keyof T]?: T[K] | T[K][] | AttributeOperators<T, K>;
-} &
-  LogicalOperators<T>;
+} & LogicalOperators<T>;
 
 type Sortables<T> = {
   // check sortable
@@ -158,6 +157,7 @@ export interface Database {
   lifecycles: LifecycleProvider;
   migrations: MigrationProvider;
   entityManager: EntityManager;
+  queryBuilder: any;
 
   query<T extends keyof AllTypes>(uid: T): QueryFromContentType<T>;
 }

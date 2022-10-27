@@ -133,34 +133,22 @@ class TransferEngine implements ITransferEngine {
   }
 
   async transferEntities(): Promise<void> {
-    // const inStream = await this.sourceProvider.streamEntities?.();
-    // const outStream = await this.destinationProvider.getEntitiesStream?.();
-    // if (!inStream || !outStream) {
-    //   console.log('Unable to transfer entities, one of the stream is missing');
-    //   return;
-    // }
-    // return new Promise((resolve, reject) => {
-    //   pipeline(
-    //     inStream,
-    //     chain([
-    //       (data) => {
-    //         console.log('hello', data);
-    //         return data;
-    //       },
-    //     ]),
-    //     outStream,
-    //     (e: NodeJS.ErrnoException | null) => {
-    //       if (e) {
-    //         console.log('Something wrong happened', e);
-    //         return reject(e);
-    //       }
-    //       console.log('All the entities have been transferred');
-    //       resolve();
-    //     }
-    //   );
-    // });
-    console.log('transferEntities not yet implemented');
-    return new Promise((resolve) => resolve());
+    const inStream = await this.sourceProvider.streamEntities?.();
+    const outStream = await this.destinationProvider.getEntitiesStream?.();
+    if (!inStream || !outStream) {
+      console.log('Unable to transfer entities, one of the stream is missing');
+      return;
+    }
+    return new Promise((resolve, reject) => {
+      pipeline(inStream, outStream, (e: NodeJS.ErrnoException | null) => {
+        if (e) {
+          console.log('Something wrong happened', e);
+          return reject(e);
+        }
+        console.log('All the entities have been transferred');
+        resolve();
+      });
+    });
   }
 
   async transferLinks(): Promise<void> {
