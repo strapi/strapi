@@ -2,11 +2,11 @@
 
 const { Readable } = require('stream');
 
-const kQueryDone = Symbol('kOpDone');
-const kPerformingQuery = Symbol('kPerformingQuery');
-
 const { applyPopulate } = require('../populate');
 const { fromRow } = require('../transform');
+
+const knexQueryDone = Symbol('knexQueryDone');
+const knexPerformingQuery = Symbol('knexPerformingQuery');
 
 class ReadableStrapiQuery extends Readable {
   /**
@@ -51,14 +51,14 @@ class ReadableStrapiQuery extends Readable {
     this._mapResults = mapResults;
 
     // States
-    this[kPerformingQuery] = false;
+    this[knexPerformingQuery] = false;
   }
 
   _destroy(err, cb) {
     // If the stream is destroyed while a query is being made, then wait for a
     // kQueryDone event to be emitted before actually destroying the stream
-    if (this[kPerformingQuery]) {
-      this.once(kQueryDone, (er) => cb(err || er));
+    if (this[knexPerformingQuery]) {
+      this.once(knexQueryDone, (er) => cb(err || er));
     } else {
       cb(err);
     }
@@ -112,7 +112,7 @@ class ReadableStrapiQuery extends Readable {
     query.offset(offset).limit(limit);
 
     // Lock the ._destroy()
-    this[kPerformingQuery] = true;
+    this[knexPerformingQuery] = true;
 
     let results;
     let count;
@@ -140,12 +140,12 @@ class ReadableStrapiQuery extends Readable {
     }
 
     // Unlock the ._destroy()
-    this[kPerformingQuery] = false;
+    this[knexPerformingQuery] = false;
 
     // Tell ._destroy() that it's now safe to close the db connection
     // Q: Should we push & return entities anyway or should we assume that the user wanted to abort the query?
     if (this.destroyed) {
-      this.emit(kQueryDone);
+      this.emit(knexQueryDone);
       return;
     }
 
