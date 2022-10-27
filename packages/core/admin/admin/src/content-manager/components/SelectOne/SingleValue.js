@@ -9,6 +9,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
+import { Tooltip } from '@strapi/design-system/Tooltip';
 import { getTrad } from '../../utils';
 
 const StyledBullet = styled.div`
@@ -43,7 +44,9 @@ const SingleValue = (props) => {
       <Component {...props}>
         <Flex>
           <StyledBullet title={title} isDraft={isDraft} />
-          <Typography ellipsis>{props.data.label ?? '-'}</Typography>
+          <Tooltip description={props.data.label ?? '-'}>
+            <Typography ellipsis>{props.data.label ?? '-'}</Typography>
+          </Tooltip>
         </Flex>
       </Component>
     );

@@ -110,7 +110,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c49 .sc-ezHhwS {
+.c49 .sc-kBzgEd {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -182,7 +182,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c52 .sc-ezHhwS {
+.c52 .sc-kBzgEd {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -262,7 +262,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c53 .sc-ezHhwS {
+.c53 .sc-kBzgEd {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1286,6 +1286,29 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                   class="c30"
                                 >
                                   png
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="c13"
+                          >
+                            <div
+                              class=""
+                            >
+                              <div
+                                class="c25 c28"
+                                spacing="1"
+                              >
+                                <span
+                                  class="c29"
+                                >
+                                  Asset ID
+                                </span>
+                                <span
+                                  class="c30"
+                                >
+                                  8
                                 </span>
                               </div>
                             </div>

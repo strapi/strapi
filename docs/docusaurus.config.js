@@ -12,7 +12,7 @@ const config = {
   baseUrl: '/strapi/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.png',
   organizationName: 'strapi',
   projectName: 'strapi',
   trailingSlash: false,

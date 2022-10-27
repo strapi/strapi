@@ -1063,7 +1063,7 @@ exports[`Marketplace page renders and matches the plugin tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -1203,7 +1203,7 @@ exports[`Marketplace page renders and matches the plugin tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -1223,38 +1223,46 @@ exports[`Marketplace page renders and matches the plugin tab snapshot 1`] = `
                             </svg>
                           </div>
                         </a>
-                        <button
-                          aria-disabled="false"
-                          class="c51 c52"
-                          type="button"
-                        >
+                        <span>
                           <div
-                            aria-hidden="true"
-                            class="c53 c54 c55"
+                            aria-describedby="tooltip-3"
+                            class=""
+                            tabindex="0"
                           >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <button
+                              aria-disabled="false"
+                              class="c51 c52"
+                              type="button"
                             >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
+                              <div
+                                aria-hidden="true"
+                                class="c53 c54 c55"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </div>
+                              <span
+                                class="c56 c57"
+                              >
+                                Copy install command
+                              </span>
+                            </button>
                           </div>
-                          <span
-                            class="c56 c57"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1320,7 +1328,7 @@ exports[`Marketplace page renders and matches the plugin tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -1340,38 +1348,47 @@ exports[`Marketplace page renders and matches the plugin tab snapshot 1`] = `
                             </svg>
                           </div>
                         </a>
-                        <button
-                          aria-disabled="false"
-                          class="c51 c52"
-                          type="button"
-                        >
+                        <span>
                           <div
-                            aria-hidden="true"
-                            class="c53 c54 c55"
+                            aria-describedby="tooltip-5"
+                            class=""
+                            tabindex="0"
                           >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <button
+                              aria-disabled="true"
+                              class="c51 c52"
+                              disabled=""
+                              type="button"
                             >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
+                              <div
+                                aria-hidden="true"
+                                class="c53 c54 c55"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </div>
+                              <span
+                                class="c56 c57"
+                              >
+                                Copy install command
+                              </span>
+                            </button>
                           </div>
-                          <span
-                            class="c56 c57"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1410,7 +1427,7 @@ exports[`Marketplace page renders and matches the plugin tab snapshot 1`] = `
                               Documentation
                               <span>
                                 <div
-                                  aria-describedby="tooltip-3"
+                                  aria-describedby="tooltip-7"
                                   class="c43"
                                   tabindex="0"
                                 >
@@ -1452,7 +1469,7 @@ exports[`Marketplace page renders and matches the plugin tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -1559,7 +1576,7 @@ exports[`Marketplace page renders and matches the plugin tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -1579,38 +1596,47 @@ exports[`Marketplace page renders and matches the plugin tab snapshot 1`] = `
                             </svg>
                           </div>
                         </a>
-                        <button
-                          aria-disabled="false"
-                          class="c51 c52"
-                          type="button"
-                        >
+                        <span>
                           <div
-                            aria-hidden="true"
-                            class="c53 c54 c55"
+                            aria-describedby="tooltip-9"
+                            class=""
+                            tabindex="0"
                           >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <button
+                              aria-disabled="true"
+                              class="c51 c52"
+                              disabled=""
+                              type="button"
                             >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
+                              <div
+                                aria-hidden="true"
+                                class="c53 c54 c55"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </div>
+                              <span
+                                class="c56 c57"
+                              >
+                                Copy install command
+                              </span>
+                            </button>
                           </div>
-                          <span
-                            class="c56 c57"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -2724,7 +2750,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                               Amazon Ses
                               <span>
                                 <div
-                                  aria-describedby="tooltip-9"
+                                  aria-describedby="tooltip-21"
                                   class="c43"
                                   tabindex="0"
                                 >
@@ -2766,7 +2792,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -2856,7 +2882,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                               AWS S3
                               <span>
                                 <div
-                                  aria-describedby="tooltip-11"
+                                  aria-describedby="tooltip-23"
                                   class="c43"
                                   tabindex="0"
                                 >
@@ -2898,7 +2924,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -2988,7 +3014,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                               Cloudinary
                               <span>
                                 <div
-                                  aria-describedby="tooltip-13"
+                                  aria-describedby="tooltip-25"
                                   class="c43"
                                   tabindex="0"
                                 >
@@ -3030,7 +3056,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -3110,7 +3136,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                               Local Upload
                               <span>
                                 <div
-                                  aria-describedby="tooltip-15"
+                                  aria-describedby="tooltip-27"
                                   class="c43"
                                   tabindex="0"
                                 >
@@ -3152,7 +3178,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -3242,7 +3268,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                               Mailgun
                               <span>
                                 <div
-                                  aria-describedby="tooltip-17"
+                                  aria-describedby="tooltip-29"
                                   class="c43"
                                   tabindex="0"
                                 >
@@ -3284,7 +3310,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -3374,7 +3400,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                               Nodemailer
                               <span>
                                 <div
-                                  aria-describedby="tooltip-19"
+                                  aria-describedby="tooltip-31"
                                   class="c43"
                                   tabindex="0"
                                 >
@@ -3416,7 +3442,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -3506,7 +3532,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                               Rackspace
                               <span>
                                 <div
-                                  aria-describedby="tooltip-21"
+                                  aria-describedby="tooltip-33"
                                   class="c43"
                                   tabindex="0"
                                 >
@@ -3548,7 +3574,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -3638,7 +3664,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                               SendGrid
                               <span>
                                 <div
-                                  aria-describedby="tooltip-23"
+                                  aria-describedby="tooltip-35"
                                   class="c43"
                                   tabindex="0"
                                 >
@@ -3680,7 +3706,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -3770,7 +3796,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                               Sendmail
                               <span>
                                 <div
-                                  aria-describedby="tooltip-25"
+                                  aria-describedby="tooltip-37"
                                   class="c43"
                                   tabindex="0"
                                 >
@@ -3812,7 +3838,7 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"

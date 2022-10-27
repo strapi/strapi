@@ -16,7 +16,7 @@ const FlexGap = styled(Flex)`
 
 const Settings = ({ modifiedData, onChange, sortOptions }) => {
   const { formatMessage } = useIntl();
-  const { settings } = modifiedData;
+  const { settings, metadatas } = modifiedData;
 
   return (
     <>
@@ -122,7 +122,7 @@ const Settings = ({ modifiedData, onChange, sortOptions }) => {
           >
             {sortOptions.map((sortBy) => (
               <Option key={sortBy} value={sortBy}>
-                {sortBy}
+                {metadatas[sortBy].list.label || sortBy}
               </Option>
             ))}
           </Select>

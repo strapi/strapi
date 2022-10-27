@@ -1,0 +1,36 @@
+{
+  "name": "@strapi/permissions",
+  "version": "4.4.5",
+  "description": "Strapi's permission layer.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./lib/index.js",
+  "scripts": {
+    "test:unit": "jest --verbose"
+  },
+  "dependencies": {
+    "@casl/ability": "5.4.4",
+    "@strapi/utils": "4.4.5",
+    "lodash": "4.17.21",
+    "sift": "16.0.0"
+  },
+  "engines": {
+    "node": ">=14.19.1 <=18.x.x",
+    "npm": ">=6.0.0"
+  }
+}
