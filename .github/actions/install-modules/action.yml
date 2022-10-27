@@ -9,4 +9,5 @@ runs:
     - run: $GITHUB_ACTION_PATH/script.sh
       env:
         GLOBAL_PACKAGES: ${{ inputs.globalPackages }}
+      if: steps.yarn-cache.outputs.cache-hit != 'true'
       shell: bash
