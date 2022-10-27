@@ -1,49 +1,14 @@
-import { Duplex } from 'stream';
-import { isEmpty, castArray, concat, set } from 'lodash/fp';
 import type { RelationsType } from '@strapi/strapi';
-import { ILink } from '../../../types';
+import type { ILink } from '../../../../types';
 
-/**
- * Create a Duplex instance which will stream all the links from a Strapi instance
- */
-export const createLinksStream = (strapi: any): Duplex => {
-  const schemas: any[] = Object.values(strapi.contentTypes);
+import { concat, set, isEmpty } from 'lodash/fp';
 
-  // Destroy the Duplex stream instance
-  const destroy = () => {
-    if (!stream.destroyed) {
-      stream.destroy();
-    }
-  };
-
-  // Async generator stream that returns every link from a Strapi instance
-  const stream = Duplex.from(async function* () {
-    for (const schema of schemas) {
-      const populate = getDeepPopulateQuery(strapi, schema);
-      const query = { fields: ['id'], populate };
-
-      // TODO: Replace with the DB stream API
-      const results = await strapi.entityService.findMany(schema.uid, query);
-
-      for (const entity of castArray(results)) {
-        const links = parseEntityLinks(entity, populate, schema, strapi);
-
-        for (const link of links) {
-          yield link;
-        }
-      }
-    }
-
-    destroy();
-  });
-
-  return stream;
-};
+// TODO: Fix any typings when we'll have better Strapi types
 
 /**
  * Parse every links from an entity result (including nested components and dynamic zone levels)
  */
-const parseEntityLinks = (entity: any, populate: any, schema: any, strapi: any): any[] => {
+export const parseEntityLinks = (entity: any, populate: any, schema: any, strapi: any): any[] => {
   if (!entity) {
     return [];
   }
@@ -63,10 +28,13 @@ const parseEntityLinks = (entity: any, populate: any, schema: any, strapi: any):
     const value = entity[key];
     const subPopulate = populate[key];
 
+    // Ignore nil values (relations, components or dynamic zones not set)
     if (!value) {
       continue;
     }
 
+    // Components
+    // Recurse to find relations
     if (attribute.type === 'component') {
       const componentSchema = strapi.components[attribute.component];
       const componentLinks = parseEntityLinks(value, subPopulate.populate, componentSchema, strapi);
@@ -74,6 +42,8 @@ const parseEntityLinks = (entity: any, populate: any, schema: any, strapi: any):
       links.push(...componentLinks);
     }
 
+    // Dynamic Zones
+    // We need to extract links from each items in the DZ's components
     if (attribute.type === 'dynamiczone') {
       const dzLinks = value
         .map(({ __component, ...item }: any) =>
@@ -84,6 +54,8 @@ const parseEntityLinks = (entity: any, populate: any, schema: any, strapi: any):
       links.push(...dzLinks);
     }
 
+    // Relations
+    // If it's a regular relation, extract the links but do not recurse further
     if (attribute.type === 'relation') {
       const relationLinks = parseRelationLinks({ entity, fieldName: key, value, schema });
 
@@ -97,7 +69,7 @@ const parseEntityLinks = (entity: any, populate: any, schema: any, strapi: any):
 /**
  * Parse links contained in a relational attribute
  */
-const parseRelationLinks = ({ entity, schema, fieldName, value }: any): ILink[] => {
+export const parseRelationLinks = ({ entity, schema, fieldName, value }: any): ILink[] => {
   const attribute = schema.attributes[fieldName];
 
   const { relation, target }: { relation: RelationsType; target: string } = attribute;
@@ -139,7 +111,7 @@ const parseRelationLinks = ({ entity, schema, fieldName, value }: any): ILink[] 
  * It will populate first level for relations and media as well as
  * first-level relations for nested components and dynamic zones' components
  */
-const getDeepPopulateQuery = (strapi: any, schema: any) => {
+export const getDeepPopulateQuery = (schema: any, strapi: any) => {
   const populate: { [key: string]: any } = {};
 
   for (const [key, attribute] of Object.entries<any>(schema.attributes)) {
@@ -163,7 +135,7 @@ const getDeepPopulateQuery = (strapi: any, schema: any) => {
 
       for (const component of attribute.components) {
         const componentSchema = strapi.components[component];
-        const componentPopulate = getDeepPopulateQuery(strapi, componentSchema);
+        const componentPopulate = getDeepPopulateQuery(componentSchema, strapi);
 
         // FIXME: Same problem as when trying to populate dynamic zones,
         // we don't have a way to discriminate components queries (which
@@ -179,7 +151,7 @@ const getDeepPopulateQuery = (strapi: any, schema: any) => {
     // Component (nested structure)
     if (attribute.type === 'component') {
       const componentSchema = strapi.components[attribute.component];
-      const componentPopulate = getDeepPopulateQuery(strapi, componentSchema);
+      const componentPopulate = getDeepPopulateQuery(componentSchema, strapi);
 
       if (!isEmpty(componentPopulate)) {
         setPopulateKey({ fields: ['id'], populate: componentPopulate });
@@ -194,7 +166,7 @@ const getDeepPopulateQuery = (strapi: any, schema: any) => {
  * Domain util to create a link
  * TODO: Move that to the domain layer when we'll update it
  */
-const linkBuilder = <T extends ILink = ILink>(kind: T['kind'], relation: RelationsType) => {
+export const linkBuilder = <T extends ILink = ILink>(kind: T['kind'], relation: RelationsType) => {
   const link: Partial<T> = {};
 
   link.kind = kind;
