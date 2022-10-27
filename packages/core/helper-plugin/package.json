@@ -74,7 +74,7 @@
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
     "cross-env": "^7.0.3",
-    "esbuild-loader": "2.20.0",
+    "esbuild-loader": "^2.20.0",
     "react-test-renderer": "^17.0.2",
     "require-from-string": "2.0.2",
     "rimraf": "3.0.2",
@@ -94,6 +94,6 @@
     }
   },
   "peerDependencies": {
-    "webpack": "5.74.0"
+    "webpack": "^5.74.0"
   }
 }
