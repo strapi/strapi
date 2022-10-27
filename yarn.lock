@@ -15077,10 +15077,10 @@ koa-static@5.0.0, koa-static@^5.0.0:
     debug "^3.1.0"
     koa-send "^5.0.0"
 
-koa2-ratelimit@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/koa2-ratelimit/-/koa2-ratelimit-1.1.1.tgz#9c1d8257770e4a0a08063ba2ddcaf690fd457d23"
-  integrity sha512-IpxGMdZqEhMykW0yYKGVB4vDEacPvSBH4hNpDL38ABj3W2KHNLujAljGEDg7eEjXvrRbXRSWXzANhV3c9v7nyg==
+koa2-ratelimit@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/koa2-ratelimit/-/koa2-ratelimit-1.1.2.tgz#84775e39f046ef25e4a35051f2f69568844935ef"
+  integrity sha512-Iiri4o7dVlLK6zB7kH5A4ACtPmgIys5Ad2b+RoqOx9U2V8P0pY5sD/F7piCt0w3yiLl9vckH7pMcQ9yWkRdsIg==
 
 koa@2.13.4, koa@^2.13.4:
   version "2.13.4"
@@ -17850,8 +17850,6 @@ path-case@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/path-case/-/path-case-2.1.1.tgz#94b8037c372d3fe2906e465bb45e25d226e8eea5"
   integrity sha1-lLgDfDctP+KQbkZbtF4l0ibo7qU=
-  dependencies:
-    no-case "^2.2.0"
 
 path-dirname@^1.0.0:
   version "1.0.2"
