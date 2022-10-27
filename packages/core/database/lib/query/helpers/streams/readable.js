@@ -1,6 +1,7 @@
 'use strict';
 
 const { Readable } = require('stream');
+const { isFinite } = require('lodash/fp');
 
 const { applyPopulate } = require('../populate');
 const { fromRow } = require('../transform');
@@ -24,10 +25,10 @@ class ReadableStrapiQuery extends Readable {
     const { offset, limit } = qb.state;
 
     // Original offset value
-    this._offset = offset === undefined ? 0 : offset;
+    this._offset = isFinite(offset) ? offset : 0;
 
     // Max amount of entities to fetch, force null as undefined value
-    this._limit = offset === undefined ? null : limit;
+    this._limit = isFinite(limit) ? limit : 0;
 
     // Total amount of entities fetched
     this._fetched = 0;
