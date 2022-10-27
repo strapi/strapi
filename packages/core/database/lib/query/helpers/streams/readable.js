@@ -160,9 +160,8 @@ class ReadableStrapiQuery extends Readable {
     this._fetched += count;
 
     // While there is at least one value to unpack
-    while (results.length) {
-      // Add the first one to the stream's queue
-      this.push(results.shift());
+    for (const result of results) {
+      this.push(result);
     }
 
     // If the amount of fetched entities is smaller than the
