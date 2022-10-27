@@ -5,4 +5,4 @@ if [[ -n "$GLOBAL_PACKAGES" ]]; then
 fi
 
 # run yarn
-yarn
+yarn --prefer-offline
