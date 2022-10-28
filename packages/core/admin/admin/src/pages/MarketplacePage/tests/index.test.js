@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-  render,
-  waitFor,
-  waitForElementToBeRemoved,
-  fireEvent,
-  screen,
-} from '@testing-library/react';
+import { render, waitFor, waitForElementToBeRemoved, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useTracking, useAppInfos } from '@strapi/helper-plugin';
@@ -134,7 +129,7 @@ describe('Marketplace page', () => {
   it('shows the correct options on sort select', () => {
     render(App);
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
-    fireEvent.mouseDown(sortButton);
+    userEvent.click(sortButton);
 
     const alphabeticalOption = screen.getByRole('option', { name: 'Alphabetical order' });
     const newestOption = screen.getByRole('option', { name: 'Newest' });
@@ -146,10 +141,10 @@ describe('Marketplace page', () => {
   it('changes the url on sort option select', () => {
     render(App);
     const sortButton = screen.getByRole('button', { name: /Sort by/i });
-    fireEvent.mouseDown(sortButton);
+    userEvent.click(sortButton);
 
     const newestOption = screen.getByRole('option', { name: 'Newest' });
-    fireEvent.click(newestOption);
+    userEvent.click(newestOption);
     expect(history.location.search).toEqual('?sort=submissionDate:desc');
   });
 });
