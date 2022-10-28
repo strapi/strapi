@@ -9,6 +9,7 @@ import {
   getByText,
   queryByText,
   getByRole,
+  getByLabelText,
 } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -18,8 +19,8 @@ import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
 
-const GITHUB_STARS = 12;
-const WEEKLY_DOWNLOADS = 135;
+const GITHUB_STARS = 49130;
+const WEEKLY_DOWNLOADS = 7492;
 
 const toggleNotification = jest.fn();
 
@@ -303,10 +304,18 @@ describe('Marketplace page', () => {
     const documentationCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Documentation'));
-    const githubStars = queryByText(documentationCard, GITHUB_STARS);
-    expect(githubStars).toBeVisible();
-    const weeklyDownloads = queryByText(documentationCard, WEEKLY_DOWNLOADS);
-    expect(weeklyDownloads).toBeVisible();
+
+    const githubStarsLabel = getByLabelText(
+      documentationCard,
+      `This plugin was starred ${GITHUB_STARS} on GitHub`
+    );
+    expect(githubStarsLabel).toBeVisible();
+
+    const downloadsLabel = getByLabelText(
+      documentationCard,
+      `This plugin has ${WEEKLY_DOWNLOADS} weekly downloads`
+    );
+    expect(downloadsLabel).toBeVisible();
   });
 
   it('shows github stars and weekly downloads count for each provider', () => {
@@ -317,9 +326,31 @@ describe('Marketplace page', () => {
     const cloudinaryCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Cloudinary'));
-    const githubStars = queryByText(cloudinaryCard, GITHUB_STARS);
-    expect(githubStars).toBeVisible();
-    const weeklyDownloads = queryByText(cloudinaryCard, WEEKLY_DOWNLOADS);
-    expect(weeklyDownloads).toBeVisible();
+
+    const githubStarsLabel = getByLabelText(
+      cloudinaryCard,
+      `This provider was starred ${GITHUB_STARS} on GitHub`
+    );
+    expect(githubStarsLabel).toBeVisible();
+
+    const downloadsLabel = getByLabelText(
+      cloudinaryCard,
+      `This provider has ${WEEKLY_DOWNLOADS} weekly downloads`
+    );
+    expect(downloadsLabel).toBeVisible();
+  });
+
+  it('do not show github stars if there are 0 stars for any package', () => {
+    render(App);
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    fireEvent.click(providersTab);
+    const GITHUB_STARS = 0;
+
+    const NodeMailerCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Nodemailer'));
+
+    const githubStars = queryByText(NodeMailerCard, GITHUB_STARS);
+    expect(githubStars).toBe(null);
   });
 });
