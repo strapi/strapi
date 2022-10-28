@@ -197,6 +197,19 @@ const MarketPlacePage = () => {
     }
   };
 
+  const handleSelectChange = (update) => {
+    setQuery(update);
+    setTabQuery((prev) => ({
+      ...prev,
+      [npmPackageType]: { ...prev[npmPackageType], ...update },
+    }));
+  };
+
+  const handleSelectClear = (filterType) => {
+    setQuery({ [filterType]: [] }, 'remove');
+    setTabQuery((prev) => ({ ...prev, [npmPackageType]: {} }));
+  };
+
   // Check if plugins and providers are installed already
   const installedPackageNames = Object.keys(dependencies);
 
@@ -269,17 +282,15 @@ const MarketPlacePage = () => {
             <Flex paddingBottom={4} gap={2}>
               <SortSelect
                 sortQuery={query?.sort || 'name:asc'}
-                setQuery={setQuery}
-                setTabQuery={setTabQuery}
-                npmPackageType={npmPackageType}
+                handleSelectChange={handleSelectChange}
               />
               <NpmPackagesFilters
                 npmPackageType={npmPackageType}
                 possibleCollections={possibleCollections}
                 possibleCategories={possibleCategories}
                 query={query || {}}
-                setQuery={setQuery}
-                setTabQuery={setTabQuery}
+                handleSelectChange={handleSelectChange}
+                handleSelectClear={handleSelectClear}
               />
             </Flex>
 

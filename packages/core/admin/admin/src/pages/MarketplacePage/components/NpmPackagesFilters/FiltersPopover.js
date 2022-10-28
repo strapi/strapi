@@ -11,26 +11,13 @@ const FiltersPopover = ({
   source,
   onToggle,
   query,
-  setQuery,
-  setTabQuery,
   npmPackageType,
   possibleCategories,
   possibleCollections,
+  handleSelectChange,
+  handleSelectClear,
 }) => {
   const { formatMessage } = useIntl();
-
-  const handleFilterChange = (update) => {
-    setQuery(update);
-    setTabQuery((prev) => ({
-      ...prev,
-      [npmPackageType]: { ...prev[npmPackageType], ...update },
-    }));
-  };
-
-  const handleFilterClear = (filterType) => {
-    setQuery({ [filterType]: [] }, 'remove');
-    setTabQuery((prev) => ({ ...prev, [npmPackageType]: {} }));
-  };
 
   return (
     <Popover source={source} padding={3} spacing={4} onBlur={() => {}}>
@@ -45,9 +32,9 @@ const FiltersPopover = ({
               value={query?.collections || []}
               onChange={(newCollections) => {
                 const update = { collections: newCollections };
-                handleFilterChange(update);
+                handleSelectChange(update);
               }}
-              onClear={() => handleFilterClear('collections')}
+              onClear={() => handleSelectClear('collections')}
               possibleFilters={possibleCollections}
               customizeContent={(values) =>
                 formatMessage(
@@ -71,9 +58,9 @@ const FiltersPopover = ({
                 value={query?.categories || []}
                 onChange={(newCategories) => {
                   const update = { categories: newCategories };
-                  handleFilterChange(update);
+                  handleSelectChange(update);
                 }}
-                onClear={() => handleFilterClear('categories')}
+                onClear={() => handleSelectClear('categories')}
                 possibleFilters={possibleCategories}
                 customizeContent={(values) =>
                   formatMessage(
@@ -99,11 +86,11 @@ FiltersPopover.propTypes = {
   onToggle: PropTypes.func.isRequired,
   source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
   query: PropTypes.object.isRequired,
-  setQuery: PropTypes.func.isRequired,
   npmPackageType: PropTypes.oneOf(['plugin', 'provider']).isRequired,
   possibleCollections: PropTypes.object.isRequired,
   possibleCategories: PropTypes.object.isRequired,
-  setTabQuery: PropTypes.func.isRequired,
+  handleSelectChange: PropTypes.func.isRequired,
+  handleSelectClear: PropTypes.func.isRequired,
 };
 
 export default FiltersPopover;

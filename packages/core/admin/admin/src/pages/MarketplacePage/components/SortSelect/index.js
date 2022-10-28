@@ -13,7 +13,7 @@ const SelectWrapper = styled(Box)`
   }
 `;
 
-const SortSelect = ({ sortQuery, setQuery, setTabQuery, npmPackageType }) => {
+const SortSelect = ({ sortQuery, handleSelectChange }) => {
   const { formatMessage } = useIntl();
 
   const sortTypes = {
@@ -47,11 +47,7 @@ const SortSelect = ({ sortQuery, setQuery, setTabQuery, npmPackageType }) => {
         value={sortQuery}
         customizeContent={() => formatMessage(sortTypes[sortQuery].selected)}
         onChange={(sortName) => {
-          setQuery({ sort: sortName });
-          setTabQuery((prev) => ({
-            ...prev,
-            [npmPackageType]: { ...prev[npmPackageType], sort: sortName },
-          }));
+          handleSelectChange({ sort: sortName });
         }}
       >
         {Object.entries(sortTypes).map(([sortName, messages]) => {
@@ -68,9 +64,7 @@ const SortSelect = ({ sortQuery, setQuery, setTabQuery, npmPackageType }) => {
 
 SortSelect.propTypes = {
   sortQuery: PropTypes.string.isRequired,
-  setQuery: PropTypes.func.isRequired,
-  setTabQuery: PropTypes.func.isRequired,
-  npmPackageType: PropTypes.string.isRequired,
+  handleSelectChange: PropTypes.func.isRequired,
 };
 
 export default SortSelect;

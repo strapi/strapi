@@ -28,8 +28,8 @@ const NpmPackagesFilters = ({
   possibleCategories,
   npmPackageType,
   query,
-  setQuery,
-  setTabQuery,
+  handleSelectClear,
+  handleSelectChange,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const buttonRef = useRef();
@@ -42,11 +42,7 @@ const NpmPackagesFilters = ({
       [filterType]: query[filterType].filter((previousTag) => previousTag !== tagToRemove),
     };
 
-    setQuery(update);
-    setTabQuery((prev) => ({
-      ...prev,
-      [npmPackageType]: { ...prev[npmPackageType], ...update },
-    }));
+    handleSelectChange(update);
   };
 
   return (
@@ -66,8 +62,8 @@ const NpmPackagesFilters = ({
             onToggle={handleToggle}
             source={buttonRef}
             query={query}
-            setQuery={setQuery}
-            setTabQuery={setTabQuery}
+            handleSelectClear={handleSelectClear}
+            handleSelectChange={handleSelectChange}
             possibleCollections={possibleCollections}
             possibleCategories={possibleCategories}
             npmPackageType={npmPackageType}
@@ -103,8 +99,8 @@ NpmPackagesFilters.propTypes = {
   possibleCollections: PropTypes.object.isRequired,
   possibleCategories: PropTypes.object.isRequired,
   query: PropTypes.object.isRequired,
-  setQuery: PropTypes.func.isRequired,
-  setTabQuery: PropTypes.func.isRequired,
+  handleSelectChange: PropTypes.func.isRequired,
+  handleSelectClear: PropTypes.func.isRequired,
 };
 
 export default NpmPackagesFilters;
