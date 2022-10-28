@@ -18,6 +18,9 @@ import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
 
+const GITHUB_STARS = 12;
+const WEEKLY_DOWNLOADS = 135;
+
 const toggleNotification = jest.fn();
 
 jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
@@ -290,5 +293,33 @@ describe('Marketplace page', () => {
     expect(tooltip).toHaveTextContent(
       'Unable to verify compatibility with your Strapi version: "4.1.0"'
     );
+  });
+
+  it('shows github stars and weekly downloads count for each plugin', () => {
+    render(App);
+    const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
+    fireEvent.click(pluginsTab);
+
+    const documentationCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Documentation'));
+    const githubStars = queryByText(documentationCard, GITHUB_STARS);
+    expect(githubStars).toBeVisible();
+    const weeklyDownloads = queryByText(documentationCard, WEEKLY_DOWNLOADS);
+    expect(weeklyDownloads).toBeVisible();
+  });
+
+  it('shows github stars and weekly downloads count for each provider', () => {
+    render(App);
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    fireEvent.click(providersTab);
+
+    const cloudinaryCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Cloudinary'));
+    const githubStars = queryByText(cloudinaryCard, GITHUB_STARS);
+    expect(githubStars).toBeVisible();
+    const weeklyDownloads = queryByText(cloudinaryCard, WEEKLY_DOWNLOADS);
+    expect(weeklyDownloads).toBeVisible();
   });
 });
