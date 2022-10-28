@@ -1,7 +1,6 @@
 'use strict';
 
-const exit = jest.spyOn(process, 'exit').mockImplementation(() => {});
-jest.spyOn(console, 'error').mockImplementation(() => {});
+const utils = require('../transfer/utils');
 
 const mockDataTransfer = {
   createLocalFileDestinationProvider: jest.fn(),
@@ -10,24 +9,24 @@ const mockDataTransfer = {
     transfer: jest.fn().mockReturnValue(Promise.resolve({})),
   }),
 };
+
 jest.mock('@strapi/data-transfer', () => {
   return mockDataTransfer;
 });
 
-const defaultFileName = 'defaultFilename';
-const mockUtils = {
-  getDefaultExportBackupName: jest.fn().mockReturnValue(defaultFileName),
-};
-jest.mock('../transfer/utils', () => {
-  return mockUtils;
-});
-
 const exportCommand = require('../transfer/export');
-const { getDefaultExportBackupName } = require('../transfer/utils');
+
+const exit = jest.spyOn(process, 'exit').mockImplementation(() => {});
+jest.spyOn(console, 'error').mockImplementation(() => {});
+
+const defaultFileName = 'defaultFilename';
+
+jest.mock('../transfer/utils');
 
 describe('export', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    utils.getDefaultExportBackupName.mockReturnValue(defaultFileName);
   });
 
   it('uses path provided by user', async () => {
@@ -38,8 +37,7 @@ describe('export', () => {
         file: { path: filename },
       })
     );
-
-    expect(getDefaultExportBackupName).not.toHaveBeenCalled();
+    expect(utils.getDefaultExportBackupName).not.toHaveBeenCalled();
     expect(exit).toHaveBeenCalled();
   });
 
@@ -51,7 +49,40 @@ describe('export', () => {
       })
     );
 
-    expect(getDefaultExportBackupName).toHaveBeenCalled();
+    expect(utils.getDefaultExportBackupName).toHaveBeenCalled();
+    expect(exit).toHaveBeenCalled();
+  });
+
+  it('encrypts the output file if specified', async () => {
+    const encrypt = true;
+    await exportCommand({ encrypt });
+    expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        encryption: { enabled: encrypt },
+      })
+    );
+    expect(exit).toHaveBeenCalled();
+  });
+
+  it('encrypts the output file with the given key', async () => {
+    const key = 'secret-key';
+    await exportCommand({ key });
+    expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        encryption: { key },
+      })
+    );
+    expect(exit).toHaveBeenCalled();
+  });
+
+  it('compresses the output file if specified', async () => {
+    const compress = true;
+    await exportCommand({ compress });
+    expect(mockDataTransfer.createLocalFileDestinationProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        compression: { enabled: compress },
+      })
+    );
     expect(exit).toHaveBeenCalled();
   });
 });

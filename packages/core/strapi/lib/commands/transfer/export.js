@@ -35,7 +35,6 @@ module.exports = async (args) => {
     },
   };
   const destination = createLocalFileDestinationProvider(outputOptions);
-  console.log('outputoptions', outputOptions);
   // create transfer engine
   const engine = createTransferEngine(source, destination, {
     strategy: 'restore',
