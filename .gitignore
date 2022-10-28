@@ -10,13 +10,11 @@ Icon
 .Trashes
 ._*
 
-
 ############################
 # Linux
 ############################
 
 *~
-
 
 ############################
 # Windows
@@ -30,7 +28,6 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
-
 
 ############################
 # Packages
@@ -60,7 +57,6 @@ $RECYCLE.BIN/
 *.out
 *.pid
 
-
 ############################
 # Logs and databases
 ############################
@@ -71,7 +67,6 @@ $RECYCLE.BIN/
 !.github/workflows/db/**/*.sql
 *.sqlite
 
-
 ############################
 # Misc.
 ############################
@@ -80,7 +75,6 @@ $RECYCLE.BIN/
 .idea
 nbproject
 .eslintcache
-
 
 ############################
 # Node.js
@@ -99,16 +93,12 @@ package-lock.json
 !docs/package-lock.json
 *.heapsnapshot
 
-
 ############################
 # Tests
 ############################
 
-testApp
+test-apps
 coverage
-cypress/screenshots
-cypress/videos
-
 
 ############################
 # Documentation
@@ -149,3 +139,10 @@ front-workspace.code-workspace
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+############################
+# Playwright
+############################
+playwright-report
+test-results
+!e2e/data/*.tar
