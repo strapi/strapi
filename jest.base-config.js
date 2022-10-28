@@ -2,7 +2,7 @@
 
 module.exports = {
   rootDir: __dirname,
-  setupFilesAfterEnv: ['<rootDir>/test/unit.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/test/setup/unit.setup.js'],
   modulePathIgnorePatterns: ['.cache', 'dist'],
   testPathIgnorePatterns: ['.testdata.js', '.test.utils.js'],
   // TODO: testMatch should only include files with (test|spec) even within __tests__ so that utilities can be included and ignored there

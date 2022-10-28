@@ -5,6 +5,7 @@ const frontPaths = [
   'packages/core/helper-plugin/**/*.js',
   'packages/**/tests/front/**/*.js',
   'test/config/front/**/*.js',
+  'e2e/**/*.js',
 ];
 
 module.exports = {

@@ -160,6 +160,37 @@ const sidebars = {
     },
     {
       type: 'category',
+      label: 'Testing',
+      link: {
+        type: 'generated-index',
+      },
+      collapsible: false,
+      items: [
+        {
+          type: 'category',
+          label: 'E2E',
+          items: [
+            {
+              type: 'doc',
+              label: 'Setup',
+              id: 'testing/e2e/setup',
+            },
+            {
+              type: 'doc',
+              label: 'App Template',
+              id: 'testing/e2e/app-template',
+            },
+            {
+              type: 'doc',
+              label: 'Data Transfer',
+              id: 'testing/e2e/data-transfer',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'category',
       label: 'Custom Fields',
       link: {
         type: 'doc',

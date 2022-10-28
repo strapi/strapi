@@ -2,18 +2,16 @@
 
 const path = require('path');
 const rimraf = require('rimraf');
+const execa = require('execa');
 const generateNew = require('../../packages/generators/app/lib/generate-new');
 
-// FIXME
-/* eslint-disable import/extensions */
-
 /**
- * Delete the testApp folder
- * @param {string} appName - name of the app / folder where the app is located
+ * Deletes a test app
+ * @param {string} appPath - name of the app / folder where the app is located
  */
-const cleanTestApp = (appName) => {
+const cleanTestApp = (appPath) => {
   return new Promise((resolve, reject) => {
-    rimraf(path.resolve(appName), (err) => {
+    rimraf(path.resolve(appPath), (err) => {
       if (err) reject(err);
       resolve();
     });
@@ -23,14 +21,14 @@ const cleanTestApp = (appName) => {
 /**
  * Runs strapi generate new
  * @param {Object} options - Options
- * @param {string} options.appName - Name of the app that will be created (also the name of the folder)
+ * @param {string} options.appPath - Name of the app that will be created (also the name of the folder)
  * @param {database} options.database - Arguments to create the testApp with the provided database params
  */
-const generateTestApp = async ({ appName, database }) => {
+const generateTestApp = async ({ appPath, database, template }) => {
   const scope = {
     database,
-    rootPath: path.resolve(appName),
-    name: appName,
+    rootPath: path.resolve(appPath),
+    name: path.basename(appPath),
     // disable quickstart run app after creation
     runQuickstartApp: false,
     // use package version as strapiVersion (all packages have the same version);
@@ -50,12 +48,41 @@ const generateTestApp = async ({ appName, database }) => {
       '@strapi/plugin-i18n',
     ],
     additionalsDependencies: {},
+    template,
   };
 
   await generateNew(scope);
 };
 
+/**
+ * Runs a test app
+ * @param {string} appPath - name of the app / folder where the app is located
+ */
+const runTestApp = async (appPath) => {
+  const cmdContext = {
+    stdio: 'inherit',
+    cwd: path.resolve(__dirname, '../..', appPath),
+    env: {
+      // if STRAPI_LICENSE is in the env the test will run in ee automatically
+      STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
+      FORCE_COLOR: 1,
+      JWT_SECRET: 'aSecret',
+    },
+  };
+
+  try {
+    await execa('yarn', ['strapi', 'build'], cmdContext);
+    await execa('yarn', ['strapi', 'start'], cmdContext);
+
+    process.exit(0);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+};
+
 module.exports = {
   cleanTestApp,
   generateTestApp,
+  runTestApp,
 };
