@@ -277,4 +277,24 @@ describe('Providers tab', () => {
     userEvent.click(screen.getByRole('tab', { name: /providers/i }));
     expect(collectionCards.length).toBe(2);
   });
+
+  it('shows the correct options on sort select', () => {
+    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    userEvent.click(sortButton);
+
+    const alphabeticalOption = screen.getByRole('option', { name: 'Alphabetical order' });
+    const newestOption = screen.getByRole('option', { name: 'Newest' });
+
+    expect(alphabeticalOption).toBeVisible();
+    expect(newestOption).toBeVisible();
+  });
+
+  it('changes the url on sort option select', () => {
+    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    userEvent.click(sortButton);
+
+    const newestOption = screen.getByRole('option', { name: 'Newest' });
+    userEvent.click(newestOption);
+    expect(history.location.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc');
+  });
 });
