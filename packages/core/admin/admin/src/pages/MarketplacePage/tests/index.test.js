@@ -10,6 +10,7 @@ import {
   queryByText,
   getByRole,
   getByLabelText,
+  queryByLabelText,
 } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -340,17 +341,27 @@ describe('Marketplace page', () => {
     expect(downloadsLabel).toBeVisible();
   });
 
-  it('do not show github stars if there are 0 stars for any package', () => {
+  it('show only downloads count and not github stars if there are no or 0 stars and no downloads available for any package', () => {
     render(App);
     const providersTab = screen.getByRole('tab', { name: /providers/i });
     fireEvent.click(providersTab);
     const GITHUB_STARS = 0;
+    const WEEKLY_DOWNLOADS = 0;
 
     const NodeMailerCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Nodemailer'));
 
-    const githubStars = queryByText(NodeMailerCard, GITHUB_STARS);
-    expect(githubStars).toBe(null);
+    const githubStarsLabel = queryByLabelText(
+      NodeMailerCard,
+      `This provider was starred ${GITHUB_STARS} on GitHub`
+    );
+    expect(githubStarsLabel).toBe(null);
+
+    const downloadsLabel = getByLabelText(
+      NodeMailerCard,
+      `This provider has ${WEEKLY_DOWNLOADS} weekly downloads`
+    );
+    expect(downloadsLabel).toBeVisible();
   });
 });

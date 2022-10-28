@@ -3994,12 +3994,12 @@ exports[`Marketplace page renders and matches the provider tab snapshot 1`] = `
                               />
                             </svg>
                             <p
-                              aria-label="This provider has 22 weekly downloads"
+                              aria-label="This provider has 0 weekly downloads"
                             >
                               <span
                                 class="c46"
                               >
-                                22
+                                0
                               </span>
                             </p>
                           </div>

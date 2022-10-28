@@ -790,8 +790,6 @@ const handlers = [
               developerName: 'Strapi team',
               validated: true,
               madeByStrapi: true,
-              githubStars: 0,
-              npmDownloads: 22,
             },
           },
           {
