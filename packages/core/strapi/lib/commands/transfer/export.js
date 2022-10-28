@@ -8,8 +8,7 @@ const {
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
 const strapi = require('../../Strapi');
-
-const getDefaultExportBackupName = () => `strapi-backup`;
+const { getDefaultExportBackupName } = require('./utils');
 
 const logger = console;
 
@@ -25,7 +24,7 @@ module.exports = async (args) => {
   // To file
   const outputOptions = {
     file: {
-      path: args.output || getDefaultExportBackupName(),
+      path: args.output ?? getDefaultExportBackupName(),
     },
     encryption: {
       enabled: args.encrypt,
@@ -36,7 +35,7 @@ module.exports = async (args) => {
     },
   };
   const destination = createLocalFileDestinationProvider(outputOptions);
-
+  console.log('outputoptions', outputOptions);
   // create transfer engine
   const engine = createTransferEngine(source, destination, {
     strategy: 'restore',
@@ -45,6 +44,7 @@ module.exports = async (args) => {
 
   try {
     const result = await engine.transfer();
+
     if (!result?.destination?.path) throw new Error('Export file not created');
     logger.log(
       'Export process has been completed successfully! Export archive is in %s',
