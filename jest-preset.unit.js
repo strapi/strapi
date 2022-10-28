@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  setupFilesAfterEnv: [__dirname + '/test/unit.setup.js'],
+  setupFilesAfterEnv: [__dirname + '/test/setup/unit.setup.js'],
   modulePathIgnorePatterns: ['.cache', 'dist'],
   testPathIgnorePatterns: ['.testdata.js', '.test.utils.js'],
   testMatch: ['**/__tests__/**/*.{js,ts,jsx,tsx}'],
