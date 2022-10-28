@@ -6,10 +6,10 @@ const yargs = require('yargs');
 
 process.env.NODE_ENV = 'test';
 
-const appName = 'testApp';
-process.env.ENV_PATH = path.resolve(__dirname, '..', appName, '.env');
+const appPath = 'test-apps/api';
+process.env.ENV_PATH = path.resolve(__dirname, '../..', appPath, '.env');
 
-const { cleanTestApp, generateTestApp } = require('./test-app-generator');
+const { cleanTestApp, generateTestApp } = require('../helpers/test-app');
 
 const databases = {
   postgres: {
@@ -57,7 +57,7 @@ const jestCmd = 'jest --config jest.config.api.js --verbose --runInBand --forceE
 const runAllTests = async (args) => {
   return execa('yarn', [...jestCmd, ...args], {
     stdio: 'inherit',
-    cwd: path.resolve(__dirname, '..'),
+    cwd: path.resolve(__dirname, '../..'),
     env: {
       // if STRAPI_LICENSE is in the env the test will run in ee automatically
       STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
@@ -71,8 +71,8 @@ const runAllTests = async (args) => {
 const main = async ({ database, generateApp }, args) => {
   try {
     if (generateApp) {
-      await cleanTestApp(appName);
-      await generateTestApp({ appName, database });
+      await cleanTestApp(appPath);
+      await generateTestApp({ appPath, database });
     }
 
     await runAllTests(args).catch(() => {

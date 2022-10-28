@@ -118,6 +118,7 @@ The administration panel should now be available at http://localhost:4000/admin.
 - `yarn test:unit` runs the back-end unit tests.
 - `yarn test:api` runs the api integration tests.
 - `yarn test:generate-app` generates a test application.
+- `yarn test:run-app` runs a test application.
 - `yarn test:start-app` starts the test application.
 
 ---
@@ -127,9 +128,9 @@ The administration panel should now be available at http://localhost:4000/admin.
 The API integration tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
 
 ```bash
-$ yarn test:generate-app sqlite
-$ yarn test:generate-app postgres
-$ yarn test:generate-app mysql
+$ yarn test:generate-app --db=sqlite
+$ yarn test:generate-app --db=postgres
+$ yarn test:generate-app --db=mysql
 ```
 
 A new app is required every time you run the API integration tests, otherwise the test suite will fail. A command is available to make this process easier: `yarn test:api`.

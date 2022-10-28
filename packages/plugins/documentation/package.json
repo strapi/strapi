@@ -48,10 +48,10 @@
     "react-query": "3.39.3",
     "react-redux": "8.1.1",
     "redux": "^4.2.1",
-    "reselect": "^4.1.7",
+    "reselect": "4.1.7",
     "swagger-ui-dist": "4.19.0",
     "yaml": "1.10.2",
-    "yup": "^0.32.9"
+    "yup": "0.32.9"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.0.0",

@@ -52,6 +52,9 @@
     "tar-stream": "2.2.0",
     "ws": "8.13.0"
   },
+  "peerDependencies": {
+    "@strapi/strapi": "4.11.5"
+  },
   "devDependencies": {
     "@tsconfig/node16": "1.0.3",
     "@types/fs-extra": "9.0.13",

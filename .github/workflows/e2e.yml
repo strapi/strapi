@@ -1,0 +1,54 @@
+name: E2E Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: ['chromium', 'webkit', 'firefox']
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/yarn.lock') }}
+
+      - uses: nrwl/nx-set-shas@v3
+      - run: yarn install --immutable
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run build:ts
+        run: yarn nx run-many --target=build:ts --nx-ignore-cycles --skip-nx-cache
+
+      - name: Setup test app
+        run: yarn test:e2e:setup
+
+      - name: Install new package
+        run: yarn install --no-immutable
+
+      - name: Run E2E tests
+        run: yarn test:e2e --project=${{ matrix.project }}
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
