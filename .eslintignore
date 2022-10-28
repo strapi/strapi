@@ -4,7 +4,6 @@
 **/OLD/**
 testApp/**
 examples/**
-cypress/**
 packages/generators/generators/lib/files/
 packages/generators/app/lib/resources/files/
 packages/core/admin/admin/src/plugins.js
