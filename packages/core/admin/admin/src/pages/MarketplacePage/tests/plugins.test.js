@@ -19,9 +19,10 @@ import { createMemoryHistory } from 'history';
 import MarketPlacePage from '../index';
 import server from './server';
 
+// Increase the jest timeout to accommodate long running tests
+jest.setTimeout(30000);
 const toggleNotification = jest.fn();
 jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
-jest.setTimeout(30000);
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(() => {
@@ -63,6 +64,8 @@ describe('Plugins tab', () => {
 
   afterEach(() => {
     server.resetHandlers();
+    // Clear the cache to isolate each test
+    client.clear();
   });
 
   afterAll(() => server.close());
@@ -82,11 +85,12 @@ describe('Plugins tab', () => {
       </QueryClientProvider>
     );
 
+    await waitForReload();
+
     renderedContainer = container;
   });
 
   it('renders and matches the plugin tab snapshot', async () => {
-    await waitForReload();
     // Check snapshot
     expect(renderedContainer.firstChild).toMatchSnapshot();
 
@@ -127,9 +131,6 @@ describe('Plugins tab', () => {
   });
 
   it('shows the installed text for installed plugins', () => {
-    const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
-    userEvent.click(pluginsTab);
-
     // Plugin that's already installed
     const alreadyInstalledCard = screen
       .getAllByTestId('npm-package-card')
@@ -197,203 +198,187 @@ describe('Plugins tab', () => {
     });
   });
 
-  describe('filter requests', () => {
-    beforeAll(() => {
-      // Clear cache before all the tests run
-      client.clear();
-    });
+  it('filters a collection option', async () => {
+    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    userEvent.click(filtersButton);
 
-    beforeEach(async () => {
-      await waitForReload();
-    });
+    const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
+    userEvent.click(collectionsButton);
 
-    afterEach(() => {
-      // Clear the cache again after each test
-      client.clear();
-    });
+    const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
+    userEvent.click(option);
 
-    it('filters a collection option', async () => {
-      const filtersButton = screen.getByRole('button', { name: /filters/i });
-      userEvent.click(filtersButton);
+    await waitForReload();
 
-      const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
-      userEvent.click(collectionsButton);
+    const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
+    expect(optionTag).toBeVisible();
 
-      const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
-      userEvent.click(option);
+    const collectionCards = screen.getAllByTestId('npm-package-card');
+    expect(collectionCards.length).toEqual(2);
 
-      await waitForReload();
+    const collectionPlugin = screen.getByText('Gatsby Preview');
+    const notCollectionPlugin = screen.queryByText('Comments');
+    expect(collectionPlugin).toBeVisible();
+    expect(notCollectionPlugin).toEqual(null);
+  });
 
-      const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
-      expect(optionTag).toBeVisible();
+  it('filters a category option', async () => {
+    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    userEvent.click(filtersButton);
 
-      const collectionCards = screen.getAllByTestId('npm-package-card');
-      expect(collectionCards.length).toEqual(2);
+    const categoriesButton = screen.getByRole('button', { name: 'No categories selected' });
+    userEvent.click(categoriesButton);
 
-      const collectionPlugin = screen.getByText('Gatsby Preview');
-      const notCollectionPlugin = screen.queryByText('Comments');
-      expect(collectionPlugin).toBeVisible();
-      expect(notCollectionPlugin).toEqual(null);
-    });
+    const option = screen.getByRole('option', { name: `Custom fields (4)` });
+    userEvent.click(option);
 
-    it('filters a category option', async () => {
-      const filtersButton = screen.getByRole('button', { name: /filters/i });
-      userEvent.click(filtersButton);
+    await waitForReload();
 
-      const categoriesButton = screen.getByRole('button', { name: 'No categories selected' });
-      userEvent.click(categoriesButton);
+    const optionTag = screen.getByRole('button', { name: 'Custom fields' });
+    expect(optionTag).toBeVisible();
 
-      const option = screen.getByRole('option', { name: `Custom fields (4)` });
-      userEvent.click(option);
+    const categoryCards = screen.getAllByTestId('npm-package-card');
+    expect(categoryCards.length).toEqual(2);
 
-      await waitForReload();
+    const categoryPlugin = screen.getByText('CKEditor 5 custom field');
+    const notCategoryPlugin = screen.queryByText('Comments');
+    expect(categoryPlugin).toBeVisible();
+    expect(notCategoryPlugin).toEqual(null);
+  });
 
-      const optionTag = screen.getByRole('button', { name: 'Custom fields' });
-      expect(optionTag).toBeVisible();
+  // filters collections and categories together
+  it('filters a category and a collection option', async () => {
+    // When a user clicks the filters button
+    userEvent.click(screen.getByRole('button', { name: /filters/i }));
+    // They should see a select button for collections with no options selected
+    const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
+    // When they click the select button
+    userEvent.click(collectionsButton);
+    // They should see a Made by Strapi option
+    const collectionOption = screen.getByRole('option', { name: `Made by Strapi (13)` });
+    // When they click the option
+    userEvent.click(collectionOption);
+    // The page should reload
+    await waitForReload();
+    // When they click the filters button again
+    userEvent.click(screen.getByRole('button', { name: 'Filters' }));
+    // They should see the collections button indicating 1 option selected
+    userEvent.click(screen.getByRole('button', { name: '1 collection selected Made by Strapi' }));
+    // They should the categories button with no options selected
+    const categoriesButton = screen.getByRole('button', { name: 'No categories selected' });
+    userEvent.click(categoriesButton);
+    const categoryOption = screen.getByRole('option', { name: `Custom fields (4)` });
+    userEvent.click(categoryOption);
+    // The page should reload
+    await waitForReload();
+    // When the page reloads they should see a tag for the selected option
+    const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
+    const customFieldsTag = screen.getByRole('button', { name: 'Custom fields' });
+    expect(madeByStrapiTag).toBeVisible();
+    expect(customFieldsTag).toBeVisible();
+    // They should see the correct number of results
+    const filterCards = screen.getAllByTestId('npm-package-card');
+    expect(filterCards.length).toEqual(4);
+    // They should see the collection option results
+    const collectionPlugin = screen.getByText('Gatsby Preview');
+    const notCollectionPlugin = screen.queryByText('Comments');
+    expect(collectionPlugin).toBeVisible();
+    expect(notCollectionPlugin).toEqual(null);
+    // They should see the category option results
+    const categoryPlugin = screen.getByText('CKEditor 5 custom field');
+    const notCategoryPlugin = screen.queryByText('Config Sync');
+    expect(categoryPlugin).toBeVisible();
+    expect(notCategoryPlugin).toEqual(null);
+  });
 
-      const categoryCards = screen.getAllByTestId('npm-package-card');
-      expect(categoryCards.length).toEqual(2);
+  it('filters multiple collection options', async () => {
+    userEvent.click(screen.getByRole('button', { name: /filters/i }));
+    userEvent.click(screen.getByRole('button', { name: 'No collections selected' }));
+    userEvent.click(screen.getByRole('option', { name: `Made by Strapi (13)` }));
 
-      const categoryPlugin = screen.getByText('CKEditor 5 custom field');
-      const notCategoryPlugin = screen.queryByText('Comments');
-      expect(categoryPlugin).toBeVisible();
-      expect(notCategoryPlugin).toEqual(null);
-    });
+    await waitForReload();
 
-    // filters collections and categories together
-    it('filters a category and a collection option', async () => {
-      // When a user clicks the filters button
-      userEvent.click(screen.getByRole('button', { name: /filters/i }));
-      // They should see a select button for collections with no options selected
-      const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
-      // When they click the select button
-      userEvent.click(collectionsButton);
-      // They should see a Made by Strapi option
-      const collectionOption = screen.getByRole('option', { name: `Made by Strapi (13)` });
-      // When they click the option
-      userEvent.click(collectionOption);
-      // The page should reload
-      await waitForReload();
-      // When they click the filters button again
-      userEvent.click(screen.getByRole('button', { name: 'Filters' }));
-      // They should see the collections button indicating 1 option selected
-      userEvent.click(screen.getByRole('button', { name: '1 collection selected Made by Strapi' }));
-      // They should the categories button with no options selected
-      const categoriesButton = screen.getByRole('button', { name: 'No categories selected' });
-      userEvent.click(categoriesButton);
-      const categoryOption = screen.getByRole('option', { name: `Custom fields (4)` });
-      userEvent.click(categoryOption);
-      // The page should reload
-      await waitForReload();
-      // When the page reloads they should see a tag for the selected option
-      const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
-      const customFieldsTag = screen.getByRole('button', { name: 'Custom fields' });
-      expect(madeByStrapiTag).toBeVisible();
-      expect(customFieldsTag).toBeVisible();
-      // They should see the correct number of results
-      const filterCards = screen.getAllByTestId('npm-package-card');
-      expect(filterCards.length).toEqual(4);
-      // They should see the collection option results
-      const collectionPlugin = screen.getByText('Gatsby Preview');
-      const notCollectionPlugin = screen.queryByText('Comments');
-      expect(collectionPlugin).toBeVisible();
-      expect(notCollectionPlugin).toEqual(null);
-      // They should see the category option results
-      const categoryPlugin = screen.getByText('CKEditor 5 custom field');
-      const notCategoryPlugin = screen.queryByText('Config Sync');
-      expect(categoryPlugin).toBeVisible();
-      expect(notCategoryPlugin).toEqual(null);
-    });
+    userEvent.click(screen.getByRole('button', { name: /filters/i }));
+    userEvent.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
+    userEvent.click(screen.getByRole('option', { name: `Verified (29)` }));
 
-    it('filters multiple collection options', async () => {
-      userEvent.click(screen.getByRole('button', { name: /filters/i }));
-      userEvent.click(screen.getByRole('button', { name: 'No collections selected' }));
-      userEvent.click(screen.getByRole('option', { name: `Made by Strapi (13)` }));
+    await waitForReload();
 
-      await waitForReload();
+    const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
+    const verifiedTag = screen.getByRole('button', { name: 'Verified' });
+    expect(madeByStrapiTag).toBeVisible();
+    expect(verifiedTag).toBeVisible();
+    expect(screen.getAllByTestId('npm-package-card').length).toEqual(3);
+    expect(screen.getByText('Gatsby Preview')).toBeVisible();
+    expect(screen.getByText('Config Sync')).toBeVisible();
+    expect(screen.queryByText('Comments')).toEqual(null);
+  });
 
-      userEvent.click(screen.getByRole('button', { name: /filters/i }));
-      userEvent.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
-      userEvent.click(screen.getByRole('option', { name: `Verified (29)` }));
+  it('filters multiple category options', async () => {
+    userEvent.click(screen.getByRole('button', { name: /filters/i }));
+    userEvent.click(screen.getByRole('button', { name: 'No categories selected' }));
+    userEvent.click(screen.getByRole('option', { name: `Custom fields (4)` }));
 
-      await waitForReload();
+    await waitForReload();
 
-      const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
-      const verifiedTag = screen.getByRole('button', { name: 'Verified' });
-      expect(madeByStrapiTag).toBeVisible();
-      expect(verifiedTag).toBeVisible();
-      expect(screen.getAllByTestId('npm-package-card').length).toEqual(3);
-      expect(screen.getByText('Gatsby Preview')).toBeVisible();
-      expect(screen.getByText('Config Sync')).toBeVisible();
-      expect(screen.queryByText('Comments')).toEqual(null);
-    });
+    userEvent.click(screen.getByRole('button', { name: /filters/i }));
+    userEvent.click(screen.getByRole('button', { name: `1 category selected Custom fields` }));
+    userEvent.click(screen.getByRole('option', { name: `Monitoring (1)` }));
 
-    it('filters multiple category options', async () => {
-      userEvent.click(screen.getByRole('button', { name: /filters/i }));
-      userEvent.click(screen.getByRole('button', { name: 'No categories selected' }));
-      userEvent.click(screen.getByRole('option', { name: `Custom fields (4)` }));
+    await waitForReload();
 
-      await waitForReload();
+    const customFieldsTag = screen.getByRole('button', { name: 'Custom fields' });
+    const monitoringTag = screen.getByRole('button', { name: 'Monitoring' });
+    expect(customFieldsTag).toBeVisible();
+    expect(monitoringTag).toBeVisible();
+    expect(screen.getAllByTestId('npm-package-card').length).toEqual(3);
+    expect(screen.getByText('CKEditor 5 custom field')).toBeVisible();
+    expect(screen.getByText('Sentry')).toBeVisible();
+    expect(screen.queryByText('Comments')).toEqual(null);
+  });
 
-      userEvent.click(screen.getByRole('button', { name: /filters/i }));
-      userEvent.click(screen.getByRole('button', { name: `1 category selected Custom fields` }));
-      userEvent.click(screen.getByRole('option', { name: `Monitoring (1)` }));
+  it('removes a filter option tag', async () => {
+    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    userEvent.click(filtersButton);
 
-      await waitForReload();
+    const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
+    userEvent.click(collectionsButton);
 
-      const customFieldsTag = screen.getByRole('button', { name: 'Custom fields' });
-      const monitoringTag = screen.getByRole('button', { name: 'Monitoring' });
-      expect(customFieldsTag).toBeVisible();
-      expect(monitoringTag).toBeVisible();
-      expect(screen.getAllByTestId('npm-package-card').length).toEqual(3);
-      expect(screen.getByText('CKEditor 5 custom field')).toBeVisible();
-      expect(screen.getByText('Sentry')).toBeVisible();
-      expect(screen.queryByText('Comments')).toEqual(null);
-    });
+    const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
+    userEvent.click(option);
 
-    it('removes a filter option tag', async () => {
-      const filtersButton = screen.getByRole('button', { name: /filters/i });
-      userEvent.click(filtersButton);
+    await waitForReload();
 
-      const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
-      userEvent.click(collectionsButton);
+    const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
+    expect(optionTag).toBeVisible();
 
-      const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
-      userEvent.click(option);
+    userEvent.click(optionTag);
 
-      await waitForReload();
+    expect(optionTag).not.toBeVisible();
+    expect(history.location.search).toBe('');
+  });
 
-      const optionTag = screen.getByRole('button', { name: 'Made by Strapi' });
-      expect(optionTag).toBeVisible();
+  it('only filters in the plugins tab', async () => {
+    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    userEvent.click(filtersButton);
 
-      userEvent.click(optionTag);
+    const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
+    userEvent.click(collectionsButton);
 
-      expect(optionTag).not.toBeVisible();
-      expect(history.location.search).toBe('');
-    });
+    const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
+    userEvent.click(option);
 
-    it('only filters in the plugins tab', async () => {
-      const filtersButton = screen.getByRole('button', { name: /filters/i });
-      userEvent.click(filtersButton);
+    await waitForReload();
 
-      const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
-      userEvent.click(collectionsButton);
+    const collectionCards = screen.getAllByTestId('npm-package-card');
+    expect(collectionCards.length).toBe(2);
 
-      const option = screen.getByRole('option', { name: `Made by Strapi (13)` });
-      userEvent.click(option);
+    userEvent.click(screen.getByRole('tab', { name: /providers/i }));
 
-      await waitForReload();
+    const providerCards = screen.getAllByTestId('npm-package-card');
+    expect(providerCards.length).toBe(9);
 
-      const collectionCards = screen.getAllByTestId('npm-package-card');
-      expect(collectionCards.length).toBe(2);
-
-      userEvent.click(screen.getByRole('tab', { name: /providers/i }));
-
-      const providerCards = screen.getAllByTestId('npm-package-card');
-      expect(providerCards.length).toBe(9);
-
-      userEvent.click(screen.getByRole('tab', { name: /plugins/i }));
-      expect(collectionCards.length).toBe(2);
-    });
+    userEvent.click(screen.getByRole('tab', { name: /plugins/i }));
+    expect(collectionCards.length).toBe(2);
   });
 });
