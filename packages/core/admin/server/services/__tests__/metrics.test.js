@@ -57,7 +57,7 @@ describe('Metrics', () => {
 
     expect(getLanguagesInUse).toHaveBeenCalledWith();
     expect(send).toHaveBeenCalledWith('didChangeInterfaceLanguage', {
-      groupProperties: {
+      userProperties: {
         languagesInUse: ['en', 'fr', 'en'],
       },
     });

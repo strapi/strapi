@@ -10,6 +10,9 @@ async function digestMessage(message) {
 }
 
 export default async function hashAdminUserEmail(payload) {
+  if (!payload) {
+    return '';
+  }
   try {
     return await digestMessage(payload.email);
   } catch (error) {

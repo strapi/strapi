@@ -78,7 +78,7 @@ const AuthenticatedApp = () => {
 
   const shouldShowLoader = isLoading || shouldShowNotDependentQueriesLoader;
 
-  const adminUserId = userInfo ? hashAdminUserEmail(userInfo) : '';
+  const adminUserId = hashAdminUserEmail(userInfo);
   const appInfosValue = useMemo(() => {
     return {
       ...appInfos,

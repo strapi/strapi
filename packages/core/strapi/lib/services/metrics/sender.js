@@ -74,7 +74,7 @@ module.exports = (strapi) => {
         event,
         adminUserId,
         deviceId,
-        eventProperties: adminUserId ? payload.eventProperties : {},
+        eventProperties: payload.eventProperties,
         userProperties: adminUserId
           ? { ...anonymousUserProperties, ...payload.userProperties }
           : {},

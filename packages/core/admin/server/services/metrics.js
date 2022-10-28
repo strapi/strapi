@@ -17,7 +17,7 @@ const sendDidUpdateRolePermissions = async () => {
 const sendDidChangeInterfaceLanguage = async () => {
   const languagesInUse = await getService('user').getLanguagesInUse();
   // This event is anonymous
-  strapi.telemetry.send('didChangeInterfaceLanguage', { groupProperties: { languagesInUse } });
+  strapi.telemetry.send('didChangeInterfaceLanguage', { userProperties: { languagesInUse } });
 };
 
 module.exports = {
