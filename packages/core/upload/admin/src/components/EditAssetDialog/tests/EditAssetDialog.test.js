@@ -21,7 +21,7 @@ const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
 const asset = {
   id: 8,
   name: 'Screenshot 2.png',
-  alternativeText: null,
+  alternativeText: '',
   caption: null,
   width: 1476,
   height: 780,
