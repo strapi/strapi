@@ -7,12 +7,14 @@ import { normalizeRelations } from '../../components/RelationInputDataManager/ut
 
 export const useRelation = (cacheKey, { name, relation, search }) => {
   const [searchParams, setSearchParams] = useState({});
-
+  const [currentPage, setCurrentPage] = useState(0);
   /**
    * This runs in `useInfiniteQuery` to actually fetch the data
    */
   const fetchRelations = async ({ pageParam = 1 }) => {
     try {
+      setCurrentPage(pageParam);
+
       const { data } = await axiosInstance.get(relation?.endpoint, {
         params: {
           ...(relation.pageParams ?? {}),
@@ -88,7 +90,22 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
     }),
   });
 
-  const { status, data } = relationsRes;
+  const { pageGoal } = relation;
+
+  const { status, data, fetchNextPage, hasNextPage } = relationsRes;
+
+  useEffect(() => {
+    /**
+     * This ensures the infiniteQuery hook fetching has caught-up with the modifiedData
+     * state i.e. in circumstances where you add 10 relations, the browserState knows this,
+     * but the hook would think it could fetch more, when in reality, it can't.
+     */
+    if (pageGoal > currentPage && hasNextPage && status === 'success') {
+      fetchNextPage({
+        pageParam: currentPage + 1,
+      });
+    }
+  }, [pageGoal, currentPage, fetchNextPage, hasNextPage, status]);
 
   useEffect(() => {
     if (status === 'success' && data && data.pages?.at(-1)?.results && onLoadRelationsCallback) {

@@ -4,6 +4,7 @@ import get from 'lodash/get';
 import set from 'lodash/set';
 import take from 'lodash/take';
 import cloneDeep from 'lodash/cloneDeep';
+import uniqBy from 'lodash/uniqBy';
 
 import {
   findLeafByPathAndReplace,
@@ -107,30 +108,15 @@ const reducer = (state, action) =>
         const initialDataRelations = get(state, initialDataPath);
         const modifiedDataRelations = get(state, modifiedDataPath);
 
-        const [lastInitialRelation] = initialDataRelations.slice(-1);
-        const [lastNewRelation] = value.slice(-1);
+        set(draftState, initialDataPath, uniqBy([...value, ...initialDataRelations], 'id'));
 
         /**
-         * _IF_ the `useRelation` hook fires again with the same data
-         * we don't want to append it otherwise we'll have duplicates.
-         *
-         * We could do this in `RelationInputDataManager` but then the
-         * callback would become unstable as it requires state knowledge
-         * and then the hook would probably fire even more.
+         * We need to set the value also on modifiedData, because initialData
+         * and modifiedData need to stay in sync, so that the CM can compare
+         * both states, to render the dirty UI state
          */
-        if (lastInitialRelation?.id === lastNewRelation?.id) {
-          break;
-        } else {
-          set(draftState, initialDataPath, [...value, ...initialDataRelations]);
 
-          /**
-           * We need to set the value also on modifiedData, because initialData
-           * and modifiedData need to stay in sync, so that the CM can compare
-           * both states, to render the dirty UI state
-           */
-
-          set(draftState, modifiedDataPath, [...value, ...modifiedDataRelations]);
-        }
+        set(draftState, modifiedDataPath, uniqBy([...value, ...modifiedDataRelations], 'id'));
 
         break;
       }
