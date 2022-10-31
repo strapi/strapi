@@ -57,7 +57,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     ]);
   }
 
-  streamLinks(): NodeJS.ReadableStream {
+  async streamLinks(): Promise<NodeJS.ReadableStream> {
     if (!this.strapi) {
       throw new Error('Not able to stream links. Strapi instance not found');
     }
