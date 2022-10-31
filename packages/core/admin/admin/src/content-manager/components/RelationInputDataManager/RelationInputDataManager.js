@@ -13,7 +13,7 @@ import { useRelation } from '../../hooks/useRelation';
 import { getTrad } from '../../utils';
 
 import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
-import { connect, select, normalizeSearchResults, diffRelations } from './utils';
+import { connect, select, normalizeSearchResults, diffRelations, normalizeRelation } from './utils';
 
 export const RelationInputDataManager = ({
   error,
@@ -38,11 +38,16 @@ export const RelationInputDataManager = ({
   const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
 
+  const relationsFromModifiedData = get(modifiedData, name) ?? [];
+
+  const currentLastPage = Math.ceil(relationsFromModifiedData.length / RELATIONS_TO_DISPLAY);
+
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     name,
     relation: {
       enabled: get(initialData, name)?.count !== 0 && !!endpoints.relation,
       endpoint: endpoints.relation,
+      pageGoal: currentLastPage,
       pageParams: {
         ...defaultParams,
         pageSize: RELATIONS_TO_DISPLAY,
@@ -64,8 +69,6 @@ export const RelationInputDataManager = ({
       },
     },
   });
-
-  const relationsFromModifiedData = get(modifiedData, name) ?? [];
 
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const toOneRelation = [
@@ -89,7 +92,16 @@ export const RelationInputDataManager = ({
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
   const handleRelationConnect = (relation) => {
-    connectRelation({ name, value: relation, toOneRelation });
+    /**
+     * Any relation being added to the store should be normalized so it has it's link.
+     */
+    const normalizedRelation = normalizeRelation(relation, {
+      mainFieldName: mainField.name,
+      shouldAddLink: shouldDisplayRelationLink,
+      targetModel,
+    });
+
+    connectRelation({ name, value: normalizedRelation, toOneRelation });
   };
 
   const handleRelationDisconnect = (relation) => {
