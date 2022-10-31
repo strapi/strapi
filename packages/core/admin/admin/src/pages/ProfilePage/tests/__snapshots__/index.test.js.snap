@@ -1,18 +1,58 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
-.c12 {
-  padding-bottom: 56px;
+.c14 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
-.c16 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+.c15 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c15 > * + * {
+  margin-top: 24px;
+}
+
+.c17 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c17 > * + * {
+  margin-top: 16px;
+}
+
+.c35 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c35 > * + * {
+  margin-top: 4px;
+}
+
+.c18 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c36 {
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c11 {
@@ -156,20 +196,18 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
-.c33 {
-  border: none;
-  background: transparent;
-  font-size: 1.6rem;
-  width: auto;
-  padding: 0;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
+.c12 {
+  padding-bottom: 56px;
+}
+
+.c16 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
 .c43 {
@@ -330,47 +368,6 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
 
 .c45 {
   width: 100%;
-}
-
-.c14 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c15 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c15 > * + * {
-  margin-top: 24px;
-}
-
-.c17 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c17 > * + * {
-  margin-top: 16px;
-}
-
-.c35 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c35 > * + * {
-  margin-top: 4px;
 }
 
 .c32 {
@@ -555,17 +552,20 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
   margin-top: 4px;
 }
 
-.c18 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c36 {
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c33 {
+  border: none;
+  background: transparent;
+  font-size: 1.6rem;
+  width: auto;
+  padding: 0;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .c0:focus-visible {
