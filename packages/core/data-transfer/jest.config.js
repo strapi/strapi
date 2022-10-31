@@ -8,4 +8,5 @@ module.exports = {
   preset: 'ts-jest',
   displayName: (pkg.strapi && pkg.strapi.name) || pkg.name,
   roots: [__dirname],
+  testMatch: ['**/__tests__/**/*.test.ts'],
 };

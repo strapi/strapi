@@ -5,7 +5,7 @@ import { Duplex } from 'stream';
 import { chain, Writable } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import { IDestinationProvider, ProviderType, Stream } from '../../types';
+import type { IDestinationProvider, ProviderType, Stream } from '../../types';
 // import { encrypt } from '../encryption';
 
 export interface ILocalFileDestinationProviderOptions {

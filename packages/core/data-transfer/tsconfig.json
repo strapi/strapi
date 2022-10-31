@@ -9,5 +9,5 @@
     "sourceMap": true
   },
   "include": ["types", "lib/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "lib/**/__tests__"]
 }
