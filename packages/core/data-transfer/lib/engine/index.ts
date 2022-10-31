@@ -132,8 +132,11 @@ class TransferEngine implements ITransferEngine {
     const inStream = await this.sourceProvider.streamEntities?.();
     const outStream = await this.destinationProvider.getEntitiesStream?.();
 
-    if (!inStream || !outStream) {
-      throw new Error('Unable to transfer entities, one of the stream is missing');
+    if (!inStream) {
+      throw new Error('Unable to transfer entities, source stream is missing');
+    }
+    if (!outStream) {
+      throw new Error('Unable to transfer entities, destination stream is missing');
     }
 
     return new Promise((resolve, reject) => {
@@ -159,8 +162,11 @@ class TransferEngine implements ITransferEngine {
     const inStream = await this.sourceProvider.streamLinks?.();
     const outStream = await this.destinationProvider.getLinksStream?.();
 
-    if (!inStream || !outStream) {
-      throw new Error('Unable to transfer links, one of the stream is missing');
+    if (!inStream) {
+      throw new Error('Unable to transfer links, source stream is missing');
+    }
+    if (!outStream) {
+      throw new Error('Unable to transfer links, destination stream is missing');
     }
 
     return new Promise((resolve, reject) => {
