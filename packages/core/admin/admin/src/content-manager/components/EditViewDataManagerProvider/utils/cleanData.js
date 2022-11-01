@@ -121,7 +121,7 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
           cleanedData = value.map((componentData, index) => {
             const subCleanedData = recursiveCleanData(
               componentData,
-              oldValue[index],
+              (oldValue ?? [])[index],
               componentsSchema[componentData.__component]
             );
 
