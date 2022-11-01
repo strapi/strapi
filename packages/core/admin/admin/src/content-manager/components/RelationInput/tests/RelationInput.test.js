@@ -60,8 +60,6 @@ const setup = (props) =>
             labelDisconnectRelation="Remove"
             numberOfRelationsToDisplay={5}
             onRelationConnect={() => jest.fn()}
-            onSearchOpen={() => jest.fn()}
-            onSearchClose={() => jest.fn()}
             onRelationDisconnect={() => jest.fn()}
             onRelationLoadMore={() => jest.fn()}
             onSearch={() => jest.fn()}
@@ -97,19 +95,18 @@ describe('Content-Manager || RelationInput', () => {
   });
 
   describe('Callbacks', () => {
-    test('should call onSearchOpen', () => {
+    test('should call onSearch', () => {
       const spy = jest.fn();
-      setup({ onSearchOpen: spy });
+      setup({ onSearch: spy });
 
       fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
 
       expect(spy).toHaveBeenCalled();
     });
 
-    test('should call onRelationConnect and onSearchClose', () => {
+    test('should call onRelationConnect', () => {
       const onAddSpy = jest.fn();
-      const onCloseSpy = jest.fn();
-      setup({ onRelationConnect: onAddSpy, onSearchClose: onCloseSpy });
+      setup({ onRelationConnect: onAddSpy });
 
       fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
       expect(screen.getByText('Relation 4')).toBeInTheDocument();
@@ -117,7 +114,6 @@ describe('Content-Manager || RelationInput', () => {
       fireEvent.click(screen.getByText('Relation 4'));
 
       expect(onAddSpy).toHaveBeenCalled();
-      expect(onCloseSpy).toHaveBeenCalled();
     });
 
     test('should call onRelationDisconnect', () => {
