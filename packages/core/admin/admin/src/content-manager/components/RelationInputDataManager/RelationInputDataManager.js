@@ -124,8 +124,6 @@ export const RelationInputDataManager = ({
     });
   };
 
-  const handleOpenSearch = () => handleSearch();
-
   const handleSearchMore = () => {
     search.fetchNextPage();
   };
@@ -174,7 +172,6 @@ export const RelationInputDataManager = ({
       onRelationLoadMore={() => handleRelationLoadMore()}
       onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
-      onSearchOpen={handleOpenSearch}
       placeholder={formatMessage(
         placeholder || {
           id: getTrad('relation.add'),

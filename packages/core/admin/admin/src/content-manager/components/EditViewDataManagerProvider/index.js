@@ -204,7 +204,7 @@ const EditViewDataManagerProvider = ({
   }, []);
 
   /**
-   * @type {({ name: string, value: Relation, isSingleRelation: boolean}) => void}
+   * @type {({ name: string, value: Relation, toOneRelation: boolean}) => void}
    */
   const connectRelation = useCallback(({ name, value, toOneRelation }) => {
     dispatch({

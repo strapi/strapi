@@ -34,7 +34,7 @@ export const normalizeRelations = (
   relations,
   { shouldAddLink = false, mainFieldName, targetModel } = {}
 ) => {
-  return [...(relations ?? [])]?.map((relation) =>
+  return [...relations].map((relation) =>
     normalizeRelation(relation, {
       shouldAddLink,
       mainFieldName,

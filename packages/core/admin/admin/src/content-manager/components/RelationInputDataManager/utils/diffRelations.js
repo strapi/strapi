@@ -4,11 +4,21 @@
  * @returns {[connected: string[], disconnected: string[]]} – the connected and disconnected relations ids
  */
 export const diffRelations = (browserStateRelations = [], serverStateRelations = []) => {
-  const currentRelations = browserStateRelations.map((relation) => relation.id);
-  const oldRelations = serverStateRelations.map((relation) => relation.id);
+  const connected = browserStateRelations.reduce((acc, relation) => {
+    if (!serverStateRelations.find((oldRelation) => oldRelation.id === relation.id)) {
+      return [...acc, relation.id];
+    }
 
-  const connected = currentRelations.filter((relation) => !oldRelations.includes(relation));
-  const disconnected = oldRelations.filter((relation) => !currentRelations.includes(relation));
+    return acc;
+  }, []);
+
+  const disconnected = serverStateRelations.reduce((acc, relation) => {
+    if (!browserStateRelations.find((oldRelation) => oldRelation.id === relation.id)) {
+      return [...acc, relation.id];
+    }
+
+    return acc;
+  }, []);
 
   return [connected, disconnected];
 };

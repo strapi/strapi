@@ -64,9 +64,7 @@ const RelationInput = ({
   onRelationConnect,
   onRelationLoadMore,
   onRelationDisconnect,
-  onSearchClose,
   onSearchNextPage,
-  onSearchOpen,
   onSearch,
   placeholder,
   publicationStateTranslations,
@@ -195,15 +193,11 @@ const RelationInput = ({
 
   const handleMenuClose = () => {
     setIsMenuOpen(false);
-
-    if (onSearchClose) {
-      onSearchClose();
-    }
   };
 
   const handleMenuOpen = () => {
     setIsMenuOpen(true);
-    onSearchOpen();
+    onSearch();
   };
 
   return (
@@ -344,7 +338,7 @@ const RelationInput = ({
   );
 };
 
-const ReactQueryRelationResult = PropTypes.shape({
+const RelationsResult = PropTypes.shape({
   data: PropTypes.arrayOf(
     PropTypes.shape({
       href: PropTypes.string,
@@ -359,7 +353,7 @@ const ReactQueryRelationResult = PropTypes.shape({
   isSuccess: PropTypes.bool.isRequired,
 });
 
-const ReactQuerySearchResult = PropTypes.shape({
+const SearchResults = PropTypes.shape({
   data: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
@@ -379,7 +373,6 @@ RelationInput.defaultProps = {
   error: undefined,
   labelAction: null,
   labelLoadMore: null,
-  onSearchClose: undefined,
   required: false,
   relations: { data: [] },
   searchResults: { data: [] },
@@ -402,17 +395,15 @@ RelationInput.propTypes = {
   onRelationLoadMore: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
   onSearchNextPage: PropTypes.func.isRequired,
-  onSearchClose: PropTypes.func,
-  onSearchOpen: PropTypes.func.isRequired,
   placeholder: PropTypes.string.isRequired,
   publicationStateTranslations: PropTypes.shape({
     draft: PropTypes.string.isRequired,
     published: PropTypes.string.isRequired,
   }).isRequired,
   required: PropTypes.bool,
-  searchResults: ReactQuerySearchResult,
+  searchResults: SearchResults,
   size: PropTypes.number.isRequired,
-  relations: ReactQueryRelationResult,
+  relations: RelationsResult,
 };
 
 export default RelationInput;
