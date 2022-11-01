@@ -77,32 +77,37 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
 
         case 'relation': {
           /**
-           * Instead of the full relation object, we only want to send its ID
-           */
-          const currentRelationIds = value.map((relation) => ({ id: relation.id }));
-          /**
            * Because of how repeatable components work when you dig into them the server
            * will have no object to compare too therefore no relation array will be setup
            * because the component has not been initialised, therefore we can safely assume
            * it needs to be added and provide a default empty array.
            */
-          const oldRelationsIds = (oldValue ?? []).map((relation) => ({ id: relation.id }));
+          let actualOldValue = oldValue ?? [];
 
           /**
-           * connectedRelations are the items that are in the browserState
+           * Instead of the full relation object, we only want to send its ID
+           *  connectedRelations are the items that are in the browserState
            * array but not in the serverState
            */
-          const connectedRelations = currentRelationIds.filter(
-            (rel) => !oldRelationsIds.some((oldRel) => oldRel.id === rel.id)
-          );
+          const connectedRelations = value.reduce((acc, relation) => {
+            if (!actualOldValue.find((oldRelation) => oldRelation.id === relation.id)) {
+              return [...acc, { id: relation.id }];
+            }
+
+            return acc;
+          }, []);
 
           /**
            * disconnectedRelations are the items that are in the serverState but
            * are no longer in the browserState
            */
-          const disconnectedRelations = oldRelationsIds.filter(
-            (rel) => !currentRelationIds.some((currRel) => currRel.id === rel.id)
-          );
+          const disconnectedRelations = actualOldValue.reduce((acc, relation) => {
+            if (!value.find((newRelation) => newRelation.id === relation.id)) {
+              return [...acc, { id: relation.id }];
+            }
+
+            return acc;
+          }, []);
 
           cleanedData = {
             disconnect: disconnectedRelations,
