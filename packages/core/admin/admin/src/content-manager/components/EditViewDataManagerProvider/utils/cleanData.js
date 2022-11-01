@@ -6,7 +6,7 @@ import isObject from 'lodash/isObject';
 
 /**
  *
- * @param {{ browserState: object, serverState: object }} browserState – the modifiedData from REDUX, serverStaet - the initialData from REDUX
+ * @param {{ browserState: object, serverState: object }} browserState – the modifiedData from REDUX, serverState - the initialData from REDUX
  * @param {object} currentSchema
  * @param {object} componentsSchema
  * @returns
