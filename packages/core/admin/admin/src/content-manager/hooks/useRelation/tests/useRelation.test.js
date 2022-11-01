@@ -78,10 +78,10 @@ describe('useRelation', () => {
   });
 
   test('fetch relations and calls onLoadRelationsCallback', async () => {
-    const onLoadRelationsCallbackMock = jest.fn();
+    const onLoadMock = jest.fn();
     const { waitFor } = await setup({
       relation: {
-        onLoadRelationsCallback: onLoadRelationsCallbackMock,
+        onLoad: onLoadMock,
       },
     });
 
@@ -95,7 +95,7 @@ describe('useRelation', () => {
     });
 
     await waitFor(() =>
-      expect(onLoadRelationsCallbackMock).toBeCalledWith({
+      expect(onLoadMock).toBeCalledWith({
         target: {
           name: 'test',
           value: [expect.objectContaining({ id: 1 }), expect.objectContaining({ id: 2 })],
@@ -105,7 +105,7 @@ describe('useRelation', () => {
   });
 
   test('fetch and normalize relations for xToOne', async () => {
-    const onLoadRelationsCallbackMock = jest.fn();
+    const onLoadMock = jest.fn();
 
     const FIXTURE = {
       id: 1,
@@ -120,14 +120,14 @@ describe('useRelation', () => {
 
     const { result, waitFor } = await setup({
       relation: {
-        onLoadRelationsCallback: onLoadRelationsCallbackMock,
+        onLoad: onLoadMock,
       },
     });
 
     await waitFor(() => expect(result.current.relations.isSuccess).toBe(true));
 
     await waitFor(() =>
-      expect(onLoadRelationsCallbackMock).toBeCalledWith({
+      expect(onLoadMock).toBeCalledWith({
         target: {
           name: 'test',
           value: [expect.objectContaining({ id: 1 })],
