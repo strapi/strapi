@@ -10,6 +10,8 @@ export const RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ =
   'ContentTypeBuilder/FormModal/RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ';
 export const SET_DATA_TO_EDIT = 'ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT';
 export const SET_ATTRIBUTE_DATA_SCHEMA = 'ContentTypeBuilder/FormModal/SET_ATTRIBUTE_DATA_SCHEMA';
+export const SET_CUSTOM_FIELD_DATA_SCHEMA =
+  'ContentTypeBuilder/FormModal/SET_CUSTOM_FIELD_DATA_SCHEMA';
 export const SET_DYNAMIC_ZONE_DATA_SCHEMA =
   'ContentTypeBuilder/FormModal/SET_DYNAMIC_ZONE_DATA_SCHEMA';
 export const SET_ERRORS = 'ContentTypeBuilder/FormModal/SET_ERRORS';

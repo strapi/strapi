@@ -13,46 +13,50 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   width: 1px;
 }
 
-.c10 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-left: 40px;
+.c22 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
 }
 
-.c19 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
+.c23 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c20 {
-  background: #f6f6f9;
-  padding-top: 64px;
-  padding-bottom: 64px;
-  border-radius: 4px;
-  border-color: #c0c0cf;
-  border: 1px solid #c0c0cf;
-  position: relative;
+.c7 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
-.c26 {
-  padding-top: 12px;
-  padding-bottom: 20px;
-}
-
-.c28 {
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
-  z-index: 1;
-  width: 100%;
-}
-
-.c30 {
-  position: relative;
+.c27 {
+  color: #666687;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
 }
 
 .c34 {
@@ -130,7 +134,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c32 .sc-kBzgEd {
+.c32 .sc-haTkiu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -200,7 +204,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c38 .sc-kBzgEd {
+.c38 .sc-haTkiu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -260,50 +264,46 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   fill: #32324d;
 }
 
-.c22 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
+.c10 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-left: 40px;
 }
 
-.c23 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c19 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
 }
 
-.c7 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c20 {
+  background: #f6f6f9;
+  padding-top: 64px;
+  padding-bottom: 64px;
+  border-radius: 4px;
+  border-color: #c0c0cf;
+  border: 1px solid #c0c0cf;
+  position: relative;
 }
 
-.c27 {
-  color: #666687;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
+.c26 {
+  padding-top: 12px;
+  padding-bottom: 20px;
+}
+
+.c28 {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  z-index: 1;
+  width: 100%;
+}
+
+.c30 {
+  position: relative;
 }
 
 .c2 {
@@ -834,17 +834,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
       />
     </div>
   </div>
-  .c9 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-left: 40px;
-}
-
-.c18 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
+  .c6 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c33 {
@@ -922,7 +916,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c34 .sc-kBzgEd {
+.c34 .sc-haTkiu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -992,7 +986,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c31 .sc-kBzgEd {
+.c31 .sc-haTkiu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1050,6 +1044,19 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
 .c31 svg > g,
 .c31 svg path {
   fill: #32324d;
+}
+
+.c9 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-left: 40px;
+}
+
+.c18 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
 }
 
 .c20 {
@@ -1193,13 +1200,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   line-height: 1.43;
   color: #8e8ea9;
   opacity: 1;
-}
-
-.c6 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
 }
 
 .c1 {

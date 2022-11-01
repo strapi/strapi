@@ -9,6 +9,21 @@ class Metadata extends Map {
   add(meta) {
     return this.set(meta.uid, meta);
   }
+
+  /**
+   * Validate the DB metadata, throwing an error if a duplicate DB table name is detected
+   */
+  validate() {
+    const seenTables = new Map();
+    for (const meta of this.values()) {
+      if (seenTables.get(meta.tableName)) {
+        throw new Error(
+          `DB table "${meta.tableName}" already exists. Change the collectionName of the related content type.`
+        );
+      }
+      seenTables.set(meta.tableName, true);
+    }
+  }
 }
 
 // TODO: check if there isn't an attribute with an id already
@@ -81,6 +96,7 @@ const createMetadata = (models = []) => {
     meta.columnToAttribute = columnToAttribute;
   }
 
+  metadata.validate();
   return metadata;
 };
 

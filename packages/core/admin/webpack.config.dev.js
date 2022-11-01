@@ -20,6 +20,18 @@ module.exports = () => {
   const options = {
     backend: 'http://localhost:1337',
     adminPath: '/admin/',
+
+    /**
+     * Ideally this would take more scenarios into account, such
+     * as the `telemetryDisabled` property in the package.json
+     * of the users project. For builds based on an app we are
+     * passing this information throgh, but here we do not have access
+     * to the app's package.json. By using at least an environment variable
+     * we can make sure developers can actually test this functionality in
+     * dev-mode.
+     */
+
+    telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
   };
   const pluginsPath = getPluginsPath();
 

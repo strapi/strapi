@@ -21,6 +21,7 @@ export default {
       },
       permissions: [],
     });
+
     app.registerPlugin({
       id: pluginId,
       name,
