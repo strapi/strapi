@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Plugins tab renders and matches the plugin tab snapshot 1`] = `
+exports[`Marketplace page - plugins tab renders and matches the plugin tab snapshot 1`] = `
 .c17 {
   padding-bottom: 16px;
   width: 25%;

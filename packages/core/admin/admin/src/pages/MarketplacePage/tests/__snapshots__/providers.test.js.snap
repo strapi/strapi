@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Providers tab renders and matches the providers tab snapshot 1`] = `
+exports[`Marketplace page - providers tab renders and matches the providers tab snapshot 1`] = `
 .c17 {
   padding-bottom: 16px;
   width: 25%;

@@ -68,9 +68,9 @@ describe('Marketplace page - layout', () => {
 
   afterAll(() => server.close());
 
-  it('redners the online layout', async () => {
+  it('renders the online layout', async () => {
     const trackUsage = jest.fn();
-    useTracking.mockImplementation(() => ({ trackUsage }));
+    useTracking.mockImplementationOnce(() => ({ trackUsage }));
 
     const { container } = render(App);
     await waitForReload();
@@ -121,6 +121,6 @@ describe('Marketplace page - layout', () => {
     });
     expect(toggleNotification).toHaveBeenCalledTimes(1);
     // Should not show install buttons
-    expect(screen.queryByText(/copy install command/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/copy install command/i)).toEqual(null);
   });
 });

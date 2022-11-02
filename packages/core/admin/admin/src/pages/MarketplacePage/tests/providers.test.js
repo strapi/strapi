@@ -56,7 +56,7 @@ const waitForReload = async () => {
   );
 };
 
-describe('Providers tab', () => {
+describe('Marketplace page - providers tab', () => {
   let renderedContainer;
   let history;
 
