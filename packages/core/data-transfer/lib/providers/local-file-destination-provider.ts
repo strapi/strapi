@@ -38,7 +38,6 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   name: string = 'destination::local-file';
   type: ProviderType = 'destination';
   options: ILocalFileDestinationProviderOptions;
-  cipher?: Cipher;
 
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
@@ -91,8 +90,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     // Encryption
     if (this.options.encryption?.enabled) {
-      this.cipher = createCipher(this.options.encryption.key);
-      streams.push(this.cipher);
+      streams.push(createCipher(this.options.encryption.key));
     }
 
     // FS write stream
