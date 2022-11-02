@@ -98,11 +98,15 @@ const RelationInput = ({
 
   const options = useMemo(
     () =>
-      data.flat().map((result) => ({
-        ...result,
-        value: result.id,
-        label: result.mainField,
-      })),
+      data.flat().map((result) =>
+        result
+          ? {
+              ...result,
+              value: result.id,
+              label: result.mainField,
+            }
+          : result
+      ),
     [data]
   );
 
