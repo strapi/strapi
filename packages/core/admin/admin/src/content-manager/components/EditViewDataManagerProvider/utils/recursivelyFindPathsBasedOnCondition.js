@@ -43,11 +43,17 @@ const recursivelyFindPathsBasedOnConditionSetup = (components, predicate = () =>
         const dynamicComponents = value.components;
 
         const attributesInDynamicComponents = dynamicComponents
-          .flatMap((componentName) =>
-            recursivelyFindPathsBasedOnCondition({
+          .flatMap((componentName) => {
+            const relationsInComponents = recursivelyFindPathsBasedOnCondition({
               [componentName]: { type: 'component', component: componentName },
-            })
-          )
+            });
+
+            if (relationsInComponents.length > 0) {
+              return relationsInComponents.map((path) => path.split(`${componentName}.`)[1]);
+            }
+
+            return relationsInComponents;
+          })
           .map((path) => `${key}.${path}`);
 
         acc = [...acc, attributesInDynamicComponents];

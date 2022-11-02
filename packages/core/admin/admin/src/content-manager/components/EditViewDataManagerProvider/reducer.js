@@ -207,12 +207,13 @@ const reducer = (state, action) =>
          * which is an array. Hence why we replace those fields.
          *
          */
+
         const mergeDataWithPreparedRelations = relationalFieldPaths
           .map((path) => path.split('.'))
           .reduce((acc, currentPaths) => {
             const [componentName] = currentPaths;
 
-            if (state.modifiedData && Array.isArray(get(state.modifiedData, componentName))) {
+            if (state.modifiedData && get(state.modifiedData, componentName)) {
               /**
                * this will be null on initial load, however subsequent calls
                * will have data in them correlating to the names of the relational fields.

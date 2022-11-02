@@ -1424,7 +1424,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               },
             ],
           },
-          relationalFieldPaths: ['dynamic_relations.basic.simple.categories'],
+          relationalFieldPaths: ['dynamic_relations.categories'],
           dynamicZonePaths: ['dynamic_relations'],
         };
 
@@ -1494,7 +1494,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               },
             ],
           },
-          relationalFieldPaths: ['dynamic_relations.basic.nested-simple.simple.categories'],
+          relationalFieldPaths: ['dynamic_relations.simple.categories'],
           dynamicZonePaths: ['dynamic_relations'],
         };
 
@@ -1593,9 +1593,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               },
             ],
           },
-          relationalFieldPaths: [
-            'dynamic_relations.basic.repetable-repeatble-relation.repeatable_simple.categories',
-          ],
+          relationalFieldPaths: ['dynamic_relations.repeatable_simple.categories'],
           dynamicZonePaths: ['dynamic_relations'],
         };
 

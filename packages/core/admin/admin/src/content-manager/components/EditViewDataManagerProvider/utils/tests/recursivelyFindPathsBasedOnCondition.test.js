@@ -345,9 +345,9 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
       )(attributes);
 
       expect(actual).toEqual([
-        'dynamic_relations.basic.nested-relation.simple.categories',
-        'dynamic_relations.basic.repetable-repeatble-relation.repeatable_relation.categories',
-        'dynamic_relations.basic.relation.categories',
+        'dynamic_relations.simple.categories',
+        'dynamic_relations.repeatable_relation.categories',
+        'dynamic_relations.categories',
       ]);
     });
   });
@@ -608,10 +608,7 @@ describe('recursivelyFindPathsBasedOnCondition', () => {
         (value) => value.type === 'dynamiczone'
       )(attributes);
 
-      expect(actual).toEqual([
-        'dynamic_relations',
-        'dynamic_relations.basic.nested-dynamic-zone.simple',
-      ]);
+      expect(actual).toEqual(['dynamic_relations', 'dynamic_relations.simple']);
     });
   });
 });

@@ -13,6 +13,13 @@ export const findLeafByPathAndReplace = (endpath, replaceWith) => {
    */
   const findLeafAndReplace = (acc, curr, ind, currentArr) => {
     /**
+     * Because we're returning the `accumulator[current]` at the bottom
+     * and some components may not exist at this point, we check if `accumulator`
+     * exists before trying to access & replace properties.
+     */
+    if (!acc) return acc;
+
+    /**
      * If this is the last item in the array of paths
      * and the current path is not undefined in the accumulator
      * then we assume it's a leaf and we can replace it.
@@ -35,11 +42,10 @@ export const findLeafByPathAndReplace = (endpath, replaceWith) => {
     }
 
     /**
-     * If the value of the accumulator[current] exists return this
-     * instead of the main accumulator, this will stop the same keys overwrite
-     * the wrong objects
+     * accumulator[current]return accumulator[current] instead of the main accumulator,
+     * this will stop the same keys overwrite the wrong objects
      */
-    return acc[curr] ? acc[curr] : acc;
+    return acc[curr];
   };
 
   return findLeafAndReplace;
