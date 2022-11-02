@@ -2,23 +2,18 @@ import type { IEntity } from '../../../../types';
 
 import { Readable, PassThrough } from 'stream';
 
-import {
-  collect,
-  getStrapiFactory,
-  createMockedReadableFactory,
-  getContentTypes,
-} from './test-utils';
+import { collect, getStrapiFactory, getContentTypes, createMockedQueryBuilder } from './test-utils';
 import { createEntitiesStream, createEntitiesTransformStream } from '../entities';
 
 describe('Local Strapi Source Provider - Entities Streaming', () => {
   describe('Create Entities Stream', () => {
     test('Should return an empty stream if there is no content type', async () => {
       const customContentTypes = {};
-      const stream = createMockedReadableFactory<never>({});
+      const queryBuilder = createMockedQueryBuilder({});
 
       const strapi = getStrapiFactory({
         contentTypes: customContentTypes,
-        entityService: { stream },
+        db: { queryBuilder },
       })();
 
       const entitiesStream = createEntitiesStream(strapi);
@@ -30,14 +25,14 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
 
       // The stream should not have been called since there is no content types
       // Note: This check must happen AFTER we've collected the results
-      expect(stream).not.toHaveBeenCalled();
+      expect(queryBuilder).not.toHaveBeenCalled();
 
       // We have 0 * 0 entities
       expect(entities).toHaveLength(0);
     });
 
     test('Should return a stream with 4 entities from 2 content types', async () => {
-      const stream = createMockedReadableFactory({
+      const queryBuilder = createMockedQueryBuilder({
         foo: [
           { id: 1, title: 'First title' },
           { id: 2, title: 'Second title' },
@@ -50,7 +45,7 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
 
       const strapi = getStrapiFactory({
         contentTypes: getContentTypes(),
-        entityService: { stream },
+        db: { queryBuilder },
       })();
 
       const entitiesStream = createEntitiesStream(strapi);
@@ -62,8 +57,7 @@ describe('Local Strapi Source Provider - Entities Streaming', () => {
 
       // Should have been called with 'foo', then 'bar'
       // Note: This check must happen AFTER we've collected the results
-      expect(stream).toHaveBeenCalledTimes(2);
-
+      expect(queryBuilder).toHaveBeenCalledTimes(2);
       // We have 2 * 2 entities
       expect(results).toHaveLength(4);
 
