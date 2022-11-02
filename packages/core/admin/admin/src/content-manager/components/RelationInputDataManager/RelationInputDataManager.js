@@ -23,7 +23,7 @@ export const RelationInputDataManager = ({
   labelAction,
   mainField,
   name,
-  queryInfos: { endpoints, defaultParams, shouldDisplayRelationLink },
+  queryInfos: { endpoints, shouldDisplayRelationLink },
   placeholder,
   required,
   relationType,
@@ -39,7 +39,6 @@ export const RelationInputDataManager = ({
       enabled: get(initialData, name)?.count !== 0 && !!endpoints.relation,
       endpoint: endpoints.relation,
       pageParams: {
-        ...defaultParams,
         pageSize: RELATIONS_TO_DISPLAY,
       },
     },
@@ -47,7 +46,6 @@ export const RelationInputDataManager = ({
     search: {
       endpoint: endpoints.search,
       pageParams: {
-        ...defaultParams,
         entityId: isCreatingEntry ? undefined : componentId ?? initialData.id,
         pageSize: SEARCH_RESULTS_TO_DISPLAY,
       },
@@ -249,9 +247,6 @@ RelationInputDataManager.propTypes = {
   size: PropTypes.number.isRequired,
   targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.shape({
-    defaultParams: PropTypes.shape({
-      _component: PropTypes.string,
-    }),
     endpoints: PropTypes.shape({
       relation: PropTypes.string,
       search: PropTypes.string.isRequired,

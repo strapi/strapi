@@ -531,7 +531,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
             },
           },
           fieldSchema: { type: 'relation', targetModel: 'category' },
-          queryInfos: { defaultParams: {} },
+          queryInfos: {},
         },
         {
           name: 'component',
@@ -556,7 +556,6 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
   describe('generateRelationQueryInfos', () => {
     it('should return an object with the correct keys', () => {
       expect(generateRelationQueryInfos(addressSchema, 'categories', simpleModels)).toEqual({
-        defaultParams: {},
         shouldDisplayRelationLink: true,
       });
     });
@@ -567,9 +566,6 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
       expect(
         generateRelationQueryInfosForComponents(addressSchema, 'categories', simpleModels)
       ).toEqual({
-        defaultParams: {
-          component: 'api::address.address',
-        },
         shouldDisplayRelationLink: true,
       });
     });

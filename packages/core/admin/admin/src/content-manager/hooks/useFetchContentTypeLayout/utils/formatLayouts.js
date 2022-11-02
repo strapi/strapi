@@ -163,7 +163,6 @@ const generateRelationQueryInfos = (contentTypeConfiguration, fieldName, models)
   const shouldDisplayRelationLink = getDisplayedModels(models).includes(targetModel);
 
   return {
-    defaultParams: {},
     shouldDisplayRelationLink,
   };
 };
@@ -173,9 +172,6 @@ const generateRelationQueryInfosForComponents = (contentTypeConfiguration, field
   const shouldDisplayRelationLink = getDisplayedModels(models).includes(targetModel);
 
   return {
-    defaultParams: {
-      component: contentTypeConfiguration.uid,
-    },
     shouldDisplayRelationLink,
   };
 };
