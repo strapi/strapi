@@ -42,6 +42,7 @@ const Providers = ({
   showTutorials,
   store,
   themes,
+  fetchClient,
 }) => {
   return (
     <ThemeToggleProvider themes={themes}>
@@ -63,6 +64,7 @@ const Providers = ({
                   runHookWaterfall={runHookWaterfall}
                   runHookSeries={runHookSeries}
                   settings={settings}
+                  fetchClient={fetchClient}
                 >
                   <LibraryProvider components={components} fields={fields}>
                     <CustomFieldsProvider customFields={customFields}>
@@ -145,6 +147,7 @@ Providers.propTypes = {
     }).isRequired,
     custom: PropTypes.object,
   }).isRequired,
+  fetchClient: PropTypes.func.isRequired,
 };
 
 export default Providers;

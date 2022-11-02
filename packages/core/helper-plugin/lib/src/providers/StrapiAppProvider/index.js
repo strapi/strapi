@@ -31,6 +31,7 @@ StrapiAppProvider.propTypes = {
   runHookWaterfall: PropTypes.func.isRequired,
   runHookSeries: PropTypes.func.isRequired,
   settings: PropTypes.object.isRequired,
+  fetchClient: PropTypes.func.isRequired,
 };
 
 export default StrapiAppProvider;

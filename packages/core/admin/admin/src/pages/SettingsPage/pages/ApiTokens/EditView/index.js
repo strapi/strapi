@@ -9,6 +9,7 @@ import {
   useTracking,
   useGuidedTour,
   useRBAC,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
 import { Formik } from 'formik';
@@ -16,7 +17,6 @@ import { get } from 'lodash';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
-import { axiosInstance } from '../../../../../core/utils';
 import { schema } from './utils';
 import LoadingView from './components/LoadingView';
 import FormHead from './components/FormHead';
@@ -29,6 +29,7 @@ import reducer, { initialState } from './reducer';
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
 const ApiTokenCreateView = () => {
+  const fetchClient = useFetchClient();
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -59,7 +60,7 @@ const ApiTokenCreateView = () => {
     async () => {
       const [permissions, routes] = await Promise.all(
         ['/admin/content-api/permissions', '/admin/content-api/routes'].map(async (url) => {
-          const { data } = await axiosInstance.get(url);
+          const { data } = await fetchClient.get(url);
 
           return data.data;
         })
@@ -113,7 +114,7 @@ const ApiTokenCreateView = () => {
     async () => {
       const {
         data: { data },
-      } = await axiosInstance.get(`/admin/api-tokens/${id}`);
+      } = await fetchClient.get(`/admin/api-tokens/${id}`);
 
       setApiToken({
         ...data,
@@ -161,12 +162,12 @@ const ApiTokenCreateView = () => {
       const {
         data: { data: response },
       } = isCreating
-        ? await axiosInstance.post(`/admin/api-tokens`, {
+        ? await fetchClient.post(`/admin/api-tokens`, {
             ...body,
             lifespan: lifespanVal,
             permissions: body.type === 'custom' ? state.selectedActions : null,
           })
-        : await axiosInstance.put(`/admin/api-tokens/${id}`, {
+        : await fetchClient.put(`/admin/api-tokens/${id}`, {
             name: body.name,
             description: body.description,
             type: body.type,
