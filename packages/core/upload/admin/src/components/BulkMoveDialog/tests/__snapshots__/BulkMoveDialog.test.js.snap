@@ -13,8 +13,34 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c18 {
-  padding-right: 12px;
+.c14 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c15 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c15 > * + * {
+  margin-top: 4px;
+}
+
+.c7 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c27 {
@@ -94,7 +120,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c25 .sc-kBzgEd {
+.c25 .sc-haTkiu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -164,7 +190,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c28 .sc-kBzgEd {
+.c28 .sc-haTkiu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -222,6 +248,10 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
+.c18 {
+  padding-right: 12px;
+}
+
 .c17 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -241,36 +271,6 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
-}
-
-.c14 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c15 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c15 > * + * {
-  margin-top: 4px;
-}
-
-.c7 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
 }
 
 .c19 {
