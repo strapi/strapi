@@ -159,10 +159,10 @@ const reducer = (state, action) =>
       case 'INIT_FORM': {
         const {
           initialValues,
-          relationalFields = [],
-          repeatableFields = [],
-          dynamicZones = [],
-          componentFields = [],
+          relationalFieldPaths = [],
+          componentPaths = [],
+          repeatableComponentPaths = [],
+          dynamicZonePaths = [],
         } = action;
 
         /**
@@ -174,12 +174,12 @@ const reducer = (state, action) =>
         const data = cloneDeep(initialValues);
 
         /**
-         * relationalFields won't be an array which is what we're expecting
+         * relationalFieldPaths won't be an array which is what we're expecting
          * Therefore we reset these bits of state to the correct data type
          * which is an array. Hence why we replace those fields.
          *
          */
-        const mergeDataWithPreparedRelations = relationalFields
+        const mergeDataWithPreparedRelations = relationalFieldPaths
           .map((path) => path.split('.'))
           .reduce((acc, currentPaths) => {
             const [componentName] = currentPaths;
@@ -191,9 +191,9 @@ const reducer = (state, action) =>
                */
               set(acc, componentName, get(state.modifiedData, componentName));
             } else if (
-              repeatableFields.includes(componentName) ||
-              dynamicZones.includes(componentName) ||
-              componentFields.includes(componentName)
+              repeatableComponentPaths.includes(componentName) ||
+              dynamicZonePaths.includes(componentName) ||
+              componentPaths.includes(componentName)
             ) {
               /**
                * if the componentName is a repeatable field or dynamic zone we collect the list of paths e.g.
