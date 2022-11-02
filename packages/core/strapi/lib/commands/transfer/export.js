@@ -24,7 +24,7 @@ module.exports = async (args) => {
   // To file
   const outputOptions = {
     file: {
-      path: args.output ?? getDefaultExportBackupName(),
+      path: args.output || getDefaultExportBackupName(),
     },
     encryption: {
       enabled: args.encrypt,
