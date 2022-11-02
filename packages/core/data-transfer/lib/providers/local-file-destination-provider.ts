@@ -89,7 +89,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     }
 
     // Encryption
-    if (this.options.encryption?.enabled) {
+    if (this.options.encryption.enabled) {
       streams.push(createCipher(this.options.encryption.key));
     }
 
