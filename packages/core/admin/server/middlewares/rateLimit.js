@@ -1,6 +1,7 @@
 'use strict';
 
 const utils = require('@strapi/utils');
+const { toLower } = require('lodash/fp');
 
 const { RateLimitError } = utils.errors;
 
@@ -9,7 +10,7 @@ module.exports =
   async (ctx, next) => {
     const ratelimit = require('koa2-ratelimit').RateLimit;
 
-    const userEmail = ctx.request.body.email || 'unknownEmail';
+    const userEmail = toLower(ctx.request.body.email) || 'unknownEmail';
 
     return ratelimit.middleware({
       interval: { min: 5 },
