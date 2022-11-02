@@ -29,7 +29,7 @@ export const RelationInputDataManager = ({
   labelAction,
   mainField,
   name,
-  queryInfos: { endpoints, shouldDisplayRelationLink },
+  queryInfos: { endpoints, defaultParams, shouldDisplayRelationLink },
   placeholder,
   required,
   relationType,
@@ -51,6 +51,7 @@ export const RelationInputDataManager = ({
       endpoint: endpoints.relation,
       pageGoal: currentLastPage,
       pageParams: {
+        ...defaultParams,
         pageSize: RELATIONS_TO_DISPLAY,
       },
       onLoad: loadRelation,
@@ -64,6 +65,7 @@ export const RelationInputDataManager = ({
     search: {
       endpoint: endpoints.search,
       pageParams: {
+        ...defaultParams,
         // TODO: fix me cause this sucks
         entityId: isCreatingEntry
           ? undefined
@@ -257,6 +259,9 @@ RelationInputDataManager.propTypes = {
   size: PropTypes.number.isRequired,
   targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.shape({
+    defaultParams: PropTypes.shape({
+      locale: PropTypes.string,
+    }),
     endpoints: PropTypes.shape({
       relation: PropTypes.string,
       search: PropTypes.string.isRequired,
