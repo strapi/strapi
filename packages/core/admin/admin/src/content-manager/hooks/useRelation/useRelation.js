@@ -1,11 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useInfiniteQuery } from 'react-query';
 
 import { axiosInstance } from '../../../core/utils';
 
-export const useRelation = (cacheKey, { relation, search }) => {
-  const [searchParams, setSearchParams] = useState({});
+import { normalizeRelations } from '../../components/RelationInputDataManager/utils';
 
+export const useRelation = (cacheKey, { name, relation, search }) => {
+  const [searchParams, setSearchParams] = useState({});
+  const [currentPage, setCurrentPage] = useState(0);
+  /**
+   * This runs in `useInfiniteQuery` to actually fetch the data
+   */
   const fetchRelations = async ({ pageParam = 1 }) => {
     try {
       const { data } = await axiosInstance.get(relation?.endpoint, {
@@ -14,6 +19,8 @@ export const useRelation = (cacheKey, { relation, search }) => {
           page: pageParam,
         },
       });
+
+      setCurrentPage(pageParam);
 
       return data;
     } catch (err) {
@@ -36,6 +43,8 @@ export const useRelation = (cacheKey, { relation, search }) => {
       return null;
     }
   };
+
+  const { onLoad: onLoadRelationsCallback, normalizeArguments = {} } = relation;
 
   const relationsRes = useInfiniteQuery(['relation', cacheKey], fetchRelations, {
     cacheTime: 0,
@@ -70,7 +79,7 @@ export const useRelation = (cacheKey, { relation, search }) => {
         if (isXToOneRelation) {
           normalizedResults = [data];
         } else if (results) {
-          normalizedResults = results.reverse();
+          normalizedResults = [...results].reverse();
         }
 
         return {
@@ -80,6 +89,37 @@ export const useRelation = (cacheKey, { relation, search }) => {
       }),
     }),
   });
+
+  const { pageGoal } = relation;
+
+  const { status, data, fetchNextPage, hasNextPage } = relationsRes;
+
+  useEffect(() => {
+    /**
+     * This ensures the infiniteQuery hook fetching has caught-up with the modifiedData
+     * state i.e. in circumstances where you add 10 relations, the browserState knows this,
+     * but the hook would think it could fetch more, when in reality, it can't.
+     */
+    if (pageGoal > currentPage && hasNextPage && status === 'success') {
+      fetchNextPage({
+        pageParam: currentPage + 1,
+      });
+    }
+  }, [pageGoal, currentPage, fetchNextPage, hasNextPage, status]);
+
+  useEffect(() => {
+    if (status === 'success' && data && data.pages?.at(-1)?.results && onLoadRelationsCallback) {
+      // everytime we fetch, we normalize prior to adding to redux
+      const normalizedResults = normalizeRelations(data.pages.at(-1).results, normalizeArguments);
+
+      // this is loadRelation from EditViewDataManagerProvider
+      onLoadRelationsCallback({
+        target: { name, value: normalizedResults },
+      });
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, onLoadRelationsCallback, name, data]);
 
   const searchRes = useInfiniteQuery(
     ['relation', cacheKey, 'search', JSON.stringify(searchParams)],

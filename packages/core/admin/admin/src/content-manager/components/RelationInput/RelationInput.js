@@ -64,9 +64,7 @@ const RelationInput = ({
   onRelationConnect,
   onRelationLoadMore,
   onRelationDisconnect,
-  onSearchClose,
   onSearchNextPage,
-  onSearchOpen,
   onSearch,
   placeholder,
   publicationStateTranslations,
@@ -80,11 +78,9 @@ const RelationInput = ({
   const outerListRef = useRef();
   const [overflow, setOverflow] = useState('');
 
-  const {
-    data: { pages },
-  } = searchResults;
+  const { data } = searchResults;
 
-  const relations = useMemo(() => paginatedRelations.data.pages.flat(), [paginatedRelations]);
+  const relations = paginatedRelations.data;
   const totalNumberOfRelations = relations.length ?? 0;
 
   const dynamicListHeight = useMemo(
@@ -102,12 +98,12 @@ const RelationInput = ({
 
   const options = useMemo(
     () =>
-      pages.flat().map((result) => ({
+      data.flat().map((result) => ({
         ...result,
         value: result.id,
         label: result.mainField,
       })),
-    [pages]
+    [data]
   );
 
   useEffect(() => {
@@ -197,15 +193,11 @@ const RelationInput = ({
 
   const handleMenuClose = () => {
     setIsMenuOpen(false);
-
-    if (onSearchClose) {
-      onSearchClose();
-    }
   };
 
   const handleMenuOpen = () => {
     setIsMenuOpen(true);
-    onSearchOpen();
+    onSearch();
   };
 
   return (
@@ -346,37 +338,30 @@ const RelationInput = ({
   );
 };
 
-const ReactQueryRelationResult = PropTypes.shape({
-  data: PropTypes.shape({
-    pages: PropTypes.arrayOf(
-      PropTypes.arrayOf(
-        PropTypes.shape({
-          href: PropTypes.string,
-          id: PropTypes.number.isRequired,
-          publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-          mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        })
-      )
-    ),
-  }),
+const RelationsResult = PropTypes.shape({
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      href: PropTypes.string,
+      id: PropTypes.number.isRequired,
+      publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+      mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    })
+  ),
   hasNextPage: PropTypes.bool,
   isFetchingNextPage: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
 });
 
-const ReactQuerySearchResult = PropTypes.shape({
-  data: PropTypes.shape({
-    pages: PropTypes.arrayOf(
-      PropTypes.arrayOf(
-        PropTypes.shape({
-          id: PropTypes.number.isRequired,
-          mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-          publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-        })
-      )
-    ),
-  }),
+const SearchResults = PropTypes.shape({
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      href: PropTypes.string,
+      mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+    })
+  ),
   hasNextPage: PropTypes.bool,
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
@@ -388,10 +373,9 @@ RelationInput.defaultProps = {
   error: undefined,
   labelAction: null,
   labelLoadMore: null,
-  onSearchClose: undefined,
   required: false,
-  relations: [],
-  searchResults: [],
+  relations: { data: [] },
+  searchResults: { data: [] },
 };
 
 RelationInput.propTypes = {
@@ -411,17 +395,15 @@ RelationInput.propTypes = {
   onRelationLoadMore: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
   onSearchNextPage: PropTypes.func.isRequired,
-  onSearchClose: PropTypes.func,
-  onSearchOpen: PropTypes.func.isRequired,
   placeholder: PropTypes.string.isRequired,
   publicationStateTranslations: PropTypes.shape({
     draft: PropTypes.string.isRequired,
     published: PropTypes.string.isRequired,
   }).isRequired,
   required: PropTypes.bool,
-  searchResults: ReactQuerySearchResult,
+  searchResults: SearchResults,
   size: PropTypes.number.isRequired,
-  relations: ReactQueryRelationResult,
+  relations: RelationsResult,
 };
 
 export default RelationInput;

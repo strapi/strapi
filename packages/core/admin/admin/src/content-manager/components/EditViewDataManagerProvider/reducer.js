@@ -3,8 +3,14 @@ import unset from 'lodash/unset';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import take from 'lodash/take';
-import pull from 'lodash/pull';
-import { moveFields } from './utils';
+import cloneDeep from 'lodash/cloneDeep';
+import uniqBy from 'lodash/uniqBy';
+
+import {
+  findLeafByPathAndReplace,
+  moveFields,
+  recursivelyFindPathsBasedOnCondition,
+} from './utils';
 import { getMaxTempKey } from '../../utils';
 
 const initialState = {
@@ -26,63 +32,111 @@ const reducer = (state, action) =>
   produce(state, (draftState) => {
     switch (action.type) {
       case 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD': {
-        set(
-          draftState,
-          ['modifiedData', ...action.keys],
-          state.componentsDataStructure[action.componentUid]
-        );
+        const { componentLayoutData, allComponents } = action;
+
+        const relationPaths = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'relation'
+        )(componentLayoutData.attributes);
+
+        const defaultDataStructure = {
+          ...state.componentsDataStructure[componentLayoutData.uid],
+        };
+
+        const repeatableFields = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'component' && value.repeatable
+        )(componentLayoutData.attributes);
+
+        const componentDataStructure = relationPaths.reduce((acc, current) => {
+          const [componentName] = current.split('.');
+
+          /**
+           * Why do we do this? Because if a repeatable component
+           * has another repeatable component inside of it we
+           * don't need to attach the array at this point because that will be
+           * done again deeper in the nest.
+           */
+          if (!repeatableFields.includes(componentName)) {
+            set(acc, current, []);
+          }
+
+          return acc;
+        }, defaultDataStructure);
+
+        set(draftState, ['modifiedData', ...action.keys], componentDataStructure);
 
         break;
       }
+      case 'ADD_COMPONENT_TO_DYNAMIC_ZONE':
       case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
-        let currentValue = get(state, ['modifiedData', ...action.keys], []).slice();
+        const { keys, allComponents, componentLayoutData, shouldCheckErrors } = action;
 
-        const defaultDataStructure = {
-          ...state.componentsDataStructure[action.componentUid],
-          __temp_key__: getMaxTempKey(currentValue) + 1,
-        };
-
-        if (Array.isArray(currentValue)) {
-          currentValue.push(defaultDataStructure);
-        } else {
-          currentValue = [defaultDataStructure];
-        }
-
-        set(draftState, ['modifiedData', ...action.keys], currentValue);
-
-        if (action.shouldCheckErrors) {
+        if (shouldCheckErrors) {
           draftState.shouldCheckErrors = !state.shouldCheckErrors;
         }
 
-        break;
-      }
-      case 'ADD_COMPONENT_TO_DYNAMIC_ZONE': {
-        draftState.modifiedDZName = action.keys[0];
-
-        if (action.shouldCheckErrors) {
-          draftState.shouldCheckErrors = !state.shouldCheckErrors;
+        if (action.type === 'ADD_COMPONENT_TO_DYNAMIC_ZONE') {
+          draftState.modifiedDZName = keys[0];
         }
 
-        const defaultDataStructure = {
-          ...state.componentsDataStructure[action.componentUid],
-          __component: action.componentUid,
-        };
+        const currentValue = get(state, ['modifiedData', ...keys], []);
 
-        const currentValue = get(state, ['modifiedData', ...action.keys], null);
-        const updatedValue = currentValue
-          ? [...currentValue, defaultDataStructure]
-          : [defaultDataStructure];
+        const defaultDataStructure =
+          action.type === 'ADD_COMPONENT_TO_DYNAMIC_ZONE'
+            ? {
+                ...state.componentsDataStructure[componentLayoutData.uid],
+                __component: componentLayoutData.uid,
+              }
+            : {
+                ...state.componentsDataStructure[componentLayoutData.uid],
+                __temp_key__: getMaxTempKey(currentValue) + 1,
+              };
 
-        set(draftState, ['modifiedData', ...action.keys], updatedValue);
+        const relationPaths = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'relation'
+        )(componentLayoutData.attributes);
+
+        const repeatableFields = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'component' && value.repeatable
+        )(componentLayoutData.attributes);
+
+        const componentDataStructure = relationPaths.reduce((acc, current) => {
+          const [componentName] = current.split('.');
+
+          /**
+           * Why do we do this? Because if a repeatable component
+           * has another repeatable component inside of it we
+           * don't need to attach the array at this point because that will be
+           * done again deeper in the nest.
+           */
+          if (!repeatableFields.includes(componentName)) {
+            set(acc, current, []);
+          }
+
+          return acc;
+        }, defaultDataStructure);
+
+        const newValue = Array.isArray(currentValue)
+          ? [...currentValue, componentDataStructure]
+          : [componentDataStructure];
+
+        set(draftState, ['modifiedData', ...keys], newValue);
 
         break;
       }
+
       case 'LOAD_RELATION': {
-        const initialDataPath = ['initialData', ...action.keys, 'results'];
-        const modifiedDataPath = ['modifiedData', ...action.keys, 'results'];
+        const initialDataPath = ['initialData', ...action.keys];
+        const modifiedDataPath = ['modifiedData', ...action.keys];
         const { value } = action;
 
-        set(draftState, initialDataPath, value);
+        const initialDataRelations = get(state, initialDataPath);
+        const modifiedDataRelations = get(state, modifiedDataPath);
+
+        set(draftState, initialDataPath, uniqBy([...value, ...initialDataRelations], 'id'));
 
         /**
          * We need to set the value also on modifiedData, because initialData
@@ -90,156 +144,104 @@ const reducer = (state, action) =>
          * both states, to render the dirty UI state
          */
 
-        set(draftState, modifiedDataPath, value);
+        set(draftState, modifiedDataPath, uniqBy([...value, ...modifiedDataRelations], 'id'));
 
         break;
       }
       case 'CONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
-        const { value, replace = false } = action;
-        const connectedRelations = get(state, [...path, 'connect']);
-        const disconnectedRelations = get(state, [...path, 'disconnect']) ?? [];
-        const savedRelations = get(state, [...path, 'results']) ?? [];
-        const existInSavedRelation =
-          savedRelations?.findIndex((savedRelations) => savedRelations.id === value.id) !== -1;
+        const { value, toOneRelation } = action;
 
-        if (!connectedRelations) {
-          set(draftState, [...path, 'connect'], []);
-        }
-
-        // We should add a relation in the connect array only if it is not an already saved relation
-        if (!existInSavedRelation) {
-          if (replace) {
-            set(draftState, [...path, 'connect'], [value]);
-          } else {
-            const nextValue = get(draftState, [...path, 'connect']);
-            nextValue.push(value);
-          }
-        }
-
-        // Disconnect array handling
-        if (replace) {
-          // In xToOne relations we should place the saved relation in disconnected array to not display it
-          // only needed if there is a saved relation and it is not already stored in disconnected array
-          if (savedRelations.length && !disconnectedRelations.length) {
-            set(draftState, [...path, 'disconnect'], savedRelations);
-          }
-
-          // If the saved relation is stored in disconnected array
-          // We should remove it when an action requires to reconnect this relation
-          // We then reset the connect/disconnect state
-          if (disconnectedRelations.length) {
-            const existsInDisconnectedRelations =
-              disconnectedRelations.findIndex(
-                (disconnectedRelation) => disconnectedRelation?.id === value.id
-              ) > -1;
-
-            if (existsInDisconnectedRelations) {
-              set(draftState, [...path, 'disconnect'], []);
-              set(draftState, [...path, 'connect'], []);
-            }
-          }
-        } else if (disconnectedRelations.length) {
-          // In xToMany relations, when an action requires to connect a relation
-          // We should remove it from the disconnected array if it existed in it
-          const existsInDisconnect = disconnectedRelations.find(
-            (disconnectValue) => disconnectValue.id === value.id
-          );
-
-          if (existsInDisconnect) {
-            const newDisconnectArray = pull([...disconnectedRelations], existsInDisconnect);
-            set(draftState, [...path, 'disconnect'], newDisconnectArray);
-          }
+        /**
+         * If the field is a single relation field we don't want to append
+         * we just want to replace the value.
+         */
+        if (toOneRelation) {
+          set(draftState, path, [value]);
+        } else {
+          const modifiedDataRelations = get(state, path);
+          const newRelations = [...modifiedDataRelations, value];
+          set(draftState, path, newRelations);
         }
 
         break;
       }
       case 'DISCONNECT_RELATION': {
         const path = ['modifiedData', ...action.keys];
-        const { value } = action;
-        const connectedRelations = get(state, [...path, 'connect']);
-        const disconnectedRelations = get(state, [...path, 'disconnect']);
+        const { id } = action;
+        const modifiedDataRelation = get(state, [...path]);
 
-        if (!disconnectedRelations) {
-          set(draftState, [...path, 'disconnect'], []);
-        }
+        /**
+         * TODO: before merge make this performant (e.g. 1000 relations === long time)
+         */
+        const newRelations = modifiedDataRelation.filter((rel) => rel.id !== id);
 
-        const nextValue = get(draftState, [...path, 'disconnect']);
-        nextValue.push(value);
-
-        if (connectedRelations?.length) {
-          const existsInConnect = connectedRelations.find(
-            (connectValue) => connectValue.id === value.id
-          );
-
-          if (existsInConnect) {
-            const newConnectArray = pull([...connectedRelations], existsInConnect);
-            set(draftState, [...path, 'connect'], newConnectArray);
-          }
-        }
+        set(draftState, path, newRelations);
 
         break;
       }
+      /**
+       * This action will be called when you open your entry (first load)
+       * but also every time you press publish.
+       */
       case 'INIT_FORM': {
-        const { initialValues, relationalFields = [] } = action;
+        const {
+          initialValues,
+          relationalFieldPaths = [],
+          componentPaths = [],
+          repeatableComponentPaths = [],
+          dynamicZonePaths = [],
+        } = action;
+
+        /**
+         * You can't mutate an actions value.
+         * and spreading an object only clones
+         * the first level, the deeply nested values
+         * are a reference.
+         */
+        const data = cloneDeep(initialValues);
+
+        /**
+         * relationalFieldPaths won't be an array which is what we're expecting
+         * Therefore we reset these bits of state to the correct data type
+         * which is an array. Hence why we replace those fields.
+         *
+         */
+
+        const mergeDataWithPreparedRelations = relationalFieldPaths
+          .map((path) => path.split('.'))
+          .reduce((acc, currentPaths) => {
+            const [componentName] = currentPaths;
+
+            if (state.modifiedData && get(state.modifiedData, componentName)) {
+              /**
+               * this will be null on initial load, however subsequent calls
+               * will have data in them correlating to the names of the relational fields.
+               */
+              set(acc, componentName, get(state.modifiedData, componentName));
+            } else if (
+              repeatableComponentPaths.includes(componentName) ||
+              dynamicZonePaths.includes(componentName) ||
+              componentPaths.includes(componentName)
+            ) {
+              /**
+               * if the componentName is a repeatable field or dynamic zone we collect the list of paths e.g.
+               * ["repeatable_single_component_relation","categories"] and then reduce this
+               * recursively
+               */
+              const findleaf = findLeafByPathAndReplace(currentPaths.slice(-1)[0], []);
+              currentPaths.reduce(findleaf, acc);
+            } else {
+              set(acc, currentPaths, []);
+            }
+
+            return acc;
+          }, data);
+
+        draftState.initialData = mergeDataWithPreparedRelations;
+        draftState.modifiedData = mergeDataWithPreparedRelations;
 
         draftState.formErrors = {};
-
-        draftState.initialData = {
-          ...initialValues,
-
-          /**
-           * The state we keep in the client for relations looks like:
-           *
-           * {
-           *   count: <int>
-           *   results: [<Relation>]
-           * }
-           *
-           * The content API only returns { count: <int> }, which is why
-           * we need to extend the existing state rather than overwriting it.
-           */
-
-          ...relationalFields.reduce((acc, name) => {
-            acc[name] = {
-              ...(state.initialData?.[name] ?? {}),
-              ...(initialValues?.[name] ?? {}),
-            };
-
-            return acc;
-          }, {}),
-        };
-
-        draftState.modifiedData = {
-          ...initialValues,
-
-          /**
-           * The client sends the following to the content API:
-           *
-           * {
-           *   connect: [<Relation>],
-           *   disconnect: [<Relation>]
-           * }
-           *
-           * but receives only { count: <int> } in return. After save/ publish
-           * we have to:
-           *
-           * 1) reset the connect/ disconnect arrays
-           * 2) extend the existing state with the API response, so that `count`
-           *    stays in sync
-           */
-
-          ...relationalFields.reduce((acc, name) => {
-            const { connect, disconnect, ...currentState } = state.modifiedData?.[name] ?? {};
-
-            acc[name] = {
-              ...(currentState ?? {}),
-              ...(initialValues?.[name] ?? {}),
-            };
-
-            return acc;
-          }, {}),
-        };
 
         draftState.modifiedDZName = null;
         draftState.shouldCheckErrors = false;
