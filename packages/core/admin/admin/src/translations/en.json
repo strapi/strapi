@@ -266,7 +266,7 @@
   "admin.pages.MarketPlacePage.plugin.copy.success": "Install command ready to be pasted in your terminal",
   "admin.pages.MarketPlacePage.plugin.info": "Learn more",
   "admin.pages.MarketPlacePage.plugin.info.label": "Learn more about {pluginName}",
-  "admin.pages.MarketPlacePage.plugin.info.text": "Learn more",
+  "admin.pages.MarketPlacePage.plugin.info.text": "More",
   "admin.pages.MarketPlacePage.plugin.installed": "Installed",
   "admin.pages.MarketPlacePage.plugin.tooltip.madeByStrapi": "Made by Strapi",
   "admin.pages.MarketPlacePage.plugin.tooltip.verified": "Plugin verified by Strapi",

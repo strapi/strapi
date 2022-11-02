@@ -50,6 +50,7 @@ module.exports = {
   setupFilesAfterEnv: [
     '<rootDir>/packages/admin-test-utils/lib/setup/styled-components.js',
     '<rootDir>/packages/admin-test-utils/lib/setup/strapi.js',
+    '<rootDir>/packages/admin-test-utils/lib/setup/prop-types.js',
   ],
   testEnvironment: 'jsdom',
   transform: {
