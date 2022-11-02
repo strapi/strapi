@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "4.4.5",
+  "version": "4.4.6",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -37,7 +37,7 @@
     "lib": "./dist"
   },
   "dependencies": {
-    "@strapi/logger": "4.4.5",
+    "@strapi/logger": "4.4.6",
     "chalk": "4.1.2",
     "prettier": "2.7.1",
     "stream-chain": "2.2.5",
