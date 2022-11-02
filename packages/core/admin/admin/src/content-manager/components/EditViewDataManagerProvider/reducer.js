@@ -40,7 +40,7 @@ const reducer = (state, action) =>
         )(componentLayoutData.attributes);
 
         const defaultDataStructure = {
-          ...state.componentsDataStructure[componentLayoutData.componentUid],
+          ...state.componentsDataStructure[componentLayoutData.uid],
         };
 
         const repeatableFields = recursivelyFindPathsBasedOnCondition(

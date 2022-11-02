@@ -3,10 +3,24 @@ import reducer, { initialState } from '../reducer';
 describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer', () => {
   describe('ADD_NON_REPEATABLE_COMPONENT_TO_FIELD', () => {
     it('should add component correctly in the modifiedData', () => {
+      const components = {
+        'blog.simple': {
+          uid: 'blog.simple',
+          attributes: {
+            id: {
+              type: 'integer',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+        },
+      };
+
       const state = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
@@ -19,7 +33,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       const expected = {
         ...initialState,
         componentsDataStructure: {
-          'blog.compo': { name: 'test' },
+          'blog.simple': { name: 'test' },
         },
         initialData: {
           name: 'name',
@@ -32,18 +46,111 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       const action = {
         type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
-        componentUid: 'blog.compo',
+        componentLayoutData: components['blog.simple'],
+        allComponents: components,
         keys: ['component_field', 'sub_component'],
       };
 
       expect(reducer(state, action)).toEqual(expected);
     });
 
-    it.todo('should correctly prepare a relational field in the component');
+    it('should correctly prepare a relational field in the component', () => {
+      const components = {
+        'blog.simple': {
+          uid: 'blog.simple',
+          attributes: {
+            category: {
+              type: 'relation',
+            },
+          },
+        },
+      };
 
-    it.todo(
-      'should not prepare a relational field in the component if the component is repeatable'
-    );
+      const state = {
+        ...initialState,
+        componentsDataStructure: {},
+        initialData: {
+          name: 'name',
+        },
+        modifiedData: {
+          name: 'name',
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        componentsDataStructure: {},
+        initialData: {
+          name: 'name',
+        },
+        modifiedData: {
+          name: 'name',
+          component_field: { sub_component: { category: [] } },
+        },
+      };
+
+      const action = {
+        type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
+        componentLayoutData: components['blog.simple'],
+        allComponents: components,
+        keys: ['component_field', 'sub_component'],
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('should not prepare a relational field in the component if the component is repeatable', () => {
+      const components = {
+        'basic.simple': {
+          uid: 'basic.simple',
+          attributes: {
+            categories: {
+              type: 'relation',
+            },
+          },
+        },
+        'basic.repetable-repeatble-relation': {
+          uid: 'basic.repetable-repeatble-relation',
+          attributes: {
+            repeatable_simple: {
+              type: 'component',
+              repeatable: true,
+              component: 'basic.simple',
+            },
+          },
+        },
+      };
+
+      const state = {
+        ...initialState,
+        initialData: {
+          name: 'name',
+        },
+        modifiedData: {
+          name: 'name',
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        initialData: {
+          name: 'name',
+        },
+        modifiedData: {
+          name: 'name',
+          component_field: { sub_component: {} },
+        },
+      };
+
+      const action = {
+        type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
+        componentLayoutData: components['basic.repetable-repeatble-relation'],
+        allComponents: components,
+        keys: ['component_field', 'sub_component'],
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
   });
 
   describe('ADD_REPEATABLE_COMPONENT_TO_FIELD', () => {
