@@ -8,8 +8,9 @@ export const normalizeSearchResults = (relations, { mainFieldName }) => {
     ...relations,
     data: pages
       .map((page) =>
-        (page ?? []).results.map((relation) => normalizeRelation(relation, { mainFieldName }))
+        page?.results.map((relation) => normalizeRelation(relation, { mainFieldName }))
       )
+      .filter(Boolean)
       .flat(),
   };
 };
