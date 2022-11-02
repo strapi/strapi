@@ -30,15 +30,11 @@ const FIXTURE_RELATIONS = {
 describe('RelationInputDataManager || normalizeSearchResults', () => {
   test('add publicationState attribute to each relation', () => {
     expect(normalizeSearchResults(FIXTURE_RELATIONS, {})).toStrictEqual({
-      data: {
-        pages: [
-          [
-            expect.objectContaining({ publicationState: 'published' }),
-            expect.objectContaining({ publicationState: 'draft' }),
-            expect.objectContaining({ publicationState: false }),
-          ],
-        ],
-      },
+      data: [
+        expect.objectContaining({ publicationState: 'published' }),
+        expect.objectContaining({ publicationState: 'draft' }),
+        expect.objectContaining({ publicationState: false }),
+      ],
     });
   });
 
@@ -48,21 +44,17 @@ describe('RelationInputDataManager || normalizeSearchResults', () => {
         mainFieldName: 'name',
       })
     ).toStrictEqual({
-      data: {
-        pages: [
-          [
-            expect.objectContaining({
-              mainField: FIXTURE_RELATIONS.data.pages[0].results[0].name,
-            }),
-            expect.objectContaining({
-              mainField: FIXTURE_RELATIONS.data.pages[0].results[1].name,
-            }),
-            expect.objectContaining({
-              mainField: FIXTURE_RELATIONS.data.pages[0].results[2].name,
-            }),
-          ],
-        ],
-      },
+      data: [
+        expect.objectContaining({
+          mainField: FIXTURE_RELATIONS.data.pages[0].results[0].name,
+        }),
+        expect.objectContaining({
+          mainField: FIXTURE_RELATIONS.data.pages[0].results[1].name,
+        }),
+        expect.objectContaining({
+          mainField: FIXTURE_RELATIONS.data.pages[0].results[2].name,
+        }),
+      ],
     });
   });
 });

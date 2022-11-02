@@ -13,52 +13,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   width: 1px;
 }
 
-.c7 {
-  padding-right: 12px;
-}
-
-.c18 {
-  padding-top: 4px;
-  padding-right: 16px;
-  padding-bottom: 4px;
-  min-width: 0px;
-}
-
-.c26 {
-  padding-left: 16px;
-}
-
-.c33 {
-  padding-top: 8px;
-}
-
-.c6 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c5 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c34 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
 .c0 {
   padding-bottom: 12px;
 }
@@ -114,15 +68,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   justify-content: space-between;
 }
 
-.c28 {
-  color: #666687;
-  width: 12px;
-}
-
-.c29 path {
-  fill: #666687;
-}
-
 .c2 {
   -webkit-flex-basis: 70%;
   -ms-flex-preferred-size: 70%;
@@ -160,6 +105,61 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   text-overflow: ellipsis;
   font-size: 0.875rem;
   line-height: 1.43;
+}
+
+.c7 {
+  padding-right: 12px;
+}
+
+.c18 {
+  padding-top: 4px;
+  padding-right: 16px;
+  padding-bottom: 4px;
+  min-width: 0px;
+}
+
+.c26 {
+  padding-left: 16px;
+}
+
+.c33 {
+  padding-top: 8px;
+}
+
+.c28 {
+  color: #666687;
+  width: 12px;
+}
+
+.c29 path {
+  fill: #666687;
+}
+
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c5 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c34 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c8 {

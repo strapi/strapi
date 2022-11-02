@@ -1,15 +1,19 @@
 import PropTypes from 'prop-types';
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
+import pick from 'lodash/pick';
 
 import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin';
 
 import { RelationInput } from '../RelationInput';
+
 import { useRelation } from '../../hooks/useRelation';
-import { connect, select, normalizeRelations, normalizeSearchResults } from './utils';
-import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
+
 import { getTrad } from '../../utils';
+
+import { PUBLICATION_STATES, RELATIONS_TO_DISPLAY, SEARCH_RESULTS_TO_DISPLAY } from './constants';
+import { connect, select, normalizeSearchResults, diffRelations, normalizeRelation } from './utils';
 
 export const RelationInputDataManager = ({
   error,
@@ -34,13 +38,25 @@ export const RelationInputDataManager = ({
   const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
     useCMEditViewDataManager();
 
+  const relationsFromModifiedData = get(modifiedData, name) ?? [];
+
+  const currentLastPage = Math.ceil(relationsFromModifiedData.length / RELATIONS_TO_DISPLAY);
+
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
+    name,
     relation: {
       enabled: get(initialData, name)?.count !== 0 && !!endpoints.relation,
       endpoint: endpoints.relation,
+      pageGoal: currentLastPage,
       pageParams: {
         ...defaultParams,
         pageSize: RELATIONS_TO_DISPLAY,
+      },
+      onLoad: loadRelation,
+      normalizeArguments: {
+        mainFieldName: mainField.name,
+        shouldAddLink: shouldDisplayRelationLink,
+        targetModel,
       },
     },
 
@@ -54,38 +70,8 @@ export const RelationInputDataManager = ({
     },
   });
 
-  const relationsFromModifiedData = get(modifiedData, name);
-  const stringifiedRelations = JSON.stringify(relations);
-  const normalizedRelations = useMemo(
-    () =>
-      normalizeRelations(relations, {
-        modifiedData: relationsFromModifiedData,
-        mainFieldName: mainField.name,
-        shouldAddLink: shouldDisplayRelationLink,
-        targetModel,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      stringifiedRelations,
-      modifiedData,
-      name,
-      mainField.name,
-      shouldDisplayRelationLink,
-      targetModel,
-    ]
-  );
-
-  useEffect(() => {
-    if (relations.status === 'success') {
-      loadRelation({
-        target: { name, value: normalizedRelations.data.pages.flat() },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadRelation, relations.status, stringifiedRelations, name]);
-
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
-  const isSingleRelation = [
+  const toOneRelation = [
     'oneWay',
     'oneToOne',
     'manyToOne',
@@ -106,28 +92,35 @@ export const RelationInputDataManager = ({
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
   const handleRelationConnect = (relation) => {
-    connectRelation({ target: { name, value: relation, replace: isSingleRelation } });
+    /**
+     * Any relation being added to the store should be normalized so it has it's link.
+     */
+    const normalizedRelation = normalizeRelation(relation, {
+      mainFieldName: mainField.name,
+      shouldAddLink: shouldDisplayRelationLink,
+      targetModel,
+    });
+
+    connectRelation({ name, value: normalizedRelation, toOneRelation });
   };
 
   const handleRelationDisconnect = (relation) => {
-    disconnectRelation({ target: { name, value: relation } });
+    disconnectRelation({ name, id: relation.id });
   };
 
   const handleRelationLoadMore = () => {
     relations.fetchNextPage();
   };
 
-  const handleSearch = (term) => {
-    searchFor(term, {
-      idsToInclude: relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
-      idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
-    });
-  };
+  const handleSearch = (term = '') => {
+    const [connected, disconnected] = diffRelations(
+      relationsFromModifiedData,
+      get(initialData, name)
+    );
 
-  const handleOpenSearch = () => {
-    searchFor('', {
-      idsToInclude: relationsFromModifiedData?.disconnect?.map((relation) => relation.id),
-      idsToOmit: relationsFromModifiedData?.connect?.map((relation) => relation.id),
+    searchFor(term, {
+      idsToInclude: disconnected,
+      idsToOmit: connected,
     });
   };
 
@@ -179,7 +172,6 @@ export const RelationInputDataManager = ({
       onRelationLoadMore={() => handleRelationLoadMore()}
       onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
-      onSearchOpen={handleOpenSearch}
       placeholder={formatMessage(
         placeholder || {
           id: getTrad('relation.add'),
@@ -197,7 +189,14 @@ export const RelationInputDataManager = ({
           defaultMessage: 'Published',
         }),
       }}
-      relations={normalizedRelations}
+      relations={pick(
+        { ...relations, data: relationsFromModifiedData },
+        'data',
+        'hasNextPage',
+        'isFetchingNextPage',
+        'isLoading',
+        'isSuccess'
+      )}
       required={required}
       searchResults={normalizeSearchResults(search, {
         mainFieldName: mainField.name,
