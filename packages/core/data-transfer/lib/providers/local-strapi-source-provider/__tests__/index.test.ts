@@ -2,7 +2,7 @@ import type { IEntity } from '../../../../types';
 
 import { Readable } from 'stream';
 
-import { collect, getStrapiFactory } from './test-utils';
+import { collect, createMockedQueryBuilder, getStrapiFactory } from './test-utils';
 import { createLocalStrapiSourceProvider } from '../';
 
 describe('Local Strapi Source Provider', () => {
@@ -79,26 +79,23 @@ describe('Local Strapi Source Provider', () => {
         bar: { uid: 'bar', attributes: { age: { type: 'number' } } },
       };
 
-      const stream = jest.fn((uid: string, _query: unknown) => {
-        if (uid === 'foo') {
-          return Readable.from([
-            { id: 1, title: 'First title' },
-            { id: 2, title: 'Second title' },
-          ]);
-        }
-
-        if (uid === 'bar') {
-          return Readable.from([
-            { id: 1, age: 42 },
-            { id: 2, age: 84 },
-          ]);
-        }
+      const queryBuilder = createMockedQueryBuilder({
+        foo: [
+          { id: 1, title: 'First title' },
+          { id: 2, title: 'Second title' },
+        ],
+        bar: [
+          { id: 1, age: 42 },
+          { id: 2, age: 84 },
+        ],
       });
 
       const provider = createLocalStrapiSourceProvider({
         getStrapi: getStrapiFactory({
           contentTypes,
-          entityService: { stream },
+          db: {
+            queryBuilder,
+          },
         }),
       });
 
@@ -108,7 +105,7 @@ describe('Local Strapi Source Provider', () => {
       const entities = await collect<IEntity<'foo' | 'bar'>>(entitiesStream);
 
       // Should have been called with 'foo', then 'bar'
-      expect(stream).toHaveBeenCalledTimes(2);
+      expect(queryBuilder).toHaveBeenCalledTimes(2);
       // The returned value should be a Readable stream instance
       expect(entitiesStream).toBeInstanceOf(Readable);
       // We have 2 * 2 entities
