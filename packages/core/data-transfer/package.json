@@ -28,7 +28,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "clean": "rm -fr ./dist",
+    "clean": "rimraf ./dist",
     "build:clean": "yarn clean && yarn build",
     "watch": "yarn build -w",
     "test:unit": "jest --verbose"
@@ -50,6 +50,7 @@
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.2",
     "@types/tar": "6.1.3",
+    "rimraf": "3.0.2",
     "typescript": "4.8.4"
   },
   "engines": {
