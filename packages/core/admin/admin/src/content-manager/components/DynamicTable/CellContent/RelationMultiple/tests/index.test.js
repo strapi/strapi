@@ -26,6 +26,7 @@ const DEFAULT_PROPS_FIXTURE = {
   contentType: {
     uid: 'api::address.address',
   },
+  entityId: 1,
   fieldSchema: {
     type: 'relation',
     relation: 'manyToMany',
