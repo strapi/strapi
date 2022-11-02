@@ -44,15 +44,18 @@ const recursivelyFindPathsBasedOnConditionSetup = (components, predicate = () =>
 
         const attributesInDynamicComponents = dynamicComponents
           .flatMap((componentName) => {
-            const relationsInComponents = recursivelyFindPathsBasedOnCondition({
+            return recursivelyFindPathsBasedOnCondition({
               [componentName]: { type: 'component', component: componentName },
-            });
-
-            if (relationsInComponents.length > 0) {
-              return relationsInComponents.map((path) => path.split(`${componentName}.`)[1]);
-            }
-
-            return relationsInComponents;
+              /**
+               * DynamicZones are an array of components, therefore the componentName shouldn't
+               * be part of the path because it's not a property of the component.
+               *
+               * e.g. { dynamic_zone: [{ __component: 'basic.simple', id: 36, my_name: null, categories: { count: 1, } }] }
+               * where the path to `id` is `dynamic_zone.id` and not `dynamic_zone.basic.simple.id`
+               *
+               * NOTE: we don't need to know the path to the `array` because it's about data shape not about the actual data
+               */
+            }).map((path) => path.split(`${componentName}.`)[1]);
           })
           .map((path) => `${key}.${path}`);
 
