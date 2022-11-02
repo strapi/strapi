@@ -13,51 +13,159 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c26 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+.c25 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
 }
 
-.c28 {
-  padding-right: 24px;
-  padding-left: 24px;
+.c46 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c41 {
-  padding-right: 0px;
-  padding-left: 24px;
+.c32 {
+  padding-left: 8px;
 }
 
-.c44 {
-  padding-top: 16px;
-  padding-bottom: 16px;
+.c17 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c47 {
-  background: #dcdce4;
+.c23 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
-.c49 {
-  padding-left: 12px;
+.c24 > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
-.c52 {
-  padding-left: 40px;
+.c24 > * + * {
+  margin-top: 16px;
 }
 
-.c59 {
-  padding-right: 16px;
-  padding-left: 16px;
-  border-radius: borderRadius;
+.c55 > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
-.c64 {
-  max-width: calc(8.75rem - 32px);
+.c55 > * + * {
+  margin-top: 4px;
 }
 
-.c70 {
-  background: #d9d8ff;
+.c18 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c18 > * + * {
+  margin-left: 8px;
+}
+
+.c33 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c33 > * + * {
+  margin-left: 16px;
+}
+
+.c37 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c37 > * + * {
+  margin-left: 4px;
+}
+
+.c30 {
+  color: #666687;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.c35 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c36 {
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c50 {
+  font-weight: 600;
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c58 {
+  font-weight: 600;
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c65 {
+  font-weight: 600;
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c16 {
@@ -355,25 +463,71 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
-.c25 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: end;
-  -webkit-justify-content: flex-end;
-  -ms-flex-pack: end;
-  justify-content: flex-end;
+.c26 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c46 {
+.c28 {
+  padding-right: 24px;
+  padding-left: 24px;
+}
+
+.c41 {
+  padding-right: 0px;
+  padding-left: 24px;
+}
+
+.c44 {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.c47 {
+  background: #dcdce4;
+}
+
+.c49 {
+  padding-left: 12px;
+}
+
+.c52 {
+  padding-left: 40px;
+}
+
+.c59 {
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: borderRadius;
+}
+
+.c64 {
+  max-width: calc(8.75rem - 32px);
+}
+
+.c70 {
+  background: #d9d8ff;
+}
+
+.c72 {
+  background: #eaeaef;
+}
+
+.c74 {
+  background: #f0f0ff;
+  padding: 20px;
+}
+
+.c77 {
+  background: #d9d8ff;
+}
+
+.c79 {
+  padding-left: 12px;
+}
+
+.c76 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -385,6 +539,53 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.c73 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c80 {
+  font-weight: 600;
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c78 {
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 50%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c78 svg {
+  height: 0.625rem;
+  width: 0.625rem;
+}
+
+.c78 svg path {
+  fill: #4945ff;
+}
+
+.c75 {
+  border-radius: 0 0 4px 4px;
+  display: block;
+  width: 100%;
+  border: none;
 }
 
 .c38 {
@@ -484,207 +685,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 
 .c39[aria-disabled='true'] svg path {
   fill: #666687;
-}
-
-.c32 {
-  padding-left: 8px;
-}
-
-.c17 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c23 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c24 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c24 > * + * {
-  margin-top: 16px;
-}
-
-.c55 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c55 > * + * {
-  margin-top: 4px;
-}
-
-.c18 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c18 > * + * {
-  margin-left: 8px;
-}
-
-.c33 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c33 > * + * {
-  margin-left: 16px;
-}
-
-.c37 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c37 > * + * {
-  margin-left: 4px;
-}
-
-.c72 {
-  background: #eaeaef;
-}
-
-.c74 {
-  background: #f0f0ff;
-  padding: 20px;
-}
-
-.c77 {
-  background: #d9d8ff;
-}
-
-.c79 {
-  padding-left: 12px;
-}
-
-.c76 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c73 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c80 {
-  font-weight: 600;
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c78 {
-  height: 1.5rem;
-  width: 1.5rem;
-  border-radius: 50%;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c78 svg {
-  height: 0.625rem;
-  width: 0.625rem;
-}
-
-.c78 svg path {
-  fill: #4945ff;
-}
-
-.c75 {
-  border-radius: 0 0 4px 4px;
-  display: block;
-  width: 100%;
-  border: none;
-}
-
-.c30 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c35 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c36 {
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c50 {
-  font-weight: 600;
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c58 {
-  font-weight: 600;
-  color: #4945ff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c65 {
-  font-weight: 600;
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.75rem;
-  line-height: 1.33;
 }
 
 .c5 {

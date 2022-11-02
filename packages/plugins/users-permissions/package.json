@@ -33,7 +33,7 @@
     "grant-koa": "5.4.8",
     "jsonwebtoken": "^8.1.0",
     "koa": "^2.13.4",
-    "koa2-ratelimit": "^1.1.1",
+    "koa2-ratelimit": "^1.1.2",
     "lodash": "4.17.21",
     "purest": "4.0.2",
     "react": "^17.0.2",
