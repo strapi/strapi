@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import PropTypes from 'prop-types';
 import React, { memo, useMemo } from 'react';
 import { useIntl } from 'react-intl';
@@ -18,6 +19,7 @@ import { connect, select, normalizeSearchResults, diffRelations, normalizeRelati
 export const RelationInputDataManager = ({
   error,
   componentId,
+  componentUid,
   editable,
   description,
   intlLabel,
@@ -64,7 +66,14 @@ export const RelationInputDataManager = ({
       endpoint: endpoints.search,
       pageParams: {
         ...defaultParams,
-        entityId: isCreatingEntry ? undefined : componentId ?? initialData.id,
+        // TODO: fix me cause this sucks
+        entityId: isCreatingEntry
+          ? undefined
+          : componentUid && !componentId
+          ? undefined
+          : !componentUid && !componentId
+          ? initialData.id
+          : componentId,
         pageSize: SEARCH_RESULTS_TO_DISPLAY,
       },
     },
