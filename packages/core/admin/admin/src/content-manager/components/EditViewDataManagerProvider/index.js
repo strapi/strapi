@@ -152,22 +152,22 @@ const EditViewDataManagerProvider = ({
        * it can also return a path to a relation:
        * ['relation_component.categories']
        */
-      const relationalFields = recursivelyFindPathsBasedOnCondition(
+      const relationalFieldPaths = recursivelyFindPathsBasedOnCondition(
         components,
         (value) => value.type === 'relation'
       )(currentContentTypeLayout.attributes);
 
-      const componentFields = recursivelyFindPathsBasedOnCondition(
+      const componentPaths = recursivelyFindPathsBasedOnCondition(
         components,
         (value) => value.type === 'component' && !value.repeatable
       )(currentContentTypeLayout.attributes);
 
-      const repeatableFields = recursivelyFindPathsBasedOnCondition(
+      const repeatableComponentPaths = recursivelyFindPathsBasedOnCondition(
         components,
         (value) => value.type === 'component' && value.repeatable
       )(currentContentTypeLayout.attributes);
 
-      const dynamicZones = recursivelyFindPathsBasedOnCondition(
+      const dynamicZonePaths = recursivelyFindPathsBasedOnCondition(
         components,
         (value) => value.type === 'dynamiczone'
       )(currentContentTypeLayout.attributes);
@@ -175,10 +175,10 @@ const EditViewDataManagerProvider = ({
       dispatch({
         type: 'INIT_FORM',
         initialValues,
-        componentFields,
-        relationalFields,
-        repeatableFields,
-        dynamicZones,
+        relationalFieldPaths,
+        componentPaths,
+        repeatableComponentPaths,
+        dynamicZonePaths,
       });
     }
   }, [initialValues, currentContentTypeLayout, components]);

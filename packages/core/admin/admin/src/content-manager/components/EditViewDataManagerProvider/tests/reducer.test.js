@@ -858,13 +858,13 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         const action = {
           type: 'INIT_FORM',
           initialValues: { ok: true, relation: { count: 10 } },
-          relationalFields: ['relation'],
+          relationalFieldPaths: ['relation'],
         };
 
         expect(reducer(state, action)).toEqual(expected);
       });
 
-      it('should create an array per relational field even when the relationalFields path is nested', () => {
+      it('should create an array per relational field even when the relationalFieldPaths path is nested', () => {
         const state = {
           ...initialState,
           formErrors: true,
@@ -901,7 +901,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         const action = {
           type: 'INIT_FORM',
           initialValues: { ok: true, relation: { count: 10 }, component: null },
-          relationalFields: ['relation', 'component.field1.field2'],
+          relationalFieldPaths: ['relation', 'component.field1.field2'],
         };
 
         expect(reducer(state, action)).toEqual(expected);
@@ -965,8 +965,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         const action = {
           type: 'INIT_FORM',
           initialValues,
-          relationalFields: ['repeatable_single_component_relation.categories'],
-          repeatableFields: ['repeatable_single_component_relation'],
+          relationalFieldPaths: ['repeatable_single_component_relation.categories'],
+          repeatableComponentPaths: ['repeatable_single_component_relation'],
         };
 
         expect(reducer(state, action)).toEqual(expected);
@@ -1037,8 +1037,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         const action = {
           type: 'INIT_FORM',
           initialValues,
-          relationalFields: ['repeatable_nested_component_relation.simple.categories'],
-          repeatableFields: ['repeatable_nested_component_relation'],
+          relationalFieldPaths: ['repeatable_nested_component_relation.simple.categories'],
+          repeatableComponentPaths: ['repeatable_nested_component_relation'],
         };
 
         expect(reducer(state, action)).toEqual(expected);
@@ -1118,8 +1118,10 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         const action = {
           type: 'INIT_FORM',
           initialValues,
-          relationalFields: ['repeatable_repeatable_nested_component.repeatable_simple.categories'],
-          repeatableFields: ['repeatable_repeatable_nested_component'],
+          relationalFieldPaths: [
+            'repeatable_repeatable_nested_component.repeatable_simple.categories',
+          ],
+          repeatableComponentPaths: ['repeatable_repeatable_nested_component'],
         };
 
         expect(reducer(state, action)).toEqual(expected);
@@ -1190,9 +1192,9 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         const action = {
           type: 'INIT_FORM',
           initialValues,
-          relationalFields: ['component.repeatable_simple.categories'],
-          repeatableFields: ['component.repeatable_simple'],
-          componentFields: ['component'],
+          relationalFieldPaths: ['component.repeatable_simple.categories'],
+          repeatableComponentPaths: ['component.repeatable_simple'],
+          componentPaths: ['component'],
         };
 
         expect(reducer(state, action)).toEqual(expected);
@@ -1254,8 +1256,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               },
             ],
           },
-          relationalFields: ['dynamic_relations.basic.simple.categories'],
-          dynamicZones: ['dynamic_relations'],
+          relationalFieldPaths: ['dynamic_relations.basic.simple.categories'],
+          dynamicZonePaths: ['dynamic_relations'],
         };
 
         expect(reducer(state, action)).toEqual(expected);
@@ -1324,8 +1326,8 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               },
             ],
           },
-          relationalFields: ['dynamic_relations.basic.nested-simple.simple.categories'],
-          dynamicZones: ['dynamic_relations'],
+          relationalFieldPaths: ['dynamic_relations.basic.nested-simple.simple.categories'],
+          dynamicZonePaths: ['dynamic_relations'],
         };
 
         expect(reducer(state, action)).toEqual(expected);
@@ -1423,10 +1425,10 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
               },
             ],
           },
-          relationalFields: [
+          relationalFieldPaths: [
             'dynamic_relations.basic.repetable-repeatble-relation.repeatable_simple.categories',
           ],
-          dynamicZones: ['dynamic_relations'],
+          dynamicZonePaths: ['dynamic_relations'],
         };
 
         expect(reducer(state, action)).toEqual(expected);
