@@ -38,6 +38,12 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
       expect(reducer(state, action)).toEqual(expected);
     });
+
+    it.todo('should correctly prepare a relational field in the component');
+
+    it.todo(
+      'should not prepare a relational field in the component if the component is repeatable'
+    );
   });
 
   describe('ADD_REPEATABLE_COMPONENT_TO_FIELD', () => {
@@ -880,6 +886,50 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
             ok: true,
             relation: [],
             component: {
+              relation: [],
+            },
+          },
+          modifiedData: {
+            ok: true,
+            relation: [],
+            component: {
+              relation: [],
+            },
+          },
+          modifiedDZName: null,
+          shouldCheckErrors: false,
+        };
+
+        const action = {
+          type: 'INIT_FORM',
+          initialValues: {
+            ok: true,
+            relation: { count: 10 },
+            component: { relation: { count: 10 } },
+          },
+          relationalFieldPaths: ['relation', 'component.relation'],
+          componentPaths: ['component'],
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
+
+      it('should create an array per relational field even when the relationalFieldPaths path is nested', () => {
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+        const expected = {
+          ...initialState,
+          formErrors: {},
+          initialData: {
+            ok: true,
+            relation: [],
+            component: {
               field1: {
                 field2: [],
               },
@@ -900,8 +950,19 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
         const action = {
           type: 'INIT_FORM',
-          initialValues: { ok: true, relation: { count: 10 }, component: null },
+          initialValues: {
+            ok: true,
+            relation: { count: 10 },
+            component: {
+              field1: {
+                field2: {
+                  count: 10,
+                },
+              },
+            },
+          },
           relationalFieldPaths: ['relation', 'component.field1.field2'],
+          componentPaths: ['component', 'component.field1'],
         };
 
         expect(reducer(state, action)).toEqual(expected);

@@ -201,13 +201,17 @@ const EditViewDataManagerProvider = ({
 
   const addComponentToDynamicZone = dispatchAddComponent('ADD_COMPONENT_TO_DYNAMIC_ZONE');
 
-  const addNonRepeatableComponentToField = useCallback((keys, componentUid) => {
-    dispatch({
-      type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
-      keys: keys.split('.'),
-      componentUid,
-    });
-  }, []);
+  const addNonRepeatableComponentToField = useCallback(
+    (keys, componentLayoutData, allComponents) => {
+      dispatch({
+        type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
+        keys: keys.split('.'),
+        componentLayoutData,
+        allComponents,
+      });
+    },
+    []
+  );
 
   /**
    * @type {({ name: string, value: Relation, toOneRelation: boolean}) => void}
