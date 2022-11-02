@@ -13,6 +13,170 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   width: 1px;
 }
 
+.c13 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c2 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+}
+
+.c4 {
+  padding: 24px;
+}
+
+.c8 {
+  padding-top: 40px;
+  padding-right: 24px;
+  padding-bottom: 40px;
+  padding-left: 24px;
+}
+
+.c9 {
+  padding-bottom: 8px;
+}
+
+.c15 {
+  padding: 16px;
+}
+
+.c5 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c17 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c7 {
+  color: #32324d;
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.22;
+}
+
+.c1 {
+  position: fixed;
+  z-index: 4;
+  inset: 0;
+  background: #32324d33;
+  padding: 0 40px;
+}
+
+.c3 {
+  max-width: 25.75rem;
+  margin: 0 auto;
+  overflow: hidden;
+  margin-top: 10%;
+}
+
+.c6 {
+  border-bottom: 1px solid #eaeaef;
+}
+
+.c10 svg {
+  width: 24px;
+  height: 24px;
+}
+
+.c10 svg path {
+  fill: #d02b20;
+}
+
+.c18 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c18 > * + * {
+  margin-left: 8px;
+}
+
+.c16 {
+  border-top: 1px solid #eaeaef;
+}
+
+.c16 button {
+  width: 100%;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.c11 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c12 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c12 > * + * {
+  margin-top: 8px;
+}
+
+.c14 {
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
 .c22 {
   font-weight: 600;
   color: #32324d;
@@ -238,170 +402,6 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 .c23 svg > g,
 .c23 svg path {
   fill: #b72b1a;
-}
-
-.c2 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
-}
-
-.c4 {
-  padding: 24px;
-}
-
-.c8 {
-  padding-top: 40px;
-  padding-right: 24px;
-  padding-bottom: 40px;
-  padding-left: 24px;
-}
-
-.c9 {
-  padding-bottom: 8px;
-}
-
-.c15 {
-  padding: 16px;
-}
-
-.c5 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c17 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c7 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 1.125rem;
-  line-height: 1.22;
-}
-
-.c1 {
-  position: fixed;
-  z-index: 4;
-  inset: 0;
-  background: #32324d33;
-  padding: 0 40px;
-}
-
-.c3 {
-  max-width: 25.75rem;
-  margin: 0 auto;
-  overflow: hidden;
-  margin-top: 10%;
-}
-
-.c6 {
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c10 svg {
-  width: 24px;
-  height: 24px;
-}
-
-.c10 svg path {
-  fill: #d02b20;
-}
-
-.c18 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c18 > * + * {
-  margin-left: 8px;
-}
-
-.c16 {
-  border-top: 1px solid #eaeaef;
-}
-
-.c16 button {
-  width: 100%;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c13 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c11 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c12 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c12 > * + * {
-  margin-top: 8px;
-}
-
-.c14 {
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
 }
 
 <body

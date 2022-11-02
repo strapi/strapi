@@ -133,7 +133,7 @@ const NpmPackageCard = ({
         >
           {formatMessage({
             id: 'admin.pages.MarketPlacePage.plugin.info.text',
-            defaultMessage: 'Learn more',
+            defaultMessage: 'More',
           })}
         </LinkButton>
         <InstallPluginButton
