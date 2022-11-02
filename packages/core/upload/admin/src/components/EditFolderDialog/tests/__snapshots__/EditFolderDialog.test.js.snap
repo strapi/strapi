@@ -13,8 +13,57 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c25 {
-  padding-right: 12px;
+.c21 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c35 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c22 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c22 > * + * {
+  margin-top: 4px;
+}
+
+.c36 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c36 > * + * {
+  margin-left: 8px;
+}
+
+.c7 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c34 {
@@ -94,7 +143,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c32 .sc-kBzgEd {
+.c32 .sc-haTkiu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -164,7 +213,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c37 .sc-kBzgEd {
+.c37 .sc-haTkiu {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -222,71 +271,8 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
-.c24 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c23 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c21 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c35 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c22 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c22 > * + * {
-  margin-top: 4px;
-}
-
-.c36 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c36 > * + * {
-  margin-left: 8px;
+.c25 {
+  padding-right: 12px;
 }
 
 .c14 {
@@ -412,11 +398,25 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   margin-top: 4px;
 }
 
-.c7 {
+.c24 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c23 {
   font-weight: 600;
   color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c26 {
@@ -665,27 +665,29 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 <body
   class="lock-body-scroll"
 >
-  <div
-    class="c0"
-  >
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-log"
-      role="log"
-    />
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-status"
-      role="status"
-    />
-    <p
-      aria-live="assertive"
-      aria-relevant="all"
-      id="live-region-alert"
-      role="alert"
-    />
+  <div>
+    <div
+      class="c0"
+    >
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-log"
+        role="log"
+      />
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-status"
+        role="status"
+      />
+      <p
+        aria-live="assertive"
+        aria-relevant="all"
+        id="live-region-alert"
+        role="alert"
+      />
+    </div>
   </div>
   <div
     data-react-portal="true"

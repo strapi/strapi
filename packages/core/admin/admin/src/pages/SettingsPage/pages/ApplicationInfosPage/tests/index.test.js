@@ -59,23 +59,57 @@ describe('Application page', () => {
     await waitFor(() => expect(screen.getByText('Logo')).toBeInTheDocument());
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c19 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      .c17 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
-      .c32 {
-        padding-top: 4px;
+      .c18 > * {
+        margin-top: 0;
+        margin-bottom: 0;
       }
 
-      .c46 {
-        max-width: 40%;
-        max-height: 40%;
+      .c18 > * + * {
+        margin-top: 24px;
+      }
+
+      .c20 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c20 > * + * {
+        margin-top: 20px;
+      }
+
+      .c21 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c25 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c26 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c14 {
@@ -219,6 +253,25 @@ describe('Application page', () => {
         fill: #ffffff;
       }
 
+      .c19 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c32 {
+        padding-top: 4px;
+      }
+
+      .c46 {
+        max-width: 40%;
+        max-height: 40%;
+      }
+
       .c49 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -315,59 +368,6 @@ describe('Application page', () => {
 
       .c50[aria-disabled='true'] svg path {
         fill: #666687;
-      }
-
-      .c17 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c18 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c18 > * + * {
-        margin-top: 24px;
-      }
-
-      .c20 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c20 > * + * {
-        margin-top: 20px;
-      }
-
-      .c21 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c25 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
-      .c26 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
       }
 
       .c29 {
