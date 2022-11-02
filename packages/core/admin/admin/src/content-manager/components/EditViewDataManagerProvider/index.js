@@ -157,6 +157,11 @@ const EditViewDataManagerProvider = ({
         (value) => value.type === 'relation'
       )(currentContentTypeLayout.attributes);
 
+      const componentFields = recursivelyFindPathsBasedOnCondition(
+        components,
+        (value) => value.type === 'component' && !value.repeatable
+      )(currentContentTypeLayout.attributes);
+
       const repeatableFields = recursivelyFindPathsBasedOnCondition(
         components,
         (value) => value.type === 'component' && value.repeatable
@@ -170,6 +175,7 @@ const EditViewDataManagerProvider = ({
       dispatch({
         type: 'INIT_FORM',
         initialValues,
+        componentFields,
         relationalFields,
         repeatableFields,
         dynamicZones,

@@ -1124,6 +1124,79 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
 
         expect(reducer(state, action)).toEqual(expected);
       });
+
+      it('should create an array for a relational field inside a repeatable component which is inside a regular component', () => {
+        const initialValues = {
+          categories: 'my_category',
+          component: {
+            id: 2,
+            repeatable_simple: [
+              {
+                id: 18,
+                my_name: null,
+                categories: {
+                  count: 2,
+                },
+                __temp_key__: 0,
+              },
+            ],
+          },
+        };
+
+        const state = {
+          ...initialState,
+          formErrors: true,
+          initialData: {},
+          modifiedData: {},
+          modifiedDZName: true,
+          shouldCheckErrors: true,
+        };
+
+        const expected = {
+          ...initialState,
+          formErrors: {},
+          initialData: {
+            categories: 'my_category',
+            component: {
+              id: 2,
+              repeatable_simple: [
+                {
+                  id: 18,
+                  my_name: null,
+                  categories: [],
+                  __temp_key__: 0,
+                },
+              ],
+            },
+          },
+          modifiedData: {
+            categories: 'my_category',
+            component: {
+              id: 2,
+              repeatable_simple: [
+                {
+                  id: 18,
+                  my_name: null,
+                  categories: [],
+                  __temp_key__: 0,
+                },
+              ],
+            },
+          },
+          modifiedDZName: null,
+          shouldCheckErrors: false,
+        };
+
+        const action = {
+          type: 'INIT_FORM',
+          initialValues,
+          relationalFields: ['component.repeatable_simple.categories'],
+          repeatableFields: ['component.repeatable_simple'],
+          componentFields: ['component'],
+        };
+
+        expect(reducer(state, action)).toEqual(expected);
+      });
     });
 
     describe('dynamic zones', () => {

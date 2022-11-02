@@ -162,6 +162,7 @@ const reducer = (state, action) =>
           relationalFields = [],
           repeatableFields = [],
           dynamicZones = [],
+          componentFields = [],
         } = action;
 
         /**
@@ -191,7 +192,8 @@ const reducer = (state, action) =>
               set(acc, componentName, get(state.modifiedData, componentName));
             } else if (
               repeatableFields.includes(componentName) ||
-              dynamicZones.includes(componentName)
+              dynamicZones.includes(componentName) ||
+              componentFields.includes(componentName)
             ) {
               /**
                * if the componentName is a repeatable field or dynamic zone we collect the list of paths e.g.
