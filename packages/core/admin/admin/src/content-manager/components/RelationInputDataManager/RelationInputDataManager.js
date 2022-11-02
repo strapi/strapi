@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import PropTypes from 'prop-types';
 import React, { memo, useMemo } from 'react';
 import { useIntl } from 'react-intl';
