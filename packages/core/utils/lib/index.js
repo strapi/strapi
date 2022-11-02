@@ -39,6 +39,7 @@ const sanitize = require('./sanitize');
 const traverseEntity = require('./traverse-entity');
 const pipeAsync = require('./pipe-async');
 const convertQueryParams = require('./convert-query-params');
+const importDefault = require('./import-default');
 
 module.exports = {
   yup,
@@ -81,4 +82,5 @@ module.exports = {
   validateYupSchema,
   validateYupSchemaSync,
   convertQueryParams,
+  importDefault,
 };
