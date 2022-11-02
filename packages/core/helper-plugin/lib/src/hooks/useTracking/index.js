@@ -9,14 +9,14 @@ const useTracking = () => {
   const appInfo = useAppInfos();
 
   trackRef.current = async (event, properties) => {
-    if (uuid) {
+    if (uuid && !window.strapi.telemetryDisabled) {
       try {
         await axios.post('https://analytics.strapi.io/track', {
           event,
           properties: {
             ...telemetryProperties,
             ...properties,
-            projectType: strapi.projectType,
+            projectType: window.strapi.projectType,
             environment: appInfo.currentEnvironment,
           },
           uuid,

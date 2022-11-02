@@ -54,6 +54,43 @@ describe('Admin | ee | SettingsPage | SSO', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c17 {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c18 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c19 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c19 > * + * {
+        margin-top: 16px;
+      }
+
+      .c20 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
       .c14 {
         font-weight: 600;
         color: #32324d;
@@ -355,36 +392,6 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         width: 100%;
       }
 
-      .c17 {
-        background: #ffffff;
-        padding: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c18 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c19 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c19 > * + * {
-        margin-top: 16px;
-      }
-
       .c30 {
         background: #f6f6f9;
         padding: 4px;
@@ -539,13 +546,6 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         width: -webkit-fit-content;
         width: -moz-fit-content;
         width: fit-content;
-      }
-
-      .c20 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
       }
 
       .c1 {
