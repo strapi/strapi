@@ -226,7 +226,7 @@ const createValidateEntity =
     )
       .test('relations-test', 'check that all relations exist', async function (data) {
         try {
-          await checkRelationsExist(buildRelationsStore(model.uid, data) || {});
+          await checkRelationsExist(buildRelationsStore({ uid: model.uid, data }));
         } catch (e) {
           return this.createError({
             path: this.path,
@@ -241,57 +241,66 @@ const createValidateEntity =
   };
 
 /**
+ * Assign values in the relationsStore
+ * @param {Object} relationsValue containing the relation IDs
+ * @param {String} target the UID of these relations
+ * @param {Object} relationsStore to be updated
+ */
+const updateRelationsStore = ({ relationsValue = null, target = '', relationsStore = {} }) => {
+  if (isEmpty(target) || isNil(relationsValue)) {
+    return;
+  }
+  const source = relationsValue.connect || relationsValue.set || castArray(relationsValue);
+  const idArray = source.map((v) => ({ id: v.id || v }));
+
+  relationsStore[target] = relationsStore[target] || [];
+  relationsStore[target].push(...idArray);
+};
+
+/**
  * Builds an object containing all the media and relations being associated with an entity
  * @param {String} uid of the model
  * @param {Object} data
  * @param {Object} relationsStore to be updated and returned
  * @returns
  */
-const buildRelationsStore = (uid, data, relationsStore = {}) => {
+const buildRelationsStore = ({ uid = '', data = null, relationsStore = {} }) => {
+  if (isEmpty(uid) || isNil(data)) {
+    return relationsStore;
+  }
+
   const currentModel = strapi.getModel(uid);
 
-  Object.keys(currentModel?.attributes || {}).forEach((attributeName) => {
+  Object.keys(currentModel.attributes).forEach((attributeName) => {
     const attribute = currentModel.attributes[attributeName];
 
     const value = data[attributeName];
-    if (isEmpty(value) || isNil(value)) {
+    if (isNil(value)) {
       return;
     }
 
     switch (attribute.type) {
-      case 'relation': {
-        if (!attribute.target) {
+      case 'relation':
+      case 'media': {
+        const target =
+          attribute.type === 'media' ? 'plugin::upload.file' : attribute?.target ?? null;
+        if (!target) {
           return;
         }
-        // If the attribute type is a relation keep track of all
-        // associations being made with relations.
-        let directValue = [];
-        if (Array.isArray(value)) {
-          directValue = value.map((v) => ({ id: v }));
-        }
-        relationsStore[attribute.target] = relationsStore[attribute.target] || [];
-        relationsStore[attribute.target].push(...(value.connect || value.set || directValue));
+        // Keep track of all associations being made with relations or media.
+        updateRelationsStore({ relationsValue: value, target, relationsStore });
         break;
       }
-      case 'media': {
-        // For media attribute types keep track of all media associated with
-        // this entity.
-        const mediaUID = 'plugin::upload.file';
-        castArray(value).forEach((v) => {
-          relationsStore[mediaUID] = relationsStore[mediaUID] || [];
-          relationsStore[mediaUID].push({ id: v.id || v });
-        });
-        break;
-      }
-      case 'component': {
-        return castArray(value).forEach((componentValue) =>
-          buildRelationsStore(attribute.component, componentValue, relationsStore)
-        );
-      }
+      case 'component':
       case 'dynamiczone': {
-        return value.forEach((dzValue) =>
-          buildRelationsStore(dzValue.__component, dzValue, relationsStore)
-        );
+        const key = attribute.target === 'dynamiczone' ? `__component` : `component`;
+        const values = castArray(value);
+        return values.forEach((value) => {
+          if (!value || !value[key]) {
+            return;
+          }
+          buildRelationsStore({ uid: value[key], data: value, relationsStore });
+        });
       }
       default:
         break;
@@ -311,11 +320,10 @@ const checkRelationsExist = async (relationsStore = {}) => {
   for (const [key, value] of Object.entries(relationsStore)) {
     const evaluate = async () => {
       const uniqueValues = uniqBy(value, `id`);
-      // eslint-disable-next-line no-unused-vars
       const count = await strapi.db.query(key).count({
         where: {
           id: {
-            $in: uniqueValues.map((v) => Number(v.id)),
+            $in: uniqueValues.map((v) => v.id),
           },
         },
       });
