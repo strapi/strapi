@@ -28,6 +28,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "clean": "rm -fr ./dist",
+    "build:clean": "yarn clean && yarn build",
     "watch": "yarn build -w",
     "test:unit": "jest --verbose"
   },
