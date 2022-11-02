@@ -32,11 +32,39 @@ const reducer = (state, action) =>
   produce(state, (draftState) => {
     switch (action.type) {
       case 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD': {
-        set(
-          draftState,
-          ['modifiedData', ...action.keys],
-          state.componentsDataStructure[action.componentUid]
-        );
+        const { componentLayoutData, allComponents } = action;
+
+        const relationPaths = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'relation'
+        )(componentLayoutData.attributes);
+
+        const defaultDataStructure = {
+          ...state.componentsDataStructure[componentLayoutData.componentUid],
+        };
+
+        const repeatableFields = recursivelyFindPathsBasedOnCondition(
+          allComponents,
+          (value) => value.type === 'component' && value.repeatable
+        )(componentLayoutData.attributes);
+
+        const componentDataStructure = relationPaths.reduce((acc, current) => {
+          const [componentName] = current.split('.');
+
+          /**
+           * Why do we do this? Because if a repeatable component
+           * has another repeatable component inside of it we
+           * don't need to attach the array at this point because that will be
+           * done again deeper in the nest.
+           */
+          if (!repeatableFields.includes(componentName)) {
+            set(acc, current, []);
+          }
+
+          return acc;
+        }, defaultDataStructure);
+
+        set(draftState, ['modifiedData', ...action.keys], componentDataStructure);
 
         break;
       }
