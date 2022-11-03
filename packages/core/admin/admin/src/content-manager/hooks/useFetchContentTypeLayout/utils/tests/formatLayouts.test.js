@@ -2,7 +2,6 @@ import formatLayouts, {
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
   generateRelationQueryInfos,
-  generateRelationQueryInfosForComponents,
   getDisplayedModels,
 } from '../formatLayouts';
 
@@ -556,16 +555,6 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
   describe('generateRelationQueryInfos', () => {
     it('should return an object with the correct keys', () => {
       expect(generateRelationQueryInfos(addressSchema, 'categories', simpleModels)).toEqual({
-        shouldDisplayRelationLink: true,
-      });
-    });
-  });
-
-  describe('generateRelationQueryInfosForComponents', () => {
-    it('should return an object with the correct keys', () => {
-      expect(
-        generateRelationQueryInfosForComponents(addressSchema, 'categories', simpleModels)
-      ).toEqual({
         shouldDisplayRelationLink: true,
       });
     });

@@ -89,13 +89,11 @@ const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
         const targetModelSchema = getRelationModel(targetModelUID, models);
         const targetModelPluginOptions = targetModelSchema.pluginOptions || {};
 
-        const queryInfos = ctUid
-          ? generateRelationQueryInfosForComponents(
-              contentTypeConfiguration,
-              attribute.name,
-              models
-            )
-          : generateRelationQueryInfos(contentTypeConfiguration, attribute.name, models);
+        const queryInfos = generateRelationQueryInfos(
+          contentTypeConfiguration,
+          attribute.name,
+          models
+        );
 
         set(data, 'targetModelPluginOptions', targetModelPluginOptions);
         set(data, 'queryInfos', queryInfos);
@@ -120,11 +118,7 @@ const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
     const type = fieldSchema.type;
 
     if (type === 'relation') {
-      const queryInfos = {
-        defaultParams: {},
-      };
-
-      acc.push({ key: `__${current}_key__`, name: current, fieldSchema, metadatas, queryInfos });
+      acc.push({ key: `__${current}_key__`, name: current, fieldSchema, metadatas });
 
       return acc;
     }
@@ -167,15 +161,6 @@ const generateRelationQueryInfos = (contentTypeConfiguration, fieldName, models)
   };
 };
 
-const generateRelationQueryInfosForComponents = (contentTypeConfiguration, fieldName, models) => {
-  const targetModel = get(contentTypeConfiguration, ['attributes', fieldName, 'targetModel'], '');
-  const shouldDisplayRelationLink = getDisplayedModels(models).includes(targetModel);
-
-  return {
-    shouldDisplayRelationLink,
-  };
-};
-
 const getDisplayedModels = (models) =>
   models.filter((model) => model.isDisplayed).map(({ uid }) => uid);
 
@@ -184,6 +169,5 @@ export {
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
   generateRelationQueryInfos,
-  generateRelationQueryInfosForComponents,
   getDisplayedModels,
 };
