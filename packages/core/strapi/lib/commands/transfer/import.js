@@ -8,6 +8,8 @@ const {
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
 
+const strapi = require('../../Strapi');
+
 const logger = console;
 
 module.exports = async (args, unknownArgs) => {
