@@ -98,15 +98,14 @@ const RelationInput = ({
 
   const options = useMemo(
     () =>
-      data.flat().map((result) =>
-        result
-          ? {
-              ...result,
-              value: result.id,
-              label: result.mainField,
-            }
-          : result
-      ),
+      data
+        .flat()
+        .filter(Boolean)
+        .map((result) => ({
+          ...result,
+          value: result.id,
+          label: result.mainField,
+        })),
     [data]
   );
 
