@@ -254,7 +254,7 @@ RelationInputDataManager.propTypes = {
   targetModel: PropTypes.string.isRequired,
   queryInfos: PropTypes.shape({
     defaultParams: PropTypes.shape({
-      _component: PropTypes.string,
+      locale: PropTypes.string,
     }),
     endpoints: PropTypes.shape({
       relation: PropTypes.string,

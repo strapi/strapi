@@ -1,41 +1,9 @@
 import formatLayouts, {
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
-  generateRelationQueryInfos,
-  generateRelationQueryInfosForComponents,
+  shouldDisplayRelationLink,
   getDisplayedModels,
 } from '../formatLayouts';
-
-const addressSchema = {
-  uid: 'api::address.address',
-  attributes: {
-    categories: {
-      targetModel: 'api::category.category',
-    },
-  },
-  layouts: {},
-  metadatas: {
-    categories: {
-      edit: {
-        mainField: {
-          name: 'name',
-          type: 'string',
-        },
-      },
-    },
-  },
-};
-const simpleModels = [
-  {
-    uid: 'api::category.category',
-    isDisplayed: true,
-    attributes: {
-      name: {
-        type: 'string',
-      },
-    },
-  },
-];
 
 describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
   describe('formatLayouts', () => {
@@ -531,7 +499,6 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
             },
           },
           fieldSchema: { type: 'relation', targetModel: 'category' },
-          queryInfos: { defaultParams: {} },
         },
         {
           name: 'component',
@@ -553,25 +520,45 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
     });
   });
 
-  describe('generateRelationQueryInfos', () => {
-    it('should return an object with the correct keys', () => {
-      expect(generateRelationQueryInfos(addressSchema, 'categories', simpleModels)).toEqual({
-        defaultParams: {},
-        shouldDisplayRelationLink: true,
-      });
-    });
-  });
-
-  describe('generateRelationQueryInfosForComponents', () => {
-    it('should return an object with the correct keys', () => {
-      expect(
-        generateRelationQueryInfosForComponents(addressSchema, 'categories', simpleModels)
-      ).toEqual({
-        defaultParams: {
-          component: 'api::address.address',
+  describe('shouldDisplayRelationLink', () => {
+    it('should generate shouldDisplayRelationLink = true for displayed models', () => {
+      const MODELS = [
+        {
+          uid: 'api::category.category',
+          isDisplayed: true,
         },
-        shouldDisplayRelationLink: true,
-      });
+      ];
+
+      const SCHEMA_ADDRESS = {
+        uid: 'api::address.address',
+        attributes: {
+          categories: {
+            targetModel: 'api::category.category',
+          },
+        },
+      };
+
+      expect(shouldDisplayRelationLink(SCHEMA_ADDRESS, 'categories', MODELS)).toBeTruthy();
+    });
+
+    it('should generate shouldDisplayRelationLink = false for non displayed models', () => {
+      const MODELS = [
+        {
+          uid: 'api::category.category',
+          isDisplayed: false,
+        },
+      ];
+
+      const SCHEMA_ADDRESS = {
+        uid: 'api::address.address',
+        attributes: {
+          categories: {
+            targetModel: 'api::category.category',
+          },
+        },
+      };
+
+      expect(shouldDisplayRelationLink(SCHEMA_ADDRESS, 'categories', MODELS)).toBeFalsy();
     });
   });
 
