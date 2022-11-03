@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { isEmpty, uniqBy, castArray, isNil } = require('lodash');
+const { uniqBy, castArray, isNil } = require('lodash');
 const { has, assoc, prop, isObject } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const validators = require('./validators');
@@ -241,31 +241,14 @@ const createValidateEntity =
   };
 
 /**
- * Assign values in the relationsStore
- * @param {Object} relationsValue containing the relation IDs
- * @param {String} target the UID of these relations
- * @param {Object} relationsStore to be updated
- */
-const updateRelationsStore = ({ relationsValue = null, target = '', relationsStore = {} }) => {
-  if (isEmpty(target) || isNil(relationsValue)) {
-    return;
-  }
-  const source = relationsValue.connect || relationsValue.set || castArray(relationsValue);
-  const idArray = source.map((v) => ({ id: v.id || v }));
-
-  relationsStore[target] = relationsStore[target] || [];
-  relationsStore[target].push(...idArray);
-};
-
-/**
  * Builds an object containing all the media and relations being associated with an entity
  * @param {String} uid of the model
  * @param {Object} data
  * @param {Object} relationsStore to be updated and returned
  * @returns
  */
-const buildRelationsStore = ({ uid = '', data = null, relationsStore = {} }) => {
-  if (isEmpty(uid) || isNil(data)) {
+const buildRelationsStore = ({ uid, data, relationsStore = {} }) => {
+  if (!uid || !data) {
     return relationsStore;
   }
 
@@ -282,25 +265,38 @@ const buildRelationsStore = ({ uid = '', data = null, relationsStore = {} }) => 
     switch (attribute.type) {
       case 'relation':
       case 'media': {
-        const target =
-          attribute.type === 'media' ? 'plugin::upload.file' : attribute?.target ?? null;
+        const target = attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
         if (!target) {
-          return;
+          break;
         }
-        // Keep track of all associations being made with relations or media.
-        updateRelationsStore({ relationsValue: value, target, relationsStore });
+
+        // As there are multiple formats supported for associating relations
+        // with an entity, the value here can be an: array, object or number.
+        let source;
+        if (Array.isArray(value)) {
+          source = value;
+        } else if (isObject(value)) {
+          source = value?.connect ?? value?.set ?? [];
+        } else {
+          source = castArray(value);
+        }
+        const idArray = source.map((v) => ({ id: v.id || v }));
+
+        // Update the relationStore to keep track of all associations being made
+        // with relations and media.
+        relationsStore[target] = relationsStore[target] || [];
+        relationsStore[target].push(...idArray);
         break;
       }
-      case 'component':
+      case 'component': {
+        return castArray(value).forEach((componentValue) =>
+          buildRelationsStore({ uid: attribute.component, data: componentValue, relationsStore })
+        );
+      }
       case 'dynamiczone': {
-        const key = attribute.target === 'dynamiczone' ? `__component` : `component`;
-        const values = castArray(value);
-        return values.forEach((value) => {
-          if (!value || !value[key]) {
-            return;
-          }
-          buildRelationsStore({ uid: value[key], data: value, relationsStore });
-        });
+        return value.forEach((dzValue) =>
+          buildRelationsStore({ uid: dzValue.__component, data: dzValue, relationsStore })
+        );
       }
       default:
         break;
