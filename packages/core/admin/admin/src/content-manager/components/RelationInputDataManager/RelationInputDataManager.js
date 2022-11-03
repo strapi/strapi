@@ -19,7 +19,7 @@ import { connect, select, normalizeSearchResults, diffRelations, normalizeRelati
 export const RelationInputDataManager = ({
   error,
   componentId,
-  componentUid,
+  isComponentRelation,
   editable,
   description,
   intlLabel,
@@ -66,14 +66,8 @@ export const RelationInputDataManager = ({
       endpoint: endpoints.search,
       pageParams: {
         ...defaultParams,
-        // TODO: fix me cause this sucks
-        entityId: isCreatingEntry
-          ? undefined
-          : componentUid && !componentId
-          ? undefined
-          : !componentUid && !componentId
-          ? initialData.id
-          : componentId,
+        // eslint-disable-next-line no-nested-ternary
+        entityId: isCreatingEntry ? undefined : isComponentRelation ? componentId : initialData.id,
         pageSize: SEARCH_RESULTS_TO_DISPLAY,
       },
     },
@@ -221,6 +215,7 @@ RelationInputDataManager.defaultProps = {
   error: undefined,
   description: '',
   labelAction: null,
+  isComponentRelation: false,
   isFieldAllowed: true,
   placeholder: null,
   required: false,
@@ -238,6 +233,7 @@ RelationInputDataManager.propTypes = {
   }).isRequired,
   labelAction: PropTypes.element,
   isCreatingEntry: PropTypes.bool.isRequired,
+  isComponentRelation: PropTypes.bool,
   isFieldAllowed: PropTypes.bool,
   isFieldReadable: PropTypes.bool.isRequired,
   mainField: PropTypes.shape({
