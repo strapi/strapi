@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Content-Manager || RelationInput should render and match snapshot 1`] = `
-.c36 {
+.c37 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -97,12 +97,26 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   margin-top: 4px;
 }
 
+.c26 {
+  font-weight: 600;
+  color: #006096;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
 .c31 {
   color: #4945ff;
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c34 {
+  font-weight: 600;
+  color: #2f6846;
   font-size: 0.875rem;
   line-height: 1.43;
 }
@@ -122,7 +136,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   padding-left: 16px;
 }
 
-.c34 {
+.c35 {
   padding-top: 8px;
 }
 
@@ -156,7 +170,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   line-height: 1.33;
 }
 
-.c35 {
+.c36 {
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
@@ -193,63 +207,32 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
 
 .c24 {
   background: #eaf5ff;
-  padding: 4px;
+  padding-top: 4px;
+  padding-right: 8px;
+  padding-bottom: 4px;
+  padding-left: 8px;
   border-radius: 4px;
   border-color: #b8e1ff;
   border: 1px solid #b8e1ff;
-  min-width: 20px;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
 }
 
 .c32 {
   background: #eafbe7;
-  padding: 4px;
+  padding-top: 4px;
+  padding-right: 8px;
+  padding-bottom: 4px;
+  padding-left: 8px;
   border-radius: 4px;
   border-color: #c6f0c2;
   border: 1px solid #c6f0c2;
-  min-width: 20px;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
 }
 
-.c25 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
-  flex-shrink: 0;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
+.c25 .sc-URNzB {
+  color: #0c75af;
 }
 
-.c26 {
-  color: #006096;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c33 {
-  color: #2f6846;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
+.c33 .sc-URNzB {
+  color: #328048;
 }
 
 .c23 {
@@ -684,10 +667,10 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     </span>
                   </div>
                   <div
-                    class="c32 c25"
+                    class="c32 c33"
                   >
                     <span
-                      class="c33"
+                      class="c34"
                     >
                       Published
                     </span>
@@ -774,10 +757,10 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
       </div>
     </div>
     <div
-      class="c34"
+      class="c35"
     >
       <p
-        class="c35"
+        class="c36"
         id="1-hint"
       >
         this is a description
@@ -785,7 +768,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
     </div>
   </div>
   <div
-    class="c36"
+    class="c37"
   >
     <p
       aria-live="polite"
