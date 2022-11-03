@@ -55,3 +55,23 @@ export const createMockedReadableFactory = <T extends string = ContentType>(sour
   jest.fn((uid: T) => {
     return Readable.from(source[uid] || []);
   });
+
+/**
+ * Create a factory of mocked query builders
+ */
+export const createMockedQueryBuilder = <T extends string = ContentType>(data: {
+  [key in T]: unknown[];
+}) =>
+  jest.fn((uid: T) => {
+    const state: { [key: string]: unknown } = { populate: undefined };
+
+    return {
+      populate(populate: unknown) {
+        state.populate = populate;
+        return this;
+      },
+      stream() {
+        return Readable.from(data[uid]);
+      },
+    };
+  });

@@ -4,10 +4,9 @@ import zip from 'zlib';
 import { Duplex } from 'stream';
 import { chain, Writable } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
-import { createCipher } from '../encryption/encrypt';
 
 import type { IDestinationProvider, ProviderType, Stream } from '../../types';
-// import { encrypt } from '../encryption';
+import { createCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {
   // Encryption
@@ -123,9 +122,9 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     }
 
     // Encryption
-    // if (options.encryption?.enabled) {
-    //   streams.push(encrypt(options.encryption.key).cipher());
-    // }
+    if (this.options.encryption.enabled) {
+      streams.push(createCipher(this.options.encryption.key));
+    }
 
     // FS write stream
     streams.push(createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize));
