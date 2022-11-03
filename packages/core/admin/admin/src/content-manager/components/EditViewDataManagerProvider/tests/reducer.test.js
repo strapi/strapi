@@ -1600,6 +1600,95 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         expect(reducer(state, action)).toEqual(expected);
       });
     });
+
+    it('should merge modifiedData with relation containing fields if the modifiedData exists', () => {
+      const state = {
+        ...initialState,
+        formErrors: true,
+        initialData: {},
+        modifiedData: {
+          relation: [
+            {
+              id: 1,
+            },
+          ],
+          componentWithRelation: {
+            relation: [
+              {
+                id: 1,
+              },
+              {
+                id: 2,
+              },
+            ],
+          },
+        },
+        modifiedDZName: true,
+        shouldCheckErrors: true,
+      };
+      const expected = {
+        ...initialState,
+        formErrors: {},
+        initialData: {
+          ok: true,
+          relation: [
+            {
+              id: 1,
+            },
+          ],
+          componentWithRelation: {
+            relation: [
+              {
+                id: 1,
+              },
+              {
+                id: 2,
+              },
+            ],
+            id: 1,
+          },
+        },
+        modifiedData: {
+          ok: true,
+          relation: [
+            {
+              id: 1,
+            },
+          ],
+          componentWithRelation: {
+            relation: [
+              {
+                id: 1,
+              },
+              {
+                id: 2,
+              },
+            ],
+            id: 1,
+          },
+        },
+        modifiedDZName: null,
+        shouldCheckErrors: false,
+      };
+
+      const action = {
+        type: 'INIT_FORM',
+        initialValues: {
+          ok: true,
+          relation: { count: 10 },
+          componentWithRelation: {
+            id: 1,
+            relation: {
+              count: 10,
+            },
+          },
+        },
+        relationalFieldPaths: ['relation', 'componentWithRelation.relation'],
+        componentPaths: ['componentWithRelation'],
+      };
+
+      expect(JSON.stringify(reducer(state, action))).toEqual(JSON.stringify(expected));
+    });
   });
 
   describe('MOVE_COMPONENT_FIELD', () => {
