@@ -16,7 +16,7 @@ const VerticalDivider = styled(Divider)`
   transform: rotate(90deg);
 `;
 
-const PackageStats = ({ githubStars, weeklyDownloads, npmPackageType }) => {
+const PackageStats = ({ githubStars, npmDownloads, npmPackageType }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -52,13 +52,13 @@ const PackageStats = ({ githubStars, weeklyDownloads, npmPackageType }) => {
             defaultMessage: `This {package} has {downloadsCount} weekly downloads`,
           },
           {
-            downloadsCount: weeklyDownloads,
+            downloadsCount: npmDownloads,
             package: npmPackageType,
           }
         )}
       >
         <Typography variant="pi" textColor="neutral800" lineHeight={16}>
-          {weeklyDownloads}
+          {npmDownloads}
         </Typography>
       </p>
     </Stack>
@@ -67,12 +67,12 @@ const PackageStats = ({ githubStars, weeklyDownloads, npmPackageType }) => {
 
 PackageStats.defaultProps = {
   githubStars: 0,
-  weeklyDownloads: 0,
+  npmDownloads: 0,
 };
 
 PackageStats.propTypes = {
   githubStars: PropTypes.number,
-  weeklyDownloads: PropTypes.number,
+  npmDownloads: PropTypes.number,
   npmPackageType: PropTypes.string.isRequired,
 };
 

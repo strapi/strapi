@@ -20,9 +20,6 @@ import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
 
-const GITHUB_STARS = 49130;
-const WEEKLY_DOWNLOADS = 7492;
-
 const toggleNotification = jest.fn();
 
 jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
@@ -308,13 +305,13 @@ describe('Marketplace page', () => {
 
     const githubStarsLabel = getByLabelText(
       documentationCard,
-      `This plugin was starred ${GITHUB_STARS} on GitHub`
+      /this plugin was starred \d+ on GitHub/i
     );
     expect(githubStarsLabel).toBeVisible();
 
     const downloadsLabel = getByLabelText(
       documentationCard,
-      `This plugin has ${WEEKLY_DOWNLOADS} weekly downloads`
+      /this plugin has \d+ weekly downloads/i
     );
     expect(downloadsLabel).toBeVisible();
   });
@@ -330,13 +327,13 @@ describe('Marketplace page', () => {
 
     const githubStarsLabel = getByLabelText(
       cloudinaryCard,
-      `This provider was starred ${GITHUB_STARS} on GitHub`
+      /this provider was starred \d+ on GitHub/i
     );
     expect(githubStarsLabel).toBeVisible();
 
     const downloadsLabel = getByLabelText(
       cloudinaryCard,
-      `This provider has ${WEEKLY_DOWNLOADS} weekly downloads`
+      /this provider has \d+ weekly downloads/i
     );
     expect(downloadsLabel).toBeVisible();
   });
@@ -345,22 +342,20 @@ describe('Marketplace page', () => {
     render(App);
     const providersTab = screen.getByRole('tab', { name: /providers/i });
     fireEvent.click(providersTab);
-    const GITHUB_STARS = 0;
-    const WEEKLY_DOWNLOADS = 0;
 
-    const NodeMailerCard = screen
+    const nodeMailerCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Nodemailer'));
 
     const githubStarsLabel = queryByLabelText(
-      NodeMailerCard,
-      `This provider was starred ${GITHUB_STARS} on GitHub`
+      nodeMailerCard,
+      /this provider was starred \d+ on GitHub/i
     );
     expect(githubStarsLabel).toBe(null);
 
     const downloadsLabel = getByLabelText(
-      NodeMailerCard,
-      `This provider has ${WEEKLY_DOWNLOADS} weekly downloads`
+      nodeMailerCard,
+      /this provider has \d+ weekly downloads/i
     );
     expect(downloadsLabel).toBeVisible();
   });

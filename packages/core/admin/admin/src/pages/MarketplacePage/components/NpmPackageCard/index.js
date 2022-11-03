@@ -79,7 +79,7 @@ const NpmPackageCard = ({
           />
           <PackageStats
             githubStars={attributes.githubStars}
-            weeklyDownloads={attributes.npmDownloads}
+            npmDownloads={attributes.npmDownloads}
             npmPackageType={npmPackageType}
           />
         </Flex>
