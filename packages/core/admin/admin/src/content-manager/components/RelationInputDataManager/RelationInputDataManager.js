@@ -19,6 +19,7 @@ import { connect, select, normalizeSearchResults, diffRelations, normalizeRelati
 export const RelationInputDataManager = ({
   error,
   componentId,
+  // eslint-disable-next-line react/prop-types
   componentUid,
   editable,
   description,
@@ -217,7 +218,6 @@ export const RelationInputDataManager = ({
 
 RelationInputDataManager.defaultProps = {
   componentId: undefined,
-  componentUid: undefined,
   editable: true,
   error: undefined,
   description: '',
@@ -229,7 +229,6 @@ RelationInputDataManager.defaultProps = {
 
 RelationInputDataManager.propTypes = {
   componentId: PropTypes.number,
-  componentUid: PropTypes.string,
   editable: PropTypes.bool,
   error: PropTypes.string,
   description: PropTypes.string,
