@@ -87,6 +87,7 @@ const formatLayoutWithMetas = (contentTypeConfiguration, models) =>
         const targetModelSchema = getRelationModel(targetModelUID, models);
         const targetModelPluginOptions = targetModelSchema.pluginOptions || {};
 
+        /** We inject  */
         const queryInfos = generateRelationQueryInfos(
           contentTypeConfiguration,
           attribute.name,
