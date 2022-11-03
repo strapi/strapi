@@ -194,7 +194,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c49 .sc-haTkiu {
+.c49 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -266,7 +266,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #f0f0ff;
 }
 
-.c52 .sc-haTkiu {
+.c52 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -346,7 +346,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c53 .sc-haTkiu {
+.c53 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1007,555 +1007,557 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
       class="c1"
     >
       <div>
-        <div
-          aria-labelledby="title"
-          aria-modal="true"
-          class="c2 c3"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c4 c5"
+            aria-labelledby="title"
+            aria-modal="true"
+            class="c2 c3"
+            role="dialog"
           >
             <div
-              class="c6"
-            >
-              <h2
-                class="c7"
-                id="title"
-              >
-                Details
-              </h2>
-              <button
-                aria-disabled="false"
-                aria-label="Close the modal"
-                class="c8 c9"
-                type="button"
-              >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                    fill="#212134"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div
-            class="c10 c11"
-          >
-            <div
-              class="c12"
+              class="c4 c5"
             >
               <div
-                class="c13"
+                class="c6"
+              >
+                <h2
+                  class="c7"
+                  id="title"
+                >
+                  Details
+                </h2>
+                <button
+                  aria-disabled="false"
+                  aria-label="Close the modal"
+                  class="c8 c9"
+                  type="button"
+                >
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                      fill="#212134"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div
+              class="c10 c11"
+            >
+              <div
+                class="c12"
               >
                 <div
-                  class=""
+                  class="c13"
                 >
                   <div
-                    class="c14 c15"
+                    class=""
                   >
                     <div
-                      class="c16 c17 c18"
+                      class="c14 c15"
                     >
                       <div
-                        class="c19 c20"
-                        spacing="1"
+                        class="c16 c17 c18"
                       >
-                        <span>
-                          <button
-                            aria-disabled="false"
-                            aria-labelledby="tooltip-1"
-                            class="c21 c22"
-                            tabindex="0"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                        <div
+                          class="c19 c20"
+                          spacing="1"
+                        >
+                          <span>
+                            <button
+                              aria-disabled="false"
+                              aria-labelledby="tooltip-1"
+                              class="c21 c22"
+                              tabindex="0"
+                              type="button"
                             >
-                              <path
-                                d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
-                                fill="#32324D"
-                              />
-                            </svg>
-                          </button>
-                        </span>
-                        <span>
-                          <button
-                            aria-disabled="false"
-                            aria-labelledby="tooltip-3"
-                            class="c21 c22"
-                            tabindex="0"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 25"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 24 24"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                                  fill="#32324D"
+                                />
+                              </svg>
+                            </button>
+                          </span>
+                          <span>
+                            <button
+                              aria-disabled="false"
+                              aria-labelledby="tooltip-3"
+                              class="c21 c22"
+                              tabindex="0"
+                              type="button"
                             >
-                              <path
-                                clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
-                                fill="#212134"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </button>
-                        </span>
-                        <span>
-                          <button
-                            aria-disabled="false"
-                            aria-labelledby="tooltip-5"
-                            class="c21 c22"
-                            tabindex="0"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 24 25"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  clip-rule="evenodd"
+                                  d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                  fill="#212134"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
+                            </button>
+                          </span>
+                          <span>
+                            <button
+                              aria-disabled="false"
+                              aria-labelledby="tooltip-5"
+                              class="c21 c22"
+                              tabindex="0"
+                              type="button"
                             >
-                              <path
-                                d="M21.415 1.344a6.137 6.137 0 00-8.525.838L11.095 4.33a1.53 1.53 0 102.35 1.963l1.794-2.148a3.054 3.054 0 014.365-.324 3.117 3.117 0 01.255 4.301l-3.73 4.467-.035.038a3.048 3.048 0 01-4.53.078 1.531 1.531 0 00-2.241 2.086 6.114 6.114 0 009.159-.245l3.721-4.454a6.289 6.289 0 001.418-4.62 6.01 6.01 0 00-2.206-4.128z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M10.399 17.884l-1.604 1.92a3.118 3.118 0 01-4.278.513 3.052 3.052 0 01-.457-4.353l3.795-4.542.028-.031a3.042 3.042 0 014.584-.022 1.529 1.529 0 001.794.37c.197-.094.37-.228.51-.395l.018-.022a1.51 1.51 0 00-.025-1.977 6.11 6.11 0 00-9.27.126l-3.784 4.53a6.137 6.137 0 00.692 8.539 6.01 6.01 0 004.454 1.437 6.289 6.289 0 004.294-2.217l1.598-1.913a1.53 1.53 0 00-2.35-1.963z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </button>
-                        </span>
-                        <span>
-                          <button
-                            aria-disabled="false"
-                            aria-labelledby="tooltip-7"
-                            class="c21 c22"
-                            tabindex="0"
-                            type="button"
-                          >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 24 24"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M21.415 1.344a6.137 6.137 0 00-8.525.838L11.095 4.33a1.53 1.53 0 102.35 1.963l1.794-2.148a3.054 3.054 0 014.365-.324 3.117 3.117 0 01.255 4.301l-3.73 4.467-.035.038a3.048 3.048 0 01-4.53.078 1.531 1.531 0 00-2.241 2.086 6.114 6.114 0 009.159-.245l3.721-4.454a6.289 6.289 0 001.418-4.62 6.01 6.01 0 00-2.206-4.128z"
+                                  fill="#212134"
+                                />
+                                <path
+                                  d="M10.399 17.884l-1.604 1.92a3.118 3.118 0 01-4.278.513 3.052 3.052 0 01-.457-4.353l3.795-4.542.028-.031a3.042 3.042 0 014.584-.022 1.529 1.529 0 001.794.37c.197-.094.37-.228.51-.395l.018-.022a1.51 1.51 0 00-.025-1.977 6.11 6.11 0 00-9.27.126l-3.784 4.53a6.137 6.137 0 00.692 8.539 6.01 6.01 0 004.454 1.437 6.289 6.289 0 004.294-2.217l1.598-1.913a1.53 1.53 0 00-2.35-1.963z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
+                          </span>
+                          <span>
+                            <button
+                              aria-disabled="false"
+                              aria-labelledby="tooltip-7"
+                              class="c21 c22"
+                              tabindex="0"
+                              type="button"
                             >
-                              <path
-                                d="M20.571 21.429h-3.428V24h3.428v-2.571zM20.571 17.143V3.429H7.714v3.428h9.429v10.286H6.857V0H3.43v3.429H0v3.428h3.429v13.714H24v-3.428h-3.429z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </button>
-                        </span>
+                              <svg
+                                fill="none"
+                                height="1em"
+                                viewBox="0 0 24 24"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M20.571 21.429h-3.428V24h3.428v-2.571zM20.571 17.143V3.429H7.714v3.428h9.429v10.286H6.857V0H3.43v3.429H0v3.428h3.429v13.714H24v-3.428h-3.429z"
+                                  fill="#212134"
+                                />
+                              </svg>
+                            </button>
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div
-                      class="c23"
-                    >
-                      <img
-                        alt="Screenshot 2.png"
-                        src="http://localhost:1337/uploads/thumbnail_Screenshot_2_5d4a574d61.png?updated_at=2021-10-04T09:42:31.670Z"
+                      <div
+                        class="c23"
+                      >
+                        <img
+                          alt="Screenshot 2.png"
+                          src="http://localhost:1337/uploads/thumbnail_Screenshot_2_5d4a574d61.png?updated_at=2021-10-04T09:42:31.670Z"
+                        />
+                      </div>
+                      <div
+                        class="c24 c17 c18"
                       />
                     </div>
-                    <div
-                      class="c24 c17 c18"
-                    />
+                  </div>
+                </div>
+                <div
+                  class="c13"
+                >
+                  <div
+                    class=""
+                  >
+                    <form
+                      action="#"
+                      novalidate=""
+                    >
+                      <div
+                        class="c25 c26"
+                        spacing="3"
+                      >
+                        <div
+                          class="c27"
+                        >
+                          <div
+                            class="c12"
+                          >
+                            <div
+                              class="c13"
+                            >
+                              <div
+                                class=""
+                              >
+                                <div
+                                  class="c25 c28"
+                                  spacing="1"
+                                >
+                                  <span
+                                    class="c29"
+                                  >
+                                    Size
+                                  </span>
+                                  <span
+                                    class="c30"
+                                  >
+                                    102KB
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="c13"
+                            >
+                              <div
+                                class=""
+                              >
+                                <div
+                                  class="c25 c28"
+                                  spacing="1"
+                                >
+                                  <span
+                                    class="c29"
+                                  >
+                                    Dimensions
+                                  </span>
+                                  <span
+                                    class="c30"
+                                  >
+                                    1476✕780
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="c13"
+                            >
+                              <div
+                                class=""
+                              >
+                                <div
+                                  class="c25 c28"
+                                  spacing="1"
+                                >
+                                  <span
+                                    class="c29"
+                                  >
+                                    Date
+                                  </span>
+                                  <span
+                                    class="c30"
+                                  >
+                                    10/4/2021
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="c13"
+                            >
+                              <div
+                                class=""
+                              >
+                                <div
+                                  class="c25 c28"
+                                  spacing="1"
+                                >
+                                  <span
+                                    class="c29"
+                                  >
+                                    Extension
+                                  </span>
+                                  <span
+                                    class="c30"
+                                  >
+                                    png
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="c13"
+                            >
+                              <div
+                                class=""
+                              >
+                                <div
+                                  class="c25 c28"
+                                  spacing="1"
+                                >
+                                  <span
+                                    class="c29"
+                                  >
+                                    Asset ID
+                                  </span>
+                                  <span
+                                    class="c30"
+                                  >
+                                    8
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div>
+                            <div
+                              class="c31 c32"
+                              spacing="1"
+                            >
+                              <label
+                                class="c33"
+                                for="textinput-1"
+                              >
+                                <div
+                                  class="c34"
+                                >
+                                  File name
+                                </div>
+                              </label>
+                              <div
+                                class="c35 c36"
+                              >
+                                <input
+                                  aria-disabled="false"
+                                  aria-invalid="false"
+                                  class="c37"
+                                  id="textinput-1"
+                                  name="name"
+                                  value="Screenshot 2.png"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div>
+                            <div
+                              class="c31 c32"
+                              spacing="1"
+                            >
+                              <label
+                                class="c33"
+                                for="textinput-2"
+                              >
+                                <div
+                                  class="c34"
+                                >
+                                  Alternative text
+                                </div>
+                              </label>
+                              <div
+                                class="c35 c36"
+                              >
+                                <input
+                                  aria-describedby="textinput-2-hint"
+                                  aria-disabled="false"
+                                  aria-invalid="false"
+                                  class="c37"
+                                  id="textinput-2"
+                                  name="alternativeText"
+                                  value=""
+                                />
+                              </div>
+                              <p
+                                class="c38"
+                                id="textinput-2-hint"
+                              >
+                                This text will be displayed if the asset can’t be shown.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div>
+                            <div
+                              class="c31 c32"
+                              spacing="1"
+                            >
+                              <label
+                                class="c33"
+                                for="textinput-3"
+                              >
+                                <div
+                                  class="c34"
+                                >
+                                  Caption
+                                </div>
+                              </label>
+                              <div
+                                class="c35 c36"
+                              >
+                                <input
+                                  aria-disabled="false"
+                                  aria-invalid="false"
+                                  class="c37"
+                                  id="textinput-3"
+                                  name="caption"
+                                  value=""
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="c25 c28"
+                          spacing="1"
+                        >
+                          <label
+                            class="c39"
+                            for="asset-folder"
+                          >
+                            <div
+                              class="c40"
+                            >
+                              Location
+                            </div>
+                          </label>
+                          <div
+                            class=" css-1tkrshn-container"
+                          >
+                            <div
+                              class=" css-1sb7bue-control"
+                            >
+                              <div
+                                class=" css-1kj7tu4-ValueContainer"
+                              >
+                                <div
+                                  class=" css-p5rves-singleValue"
+                                >
+                                  Media Library
+                                </div>
+                                <input
+                                  aria-autocomplete="list"
+                                  class="css-wmatm6-dummyInput-DummyInput"
+                                  id="asset-folder"
+                                  readonly=""
+                                  tabindex="0"
+                                  value=""
+                                />
+                              </div>
+                              <div
+                                class=" css-1hb7zxy-IndicatorsContainer"
+                              >
+                                <button
+                                  class="c41 c42 c43"
+                                  type="button"
+                                >
+                                  <svg
+                                    fill="none"
+                                    height="1em"
+                                    viewBox="0 0 14 8"
+                                    width="1em"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      clip-rule="evenodd"
+                                      d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                      fill="#32324D"
+                                      fill-rule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                            <input
+                              name="parent"
+                              type="hidden"
+                              value=""
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="c44"
+                      >
+                        <button
+                          tabindex="-1"
+                          type="submit"
+                        >
+                          Submit
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 </div>
               </div>
-              <div
-                class="c13"
-              >
-                <div
-                  class=""
-                >
-                  <form
-                    action="#"
-                    novalidate=""
-                  >
-                    <div
-                      class="c25 c26"
-                      spacing="3"
-                    >
-                      <div
-                        class="c27"
-                      >
-                        <div
-                          class="c12"
-                        >
-                          <div
-                            class="c13"
-                          >
-                            <div
-                              class=""
-                            >
-                              <div
-                                class="c25 c28"
-                                spacing="1"
-                              >
-                                <span
-                                  class="c29"
-                                >
-                                  Size
-                                </span>
-                                <span
-                                  class="c30"
-                                >
-                                  102KB
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            class="c13"
-                          >
-                            <div
-                              class=""
-                            >
-                              <div
-                                class="c25 c28"
-                                spacing="1"
-                              >
-                                <span
-                                  class="c29"
-                                >
-                                  Dimensions
-                                </span>
-                                <span
-                                  class="c30"
-                                >
-                                  1476✕780
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            class="c13"
-                          >
-                            <div
-                              class=""
-                            >
-                              <div
-                                class="c25 c28"
-                                spacing="1"
-                              >
-                                <span
-                                  class="c29"
-                                >
-                                  Date
-                                </span>
-                                <span
-                                  class="c30"
-                                >
-                                  10/4/2021
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            class="c13"
-                          >
-                            <div
-                              class=""
-                            >
-                              <div
-                                class="c25 c28"
-                                spacing="1"
-                              >
-                                <span
-                                  class="c29"
-                                >
-                                  Extension
-                                </span>
-                                <span
-                                  class="c30"
-                                >
-                                  png
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            class="c13"
-                          >
-                            <div
-                              class=""
-                            >
-                              <div
-                                class="c25 c28"
-                                spacing="1"
-                              >
-                                <span
-                                  class="c29"
-                                >
-                                  Asset ID
-                                </span>
-                                <span
-                                  class="c30"
-                                >
-                                  8
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <div>
-                          <div
-                            class="c31 c32"
-                            spacing="1"
-                          >
-                            <label
-                              class="c33"
-                              for="textinput-1"
-                            >
-                              <div
-                                class="c34"
-                              >
-                                File name
-                              </div>
-                            </label>
-                            <div
-                              class="c35 c36"
-                            >
-                              <input
-                                aria-disabled="false"
-                                aria-invalid="false"
-                                class="c37"
-                                id="textinput-1"
-                                name="name"
-                                value="Screenshot 2.png"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <div>
-                          <div
-                            class="c31 c32"
-                            spacing="1"
-                          >
-                            <label
-                              class="c33"
-                              for="textinput-2"
-                            >
-                              <div
-                                class="c34"
-                              >
-                                Alternative text
-                              </div>
-                            </label>
-                            <div
-                              class="c35 c36"
-                            >
-                              <input
-                                aria-describedby="textinput-2-hint"
-                                aria-disabled="false"
-                                aria-invalid="false"
-                                class="c37"
-                                id="textinput-2"
-                                name="alternativeText"
-                                value=""
-                              />
-                            </div>
-                            <p
-                              class="c38"
-                              id="textinput-2-hint"
-                            >
-                              This text will be displayed if the asset can’t be shown.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <div>
-                          <div
-                            class="c31 c32"
-                            spacing="1"
-                          >
-                            <label
-                              class="c33"
-                              for="textinput-3"
-                            >
-                              <div
-                                class="c34"
-                              >
-                                Caption
-                              </div>
-                            </label>
-                            <div
-                              class="c35 c36"
-                            >
-                              <input
-                                aria-disabled="false"
-                                aria-invalid="false"
-                                class="c37"
-                                id="textinput-3"
-                                name="caption"
-                                value=""
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        class="c25 c28"
-                        spacing="1"
-                      >
-                        <label
-                          class="c39"
-                          for="asset-folder"
-                        >
-                          <div
-                            class="c40"
-                          >
-                            Location
-                          </div>
-                        </label>
-                        <div
-                          class=" css-1tkrshn-container"
-                        >
-                          <div
-                            class=" css-1sb7bue-control"
-                          >
-                            <div
-                              class=" css-1kj7tu4-ValueContainer"
-                            >
-                              <div
-                                class=" css-p5rves-singleValue"
-                              >
-                                Media Library
-                              </div>
-                              <input
-                                aria-autocomplete="list"
-                                class="css-wmatm6-dummyInput-DummyInput"
-                                id="asset-folder"
-                                readonly=""
-                                tabindex="0"
-                                value=""
-                              />
-                            </div>
-                            <div
-                              class=" css-1hb7zxy-IndicatorsContainer"
-                            >
-                              <button
-                                class="c41 c42 c43"
-                                type="button"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 14 8"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-                          <input
-                            name="parent"
-                            type="hidden"
-                            value=""
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      class="c44"
-                    >
-                      <button
-                        tabindex="-1"
-                        type="submit"
-                      >
-                        Submit
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
             </div>
-          </div>
-          <div
-            class="c4 c45"
-          >
             <div
-              class="c6"
+              class="c4 c45"
             >
               <div
-                class="c46 c47"
+                class="c6"
               >
-                <button
-                  aria-disabled="false"
-                  class="c48 c49"
-                  type="button"
-                >
-                  <span
-                    class="c50 c51"
-                  >
-                    Cancel
-                  </span>
-                </button>
-              </div>
-              <div
-                class="c46 c47"
-              >
-                <button
-                  aria-disabled="false"
-                  class="c48 c52"
-                  type="button"
-                >
-                  <span
-                    class="c50 c51"
-                  >
-                    Replace media
-                  </span>
-                </button>
                 <div
-                  class="c44"
+                  class="c46 c47"
                 >
-                  <input
-                    accept="image/png"
-                    aria-hidden="true"
-                    name="file"
-                    tabindex="-1"
-                    type="file"
-                  />
-                </div>
-                <button
-                  aria-disabled="false"
-                  class="c48 c53"
-                  type="button"
-                >
-                  <span
-                    class="c50 c51"
+                  <button
+                    aria-disabled="false"
+                    class="c48 c49"
+                    type="button"
                   >
-                    Finish
-                  </span>
-                </button>
+                    <span
+                      class="c50 c51"
+                    >
+                      Cancel
+                    </span>
+                  </button>
+                </div>
+                <div
+                  class="c46 c47"
+                >
+                  <button
+                    aria-disabled="false"
+                    class="c48 c52"
+                    type="button"
+                  >
+                    <span
+                      class="c50 c51"
+                    >
+                      Replace media
+                    </span>
+                  </button>
+                  <div
+                    class="c44"
+                  >
+                    <input
+                      accept="image/png"
+                      aria-hidden="true"
+                      name="file"
+                      tabindex="-1"
+                      type="file"
+                    />
+                  </div>
+                  <button
+                    aria-disabled="false"
+                    class="c48 c53"
+                    type="button"
+                  >
+                    <span
+                      class="c50 c51"
+                    >
+                      Finish
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -31,6 +31,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
 .c7 {
   padding-right: 8px;
   padding-left: 8px;
+  overflow: hidden;
   width: 100%;
 }
 
@@ -288,6 +289,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
               <div
                 aria-live="polite"
                 class="c7 c8"
+                overflow="hidden"
                 width="100%"
               >
                 <div
@@ -853,7 +855,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   border: 1px solid #4945ff;
 }
 
-.c29 .sc-eZhRLC {
+.c29 .sc-hAWBJg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -923,7 +925,7 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
   background: #ffffff;
 }
 
-.c37 .sc-eZhRLC {
+.c37 .sc-hAWBJg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1000,205 +1002,207 @@ exports[`ApplicationsInfosPage || LogoInput from computer should render upload m
       class="c0"
     >
       <div>
-        <div
-          aria-labelledby="modal"
-          aria-modal="true"
-          class="c1 c2"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c3 c4"
+            aria-labelledby="modal"
+            aria-modal="true"
+            class="c1 c2"
+            role="dialog"
           >
             <div
-              class="c5"
-            >
-              <h2
-                class="c6"
-                id="modal"
-              >
-                Upload logo
-              </h2>
-              <button
-                aria-disabled="false"
-                aria-label="Close the modal"
-                class="c7 c8"
-                type="button"
-              >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                    fill="#212134"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div>
-            <div
-              class="c9"
+              class="c3 c4"
             >
               <div
-                aria-label="How do you want to upload your assets?"
-                role="tablist"
+                class="c5"
               >
-                <button
-                  aria-controls="tabgroup-1-0-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c10"
-                  id="tabgroup-1-0-tab"
-                  role="tab"
-                  tabindex="0"
-                  type="button"
+                <h2
+                  class="c6"
+                  id="modal"
                 >
-                  <div
-                    class="c11 c12"
-                  >
-                    <span
-                      class="c13"
-                    >
-                      From computer
-                    </span>
-                  </div>
-                </button>
+                  Upload logo
+                </h2>
                 <button
                   aria-disabled="false"
-                  aria-selected="false"
-                  class="c10"
-                  id="tabgroup-1-1-tab"
-                  role="tab"
-                  tabindex="-1"
+                  aria-label="Close the modal"
+                  class="c7 c8"
                   type="button"
                 >
-                  <div
-                    class="c11 c14"
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <span
-                      class="c15"
-                    >
-                      From url
-                    </span>
-                  </div>
+                    <path
+                      d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                      fill="#212134"
+                    />
+                  </svg>
                 </button>
               </div>
-              <hr
-                class="c16 c17"
-              />
             </div>
             <div>
               <div
-                aria-labelledby="tabgroup-1-0-tab"
-                id="tabgroup-1-0-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                class="c9"
               >
-                <form>
-                  <div
-                    class="c18"
+                <div
+                  aria-label="How do you want to upload your assets?"
+                  role="tablist"
+                >
+                  <button
+                    aria-controls="tabgroup-1-0-tabpanel"
+                    aria-disabled="false"
+                    aria-selected="true"
+                    class="c10"
+                    id="tabgroup-1-0-tab"
+                    role="tab"
+                    tabindex="0"
+                    type="button"
                   >
-                    <div>
-                      <label
-                        for="logo-upload"
+                    <div
+                      class="c11 c12"
+                    >
+                      <span
+                        class="c13"
                       >
-                        <div
-                          class="c19 c20"
-                          spacing="2"
+                        From computer
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    aria-disabled="false"
+                    aria-selected="false"
+                    class="c10"
+                    id="tabgroup-1-1-tab"
+                    role="tab"
+                    tabindex="-1"
+                    type="button"
+                  >
+                    <div
+                      class="c11 c14"
+                    >
+                      <span
+                        class="c15"
+                      >
+                        From url
+                      </span>
+                    </div>
+                  </button>
+                </div>
+                <hr
+                  class="c16 c17"
+                />
+              </div>
+              <div>
+                <div
+                  aria-labelledby="tabgroup-1-0-tab"
+                  id="tabgroup-1-0-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <form>
+                    <div
+                      class="c18"
+                    >
+                      <div>
+                        <label
+                          for="logo-upload"
                         >
                           <div
-                            class="c21 c22"
+                            class="c19 c20"
+                            spacing="2"
                           >
-                            <svg
-                              aria-hidden="true"
-                              class="c23 c24"
-                              fill="none"
-                              height="3.75rem"
-                              viewBox="0 0 24 20"
-                              width="3.75rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
-                                fill="#32324D"
-                              />
-                              <path
-                                d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
-                                fill="#32324D"
-                              />
-                            </svg>
                             <div
-                              class="c25"
+                              class="c21 c22"
                             >
-                              <span
-                                class="c26"
+                              <svg
+                                aria-hidden="true"
+                                class="c23 c24"
+                                fill="none"
+                                height="3.75rem"
+                                viewBox="0 0 24 20"
+                                width="3.75rem"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                Drag and Drop here or
-                              </span>
-                            </div>
-                            <input
-                              accept="image/jpeg,image/png,image/svg+xml"
-                              class="c27"
-                              cursor="pointer"
-                              id="logo-upload"
-                              name="files"
-                              tabindex="-1"
-                              type="file"
-                            />
-                            <button
-                              aria-disabled="false"
-                              class="c28 c29"
-                              type="button"
-                            >
-                              <span
-                                class="c30 c31"
+                                <path
+                                  d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
+                                  fill="#32324D"
+                                />
+                                <path
+                                  d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
+                                  fill="#32324D"
+                                />
+                              </svg>
+                              <div
+                                class="c25"
                               >
-                                Browse files
-                              </span>
-                            </button>
-                            <div
-                              class="c32"
-                            >
-                              <span
-                                class="c33"
+                                <span
+                                  class="c26"
+                                >
+                                  Drag and Drop here or
+                                </span>
+                              </div>
+                              <input
+                                accept="image/jpeg,image/png,image/svg+xml"
+                                class="c27"
+                                cursor="pointer"
+                                id="logo-upload"
+                                name="files"
+                                tabindex="-1"
+                                type="file"
+                              />
+                              <button
+                                aria-disabled="false"
+                                class="c28 c29"
+                                type="button"
                               >
-                                Max dimension: 750x750, Max size: 100KB
-                              </span>
+                                <span
+                                  class="c30 c31"
+                                >
+                                  Browse files
+                                </span>
+                              </button>
+                              <div
+                                class="c32"
+                              >
+                                <span
+                                  class="c33"
+                                >
+                                  Max dimension: 750x750, Max size: 100KB
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </label>
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                </form>
-                <div
-                  class="c3 c34"
-                >
+                  </form>
                   <div
-                    class="c5"
+                    class="c3 c34"
                   >
                     <div
-                      class="c35 c36"
+                      class="c5"
                     >
-                      <button
-                        aria-disabled="false"
-                        class="c28 c37"
-                        type="button"
+                      <div
+                        class="c35 c36"
                       >
-                        <span
-                          class="c30 c31"
+                        <button
+                          aria-disabled="false"
+                          class="c28 c37"
+                          type="button"
                         >
-                          Cancel
-                        </span>
-                      </button>
+                          <span
+                            class="c30 c31"
+                          >
+                            Cancel
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        class="c35 c36"
+                      />
                     </div>
-                    <div
-                      class="c35 c36"
-                    />
                   </div>
                 </div>
               </div>
@@ -1242,6 +1246,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
 .c7 {
   padding-right: 8px;
   padding-left: 8px;
+  overflow: hidden;
   width: 100%;
 }
 
@@ -1499,6 +1504,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
               <div
                 aria-live="polite"
                 class="c7 c8"
+                overflow="hidden"
                 width="100%"
               >
                 <div
@@ -1980,7 +1986,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   border: 1px solid #4945ff;
 }
 
-.c33 .sc-eZhRLC {
+.c33 .sc-hAWBJg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2050,7 +2056,7 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
   background: #ffffff;
 }
 
-.c30 .sc-eZhRLC {
+.c30 .sc-hAWBJg {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2240,179 +2246,181 @@ exports[`ApplicationsInfosPage || LogoInput from url should render upload modal 
       class="c0"
     >
       <div>
-        <div
-          aria-labelledby="modal"
-          aria-modal="true"
-          class="c1 c2"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c3 c4"
+            aria-labelledby="modal"
+            aria-modal="true"
+            class="c1 c2"
+            role="dialog"
           >
             <div
-              class="c5"
-            >
-              <h2
-                class="c6"
-                id="modal"
-              >
-                Upload logo
-              </h2>
-              <button
-                aria-disabled="false"
-                aria-label="Close the modal"
-                class="c7 c8"
-                type="button"
-              >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                    fill="#212134"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div>
-            <div
-              class="c9"
+              class="c3 c4"
             >
               <div
-                aria-label="How do you want to upload your assets?"
-                role="tablist"
+                class="c5"
               >
+                <h2
+                  class="c6"
+                  id="modal"
+                >
+                  Upload logo
+                </h2>
                 <button
                   aria-disabled="false"
-                  aria-selected="false"
-                  class="c10"
-                  id="tabgroup-10-0-tab"
-                  role="tab"
-                  tabindex="-1"
+                  aria-label="Close the modal"
+                  class="c7 c8"
                   type="button"
                 >
-                  <div
-                    class="c11 c12"
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <span
-                      class="c13"
-                    >
-                      From computer
-                    </span>
-                  </div>
-                </button>
-                <button
-                  aria-controls="tabgroup-10-1-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c10"
-                  id="tabgroup-10-1-tab"
-                  role="tab"
-                  tabindex="0"
-                  type="button"
-                >
-                  <div
-                    class="c11 c14"
-                  >
-                    <span
-                      class="c15"
-                    >
-                      From url
-                    </span>
-                  </div>
+                    <path
+                      d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                      fill="#212134"
+                    />
+                  </svg>
                 </button>
               </div>
-              <hr
-                class="c16 c17"
-              />
             </div>
             <div>
               <div
-                aria-labelledby="tabgroup-10-1-tab"
-                id="tabgroup-10-1-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                class="c9"
               >
-                <form>
-                  <div
-                    class="c18"
+                <div
+                  aria-label="How do you want to upload your assets?"
+                  role="tablist"
+                >
+                  <button
+                    aria-disabled="false"
+                    aria-selected="false"
+                    class="c10"
+                    id="tabgroup-10-0-tab"
+                    role="tab"
+                    tabindex="-1"
+                    type="button"
                   >
-                    <div>
+                    <div
+                      class="c11 c12"
+                    >
+                      <span
+                        class="c13"
+                      >
+                        From computer
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    aria-controls="tabgroup-10-1-tabpanel"
+                    aria-disabled="false"
+                    aria-selected="true"
+                    class="c10"
+                    id="tabgroup-10-1-tab"
+                    role="tab"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <div
+                      class="c11 c14"
+                    >
+                      <span
+                        class="c15"
+                      >
+                        From url
+                      </span>
+                    </div>
+                  </button>
+                </div>
+                <hr
+                  class="c16 c17"
+                />
+              </div>
+              <div>
+                <div
+                  aria-labelledby="tabgroup-10-1-tab"
+                  id="tabgroup-10-1-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <form>
+                    <div
+                      class="c18"
+                    >
                       <div>
-                        <div
-                          class="c19 c20"
-                          spacing="1"
-                        >
-                          <label
-                            class="c21"
-                            for="textinput-1"
-                          >
-                            <div
-                              class="c22"
-                            >
-                              URL
-                            </div>
-                          </label>
+                        <div>
                           <div
-                            class="c23 c24"
+                            class="c19 c20"
+                            spacing="1"
                           >
-                            <input
-                              aria-disabled="false"
-                              aria-invalid="false"
-                              class="c25"
-                              id="textinput-1"
-                              name="logo-url"
-                              value=""
-                            />
+                            <label
+                              class="c21"
+                              for="textinput-1"
+                            >
+                              <div
+                                class="c22"
+                              >
+                                URL
+                              </div>
+                            </label>
+                            <div
+                              class="c23 c24"
+                            >
+                              <input
+                                aria-disabled="false"
+                                aria-invalid="false"
+                                class="c25"
+                                id="textinput-1"
+                                name="logo-url"
+                                value=""
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div
-                    class="c3 c26"
-                  >
                     <div
-                      class="c5"
+                      class="c3 c26"
                     >
                       <div
-                        class="c27 c28"
+                        class="c5"
                       >
-                        <button
-                          aria-disabled="false"
-                          class="c29 c30"
-                          type="button"
+                        <div
+                          class="c27 c28"
                         >
-                          <span
-                            class="c31 c32"
+                          <button
+                            aria-disabled="false"
+                            class="c29 c30"
+                            type="button"
                           >
-                            Cancel
-                          </span>
-                        </button>
-                      </div>
-                      <div
-                        class="c27 c28"
-                      >
-                        <button
-                          aria-disabled="false"
-                          class="c29 c33"
-                          type="submit"
+                            <span
+                              class="c31 c32"
+                            >
+                              Cancel
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          class="c27 c28"
                         >
-                          <span
-                            class="c31 c32"
+                          <button
+                            aria-disabled="false"
+                            class="c29 c33"
+                            type="submit"
                           >
-                            Next
-                          </span>
-                        </button>
+                            <span
+                              class="c31 c32"
+                            >
+                              Next
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
@@ -2451,6 +2459,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
 .c7 {
   padding-right: 8px;
   padding-left: 8px;
+  overflow: hidden;
   width: 100%;
 }
 
@@ -2747,6 +2756,7 @@ exports[`ApplicationsInfosPage || LogoInput logo input should match snapshot 1`]
               <div
                 aria-live="polite"
                 class="c7 c8"
+                overflow="hidden"
                 width="100%"
               >
                 <div
