@@ -11,9 +11,9 @@ const { Command, Option } = require('commander');
 
 const program = new Command();
 
-const { parseType } = require('@strapi/utils/lib');
 const inquirer = require('inquirer');
 const packageJSON = require('../package.json');
+const { parseInputList, parseInputBool } = require('../lib/commands/utils/commander');
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -258,19 +258,6 @@ program
   .action(getLocalScript('ts/generate-types'));
 
 // `$ strapi export`
-const parseBool = (arg) => {
-  try {
-    return parseType({ type: 'boolean', value: arg });
-  } catch (e) {
-    console.error(e.message);
-    process.exit(1);
-  }
-};
-// // Will be used for the options that accept a list
-const listOption = (value) => {
-  return value.split(',');
-};
-
 program
   .command('export')
   .description('Export data from Strapi to file')
@@ -281,12 +268,12 @@ program
     )
   )
   .addOption(
-    new Option('--encrypt [boolean]', 'Encrypt output file').default(true).argParser(parseBool)
+    new Option('--encrypt [boolean]', 'Encrypt output file').default(true).argParser(parseInputBool)
   )
   .addOption(
     new Option('--compress [boolean]', 'Compress output file using gz')
       .default(true)
-      .argParser(parseBool)
+      .argParser(parseInputBool)
   )
   .addOption(new Option('--key', 'Provide encryption key in command instead of using a prompt'))
   // Options we plan to add in the future:
@@ -366,21 +353,21 @@ program
     new Option(
       '--only <data,to,include>',
       'Comma-separated list of data to include (webhooks,content,localmedia,providermedia,config)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
-      listOption
+      parseInputList
     )
   )
   .addOption(
     new Option(
       '--exclude <data,to,exclude>',
       'Comma-separated list of data to exclude (webhooks,content,localmedia,providermedia,config,relations)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
-      listOption
+      parseInputList
     )
   )
   .addOption(
     new Option(
       '--schemaComparison <schemaComparison>',
       'exact requires every field to match, strict requires Strapi version and schemas to match, subset requires source schema to exist in destination, bypass skips checks',
-      listOption
+      parseInputList
     )
       .choices(['exact', 'strict', 'subset', 'bypass'])
       .default('exact')
