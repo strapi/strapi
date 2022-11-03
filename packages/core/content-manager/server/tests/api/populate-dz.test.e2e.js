@@ -157,9 +157,6 @@ describe('CM API - Populate dz', () => {
           __component: 'default.compo-a',
           items: {
             title: 'AAAA',
-            category: {
-              name: 'name',
-            },
           },
         },
         {
@@ -167,9 +164,6 @@ describe('CM API - Populate dz', () => {
           items: {
             name: 'BBBB',
             category: 'smthg',
-            category_diff: {
-              name: 'name',
-            },
           },
         },
       ],

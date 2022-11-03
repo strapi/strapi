@@ -112,6 +112,7 @@ const DynamicTable = ({
       <TableRows
         canCreate={canCreate}
         canDelete={canDelete}
+        contentType={layout.contentType}
         headers={tableHeaders}
         rows={rows}
         withBulkActions
@@ -139,7 +140,6 @@ DynamicTable.propTypes = {
       metadatas: PropTypes.object.isRequired,
       layouts: PropTypes.shape({
         list: PropTypes.array.isRequired,
-        editRelations: PropTypes.array,
       }).isRequired,
       options: PropTypes.object.isRequired,
       settings: PropTypes.object.isRequired,
