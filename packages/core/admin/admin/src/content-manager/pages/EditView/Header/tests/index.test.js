@@ -23,6 +23,7 @@ const defaultProps = {
   layout: ct,
   modifiedData: {},
   onPublish: jest.fn(),
+  onPublishPromptDismissal: jest.fn(),
   onUnpublish: jest.fn(),
   status: 'resolved',
   publishConfirmation: {
