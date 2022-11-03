@@ -1626,50 +1626,6 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         modifiedDZName: true,
         shouldCheckErrors: true,
       };
-      const expected = {
-        ...initialState,
-        formErrors: {},
-        initialData: {
-          ok: true,
-          relation: [
-            {
-              id: 1,
-            },
-          ],
-          componentWithRelation: {
-            relation: [
-              {
-                id: 1,
-              },
-              {
-                id: 2,
-              },
-            ],
-            id: 1,
-          },
-        },
-        modifiedData: {
-          ok: true,
-          relation: [
-            {
-              id: 1,
-            },
-          ],
-          componentWithRelation: {
-            relation: [
-              {
-                id: 1,
-              },
-              {
-                id: 2,
-              },
-            ],
-            id: 1,
-          },
-        },
-        modifiedDZName: null,
-        shouldCheckErrors: false,
-      };
 
       const action = {
         type: 'INIT_FORM',
@@ -1687,7 +1643,16 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         componentPaths: ['componentWithRelation'],
       };
 
-      expect(JSON.stringify(reducer(state, action))).toEqual(JSON.stringify(expected));
+      const newState = reducer(state, action);
+
+      expect(newState.modifiedData.relation[0]).toEqual({
+        id: 1,
+      });
+
+      expect(newState.modifiedData.componentWithRelation).toEqual({
+        id: 1,
+        relation: expect.arrayContaining([{ id: expect.any(Number) }]),
+      });
     });
   });
 
