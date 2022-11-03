@@ -82,7 +82,7 @@ function useSelect({
 
   return {
     componentId,
-    componentUid,
+    isComponentRelation: Boolean(componentUid),
     queryInfos: {
       ...queryInfos,
       endpoints: {

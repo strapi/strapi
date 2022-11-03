@@ -49,13 +49,26 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
   const relationsRes = useInfiniteQuery(['relation', cacheKey], fetchRelations, {
     cacheTime: 0,
     enabled: relation.enabled,
+    /**
+     * @type {(lastPage:
+     * | { data: null }
+     * | { results: any[],
+     *     pagination: {
+     *      page: number,
+     *      pageCount: number,
+     *      pageSize: number,
+     *      total: number
+     *     }
+     *   }
+     * ) => number}
+     */
     getNextPageParam(lastPage) {
       const isXToOneRelation = !lastPage?.pagination;
 
       if (
         !lastPage || // the API may send an empty 204 response
         isXToOneRelation || // xToOne relations do not have a pagination
-        lastPage.pagination.page >= lastPage.pagination.pageCount
+        lastPage?.pagination.page >= lastPage?.pagination.pageCount
       ) {
         return undefined;
       }
@@ -126,8 +139,21 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
     fetchSearch,
     {
       enabled: Object.keys(searchParams).length > 0,
+      /**
+       * @type {(lastPage:
+       * | { data: null }
+       * | { results: any[],
+       *     pagination: {
+       *      page: number,
+       *      pageCount: number,
+       *      pageSize: number,
+       *      total: number
+       *     }
+       *   }
+       * ) => number}
+       */
       getNextPageParam(lastPage) {
-        if (lastPage.pagination.page >= lastPage.pagination.pageCount) {
+        if (!lastPage?.pagination || lastPage.pagination.page >= lastPage.pagination.pageCount) {
           return undefined;
         }
 
