@@ -147,7 +147,7 @@ describe('RelationInputDataManager', () => {
   test('Does pass through props from the CM', async () => {
     const { findByText } = setup();
 
-    expect(await findByText('Label')).toBeInTheDocument();
+    expect(await findByText(/Label/)).toBeInTheDocument();
     expect(await findByText('Description')).toBeInTheDocument();
     expect(await findByText('Action')).toBeInTheDocument();
     expect(await findByText('Placeholder')).toBeInTheDocument();
