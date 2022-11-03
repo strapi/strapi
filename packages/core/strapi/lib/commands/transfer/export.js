@@ -18,19 +18,23 @@ module.exports = async (args) => {
   /**
    * From local Strapi instance
    */
-  const inputOptions = {
+  const sourceOptions = {
     getStrapi() {
       return strapi().load();
     },
   };
-  const source = createLocalStrapiSourceProvider(inputOptions);
+  const source = createLocalStrapiSourceProvider(sourceOptions);
 
   /**
    * To a Strapi backup file
    */
-  const outputOptions = {
+  const BYTES_IN_MB = 1024;
+
+  const destinationOptions = {
     file: {
       path: args.output || getDefaultExportBackupName(),
+      maxSize: Math.floor(args.maxSize) * BYTES_IN_MB,
+      maxSizeJsonl: Math.floor(args.maxSizeJsonl) * BYTES_IN_MB,
     },
     encryption: {
       enabled: args.encrypt,
@@ -40,15 +44,17 @@ module.exports = async (args) => {
       enabled: args.compress,
     },
   };
-  const destination = createLocalFileDestinationProvider(outputOptions);
+  const destination = createLocalFileDestinationProvider(destinationOptions);
 
   /**
    * Configure and run the transfer engine
    */
-  const engine = createTransferEngine(source, destination, {
-    strategy: 'restore',
-    versionMatching: 'minor',
-  });
+  const engineOptions = {
+    strategy: args.conflictStrategy,
+    versionMatching: args.schemaComparison,
+    exclude: args.exclude,
+  };
+  const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
     const result = await engine.transfer();

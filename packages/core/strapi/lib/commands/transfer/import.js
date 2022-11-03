@@ -44,12 +44,12 @@ module.exports = async (args, unknownArgs) => {
   /**
    * Configure and run the transfer engine
    */
-  const transferEngineOptions = {
+  const engineOptions = {
     strategy: args.conflictStrategy,
     versionMatching: args.schemaComparison,
     exclude: args.exclude,
   };
-  const engine = createTransferEngine(source, destination, transferEngineOptions);
+  const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
     logger.log('Importing data...');

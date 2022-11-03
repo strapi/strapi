@@ -62,6 +62,13 @@ const getLocalScript =
       });
   };
 
+// option to exclude types of data for the export, import, and transfer commands
+// TODO: validate these inputs. Hopefully here, but worst case it may require adding a hook on each command
+const excludeOption = new Option(
+  '--exclude <data,to,exclude>',
+  'Comma-separated list of data to exclude (files [localMediaFiles, providerMediaFiles], content [entities, links], schema, configuration)' // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+).argParser(parseInputList);
+
 // Initial program setup
 program.storeOptionsAsProperties(false).allowUnknownOption(true);
 
@@ -268,7 +275,9 @@ program
     )
   )
   .addOption(
-    new Option('--encrypt [boolean]', 'Encrypt output file').default(true).argParser(parseInputBool)
+    new Option('--encrypt [boolean]', `Encrypt output file using 'aes-128-ecb'`) // TODO: we should set export a default from data-transfer and display it here
+      .default(true)
+      .argParser(parseInputBool)
   )
   .addOption(
     new Option('--compress [boolean]', 'Compress output file using gz')
@@ -276,34 +285,16 @@ program
       .argParser(parseInputBool)
   )
   .addOption(new Option('--key', 'Provide encryption key in command instead of using a prompt'))
-  // Options we plan to add in the future:
-  // .option('--config <configFile>', 'Path to the config file')
-  // .addOption(new Option('--sourceUrl', 'Remote url to use instead of local instance of Strapi'))
-  // .addOption(new Option('--sourceToken', 'Auth token for remote Strapi')) // required if sourceUrl is set
-  // .addOption(new Option('--archive', 'combine into one gzip file', true)) // for now we REQUIRE this to be true
-  // .addOption(
-  //   new Option(
-  //     '--only <data,to,include>',
-  //     'Comma-separated list of data to include (webhooks, content, localmedia, providermedia, config)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
-  //     listOption
-  //   )
-  // )
-  // .addOption(
-  //   new Option(
-  //     '--exclude <data,to,exclude>',
-  //     'Comma-separated list of data to exclude (webhooks,content,localmedia,providermedia,config,relations)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
-  //     listOption
-  //   )
-  // )
-  // .addOption(
-  //   new Option('--encryptionCipher <crypto cipher>', 'node crypto cipher to use', 'aes-256') // .choices(crypto.getCiphers())
-  // )
-  // .addOption(
-  //   new Option('--encryptionHash <crypto hash>', 'node crypto hash to use', 'sha-256') // .choices(crypto.getHashes())
-  // )
-  // .addOption(
-  //   new Option('--split <max MB per file>', 'split exported file when exceeding max filesize in MB')
-  // )
+  .addOption(
+    new Option('--max-size <max MB per file>', 'split final file when exceeding size in MB')
+  )
+  .addOption(
+    new Option(
+      '--max-size-jsonl <max MB per internal backup file>',
+      'split internal jsonl files when exceeding max size in MB'
+    )
+  )
+  .addOption(excludeOption)
   .hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts();
 
@@ -341,28 +332,13 @@ program
 program
   .command('import')
   .description('Import data from file to Strapi')
-  // TODO: Final version should be possible to provide all options on the CLI instead of config file
-  // .option('--config <configFile>', 'Path to the config file')
   .option('--input <input filename>', 'Path to the file to be imported')
   .addOption(
     new Option('--conflictStrategy <conflictStrategy>', 'Which strategy to use for ID conflicts')
       .choices(['restore', 'abort', 'keep', 'replace'])
       .default('restore')
   )
-  .addOption(
-    new Option(
-      '--only <data,to,include>',
-      'Comma-separated list of data to include (webhooks,content,localmedia,providermedia,config)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
-      parseInputList
-    )
-  )
-  .addOption(
-    new Option(
-      '--exclude <data,to,exclude>',
-      'Comma-separated list of data to exclude (webhooks,content,localmedia,providermedia,config,relations)', // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
-      parseInputList
-    )
-  )
+  .addOption(excludeOption)
   .addOption(
     new Option(
       '--schemaComparison <schemaComparison>',
@@ -372,8 +348,9 @@ program
       .choices(['exact', 'strict', 'subset', 'bypass'])
       .default('exact')
   )
-  // A --decrypt option is superfluous. If user provides a password, we try it. Otherwise it fails and we notify user.
-  .addOption(new Option('--key [encryptionKey]', 'prompt for [or provide] the decryption key'))
+  .addOption(
+    new Option('--key [encryptionKey]', 'prompt for [or provide directly] the decryption key')
+  )
   .action(require('../lib/commands/transfer/import'));
 
 program.parseAsync(process.argv);
