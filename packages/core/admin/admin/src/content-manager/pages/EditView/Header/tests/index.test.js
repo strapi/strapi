@@ -151,7 +151,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 1px solid #4945ff;
       }
 
-      .c12 .sc-cfJLRR {
+      .c12 .sc-jCHUfY {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

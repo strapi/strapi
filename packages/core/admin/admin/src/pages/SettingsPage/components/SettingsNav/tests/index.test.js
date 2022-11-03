@@ -417,7 +417,7 @@ describe('SettingsPage || components || SettingsNav', () => {
                         </div>
                       </div>
                       <div
-                        class="c16 sc-eBTqsU c25"
+                        class="c16 sc-iseIHH c25"
                       >
                         <svg
                           class="c26"
