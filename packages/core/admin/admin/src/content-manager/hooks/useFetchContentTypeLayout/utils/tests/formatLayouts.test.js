@@ -1,7 +1,7 @@
 import formatLayouts, {
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
-  generateRelationQueryInfos,
+  shouldDisplayRelationLink,
   getDisplayedModels,
 } from '../formatLayouts';
 
@@ -520,7 +520,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
     });
   });
 
-  describe('generateRelationQueryInfos', () => {
+  describe('shouldDisplayRelationLink', () => {
     it('should generate shouldDisplayRelationLink = true for displayed models', () => {
       const MODELS = [
         {
@@ -538,9 +538,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
         },
       };
 
-      expect(generateRelationQueryInfos(SCHEMA_ADDRESS, 'categories', MODELS)).toEqual({
-        shouldDisplayRelationLink: true,
-      });
+      expect(shouldDisplayRelationLink(SCHEMA_ADDRESS, 'categories', MODELS)).toBeTruthy();
     });
 
     it('should generate shouldDisplayRelationLink = false for non displayed models', () => {
@@ -560,9 +558,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
         },
       };
 
-      expect(generateRelationQueryInfos(SCHEMA_ADDRESS, 'categories', MODELS)).toEqual({
-        shouldDisplayRelationLink: false,
-      });
+      expect(shouldDisplayRelationLink(SCHEMA_ADDRESS, 'categories', MODELS)).toBeFalsy();
     });
   });
 

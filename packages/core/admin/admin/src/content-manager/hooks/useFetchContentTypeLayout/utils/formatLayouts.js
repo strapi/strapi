@@ -83,19 +83,17 @@ const formatLayoutWithMetas = (contentTypeConfiguration, models) =>
       };
 
       if (fieldSchema.type === 'relation') {
-        const targetModelUID = fieldSchema.targetModel;
-        const targetModelSchema = getRelationModel(targetModelUID, models);
+        const targetModelSchema = getRelationModel(fieldSchema.targetModel, models);
         const targetModelPluginOptions = targetModelSchema.pluginOptions || {};
 
-        /** We inject  */
-        const queryInfos = generateRelationQueryInfos(
-          contentTypeConfiguration,
-          attribute.name,
-          models
-        );
-
         set(data, 'targetModelPluginOptions', targetModelPluginOptions);
-        set(data, 'queryInfos', queryInfos);
+        set(data, 'queryInfos', {
+          shouldDisplayRelationLink: shouldDisplayRelationLink(
+            contentTypeConfiguration,
+            attribute.name,
+            models
+          ),
+        });
       }
 
       return data;
@@ -148,13 +146,10 @@ const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
   return formatted;
 };
 
-const generateRelationQueryInfos = (contentTypeConfiguration, fieldName, models) => {
+const shouldDisplayRelationLink = (contentTypeConfiguration, fieldName, models) => {
   const targetModel = get(contentTypeConfiguration, ['attributes', fieldName, 'targetModel'], '');
-  const shouldDisplayRelationLink = getDisplayedModels(models).includes(targetModel);
 
-  return {
-    shouldDisplayRelationLink,
-  };
+  return getDisplayedModels(models).includes(targetModel);
 };
 
 const getDisplayedModels = (models) =>
@@ -164,6 +159,6 @@ export default formatLayouts;
 export {
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
-  generateRelationQueryInfos,
+  shouldDisplayRelationLink,
   getDisplayedModels,
 };
