@@ -25,6 +25,7 @@ export interface ILocalFileDestinationProviderOptions {
   file: {
     path: string;
     maxSize?: number;
+    maxSizeJsonl?: number;
   };
 }
 
@@ -94,25 +95,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     }
 
     // FS write stream
-    streams.push(createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize));
+    streams.push(createMultiFilesWriteStream(filePathFactory, this.options.file.maxSizeJsonl));
 
     return chain(streams);
   }
 
   getLinksStream(): Duplex | Promise<Duplex> {
-    const options = {
-      encryption: {
-        enabled: true,
-        key: 'Hello World!',
-      },
-      compression: {
-        enabled: false,
-      },
-      file: {
-        maxSize: 100000,
-      },
-    };
-
     const filePathFactory = (fileIndex: number = 0) => {
       return path.join(
         // Backup path
@@ -130,7 +118,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     ];
 
     // Compression
-    if (options.compression.enabled) {
+    if (this.options.compression.enabled) {
       streams.push(zip.createGzip());
     }
 
@@ -140,7 +128,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     // }
 
     // FS write stream
-    streams.push(createMultiFilesWriteStream(filePathFactory, options.file.maxSize));
+    streams.push(createMultiFilesWriteStream(filePathFactory, this.options.file.maxSizeJsonl));
 
     return chain(streams);
   }
