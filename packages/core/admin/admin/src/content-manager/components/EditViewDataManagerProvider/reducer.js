@@ -5,6 +5,7 @@ import set from 'lodash/set';
 import take from 'lodash/take';
 import cloneDeep from 'lodash/cloneDeep';
 import uniqBy from 'lodash/uniqBy';
+import merge from 'lodash/merge';
 
 import {
   findLeafByPathAndReplace,
@@ -217,8 +218,12 @@ const reducer = (state, action) =>
               /**
                * this will be null on initial load, however subsequent calls
                * will have data in them correlating to the names of the relational fields.
+               *
+               * We also merge the fetched data so that things like `id` for components can be copied over
+               * which would be `undefined` in the `browserState`.
                */
-              set(acc, componentName, get(state.modifiedData, componentName));
+              const currentState = cloneDeep(get(state.modifiedData, componentName));
+              set(acc, componentName, merge(currentState, get(initialValues, componentName)));
             } else if (
               repeatableComponentPaths.includes(componentName) ||
               dynamicZonePaths.includes(componentName) ||

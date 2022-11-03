@@ -47,7 +47,7 @@ export const RelationInputDataManager = ({
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     name,
     relation: {
-      enabled: get(initialData, name)?.count !== 0 && !!endpoints.relation,
+      enabled: !!endpoints.relation,
       endpoint: endpoints.relation,
       pageGoal: currentLastPage,
       pageParams: {
@@ -138,6 +138,28 @@ export const RelationInputDataManager = ({
     return <NotAllowedInput name={name} intlLabel={intlLabel} labelAction={labelAction} />;
   }
 
+  /**
+   * How to calculate the total number of relations even if you don't
+   * have them all loaded in the browser.
+   *
+   * 1. The `infiniteQuery` gives you the total number of relations in the pagination result.
+   * 2. You can diff the length of the browserState vs the fetchedServerState to determine if you've
+   * either added or removed relations.
+   * 3. Add them together, if you've removed relations you'll get a negative number and it'll
+   * actually subtract from the total number on the server (regardless of how many you fetched).
+   */
+  const browserRelationsCount = relationsFromModifiedData.length;
+  const serverRelationsCount = (get(initialData, name) ?? []).length;
+  const realServerRelationsCount = relations.data?.pages[0]?.pagination?.total ?? 0;
+  /**
+   * _IF_ theres no relations data and the browserCount is the same as serverCount you can therefore assume
+   * that the browser count is correct because we've just _made_ this entry and the in-component hook is now fetching.
+   */
+  const totalRelations =
+    !relations.data && browserRelationsCount === serverRelationsCount
+      ? browserRelationsCount
+      : browserRelationsCount - serverRelationsCount + realServerRelationsCount;
+
   return (
     <RelationInput
       error={error}
@@ -147,7 +169,7 @@ export const RelationInputDataManager = ({
       label={`${formatMessage({
         id: intlLabel.id,
         defaultMessage: intlLabel.defaultMessage,
-      })} ${initialData[name]?.count !== undefined ? `(${initialData[name].count})` : ''}`}
+      })} ${totalRelations > 0 ? `(${totalRelations})` : ''}`}
       labelAction={labelAction}
       labelLoadMore={
         !isCreatingEntry

@@ -101,43 +101,44 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
-const setup = (props) =>
-  render(
-    <MemoryRouter>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={lightTheme}>
-          <IntlProvider locale="en">
-            <RelationInputDataManager
-              description="Description"
-              intlLabel={{
-                id: 'label',
-                defaultMessage: 'Label',
-              }}
-              labelAction={<>Action</>}
-              mainField={{
-                name: 'relation',
-                schema: {
-                  type: 'relation',
-                },
-              }}
-              name="relation"
-              placeholder={{
-                id: 'placeholder',
-                defaultMessage: 'Placeholder',
-              }}
-              relationType="oneToOne"
-              size={6}
-              targetModel="something"
-              queryInfos={{
-                shouldDisplayRelationLink: true,
-              }}
-              {...props}
-            />
-          </IntlProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </MemoryRouter>
-  );
+const RelationInputDataManagerComponent = (props) => (
+  <MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={lightTheme}>
+        <IntlProvider locale="en">
+          <RelationInputDataManager
+            description="Description"
+            intlLabel={{
+              id: 'label',
+              defaultMessage: 'Label',
+            }}
+            labelAction={<>Action</>}
+            mainField={{
+              name: 'relation',
+              schema: {
+                type: 'relation',
+              },
+            }}
+            name="relation"
+            placeholder={{
+              id: 'placeholder',
+              defaultMessage: 'Placeholder',
+            }}
+            relationType="oneToOne"
+            size={6}
+            targetModel="something"
+            queryInfos={{
+              shouldDisplayRelationLink: true,
+            }}
+            {...props}
+          />
+        </IntlProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </MemoryRouter>
+);
+
+const setup = (props) => render(<RelationInputDataManagerComponent {...props} />);
 
 describe('RelationInputDataManager', () => {
   afterEach(() => {
@@ -147,7 +148,7 @@ describe('RelationInputDataManager', () => {
   test('Does pass through props from the CM', async () => {
     const { findByText } = setup();
 
-    expect(await findByText('Label')).toBeInTheDocument();
+    expect(await findByText(/Label/)).toBeInTheDocument();
     expect(await findByText('Description')).toBeInTheDocument();
     expect(await findByText('Action')).toBeInTheDocument();
     expect(await findByText('Placeholder')).toBeInTheDocument();
@@ -381,5 +382,190 @@ describe('RelationInputDataManager', () => {
         }),
       })
     );
+  });
+
+  describe('Counting relations', () => {
+    it('should not render a count value when there are no relations', () => {
+      useCMEditViewDataManager.mockImplementation(() => ({
+        isCreatingEntry: false,
+        createActionAllowedFields: ['relation'],
+        readActionAllowedFields: ['relation'],
+        updateActionAllowedFields: ['relation'],
+        slug: 'test',
+        initialData: {
+          relation: [],
+        },
+        modifiedData: {
+          relation: [],
+        },
+      }));
+
+      const { queryByText } = setup();
+
+      expect(queryByText(/\([0-9]\)/)).not.toBeInTheDocument();
+    });
+
+    it('should render a count value when there are relations added to the store but no relations from useRelation', () => {
+      useCMEditViewDataManager.mockImplementation(() => ({
+        isCreatingEntry: false,
+        createActionAllowedFields: ['relation'],
+        readActionAllowedFields: ['relation'],
+        updateActionAllowedFields: ['relation'],
+        slug: 'test',
+        initialData: {
+          relation: [],
+        },
+        modifiedData: {
+          relation: [
+            {
+              id: 1,
+            },
+            {
+              id: 2,
+            },
+            {
+              id: 3,
+            },
+          ],
+        },
+      }));
+
+      const { queryByText } = setup();
+
+      expect(queryByText(/\(3\)/)).toBeInTheDocument();
+    });
+
+    it('should render the count value of the useRelations response when there are relations from useRelation', () => {
+      useRelation.mockImplementation(() => ({
+        relations: {
+          data: {
+            pages: [
+              {
+                pagination: {
+                  total: 8,
+                },
+              },
+            ],
+          },
+          hasNextPage: true,
+          isFetchingNextPage: false,
+          isLoading: false,
+          isSuccess: true,
+          status: 'success',
+        },
+        search: {
+          data: {},
+          isFetchingNextPage: false,
+          isLoading: false,
+          isSuccess: true,
+          status: 'success',
+        },
+      }));
+
+      useCMEditViewDataManager.mockImplementation(() => ({
+        isCreatingEntry: false,
+        createActionAllowedFields: ['relation'],
+        readActionAllowedFields: ['relation'],
+        updateActionAllowedFields: ['relation'],
+        slug: 'test',
+        initialData: {
+          relation: [
+            {
+              id: 1,
+            },
+          ],
+        },
+        modifiedData: {
+          relation: [
+            {
+              id: 1,
+            },
+          ],
+        },
+      }));
+
+      const { queryByText } = setup();
+
+      expect(queryByText(/\(8\)/)).toBeInTheDocument();
+    });
+
+    it('should correct calculate browser mutations when there are relations from useRelation', async () => {
+      useRelation.mockImplementation(() => ({
+        relations: {
+          data: {
+            pages: [
+              {
+                pagination: {
+                  total: 8,
+                },
+              },
+            ],
+          },
+          hasNextPage: true,
+          isFetchingNextPage: false,
+          isLoading: false,
+          isSuccess: true,
+          status: 'success',
+        },
+        search: {
+          data: {},
+          isFetchingNextPage: false,
+          isLoading: false,
+          isSuccess: true,
+          status: 'success',
+        },
+      }));
+
+      useCMEditViewDataManager.mockImplementation(() => ({
+        isCreatingEntry: false,
+        createActionAllowedFields: ['relation'],
+        readActionAllowedFields: ['relation'],
+        updateActionAllowedFields: ['relation'],
+        slug: 'test',
+        initialData: {
+          relation: [
+            {
+              id: 1,
+            },
+          ],
+        },
+        modifiedData: {
+          relation: [
+            {
+              id: 1,
+            },
+          ],
+        },
+      }));
+
+      const { queryByText, rerender } = setup();
+
+      expect(queryByText(/\(8\)/)).toBeInTheDocument();
+
+      /**
+       * Simulate changing the store
+       */
+      useCMEditViewDataManager.mockImplementation(() => ({
+        isCreatingEntry: false,
+        createActionAllowedFields: ['relation'],
+        readActionAllowedFields: ['relation'],
+        updateActionAllowedFields: ['relation'],
+        slug: 'test',
+        initialData: {
+          relation: [
+            {
+              id: 1,
+            },
+          ],
+        },
+        modifiedData: {
+          relation: [],
+        },
+      }));
+
+      rerender(<RelationInputDataManagerComponent />);
+
+      expect(queryByText(/\(7\)/)).toBeInTheDocument();
+    });
   });
 });

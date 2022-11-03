@@ -1600,6 +1600,60 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         expect(reducer(state, action)).toEqual(expected);
       });
     });
+
+    it('should merge modifiedData with relation containing fields if the modifiedData exists', () => {
+      const state = {
+        ...initialState,
+        formErrors: true,
+        initialData: {},
+        modifiedData: {
+          relation: [
+            {
+              id: 1,
+            },
+          ],
+          componentWithRelation: {
+            relation: [
+              {
+                id: 1,
+              },
+              {
+                id: 2,
+              },
+            ],
+          },
+        },
+        modifiedDZName: true,
+        shouldCheckErrors: true,
+      };
+
+      const action = {
+        type: 'INIT_FORM',
+        initialValues: {
+          ok: true,
+          relation: { count: 10 },
+          componentWithRelation: {
+            id: 1,
+            relation: {
+              count: 10,
+            },
+          },
+        },
+        relationalFieldPaths: ['relation', 'componentWithRelation.relation'],
+        componentPaths: ['componentWithRelation'],
+      };
+
+      const newState = reducer(state, action);
+
+      expect(newState.modifiedData.relation[0]).toEqual({
+        id: 1,
+      });
+
+      expect(newState.modifiedData.componentWithRelation).toEqual({
+        id: 1,
+        relation: expect.arrayContaining([{ id: expect.any(Number) }]),
+      });
+    });
   });
 
   describe('MOVE_COMPONENT_FIELD', () => {
