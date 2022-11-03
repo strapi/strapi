@@ -13,6 +13,11 @@ const strapi = require('../../Strapi');
 const logger = console;
 
 module.exports = async (args, unknownArgs) => {
+  /**
+   * From strapi backup file
+   */
+
+  // treat any unknown arguments as filenames
   if (unknownArgs.args.length !== 1) {
     logger.error('Please enter exactly one filename to import');
     if (unknownArgs.args.length > 1) {
@@ -20,16 +25,15 @@ module.exports = async (args, unknownArgs) => {
     }
     process.exit(1);
   }
-
   const inputFile = unknownArgs.args[0];
-
-  // From file
   const sourceOptions = {
     backupFilePath: inputFile,
   };
   const source = createLocalFileSourceProvider(sourceOptions);
 
-  // To Strapi
+  /**
+   * To local Strapi instance
+   */
   const destinationOptions = {
     getStrapi() {
       return strapi().load();
@@ -37,6 +41,9 @@ module.exports = async (args, unknownArgs) => {
   };
   const destination = createLocalStrapiDestinationProvider(destinationOptions);
 
+  /**
+   * Configure and run the transfer engine
+   */
   const transferEngineOptions = {
     strategy: args.conflictStrategy,
     versionMatching: args.schemaComparison,
