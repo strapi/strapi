@@ -8,33 +8,50 @@ const {
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
 
-module.exports = async () => {
-  console.log('Importing data...');
+const logger = console;
+
+module.exports = async (args, unknownArgs) => {
+  if (unknownArgs.args.length !== 1) {
+    logger.error('Please enter exactly one filename to import');
+    if (unknownArgs.args.length > 1) {
+      logger.error(`Received filenames: ${unknownArgs.args.join(', ')}`);
+    }
+    process.exit(1);
+  }
+
+  const inputFile = unknownArgs.args[0];
 
   // From file
-  const source = createLocalFileSourceProvider({ backupFilePath: './backup.tar.gz' });
+  const sourceOptions = {
+    backupFilePath: inputFile,
+  };
+  const source = createLocalFileSourceProvider(sourceOptions);
 
   // To Strapi
-  const destination = createLocalStrapiDestinationProvider({
+  const destinationOptions = {
     getStrapi() {
       return strapi().load();
     },
-  });
+  };
+  const destination = createLocalStrapiDestinationProvider(destinationOptions);
 
-  const engine = createTransferEngine(source, destination, {
-    strategy: 'restore',
-    versionMatching: 'ignore',
-  });
+  const transferEngineOptions = {
+    strategy: args.conflictStrategy,
+    versionMatching: args.schemaComparison,
+    exclude: args.exclude,
+  };
+  const engine = createTransferEngine(source, destination, transferEngineOptions);
 
   try {
+    logger.log('Importing data...');
     const result = await engine.transfer();
-    console.log('Import process has been completed successfully!');
+    logger.log('Import process has been completed successfully!');
 
     // TODO: this won't dump the entire results, we will print a pretty summary
-    console.log('Results:', result);
+    logger.log('Results:', result);
     process.exit(0);
   } catch (e) {
-    console.log('Import process failed unexpectedly');
+    logger.log('Import process failed unexpectedly');
     process.exit(1);
   }
 };
