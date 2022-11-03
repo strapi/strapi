@@ -6,21 +6,19 @@ const getRelationModel = (targetModel, models) => models.find((model) => model.u
 const formatLayouts = (initialData, models) => {
   const data = createMetasSchema(initialData, models);
 
-  const formattedCTEditLayout = formatLayoutWithMetas(data.contentType, null, models);
-  const ctUid = data.contentType.uid;
+  const formattedCTEditLayout = formatLayoutWithMetas(data.contentType, models);
   const formattedListLayout = formatListLayoutWithMetas(data.contentType, data.components);
 
   set(data, ['contentType', 'layouts', 'edit'], formattedCTEditLayout);
   set(data, ['contentType', 'layouts', 'list'], formattedListLayout);
 
-  Object.keys(data.components).forEach((compoUID) => {
-    const formattedCompoEditLayout = formatLayoutWithMetas(
-      data.components[compoUID],
-      ctUid,
+  Object.keys(data.components).forEach((componentUid) => {
+    const formattedComponentEditLayout = formatLayoutWithMetas(
+      data.components[componentUid],
       models
     );
 
-    set(data, ['components', compoUID, 'layouts', 'edit'], formattedCompoEditLayout);
+    set(data, ['components', componentUid, 'layouts', 'edit'], formattedComponentEditLayout);
   });
 
   return data;
@@ -73,8 +71,8 @@ const createMetasSchema = (initialData, models) => {
   return data;
 };
 
-const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
-  const formatted = contentTypeConfiguration.layouts.edit.reduce((acc, current) => {
+const formatLayoutWithMetas = (contentTypeConfiguration, models) =>
+  contentTypeConfiguration.layouts.edit.reduce((acc, current) => {
     const row = current.map((attribute) => {
       const fieldSchema = get(contentTypeConfiguration, ['attributes', attribute.name], {});
 
@@ -106,9 +104,6 @@ const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
 
     return acc;
   }, []);
-
-  return formatted;
-};
 
 const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
   const formatted = contentTypeConfiguration.layouts.list.reduce((acc, current) => {
