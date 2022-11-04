@@ -4,6 +4,7 @@ import { chain } from 'stream-chain';
 import { Readable } from 'stream';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
+import { createConfigurationStream } from './configuration';
 
 export interface ILocalStrapiSourceProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
@@ -63,6 +64,14 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     }
 
     return createLinksStream(this.strapi);
+  }
+
+  streamConfiguration(): NodeJS.ReadableStream {
+    if (!this.strapi) {
+      throw new Error('Not able to stream configuration. Strapi instance not found');
+    }
+
+    return createConfigurationStream(strapi);
   }
 
   getSchemas() {

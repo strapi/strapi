@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import zip from 'zlib';
-import { Duplex } from 'stream';
-import { chain, Writable } from 'stream-chain';
+import { Writable } from 'stream';
+import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
 import type { IDestinationProvider, ProviderType, Stream } from '../../types';
@@ -42,6 +42,26 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     this.options = options;
   }
 
+  #getDataTransformers() {
+    const transforms = [];
+
+    // Convert to stringified JSON lines
+    transforms.push(stringer());
+
+    // Compression
+    if (this.options.compression.enabled) {
+      transforms.push(zip.createGzip());
+    }
+
+    // Encryption
+    if (this.options.encryption.enabled) {
+      const cipher = createCipher(this.options.encryption.key);
+      transforms.push(cipher);
+    }
+
+    return transforms;
+  }
+
   bootstrap(): void | Promise<void> {
     const rootDir = this.options.file.path;
     const dirExists = fs.existsSync(rootDir);
@@ -67,113 +87,61 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   getSchemasStream() {
-    const filePathFactory = (fileIndex: number = 0) => {
-      return path.join(
-        // Backup path
-        this.options.file.path,
-        // "schemas/" directory
-        'schemas',
-        // "schemas_00000.jsonl" file
-        `schemas_${String(fileIndex).padStart(5, '0')}.jsonl`
-      );
-    };
+    const filePathFactory = createFilePathFactory(this.options.file.path, 'schemas');
 
-    const streams: any[] = [
-      // create jsonl strings from object entities
-      stringer(),
-    ];
-
-    // Compression
-    if (this.options.compression?.enabled) {
-      streams.push(zip.createGzip());
-    }
-
-    // Encryption;
-    if (this.options.encryption?.enabled) {
-      streams.push(createCipher(this.options.encryption.key));
-    }
+    // Transform streams
+    const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
-    streams.push(createMultiFilesWriteStream(filePathFactory, this.options.file?.maxSize));
+    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
+
+    // Full pipeline
+    const streams = transforms.concat(fileStream);
 
     return chain(streams);
   }
 
-  getEntitiesStream(): Duplex {
-    const filePathFactory = (fileIndex: number = 0) => {
-      return path.join(
-        // Backup path
-        this.options.file.path,
-        // "entities/" directory
-        'entities',
-        // "entities_00000.jsonl" file
-        `entities_${String(fileIndex).padStart(5, '0')}.jsonl`
-      );
-    };
+  getEntitiesStream(): NodeJS.WritableStream {
+    const filePathFactory = createFilePathFactory(this.options.file.path, 'entities');
 
-    const streams: any[] = [
-      // create jsonl strings from object entities
-      stringer(),
-    ];
-
-    // Compression
-    if (this.options.compression.enabled) {
-      streams.push(zip.createGzip());
-    }
-
-    // Encryption
-    if (this.options.encryption.enabled) {
-      streams.push(createCipher(this.options.encryption.key));
-    }
+    // Transform streams
+    const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
-    streams.push(createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize));
+    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
+
+    // Full pipeline
+    const streams = transforms.concat(fileStream);
 
     return chain(streams);
   }
 
-  getLinksStream(): Duplex | Promise<Duplex> {
-    const options = {
-      encryption: {
-        enabled: true,
-        key: 'Hello World!',
-      },
-      compression: {
-        enabled: false,
-      },
-      file: {
-        maxSize: 100000,
-      },
-    };
+  getLinksStream(): NodeJS.WritableStream {
+    const filePathFactory = createFilePathFactory(this.options.file.path, 'links');
 
-    const filePathFactory = (fileIndex: number = 0) => {
-      return path.join(
-        // Backup path
-        this.options.file.path,
-        // "links/" directory
-        'links',
-        // "links_00000.jsonl" file
-        `links_${String(fileIndex).padStart(5, '0')}.jsonl`
-      );
-    };
-
-    const streams: any[] = [
-      // create jsonl strings from object links
-      stringer(),
-    ];
-
-    // Compression
-    if (options.compression.enabled) {
-      streams.push(zip.createGzip());
-    }
-
-    // Encryption
-    // if (options.encryption?.enabled) {
-    //   streams.push(encrypt(options.encryption.key).cipher());
-    // }
+    // Transform streams
+    const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
-    streams.push(createMultiFilesWriteStream(filePathFactory, options.file.maxSize));
+    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
+
+    // Full pipelines
+    const streams = transforms.concat(fileStream);
+
+    return chain(streams);
+  }
+
+  getConfigurationStream(): NodeJS.WritableStream {
+    const filePathFactory = createFilePathFactory(this.options.file.path, 'configuration');
+
+    // Transform streams
+    const transforms: Writable[] = this.#getDataTransformers();
+
+    // FS write stream
+    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
+
+    // Full pipeline
+    const streams = transforms.concat(fileStream);
 
     return chain(streams);
   }
@@ -186,7 +154,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 const createMultiFilesWriteStream = (
   filePathFactory: (index?: number) => string,
   maxFileSize?: number
-): Stream => {
+): Writable => {
   let fileIndex = 0;
   let fileSize = 0;
   let maxSize = maxFileSize;
@@ -231,3 +199,20 @@ const createMultiFilesWriteStream = (
     },
   });
 };
+
+/**
+ * Create a file path factory for a given path & prefix.
+ * Upon being called, the factory will return a file path for a given index
+ */
+const createFilePathFactory =
+  (src: string, directory: string, prefix: string = directory) =>
+  (fileIndex: number = 0): string => {
+    return path.join(
+      // Backup path
+      src,
+      // "{directory}/" directory
+      directory,
+      // "${prefix}_XXXXX.jsonl" file
+      `${prefix}_${String(fileIndex).padStart(5, '0')}.jsonl`
+    );
+  };
