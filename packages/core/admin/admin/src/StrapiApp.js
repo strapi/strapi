@@ -23,7 +23,7 @@ import {
 import injectionZones from './injectionZones';
 import favicon from './favicon.png';
 import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
-import fetchClient from './core/fetch-client';
+import { fetchClient } from './utils';
 
 class StrapiApp {
   constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
