@@ -17,7 +17,12 @@ const logger = console;
 
 const BYTES_IN_MB = 1024 * 1024;
 
-module.exports = async (args, unknownArgs) => {
+module.exports = async (filename, opts) => {
+  // validate inputs from Commander
+  if (!_.isObject(opts)) {
+    logger.error('Could not parse arguments');
+    process.exit(1);
+  }
   /**
    * From local Strapi instance
    */
@@ -32,27 +37,20 @@ module.exports = async (args, unknownArgs) => {
    * To a Strapi backup file
    */
   // treat any unknown arguments as filenames
-  if (unknownArgs.args.length > 1) {
-    logger.error('Please enter exactly one filename to export to');
-    logger.error(`Received filenames: ${unknownArgs.args.join(', ')}`);
-    process.exit(1);
-  }
-  const outputFile = unknownArgs.args?.[0] || getDefaultExportBackupName();
-
   const destinationOptions = {
     file: {
-      path: outputFile,
-      maxSize: _.isFinite(args.maxSize) ? Math.floor(args.maxSize) * BYTES_IN_MB : undefined,
-      maxSizeJsonl: _.isFinite(args.maxSizeJsonl)
-        ? Math.floor(args.maxSizeJsonl) * BYTES_IN_MB
+      path: _.isString(filename) && filename.length > 0 ? filename : getDefaultExportBackupName(),
+      maxSize: _.isFinite(opts.maxSize) ? Math.floor(opts.maxSize) * BYTES_IN_MB : undefined,
+      maxSizeJsonl: _.isFinite(opts.maxSizeJsonl)
+        ? Math.floor(opts.maxSizeJsonl) * BYTES_IN_MB
         : undefined,
     },
     encryption: {
-      enabled: args.encrypt,
-      key: args.key,
+      enabled: opts.encrypt,
+      key: opts.key,
     },
     compression: {
-      enabled: args.compress,
+      enabled: opts.compress,
     },
   };
   const destination = createLocalFileDestinationProvider(destinationOptions);
@@ -61,9 +59,9 @@ module.exports = async (args, unknownArgs) => {
    * Configure and run the transfer engine
    */
   const engineOptions = {
-    strategy: args.conflictStrategy,
-    versionMatching: args.schemaComparison,
-    exclude: args.exclude,
+    strategy: opts.conflictStrategy,
+    versionMatching: opts.schemaComparison,
+    exclude: opts.exclude,
   };
   const engine = createTransferEngine(source, destination, engineOptions);
 

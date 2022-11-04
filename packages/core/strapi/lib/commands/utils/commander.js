@@ -1,9 +1,10 @@
 'use strict';
 
 const { parseType } = require('@strapi/utils/lib');
+const inquirer = require('inquirer');
 
 /**
- * Parse a string argument from the command line as a boolean
+ * argsParser: Parse a string argument from the command line as a boolean
  */
 const parseInputBool = (arg) => {
   try {
@@ -15,13 +16,49 @@ const parseInputBool = (arg) => {
 };
 
 /**
- * Parse a comma-delimited string as an array
+ * argsParser: Parse a comma-delimited string as an array
  */
 const parseInputList = (value) => {
   return value.split(',');
 };
 
+/**
+ * hook: if encrpyt=true and key not provided, prompt for it
+ */
+const promptEncryptionKey = async (thisCommand) => {
+  const opts = thisCommand.opts();
+
+  // if encrypt is set but we have no key, prompt for it
+  if (opts.encrypt && !opts.key) {
+    try {
+      const answers = await inquirer.prompt([
+        {
+          type: 'password',
+          message: 'Please enter an encryption key',
+          name: 'key',
+          validate(key) {
+            if (key.length > 0) return true;
+
+            return 'Key must be present when using the encrypt option';
+          },
+        },
+      ]);
+      opts.key = answers.key;
+    } catch (e) {
+      console.error('Failed to get encryption key');
+      console.error('Export process failed unexpectedly');
+      process.exit(1);
+    }
+    if (!opts.key) {
+      console.error('Failed to get encryption key');
+      console.error('Export process failed unexpectedly');
+      process.exit(1);
+    }
+  }
+};
+
 module.exports = {
   parseInputList,
   parseInputBool,
+  promptEncryptionKey,
 };

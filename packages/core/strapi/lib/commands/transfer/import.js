@@ -7,27 +7,26 @@ const {
   // TODO: we need to solve this issue with typescript modules
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
+const _ = require('lodash/fp');
 
 const strapi = require('../../Strapi');
 
 const logger = console;
 
-module.exports = async (args, unknownArgs) => {
+module.exports = async (filename, opts) => {
+  // validate inputs from Commander
+  if (!_.isString(filename) || !_.isObject(opts)) {
+    logger.error('Could not parse arguments');
+    process.exit(1);
+  }
+
   /**
    * From strapi backup file
    */
 
   // treat any unknown arguments as filenames
-  if (unknownArgs.args.length !== 1) {
-    logger.error('Please enter exactly one filename to import');
-    if (unknownArgs.args.length > 1) {
-      logger.error(`Received filenames: ${unknownArgs.args.join(', ')}`);
-    }
-    process.exit(1);
-  }
-  const inputFile = unknownArgs.args[0];
   const sourceOptions = {
-    backupFilePath: inputFile,
+    backupFilePath: filename,
   };
   const source = createLocalFileSourceProvider(sourceOptions);
 
@@ -45,9 +44,9 @@ module.exports = async (args, unknownArgs) => {
    * Configure and run the transfer engine
    */
   const engineOptions = {
-    strategy: args.conflictStrategy,
-    versionMatching: args.schemaComparison,
-    exclude: args.exclude,
+    strategy: opts.conflictStrategy,
+    versionMatching: opts.schemaComparison,
+    exclude: opts.exclude,
   };
   const engine = createTransferEngine(source, destination, engineOptions);
 

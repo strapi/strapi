@@ -11,9 +11,12 @@ const { Command, Option } = require('commander');
 
 const program = new Command();
 
-const inquirer = require('inquirer');
 const packageJSON = require('../package.json');
-const { parseInputList, parseInputBool } = require('../lib/commands/utils/commander');
+const {
+  parseInputList,
+  parseInputBool,
+  promptEncryptionKey,
+} = require('../lib/commands/utils/commander');
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -289,37 +292,9 @@ program
     )
   )
   .addOption(excludeOption)
-  .hook('preAction', async (thisCommand) => {
-    const opts = thisCommand.opts();
-
-    // if encrypt is set but we have no key, prompt for it
-    if (opts.encrypt && !opts.key) {
-      try {
-        const answers = await inquirer.prompt([
-          {
-            type: 'password',
-            message: 'Please enter an encryption key',
-            name: 'key',
-            validate(key) {
-              if (key.length > 0) return true;
-
-              return 'Key must be present when using the encrypt option';
-            },
-          },
-        ]);
-        opts.key = answers.key;
-      } catch (e) {
-        console.error('Failed to get encryption key');
-        console.error('Export process failed unexpectedly');
-        process.exit(1);
-      }
-      if (!opts.key) {
-        console.error('Failed to get encryption key');
-        console.error('Export process failed unexpectedly');
-        process.exit(1);
-      }
-    }
-  })
+  .arguments('[filename]')
+  .allowExcessArguments(false)
+  .hook('preAction', promptEncryptionKey)
   .action(require('../lib/commands/transfer/export'));
 
 // `$ strapi import`
@@ -344,6 +319,8 @@ program
   .addOption(
     new Option('--key [encryptionKey]', 'prompt for [or provide directly] the decryption key')
   )
+  .arguments('<filename>')
+  .allowExcessArguments(false)
   .action(require('../lib/commands/transfer/import'));
 
 program.parseAsync(process.argv);
