@@ -28,13 +28,22 @@ const NpmPackagesFilters = ({
   possibleCategories,
   npmPackageType,
   query,
-  setQuery,
+  handleSelectClear,
+  handleSelectChange,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const buttonRef = useRef();
   const { formatMessage } = useIntl();
 
   const handleToggle = () => setIsVisible((prev) => !prev);
+
+  const handleTagRemove = (tagToRemove, filterType) => {
+    const update = {
+      [filterType]: query[filterType].filter((previousTag) => previousTag !== tagToRemove),
+    };
+
+    handleSelectChange(update);
+  };
 
   return (
     <>
@@ -53,7 +62,8 @@ const NpmPackagesFilters = ({
             onToggle={handleToggle}
             source={buttonRef}
             query={query}
-            setQuery={setQuery}
+            handleSelectClear={handleSelectClear}
+            handleSelectChange={handleSelectChange}
             possibleCollections={possibleCollections}
             possibleCategories={possibleCategories}
             npmPackageType={npmPackageType}
@@ -64,13 +74,7 @@ const NpmPackagesFilters = ({
         <FilterTag
           name={collection}
           key={collection}
-          handleRemove={() =>
-            setQuery({
-              collections: query.collections.filter(
-                (previousCollection) => previousCollection !== collection
-              ),
-            })
-          }
+          handleRemove={() => handleTagRemove(collection, 'collections')}
         />
       ))}
       {npmPackageType === 'plugin' &&
@@ -78,13 +82,7 @@ const NpmPackagesFilters = ({
           <FilterTag
             name={category}
             key={category}
-            handleRemove={() =>
-              setQuery({
-                categories: query.categories.filter(
-                  (previousCategory) => previousCategory !== category
-                ),
-              })
-            }
+            handleRemove={() => handleTagRemove(category, 'categories')}
           />
         ))}
     </>
@@ -101,7 +99,8 @@ NpmPackagesFilters.propTypes = {
   possibleCollections: PropTypes.object.isRequired,
   possibleCategories: PropTypes.object.isRequired,
   query: PropTypes.object.isRequired,
-  setQuery: PropTypes.func.isRequired,
+  handleSelectChange: PropTypes.func.isRequired,
+  handleSelectClear: PropTypes.func.isRequired,
 };
 
 export default NpmPackagesFilters;

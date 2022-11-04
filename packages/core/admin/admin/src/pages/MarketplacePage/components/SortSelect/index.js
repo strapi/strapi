@@ -13,7 +13,7 @@ const SelectWrapper = styled(Box)`
   }
 `;
 
-const SortSelect = ({ sortQuery, setQuery }) => {
+const SortSelect = ({ sortQuery, handleSelectChange }) => {
   const { formatMessage } = useIntl();
 
   const sortTypes = {
@@ -46,7 +46,9 @@ const SortSelect = ({ sortQuery, setQuery }) => {
         id="sort-by-select"
         value={sortQuery}
         customizeContent={() => formatMessage(sortTypes[sortQuery].selected)}
-        onChange={(sort) => setQuery({ sort })}
+        onChange={(sortName) => {
+          handleSelectChange({ sort: sortName });
+        }}
       >
         {Object.entries(sortTypes).map(([sortName, messages]) => {
           return (
@@ -62,7 +64,7 @@ const SortSelect = ({ sortQuery, setQuery }) => {
 
 SortSelect.propTypes = {
   sortQuery: PropTypes.string.isRequired,
-  setQuery: PropTypes.func.isRequired,
+  handleSelectChange: PropTypes.func.isRequired,
 };
 
 export default SortSelect;

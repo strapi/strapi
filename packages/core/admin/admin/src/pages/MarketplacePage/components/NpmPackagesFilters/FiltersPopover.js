@@ -11,10 +11,11 @@ const FiltersPopover = ({
   source,
   onToggle,
   query,
-  setQuery,
   npmPackageType,
   possibleCategories,
   possibleCollections,
+  handleSelectChange,
+  handleSelectClear,
 }) => {
   const { formatMessage } = useIntl();
 
@@ -29,8 +30,11 @@ const FiltersPopover = ({
                 defaultMessage: 'Collections',
               })}
               value={query?.collections || []}
-              onChange={(newCollections) => setQuery({ collections: newCollections })}
-              onClear={() => setQuery({ collections: [] }, 'remove')}
+              onChange={(newCollections) => {
+                const update = { collections: newCollections };
+                handleSelectChange(update);
+              }}
+              onClear={() => handleSelectClear('collections')}
               possibleFilters={possibleCollections}
               customizeContent={(values) =>
                 formatMessage(
@@ -52,8 +56,11 @@ const FiltersPopover = ({
                   defaultMessage: 'Categories',
                 })}
                 value={query?.categories || []}
-                onChange={(newCategories) => setQuery({ categories: newCategories })}
-                onClear={() => setQuery({ categories: [] }, 'remove')}
+                onChange={(newCategories) => {
+                  const update = { categories: newCategories };
+                  handleSelectChange(update);
+                }}
+                onClear={() => handleSelectClear('categories')}
                 possibleFilters={possibleCategories}
                 customizeContent={(values) =>
                   formatMessage(
@@ -79,10 +86,11 @@ FiltersPopover.propTypes = {
   onToggle: PropTypes.func.isRequired,
   source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
   query: PropTypes.object.isRequired,
-  setQuery: PropTypes.func.isRequired,
   npmPackageType: PropTypes.oneOf(['plugin', 'provider']).isRequired,
   possibleCollections: PropTypes.object.isRequired,
   possibleCategories: PropTypes.object.isRequired,
+  handleSelectChange: PropTypes.func.isRequired,
+  handleSelectClear: PropTypes.func.isRequired,
 };
 
 export default FiltersPopover;
