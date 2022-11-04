@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
 
 import { ReactSelect } from '@strapi/helper-plugin';
-import { Badge } from '@strapi/design-system/Badge';
+import { Status } from '@strapi/design-system/Status';
 import { Box } from '@strapi/design-system/Box';
 import { Link } from '@strapi/design-system/Link';
 import { Icon } from '@strapi/design-system/Icon';
@@ -281,7 +281,7 @@ const RelationInput = ({
           >
             {({ data, index, style }) => {
               const { publicationState, href, mainField, id } = data[index];
-              const badgeColor = publicationState === 'draft' ? 'secondary' : 'success';
+              const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
 
               return (
                 <RelationItem
@@ -315,15 +315,11 @@ const RelationInput = ({
                   </BoxEllipsis>
 
                   {publicationState && (
-                    <Badge
-                      borderSize={1}
-                      borderColor={`${badgeColor}200`}
-                      backgroundColor={`${badgeColor}100`}
-                      textColor={`${badgeColor}700`}
-                      shrink={0}
-                    >
-                      {publicationStateTranslations[publicationState]}
-                    </Badge>
+                    <Status variant={statusColor} showBullet={false} size="S">
+                      <Typography fontWeight="bold" textColor={`${statusColor}700`}>
+                        {publicationStateTranslations[publicationState]}
+                      </Typography>
+                    </Status>
                   )}
                 </RelationItem>
               );
