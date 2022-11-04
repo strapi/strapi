@@ -29,7 +29,7 @@ import reducer, { initialState } from './reducer';
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
 const ApiTokenCreateView = () => {
-  const fetchClient = useFetchClient();
+  const { getClient, postClient, putClient } = useFetchClient();
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -60,7 +60,7 @@ const ApiTokenCreateView = () => {
     async () => {
       const [permissions, routes] = await Promise.all(
         ['/admin/content-api/permissions', '/admin/content-api/routes'].map(async (url) => {
-          const { data } = await fetchClient.get(url);
+          const { data } = await getClient(url);
 
           return data.data;
         })
@@ -114,7 +114,7 @@ const ApiTokenCreateView = () => {
     async () => {
       const {
         data: { data },
-      } = await fetchClient.get(`/admin/api-tokens/${id}`);
+      } = await getClient(`/admin/api-tokens/${id}`);
 
       setApiToken({
         ...data,
@@ -162,12 +162,12 @@ const ApiTokenCreateView = () => {
       const {
         data: { data: response },
       } = isCreating
-        ? await fetchClient.post(`/admin/api-tokens`, {
+        ? await postClient(`/admin/api-tokens`, {
             ...body,
             lifespan: lifespanVal,
             permissions: body.type === 'custom' ? state.selectedActions : null,
           })
-        : await fetchClient.put(`/admin/api-tokens/${id}`, {
+        : await putClient(`/admin/api-tokens/${id}`, {
             name: body.name,
             description: body.description,
             type: body.type,

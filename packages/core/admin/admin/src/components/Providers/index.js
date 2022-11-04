@@ -147,7 +147,7 @@ Providers.propTypes = {
     }).isRequired,
     custom: PropTypes.object,
   }).isRequired,
-  fetchClient: PropTypes.func.isRequired,
+  fetchClient: PropTypes.object.isRequired,
 };
 
 export default Providers;

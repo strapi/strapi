@@ -33,6 +33,9 @@ instance.interceptors.response.use(
   }
 );
 
-const fetchClient = instance;
-
-export default fetchClient;
+export default {
+  getClient: instance.get,
+  putClient: instance.put,
+  postClient: instance.post,
+  deleteClient: instance.delete,
+};
