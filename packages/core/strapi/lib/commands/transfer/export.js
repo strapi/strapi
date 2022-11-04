@@ -7,12 +7,15 @@ const {
   // TODO: we need to solve this issue with typescript modules
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
+const _ = require('lodash/fp');
 
 const strapi = require('../../Strapi');
 
 const getDefaultExportBackupName = () => `strapi-backup`;
 
 const logger = console;
+
+const BYTES_IN_MB = 1024 * 1024;
 
 module.exports = async (args, unknownArgs) => {
   /**
@@ -36,13 +39,13 @@ module.exports = async (args, unknownArgs) => {
   }
   const outputFile = unknownArgs.args?.[0] || getDefaultExportBackupName();
 
-  const BYTES_IN_MB = 1024 * 1024;
-
   const destinationOptions = {
     file: {
       path: outputFile,
-      maxSize: Math.floor(args.maxSize) * BYTES_IN_MB,
-      maxSizeJsonl: Math.floor(args.maxSizeJsonl) * BYTES_IN_MB,
+      maxSize: _.isFinite(args.maxSize) ? Math.floor(args.maxSize) * BYTES_IN_MB : undefined,
+      maxSizeJsonl: _.isFinite(args.maxSizeJsonl)
+        ? Math.floor(args.maxSizeJsonl) * BYTES_IN_MB
+        : undefined,
     },
     encryption: {
       enabled: args.encrypt,
