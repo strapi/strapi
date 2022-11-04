@@ -515,6 +515,25 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
+  /**
+   * @typedef Payload
+   * @type {object}
+   * @property {string} name - The name of the field in `modifiedData`
+   * @property {number} oldIndex - The relation's current index
+   * @property {number} newIndex - The relation's new index
+   *
+   *
+   * @type {(payload: Payload) => void}
+   */
+  const reorderRelation = useCallback(({ name, oldIndex, newIndex }) => {
+    dispatch({
+      type: 'REORDER_RELATION',
+      keys: name.split('.'),
+      oldIndex,
+      newIndex,
+    });
+  }, []);
+
   const removeComponentFromDynamicZone = useCallback(
     (dynamicZoneName, index) => {
       trackUsageRef.current('removeComponentFromDynamicZone');
@@ -592,6 +611,7 @@ const EditViewDataManagerProvider = ({
         removeComponentFromDynamicZone,
         removeComponentFromField,
         removeRepeatableField,
+        reorderRelation,
         slug,
         triggerFormValidation,
         updateActionAllowedFields,

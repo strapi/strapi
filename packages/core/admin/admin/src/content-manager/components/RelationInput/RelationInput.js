@@ -20,7 +20,7 @@ import { Relation } from './components/Relation';
 import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
-import { RELATION_ITEM_HEIGHT } from './constants';
+import { RELATION_GUTTER, RELATION_ITEM_HEIGHT } from './constants';
 
 const LinkEllipsis = styled(Link)`
   white-space: nowrap;
@@ -65,6 +65,7 @@ const RelationInput = ({
   onRelationConnect,
   onRelationLoadMore,
   onRelationDisconnect,
+  onRelationReorder,
   onSearchNextPage,
   onSearch,
   placeholder,
@@ -87,9 +88,11 @@ const RelationInput = ({
   const dynamicListHeight = useMemo(
     () =>
       totalNumberOfRelations > numberOfRelationsToDisplay
-        ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT +
+        ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) *
+            (RELATION_ITEM_HEIGHT + RELATION_GUTTER) +
           RELATION_ITEM_HEIGHT / 2
-        : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT,
+        : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) *
+          (RELATION_ITEM_HEIGHT + RELATION_GUTTER),
     [totalNumberOfRelations, numberOfRelationsToDisplay]
   );
 
@@ -143,6 +146,9 @@ const RelationInput = ({
     };
   }, [paginatedRelations, relations, numberOfRelationsToDisplay, totalNumberOfRelations]);
 
+  /**
+   * --- ReactSelect Workaround START ---
+   */
   /**
    * This code is being isolated because it's a hack to fix a placement bug in
    * `react-select` where when the options prop is updated the position of the
@@ -198,10 +204,19 @@ const RelationInput = ({
   const handleMenuClose = () => {
     setIsMenuOpen(false);
   };
+  /**
+   * --- ReactSelect Workaround END ---
+   */
 
   const handleMenuOpen = () => {
     setIsMenuOpen(true);
     onSearch();
+  };
+
+  const handleUpdatePositionOfRelation = (newIndex, currentIndex) => {
+    if (onRelationReorder) {
+      onRelationReorder(currentIndex, newIndex);
+    }
   };
 
   return (
@@ -277,18 +292,24 @@ const RelationInput = ({
             ref={listRef}
             outerRef={outerListRef}
             itemCount={totalNumberOfRelations}
-            itemSize={RELATION_ITEM_HEIGHT}
+            itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
             itemData={relations}
+            itemKey={(index, listData) => `${listData[index].id}-${listData[index].name}`}
             innerElementType="ol"
           >
             {({ data, index, style }) => {
               const { publicationState, href, mainField, id } = data[index];
               const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
+              const canDrag = totalNumberOfRelations > 1;
 
               return (
                 <RelationItem
                   disabled={disabled}
                   key={`relation-${name}-${id}`}
+                  canDrag={canDrag}
+                  id={id}
+                  index={index}
+                  updatePositionOfRelation={handleUpdatePositionOfRelation}
                   endAction={
                     <DisconnectButton
                       data-testid={`remove-relation-${id}`}
@@ -300,7 +321,11 @@ const RelationInput = ({
                       <Icon width="12px" as={Cross} />
                     </DisconnectButton>
                   }
-                  style={style}
+                  style={{
+                    ...style,
+                    bottom: style.bottom + RELATION_GUTTER,
+                    height: style.height - RELATION_GUTTER,
+                  }}
                 >
                   <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                     <Tooltip description={mainField ?? `${id}`}>
@@ -395,6 +420,7 @@ RelationInput.propTypes = {
   onRelationConnect: PropTypes.func.isRequired,
   onRelationDisconnect: PropTypes.func.isRequired,
   onRelationLoadMore: PropTypes.func.isRequired,
+  onRelationReorder: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
   onSearchNextPage: PropTypes.func.isRequired,
   placeholder: PropTypes.string.isRequired,

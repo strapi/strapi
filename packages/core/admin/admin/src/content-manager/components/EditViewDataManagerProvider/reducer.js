@@ -172,10 +172,27 @@ const reducer = (state, action) =>
         const { id } = action;
         const modifiedDataRelation = get(state, [...path]);
 
-        /**
-         * TODO: before merge make this performant (e.g. 1000 relations === long time)
-         */
         const newRelations = modifiedDataRelation.filter((rel) => rel.id !== id);
+
+        set(draftState, path, newRelations);
+
+        break;
+      }
+      case 'REORDER_RELATION': {
+        const { oldIndex, newIndex, keys } = action;
+        const path = ['modifiedData', ...keys];
+        const modifiedDataRelations = get(state, [...path]);
+
+        const currentItem = modifiedDataRelations[oldIndex];
+
+        const newRelations = [...modifiedDataRelations];
+
+        console.log(oldIndex, newIndex);
+
+        newRelations.splice(oldIndex, 1);
+        newRelations.splice(newIndex, 0, currentItem);
+
+        console.log(newRelations);
 
         set(draftState, path, newRelations);
 

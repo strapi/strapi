@@ -10,6 +10,7 @@ import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin
 import { RelationInput } from '../RelationInput';
 
 import { useRelation } from '../../hooks/useRelation';
+import { useModifiedDataSelector } from '../../hooks/useModifiedDataSelector';
 
 import { getTrad } from '../../utils';
 
@@ -37,10 +38,10 @@ export const RelationInputDataManager = ({
   targetModel,
 }) => {
   const { formatMessage } = useIntl();
-  const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
+  const { connectRelation, disconnectRelation, loadRelation, slug, initialData, reorderRelation } =
     useCMEditViewDataManager();
 
-  const relationsFromModifiedData = get(modifiedData, name) ?? [];
+  const relationsFromModifiedData = useModifiedDataSelector(name, []);
 
   const currentLastPage = Math.ceil(relationsFromModifiedData.length / RELATIONS_TO_DISPLAY);
 
@@ -131,6 +132,19 @@ export const RelationInputDataManager = ({
     search.fetchNextPage();
   };
 
+  /**
+   *
+   * @param {number} currentIndex
+   * @param {number} oldIndex
+   */
+  const handleRelationReorder = (oldIndex, newIndex) => {
+    reorderRelation({
+      name,
+      newIndex,
+      oldIndex,
+    });
+  };
+
   if (
     (!isFieldAllowed && isCreatingEntry) ||
     (!isCreatingEntry && !isFieldAllowed && !isFieldReadable)
@@ -194,9 +208,10 @@ export const RelationInputDataManager = ({
         defaultMessage: 'No relations available',
       })}
       numberOfRelationsToDisplay={RELATIONS_TO_DISPLAY}
-      onRelationConnect={(relation) => handleRelationConnect(relation)}
-      onRelationDisconnect={(relation) => handleRelationDisconnect(relation)}
-      onRelationLoadMore={() => handleRelationLoadMore()}
+      onRelationConnect={handleRelationConnect}
+      onRelationDisconnect={handleRelationDisconnect}
+      onRelationLoadMore={handleRelationLoadMore}
+      onRelationReorder={handleRelationReorder}
       onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
       placeholder={formatMessage(

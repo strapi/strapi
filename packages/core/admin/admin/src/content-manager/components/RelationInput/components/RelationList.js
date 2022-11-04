@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from '@strapi/design-system/Box';
-import { Stack } from '@strapi/design-system/Stack';
 
 const ShadowBox = styled(Box)`
   position: relative;
@@ -37,7 +36,7 @@ const ShadowBox = styled(Box)`
 export const RelationList = ({ children, overflow, ...props }) => {
   return (
     <ShadowBox overflowDirection={overflow} {...props}>
-      <Stack spacing={1}>{children}</Stack>
+      {children}
     </ShadowBox>
   );
 };
