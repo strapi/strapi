@@ -10,10 +10,17 @@ export function getDisplayedValue(modifiedData, componentFieldPath, mainField) {
 function useMainValue(schema, componentFieldPath) {
   const { modifiedData } = useCMEditViewDataManager();
 
-  const mainField = useMemo(() => get(schema, ['settings', 'mainField'], 'id'), [schema]);
-  let displayedValue = getDisplayedValue(modifiedData, componentFieldPath, mainField);
+  const mainField = useMemo(
+    () => get(schema, ["settings", "mainField"], "id"),
+    [schema]
+  );
 
-  return displayedValue;
+  const displayedValue =
+    mainField === "id"
+      ? ""
+      : getDisplayedValue(modifiedData, componentFieldPath, mainField);
+
+  return displayedValue.trim().length < 1 ? "" : ` - ${displayedValue}`;
 }
 
 export default useMainValue;

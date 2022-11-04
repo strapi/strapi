@@ -147,7 +147,7 @@ const Component = ({
                 )}
               </ActionStack>
             }
-            title={`${friendlyName} - ${mainValue}`}
+            title={`${friendlyName}${mainValue}`}
             togglePosition="left"
           />
           <AccordionContent>
