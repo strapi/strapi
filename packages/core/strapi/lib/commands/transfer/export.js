@@ -14,7 +14,7 @@ const getDefaultExportBackupName = () => `strapi-backup`;
 
 const logger = console;
 
-module.exports = async (args) => {
+module.exports = async (args, unknownArgs) => {
   /**
    * From local Strapi instance
    */
@@ -28,11 +28,19 @@ module.exports = async (args) => {
   /**
    * To a Strapi backup file
    */
+  // treat any unknown arguments as filenames
+  if (unknownArgs.args.length > 1) {
+    logger.error('Please enter exactly one filename to export to');
+    logger.error(`Received filenames: ${unknownArgs.args.join(', ')}`);
+    process.exit(1);
+  }
+  const outputFile = unknownArgs.args?.[0] || getDefaultExportBackupName();
+  console.log('output file', outputFile);
   const BYTES_IN_MB = 1024;
 
   const destinationOptions = {
     file: {
-      path: args.output || getDefaultExportBackupName(),
+      path: outputFile,
       maxSize: Math.floor(args.maxSize) * BYTES_IN_MB,
       maxSizeJsonl: Math.floor(args.maxSizeJsonl) * BYTES_IN_MB,
     },
