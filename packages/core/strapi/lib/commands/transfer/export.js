@@ -35,7 +35,7 @@ module.exports = async (args, unknownArgs) => {
     process.exit(1);
   }
   const outputFile = unknownArgs.args?.[0] || getDefaultExportBackupName();
-  console.log('output file', outputFile);
+
   const BYTES_IN_MB = 1024 * 1024;
 
   const destinationOptions = {
