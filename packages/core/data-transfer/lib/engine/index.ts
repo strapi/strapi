@@ -110,6 +110,7 @@ class TransferEngine implements ITransferEngine {
         );
       }
 
+      await this.transferSchemas();
       await this.transferEntities()
         // Temporary while we don't have the final API for streaming data from the database
         .catch((e) => {
@@ -126,6 +127,31 @@ class TransferEngine implements ITransferEngine {
       // Note: This will be configurable in the future
       // await this.destinationProvider?.rollback(e);
     }
+  }
+
+  async transferSchemas(): Promise<void> {
+    const inStream = await this.sourceProvider.streamSchemas?.();
+    const outStream = await this.destinationProvider.getSchemasStream?.();
+    console.log(inStream);
+    if (!inStream || !outStream) {
+      throw new Error('Unable to transfer schemas, one of the streams is missing');
+    }
+
+    return new Promise((resolve, reject) => {
+      inStream
+        // Throw on error in the source
+        .on('error', reject);
+
+      outStream
+        // Throw on error in the destination
+        .on('error', (e) => {
+          reject(e);
+        })
+        // Resolve the promise when the destination has finished reading all the data from the source
+        .on('close', resolve);
+
+      inStream.pipe(outStream);
+    });
   }
 
   async transferEntities(): Promise<void> {
@@ -190,8 +216,29 @@ class TransferEngine implements ITransferEngine {
   }
 
   async transferConfiguration(): Promise<void> {
-    console.log('transferConfiguration not yet implemented');
-    return new Promise((resolve) => resolve());
+    const inStream = await this.sourceProvider.streamConfiguration?.();
+    const outStream = await this.destinationProvider.getConfigurationStream?.();
+
+    if (!inStream) {
+      throw new Error('Unable to transfer configuration, source stream is missing');
+    }
+    if (!outStream) {
+      throw new Error('Unable to transfer configuration, destination stream is missing');
+    }
+
+    return new Promise((resolve, reject) => {
+      inStream
+        // Throw on error in the source
+        .on('error', reject);
+
+      outStream
+        // Throw on error in the destination
+        .on('error', reject)
+        // Resolve the promise when the destination has finished reading all the data from the source
+        .on('close', resolve);
+
+      inStream.pipe(outStream);
+    });
   }
 }
 
