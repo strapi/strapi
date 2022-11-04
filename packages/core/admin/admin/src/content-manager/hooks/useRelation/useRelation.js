@@ -19,6 +19,9 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
           page: pageParam,
         },
       });
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+      );
 
       setCurrentPage(pageParam);
 
@@ -37,6 +40,9 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
           page: pageParam,
         },
       });
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+      );
 
       return data;
     } catch (err) {

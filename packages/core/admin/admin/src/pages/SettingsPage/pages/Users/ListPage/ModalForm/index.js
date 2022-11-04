@@ -34,27 +34,36 @@ const ModalForm = ({ queryName, onToggle }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const postMutation = useMutation((body) => axiosInstance.post('/admin/users', body), {
-    async onSuccess({ data }) {
-      setRegistrationToken(data.data.registrationToken);
-      await queryClient.invalidateQueries(queryName);
-      goNext();
-      setIsSubmitting(false);
-    },
-    onError(err) {
-      setIsSubmitting(false);
+  const postMutation = useMutation(
+    (body) => {
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
+      );
 
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
-      });
+      return axiosInstance.post('/admin/users', body);
+    },
+    {
+      async onSuccess({ data }) {
+        setRegistrationToken(data.data.registrationToken);
+        await queryClient.invalidateQueries(queryName);
+        goNext();
+        setIsSubmitting(false);
+      },
+      onError(err) {
+        setIsSubmitting(false);
 
-      throw err;
-    },
-    onSettled() {
-      unlockApp();
-    },
-  });
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        });
+
+        throw err;
+      },
+      onSettled() {
+        unlockApp();
+      },
+    }
+  );
 
   const headerTitle = formatMessage({
     id: 'Settings.permissions.users.create',

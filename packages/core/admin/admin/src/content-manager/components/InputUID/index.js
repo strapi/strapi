@@ -79,6 +79,9 @@ const InputUID = ({
         field: name,
         data: modifiedData,
       });
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
+      );
       onChange({ target: { name, value: data, type: 'text' } }, shouldSetInitialValue);
       setIsLoading(false);
     } catch (err) {
@@ -101,6 +104,9 @@ const InputUID = ({
         field: name,
         value: value ? value.trim() : '',
       });
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
+      );
 
       setAvailability(data);
 

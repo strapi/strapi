@@ -108,6 +108,10 @@ const DataManagerProvider = ({
         { data: reservedNames },
       ] = await Promise.all(
         ['components', 'content-types', 'reserved-names'].map((endPoint) => {
+          console.warn(
+            'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+          );
+
           return axiosInstance.get(endPoint);
         })
       );
@@ -315,7 +319,9 @@ const DataManagerProvider = ({
         }
 
         lockAppWithAutoreload();
-
+        console.warn(
+          'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function deleteClient'
+        );
         await axiosInstance.delete(requestURL);
 
         // Make sure the server has restarted
@@ -349,6 +355,9 @@ const DataManagerProvider = ({
       lockAppWithAutoreload();
 
       // Update the category
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function putClient'
+      );
       await axiosInstance({ url: requestURL, method: 'PUT', data: body });
 
       // Make sure the server has restarted
@@ -506,6 +515,10 @@ const DataManagerProvider = ({
 
       // Lock the app
       lockAppWithAutoreload();
+
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient or the putClient'
+      );
 
       await axiosInstance({
         url: requestURL,

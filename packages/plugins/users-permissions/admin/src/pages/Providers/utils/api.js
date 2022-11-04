@@ -4,6 +4,9 @@ import { getRequestURL, axiosInstance } from '../../../utils';
 export const fetchData = async (toggleNotification) => {
   try {
     const { data } = await axiosInstance.get(getRequestURL('providers'));
+    console.warn(
+      'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+    );
 
     return data;
   } catch (err) {
@@ -17,5 +20,9 @@ export const fetchData = async (toggleNotification) => {
 };
 
 export const putProvider = (body) => {
+  console.warn(
+    'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function putClient'
+  );
+
   return axiosInstance.put(getRequestURL('providers'), body);
 };

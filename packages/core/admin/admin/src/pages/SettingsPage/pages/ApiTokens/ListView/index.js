@@ -68,6 +68,9 @@ const ApiTokenListView = () => {
       const {
         data: { data },
       } = await axiosInstance.get(`/admin/api-tokens`);
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+      );
 
       trackUsage('didAccessTokenList', { number: data.length });
 
@@ -90,6 +93,9 @@ const ApiTokenListView = () => {
 
   const deleteMutation = useMutation(
     async (id) => {
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function deleteClient'
+      );
       await axiosInstance.delete(`/admin/api-tokens/${id}`);
     },
     {

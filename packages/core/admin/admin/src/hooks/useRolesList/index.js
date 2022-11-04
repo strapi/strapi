@@ -27,6 +27,9 @@ const useRolesList = (shouldFetchData = true) => {
       const {
         data: { data },
       } = await axiosInstance.get('/admin/roles');
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+      );
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',

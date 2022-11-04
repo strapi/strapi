@@ -8,6 +8,10 @@ const editFolderRequest = ({ attrs, id }) => {
   const method = isEditing ? 'put' : 'post';
   const url = getRequestUrl(`folders/${id ?? ''}`);
 
+  console.warn(
+    'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function putClient or the postClient'
+  );
+
   return axiosInstance[method](url, attrs).then((res) => res.data);
 };
 

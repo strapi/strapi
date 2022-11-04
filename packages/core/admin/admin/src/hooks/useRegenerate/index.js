@@ -14,6 +14,9 @@ const useRegenerate = (id, onRegenerate) => {
           data: { accessKey },
         },
       } = await axiosInstance.post(`/admin/api-tokens/${id}/regenerate`);
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
+      );
       setIsLoadingConfirmation(false);
       onRegenerate(accessKey);
     } catch (error) {

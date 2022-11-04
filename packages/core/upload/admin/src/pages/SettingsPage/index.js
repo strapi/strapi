@@ -50,6 +50,9 @@ export const SettingsPage = () => {
         } = await axiosInstance.get(getRequestUrl('settings'), {
           cancelToken: source.token,
         });
+        console.warn(
+          'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+        );
 
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
@@ -86,6 +89,9 @@ export const SettingsPage = () => {
 
     try {
       await axiosInstance.put(getRequestUrl('settings'), modifiedData);
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function putClient'
+      );
 
       dispatch({
         type: 'SUBMIT_SUCCEEDED',

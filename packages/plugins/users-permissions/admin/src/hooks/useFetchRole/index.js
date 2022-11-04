@@ -1,7 +1,7 @@
 import { useCallback, useReducer, useEffect, useRef } from 'react';
 import { useNotification } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
-import axiosIntance from '../../utils/axiosInstance';
+import axiosInstance from '../../utils/axiosInstance';
 import pluginId from '../../pluginId';
 
 const useFetchRole = (id) => {
@@ -29,7 +29,10 @@ const useFetchRole = (id) => {
     try {
       const {
         data: { role },
-      } = await axiosIntance.get(`/${pluginId}/roles/${roleId}`);
+      } = await axiosInstance.get(`/${pluginId}/roles/${roleId}`);
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+      );
 
       // Prevent updating state on an unmounted component
       if (isMounted.current) {

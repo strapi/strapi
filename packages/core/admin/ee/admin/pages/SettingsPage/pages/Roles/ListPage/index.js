@@ -78,6 +78,9 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
         type: 'ON_REMOVE_ROLES',
       });
 
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
+      );
       await axiosInstance.post('/admin/roles/batch-delete', {
         ids: [roleToDelete],
       });
