@@ -1,46 +1,152 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Marketplace page - layout renders the online layout 1`] = `
-.c17 {
-  padding-bottom: 16px;
-  width: 25%;
-}
-
-.c29 {
+.c36 {
   padding-bottom: 16px;
 }
 
-.c51 {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-.c64 {
-  border-radius: 4px;
-  width: 64px;
-  height: 64px;
-}
-
-.c65 {
+.c62 {
+  background: #ffffff;
   padding-top: 16px;
-}
-
-.c68 {
-  padding-top: 8px;
-}
-
-.c78 {
-  margin-left: 4px;
-  width: 24px;
-  height: auto;
-}
-
-.c79 {
+  padding-right: 16px;
+  padding-bottom: 16px;
   padding-left: 16px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  height: 100%;
 }
 
-.c82 {
-  padding-top: 32px;
+.c83 {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c84 {
+  background: #f6ecfc;
+  padding: 12px;
+  border-radius: 4px;
+}
+
+.c37 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c63 {
+  -webkit-align-items: normal;
+  -webkit-box-align: normal;
+  -ms-flex-align: normal;
+  align-items: normal;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c67 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c71 {
+  padding-top: 24px;
+}
+
+.c72 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c86 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c87 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c73 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c73 > * + * {
+  margin-left: 8px;
+}
+
+.c66 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c69 {
+  color: #666687;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c81 {
+  font-weight: 600;
+  color: #328048;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c88 {
+  font-weight: 500;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c59 {
@@ -270,54 +376,81 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   fill: #271fe0;
 }
 
-.c36 {
+.c17 {
+  padding-bottom: 16px;
+  width: 25%;
+}
+
+.c29 {
   padding-bottom: 16px;
 }
 
-.c62 {
-  background: #ffffff;
+.c51 {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.c64 {
+  border-radius: 4px;
+  width: 64px;
+  height: 64px;
+}
+
+.c65 {
   padding-top: 16px;
-  padding-right: 16px;
-  padding-bottom: 16px;
+}
+
+.c68 {
+  padding-top: 8px;
+}
+
+.c78 {
+  margin-left: 4px;
+  width: 24px;
+  height: auto;
+}
+
+.c79 {
   padding-left: 16px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-  height: 100%;
 }
 
-.c83 {
-  background: #ffffff;
-  padding: 24px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+.c82 {
+  padding-top: 32px;
 }
 
-.c84 {
-  background: #f6ecfc;
-  padding: 12px;
-  border-radius: 4px;
+.c43 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
 }
 
-.c37 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 8px;
+.c43:focus {
+  outline: none;
 }
 
-.c63 {
-  -webkit-align-items: normal;
-  -webkit-box-align: normal;
-  -ms-flex-align: normal;
-  align-items: normal;
+.c43[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.c46 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.c48 {
+  padding-left: 12px;
+}
+
+.c39 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -325,13 +458,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
 }
 
-.c67 {
+.c41 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -343,6 +472,93 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
+}
+
+.c44 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c47 {
+  color: #32324d;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c40 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c42 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 2rem;
+  outline: none;
+  box-shadow: 0;
+  -webkit-transition-property: border-color,box-shadow,fill;
+  transition-property: border-color,box-shadow,fill;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+}
+
+.c42:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c49 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c49 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c49 svg path {
+  fill: #666687;
+}
+
+.c50 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c50 svg {
+  width: 0.375rem;
+}
+
+.c45 {
+  width: 100%;
 }
 
 .c76 {
@@ -519,222 +735,6 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
 .c18 .c22:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c43 {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  width: 100%;
-  background: transparent;
-  border: none;
-}
-
-.c43:focus {
-  outline: none;
-}
-
-.c43[aria-disabled='true'] {
-  cursor: not-allowed;
-}
-
-.c46 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.c48 {
-  padding-left: 12px;
-}
-
-.c39 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c41 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c44 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c47 {
-  color: #32324d;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c40 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c42 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-  min-height: 2rem;
-  outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
-  transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-}
-
-.c42:focus-within {
-  border: 1px solid #4945ff;
-  box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c49 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c49 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c49 svg path {
-  fill: #666687;
-}
-
-.c50 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c50 svg {
-  width: 0.375rem;
-}
-
-.c45 {
-  width: 100%;
-}
-
-.c71 {
-  padding-top: 24px;
-}
-
-.c72 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c86 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c87 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c73 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c73 > * + * {
-  margin-left: 8px;
-}
-
-.c66 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c69 {
-  color: #666687;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c81 {
-  font-weight: 600;
-  color: #328048;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c88 {
-  font-weight: 500;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
 }
 
 .c14 {
@@ -1418,7 +1418,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -1438,38 +1438,46 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             </svg>
                           </div>
                         </a>
-                        <button
-                          aria-disabled="false"
-                          class="c52 c75"
-                          type="button"
-                        >
+                        <span>
                           <div
-                            aria-hidden="true"
-                            class="c55 c56 c57"
+                            aria-describedby="tooltip-1"
+                            class=""
+                            tabindex="0"
                           >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <button
+                              aria-disabled="false"
+                              class="c52 c75"
+                              type="button"
                             >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
+                              <div
+                                aria-hidden="true"
+                                class="c55 c56 c57"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </div>
+                              <span
+                                class="c58 c59"
+                              >
+                                Copy install command
+                              </span>
+                            </button>
                           </div>
-                          <span
-                            class="c58 c59"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1508,7 +1516,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               Config Sync
                               <span>
                                 <div
-                                  aria-describedby="tooltip-1"
+                                  aria-describedby="tooltip-3"
                                   class="c67"
                                   tabindex="0"
                                 >
@@ -1558,7 +1566,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -1578,38 +1586,46 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             </svg>
                           </div>
                         </a>
-                        <button
-                          aria-disabled="false"
-                          class="c52 c75"
-                          type="button"
-                        >
+                        <span>
                           <div
-                            aria-hidden="true"
-                            class="c55 c56 c57"
+                            aria-describedby="tooltip-5"
+                            class=""
+                            tabindex="0"
                           >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <button
+                              aria-disabled="false"
+                              class="c52 c75"
+                              type="button"
                             >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
+                              <div
+                                aria-hidden="true"
+                                class="c55 c56 c57"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </div>
+                              <span
+                                class="c58 c59"
+                              >
+                                Copy install command
+                              </span>
+                            </button>
                           </div>
-                          <span
-                            class="c58 c59"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1675,7 +1691,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -1695,38 +1711,46 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             </svg>
                           </div>
                         </a>
-                        <button
-                          aria-disabled="false"
-                          class="c52 c75"
-                          type="button"
-                        >
+                        <span>
                           <div
-                            aria-hidden="true"
-                            class="c55 c56 c57"
+                            aria-describedby="tooltip-7"
+                            class=""
+                            tabindex="0"
                           >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <button
+                              aria-disabled="false"
+                              class="c52 c75"
+                              type="button"
                             >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
+                              <div
+                                aria-hidden="true"
+                                class="c55 c56 c57"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </div>
+                              <span
+                                class="c58 c59"
+                              >
+                                Copy install command
+                              </span>
+                            </button>
                           </div>
-                          <span
-                            class="c58 c59"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1765,7 +1789,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               Documentation
                               <span>
                                 <div
-                                  aria-describedby="tooltip-3"
+                                  aria-describedby="tooltip-9"
                                   class="c67"
                                   tabindex="0"
                                 >
@@ -1807,7 +1831,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -1914,7 +1938,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           <span
                             class="c13 c14"
                           >
-                            Learn more
+                            More
                           </span>
                           <div
                             aria-hidden="true"
@@ -1934,38 +1958,46 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             </svg>
                           </div>
                         </a>
-                        <button
-                          aria-disabled="false"
-                          class="c52 c75"
-                          type="button"
-                        >
+                        <span>
                           <div
-                            aria-hidden="true"
-                            class="c55 c56 c57"
+                            aria-describedby="tooltip-11"
+                            class=""
+                            tabindex="0"
                           >
-                            <svg
-                              fill="none"
-                              height="1em"
-                              viewBox="0 0 24 24"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <button
+                              aria-disabled="false"
+                              class="c52 c75"
+                              type="button"
                             >
-                              <path
-                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                fill="#212134"
-                              />
-                            </svg>
+                              <div
+                                aria-hidden="true"
+                                class="c55 c56 c57"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 24"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                    fill="#212134"
+                                  />
+                                  <path
+                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                    fill="#212134"
+                                  />
+                                </svg>
+                              </div>
+                              <span
+                                class="c58 c59"
+                              >
+                                Copy install command
+                              </span>
+                            </button>
                           </div>
-                          <span
-                            class="c58 c59"
-                          >
-                            Copy install command
-                          </span>
-                        </button>
+                        </span>
                       </div>
                     </div>
                   </div>

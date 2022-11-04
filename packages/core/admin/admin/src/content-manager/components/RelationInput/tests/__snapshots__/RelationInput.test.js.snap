@@ -1,0 +1,803 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Content-Manager || RelationInput should render and match snapshot 1`] = `
+.c37 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c0 {
+  padding-bottom: 12px;
+}
+
+.c15 {
+  background: #ffffff;
+  padding-top: 8px;
+  padding-right: 16px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+}
+
+.c1 {
+  -webkit-align-items: end;
+  -webkit-box-align: end;
+  -ms-flex-align: end;
+  align-items: end;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  gap: 8px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c16 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c2 {
+  -webkit-flex-basis: 70%;
+  -ms-flex-preferred-size: 70%;
+  flex-basis: 70%;
+}
+
+.c3 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c4 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c4 > * + * {
+  margin-top: 4px;
+}
+
+.c26 {
+  font-weight: 600;
+  color: #006096;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c31 {
+  color: #4945ff;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c34 {
+  font-weight: 600;
+  color: #2f6846;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c7 {
+  padding-right: 12px;
+}
+
+.c18 {
+  padding-top: 4px;
+  padding-right: 16px;
+  padding-bottom: 4px;
+  min-width: 0px;
+}
+
+.c27 {
+  padding-left: 16px;
+}
+
+.c35 {
+  padding-top: 8px;
+}
+
+.c29 {
+  color: #666687;
+  width: 12px;
+}
+
+.c30 path {
+  fill: #666687;
+}
+
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c5 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c36 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c8 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c8 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c8 svg path {
+  fill: #666687;
+}
+
+.c9 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c9 svg {
+  width: 0.5625rem;
+}
+
+.c24 {
+  background: #eaf5ff;
+  padding-top: 4px;
+  padding-right: 8px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+  border-radius: 4px;
+  border-color: #b8e1ff;
+  border: 1px solid #b8e1ff;
+}
+
+.c32 {
+  background: #eafbe7;
+  padding-top: 4px;
+  padding-right: 8px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+  border-radius: 4px;
+  border-color: #c6f0c2;
+  border: 1px solid #c6f0c2;
+}
+
+.c25 .sc-URNzB {
+  color: #0c75af;
+}
+
+.c33 .sc-URNzB {
+  color: #328048;
+}
+
+.c23 {
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c20 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  color: #4945ff;
+  position: relative;
+  outline: none;
+}
+
+.c20 svg path {
+  -webkit-transition: fill 150ms ease-out;
+  transition: fill 150ms ease-out;
+  fill: currentColor;
+}
+
+.c20 svg {
+  font-size: 0.625rem;
+}
+
+.c20 .c22 {
+  -webkit-transition: color 150ms ease-out;
+  transition: color 150ms ease-out;
+  color: currentColor;
+}
+
+.c20:hover {
+  color: #7b79ff;
+}
+
+.c20:active {
+  color: #271fe0;
+}
+
+.c20:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c20:focus-visible {
+  outline: none;
+}
+
+.c20:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c12 {
+  padding-right: 8px;
+}
+
+.c13 {
+  color: #4945ff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c10 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c11 {
+  background: transparent;
+  border: none;
+  position: relative;
+  outline: none;
+}
+
+.c11[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c11[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c11 svg {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 0.625rem;
+}
+
+.c11 svg path {
+  fill: #4945ff;
+}
+
+.c11:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c11:focus-visible {
+  outline: none;
+}
+
+.c11:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c17 {
+  width: 100%;
+  min-width: 0;
+}
+
+.c14 {
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.c14:before,
+.c14:after {
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  z-index: 1;
+}
+
+.c14:before {
+  background: linear-gradient(rgba(33,33,52,0.1) 0%,rgba(0,0,0,0) 100%);
+  top: 0;
+}
+
+.c14:after {
+  background: linear-gradient(rgba(0,0,0,0) 0%,rgba(33,33,52,0.1) 100%);
+  bottom: 0;
+}
+
+.c21 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inherit;
+}
+
+.c19 > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inherit;
+}
+
+.c28 svg path {
+  fill: #8e8ea9;
+}
+
+.c28:hover svg path,
+.c28:focus svg path {
+  fill: #666687;
+}
+
+<div>
+  <div>
+    <div
+      class="c0 c1"
+      wrap="wrap"
+    >
+      <div
+        class="c2 c3 c4"
+        spacing="1"
+      >
+        <label
+          class="c5"
+          for="1"
+        >
+          <div
+            class="c6"
+          >
+            Some Relation
+          </div>
+        </label>
+        <div
+          class=" css-1iyvlxg-container"
+        >
+          <span
+            class="css-1f43avz-a11yText-A11yText"
+            id="react-select-2-live-region"
+          />
+          <span
+            aria-atomic="false"
+            aria-live="polite"
+            aria-relevant="additions text"
+            class="css-1f43avz-a11yText-A11yText"
+          />
+          <div
+            class=" css-1sb7bue-control"
+          >
+            <div
+              class=" css-do2euy-ValueContainer"
+            >
+              <div
+                class=" css-17f8yyk-placeholder"
+                id="react-select-2-placeholder"
+              >
+                Select...
+              </div>
+              <div
+                class=" css-aaf1np-Input"
+                data-value=""
+              >
+                <input
+                  aria-autocomplete="list"
+                  aria-describedby="react-select-2-placeholder"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  aria-invalid="false"
+                  autocapitalize="none"
+                  autocomplete="off"
+                  autocorrect="off"
+                  class=""
+                  id="1"
+                  role="combobox"
+                  spellcheck="false"
+                  style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
+                  tabindex="0"
+                  type="text"
+                  value=""
+                />
+              </div>
+            </div>
+            <div
+              class=" css-1hb7zxy-IndicatorsContainer"
+            >
+              <button
+                class="c7 c8 c9"
+                type="button"
+              >
+                <svg
+                  fill="none"
+                  height="1em"
+                  viewBox="0 0 14 8"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    clip-rule="evenodd"
+                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                    fill="#32324D"
+                    fill-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <input
+            name="some-relation-1"
+            type="hidden"
+            value=""
+          />
+        </div>
+      </div>
+      <button
+        aria-disabled="false"
+        class="c10 c11"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="c12"
+        >
+          <svg
+            fill="none"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M15.681 2.804A9.64 9.64 0 0011.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 003.589-4.831 1.117 1.117 0 00-.664-1.418 1.086 1.086 0 00-1.393.676 7.769 7.769 0 01-2.792 3.758 7.546 7.546 0 01-4.41 1.428V4.222h.002a7.492 7.492 0 013.003.625 7.61 7.61 0 012.5 1.762l.464.551-2.986 3.042a.186.186 0 00.129.316H22V3.317a.188.188 0 00-.112-.172.179.179 0 00-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 00-3.239-2.293zm-3.863 1.418V2v2.222zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778z"
+              fill="#212134"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </span>
+        <span
+          class="c13"
+        >
+          Load more
+        </span>
+      </button>
+    </div>
+    <div
+      class="c14"
+    >
+      <div
+        class="c3 c4"
+        spacing="1"
+      >
+        <div
+          style="position: relative; height: 150px; overflow: auto; will-change: transform; direction: ltr;"
+        >
+          <ol
+            style="height: 150px; width: 100%;"
+          >
+            <li
+              class=""
+              style="position: absolute; left: 0px; top: 0px; height: 50px; width: 100%;"
+            >
+              <div
+                class="c15 c16"
+              >
+                <div
+                  class="c16 c17"
+                >
+                  <div
+                    class="c18 c19"
+                  >
+                    <span>
+                      <a
+                        aria-current="page"
+                        aria-describedby="tooltip-1"
+                        class="c20 c21 active"
+                        href="/"
+                        tabindex="0"
+                      >
+                        <span
+                          class="c22 c23"
+                        >
+                          Relation 1
+                        </span>
+                      </a>
+                    </span>
+                  </div>
+                  <div
+                    class="c24 c25"
+                  >
+                    <span
+                      class="c26"
+                    >
+                      Draft
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="c27"
+                >
+                  <button
+                    aria-label="Remove"
+                    class="c28"
+                    data-testid="remove-relation-1"
+                    type="button"
+                  >
+                    <svg
+                      class="c29 c30"
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      width="12px"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                        fill="#212134"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li
+              class=""
+              style="position: absolute; left: 0px; top: 50px; height: 50px; width: 100%;"
+            >
+              <div
+                class="c15 c16"
+              >
+                <div
+                  class="c16 c17"
+                >
+                  <div
+                    class="c18 c19"
+                  >
+                    <span>
+                      <span
+                        aria-describedby="tooltip-3"
+                        class="c31"
+                        tabindex="0"
+                      >
+                        Relation 2
+                      </span>
+                    </span>
+                  </div>
+                  <div
+                    class="c32 c33"
+                  >
+                    <span
+                      class="c34"
+                    >
+                      Published
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="c27"
+                >
+                  <button
+                    aria-label="Remove"
+                    class="c28"
+                    data-testid="remove-relation-2"
+                    type="button"
+                  >
+                    <svg
+                      class="c29 c30"
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      width="12px"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                        fill="#212134"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li
+              class=""
+              style="position: absolute; left: 0px; top: 100px; height: 50px; width: 100%;"
+            >
+              <div
+                class="c15 c16"
+              >
+                <div
+                  class="c16 c17"
+                >
+                  <div
+                    class="c18 c19"
+                  >
+                    <span>
+                      <span
+                        aria-describedby="tooltip-5"
+                        class="c31"
+                        tabindex="0"
+                      >
+                        Relation 3
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="c27"
+                >
+                  <button
+                    aria-label="Remove"
+                    class="c28"
+                    data-testid="remove-relation-3"
+                    type="button"
+                  >
+                    <svg
+                      class="c29 c30"
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      width="12px"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                        fill="#212134"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div
+      class="c35"
+    >
+      <p
+        class="c36"
+        id="1-hint"
+      >
+        this is a description
+      </p>
+    </div>
+  </div>
+  <div
+    class="c37"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;

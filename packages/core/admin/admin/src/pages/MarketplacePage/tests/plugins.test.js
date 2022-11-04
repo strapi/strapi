@@ -7,6 +7,7 @@ import {
   screen,
   getByText,
   queryByText,
+  getByRole,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -14,6 +15,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 
 import { Router } from 'react-router-dom';
+
 import { createMemoryHistory } from 'history';
 
 import MarketPlacePage from '../index';
@@ -400,5 +402,41 @@ describe('Marketplace page - plugins tab', () => {
     const newestOption = screen.getByRole('option', { name: 'Newest' });
     userEvent.click(newestOption);
     expect(history.location.search).toEqual('?sort=submissionDate:desc');
+  });
+
+  it('disables the button and shows compatibility tooltip message when version provided', async () => {
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Transformer'));
+    const button = getByRole(alreadyInstalledCard, 'button', {
+      name: /copy install command/i,
+    });
+
+    userEvent.hover(button);
+    const tooltip = screen.getByTestId(`tooltip-Transformer`);
+
+    expect(tooltip).toBeVisible();
+    expect(button).toBeDisabled();
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent('Update your Strapi version: "4.1.0" to: "4.0.7"');
+  });
+
+  it('shows compatibility tooltip message when no version provided', async () => {
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Config Sync'));
+    const button = getByRole(alreadyInstalledCard, 'button', {
+      name: /copy install command/i,
+    });
+
+    userEvent.hover(button);
+    const tooltip = screen.getByTestId(`tooltip-Config Sync`);
+
+    expect(tooltip).toBeVisible();
+    expect(button).not.toBeDisabled();
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent(
+      'Unable to verify compatibility with your Strapi version: "4.1.0"'
+    );
   });
 });

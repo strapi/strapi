@@ -28,6 +28,7 @@ jest.mock('@strapi/helper-plugin', () => ({
       '@strapi/plugin-documentation': '4.2.0',
       '@strapi/provider-upload-cloudinary': '4.2.0',
     },
+    strapiVersion: '4.1.0',
     useYarn: true,
   })),
 }));

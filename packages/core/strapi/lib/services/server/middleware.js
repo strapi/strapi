@@ -2,6 +2,7 @@
 
 const path = require('path');
 const { propOr, isArray, isNil } = require('lodash/fp');
+const { importDefault } = require('@strapi/utils');
 
 const getMiddlewareConfig = propOr([], 'config.middlewares');
 
@@ -119,7 +120,7 @@ const resolveCustomMiddleware = (resolve, strapi) => {
   }
 
   try {
-    return require(modulePath);
+    return importDefault(modulePath);
   } catch (err) {
     throw new Error(`Could not load middleware "${modulePath}".`);
   }

@@ -55,7 +55,7 @@ const MarketPlacePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [{ query }, setQuery] = useQueryParams();
 
-  const { autoReload: isInDevelopmentMode, dependencies, useYarn } = useAppInfos();
+  const { autoReload: isInDevelopmentMode, dependencies, useYarn, strapiVersion } = useAppInfos();
   const isOnline = useNavigatorOnLine();
 
   const npmPackageType = query?.npmPackageType || 'plugin';
@@ -306,6 +306,7 @@ const MarketPlacePage = () => {
                     useYarn={useYarn}
                     isInDevelopmentMode={isInDevelopmentMode}
                     npmPackageType="plugin"
+                    strapiAppVersion={strapiVersion}
                   />
                 )}
               </TabPanel>
