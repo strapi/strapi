@@ -470,6 +470,8 @@ const morphToMany = async (input, ctx) => {
   }, {});
 
   const map = {};
+  const { on, ...typePopulate } = populateValue;
+
   for (const type of Object.keys(idsByType)) {
     const ids = idsByType[type];
 
@@ -480,10 +482,14 @@ const morphToMany = async (input, ctx) => {
       continue;
     }
 
+    if (on && on[type]) {
+      Object.assign(typePopulate, on[type]);
+    }
+
     const qb = db.entityManager.createQueryBuilder(type);
 
     const rows = await qb
-      .init(populateValue)
+      .init(typePopulate)
       .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
       .where({ [idColumn.referencedColumn]: ids })
       .execute({ mapResults: false });
@@ -579,7 +585,16 @@ const morphToOne = async (input, ctx) => {
 
 //  TODO: Omit limit & offset to avoid needing a query per result to avoid making too many queries
 const pickPopulateParams = (populate) => {
-  const fieldsToPick = ['select', 'count', 'where', 'populate', 'orderBy', 'filters', 'ordering'];
+  const fieldsToPick = [
+    'select',
+    'count',
+    'where',
+    'populate',
+    'orderBy',
+    'filters',
+    'ordering',
+    'on',
+  ];
 
   if (populate.count !== true) {
     fieldsToPick.push('limit', 'offset');
