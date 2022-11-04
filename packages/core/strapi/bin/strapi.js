@@ -269,12 +269,6 @@ program
   .command('export')
   .description('Export data from Strapi to file')
   .addOption(
-    new Option(
-      '--output <outputFilename>',
-      'Filename to output (without extension) [Default: "export_{yyyymmddHHMMSS}[.tar.gz][.gpg]"]'
-    )
-  )
-  .addOption(
     new Option('--encrypt [boolean]', `Encrypt output file using 'aes-128-ecb'`) // TODO: we should get a default from @strapi/data-transfer and display it here
       .default(true)
       .argParser(parseInputBool)
@@ -332,7 +326,6 @@ program
 program
   .command('import')
   .description('Import data from file to Strapi')
-  .option('--input <input filename>', 'Path to the file to be imported')
   .addOption(
     new Option('--conflictStrategy <conflictStrategy>', 'Which strategy to use for ID conflicts')
       .choices(['restore', 'abort', 'keep', 'replace'])
