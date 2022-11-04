@@ -107,7 +107,7 @@
   "Settings.permissions.conditions.anytime": "W dowolnym momencie",
   "Settings.permissions.conditions.apply": "Zastosuj",
   "Settings.permissions.conditions.can": "Może",
-  "Settings.permissions.conditions.define-conditions": "Definiować warunki",
+  "Settings.permissions.conditions.conditions": "Definiować warunki",
   "Settings.permissions.conditions.links": "Linki",
   "Settings.permissions.conditions.no-actions": "Najpierw musisz wybrać akcje (tworzenie, odczytywanie, aktualizowanie, ...) przed zdefiniowaniem dla nich warunków.",
   "Settings.permissions.conditions.none-selected": "W dowolnym momencie",

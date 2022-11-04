@@ -26,7 +26,7 @@
   "Auth.form.error.password.local": "આ વપરાશકર્તાએ ક્યારેય સ્થાનિક પાસવર્ડ સેટ કર્યો નથી, કૃપા કરીને એકાઉન્ટ બનાવતી વખતે ઉપયોગમાં લેવાતા પ્રદાતા દ્વારા લૉગિન કરો",
   "Auth.form.error.password.matching": "પાસવર્ડ મેળ ખાતા નથી",
   "Auth.form.error.password.provide": "કૃપા કરીને તમારો પાસવર્ડ આપો",
-  "Settings.permissions.conditions.define-conditions": "શરતો વ્યાખ્યાયિત કરો",
+  "Settings.permissions.conditions.conditions": "શરતો વ્યાખ્યાયિત કરો",
   "Settings.permissions.conditions.links": "લિંક્સ",
   "Settings.permissions.conditions.no-actions": "તમારે તેના પર શરતો વ્યાખ્યાયિત કરતા પહેલા ક્રિયાઓ (બનાવો, વાંચો, અપડેટ કરો, ...) પસંદ કરો.",
   "Settings.permissions.conditions.none-selected": "કોઈપણ સમયે",
