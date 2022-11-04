@@ -1,5 +1,13 @@
 import React from 'react';
-import { render, waitFor, waitForElementToBeRemoved, screen } from '@testing-library/react';
+import {
+  render,
+  waitFor,
+  waitForElementToBeRemoved,
+  screen,
+  getByRole,
+  fireEvent,
+} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
@@ -97,6 +105,54 @@ describe('Marketplace page - layout', () => {
     const offlineText = screen.getByText('You are offline');
 
     expect(offlineText).toBeVisible();
+  });
+
+  it('disables the button and shows compatibility tooltip message when version provided', async () => {
+    client.clear();
+    const { getByTestId } = render(App);
+    await waitForReload();
+
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Transformer'));
+
+    const button = getByRole(alreadyInstalledCard, 'button', { name: /copy install command/i });
+
+    // User event throws an error that there are no pointer events
+    fireEvent.mouseOver(button);
+    const tooltip = getByTestId(`tooltip-Transformer`);
+    await waitFor(() => {
+      expect(tooltip).toBeVisible();
+    });
+    expect(button).toBeDisabled();
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent('Update your Strapi version: "4.1.0" to: "4.0.7"');
+  });
+
+  it('shows compatibility tooltip message when no version provided', async () => {
+    client.clear();
+    const { getByTestId } = render(App);
+    await waitForReload();
+
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Config Sync'));
+
+    const button = getByRole(alreadyInstalledCard, 'button', {
+      name: /copy install command/i,
+    });
+
+    userEvent.hover(button);
+    const tooltip = getByTestId(`tooltip-Config Sync`);
+
+    await waitFor(() => {
+      expect(tooltip).toBeVisible();
+    });
+    expect(button).not.toBeDisabled();
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent(
+      'Unable to verify compatibility with your Strapi version: "4.1.0"'
+    );
   });
 
   it('handles production environment', async () => {

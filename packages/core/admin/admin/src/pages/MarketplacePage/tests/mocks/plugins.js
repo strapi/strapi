@@ -478,6 +478,7 @@ const plugins = {
         validated: false,
         madeByStrapi: false,
         strapiCompatibility: 'v4',
+        strapiVersion: '4.0.7',
       },
     },
   ],

@@ -1965,8 +1965,9 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             tabindex="0"
                           >
                             <button
-                              aria-disabled="false"
+                              aria-disabled="true"
                               class="c52 c75"
+                              disabled=""
                               type="button"
                             >
                               <div
