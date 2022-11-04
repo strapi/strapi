@@ -49,6 +49,12 @@ export interface ITransferEngine {
   close(): Promise<void>;
 
   /**
+   * Start the schemas transfer by connecting the
+   * related source and destination providers streams
+   */
+  transferSchemas(): Promise<void>;
+
+  /**
    * Start the entities transfer by connecting the
    * related source and destination providers streams
    */

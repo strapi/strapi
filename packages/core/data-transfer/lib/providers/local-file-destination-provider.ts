@@ -4,7 +4,6 @@ import zip from 'zlib';
 import { Duplex } from 'stream';
 import { chain, Writable } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
-import type { Cipher } from 'crypto';
 
 import type { IDestinationProvider, ProviderType, Stream } from '../../types';
 import { createCipher } from '../encryption/encrypt';
@@ -52,6 +51,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     }
 
     fs.mkdirSync(rootDir, { recursive: true });
+    fs.mkdirSync(path.join(rootDir, 'schemas'));
     fs.mkdirSync(path.join(rootDir, 'entities'));
     fs.mkdirSync(path.join(rootDir, 'links'));
     fs.mkdirSync(path.join(rootDir, 'media'));
@@ -64,6 +64,39 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   getMetadata() {
     return null;
+  }
+
+  getSchemasStream() {
+    const filePathFactory = (fileIndex: number = 0) => {
+      return path.join(
+        // Backup path
+        this.options.file.path,
+        // "schemas/" directory
+        'schemas',
+        // "schemas_00000.jsonl" file
+        `schemas_${String(fileIndex).padStart(5, '0')}.jsonl`
+      );
+    };
+
+    const streams: any[] = [
+      // create jsonl strings from object entities
+      stringer(),
+    ];
+
+    // Compression
+    if (this.options.compression?.enabled) {
+      streams.push(zip.createGzip());
+    }
+
+    // Encryption;
+    if (this.options.encryption?.enabled) {
+      streams.push(createCipher(this.options.encryption.key));
+    }
+
+    // FS write stream
+    streams.push(createMultiFilesWriteStream(filePathFactory, this.options.file?.maxSize));
+
+    return chain(streams);
   }
 
   getEntitiesStream(): Duplex {
