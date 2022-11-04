@@ -269,7 +269,7 @@ program
   .command('export')
   .description('Export data from Strapi to file')
   .addOption(
-    new Option('--encrypt [boolean]', `Encrypt output file using 'aes-128-ecb'`) // TODO: we should get a default from @strapi/data-transfer and display it here
+    new Option('--encrypt [boolean]', `Encrypt output file using the 'aes-128-ecb' algorithm`)
       .default(true)
       .argParser(parseInputBool)
   )
