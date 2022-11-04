@@ -3,7 +3,7 @@
 jest.mock('bcryptjs', () => ({ hashSync: () => 'secret-password' }));
 
 const { EventEmitter } = require('events');
-const { ApplicationError } = require('@strapi/utils').errors;
+const { ValidationError } = require('@strapi/utils').errors;
 const createEntityService = require('..');
 const entityValidator = require('../../entity-validator');
 
@@ -291,7 +291,11 @@ describe('Entity service', () => {
         };
 
         const res = instance.create(entityUID, { data });
-        await expect(res).rejects.toThrow(ApplicationError);
+        await expect(res).rejects.toThrowError(
+          new ValidationError(
+            `1 relation(s) of type api::relation.relation associated with this entity do not exist`
+          )
+        );
       });
     });
   });
@@ -445,7 +449,11 @@ describe('Entity service', () => {
         };
 
         const res = instance.update(entityUID, 0, { data });
-        await expect(res).rejects.toThrow(ApplicationError);
+        await expect(res).rejects.toThrowError(
+          new ValidationError(
+            `1 relation(s) of type api::relation.relation associated with this entity do not exist`
+          )
+        );
       });
     });
   });
