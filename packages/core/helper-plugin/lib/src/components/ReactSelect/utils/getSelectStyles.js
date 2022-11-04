@@ -46,12 +46,7 @@ const getSelectStyles = (theme, error) => {
         marginTop: theme.spaces[1],
         backgroundColor: theme.colors.neutral0,
         color: theme.colors.neutral800,
-        borderRadius: '4px !important',
-        borderTopLeftRadius: '4px !important',
-        borderTopRightRadius: '4px !important',
-        border: `1px solid ${theme.colors.neutral200} !important`,
-        boxShadow: 0,
-        fontSize: '14px',
+        boxShadow: theme.shadows.tableShadow,
         zIndex: 2,
       };
     },
