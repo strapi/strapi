@@ -275,7 +275,7 @@ program
     )
   )
   .addOption(
-    new Option('--encrypt [boolean]', `Encrypt output file using 'aes-128-ecb'`) // TODO: we should set export a default from data-transfer and display it here
+    new Option('--encrypt [boolean]', `Encrypt output file using 'aes-128-ecb'`) // TODO: we should get a default from @strapi/data-transfer and display it here
       .default(true)
       .argParser(parseInputBool)
   )
