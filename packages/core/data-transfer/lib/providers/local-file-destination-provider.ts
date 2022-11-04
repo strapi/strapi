@@ -71,6 +71,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     }
 
     fs.mkdirSync(rootDir, { recursive: true });
+    fs.mkdirSync(path.join(rootDir, 'schemas'));
     fs.mkdirSync(path.join(rootDir, 'entities'));
     fs.mkdirSync(path.join(rootDir, 'links'));
     fs.mkdirSync(path.join(rootDir, 'media'));
@@ -83,6 +84,21 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   getMetadata() {
     return null;
+  }
+
+  getSchemasStream() {
+    const filePathFactory = createFilePathFactory(this.options.file.path, 'schemas');
+
+    // Transform streams
+    const transforms: Writable[] = this.#getDataTransformers();
+
+    // FS write stream
+    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
+
+    // Full pipeline
+    const streams = transforms.concat(fileStream);
+
+    return chain(streams);
   }
 
   getEntitiesStream(): NodeJS.WritableStream {

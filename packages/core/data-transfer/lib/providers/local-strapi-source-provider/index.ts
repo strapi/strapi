@@ -1,7 +1,7 @@
 import type { ISourceProvider, ProviderType } from '../../../types';
 
 import { chain } from 'stream-chain';
-
+import { Readable } from 'stream';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
@@ -72,5 +72,17 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     }
 
     return createConfigurationStream(strapi);
+  }
+
+  getSchemas() {
+    if (!this.strapi) {
+      throw new Error('Not able to get Schemas. Strapi instance not found');
+    }
+
+    return [...Object.values(this.strapi.contentTypes), ...Object.values(this.strapi.components)];
+  }
+
+  streamSchemas(): NodeJS.ReadableStream {
+    return Readable.from(this.getSchemas());
   }
 }
