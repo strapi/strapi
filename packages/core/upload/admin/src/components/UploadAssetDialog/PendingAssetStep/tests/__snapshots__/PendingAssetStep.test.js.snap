@@ -177,7 +177,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c15 .sc-haTkiu {
+.c15 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -247,7 +247,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #ffffff;
 }
 
-.c58 .sc-haTkiu {
+.c58 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;

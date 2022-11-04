@@ -214,7 +214,6 @@
   "content-manager.containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
   "content-manager.containers.SettingPage.editSettings.title": "Edit (settings)",
   "content-manager.containers.SettingPage.listSettings.title": "Lista (configurações)",
-  "content-manager.containers.SettingPage.relations": "Relational fields",
   "content-manager.containers.SettingsPage.Block.contentType.description": "Configurar configurações específicas",
   "content-manager.containers.SettingsPage.Block.generalSettings.title": "Geral",
   "content-manager.emptyAttributes.title": "Ainda não há campos",

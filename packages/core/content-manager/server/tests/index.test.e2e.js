@@ -1,6 +1,7 @@
 'use strict';
 
-// Helpers.
+const { isEmpty } = require('lodash/fp');
+
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const form = require('../../../../../test/helpers/generators');
@@ -15,6 +16,15 @@ const builder = createTestBuilder();
 let strapi;
 let data;
 let rq;
+
+const getRelations = async (modelName, field, id) => {
+  const res = await rq({
+    method: 'GET',
+    url: `/content-manager/relations/api::${modelName}.${modelName}/${id}/${field}`,
+  });
+
+  return res.body;
+};
 
 const deleteFixtures = async () => {
   for (const [name, modelName] of [
@@ -38,7 +48,7 @@ const deleteFixtures = async () => {
   }
 };
 
-describe('Content Manager End to End', () => {
+describe('Relations', () => {
   beforeAll(async () => {
     await builder
       .addContentTypes(
@@ -80,18 +90,13 @@ describe('Content Manager End to End', () => {
       data.tags.push(body);
 
       expect(body.id).toBeDefined();
-      expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag1');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -109,18 +114,13 @@ describe('Content Manager End to End', () => {
       data.tags.push(body);
 
       expect(body.id).toBeDefined();
-      expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag2');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -138,18 +138,13 @@ describe('Content Manager End to End', () => {
       data.tags.push(body);
 
       expect(body.id).toBeDefined();
-      expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('tag3');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
@@ -159,7 +154,7 @@ describe('Content Manager End to End', () => {
       const entry = {
         title: 'Article 1',
         content: 'My super content 1',
-        date: '2019-08-13T00:00:00.000Z',
+        date: '2019-08-13',
       };
 
       const { body } = await rq({
@@ -173,21 +168,18 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      expect(Array.isArray(body.tags)).toBeTruthy();
-      expect(body.tags.length).toBe(0);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
+
+      const tags = (await getRelations('article', 'tags', body.id)).results;
+      expect(tags.length).toBe(0);
     });
 
     test('Create article2 with tag1', async () => {
@@ -208,22 +200,19 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      expect(Array.isArray(body.tags)).toBeTruthy();
-      expect(body.tags.length).toBe(1);
-      expect(body.tags[0].id).toBe(data.tags[0].id);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
+
+      const tags = (await getRelations('article', 'tags', body.id)).results;
+      expect(tags.length).toBe(1);
+      expect(tags[0].id).toBe(data.tags[0].id);
     });
 
     test('Update article1 add tag2', async () => {
@@ -242,93 +231,71 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      expect(Array.isArray(body.tags)).toBeTruthy();
-      expect(body.tags.length).toBe(1);
-      expect(body.tags[0].id).toBe(data.tags[1].id);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
+
+      const tags = (await getRelations('article', 'tags', body.id)).results;
+      expect(tags.length).toBe(1);
+      expect(tags[0].id).toBe(data.tags[1].id);
     });
 
     test('Update article1 add tag1 and tag3', async () => {
-      const entry = { ...data.articles[0] };
-      entry.tags = entry.tags.map((tag) => tag.id);
-
-      entry.tags.push(data.tags[0].id);
-      entry.tags.push(data.tags[2].id);
-
-      cleanDate(entry);
-
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${data.articles[0].id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          tags: [data.tags[0].id, data.tags[1].id, data.tags[2].id],
+        },
       });
 
-      data.articles[0] = body;
-
       expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(Array.isArray(body.tags)).toBeTruthy();
-      expect(body.tags.length).toBe(3);
+      expect(body.title).toBe(data.articles[0].title);
+      expect(body.content).toBe(data.articles[0].content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
+
+      const tags = (await getRelations('article', 'tags', body.id)).results;
+      expect(tags.length).toBe(3);
     });
 
     test('Update article1 remove one tag', async () => {
-      const entry = { ...data.articles[0] };
-      entry.tags = entry.tags.slice(1).map((tag) => tag.id);
-
-      cleanDate(entry);
-
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${data.articles[0].id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          tags: [data.tags[1].id, data.tags[2].id],
+        },
       });
 
-      data.articles[0] = body;
-
       expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(Array.isArray(body.tags)).toBeTruthy();
-      expect(body.tags.length).toBe(2);
+      expect(body.title).toBe(data.articles[0].title);
+      expect(body.content).toBe(data.articles[0].content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
+
+      const tags = (await getRelations('article', 'tags', body.id)).results;
+      expect(tags.length).toBe(2);
     });
 
     test('Update article1 remove all tag', async () => {
@@ -347,21 +314,18 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      expect(Array.isArray(body.tags)).toBeTruthy();
-      expect(body.tags.length).toBe(0);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
+
+      const tags = (await getRelations('article', 'tags', body.id)).results;
+      expect(tags.length).toBe(0);
     });
 
     test('Delete all articles should remove the association in each tags related to them', async () => {
@@ -398,26 +362,18 @@ describe('Content Manager End to End', () => {
         },
       });
 
-      const articles = [article12, article13];
-
-      expect(Array.isArray(articles[0].tags)).toBeTruthy();
-      expect(articles[0].tags.length).toBe(1);
-      expect(Array.isArray(articles[1].tags)).toBeTruthy();
-      expect(articles[1].tags.length).toBe(1);
-
       const { body: foundTag } = await rq({
         url: `/content-manager/collection-types/api::tag.tag/${createdTag.id}`,
         method: 'GET',
       });
 
-      expect(Array.isArray(foundTag.articles)).toBeTruthy();
-      expect(foundTag.articles.length).toBe(2);
+      expect(foundTag.articles.count).toBe(2);
 
       await rq({
         url: '/content-manager/collection-types/api::article.article/actions/bulkDelete',
         method: 'POST',
         body: {
-          ids: articles.map((article) => article.id),
+          ids: [article12.id, article13.id],
         },
       });
 
@@ -426,8 +382,7 @@ describe('Content Manager End to End', () => {
         method: 'GET',
       });
 
-      expect(Array.isArray(foundTag2.articles)).toBeTruthy();
-      expect(foundTag2.articles.length).toBe(0);
+      expect(foundTag2.articles.count).toBe(0);
     });
   });
 
@@ -467,21 +422,18 @@ describe('Content Manager End to End', () => {
       data.articlesWithTag.push(body);
 
       expect(body.id).toBeDefined();
-      expect(Array.isArray(body.tags)).toBeTruthy();
-      expect(body.tags.length).toBe(1);
-      expect(body.tags[0].id).toBe(data.tags[0].id);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
+
+      const tags = (await getRelations('articlewithtag', 'tags', body.id)).results;
+      expect(tags.length).toBe(1);
+      expect(tags[0].id).toBe(data.tags[0].id);
     });
   });
 
@@ -509,21 +461,19 @@ describe('Content Manager End to End', () => {
       data.categories.push(body);
 
       expect(body.id).toBeDefined();
-      expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('cat1');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
+
+      const articles = (await getRelations('category', 'articles', body.id)).results;
+      expect(articles.length).toBe(0);
     });
 
     test('Create cat2', async () => {
@@ -538,21 +488,18 @@ describe('Content Manager End to End', () => {
       data.categories.push(body);
 
       expect(body.id).toBeDefined();
-      expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.name).toBe('cat2');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
+      const articles = (await getRelations('category', 'articles', body.id)).results;
+      expect(articles.length).toBe(0);
     });
 
     test('Create article1 with cat1', async () => {
@@ -573,52 +520,51 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      expect(body.category.name).toBe(data.categories[0].name);
-      expect(Array.isArray(body.tags)).toBeTruthy();
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
+      expect(body.publishedAt).toBeUndefined();
+
+      const tags = (await getRelations('article', 'tags', body.id)).results;
+      expect(tags.length).toBe(0);
+
+      const category = (await getRelations('article', 'category', body.id)).data;
+      expect(category.name).toBe(data.categories[0].name);
     });
 
     test('Update article1 with cat2', async () => {
-      const entry = { ...data.articles[0], category: data.categories[1].id };
-
-      cleanDate(entry);
-
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${data.articles[0].id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          category: data.categories[1].id,
+        },
       });
 
       data.articles[0] = body;
 
       expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(body.category.name).toBe(data.categories[1].name);
-      expect(Array.isArray(body.tags)).toBeTruthy();
+      expect(body.title).toBe(data.articles[0].title);
+      expect(body.content).toBe(data.articles[0].content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
+
+      const tags = (await getRelations('article', 'tags', body.id)).results;
+      expect(tags.length).toBe(0);
+
+      const category = (await getRelations('article', 'category', body.id)).data;
+      expect(category.name).toBe(data.categories[1].name);
     });
 
     test('Create article2', async () => {
@@ -638,84 +584,73 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      expect(Array.isArray(body.tags)).toBeTruthy();
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
+
+      const tags = (await getRelations('article', 'tags', body.id)).results;
+      expect(tags.length).toBe(0);
     });
 
     test('Update article2 with cat2', async () => {
-      const entry = { ...data.articles[1], category: data.categories[1].id };
-
-      cleanDate(entry);
-
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${data.articles[1].id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          category: data.categories[1].id,
+        },
       });
 
       data.articles[1] = body;
 
       expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(body.category.name).toBe(data.categories[1].name);
-      expect(Array.isArray(body.tags)).toBeTruthy();
+      expect(body.title).toBe(data.articles[1].title);
+      expect(body.content).toBe(data.articles[1].content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
+
+      const tags = (await getRelations('article', 'tags', body.id)).results;
+      expect(tags.length).toBe(0);
+
+      const category = (await getRelations('article', 'category', body.id)).data;
+      expect(category.name).toBe(data.categories[1].name);
     });
 
     test('Update cat1 with article1', async () => {
-      const entry = { ...data.categories[0] };
-      entry.articles = entry.articles.map((article) => article.id);
-      entry.articles.push(data.articles[0].id);
-
-      cleanDate(entry);
-
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${entry.id}`,
+        url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          articles: [data.articles[0].id],
+        },
       });
 
       data.categories[0] = body;
 
       expect(body.id).toBeDefined();
-      expect(Array.isArray(body.articles)).toBeTruthy();
-      expect(body.articles.length).toBe(1);
-      expect(body.name).toBe(entry.name);
+      expect(body.name).toBe(data.categories[0].name);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
+
+      const articles = (await getRelations('category', 'articles', body.id)).results;
+      expect(articles.length).toBe(1);
     });
 
     test('Create cat3 with article1', async () => {
@@ -733,132 +668,76 @@ describe('Content Manager End to End', () => {
       data.categories.push(body);
 
       expect(body.id).toBeDefined();
-      expect(Array.isArray(body.articles)).toBeTruthy();
-      expect(body.articles.length).toBe(1);
       expect(body.name).toBe(entry.name);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
+
+      const articles = (await getRelations('category', 'articles', body.id)).results;
+      expect(articles.length).toBe(1);
     });
 
     test('Get article1 with cat3', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${data.articles[0].id}`,
+        url: `/content-manager/relations/api::article.article/${data.articles[0].id}/category`,
         method: 'GET',
       });
 
-      expect(body.id).toBeDefined();
-      expect(body.category.id).toBe(data.categories[2].id);
-      expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
-        id: 1,
-        lastname: 'admin',
-        username: null,
-      });
-      expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
-        id: 1,
-        lastname: 'admin',
-        username: null,
-      });
+      expect(body).toMatchObject({ data: { name: 'cat3' } });
     });
 
     test('Get article2 with cat2', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${data.articles[1].id}`,
+        url: `/content-manager/relations/api::article.article/${data.articles[1].id}/category`,
         method: 'GET',
       });
 
-      expect(body.id).toBeDefined();
-      expect(body.category.id).toBe(data.categories[1].id);
-      expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
-        id: 1,
-        lastname: 'admin',
-        username: null,
-      });
-      expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
-        id: 1,
-        lastname: 'admin',
-        username: null,
-      });
+      expect(body).toMatchObject({ data: { name: 'cat2' } });
     });
 
     test('Get cat1 without relations', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}`,
+        url: `/content-manager/relations/api::category.category/${data.categories[0].id}/articles`,
         method: 'GET',
       });
 
-      expect(body.id).toBeDefined();
-      expect(body.articles.length).toBe(0);
-      expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
-        id: 1,
-        lastname: 'admin',
-        username: null,
-      });
-      expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
-        id: 1,
-        lastname: 'admin',
-        username: null,
+      expect(body).toMatchObject({
+        results: [],
+        pagination: {
+          total: 0,
+          pageSize: 10,
+          page: 1,
+          pageCount: 0,
+        },
       });
     });
 
     test('Get cat2 with article2', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[1].id}`,
+        url: `/content-manager/relations/api::category.category/${data.categories[1].id}/articles`,
         method: 'GET',
       });
 
-      expect(body.id).toBeDefined();
-      expect(body.articles.length).toBe(1);
-      expect(body.articles[0].id).toBe(data.articles[1].id);
-      expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
-        id: 1,
-        lastname: 'admin',
-        username: null,
-      });
-      expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
-        id: 1,
-        lastname: 'admin',
-        username: null,
+      expect(body).toMatchObject({
+        pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
+        results: [{ title: 'Article 2' }],
       });
     });
 
     test('Get cat3 with article1', async () => {
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::category.category/${data.categories[2].id}`,
+        url: `/content-manager/relations/api::category.category/${data.categories[2].id}/articles`,
         method: 'GET',
       });
 
-      expect(body.id).toBeDefined();
-      expect(body.articles.length).toBe(1);
-      expect(body.articles[0].id).toBe(data.articles[0].id);
-      expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
-        id: 1,
-        lastname: 'admin',
-        username: null,
-      });
-      expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
-        id: 1,
-        lastname: 'admin',
-        username: null,
+      expect(body).toMatchObject({
+        pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
+        results: [{ title: 'Article 1' }],
       });
     });
   });
@@ -889,15 +768,11 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.name).toBe('ref1');
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
     });
@@ -920,49 +795,41 @@ describe('Content Manager End to End', () => {
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.publishedAt).toBeUndefined();
     });
 
     test('Update article1 with ref1', async () => {
-      const entry = { ...data.articles[0], reference: data.references[0].id };
-
-      cleanDate(entry);
-
       const { body } = await rq({
-        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${data.articles[0].id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          reference: data.references[0].id,
+        },
       });
 
       data.articles[0] = body;
 
       expect(body.id).toBeDefined();
-      expect(body.title).toBe(entry.title);
-      expect(body.content).toBe(entry.content);
-      expect(body.reference.id).toBe(entry.reference);
+      expect(body.title).toBe(data.articles[0].title);
+      expect(body.content).toBe(data.articles[0].content);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
+
+      const reference = (await getRelations('article', 'reference', body.id)).data;
+      expect(reference.id).toBe(data.references[0].id);
     });
 
     test('Create article2 with ref1', async () => {
@@ -983,19 +850,16 @@ describe('Content Manager End to End', () => {
       expect(body.id).toBeDefined();
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      expect(body.reference.id).toBe(entry.reference);
       expect(body.createdBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
       expect(body.updatedBy).toMatchObject({
-        firstname: 'admin',
         id: 1,
-        lastname: 'admin',
         username: null,
       });
+      const reference = (await getRelations('article', 'reference', body.id)).data;
+      expect(reference.id).toBe(data.references[0].id);
     });
   });
 
@@ -1019,7 +883,9 @@ describe('Content Manager End to End', () => {
       });
 
       expect(createdReference.id).toBeDefined();
-      expect(createdReference.tag.id).toBe(createdTag.id);
+
+      const tag = (await getRelations('reference', 'tag', createdReference.id)).data;
+      expect(tag.id).toBe(createdTag.id);
     });
 
     test('Detach Tag to a Reference', async () => {
@@ -1040,7 +906,8 @@ describe('Content Manager End to End', () => {
         },
       });
 
-      expect(createdReference.tag.id).toBe(createdTag.id);
+      let tag = (await getRelations('reference', 'tag', createdReference.id)).data;
+      expect(tag.id).toBe(createdTag.id);
 
       const { body: referenceToUpdate } = await rq({
         url: `/content-manager/collection-types/api::reference.reference/${createdReference.id}`,
@@ -1050,7 +917,8 @@ describe('Content Manager End to End', () => {
         },
       });
 
-      expect(referenceToUpdate.tag).toBe(null);
+      tag = (await getRelations('reference', 'tag', referenceToUpdate.id)).results;
+      expect(isEmpty(tag)).toBe(true);
     });
 
     test('Delete Tag so the relation in the Reference side should be removed', async () => {
@@ -1081,9 +949,7 @@ describe('Content Manager End to End', () => {
         method: 'GET',
       });
 
-      if (!foundReference.tag || Object.keys(foundReference.tag).length === 0) return;
-
-      expect(foundReference.tag).toBe(null);
+      expect(foundReference.tag.count).toBe(0);
     });
   });
 });
