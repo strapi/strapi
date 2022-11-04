@@ -9,6 +9,8 @@ import {
   getByText,
   queryByText,
   getByRole,
+  getByLabelText,
+  queryByLabelText,
 } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -17,9 +19,6 @@ import { useTracking, useAppInfos } from '@strapi/helper-plugin';
 import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
-
-const GITHUB_STARS = 12;
-const WEEKLY_DOWNLOADS = 135;
 
 const toggleNotification = jest.fn();
 
@@ -303,10 +302,18 @@ describe('Marketplace page', () => {
     const documentationCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Documentation'));
-    const githubStars = queryByText(documentationCard, GITHUB_STARS);
-    expect(githubStars).toBeVisible();
-    const weeklyDownloads = queryByText(documentationCard, WEEKLY_DOWNLOADS);
-    expect(weeklyDownloads).toBeVisible();
+
+    const githubStarsLabel = getByLabelText(
+      documentationCard,
+      /this plugin was starred \d+ on GitHub/i
+    );
+    expect(githubStarsLabel).toBeVisible();
+
+    const downloadsLabel = getByLabelText(
+      documentationCard,
+      /this plugin has \d+ weekly downloads/i
+    );
+    expect(downloadsLabel).toBeVisible();
   });
 
   it('shows github stars and weekly downloads count for each provider', () => {
@@ -317,9 +324,39 @@ describe('Marketplace page', () => {
     const cloudinaryCard = screen
       .getAllByTestId('npm-package-card')
       .find((div) => div.innerHTML.includes('Cloudinary'));
-    const githubStars = queryByText(cloudinaryCard, GITHUB_STARS);
-    expect(githubStars).toBeVisible();
-    const weeklyDownloads = queryByText(cloudinaryCard, WEEKLY_DOWNLOADS);
-    expect(weeklyDownloads).toBeVisible();
+
+    const githubStarsLabel = getByLabelText(
+      cloudinaryCard,
+      /this provider was starred \d+ on GitHub/i
+    );
+    expect(githubStarsLabel).toBeVisible();
+
+    const downloadsLabel = getByLabelText(
+      cloudinaryCard,
+      /this provider has \d+ weekly downloads/i
+    );
+    expect(downloadsLabel).toBeVisible();
+  });
+
+  it('show only downloads count and not github stars if there are no or 0 stars and no downloads available for any package', () => {
+    render(App);
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    fireEvent.click(providersTab);
+
+    const nodeMailerCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Nodemailer'));
+
+    const githubStarsLabel = queryByLabelText(
+      nodeMailerCard,
+      /this provider was starred \d+ on GitHub/i
+    );
+    expect(githubStarsLabel).toBe(null);
+
+    const downloadsLabel = getByLabelText(
+      nodeMailerCard,
+      /this provider has \d+ weekly downloads/i
+    );
+    expect(downloadsLabel).toBeVisible();
   });
 });

@@ -77,7 +77,11 @@ const NpmPackageCard = ({
             width={11}
             height={11}
           />
-          <PackageStats githubStars={12} weeklyDownloads={135} npmPackageType={npmPackageType} />
+          <PackageStats
+            githubStars={attributes.githubStars}
+            npmDownloads={attributes.npmDownloads}
+            npmPackageType={npmPackageType}
+          />
         </Flex>
         <Box paddingTop={4}>
           <Typography as="h3" variant="delta">
@@ -174,6 +178,8 @@ NpmPackageCard.propTypes = {
       madeByStrapi: PropTypes.bool.isRequired,
       strapiCompatibility: PropTypes.oneOf(['v3', 'v4']),
       strapiVersion: PropTypes.string,
+      githubStars: PropTypes.number,
+      npmDownloads: PropTypes.number,
     }).isRequired,
   }).isRequired,
   isInstalled: PropTypes.bool.isRequired,

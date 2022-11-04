@@ -49,6 +49,8 @@ const handlers = [
               madeByStrapi: false,
               strapiCompatibility: 'v3',
               strapiVersion: '^4.0.0',
+              githubStars: 23,
+              npmDownloads: 5623,
             },
           },
           {
@@ -223,6 +225,8 @@ const handlers = [
               madeByStrapi: false,
               strapiCompatibility: 'v4',
               strapiVersion: '4.x.x',
+              githubStars: 323,
+              npmDownloads: 1123,
             },
           },
           {
@@ -409,6 +413,8 @@ const handlers = [
               madeByStrapi: true,
               strapiCompatibility: 'v4',
               strapiVersion: '^4.0.7',
+              githubStars: 49130,
+              npmDownloads: 7492,
             },
           },
           {
@@ -654,6 +660,8 @@ const handlers = [
               validated: true,
               madeByStrapi: true,
               strapiCompatibility: 'v4',
+              githubStars: 49130,
+              npmDownloads: 7492,
             },
           },
           {
@@ -696,6 +704,8 @@ const handlers = [
               developerName: 'Strapi team',
               validated: true,
               madeByStrapi: true,
+              githubStars: 30,
+              npmDownloads: 2492,
             },
           },
           {
