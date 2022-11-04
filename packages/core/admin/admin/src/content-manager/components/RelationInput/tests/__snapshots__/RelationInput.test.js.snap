@@ -465,42 +465,52 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
           </div>
         </label>
         <div
-          class=" css-1tkrshn-container"
+          class=" css-1iyvlxg-container"
         >
+          <span
+            class="css-1f43avz-a11yText-A11yText"
+            id="react-select-2-live-region"
+          />
+          <span
+            aria-atomic="false"
+            aria-live="polite"
+            aria-relevant="additions text"
+            class="css-1f43avz-a11yText-A11yText"
+          />
           <div
             class=" css-1sb7bue-control"
           >
             <div
-              class=" css-1kj7tu4-ValueContainer"
+              class=" css-do2euy-ValueContainer"
             >
               <div
-                class=" css-6gbuim-placeholder"
+                class=" css-17f8yyk-placeholder"
+                id="react-select-2-placeholder"
               >
                 Select...
               </div>
               <div
-                class="css-fph3ax-Input"
+                class=" css-aaf1np-Input"
+                data-value=""
               >
-                <div
+                <input
+                  aria-autocomplete="list"
+                  aria-describedby="react-select-2-placeholder"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  aria-invalid="false"
+                  autocapitalize="none"
+                  autocomplete="off"
+                  autocorrect="off"
                   class=""
-                  style="display: inline-block;"
-                >
-                  <input
-                    aria-autocomplete="list"
-                    autocapitalize="none"
-                    autocomplete="off"
-                    autocorrect="off"
-                    id="1"
-                    spellcheck="false"
-                    style="box-sizing: content-box; width: 2px; border: 0px; opacity: 1; outline: 0; padding: 0px;"
-                    tabindex="0"
-                    type="text"
-                    value=""
-                  />
-                  <div
-                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
-                  />
-                </div>
+                  id="1"
+                  role="combobox"
+                  spellcheck="false"
+                  style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
+                  tabindex="0"
+                  type="text"
+                  value=""
+                />
               </div>
             </div>
             <div

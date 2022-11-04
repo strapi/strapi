@@ -224,11 +224,11 @@ describe('Content-Manager || RelationInput', () => {
     });
 
     test('should apply disabled state', () => {
-      setup({ disabled: true });
+      const { queryByText, getByTestId, container } = setup({ disabled: true });
 
-      expect(screen.queryByText('Load more')).not.toBeInTheDocument();
-      expect(screen.getByRole('textbox')).toBeDisabled();
-      expect(screen.getByTestId('remove-relation-1')).toBeDisabled();
+      expect(queryByText('Load more')).not.toBeInTheDocument();
+      expect(container.querySelector('input')).toBeDisabled();
+      expect(getByTestId('remove-relation-1')).toBeDisabled();
     });
   });
 });
