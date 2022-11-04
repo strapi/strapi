@@ -24,16 +24,12 @@ const getSelectStyles = (theme, error) => {
 
       return {
         ...base,
-        fontSize: 14,
+        fontSize: theme.fontSizes[2],
         height: 40,
         border: `1px solid ${borderColor} !important`,
         outline: 0,
-        borderRadius: '2px !important',
         backgroundColor,
-        borderTopLeftRadius: '4px !important',
-        borderTopRightRadius: '4px !important',
-        borderBottomLeftRadius: '4px !important',
-        borderBottomRightRadius: '4px !important',
+        borderRadius: theme.borderRadius,
         boxShadow: boxShadowColor ? `${boxShadowColor} 0px 0px 0px 2px` : 0,
       };
     },
@@ -46,7 +42,10 @@ const getSelectStyles = (theme, error) => {
         marginTop: theme.spaces[1],
         backgroundColor: theme.colors.neutral0,
         color: theme.colors.neutral800,
+        borderRadius: theme.borderRadius,
+        border: `1px solid ${theme.colors.neutral200}`,
         boxShadow: theme.shadows.tableShadow,
+        fontSize: theme.fontSizes[2],
         zIndex: 2,
       };
     },
