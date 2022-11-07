@@ -9,6 +9,8 @@ import {
   getByText,
   queryByText,
   getByRole,
+  getByLabelText,
+  queryByLabelText,
 } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -290,5 +292,71 @@ describe('Marketplace page', () => {
     expect(tooltip).toHaveTextContent(
       'Unable to verify compatibility with your Strapi version: "4.1.0"'
     );
+  });
+
+  it('shows github stars and weekly downloads count for each plugin', () => {
+    render(App);
+    const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
+    fireEvent.click(pluginsTab);
+
+    const documentationCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Documentation'));
+
+    const githubStarsLabel = getByLabelText(
+      documentationCard,
+      /this plugin was starred \d+ on GitHub/i
+    );
+    expect(githubStarsLabel).toBeVisible();
+
+    const downloadsLabel = getByLabelText(
+      documentationCard,
+      /this plugin has \d+ weekly downloads/i
+    );
+    expect(downloadsLabel).toBeVisible();
+  });
+
+  it('shows github stars and weekly downloads count for each provider', () => {
+    render(App);
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    fireEvent.click(providersTab);
+
+    const cloudinaryCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Cloudinary'));
+
+    const githubStarsLabel = getByLabelText(
+      cloudinaryCard,
+      /this provider was starred \d+ on GitHub/i
+    );
+    expect(githubStarsLabel).toBeVisible();
+
+    const downloadsLabel = getByLabelText(
+      cloudinaryCard,
+      /this provider has \d+ weekly downloads/i
+    );
+    expect(downloadsLabel).toBeVisible();
+  });
+
+  it('show only downloads count and not github stars if there are no or 0 stars and no downloads available for any package', () => {
+    render(App);
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    fireEvent.click(providersTab);
+
+    const nodeMailerCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Nodemailer'));
+
+    const githubStarsLabel = queryByLabelText(
+      nodeMailerCard,
+      /this provider was starred \d+ on GitHub/i
+    );
+    expect(githubStarsLabel).toBe(null);
+
+    const downloadsLabel = getByLabelText(
+      nodeMailerCard,
+      /this provider has \d+ weekly downloads/i
+    );
+    expect(downloadsLabel).toBeVisible();
   });
 });
