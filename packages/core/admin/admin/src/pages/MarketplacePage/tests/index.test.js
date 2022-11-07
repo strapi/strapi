@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  render,
-  waitFor,
-  waitForElementToBeRemoved,
-  screen,
-  getByRole,
-  fireEvent,
-} from '@testing-library/react';
+import { render, waitFor, screen, getByRole, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -64,10 +57,10 @@ const App = (
 );
 
 const waitForReload = async () => {
-  await waitForElementToBeRemoved(() => screen.getByTestId('loader'));
-  await waitFor(() =>
-    expect(screen.getByRole('heading', { name: /marketplace/i })).toBeInTheDocument()
-  );
+  await waitFor(() => {
+    expect(screen.queryByTestId('loader')).toBe(null);
+    expect(screen.getByRole('heading', { name: /marketplace/i })).toBeInTheDocument();
+  });
 };
 
 describe('Marketplace page - layout', () => {

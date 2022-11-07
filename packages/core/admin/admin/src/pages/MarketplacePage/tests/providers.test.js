@@ -2,7 +2,6 @@ import React from 'react';
 import {
   render,
   waitFor,
-  waitForElementToBeRemoved,
   getByPlaceholderText,
   screen,
   getByText,
@@ -50,10 +49,10 @@ const client = new QueryClient({
 });
 
 const waitForReload = async () => {
-  await waitForElementToBeRemoved(() => screen.getByTestId('loader'));
-  await waitFor(() =>
-    expect(screen.getByRole('heading', { name: /marketplace/i })).toBeInTheDocument()
-  );
+  await waitFor(() => {
+    expect(screen.queryByTestId('loader')).toBe(null);
+    expect(screen.getByRole('heading', { name: /marketplace/i })).toBeInTheDocument();
+  });
 };
 
 describe('Marketplace page - providers tab', () => {
