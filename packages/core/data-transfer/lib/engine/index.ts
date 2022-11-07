@@ -132,7 +132,7 @@ class TransferEngine implements ITransferEngine {
   async transferSchemas(): Promise<void> {
     const inStream = await this.sourceProvider.streamSchemas?.();
     const outStream = await this.destinationProvider.getSchemasStream?.();
-    console.log(inStream);
+
     if (!inStream || !outStream) {
       throw new Error('Unable to transfer schemas, one of the streams is missing');
     }
