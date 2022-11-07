@@ -389,7 +389,7 @@ describe('RelationInputDataManager', () => {
     );
   });
 
-  test('Reorder an entity', () => {
+  test('reordering an entity', () => {
     const { reorderRelation } = useCMEditViewDataManager();
     setup();
 

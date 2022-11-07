@@ -2,6 +2,7 @@ import React, { useRef, useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
+import { useIntl } from 'react-intl';
 
 import { ReactSelect } from '@strapi/helper-plugin';
 import { Status } from '@strapi/design-system/Status';
@@ -12,6 +13,7 @@ import { FieldLabel, FieldError, FieldHint, Field } from '@strapi/design-system/
 import { TextButton } from '@strapi/design-system/TextButton';
 import { Typography } from '@strapi/design-system/Typography';
 import { Tooltip } from '@strapi/design-system/Tooltip';
+import { VisuallyHidden } from '@strapi/design-system/VisuallyHidden';
 
 import Cross from '@strapi/icons/Cross';
 import Refresh from '@strapi/icons/Refresh';
@@ -21,6 +23,8 @@ import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
 import { RELATION_GUTTER, RELATION_ITEM_HEIGHT } from './constants';
+
+import { getTrad } from '../../utils';
 
 const LinkEllipsis = styled(Link)`
   white-space: nowrap;
@@ -76,9 +80,13 @@ const RelationInput = ({
   size,
 }) => {
   const [value, setValue] = useState(null);
+  const [overflow, setOverflow] = useState('');
+  const [liveText, setLiveText] = useState('');
+
   const listRef = useRef();
   const outerListRef = useRef();
-  const [overflow, setOverflow] = useState('');
+
+  const { formatMessage } = useIntl();
 
   const { data } = searchResults;
 
@@ -213,10 +221,66 @@ const RelationInput = ({
     onSearch();
   };
 
+  /**
+   *
+   * @param {number} newIndex
+   * @param {number} currentIndex
+   *
+   * @returns {void}
+   */
   const handleUpdatePositionOfRelation = (newIndex, currentIndex) => {
-    if (onRelationReorder) {
+    if (onRelationReorder && newIndex >= 0 && newIndex < relations.length) {
       onRelationReorder(currentIndex, newIndex);
+
+      const item = relations[currentIndex];
+      setLiveText(`${item.mainField ?? item.id}. New position in list: ${getItemPos(newIndex)}`);
     }
+  };
+
+  /**
+   *
+   * @param {number} index
+   * @returns {string}
+   */
+  const getItemPos = (index) => `${index + 1} of ${relations.length}`;
+
+  /**
+   *
+   * @param {number} index
+   * @returns {void}
+   */
+  const handleGrabItem = (index) => {
+    const item = relations[index];
+
+    setLiveText(
+      `${item.mainField ?? item.id}, grabbed. Current position in list: ${getItemPos(
+        index
+      )}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`
+    );
+  };
+
+  /**
+   *
+   * @param {number} index
+   * @returns {void}
+   */
+  const handleDropItem = (index) => {
+    const item = relations[index];
+
+    setLiveText(
+      `${item.mainField ?? item.id}, dropped. Final position in list: ${getItemPos(index)}`
+    );
+  };
+
+  /**
+   *
+   * @param {number} index
+   * @returns {void}
+   */
+  const handleCancel = (index) => {
+    const item = relations[index];
+
+    setLiveText(`${item.mainField ?? item.id}, dropped. Re-order cancelled.`);
   };
 
   return (
@@ -287,6 +351,13 @@ const RelationInput = ({
         }
       >
         <RelationList overflow={overflow}>
+          <VisuallyHidden id={`${name}-item-instructions`}>
+            {formatMessage({
+              id: getTrad('components.RelationInput.instructions'),
+              defaultMessage: `Press spacebar to grab and re-order`,
+            })}
+          </VisuallyHidden>
+          <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
           <List
             height={dynamicListHeight}
             ref={listRef}
@@ -294,7 +365,11 @@ const RelationInput = ({
             itemCount={totalNumberOfRelations}
             itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
             itemData={{
+              ariaDescribedBy: `${name}-item-instructions`,
               disabled,
+              handleCancel,
+              handleDropItem,
+              handleGrabItem,
               labelDisconnectRelation,
               onRelationDisconnect,
               publicationStateTranslations,
@@ -395,7 +470,11 @@ RelationInput.propTypes = {
  */
 const ListItem = ({ data, index, style }) => {
   const {
+    ariaDescribedBy,
     disabled,
+    handleCancel,
+    handleDropItem,
+    handleGrabItem,
     labelDisconnectRelation,
     onRelationDisconnect,
     publicationStateTranslations,
@@ -409,11 +488,11 @@ const ListItem = ({ data, index, style }) => {
 
   return (
     <RelationItem
-      disabled={disabled}
+      ariaDescribedBy={ariaDescribedBy}
       canDrag={canDrag}
+      disabled={disabled}
       id={id}
       index={index}
-      updatePositionOfRelation={updatePositionOfRelation}
       endAction={
         <DisconnectButton
           data-testid={`remove-relation-${id}`}
@@ -425,11 +504,15 @@ const ListItem = ({ data, index, style }) => {
           <Icon width="12px" as={Cross} />
         </DisconnectButton>
       }
+      onCancel={handleCancel}
+      onDrop={handleDropItem}
+      onGrab={handleGrabItem}
       style={{
         ...style,
         bottom: style.bottom ?? 0 + RELATION_GUTTER,
         height: style.height ?? 0 - RELATION_GUTTER,
       }}
+      updatePositionOfRelation={updatePositionOfRelation}
     >
       <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
         <Tooltip description={mainField ?? `${id}`}>
@@ -462,7 +545,11 @@ ListItem.defaultProps = {
 
 ListItem.propTypes = {
   data: PropTypes.shape({
+    ariaDescribedBy: PropTypes.string.isRequired,
     disabled: PropTypes.bool.isRequired,
+    handleCancel: PropTypes.func,
+    handleDropItem: PropTypes.func,
+    handleGrabItem: PropTypes.func,
     labelDisconnectRelation: PropTypes.string.isRequired,
     onRelationDisconnect: PropTypes.func.isRequired,
     publicationStateTranslations: PropTypes.shape({
