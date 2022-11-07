@@ -10,7 +10,6 @@ import { useCMEditViewDataManager, NotAllowedInput } from '@strapi/helper-plugin
 import { RelationInput } from '../RelationInput';
 
 import { useRelation } from '../../hooks/useRelation';
-import { useModifiedDataSelector } from '../../hooks/useModifiedDataSelector';
 
 import { getTrad } from '../../utils';
 
@@ -38,10 +37,17 @@ export const RelationInputDataManager = ({
   targetModel,
 }) => {
   const { formatMessage } = useIntl();
-  const { connectRelation, disconnectRelation, loadRelation, slug, initialData, reorderRelation } =
-    useCMEditViewDataManager();
+  const {
+    connectRelation,
+    disconnectRelation,
+    loadRelation,
+    slug,
+    initialData,
+    modifiedData,
+    reorderRelation,
+  } = useCMEditViewDataManager();
 
-  const relationsFromModifiedData = useModifiedDataSelector(name, []);
+  const relationsFromModifiedData = get(modifiedData, name);
 
   const currentLastPage = Math.ceil(relationsFromModifiedData.length / RELATIONS_TO_DISPLAY);
 

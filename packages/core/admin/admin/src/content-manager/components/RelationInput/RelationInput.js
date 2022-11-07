@@ -293,64 +293,19 @@ const RelationInput = ({
             outerRef={outerListRef}
             itemCount={totalNumberOfRelations}
             itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
-            itemData={relations}
-            itemKey={(index, listData) => `${listData[index].id}-${listData[index].name}`}
+            itemData={{
+              disabled,
+              labelDisconnectRelation,
+              onRelationDisconnect,
+              publicationStateTranslations,
+              relations,
+              totalNumberOfRelations,
+              updatePositionOfRelation: handleUpdatePositionOfRelation,
+            }}
+            itemKey={(index, { relations: relationsItems }) => relationsItems[index].id}
             innerElementType="ol"
           >
-            {({ data, index, style }) => {
-              const { publicationState, href, mainField, id } = data[index];
-              const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
-              const canDrag = totalNumberOfRelations > 1;
-
-              return (
-                <RelationItem
-                  disabled={disabled}
-                  key={`relation-${name}-${id}`}
-                  canDrag={canDrag}
-                  id={id}
-                  index={index}
-                  updatePositionOfRelation={handleUpdatePositionOfRelation}
-                  endAction={
-                    <DisconnectButton
-                      data-testid={`remove-relation-${id}`}
-                      disabled={disabled}
-                      type="button"
-                      onClick={() => onRelationDisconnect(data[index])}
-                      aria-label={labelDisconnectRelation}
-                    >
-                      <Icon width="12px" as={Cross} />
-                    </DisconnectButton>
-                  }
-                  style={{
-                    ...style,
-                    bottom: style.bottom + RELATION_GUTTER,
-                    height: style.height - RELATION_GUTTER,
-                  }}
-                >
-                  <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                    <Tooltip description={mainField ?? `${id}`}>
-                      {href ? (
-                        <LinkEllipsis to={href} disabled={disabled}>
-                          {mainField ?? id}
-                        </LinkEllipsis>
-                      ) : (
-                        <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
-                          {mainField ?? id}
-                        </Typography>
-                      )}
-                    </Tooltip>
-                  </BoxEllipsis>
-
-                  {publicationState && (
-                    <Status variant={statusColor} showBullet={false} size="S">
-                      <Typography fontWeight="bold" textColor={`${statusColor}700`}>
-                        {publicationStateTranslations[publicationState]}
-                      </Typography>
-                    </Status>
-                  )}
-                </RelationItem>
-              );
-            }}
+            {ListItem}
           </List>
         </RelationList>
         {(description || error) && (
@@ -432,6 +387,101 @@ RelationInput.propTypes = {
   searchResults: SearchResults,
   size: PropTypes.number.isRequired,
   relations: RelationsResult,
+};
+
+/**
+ * This is in a seperate component to enforce passing all the props the component requires to react-window
+ * to ensure drag & drop correctly works.
+ */
+const ListItem = ({ data, index, style }) => {
+  const {
+    disabled,
+    labelDisconnectRelation,
+    onRelationDisconnect,
+    publicationStateTranslations,
+    relations,
+    totalNumberOfRelations,
+    updatePositionOfRelation,
+  } = data;
+  const { publicationState, href, mainField, id } = relations[index];
+  const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
+  const canDrag = totalNumberOfRelations > 1;
+
+  return (
+    <RelationItem
+      disabled={disabled}
+      canDrag={canDrag}
+      id={id}
+      index={index}
+      updatePositionOfRelation={updatePositionOfRelation}
+      endAction={
+        <DisconnectButton
+          data-testid={`remove-relation-${id}`}
+          disabled={disabled}
+          type="button"
+          onClick={() => onRelationDisconnect(data[index])}
+          aria-label={labelDisconnectRelation}
+        >
+          <Icon width="12px" as={Cross} />
+        </DisconnectButton>
+      }
+      style={{
+        ...style,
+        bottom: style.bottom + RELATION_GUTTER,
+        height: style.height - RELATION_GUTTER,
+      }}
+    >
+      <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+        <Tooltip description={mainField ?? `${id}`}>
+          {href ? (
+            <LinkEllipsis to={href} disabled={disabled}>
+              {mainField ?? id}
+            </LinkEllipsis>
+          ) : (
+            <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
+              {mainField ?? id}
+            </Typography>
+          )}
+        </Tooltip>
+      </BoxEllipsis>
+
+      {publicationState && (
+        <Status variant={statusColor} showBullet={false} size="S">
+          <Typography fontWeight="bold" textColor={`${statusColor}700`}>
+            {publicationStateTranslations[publicationState]}
+          </Typography>
+        </Status>
+      )}
+    </RelationItem>
+  );
+};
+
+ListItem.defaultProps = {
+  data: {},
+};
+
+ListItem.propTypes = {
+  data: PropTypes.shape({
+    disabled: PropTypes.bool.isRequired,
+    labelDisconnectRelation: PropTypes.string.isRequired,
+    onRelationDisconnect: PropTypes.func.isRequired,
+    publicationStateTranslations: PropTypes.shape({
+      draft: PropTypes.string.isRequired,
+      published: PropTypes.string.isRequired,
+    }).isRequired,
+    relations: PropTypes.arrayOf(
+      PropTypes.shape({
+        href: PropTypes.string,
+        id: PropTypes.number.isRequired,
+        publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+        mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      })
+    ),
+    totalNumberOfRelations: PropTypes.number.isRequired,
+    updatePositionOfRelation: PropTypes.func.isRequired,
+  }),
+  index: PropTypes.number.isRequired,
+  style: PropTypes.object.isRequired,
 };
 
 export default RelationInput;

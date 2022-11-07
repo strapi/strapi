@@ -187,12 +187,8 @@ const reducer = (state, action) =>
 
         const newRelations = [...modifiedDataRelations];
 
-        console.log(oldIndex, newIndex);
-
         newRelations.splice(oldIndex, 1);
         newRelations.splice(newIndex, 0, currentItem);
-
-        console.log(newRelations);
 
         set(draftState, path, newRelations);
 

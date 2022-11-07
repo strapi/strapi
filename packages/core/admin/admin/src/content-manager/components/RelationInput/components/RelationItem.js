@@ -51,21 +51,10 @@ export const RelationItem = ({
         return;
       }
 
-      // Determine rectangle on screen
       const hoverBoundingRect = relationRef.current.getBoundingClientRect();
-
-      // Get vertical middle
       const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-
-      // Determine mouse position
       const clientOffset = monitor.getClientOffset();
-
-      // Get pixels to the top
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
 
       // Dragging downwards
       if (dragIndex < currentIndex && hoverClientY < hoverMiddleY) {
@@ -84,42 +73,57 @@ export const RelationItem = ({
     },
   });
 
-  const [{ isDragging }, dragRef] = useDrag(() => ({
+  const [{ isDragging }, dragRef, dragPreviewRef] = useDrag({
     type: RELATION_ITEM_DRAG_TYPE,
-    item: { index },
+    item: { index, id },
     canDrag,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
-  }));
+  });
 
-  const composedRefs = composeRefs(relationRef, dropRef, dragRef);
-
-  const opacity = isDragging ? 0 : 1;
+  const composedRefs = composeRefs(relationRef, dragRef);
 
   return (
-    <Box style={style} as="li">
-      <Flex
-        draggable={canDrag}
-        paddingTop={2}
-        paddingBottom={2}
-        paddingLeft={canDrag ? 2 : 4}
-        paddingRight={4}
-        hasRadius
-        borderSize={1}
-        background={disabled ? 'neutral150' : 'neutral0'}
-        borderColor="neutral200"
-        justifyContent="space-between"
-        ref={composedRefs}
-        style={{ opacity }}
-        data-handler-id={handlerId}
-        {...props}
-      >
-        {/* TODO: swap this out for using children when DS is updated */}
-        {canDrag ? <IconButton marginRight={1} aria-label="Drag" noBorder icon={<Drag />} /> : null}
-        <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
-        {endAction && <Box paddingLeft={4}>{endAction}</Box>}
-      </Flex>
+    <Box style={style} as="li" ref={dropRef}>
+      {isDragging ? (
+        <Box
+          ref={dragPreviewRef}
+          paddingTop={2}
+          paddingBottom={2}
+          paddingLeft={4}
+          paddingRight={4}
+          hasRadius
+          borderStyle="dashed"
+          borderColor="primary600"
+          borderWidth="1px"
+          background="primary100"
+          height="100%"
+        />
+      ) : (
+        <Flex
+          draggable={canDrag}
+          paddingTop={2}
+          paddingBottom={2}
+          paddingLeft={canDrag ? 2 : 4}
+          paddingRight={4}
+          hasRadius
+          borderSize={1}
+          background={disabled ? 'neutral150' : 'neutral0'}
+          borderColor="neutral200"
+          justifyContent="space-between"
+          ref={composedRefs}
+          data-handler-id={handlerId}
+          {...props}
+        >
+          {/* TODO: swap this out for using children when DS is updated */}
+          {canDrag ? (
+            <IconButton marginRight={1} aria-label="Drag" noBorder icon={<Drag />} />
+          ) : null}
+          <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
+          {endAction && <Box paddingLeft={4}>{endAction}</Box>}
+        </Flex>
+      )}
     </Box>
   );
 };
