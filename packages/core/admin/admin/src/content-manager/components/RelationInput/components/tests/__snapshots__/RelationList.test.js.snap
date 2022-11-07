@@ -81,12 +81,25 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
       <div
         class="c1 c2"
         data-handler-id="T0"
-        draggable="true"
       >
         <div
           class="c2 c3"
         >
           First relation
+        </div>
+      </div>
+    </li>
+    <li
+      class=""
+    >
+      <div
+        class="c1 c2"
+        data-handler-id="T2"
+      >
+        <div
+          class="c2 c3"
+        >
+          Second relation
         </div>
       </div>
     </li>

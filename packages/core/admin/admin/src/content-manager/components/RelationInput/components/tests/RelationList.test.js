@@ -15,6 +15,9 @@ const setup = ({ endAction }) =>
           <RelationItem index={0} id={0} endAction={endAction}>
             First relation
           </RelationItem>
+          <RelationItem index={1} id={1} endAction={endAction}>
+            Second relation
+          </RelationItem>
         </RelationList>
       </DndProvider>
     </ThemeProvider>

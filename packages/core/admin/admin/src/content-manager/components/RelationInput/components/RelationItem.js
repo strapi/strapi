@@ -77,7 +77,7 @@ export const RelationItem = ({
   const [{ isDragging }, dragRef, dragPreviewRef] = useDrag({
     type: RELATION_ITEM_DRAG_TYPE,
     item: { index },
-    canDrag,
+    canDrag: canDrag && !disabled,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -103,7 +103,6 @@ export const RelationItem = ({
         />
       ) : (
         <Flex
-          draggable={canDrag}
           paddingTop={2}
           paddingBottom={2}
           paddingLeft={canDrag ? 2 : 4}
@@ -113,7 +112,7 @@ export const RelationItem = ({
           background={disabled ? 'neutral150' : 'neutral0'}
           borderColor="neutral200"
           justifyContent="space-between"
-          ref={composedRefs}
+          ref={canDrag ? composedRefs : undefined}
           data-handler-id={handlerId}
           {...props}
         >
