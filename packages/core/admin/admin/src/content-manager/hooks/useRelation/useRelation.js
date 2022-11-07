@@ -13,15 +13,15 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
    */
   const fetchRelations = async ({ pageParam = 1 }) => {
     try {
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+      );
       const { data } = await axiosInstance.get(relation?.endpoint, {
         params: {
           ...(relation.pageParams ?? {}),
           page: pageParam,
         },
       });
-      console.warn(
-        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
-      );
 
       setCurrentPage(pageParam);
 
@@ -33,6 +33,9 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
 
   const fetchSearch = async ({ pageParam = 1 }) => {
     try {
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+      );
       const { data } = await axiosInstance.get(search.endpoint, {
         params: {
           ...(search.pageParams ?? {}),
@@ -40,9 +43,6 @@ export const useRelation = (cacheKey, { name, relation, search }) => {
           page: pageParam,
         },
       });
-      console.warn(
-        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
-      );
 
       return data;
     } catch (err) {

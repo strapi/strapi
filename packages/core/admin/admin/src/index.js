@@ -29,14 +29,14 @@ const MOUNT_NODE = document.getElementById('app');
 
 const run = async () => {
   try {
+    console.warn(
+      'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+    );
     const {
       data: {
         data: { isEE, features },
       },
     } = await axiosInstance.get('/admin/project-type');
-    console.warn(
-      'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
-    );
 
     window.strapi.isEE = isEE;
     window.strapi.features = {

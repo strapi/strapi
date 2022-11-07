@@ -43,10 +43,10 @@ const EditPage = () => {
     try {
       const permissions = permissionsRef.current.getPermissions();
       // Update role in Strapi
-      await axiosInstance.post(`/${pluginId}/roles`, { ...data, ...permissions, users: [] });
       console.warn(
         'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
       );
+      await axiosInstance.post(`/${pluginId}/roles`, { ...data, ...permissions, users: [] });
       // Notify success
       trackUsage('didCreateRole');
       toggleNotification({

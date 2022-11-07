@@ -34,8 +34,8 @@ instance.interceptors.response.use(
 );
 
 export default {
-  getClient: instance.get,
-  putClient: instance.put,
-  postClient: instance.post,
-  deleteClient: instance.delete,
+  get: instance.get,
+  put: instance.put,
+  post: instance.post,
+  delete: instance.delete,
 };

@@ -13,7 +13,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/design-system/Main';
 import { Formik } from 'formik';
-import { get } from 'lodash';
+import { get as getProperty } from 'lodash';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { formatAPIErrors } from '../../../../../utils';
@@ -29,7 +29,7 @@ import reducer, { initialState } from './reducer';
 const MSG_ERROR_NAME_TAKEN = 'Name already taken';
 
 const ApiTokenCreateView = () => {
-  const { getClient, postClient, putClient } = useFetchClient();
+  const { get, post, put } = useFetchClient();
   useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -60,7 +60,7 @@ const ApiTokenCreateView = () => {
     async () => {
       const [permissions, routes] = await Promise.all(
         ['/admin/content-api/permissions', '/admin/content-api/routes'].map(async (url) => {
-          const { data } = await getClient(url);
+          const { data } = await get(url);
 
           return data.data;
         })
@@ -114,7 +114,7 @@ const ApiTokenCreateView = () => {
     async () => {
       const {
         data: { data },
-      } = await getClient(`/admin/api-tokens/${id}`);
+      } = await get(`/admin/api-tokens/${id}`);
 
       setApiToken({
         ...data,
@@ -162,12 +162,12 @@ const ApiTokenCreateView = () => {
       const {
         data: { data: response },
       } = isCreating
-        ? await postClient(`/admin/api-tokens`, {
+        ? await post(`/admin/api-tokens`, {
             ...body,
             lifespan: lifespanVal,
             permissions: body.type === 'custom' ? state.selectedActions : null,
           })
-        : await putClient(`/admin/api-tokens/${id}`, {
+        : await put(`/admin/api-tokens/${id}`, {
             name: body.name,
             description: body.description,
             type: body.type,
@@ -206,12 +206,16 @@ const ApiTokenCreateView = () => {
       if (err?.response?.data?.error?.message === MSG_ERROR_NAME_TAKEN) {
         toggleNotification({
           type: 'warning',
-          message: get(err, 'response.data.message', 'notification.error.tokennamenotunique'),
+          message: getProperty(
+            err,
+            'response.data.message',
+            'notification.error.tokennamenotunique'
+          ),
         });
       } else {
         toggleNotification({
           type: 'warning',
-          message: get(err, 'response.data.message', 'notification.error'),
+          message: getProperty(err, 'response.data.message', 'notification.error'),
         });
       }
       unlockApp();

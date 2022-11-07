@@ -27,6 +27,9 @@ const useModels = () => {
     dispatch(getData());
 
     try {
+      console.warn(
+        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
+      );
       const [
         {
           data: { data: components },
@@ -38,9 +41,6 @@ const useModels = () => {
         ['components', 'content-types'].map((endPoint) =>
           axiosInstance.get(getRequestUrl(endPoint), { cancelToken: source.token })
         )
-      );
-      console.warn(
-        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
       );
 
       notifyStatus(

@@ -103,12 +103,12 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       setIsCreatingEntry(true);
 
       try {
-        const { data } = await axiosInstance(getRequestUrl(`${slug}${searchToSend}`), {
-          cancelToken: source.token,
-        });
         console.warn(
           'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
         );
+        const { data } = await axiosInstance(getRequestUrl(`${slug}${searchToSend}`), {
+          cancelToken: source.token,
+        });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
 
@@ -163,10 +163,10 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const { data } = await axiosInstance.delete(getRequestUrl(`${slug}${searchToSend}`));
         console.warn(
           'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function deleteClient'
         );
+        const { data } = await axiosInstance.delete(getRequestUrl(`${slug}${searchToSend}`));
 
         toggleNotification({
           type: 'success',
@@ -200,10 +200,10 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       try {
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await axiosInstance.put(endPoint, body);
         console.warn(
           'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function putClient'
         );
+        const { data } = await axiosInstance.put(endPoint, body);
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -251,10 +251,11 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       const endPoint = getRequestUrl(`${slug}/actions/numberOfDraftRelations`);
       dispatch(setStatus('draft-relation-check-pending'));
 
-      const numberOfDraftRelations = await axiosInstance.get(endPoint);
       console.warn(
         'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
       );
+      const numberOfDraftRelations = await axiosInstance.get(endPoint);
+
       trackUsageRef.current('didCheckDraftRelations');
 
       dispatch(setStatus('resolved'));
@@ -275,10 +276,10 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
       dispatch(setStatus('publish-pending'));
 
-      const { data } = await axiosInstance.post(endPoint);
       console.warn(
         'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
       );
+      const { data } = await axiosInstance.post(endPoint);
 
       trackUsageRef.current('didPublishEntry');
       toggleNotification({
@@ -309,10 +310,10 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await axiosInstance.put(endPoint, body);
         console.warn(
           'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function putClient'
         );
+        const { data } = await axiosInstance.put(endPoint, body);
 
         toggleNotification({
           type: 'success',
@@ -351,10 +352,10 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     try {
       trackUsageRef.current('willUnpublishEntry');
 
-      const { data } = await axiosInstance.post(endPoint);
       console.warn(
         'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
       );
+      const { data } = await axiosInstance.post(endPoint);
 
       trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
