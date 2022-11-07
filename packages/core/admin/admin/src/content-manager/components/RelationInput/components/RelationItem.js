@@ -67,9 +67,10 @@ export const RelationItem = ({
       }
 
       // Time to actually perform the action
-      updatePositionOfRelation(dragIndex, currentIndex);
-
-      item.index = currentIndex;
+      if (updatePositionOfRelation) {
+        updatePositionOfRelation(dragIndex, currentIndex);
+        item.index = currentIndex;
+      }
     },
   });
 
@@ -133,6 +134,7 @@ RelationItem.defaultProps = {
   disabled: false,
   endAction: undefined,
   style: undefined,
+  updatePositionOfRelation: undefined,
 };
 
 RelationItem.propTypes = {
@@ -149,5 +151,5 @@ RelationItem.propTypes = {
     right: PropTypes.number,
     width: PropTypes.string,
   }),
-  updatePositionOfRelation: PropTypes.func.isRequired,
+  updatePositionOfRelation: PropTypes.func,
 };

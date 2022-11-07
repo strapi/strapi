@@ -3,6 +3,8 @@ import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { RelationInput } from '../index';
 
@@ -49,33 +51,36 @@ const setup = (props) =>
   render(
     <MemoryRouter>
       <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en">
-          <RelationInput
-            description="this is a description"
-            id="1"
-            name="some-relation-1"
-            label="Some Relation"
-            labelLoadMore="Load more"
-            loadingMessage="Relations are loading"
-            labelDisconnectRelation="Remove"
-            numberOfRelationsToDisplay={5}
-            noRelationsMessage="No relations available"
-            onRelationConnect={() => jest.fn()}
-            onRelationDisconnect={() => jest.fn()}
-            onRelationLoadMore={() => jest.fn()}
-            onSearch={() => jest.fn()}
-            onSearchNextPage={() => jest.fn()}
-            placeholder="Select..."
-            publicationStateTranslations={{
-              draft: 'Draft',
-              published: 'Published',
-            }}
-            relations={FIXTURES_RELATIONS}
-            searchResults={FIXTURES_SEARCH}
-            size={8}
-            {...props}
-          />
-        </IntlProvider>
+        <DndProvider backend={HTML5Backend}>
+          <IntlProvider locale="en">
+            <RelationInput
+              description="this is a description"
+              id="1"
+              name="some-relation-1"
+              label="Some Relation"
+              labelLoadMore="Load more"
+              loadingMessage="Relations are loading"
+              labelDisconnectRelation="Remove"
+              numberOfRelationsToDisplay={5}
+              noRelationsMessage="No relations available"
+              onRelationConnect={() => jest.fn()}
+              onRelationDisconnect={() => jest.fn()}
+              onRelationLoadMore={() => jest.fn()}
+              onRelationReorder={() => jest.fn()}
+              onSearch={() => jest.fn()}
+              onSearchNextPage={() => jest.fn()}
+              placeholder="Select..."
+              publicationStateTranslations={{
+                draft: 'Draft',
+                published: 'Published',
+              }}
+              relations={FIXTURES_RELATIONS}
+              searchResults={FIXTURES_SEARCH}
+              size={8}
+              {...props}
+            />
+          </IntlProvider>
+        </DndProvider>
       </ThemeProvider>
     </MemoryRouter>
   );

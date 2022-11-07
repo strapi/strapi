@@ -419,7 +419,7 @@ const ListItem = ({ data, index, style }) => {
           data-testid={`remove-relation-${id}`}
           disabled={disabled}
           type="button"
-          onClick={() => onRelationDisconnect(data[index])}
+          onClick={() => onRelationDisconnect(relations[index])}
           aria-label={labelDisconnectRelation}
         >
           <Icon width="12px" as={Cross} />
