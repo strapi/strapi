@@ -133,7 +133,7 @@
   "Settings.permissions.conditions.anytime": "När som helst",
   "Settings.permissions.conditions.apply": "Använd",
   "Settings.permissions.conditions.can": "Kan",
-  "Settings.permissions.conditions.define-conditions": "Definiera behörigheter",
+  "Settings.permissions.conditions.conditions": "Definiera behörigheter",
   "Settings.permissions.conditions.links": "Länkar",
   "Settings.permissions.conditions.no-actions": "Du måste först välja åtgärder (skapa, läsa, uppdatera, ...) innan du definierar behörigheter för dem.",
   "Settings.permissions.conditions.none-selected": "När som helst",

@@ -105,7 +105,7 @@
   "Settings.permissions.conditions.anytime": "Altijd",
   "Settings.permissions.conditions.apply": "Pas toe",
   "Settings.permissions.conditions.can": "Kan",
-  "Settings.permissions.conditions.define-conditions": "Definieer voorwaarden",
+  "Settings.permissions.conditions.conditions": "Definieer voorwaarden",
   "Settings.permissions.conditions.links": "Links",
   "Settings.permissions.conditions.no-actions": "Selecteer eerst acties (creëer, lees, update, ...) voordat je voorwaarden definieert.",
   "Settings.permissions.conditions.none-selected": "Altijd",

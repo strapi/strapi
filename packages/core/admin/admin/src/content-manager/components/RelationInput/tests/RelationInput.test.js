@@ -56,9 +56,10 @@ const setup = (props) =>
             name="some-relation-1"
             label="Some Relation"
             labelLoadMore="Load more"
-            loadingMessage={() => 'Relations are loading'}
+            loadingMessage="Relations are loading"
             labelDisconnectRelation="Remove"
             numberOfRelationsToDisplay={5}
+            noRelationsMessage="No relations available"
             onRelationConnect={() => jest.fn()}
             onRelationDisconnect={() => jest.fn()}
             onRelationLoadMore={() => jest.fn()}

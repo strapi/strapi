@@ -151,7 +151,7 @@
   "Settings.permissions.conditions.anytime": "Anytime",
   "Settings.permissions.conditions.apply": "Apply",
   "Settings.permissions.conditions.can": "Can",
-  "Settings.permissions.conditions.define-conditions": "Define conditions",
+  "Settings.permissions.conditions.conditions": "Conditions",
   "Settings.permissions.conditions.links": "Links",
   "Settings.permissions.conditions.no-actions": "You first need to select actions (create, read, update, ...) before defining conditions on them.",
   "Settings.permissions.conditions.none-selected": "Anytime",

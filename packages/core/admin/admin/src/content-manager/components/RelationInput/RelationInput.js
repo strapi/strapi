@@ -61,6 +61,7 @@ const RelationInput = ({
   labelLoadMore,
   labelDisconnectRelation,
   loadingMessage,
+  noRelationsMessage,
   onRelationConnect,
   onRelationLoadMore,
   onRelationDisconnect,
@@ -226,7 +227,7 @@ const RelationInput = ({
               inputId={id}
               isSearchable
               isClear
-              loadingMessage={loadingMessage}
+              loadingMessage={() => loadingMessage}
               onChange={(relation) => {
                 setValue(null);
                 onRelationConnect(relation);
@@ -245,6 +246,7 @@ const RelationInput = ({
               onMenuClose={handleMenuClose}
               onMenuOpen={handleMenuOpen}
               menuIsOpen={isMenuOpen}
+              noOptionsMessage={() => noRelationsMessage}
               onMenuScrollToBottom={() => {
                 if (searchResults.hasNextPage) {
                   onSearchNextPage();
@@ -386,8 +388,9 @@ RelationInput.propTypes = {
   labelAction: PropTypes.element,
   labelLoadMore: PropTypes.string,
   labelDisconnectRelation: PropTypes.string.isRequired,
-  loadingMessage: PropTypes.func.isRequired,
+  loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  noRelationsMessage: PropTypes.string.isRequired,
   numberOfRelationsToDisplay: PropTypes.number.isRequired,
   onRelationConnect: PropTypes.func.isRequired,
   onRelationDisconnect: PropTypes.func.isRequired,
