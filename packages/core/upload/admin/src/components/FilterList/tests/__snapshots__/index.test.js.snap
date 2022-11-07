@@ -17,13 +17,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
   padding: 4px;
 }
 
-.c4 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
 .c1 {
   background: #f0f0ff;
   color: #4945ff;
@@ -38,6 +31,13 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
 
 .c6 {
   padding-left: 8px;
+}
+
+.c4 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c3 {

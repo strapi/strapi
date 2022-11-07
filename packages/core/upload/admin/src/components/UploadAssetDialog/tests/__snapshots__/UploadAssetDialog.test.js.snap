@@ -13,7 +13,89 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   width: 1px;
 }
 
+.c3 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+}
+
+.c5 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
+}
+
+.c12 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-left: 40px;
+}
+
+.c14 {
+  padding: 16px;
+}
+
+.c19 {
+  background: #eaeaef;
+}
+
+.c21 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
+}
+
 .c22 {
+  background: #f6f6f9;
+  padding-top: 64px;
+  padding-bottom: 64px;
+  border-radius: 4px;
+  border-color: #c0c0cf;
+  border: 1px solid #c0c0cf;
+  position: relative;
+}
+
+.c28 {
+  padding-top: 12px;
+  padding-bottom: 20px;
+}
+
+.c30 {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  z-index: 1;
+  width: 100%;
+}
+
+.c32 {
+  position: relative;
+}
+
+.c7 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c24 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -31,7 +113,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   justify-content: center;
 }
 
-.c23 {
+.c25 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -45,14 +127,30 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   flex-direction: row;
 }
 
-.c7 {
+.c9 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c27 {
+.c16 {
+  color: #4945ff;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.c18 {
+  color: #666687;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.c29 {
   color: #666687;
   font-weight: 500;
   font-size: 1rem;
@@ -66,7 +164,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   line-height: 1.33;
 }
 
-.c31 {
+.c10 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -80,21 +178,21 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   outline: none;
 }
 
-.c31 svg {
+.c10 svg {
   height: 12px;
   width: 12px;
 }
 
-.c31 svg > g,
-.c31 svg path {
+.c10 svg > g,
+.c10 svg path {
   fill: #ffffff;
 }
 
-.c31[aria-disabled='true'] {
+.c10[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c31:after {
+.c10:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -109,11 +207,11 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   border: 2px solid transparent;
 }
 
-.c31:focus-visible {
+.c10:focus-visible {
   outline: none;
 }
 
-.c31:focus-visible:after {
+.c10:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -124,7 +222,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c32 {
+.c33 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -134,7 +232,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c32 .sc-cfJLRR {
+.c33 .c2 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -145,54 +243,54 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   align-items: center;
 }
 
-.c32 .c33 {
+.c33 .c8 {
   color: #ffffff;
 }
 
-.c32[aria-disabled='true'] {
+.c33[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c32[aria-disabled='true'] .c33 {
+.c33[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c32[aria-disabled='true'] svg > g,
-.c32[aria-disabled='true'] svg path {
+.c33[aria-disabled='true'] svg > g,
+.c33[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c32[aria-disabled='true']:active {
+.c33[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c32[aria-disabled='true']:active .c33 {
+.c33[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c32[aria-disabled='true']:active svg > g,
-.c32[aria-disabled='true']:active svg path {
+.c33[aria-disabled='true']:active svg > g,
+.c33[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c32:hover {
+.c33:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c32:active {
+.c33:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c32 svg > g,
-.c32 svg path {
+.c33 svg > g,
+.c33 svg path {
   fill: #ffffff;
 }
 
-.c38 {
+.c37 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -204,7 +302,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c38 .sc-cfJLRR {
+.c37 .c2 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -215,109 +313,99 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   align-items: center;
 }
 
-.c38 .c33 {
+.c37 .c8 {
   color: #ffffff;
 }
 
-.c38[aria-disabled='true'] {
+.c37[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c38[aria-disabled='true'] .c33 {
+.c37[aria-disabled='true'] .c8 {
   color: #666687;
 }
 
-.c38[aria-disabled='true'] svg > g,
-.c38[aria-disabled='true'] svg path {
+.c37[aria-disabled='true'] svg > g,
+.c37[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c38[aria-disabled='true']:active {
+.c37[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c38[aria-disabled='true']:active .c33 {
+.c37[aria-disabled='true']:active .c8 {
   color: #666687;
 }
 
-.c38[aria-disabled='true']:active svg > g,
-.c38[aria-disabled='true']:active svg path {
+.c37[aria-disabled='true']:active svg > g,
+.c37[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c38:hover {
+.c37:hover {
   background-color: #f6f6f9;
 }
 
-.c38:active {
+.c37:active {
   background-color: #eaeaef;
 }
 
-.c38 .c33 {
+.c37 .c8 {
   color: #32324d;
 }
 
-.c38 svg > g,
-.c38 svg path {
+.c37 svg > g,
+.c37 svg path {
   fill: #32324d;
 }
 
-.c10 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-left: 40px;
-}
-
-.c19 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
-}
-
 .c20 {
-  background: #f6f6f9;
-  padding-top: 64px;
-  padding-bottom: 64px;
-  border-radius: 4px;
-  border-color: #c0c0cf;
-  border: 1px solid #c0c0cf;
-  position: relative;
+  height: 1px;
+  border: none;
+  margin: 0;
 }
 
-.c26 {
-  padding-top: 12px;
-  padding-bottom: 20px;
+.c11 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
 }
 
-.c28 {
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
-  z-index: 1;
-  width: 100%;
+.c11 svg > g,
+.c11 svg path {
+  fill: #8e8ea9;
 }
 
-.c30 {
-  position: relative;
+.c11:hover svg > g,
+.c11:hover svg path {
+  fill: #666687;
 }
 
-.c2 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+.c11:active svg > g,
+.c11:active svg path {
+  fill: #a5a5ba;
 }
 
-.c4 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
+.c11[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c11[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c1 {
@@ -340,141 +428,11 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   justify-content: center;
 }
 
-.c3 {
+.c4 {
   width: 51.875rem;
 }
 
 .c6 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c36 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c8 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c8 svg > g,
-.c8 svg path {
-  fill: #ffffff;
-}
-
-.c8[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c8:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c8:focus-visible {
-  outline: none;
-}
-
-.c8:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c9 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c9 svg > g,
-.c9 svg path {
-  fill: #8e8ea9;
-}
-
-.c9:hover svg > g,
-.c9:hover svg path {
-  fill: #666687;
-}
-
-.c9:active svg > g,
-.c9:active svg path {
-  fill: #a5a5ba;
-}
-
-.c9[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c9[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c5 {
   border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
@@ -484,71 +442,41 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   border-top: 1px solid #eaeaef;
 }
 
-.c37 > * + * {
+.c36 > * + * {
   margin-left: 8px;
 }
 
-.c17 {
-  background: #eaeaef;
-}
-
-.c18 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c14 {
-  color: #4945ff;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c16 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c12 {
-  padding: 16px;
-}
-
-.c13 {
+.c15 {
   border-bottom: 2px solid #4945ff;
 }
 
-.c15 {
+.c17 {
   border-bottom: 2px solid transparent;
 }
 
-.c11[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c24 {
+.c26 {
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
 }
 
-.c25 {
+.c27 {
   font-size: 3.75rem;
 }
 
-.c25 svg path {
+.c27 svg path {
   fill: #4945ff;
 }
 
-.c21 {
+.c23 {
   border-style: dashed;
 }
 
-.c29 {
+.c31 {
   opacity: 0;
   cursor: pointer;
 }
@@ -591,17 +519,17 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
           <div
             aria-labelledby="title"
             aria-modal="true"
-            class="c2 c3"
+            class="c2 c3 c4"
             role="dialog"
           >
             <div
-              class="c4 c5"
+              class="c2 c5 c6"
             >
               <div
-                class="c6"
+                class="c2 c7"
               >
                 <h2
-                  class="c7"
+                  class="c8 c9"
                   id="title"
                 >
                   Add new assets
@@ -609,7 +537,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                 <button
                   aria-disabled="false"
                   aria-label="Close the modal"
-                  class="c8 c9"
+                  class="c10 c11"
                   type="button"
                 >
                   <svg
@@ -629,7 +557,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
             </div>
             <div>
               <div
-                class="c10"
+                class="c2 c12"
               >
                 <div
                   aria-label="How do you want to upload your assets?"
@@ -639,17 +567,17 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                     aria-controls="tabgroup-1-0-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
-                    class="c11"
+                    class="c13"
                     id="tabgroup-1-0-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
                   >
                     <div
-                      class="c12 c13"
+                      class="c2 c14 c15"
                     >
                       <span
-                        class="c14"
+                        class="c8 c16"
                       >
                         From computer
                       </span>
@@ -658,17 +586,17 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                   <button
                     aria-disabled="false"
                     aria-selected="false"
-                    class="c11"
+                    class="c13"
                     id="tabgroup-1-1-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
                   >
                     <div
-                      class="c12 c15"
+                      class="c2 c14 c17"
                     >
                       <span
-                        class="c16"
+                        class="c8 c18"
                       >
                         From url
                       </span>
@@ -676,7 +604,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                   </button>
                 </div>
                 <hr
-                  class="c17 c18"
+                  class="c2 c19 c20"
                 />
               </div>
               <div>
@@ -688,20 +616,20 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                 >
                   <form>
                     <div
-                      class="c19"
+                      class="c2 c21"
                     >
                       <label>
                         <div
-                          class="c20 c21"
+                          class="c2 c22 c23"
                         >
                           <div
-                            class="c22"
+                            class="c2 c24"
                           >
                             <div
-                              class="c23 c24"
+                              class="c2 c25 c26"
                             >
                               <div
-                                class="c25"
+                                class="c27"
                               >
                                 <svg
                                   aria-hidden="true"
@@ -722,16 +650,16 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                                 </svg>
                               </div>
                               <div
-                                class="c26"
+                                class="c2 c28"
                               >
                                 <span
-                                  class="c27"
+                                  class="c8 c29"
                                 >
                                   Drag & Drop here or
                                 </span>
                               </div>
                               <input
-                                class="c28 c29"
+                                class="c2 c30 c31"
                                 multiple=""
                                 name="files"
                                 tabindex="-1"
@@ -739,15 +667,15 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                                 width="100%"
                               />
                               <div
-                                class="c30"
+                                class="c2 c32"
                               >
                                 <button
                                   aria-disabled="false"
-                                  class="c31 c32"
+                                  class="c10 c33"
                                   type="button"
                                 >
                                   <span
-                                    class="c33 c34"
+                                    class="c8 c34"
                                   >
                                     Browse files
                                   </span>
@@ -759,28 +687,28 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
                       </label>
                     </div>
                     <div
-                      class="c4 c35"
+                      class="c2 c5 c35"
                     >
                       <div
-                        class="c6"
+                        class="c2 c7"
                       >
                         <div
-                          class="c36 c37"
+                          class="c2 c25 c36"
                         >
                           <button
                             aria-disabled="false"
-                            class="c31 c38"
+                            class="c10 c37"
                             type="button"
                           >
                             <span
-                              class="c33 c34"
+                              class="c8 c34"
                             >
                               app.components.Button.cancel
                             </span>
                           </button>
                         </div>
                         <div
-                          class="c36 c37"
+                          class="c2 c25 c36"
                         />
                       </div>
                     </div>
@@ -836,21 +764,133 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
       />
     </div>
   </div>
-  .c6 {
+  .c2 {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+}
+
+.c4 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
+}
+
+.c11 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-left: 40px;
+}
+
+.c13 {
+  padding: 16px;
+}
+
+.c18 {
+  background: #eaeaef;
+}
+
+.c20 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
+}
+
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c24 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c22 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c8 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c33 {
+.c17 {
+  color: #4945ff;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.c15 {
+  color: #666687;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.c25 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c30 {
+.c28 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c23 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c23 > * + * {
+  margin-top: 4px;
+}
+
+.c9 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -864,21 +904,21 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   outline: none;
 }
 
-.c30 svg {
+.c9 svg {
   height: 12px;
   width: 12px;
 }
 
-.c30 svg > g,
-.c30 svg path {
+.c9 svg > g,
+.c9 svg path {
   fill: #ffffff;
 }
 
-.c30[aria-disabled='true'] {
+.c9[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c30:after {
+.c9:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -893,11 +933,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   border: 2px solid transparent;
 }
 
-.c30:focus-visible {
+.c9:focus-visible {
   outline: none;
 }
 
-.c30:focus-visible:after {
+.c9:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -908,7 +948,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c34 {
+.c32 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -918,7 +958,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c34 .sc-cfJLRR {
+.c32 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -929,50 +969,50 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   align-items: center;
 }
 
-.c34 .c32 {
+.c32 .c7 {
   color: #ffffff;
 }
 
-.c34[aria-disabled='true'] {
+.c32[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c34[aria-disabled='true'] .c32 {
+.c32[aria-disabled='true'] .c7 {
   color: #666687;
 }
 
-.c34[aria-disabled='true'] svg > g,
-.c34[aria-disabled='true'] svg path {
+.c32[aria-disabled='true'] svg > g,
+.c32[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c34[aria-disabled='true']:active {
+.c32[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c34[aria-disabled='true']:active .c32 {
+.c32[aria-disabled='true']:active .c7 {
   color: #666687;
 }
 
-.c34[aria-disabled='true']:active svg > g,
-.c34[aria-disabled='true']:active svg path {
+.c32[aria-disabled='true']:active svg > g,
+.c32[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c34:hover {
+.c32:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c34:active {
+.c32:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c34 svg > g,
-.c34 svg path {
+.c32 svg > g,
+.c32 svg path {
   fill: #ffffff;
 }
 
@@ -988,7 +1028,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c31 .sc-cfJLRR {
+.c31 .c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -999,7 +1039,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   align-items: center;
 }
 
-.c31 .c32 {
+.c31 .c7 {
   color: #ffffff;
 }
 
@@ -1008,7 +1048,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true'] .c32 {
+.c31[aria-disabled='true'] .c7 {
   color: #666687;
 }
 
@@ -1022,7 +1062,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #eaeaef;
 }
 
-.c31[aria-disabled='true']:active .c32 {
+.c31[aria-disabled='true']:active .c7 {
   color: #666687;
 }
 
@@ -1039,7 +1079,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background-color: #eaeaef;
 }
 
-.c31 .c32 {
+.c31 .c7 {
   color: #32324d;
 }
 
@@ -1048,61 +1088,53 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   fill: #32324d;
 }
 
-.c9 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-left: 40px;
+.c19 {
+  height: 1px;
+  border: none;
+  margin: 0;
 }
 
-.c18 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
-}
-
-.c20 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
+.c10 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c22 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
 }
 
-.c23 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
+.c10 svg > g,
+.c10 svg path {
+  fill: #8e8ea9;
+}
+
+.c10:hover svg > g,
+.c10:hover svg path {
+  fill: #666687;
+}
+
+.c10:active svg > g,
+.c10:active svg path {
+  fill: #a5a5ba;
+}
+
+.c10[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c10[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c26 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c24 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   padding-left: 16px;
@@ -1118,12 +1150,12 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   transition-duration: 0.2s;
 }
 
-.c24:focus-within {
+.c26:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c25 {
+.c27 {
   display: block;
   width: 100%;
   font-weight: 400;
@@ -1134,45 +1166,36 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: inherit;
 }
 
-.c25::-webkit-input-placeholder {
+.c27::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25::-moz-placeholder {
+.c27::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25:-ms-input-placeholder {
+.c27:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25::placeholder {
+.c27::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c25:focus-within {
+.c27:focus-within {
   outline: none;
 }
 
-.c21 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c21 > * + * {
-  margin-top: 4px;
-}
-
-.c19 textarea {
+.c21 textarea {
   height: 5rem;
   line-height: 1.25rem;
 }
 
-.c19 textarea::-webkit-input-placeholder {
+.c21 textarea::-webkit-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -1180,7 +1203,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   opacity: 1;
 }
 
-.c19 textarea::-moz-placeholder {
+.c21 textarea::-moz-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -1188,7 +1211,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   opacity: 1;
 }
 
-.c19 textarea:-ms-input-placeholder {
+.c21 textarea:-ms-input-placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
@@ -1196,26 +1219,12 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   opacity: 1;
 }
 
-.c19 textarea::placeholder {
+.c21 textarea::placeholder {
   font-weight: 400;
   font-size: 0.875rem;
   line-height: 1.43;
   color: #8e8ea9;
   opacity: 1;
-}
-
-.c1 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
-}
-
-.c3 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
 }
 
 .c0 {
@@ -1238,193 +1247,33 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   justify-content: center;
 }
 
-.c2 {
+.c3 {
   width: 51.875rem;
 }
 
 .c5 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c28 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c7 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c7 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c7 svg > g,
-.c7 svg path {
-  fill: #ffffff;
-}
-
-.c7[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c7:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c7:focus-visible {
-  outline: none;
-}
-
-.c7:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c8 svg > g,
-.c8 svg path {
-  fill: #8e8ea9;
-}
-
-.c8:hover svg > g,
-.c8:hover svg path {
-  fill: #666687;
-}
-
-.c8:active svg > g,
-.c8:active svg path {
-  fill: #a5a5ba;
-}
-
-.c8[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c8[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c4 {
   border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
-.c27 {
+.c29 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c29 > * + * {
+.c30 > * + * {
   margin-left: 8px;
 }
 
 .c16 {
-  background: #eaeaef;
-}
-
-.c17 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c15 {
-  color: #4945ff;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c13 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c11 {
-  padding: 16px;
-}
-
-.c14 {
   border-bottom: 2px solid #4945ff;
 }
 
-.c12 {
+.c14 {
   border-bottom: 2px solid transparent;
 }
 
-.c10[aria-disabled='true'] {
+.c12[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
@@ -1439,17 +1288,17 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
           <div
             aria-labelledby="title"
             aria-modal="true"
-            class="c1 c2"
+            class="c1 c2 c3"
             role="dialog"
           >
             <div
-              class="c3 c4"
+              class="c1 c4 c5"
             >
               <div
-                class="c5"
+                class="c1 c6"
               >
                 <h2
-                  class="c6"
+                  class="c7 c8"
                   id="title"
                 >
                   Add new assets
@@ -1457,7 +1306,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                 <button
                   aria-disabled="false"
                   aria-label="Close the modal"
-                  class="c7 c8"
+                  class="c9 c10"
                   type="button"
                 >
                   <svg
@@ -1477,7 +1326,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
             </div>
             <div>
               <div
-                class="c9"
+                class="c1 c11"
               >
                 <div
                   aria-label="How do you want to upload your assets?"
@@ -1486,37 +1335,37 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                   <button
                     aria-disabled="false"
                     aria-selected="false"
-                    class="c10"
-                    id="tabgroup-8-0-tab"
+                    class="c12"
+                    id="tabgroup-33-0-tab"
                     role="tab"
                     tabindex="-1"
                     type="button"
                   >
                     <div
-                      class="c11 c12"
+                      class="c1 c13 c14"
                     >
                       <span
-                        class="c13"
+                        class="c7 c15"
                       >
                         From computer
                       </span>
                     </div>
                   </button>
                   <button
-                    aria-controls="tabgroup-8-1-tabpanel"
+                    aria-controls="tabgroup-33-1-tabpanel"
                     aria-disabled="false"
                     aria-selected="true"
-                    class="c10"
-                    id="tabgroup-8-1-tab"
+                    class="c12"
+                    id="tabgroup-33-1-tab"
                     role="tab"
                     tabindex="0"
                     type="button"
                   >
                     <div
-                      class="c11 c14"
+                      class="c1 c13 c16"
                     >
                       <span
-                        class="c15"
+                        class="c7 c17"
                       >
                         From url
                       </span>
@@ -1524,13 +1373,13 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                   </button>
                 </div>
                 <hr
-                  class="c16 c17"
+                  class="c1 c18 c19"
                 />
               </div>
               <div>
                 <div
-                  aria-labelledby="tabgroup-8-1-tab"
-                  id="tabgroup-8-1-tabpanel"
+                  aria-labelledby="tabgroup-33-1-tab"
+                  id="tabgroup-33-1-tabpanel"
                   role="tabpanel"
                   tabindex="0"
                 >
@@ -1539,44 +1388,44 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                     novalidate=""
                   >
                     <div
-                      class="c18"
+                      class="c1 c20"
                     >
                       <div
-                        class="c19"
+                        class="c21"
                       >
                         <div>
                           <div
-                            class="c20 c21"
+                            class="c1 c22 c23"
                             spacing="1"
                           >
                             <div
-                              class="c22"
+                              class="c1 c24"
                             >
                               <label
-                                class="c23"
-                                for="textarea-1"
+                                class="c7 c25"
+                                for="textarea-35"
                               >
                                 <div
-                                  class="c22"
+                                  class="c1 c24"
                                 >
                                   URL
                                 </div>
                               </label>
                             </div>
                             <div
-                              class="c24"
+                              class="c26"
                             >
                               <textarea
-                                aria-describedby="textarea-1-hint"
+                                aria-describedby="textarea-35-hint"
                                 aria-invalid="false"
-                                class="c25"
-                                id="textarea-1"
+                                class="c27"
+                                id="textarea-35"
                                 name="urls"
                               />
                             </div>
                             <p
-                              class="c26"
-                              id="textarea-1-hint"
+                              class="c7 c28"
+                              id="textarea-35-hint"
                             >
                               Separate your URL links by a carriage return.
                             </p>
@@ -1585,36 +1434,36 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c3 c27"
+                      class="c1 c4 c29"
                     >
                       <div
-                        class="c5"
+                        class="c1 c6"
                       >
                         <div
-                          class="c28 c29"
+                          class="c1 c24 c30"
                         >
                           <button
                             aria-disabled="false"
-                            class="c30 c31"
+                            class="c9 c31"
                             type="button"
                           >
                             <span
-                              class="c32 c33"
+                              class="c7 c25"
                             >
                               app.components.Button.cancel
                             </span>
                           </button>
                         </div>
                         <div
-                          class="c28 c29"
+                          class="c1 c24 c30"
                         >
                           <button
                             aria-disabled="false"
-                            class="c30 c34"
+                            class="c9 c32"
                             type="submit"
                           >
                             <span
-                              class="c32 c33"
+                              class="c7 c25"
                             >
                               Next
                             </span>

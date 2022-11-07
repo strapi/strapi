@@ -136,41 +136,6 @@ describe('Content manager | App | main', () => {
         will-change: transform;
       }
 
-      .c32 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: space-around;
-        -webkit-justify-content: space-around;
-        -ms-flex-pack: space-around;
-        justify-content: space-around;
-      }
-
-      .c33 {
-        height: 100vh;
-      }
-
-      .c30 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: auto 1fr;
-      }
-
-      .c31 {
-        overflow-x: hidden;
-      }
-
       .c2 {
         padding-top: 24px;
         padding-right: 16px;
@@ -231,16 +196,8 @@ describe('Content manager | App | main', () => {
         padding-left: 8px;
       }
 
-      .c1 {
-        width: 14.5rem;
-        background: #f6f6f9;
-        position: -webkit-sticky;
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        overflow-y: auto;
-        border-right: 1px solid #dcdce4;
-        z-index: 1;
+      .c30 {
+        padding-bottom: 56px;
       }
 
       .c3 {
@@ -307,6 +264,24 @@ describe('Content manager | App | main', () => {
         justify-content: center;
       }
 
+      .c32 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: space-around;
+        -webkit-justify-content: space-around;
+        -ms-flex-pack: space-around;
+        justify-content: space-around;
+      }
+
       .c5 {
         color: #32324d;
         font-weight: 600;
@@ -326,6 +301,24 @@ describe('Content manager | App | main', () => {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
+      }
+
+      .c14 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c14 > * + * {
+        margin-top: 8px;
+      }
+
+      .c15 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c15 > * + * {
+        margin-top: 4px;
       }
 
       .c6 {
@@ -386,6 +379,12 @@ describe('Content manager | App | main', () => {
         border: 2px solid #4945ff;
       }
 
+      .c10 {
+        height: 1px;
+        border: none;
+        margin: 0;
+      }
+
       .c7 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -426,10 +425,29 @@ describe('Content manager | App | main', () => {
         fill: #666687;
       }
 
-      .c10 {
-        height: 1px;
-        border: none;
-        margin: 0;
+      .c33 {
+        height: 100vh;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: auto 1fr;
+      }
+
+      .c31 {
+        overflow-x: hidden;
+      }
+
+      .c1 {
+        width: 14.5rem;
+        background: #f6f6f9;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        border-right: 1px solid #dcdce4;
+        z-index: 1;
       }
 
       .c11 {
@@ -484,24 +502,6 @@ describe('Content manager | App | main', () => {
 
       .c27 * {
         fill: #666687;
-      }
-
-      .c14 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c14 > * + * {
-        margin-top: 8px;
-      }
-
-      .c15 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c15 > * + * {
-        margin-top: 4px;
       }
 
       .c20 {

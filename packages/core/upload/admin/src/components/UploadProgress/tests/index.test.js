@@ -55,17 +55,17 @@ describe('<UploadProgress />', () => {
         line-height: 1.33;
       }
 
+      .c0 {
+        background: #4a4a6a;
+        border-radius: 4px;
+      }
+
       .c3 {
         padding-bottom: 8px;
       }
 
       .c7 {
         padding-left: 8px;
-      }
-
-      .c0 {
-        background: #4a4a6a;
-        border-radius: 4px;
       }
 
       .c1 {

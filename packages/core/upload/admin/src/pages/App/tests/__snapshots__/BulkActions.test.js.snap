@@ -13,11 +13,15 @@ exports[`BulkActions renders 1`] = `
   width: 1px;
 }
 
-.c0 {
+.c1 {
   padding-bottom: 20px;
 }
 
-.c1 {
+.c8 {
+  padding-right: 8px;
+}
+
+.c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -31,16 +35,16 @@ exports[`BulkActions renders 1`] = `
   flex-direction: row;
 }
 
-.c2 > * {
+.c3 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c2 > * + * {
+.c3 > * + * {
   margin-left: 8px;
 }
 
-.c3 {
+.c5 {
   color: #666687;
   font-size: 1rem;
   line-height: 1.5;
@@ -53,11 +57,7 @@ exports[`BulkActions renders 1`] = `
   line-height: 1.33;
 }
 
-.c7 {
-  padding-right: 8px;
-}
-
-.c4 {
+.c6 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -71,21 +71,21 @@ exports[`BulkActions renders 1`] = `
   outline: none;
 }
 
-.c4 svg {
+.c6 svg {
   height: 12px;
   width: 12px;
 }
 
-.c4 svg > g,
-.c4 svg path {
+.c6 svg > g,
+.c6 svg path {
   fill: #ffffff;
 }
 
-.c4[aria-disabled='true'] {
+.c6[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c4:after {
+.c6:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -100,11 +100,11 @@ exports[`BulkActions renders 1`] = `
   border: 2px solid transparent;
 }
 
-.c4:focus-visible {
+.c6:focus-visible {
   outline: none;
 }
 
-.c4:focus-visible:after {
+.c6:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -115,11 +115,11 @@ exports[`BulkActions renders 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c8 {
+.c9 {
   height: 100%;
 }
 
-.c5 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -131,7 +131,7 @@ exports[`BulkActions renders 1`] = `
   background: #fcecea;
 }
 
-.c5 .c6 {
+.c7 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -142,62 +142,62 @@ exports[`BulkActions renders 1`] = `
   align-items: center;
 }
 
-.c5 .c9 {
+.c7 .c4 {
   color: #ffffff;
 }
 
-.c5[aria-disabled='true'] {
+.c7[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c5[aria-disabled='true'] .c9 {
+.c7[aria-disabled='true'] .c4 {
   color: #666687;
 }
 
-.c5[aria-disabled='true'] svg > g,
-.c5[aria-disabled='true'] svg path {
+.c7[aria-disabled='true'] svg > g,
+.c7[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c5[aria-disabled='true']:active {
+.c7[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c5[aria-disabled='true']:active .c9 {
+.c7[aria-disabled='true']:active .c4 {
   color: #666687;
 }
 
-.c5[aria-disabled='true']:active svg > g,
-.c5[aria-disabled='true']:active svg path {
+.c7[aria-disabled='true']:active svg > g,
+.c7[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c5:hover {
+.c7:hover {
   background-color: #ffffff;
 }
 
-.c5:active {
+.c7:active {
   background-color: #ffffff;
   border: 1px solid #d02b20;
 }
 
-.c5:active .c9 {
+.c7:active .c4 {
   color: #d02b20;
 }
 
-.c5:active svg > g,
-.c5:active svg path {
+.c7:active svg > g,
+.c7:active svg path {
   fill: #d02b20;
 }
 
-.c5 .c9 {
+.c7 .c4 {
   color: #b72b1a;
 }
 
-.c5 svg > g,
-.c5 svg path {
+.c7 svg > g,
+.c7 svg path {
   fill: #b72b1a;
 }
 
@@ -213,7 +213,7 @@ exports[`BulkActions renders 1`] = `
   background: #f0f0ff;
 }
 
-.c11 .c6 {
+.c11 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -224,7 +224,7 @@ exports[`BulkActions renders 1`] = `
   align-items: center;
 }
 
-.c11 .c9 {
+.c11 .c4 {
   color: #ffffff;
 }
 
@@ -233,7 +233,7 @@ exports[`BulkActions renders 1`] = `
   background: #eaeaef;
 }
 
-.c11[aria-disabled='true'] .c9 {
+.c11[aria-disabled='true'] .c4 {
   color: #666687;
 }
 
@@ -247,7 +247,7 @@ exports[`BulkActions renders 1`] = `
   background: #eaeaef;
 }
 
-.c11[aria-disabled='true']:active .c9 {
+.c11[aria-disabled='true']:active .c4 {
   color: #666687;
 }
 
@@ -265,7 +265,7 @@ exports[`BulkActions renders 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c11:active .c9 {
+.c11:active .c4 {
   color: #4945ff;
 }
 
@@ -274,7 +274,7 @@ exports[`BulkActions renders 1`] = `
   fill: #4945ff;
 }
 
-.c11 .c9 {
+.c11 .c4 {
   color: #271fe0;
 }
 
@@ -285,22 +285,22 @@ exports[`BulkActions renders 1`] = `
 
 <div>
   <div
-    class="c0 c1 c2"
+    class="c0 c1 c2 c3"
     spacing="2"
   >
     <span
-      class="c3"
+      class="c4 c5"
     >
       0 folders - 0 assets selected
     </span>
     <button
       aria-disabled="false"
-      class="c4 c5"
+      class="c6 c7"
       type="button"
     >
       <div
         aria-hidden="true"
-        class="c6 c7 c8"
+        class="c0 c8 c9"
       >
         <svg
           fill="none"
@@ -316,19 +316,19 @@ exports[`BulkActions renders 1`] = `
         </svg>
       </div>
       <span
-        class="c9 c10"
+        class="c4 c10"
       >
         Delete
       </span>
     </button>
     <button
       aria-disabled="false"
-      class="c4 c11"
+      class="c6 c11"
       type="button"
     >
       <div
         aria-hidden="true"
-        class="c6 c7 c8"
+        class="c0 c8 c9"
       >
         <svg
           fill="none"
@@ -344,7 +344,7 @@ exports[`BulkActions renders 1`] = `
         </svg>
       </div>
       <span
-        class="c9 c10"
+        class="c4 c10"
       >
         Move
       </span>

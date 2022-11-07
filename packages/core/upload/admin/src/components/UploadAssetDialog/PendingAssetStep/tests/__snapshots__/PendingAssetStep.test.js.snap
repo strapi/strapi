@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
-.c59 {
+.c51 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -13,12 +13,75 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   width: 1px;
 }
 
-.c46 {
+.c44 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c1 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
+}
+
+.c8 {
+  padding: 32px;
+}
+
+.c18 {
+  background: #ffffff;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  height: 100%;
+}
+
+.c22 {
+  position: end;
+}
+
+.c30 {
+  padding-top: 8px;
+  padding-right: 12px;
+  padding-bottom: 8px;
+  padding-left: 12px;
+}
+
+.c33 {
+  padding-top: 4px;
+}
+
+.c36 {
+  background: #f6f6f9;
+  padding: 4px;
+  border-radius: 4px;
+  min-width: 20px;
+}
+
+.c40 {
   width: 100%;
   height: 5.5rem;
 }
 
-.c10 {
+.c45 {
+  background: #32324d;
+  color: #ffffff;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.c3 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -36,7 +99,21 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   justify-content: space-between;
 }
 
-.c47 {
+.c10 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c20 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -54,55 +131,60 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   justify-content: center;
 }
 
-.c8 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
+.c23 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c9 > * {
-  margin-top: 0;
-  margin-bottom: 0;
+.c31 {
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c9 > * + * {
-  margin-top: 32px;
+.c37 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
 }
 
-.c11 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c3 {
+.c5 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c12 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
 .c13 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c17 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
@@ -110,6 +192,49 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 }
 
 .c14 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c39 {
+  color: #666687;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.c47 {
+  color: #ffffff;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c11 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c11 > * + * {
+  margin-top: 32px;
+}
+
+.c12 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c24 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c24 > * + * {
+  margin-left: 8px;
+}
+
+.c6 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -123,21 +248,21 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   outline: none;
 }
 
-.c14 svg {
+.c6 svg {
   height: 12px;
   width: 12px;
 }
 
-.c14 svg > g,
-.c14 svg path {
+.c6 svg > g,
+.c6 svg path {
   fill: #ffffff;
 }
 
-.c14[aria-disabled='true'] {
+.c6[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c14:after {
+.c6:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -152,11 +277,11 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   border: 2px solid transparent;
 }
 
-.c14:focus-visible {
+.c6:focus-visible {
   outline: none;
 }
 
-.c14:focus-visible:after {
+.c6:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -177,7 +302,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c15 .sc-cfJLRR {
+.c15 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -188,7 +313,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   align-items: center;
 }
 
-.c15 .c16 {
+.c15 .c4 {
   color: #ffffff;
 }
 
@@ -197,7 +322,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true'] .c16 {
+.c15[aria-disabled='true'] .c4 {
   color: #666687;
 }
 
@@ -211,7 +336,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #eaeaef;
 }
 
-.c15[aria-disabled='true']:active .c16 {
+.c15[aria-disabled='true']:active .c4 {
   color: #666687;
 }
 
@@ -235,7 +360,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   fill: #ffffff;
 }
 
-.c58 {
+.c50 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -247,7 +372,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background: #ffffff;
 }
 
-.c58 .sc-cfJLRR {
+.c50 .c0 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -258,118 +383,56 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   align-items: center;
 }
 
-.c58 .c16 {
+.c50 .c4 {
   color: #ffffff;
 }
 
-.c58[aria-disabled='true'] {
+.c50[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c58[aria-disabled='true'] .c16 {
+.c50[aria-disabled='true'] .c4 {
   color: #666687;
 }
 
-.c58[aria-disabled='true'] svg > g,
-.c58[aria-disabled='true'] svg path {
+.c50[aria-disabled='true'] svg > g,
+.c50[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c58[aria-disabled='true']:active {
+.c50[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c58[aria-disabled='true']:active .c16 {
+.c50[aria-disabled='true']:active .c4 {
   color: #666687;
 }
 
-.c58[aria-disabled='true']:active svg > g,
-.c58[aria-disabled='true']:active svg path {
+.c50[aria-disabled='true']:active svg > g,
+.c50[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c58:hover {
+.c50:hover {
   background-color: #f6f6f9;
 }
 
-.c58:active {
+.c50:active {
   background-color: #eaeaef;
 }
 
-.c58 .c16 {
+.c50 .c4 {
   color: #32324d;
 }
 
-.c58 svg > g,
-.c58 svg path {
+.c50 svg > g,
+.c50 svg path {
   fill: #32324d;
 }
 
-.c37 {
-  padding-top: 4px;
-}
-
-.c30 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c30 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c30 svg > g,
-.c30 svg path {
-  fill: #ffffff;
-}
-
-.c30[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c30:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c30:focus-visible {
-  outline: none;
-}
-
-.c30:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c31 {
+.c7 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -386,328 +449,66 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   width: 2rem;
 }
 
-.c31 svg > g,
-.c31 svg path {
+.c7 svg > g,
+.c7 svg path {
   fill: #8e8ea9;
 }
 
-.c31:hover svg > g,
-.c31:hover svg path {
+.c7:hover svg > g,
+.c7:hover svg path {
   fill: #666687;
 }
 
-.c31:active svg > g,
-.c31:active svg path {
+.c7:active svg > g,
+.c7:active svg path {
   fill: #a5a5ba;
 }
 
-.c31[aria-disabled='true'] {
+.c7[aria-disabled='true'] {
   background-color: #eaeaef;
 }
 
-.c31[aria-disabled='true'] svg path {
+.c7[aria-disabled='true'] svg path {
   fill: #666687;
-}
-
-.c51 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c0 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
-}
-
-.c6 {
-  padding: 32px;
 }
 
 .c2 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c56 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c4 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c4 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c4 svg > g,
-.c4 svg path {
-  fill: #ffffff;
-}
-
-.c4[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c4:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c4:focus-visible {
-  outline: none;
-}
-
-.c4:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c5 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c5 svg > g,
-.c5 svg path {
-  fill: #8e8ea9;
-}
-
-.c5:hover svg > g,
-.c5:hover svg path {
-  fill: #666687;
-}
-
-.c5:active svg > g,
-.c5:active svg path {
-  fill: #a5a5ba;
-}
-
-.c5[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c5[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c1 {
   border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
-.c55 {
+.c48 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c57 > * + * {
+.c49 > * + * {
   margin-left: 8px;
 }
 
-.c7 {
+.c9 {
   overflow: auto;
   max-height: 60vh;
 }
 
-.c18 {
+.c16 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c19 {
+.c17 {
   grid-column: span 4;
   max-width: 100%;
 }
 
-.c20 {
-  background: #ffffff;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #eaeaef;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-  height: 100%;
-}
-
-.c24 {
-  position: end;
-}
-
-.c34 {
-  padding-top: 8px;
-  padding-right: 12px;
-  padding-bottom: 8px;
-  padding-left: 12px;
-}
-
-.c42 {
-  background: #f6f6f9;
-  padding: 4px;
-  border-radius: 4px;
-  min-width: 20px;
-}
-
-.c52 {
-  background: #32324d;
-  color: #ffffff;
-  padding: 4px;
-  border-radius: 4px;
-}
-
-.c22 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c25 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c35 {
-  -webkit-align-items: flex-start;
-  -webkit-box-align: flex-start;
-  -ms-flex-align: flex-start;
-  align-items: flex-start;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c43 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c26 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c26 > * + * {
-  margin-left: 8px;
-}
-
-.c28 {
+.c26 {
   position: absolute;
   top: 12px;
   right: 12px;
 }
 
-.c33 {
+.c29 {
   margin: 0;
   padding: 0;
   max-height: 100%;
@@ -715,7 +516,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   object-fit: contain;
 }
 
-.c32 {
+.c28 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -731,103 +532,76 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   border-top-right-radius: 4px;
 }
 
-.c38 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c39 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c45 {
-  color: #666687;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-}
-
-.c54 {
-  color: #ffffff;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c41 {
+.c35 {
   margin-left: auto;
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
 }
 
-.c44 {
+.c38 {
   margin-left: 4px;
 }
 
-.c36 {
+.c32 {
   word-break: break-all;
 }
 
-.c23 {
+.c21 {
   position: relative;
   border-bottom: 1px solid #eaeaef;
 }
 
-.c53 {
+.c46 {
   position: absolute;
   bottom: 4px;
   right: 4px;
 }
 
-.c40 {
+.c34 {
   text-transform: uppercase;
 }
 
-.c29 {
+.c27 {
   opacity: 0;
 }
 
-.c29:focus-within {
+.c27:focus-within {
   opacity: 1;
 }
 
-.c21 {
+.c19 {
   cursor: pointer;
 }
 
-.c21:hover .c27 {
+.c19:hover .c25 {
   opacity: 1;
 }
 
-.c50 canvas,
-.c50 video {
+.c43 canvas,
+.c43 video {
   display: block;
   max-width: 100%;
   max-height: 5.5rem;
 }
 
-.c49 svg {
+.c42 svg {
   font-size: 3rem;
 }
 
-.c48 {
+.c41 {
   border-radius: 4px 4px 0 0;
   background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
 }
 
 @media (max-width:68.75rem) {
-  .c19 {
+  .c17 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c19 {
+  .c17 {
     grid-column: span;
   }
 }
@@ -835,13 +609,13 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 <div>
   <form>
     <div
-      class="c0 c1"
+      class="c0 c1 c2"
     >
       <div
-        class="c2"
+        class="c0 c3"
       >
         <h2
-          class="c3"
+          class="c4 c5"
           id="title"
         >
           Add new assets
@@ -849,7 +623,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
         <button
           aria-disabled="false"
           aria-label="Close the modal"
-          class="c4 c5"
+          class="c6 c7"
           type="button"
         >
           <svg
@@ -868,72 +642,72 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
       </div>
     </div>
     <div
-      class="c6 c7"
+      class="c0 c8 c9"
     >
       <div
-        class="c8 c9"
+        class="c0 c10 c11"
         spacing="7"
       >
         <div
-          class="c10"
+          class="c0 c3"
         >
           <div
-            class="c8 c11"
+            class="c0 c10 c12"
           >
             <span
-              class="c12"
+              class="c4 c13"
             >
               3 assets ready to upload
             </span>
             <span
-              class="c13"
+              class="c4 c14"
             >
               Manage the assets before adding them to the Media Library
             </span>
           </div>
           <button
             aria-disabled="false"
-            class="c14 c15"
+            class="c6 c15"
             type="button"
           >
             <span
-              class="c16 c17"
+              class="c4 c13"
             >
               Add new assets
             </span>
           </button>
         </div>
         <div
-          class=""
+          class="c0 "
         >
           <div
-            class="c18"
+            class="c0 c16"
           >
             <div
-              class="c19"
+              class="c17"
             >
               <div
-                class=""
+                class="c0 "
               >
                 <article
                   aria-labelledby="card-1-title"
-                  class="c20 c21"
+                  class="c0 c18 c19"
                   height="100%"
                   role="button"
                   tabindex="-1"
                 >
                   <div
-                    class="c22 c23"
+                    class="c0 c20 c21"
                   >
                     <div
-                      class="c24 c25 c26 c27 c28 c29"
+                      class="c0 c22 c23 c24 c25 c26 c27"
                       spacing="2"
                     >
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby="tooltip-1"
-                          class="c30 c31"
+                          aria-labelledby="tooltip-2"
+                          class="c6 c7"
                           tabindex="0"
                           type="button"
                         >
@@ -954,8 +728,8 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby="tooltip-3"
-                          class="c30 c31"
+                          aria-labelledby="tooltip-4"
+                          class="c6 c7"
                           tabindex="0"
                           type="button"
                         >
@@ -977,40 +751,40 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       </span>
                     </div>
                     <div
-                      class="c32"
+                      class="c28"
                     >
                       <img
                         alt="something.jpg"
                         aria-hidden="true"
-                        class="c33"
+                        class="c29"
                         src="http://localhost:5000/CPAM.jpg"
                       />
                     </div>
                   </div>
                   <div
-                    class="c34"
+                    class="c0 c30"
                   >
                     <div
-                      class="c35"
+                      class="c0 c31"
                     >
                       <div
-                        class="c36"
+                        class="c0 c32"
                       >
                         <div
-                          class="c37"
+                          class="c0 c33"
                         >
                           <h2
-                            class="c38"
+                            class="c4 c13"
                             id="card-1-title"
                           >
                             something.jpg
                           </h2>
                         </div>
                         <div
-                          class="c39"
+                          class="c4 c14"
                         >
                           <span
-                            class="c40"
+                            class="c34"
                           >
                             jpg
                           </span>
@@ -1018,13 +792,13 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                         </div>
                       </div>
                       <div
-                        class="c41"
+                        class="c35"
                       >
                         <div
-                          class="c42 c43 c44"
+                          class="c0 c36 c37 c38"
                         >
                           <span
-                            class="c45"
+                            class="c4 c39"
                           >
                             Image
                           </span>
@@ -1036,30 +810,30 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
               </div>
             </div>
             <div
-              class="c19"
+              class="c17"
             >
               <div
-                class=""
+                class="c0 "
               >
                 <article
-                  aria-labelledby="card-2-title"
-                  class="c20 c21"
+                  aria-labelledby="card-6-title"
+                  class="c0 c18 c19"
                   height="100%"
                   role="button"
                   tabindex="-1"
                 >
                   <div
-                    class="c22 c23"
+                    class="c0 c20 c21"
                   >
                     <div
-                      class="c24 c25 c26 c27 c28 c29"
+                      class="c0 c22 c23 c24 c25 c26 c27"
                       spacing="2"
                     >
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby="tooltip-5"
-                          class="c30 c31"
+                          aria-labelledby="tooltip-7"
+                          class="c6 c7"
                           tabindex="0"
                           type="button"
                         >
@@ -1080,8 +854,8 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby="tooltip-7"
-                          class="c30 c31"
+                          aria-labelledby="tooltip-9"
+                          class="c6 c7"
                           tabindex="0"
                           type="button"
                         >
@@ -1103,12 +877,12 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       </span>
                     </div>
                     <div
-                      class="c46 c47 c48"
+                      class="c0 c40 c20 c41"
                       height="5.5rem"
                       width="100%"
                     >
                       <span
-                        class="c49"
+                        class="c42"
                       >
                         <svg
                           aria-label="something.pdf"
@@ -1133,29 +907,29 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c34"
+                    class="c0 c30"
                   >
                     <div
-                      class="c35"
+                      class="c0 c31"
                     >
                       <div
-                        class="c36"
+                        class="c0 c32"
                       >
                         <div
-                          class="c37"
+                          class="c0 c33"
                         >
                           <h2
-                            class="c38"
-                            id="card-2-title"
+                            class="c4 c13"
+                            id="card-6-title"
                           >
                             something.pdf
                           </h2>
                         </div>
                         <div
-                          class="c39"
+                          class="c4 c14"
                         >
                           <span
-                            class="c40"
+                            class="c34"
                           >
                             pdf
                           </span>
@@ -1163,13 +937,13 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                         </div>
                       </div>
                       <div
-                        class="c41"
+                        class="c35"
                       >
                         <div
-                          class="c42 c43 c44"
+                          class="c0 c36 c37 c38"
                         >
                           <span
-                            class="c45"
+                            class="c4 c39"
                           >
                             Doc
                           </span>
@@ -1181,30 +955,30 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
               </div>
             </div>
             <div
-              class="c19"
+              class="c17"
             >
               <div
-                class=""
+                class="c0 "
               >
                 <article
-                  aria-labelledby="card-3-title"
-                  class="c20 c21"
+                  aria-labelledby="card-11-title"
+                  class="c0 c18 c19"
                   height="100%"
                   role="button"
                   tabindex="-1"
                 >
                   <div
-                    class="c22 c23"
+                    class="c0 c20 c21"
                   >
                     <div
-                      class="c24 c25 c26 c27 c28 c29"
+                      class="c0 c22 c23 c24 c25 c26 c27"
                       spacing="2"
                     >
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby="tooltip-9"
-                          class="c30 c31"
+                          aria-labelledby="tooltip-12"
+                          class="c6 c7"
                           tabindex="0"
                           type="button"
                         >
@@ -1225,8 +999,8 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       <span>
                         <button
                           aria-disabled="false"
-                          aria-labelledby="tooltip-11"
-                          class="c30 c31"
+                          aria-labelledby="tooltip-14"
+                          class="c6 c7"
                           tabindex="0"
                           type="button"
                         >
@@ -1248,16 +1022,16 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       </span>
                     </div>
                     <div
-                      class="c32"
+                      class="c28"
                     >
                       <div
-                        class="c25"
+                        class="c0 c23"
                       >
                         <div
-                          class="c50"
+                          class="c0 c43"
                         >
                           <figure
-                            class=""
+                            class="c0 "
                           >
                             <video
                               crossorigin="anonymous"
@@ -1268,7 +1042,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                               />
                             </video>
                             <figcaption
-                              class="c51"
+                              class="c44"
                             >
                               something.mp4
                             </figcaption>
@@ -1277,39 +1051,39 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       </div>
                     </div>
                     <time
-                      class="c52 c53"
+                      class="c0 c45 c46"
                     >
                       <span
-                        class="c54"
+                        class="c4 c47"
                       >
                         ...
                       </span>
                     </time>
                   </div>
                   <div
-                    class="c34"
+                    class="c0 c30"
                   >
                     <div
-                      class="c35"
+                      class="c0 c31"
                     >
                       <div
-                        class="c36"
+                        class="c0 c32"
                       >
                         <div
-                          class="c37"
+                          class="c0 c33"
                         >
                           <h2
-                            class="c38"
-                            id="card-3-title"
+                            class="c4 c13"
+                            id="card-11-title"
                           >
                             something.mp4
                           </h2>
                         </div>
                         <div
-                          class="c39"
+                          class="c4 c14"
                         >
                           <span
-                            class="c40"
+                            class="c34"
                           >
                             mp4
                           </span>
@@ -1317,13 +1091,13 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                         </div>
                       </div>
                       <div
-                        class="c41"
+                        class="c35"
                       >
                         <div
-                          class="c42 c43 c44"
+                          class="c0 c36 c37 c38"
                         >
                           <span
-                            class="c45"
+                            class="c4 c39"
                           >
                             Video
                           </span>
@@ -1339,36 +1113,36 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
       </div>
     </div>
     <div
-      class="c0 c55"
+      class="c0 c1 c48"
     >
       <div
-        class="c2"
+        class="c0 c3"
       >
         <div
-          class="c56 c57"
+          class="c0 c23 c49"
         >
           <button
             aria-disabled="false"
-            class="c14 c58"
+            class="c6 c50"
             type="button"
           >
             <span
-              class="c16 c17"
+              class="c4 c13"
             >
               cancel
             </span>
           </button>
         </div>
         <div
-          class="c56 c57"
+          class="c0 c23 c49"
         >
           <button
             aria-disabled="false"
-            class="c14 c15"
+            class="c6 c15"
             type="submit"
           >
             <span
-              class="c16 c17"
+              class="c4 c13"
             >
               Upload 3 assets to the library
             </span>
@@ -1378,7 +1152,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
     </div>
   </form>
   <div
-    class="c59"
+    class="c51"
   >
     <p
       aria-live="polite"

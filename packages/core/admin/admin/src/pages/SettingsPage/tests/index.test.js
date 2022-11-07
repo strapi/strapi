@@ -74,19 +74,6 @@ describe('ADMIN | pages | SettingsPage', () => {
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c12 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: auto 1fr;
-      }
-
-      .c13 {
-        overflow-x: hidden;
-      }
-
       .c2 {
         padding-top: 24px;
         padding-right: 16px;
@@ -107,16 +94,8 @@ describe('ADMIN | pages | SettingsPage', () => {
         padding-bottom: 16px;
       }
 
-      .c1 {
-        width: 14.5rem;
-        background: #f6f6f9;
-        position: -webkit-sticky;
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        overflow-y: auto;
-        border-right: 1px solid #dcdce4;
-        z-index: 1;
+      .c12 {
+        padding-bottom: 56px;
       }
 
       .c3 {
@@ -158,17 +137,6 @@ describe('ADMIN | pages | SettingsPage', () => {
         line-height: 1.22;
       }
 
-      .c7 {
-        height: 1px;
-        border: none;
-        margin: 0;
-      }
-
-      .c8 {
-        width: 1.5rem;
-        background-color: #dcdce4;
-      }
-
       .c11 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -176,6 +144,38 @@ describe('ADMIN | pages | SettingsPage', () => {
 
       .c11 > * + * {
         margin-top: 8px;
+      }
+
+      .c7 {
+        height: 1px;
+        border: none;
+        margin: 0;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: auto 1fr;
+      }
+
+      .c13 {
+        overflow-x: hidden;
+      }
+
+      .c1 {
+        width: 14.5rem;
+        background: #f6f6f9;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        border-right: 1px solid #dcdce4;
+        z-index: 1;
+      }
+
+      .c8 {
+        width: 1.5rem;
+        background-color: #dcdce4;
       }
 
       <div

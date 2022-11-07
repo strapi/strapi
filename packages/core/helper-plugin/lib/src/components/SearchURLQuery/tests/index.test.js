@@ -45,6 +45,10 @@ describe('<SearchURLQuery />', () => {
         width: 1px;
       }
 
+      .c2 {
+        color: #32324d;
+      }
+
       .c0 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -141,10 +145,6 @@ describe('<SearchURLQuery />', () => {
 
       .c1[aria-disabled='true'] svg path {
         fill: #666687;
-      }
-
-      .c2 {
-        color: #32324d;
       }
 
       .c3 path {
@@ -385,7 +385,7 @@ describe('<SearchURLQuery />', () => {
                 >
                   <label
                     class="c2"
-                    for="field-1"
+                    for="field-5"
                   >
                     <div
                       class="c3"
@@ -424,7 +424,7 @@ describe('<SearchURLQuery />', () => {
                     aria-disabled="false"
                     aria-invalid="false"
                     class="c10"
-                    id="field-1"
+                    id="field-5"
                     name="search"
                     value=""
                   />

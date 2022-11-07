@@ -57,6 +57,133 @@ describe('Admin | containers | RoleEditPage', () => {
     await waitFor(() => expect(getByRole('heading', { name: /permissions/i })).toBeInTheDocument());
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c2 {
+        background: #f6f6f9;
+        padding-top: 24px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c3 {
+        padding-bottom: 8px;
+      }
+
+      .c5 {
+        padding-right: 8px;
+      }
+
+      .c18 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c21 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c32 {
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c35 {
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+      }
+
+      .c39 {
+        border-radius: 4px;
+      }
+
+      .c41 {
+        background: #f6f6f9;
+        padding-top: 24px;
+        padding-right: 24px;
+        padding-bottom: 24px;
+        padding-left: 24px;
+      }
+
+      .c43 {
+        max-width: 100%;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c45 {
+        min-width: 0px;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+      }
+
+      .c50 {
+        background: #dcdce4;
+        border-radius: 50%;
+        cursor: pointer;
+        width: 2rem;
+        height: 2rem;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+        cursor: pointer;
+      }
+
+      .c52 {
+        color: #666687;
+        width: 0.6875rem;
+      }
+
+      .c55 {
+        background: #eaeaef;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+      }
+
+      .c10 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c11 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
       .c19 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
@@ -71,758 +198,7 @@ describe('Admin | containers | RoleEditPage', () => {
         flex-direction: column;
       }
 
-      .c20 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c20 > * + * {
-        margin-top: 32px;
-      }
-
-      .c22 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c22 > * + * {
-        margin-top: 16px;
-      }
-
-      .c44 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c44 > * + * {
-        margin-top: 24px;
-      }
-
-      .c45 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c45 > * + * {
-        margin-top: 8px;
-      }
-
-      .c47 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c47 > * + * {
-        margin-top: 4px;
-      }
-
-      .c23 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c46 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c16 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c13 {
-        padding-right: 8px;
-      }
-
-      .c10 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c10 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c10 svg > g,
-      .c10 svg path {
-        fill: #ffffff;
-      }
-
-      .c10[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c10:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c10:focus-visible {
-        outline: none;
-      }
-
-      .c10:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c14 {
-        height: 100%;
-      }
-
-      .c11 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        padding: 8px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c11 .c12 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c11 .c15 {
-        color: #ffffff;
-      }
-
-      .c11[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c11[aria-disabled='true'] .c15 {
-        color: #666687;
-      }
-
-      .c11[aria-disabled='true'] svg > g,
-      .c11[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c11[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c11[aria-disabled='true']:active .c15 {
-        color: #666687;
-      }
-
-      .c11[aria-disabled='true']:active svg > g,
-      .c11[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c11:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c11:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c11 svg > g,
-      .c11 svg path {
-        fill: #ffffff;
-      }
-
-      .c21 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c34 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c36 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c37 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c38 {
-        border: 1px solid #dcdce4;
-        border-radius: 4px;
-        padding-left: 16px;
-        padding-right: 16px;
-        padding-top: 12px;
-        padding-bottom: 12px;
-        background: #ffffff;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c38:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c39 {
-        display: block;
-        width: 100%;
-        font-weight: 400;
-        font-size: 0.875rem;
-        border: none;
-        color: #32324d;
-        resize: none;
-        background: inherit;
-      }
-
-      .c39::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c39::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c39:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c39::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c39:focus-within {
-        outline: none;
-      }
-
-      .c35 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c35 > * + * {
-        margin-top: 4px;
-      }
-
-      .c33 textarea {
-        height: 5rem;
-        line-height: 1.25rem;
-      }
-
-      .c33 textarea::-webkit-input-placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c33 textarea::-moz-placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c33 textarea:-ms-input-placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c33 textarea::placeholder {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c26 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c29 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c30 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c28 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c32 {
-        border: none;
-        border-radius: 4px;
-        padding-bottom: 0.65625rem;
-        padding-left: 16px;
-        padding-right: 16px;
-        padding-top: 0.65625rem;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-        background: inherit;
-      }
-
-      .c32::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c32::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c32:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c32::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c32[aria-disabled='true'] {
-        color: inherit;
-      }
-
-      .c32:focus {
-        outline: none;
-        box-shadow: none;
-      }
-
-      .c31 {
-        border: 1px solid #dcdce4;
-        border-radius: 4px;
-        background: #ffffff;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c31:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c27 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c27 > * + * {
-        margin-top: 4px;
-      }
-
-      .c6 {
-        color: #4945ff;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c4 {
-        padding-right: 8px;
-      }
-
-      .c3 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        position: relative;
-        outline: none;
-      }
-
-      .c3 svg path {
-        fill: #4945ff;
-      }
-
-      .c3 svg {
-        font-size: 0.625rem;
-      }
-
-      .c3:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c3:focus-visible {
-        outline: none;
-      }
-
-      .c3:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c5 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-      }
-
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 24px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c2 {
-        padding-bottom: 8px;
-      }
-
-      .c18 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c7 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c8 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c9 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c17 {
-        color: #666687;
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c40 {
-        background: #ffffff;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c43 {
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-      }
-
-      .c69 {
-        background: #eaeaef;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-      }
-
-      .c24 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 16px;
-      }
-
-      .c41 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 0px;
-      }
-
-      .c25 {
-        grid-column: span 6;
-        max-width: 100%;
-      }
-
-      .c42 {
-        grid-column: span 7;
-        max-width: 100%;
-      }
-
-      .c68 {
-        grid-column: span 5;
-        max-width: 100%;
-      }
-
-      .c61 {
-        color: #4945ff;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c62 {
-        color: #4a4a6a;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c63 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c48 {
-        border-radius: 4px;
-      }
-
       .c51 {
-        background: #f6f6f9;
-        padding-top: 24px;
-        padding-right: 24px;
-        padding-bottom: 24px;
-        padding-left: 24px;
-      }
-
-      .c54 {
-        max-width: 100%;
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-      }
-
-      .c57 {
-        min-width: 0px;
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-      }
-
-      .c64 {
-        background: #dcdce4;
-        border-radius: 50%;
-        cursor: pointer;
-        width: 2rem;
-        height: 2rem;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
-        flex-shrink: 0;
-        cursor: pointer;
-      }
-
-      .c66 {
-        color: #666687;
-        width: 0.6875rem;
-      }
-
-      .c52 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c55 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c65 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -843,58 +219,145 @@ describe('Admin | containers | RoleEditPage', () => {
         justify-content: center;
       }
 
-      .c49 {
-        border: 1px solid #f6f6f9;
-      }
-
-      .c49:hover:not([aria-disabled='true']) {
-        border: 1px solid #4945ff;
-      }
-
-      .c49:hover:not([aria-disabled='true']) .sc-eHyqeh {
-        color: #271fe0;
-      }
-
-      .c49:hover:not([aria-disabled='true']) .c60 {
+      .c8 {
         color: #4945ff;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
-      .c49:hover:not([aria-disabled='true']) > .c50 {
-        background: #f0f0ff;
+      .c12 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
       }
 
-      .c49:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
-        background: #d9d8ff;
+      .c16 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
       }
 
-      .c58 {
-        background: transparent;
-        border: none;
-        position: relative;
-        outline: none;
+      .c17 {
+        color: #666687;
+        font-size: 1rem;
+        line-height: 1.5;
       }
 
-      .c58[aria-disabled='true'] {
-        pointer-events: none;
+      .c23 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
       }
 
-      .c58[aria-disabled='true'] svg path {
-        fill: #666687;
+      .c38 {
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
-      .c58 svg {
+      .c48 {
+        color: #4945ff;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c49 {
+        color: #4a4a6a;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c20 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c20 > * + * {
+        margin-top: 32px;
+      }
+
+      .c22 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c22 > * + * {
+        margin-top: 16px;
+      }
+
+      .c26 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c26 > * + * {
+        margin-top: 4px;
+      }
+
+      .c36 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c36 > * + * {
+        margin-top: 24px;
+      }
+
+      .c37 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c37 > * + * {
+        margin-top: 8px;
+      }
+
+      .c44 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c44 > * + * {
+        margin-left: 12px;
+      }
+
+      .c13 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        font-size: 0.625rem;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
-      .c58 svg path {
-        fill: #4945ff;
+      .c13 svg {
+        height: 12px;
+        width: 12px;
       }
 
-      .c58:after {
+      .c13 svg > g,
+      .c13 svg path {
+        fill: #ffffff;
+      }
+
+      .c13[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c13:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -909,11 +372,11 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 2px solid transparent;
       }
 
-      .c58:focus-visible {
+      .c13:focus-visible {
         outline: none;
       }
 
-      .c58:focus-visible:after {
+      .c13:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -924,42 +387,431 @@ describe('Admin | containers | RoleEditPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c56 > * {
-        margin-left: 0;
-        margin-right: 0;
+      .c15 {
+        height: 100%;
       }
 
-      .c56 > * + * {
-        margin-left: 12px;
+      .c14 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        padding: 8px 16px;
+        background: #4945ff;
+        border: 1px solid #4945ff;
       }
 
-      .c67 path {
+      .c14 .c1 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c14 .c7 {
+        color: #ffffff;
+      }
+
+      .c14[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c14[aria-disabled='true'] .c7 {
+        color: #666687;
+      }
+
+      .c14[aria-disabled='true'] svg > g,
+      .c14[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c59 {
-        text-align: left;
+      .c14[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
       }
 
-      .c59 > span {
+      .c14[aria-disabled='true']:active .c7 {
+        color: #666687;
+      }
+
+      .c14[aria-disabled='true']:active svg > g,
+      .c14[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c14:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c14:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c14 svg > g,
+      .c14 svg path {
+        fill: #ffffff;
+      }
+
+      .c28 {
+        border: none;
+        border-radius: 4px;
+        padding-bottom: 0.65625rem;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 0.65625rem;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+        background: inherit;
+      }
+
+      .c28::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c28::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c28:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c28::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c28[aria-disabled='true'] {
+        color: inherit;
+      }
+
+      .c28:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .c27 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        background: #ffffff;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c27:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c53 path {
+        fill: #666687;
+      }
+
+      .c30 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        background: #ffffff;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c30:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c31 {
+        display: block;
+        width: 100%;
+        font-weight: 400;
+        font-size: 0.875rem;
+        border: none;
+        color: #32324d;
+        resize: none;
+        background: inherit;
+      }
+
+      .c31::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c31::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c31:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c31::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c31:focus-within {
+        outline: none;
+      }
+
+      .c29 textarea {
+        height: 5rem;
+        line-height: 1.25rem;
+      }
+
+      .c29 textarea::-webkit-input-placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c29 textarea::-moz-placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c29 textarea:-ms-input-placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c29 textarea::placeholder {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c46 {
+        background: transparent;
+        border: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c46[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c46[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c46 svg {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        font-size: 0.625rem;
+      }
+
+      .c46 svg path {
+        fill: #4945ff;
+      }
+
+      .c46:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c46:focus-visible {
+        outline: none;
+      }
+
+      .c46:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c4 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c4 svg path {
+        fill: #4945ff;
+      }
+
+      .c4 svg {
+        font-size: 0.625rem;
+      }
+
+      .c4:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c4:focus-visible {
+        outline: none;
+      }
+
+      .c4:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c6 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+      }
+
+      .c24 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 16px;
+      }
+
+      .c33 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 0px;
+      }
+
+      .c25 {
+        grid-column: span 6;
         max-width: 100%;
       }
 
-      .c59 svg {
+      .c34 {
+        grid-column: span 7;
+        max-width: 100%;
+      }
+
+      .c54 {
+        grid-column: span 5;
+        max-width: 100%;
+      }
+
+      .c0:focus-visible {
+        outline: none;
+      }
+
+      .c40 {
+        border: 1px solid #f6f6f9;
+      }
+
+      .c40:hover:not([aria-disabled='true']) {
+        border: 1px solid #4945ff;
+      }
+
+      .c40:hover:not([aria-disabled='true']) .sc-iMrobD {
+        color: #271fe0;
+      }
+
+      .c40:hover:not([aria-disabled='true']) .c7 {
+        color: #4945ff;
+      }
+
+      .c40:hover:not([aria-disabled='true']) > .c9 {
+        background: #f0f0ff;
+      }
+
+      .c40:hover:not([aria-disabled='true']) [data-strapi-dropdown='true'] {
+        background: #d9d8ff;
+      }
+
+      .c47 {
+        text-align: left;
+      }
+
+      .c47 > span {
+        max-width: 100%;
+      }
+
+      .c47 svg {
         width: 0.875rem;
         height: 0.875rem;
       }
 
-      .c59 svg path {
+      .c47 svg path {
         fill: #8e8ea9;
       }
 
-      .c53 {
+      .c42 {
         min-height: 5.5rem;
         border-radius: 4px;
       }
 
-      .c53:hover svg path {
+      .c42:hover svg path {
         fill: #4945ff;
       }
 
@@ -976,25 +828,25 @@ describe('Admin | containers | RoleEditPage', () => {
       }
 
       @media (max-width:68.75rem) {
-        .c42 {
+        .c34 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c42 {
+        .c34 {
           grid-column: span;
         }
       }
 
       @media (max-width:68.75rem) {
-        .c68 {
+        .c54 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c68 {
+        .c54 {
           grid-column: span;
         }
       }
@@ -1013,20 +865,20 @@ describe('Admin | containers | RoleEditPage', () => {
             style="height: 0px;"
           >
             <div
-              class="c1"
+              class="c1 c2"
               data-strapi-header="true"
             >
               <div
-                class="c2"
+                class="c1 c3"
               >
                 <a
                   aria-current="page"
-                  class="c3 active"
+                  class="c4 active"
                   href="/settings/users-permissions/roles"
                 >
                   <span
                     aria-hidden="true"
-                    class="c4 c5"
+                    class="c1 c5 c6"
                   >
                     <svg
                       fill="none"
@@ -1042,32 +894,32 @@ describe('Admin | containers | RoleEditPage', () => {
                     </svg>
                   </span>
                   <span
-                    class="c6"
+                    class="c7 c8"
                   >
                     Back
                   </span>
                 </a>
               </div>
               <div
-                class="c7"
+                class="c1 c9 c10"
               >
                 <div
-                  class="c8"
+                  class="c1 c9 c11"
                 >
                   <h1
-                    class="c9"
+                    class="c7 c12"
                   >
                     Authenticated
                   </h1>
                 </div>
                 <button
                   aria-disabled="false"
-                  class="c10 c11"
+                  class="c13 c14"
                   type="submit"
                 >
                   <div
                     aria-hidden="true"
-                    class="c12 c13 c14"
+                    class="c1 c5 c15"
                   >
                     <svg
                       fill="none"
@@ -1083,70 +935,70 @@ describe('Admin | containers | RoleEditPage', () => {
                     </svg>
                   </div>
                   <span
-                    class="c15 c16"
+                    class="c7 c16"
                   >
                     Save
                   </span>
                 </button>
               </div>
               <p
-                class="c17"
+                class="c7 c17"
               >
                 Default role given to authenticated user.
               </p>
             </div>
           </div>
           <div
-            class="c18"
+            class="c1 c18"
           >
             <div
-              class="c19 c20"
+              class="c1 c9 c19 c20"
               spacing="7"
             >
               <div
-                class="c21"
+                class="c1 c21"
               >
                 <div
-                  class="c19 c22"
+                  class="c1 c9 c19 c22"
                   spacing="4"
                 >
                   <h2
-                    class="c23"
+                    class="c7 c23"
                   >
                     Role details
                   </h2>
                   <div
-                    class="c24"
+                    class="c1 c24"
                   >
                     <div
                       class="c25"
                     >
                       <div
-                        class=""
+                        class="c1 "
                       >
                         <div>
                           <div>
                             <div
-                              class="c26 c27"
+                              class="c1 c9 c19 c26"
                               spacing="1"
                             >
                               <label
-                                class="c28"
+                                class="c7 c16"
                                 for="textinput-1"
                               >
                                 <div
-                                  class="c29"
+                                  class="c1 c9 c11"
                                 >
                                   Name
                                 </div>
                               </label>
                               <div
-                                class="c30 c31"
+                                class="c1 c9 c10 c27"
                               >
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
-                                  class="c32"
+                                  class="c28"
                                   id="textinput-1"
                                   name="name"
                                   value="Authenticated"
@@ -1161,37 +1013,37 @@ describe('Admin | containers | RoleEditPage', () => {
                       class="c25"
                     >
                       <div
-                        class=""
+                        class="c1 "
                       >
                         <div
-                          class="c33"
+                          class="c29"
                         >
                           <div>
                             <div
-                              class="c34 c35"
+                              class="c1 c9 c19 c26"
                               spacing="1"
                             >
                               <div
-                                class="c36"
+                                class="c1 c9 c11"
                               >
                                 <label
-                                  class="c37"
-                                  for="textarea-1"
+                                  class="c7 c16"
+                                  for="textarea-2"
                                 >
                                   <div
-                                    class="c36"
+                                    class="c1 c9 c11"
                                   >
                                     Description
                                   </div>
                                 </label>
                               </div>
                               <div
-                                class="c38"
+                                class="c30"
                               >
                                 <textarea
                                   aria-invalid="false"
-                                  class="c39"
-                                  id="textarea-1"
+                                  class="c31"
+                                  id="textarea-2"
                                   name="description"
                                 >
                                   Default role given to authenticated user.
@@ -1206,90 +1058,90 @@ describe('Admin | containers | RoleEditPage', () => {
                 </div>
               </div>
               <div
-                class="c40 c41"
+                class="c1 c32 c33"
               >
                 <div
-                  class="c42"
+                  class="c34"
                 >
                   <div
-                    class="c43"
+                    class="c1 c35"
                   >
                     <div
-                      class="c19 c44"
+                      class="c1 c9 c19 c36"
                       spacing="6"
                     >
                       <div
-                        class="c19 c45"
+                        class="c1 c9 c19 c37"
                         spacing="2"
                       >
                         <h2
-                          class="c23"
+                          class="c7 c23"
                         >
                           Permissions
                         </h2>
                         <p
-                          class="c46"
+                          class="c7 c38"
                         >
                           Only actions bound by a route are listed below.
                         </p>
                       </div>
                       <div
-                        class="c19 c47"
+                        class="c1 c9 c19 c26"
                         spacing="1"
                       >
                         <div
                           aria-disabled="false"
-                          class="c48 c49"
+                          class="c1 c39 c40"
                           data-strapi-expanded="false"
                         >
                           <div
-                            class="c50 c51 c52 c53"
+                            class="c1 c9 c41 c10 c42"
                             cursor=""
                           >
                             <div
-                              class="c50 c54 c55 c56"
+                              class="c1 c9 c43 c11 c44"
                               spacing="3"
                             >
                               <button
-                                aria-controls="accordion-content-accordion-1"
+                                aria-controls="accordion-content-accordion-3"
                                 aria-disabled="false"
                                 aria-expanded="false"
-                                aria-labelledby="accordion-label-accordion-1"
-                                class="c50 c57 c55 c58 c59"
+                                aria-labelledby="accordion-label-accordion-3"
+                                class="c1 c9 c45 c11 c46 c47"
                                 data-strapi-accordion-toggle="true"
                                 type="button"
                               >
                                 <span
-                                  class="c60 c61"
+                                  class="c7 c48"
                                 >
                                   <span
-                                    class="c60 sc-eHyqeh c62"
-                                    id="accordion-label-accordion-1"
+                                    class="c7 sc-iMrobD c49"
+                                    id="accordion-label-accordion-3"
                                   >
                                     Address
                                   </span>
                                   <p
-                                    class="c60 c63"
-                                    id="accordion-desc-accordion-1"
+                                    class="c7 c38"
+                                    id="accordion-desc-accordion-3"
                                   >
                                     Define all allowed actions for the api::address plugin.
                                   </p>
                                 </span>
                               </button>
                               <div
-                                class="c50 c55 c56"
+                                class="c1 c9 c11 c44"
                                 spacing="3"
                               >
                                 <span
                                   aria-hidden="true"
-                                  class="c50 c64 c65"
+                                  class="c1 c9 c50 c51"
                                   cursor="pointer"
                                   data-strapi-dropdown="true"
                                   height="2rem"
                                   width="2rem"
                                 >
                                   <svg
-                                    class="c66 c67"
+                                    class="c1 c52 c53"
                                     fill="none"
                                     height="1em"
                                     viewBox="0 0 14 8"
@@ -1313,23 +1165,23 @@ describe('Admin | containers | RoleEditPage', () => {
                   </div>
                 </div>
                 <div
-                  class="c68"
+                  class="c54"
                 >
                   <div
-                    class="c69"
+                    class="c1 c55"
                     style="min-height: 100%;"
                   >
                     <div
-                      class="c19 c45"
+                      class="c1 c9 c19 c37"
                       spacing="2"
                     >
                       <h3
-                        class="c23"
+                        class="c7 c23"
                       >
                         Advanced settings
                       </h3>
                       <p
-                        class="c46"
+                        class="c7 c38"
                       >
                         Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
                       </p>

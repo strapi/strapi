@@ -32,11 +32,17 @@ describe('<NoPermissions />', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c11 {
-        color: #666687;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
+      }
+
+      .c5 {
+        padding-right: 56px;
+        padding-left: 56px;
       }
 
       .c6 {
@@ -52,42 +58,6 @@ describe('<NoPermissions />', () => {
 
       .c10 {
         padding-bottom: 16px;
-      }
-
-      .c7 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
-      }
-
-      .c9 svg {
-        height: 5.5rem;
-      }
-
-      .c0:focus-visible {
-        outline: none;
-      }
-
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c5 {
-        padding-right: 56px;
-        padding-left: 56px;
       }
 
       .c2 {
@@ -127,6 +97,36 @@ describe('<NoPermissions />', () => {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
+      }
+
+      .c11 {
+        color: #666687;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c7 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      .c9 svg {
+        height: 5.5rem;
+      }
+
+      .c0:focus-visible {
+        outline: none;
       }
 
       <main

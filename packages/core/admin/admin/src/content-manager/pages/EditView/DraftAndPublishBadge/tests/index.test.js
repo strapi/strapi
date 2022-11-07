@@ -84,7 +84,7 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 "
+          class="c1 sc-iseIHH eAgSQW"
         >
           <svg
             class="c2"
@@ -184,7 +184,7 @@ describe('<DraftAndPublishBadge />', () => {
         class="c0"
       >
         <div
-          class="c1 "
+          class="c1 sc-iseIHH eAgSQW"
         >
           <svg
             class="c2"

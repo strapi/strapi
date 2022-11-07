@@ -13,297 +13,29 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c21 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c35 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c22 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c22 > * + * {
-  margin-top: 4px;
-}
-
-.c36 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c36 > * + * {
-  margin-left: 8px;
-}
-
-.c7 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c34 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c31 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
+.c3 {
+  background: #ffffff;
   border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
+  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
 }
 
-.c31 svg {
-  height: 12px;
-  width: 12px;
+.c5 {
+  background: #f6f6f9;
+  padding-top: 16px;
+  padding-right: 20px;
+  padding-bottom: 16px;
+  padding-left: 20px;
 }
 
-.c31 svg > g,
-.c31 svg path {
-  fill: #ffffff;
+.c12 {
+  padding: 32px;
 }
 
-.c31[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c31:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c31:focus-visible {
-  outline: none;
-}
-
-.c31:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c32 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c32 .sc-cfJLRR {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c32 .c33 {
-  color: #ffffff;
-}
-
-.c32[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c32[aria-disabled='true'] .c33 {
-  color: #666687;
-}
-
-.c32[aria-disabled='true'] svg > g,
-.c32[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c32[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c32[aria-disabled='true']:active .c33 {
-  color: #666687;
-}
-
-.c32[aria-disabled='true']:active svg > g,
-.c32[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c32:hover {
-  background-color: #f6f6f9;
-}
-
-.c32:active {
-  background-color: #eaeaef;
-}
-
-.c32 .c33 {
-  color: #32324d;
-}
-
-.c32 svg > g,
-.c32 svg path {
-  fill: #32324d;
-}
-
-.c37 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 8px 16px;
-  background: #4945ff;
-  border: 1px solid #4945ff;
-}
-
-.c37 .sc-cfJLRR {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c37 .c33 {
-  color: #ffffff;
-}
-
-.c37[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c37[aria-disabled='true'] .c33 {
-  color: #666687;
-}
-
-.c37[aria-disabled='true'] svg > g,
-.c37[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c37[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c37[aria-disabled='true']:active .c33 {
-  color: #666687;
-}
-
-.c37[aria-disabled='true']:active svg > g,
-.c37[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c37:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
-}
-
-.c37:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
-}
-
-.c37 svg > g,
-.c37 svg path {
-  fill: #ffffff;
-}
-
-.c25 {
+.c22 {
   padding-right: 12px;
 }
 
-.c14 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c17 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c18 {
+.c7 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -322,13 +54,304 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 }
 
 .c16 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c19 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c9 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c18 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c20 {
+.c17 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c17 > * + * {
+  margin-top: 4px;
+}
+
+.c28 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c28 > * + * {
+  margin-left: 8px;
+}
+
+.c10 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
+  position: relative;
+  outline: none;
+}
+
+.c10 svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c10 svg > g,
+.c10 svg path {
+  fill: #ffffff;
+}
+
+.c10[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c10:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c10:focus-visible {
+  outline: none;
+}
+
+.c10:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c27 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+}
+
+.c27 .c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c27 .c8 {
+  color: #ffffff;
+}
+
+.c27[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c27[aria-disabled='true'] .c8 {
+  color: #666687;
+}
+
+.c27[aria-disabled='true'] svg > g,
+.c27[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c27[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c27[aria-disabled='true']:active .c8 {
+  color: #666687;
+}
+
+.c27[aria-disabled='true']:active svg > g,
+.c27[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c27:hover {
+  background-color: #f6f6f9;
+}
+
+.c27:active {
+  background-color: #eaeaef;
+}
+
+.c27 .c8 {
+  color: #32324d;
+}
+
+.c27 svg > g,
+.c27 svg path {
+  fill: #32324d;
+}
+
+.c29 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 8px 16px;
+  background: #4945ff;
+  border: 1px solid #4945ff;
+}
+
+.c29 .c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c29 .c8 {
+  color: #ffffff;
+}
+
+.c29[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c29[aria-disabled='true'] .c8 {
+  color: #666687;
+}
+
+.c29[aria-disabled='true'] svg > g,
+.c29[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c29[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c29[aria-disabled='true']:active .c8 {
+  color: #666687;
+}
+
+.c29[aria-disabled='true']:active svg > g,
+.c29[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c29:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c29:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c29 svg > g,
+.c29 svg path {
+  fill: #ffffff;
+}
+
+.c11 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+}
+
+.c11 svg > g,
+.c11 svg path {
+  fill: #8e8ea9;
+}
+
+.c11:hover svg > g,
+.c11:hover svg path {
+  fill: #666687;
+}
+
+.c11:active svg > g,
+.c11:active svg path {
+  fill: #a5a5ba;
+}
+
+.c11[aria-disabled='true'] {
+  background-color: #eaeaef;
+}
+
+.c11[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c21 {
   border: none;
   border-radius: 4px;
   padding-bottom: 0.65625rem;
@@ -343,36 +366,36 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background: inherit;
 }
 
-.c20::-webkit-input-placeholder {
+.c21::-webkit-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c20::-moz-placeholder {
+.c21::-moz-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c20:-ms-input-placeholder {
+.c21:-ms-input-placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c20::placeholder {
+.c21::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c20[aria-disabled='true'] {
+.c21[aria-disabled='true'] {
   color: inherit;
 }
 
-.c20:focus {
+.c21:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c19 {
+.c20 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -384,58 +407,28 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c19:focus-within {
+.c20:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c15 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c15 > * + * {
-  margin-top: 4px;
-}
-
-.c24 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
 .c23 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c26 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c26 svg {
+.c23 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c26 svg path {
+.c23 svg path {
   fill: #666687;
 }
 
-.c27 {
+.c24 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -444,37 +437,19 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border: none;
 }
 
-.c27 svg {
+.c24 svg {
   width: 0.5625rem;
 }
 
-.c12 {
+.c14 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c13 {
+.c15 {
   grid-column: span 6;
   max-width: 100%;
-}
-
-.c2 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
-}
-
-.c4 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
-}
-
-.c10 {
-  padding: 32px;
 }
 
 .c1 {
@@ -497,167 +472,37 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   justify-content: center;
 }
 
-.c3 {
+.c4 {
   width: 51.875rem;
 }
 
 .c6 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c29 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
-}
-
-.c8 svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c8 svg > g,
-.c8 svg path {
-  fill: #ffffff;
-}
-
-.c8[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c8:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c8:focus-visible {
-  outline: none;
-}
-
-.c8:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c9 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c9 svg > g,
-.c9 svg path {
-  fill: #8e8ea9;
-}
-
-.c9:hover svg > g,
-.c9:hover svg path {
-  fill: #666687;
-}
-
-.c9:active svg > g,
-.c9:active svg path {
-  fill: #a5a5ba;
-}
-
-.c9[aria-disabled='true'] {
-  background-color: #eaeaef;
-}
-
-.c9[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c5 {
   border-radius: 4px 4px 0 0;
   border-bottom: 1px solid #eaeaef;
 }
 
-.c28 {
+.c25 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c30 > * + * {
+.c26 > * + * {
   margin-left: 8px;
 }
 
-.c11 {
+.c13 {
   overflow: auto;
   max-height: 60vh;
 }
 
 @media (max-width:68.75rem) {
-  .c13 {
+  .c15 {
     grid-column: span;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c13 {
+  .c15 {
     grid-column: span 12;
   }
 }
@@ -700,7 +545,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
           <div
             aria-labelledby="title"
             aria-modal="true"
-            class="c2 c3"
+            class="c2 c3 c4"
             role="dialog"
           >
             <form
@@ -708,13 +553,13 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
               novalidate=""
             >
               <div
-                class="c4 c5"
+                class="c2 c5 c6"
               >
                 <div
-                  class="c6"
+                  class="c2 c7"
                 >
                   <h2
-                    class="c7"
+                    class="c8 c9"
                     id="title"
                   >
                     Add new folder
@@ -722,7 +567,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                   <button
                     aria-disabled="false"
                     aria-label="Close the modal"
-                    class="c8 c9"
+                    class="c10 c11"
                     type="button"
                   >
                     <svg
@@ -741,40 +586,40 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c10 c11"
+                class="c2 c12 c13"
               >
                 <div
-                  class="c12"
+                  class="c2 c14"
                 >
                   <div
-                    class="c13"
+                    class="c15"
                   >
                     <div
-                      class=""
+                      class="c2 "
                     >
                       <div>
                         <div>
                           <div
-                            class="c14 c15"
+                            class="c2 c16 c17"
                             spacing="1"
                           >
                             <label
-                              class="c16"
+                              class="c8 c18"
                               for="textinput-1"
                             >
                               <div
-                                class="c17"
+                                class="c2 c19"
                               >
                                 Name
                               </div>
                             </label>
                             <div
-                              class="c18 c19"
+                              class="c2 c7 c20"
                             >
                               <input
                                 aria-disabled="false"
                                 aria-invalid="false"
-                                class="c20"
+                                class="c21"
                                 id="textinput-1"
                                 name="name"
                                 value=""
@@ -786,21 +631,21 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                     </div>
                   </div>
                   <div
-                    class="c13"
+                    class="c15"
                   >
                     <div
-                      class=""
+                      class="c2 "
                     >
                       <div
-                        class="c21 c22"
+                        class="c2 c16 c17"
                         spacing="1"
                       >
                         <label
-                          class="c23"
+                          class="c8 c18"
                           for="folder-parent"
                         >
                           <div
-                            class="c24"
+                            class="c2 c19"
                           >
                             Location
                           </div>
@@ -847,7 +692,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                               class=" css-1hb7zxy-IndicatorsContainer"
                             >
                               <button
-                                class="c25 c26 c27"
+                                class="c2 c22 c23 c24"
                                 type="button"
                               >
                                 <svg
@@ -879,42 +724,42 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <div
-                class="c4 c28"
+                class="c2 c5 c25"
               >
                 <div
-                  class="c6"
+                  class="c2 c7"
                 >
                   <div
-                    class="c29 c30"
+                    class="c2 c19 c26"
                   >
                     <button
                       aria-disabled="false"
-                      class="c31 c32"
+                      class="c10 c27"
                       name="cancel"
                       type="button"
                     >
                       <span
-                        class="c33 c34"
+                        class="c8 c18"
                       >
                         Cancel
                       </span>
                     </button>
                   </div>
                   <div
-                    class="c29 c30"
+                    class="c2 c19 c26"
                   >
                     <div
-                      class="c35 c36"
+                      class="c2 c19 c28"
                       spacing="2"
                     >
                       <button
                         aria-disabled="false"
-                        class="c31 c37"
+                        class="c10 c29"
                         name="submit"
                         type="submit"
                       >
                         <span
-                          class="c33 c34"
+                          class="c8 c18"
                         >
                           Create
                         </span>

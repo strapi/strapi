@@ -69,6 +69,10 @@ describe('ImageAssetCard', () => {
         padding-left: 12px;
       }
 
+      .c20 {
+        padding-top: 4px;
+      }
+
       .c25 {
         background: #f6f6f9;
         padding: 4px;
@@ -294,10 +298,6 @@ describe('ImageAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c20 {
-        padding-top: 4px;
-      }
-
       .c13 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -446,7 +446,7 @@ describe('ImageAssetCard', () => {
               <span>
                 <button
                   aria-disabled="false"
-                  aria-labelledby="tooltip-1"
+                  aria-labelledby="tooltip-2"
                   class="c13 c14"
                   tabindex="0"
                   type="button"
