@@ -267,44 +267,34 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
   }
 };
 
-const deleteComponents = async (uid, entityToDelete) => {
+const deleteComponents = async (uid, entityToDelete, { loadComponents = true } = {}) => {
   const { attributes = {} } = strapi.getModel(uid);
 
   for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
-    if (attribute.type === 'component') {
-      const { component: componentUID } = attribute;
-
-      // Load attribute value if it's not already loaded
-      const value =
-        entityToDelete[attributeName] ||
-        (await strapi.query(uid).load(entityToDelete, attributeName));
-
-      if (!value) {
-        continue;
-      }
-
-      if (Array.isArray(value)) {
-        await Promise.all(value.map((subValue) => deleteComponent(componentUID, subValue)));
+    if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
+      let value;
+      if (loadComponents) {
+        value = await strapi.query(uid).load(entityToDelete, attributeName);
       } else {
-        await deleteComponent(componentUID, value);
+        value = entityToDelete[attributeName];
       }
-
-      continue;
-    }
-
-    if (attribute.type === 'dynamiczone') {
-      const value =
-        entityToDelete[attributeName] ||
-        (await strapi.query(uid).load(entityToDelete, attributeName));
 
       if (!value) {
         continue;
       }
 
-      if (Array.isArray(value)) {
-        await Promise.all(value.map((subValue) => deleteComponent(subValue.__component, subValue)));
+      if (attribute.type === 'component') {
+        const { component: componentUID } = attribute;
+        await Promise.all(
+          _.castArray(value).map((subValue) => deleteComponent(componentUID, subValue))
+        );
+      } else {
+        // delete dynamic zone components
+        await Promise.all(
+          _.castArray(value).map((subValue) => deleteComponent(subValue.__component, subValue))
+        );
       }
 
       continue;

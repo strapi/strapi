@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-aws-s3",
-  "version": "4.4.3",
+  "version": "4.4.7",
   "description": "AWS S3 provider for strapi upload",
   "keywords": [
     "upload",

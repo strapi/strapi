@@ -1,6 +1,6 @@
 {
   "name": "@strapi/permissions",
-  "version": "4.4.3",
+  "version": "4.4.7",
   "description": "Strapi's permission layer.",
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@casl/ability": "5.4.4",
-    "@strapi/utils": "4.4.3",
+    "@strapi/utils": "4.4.7",
     "lodash": "4.17.21",
     "sift": "16.0.0"
   },

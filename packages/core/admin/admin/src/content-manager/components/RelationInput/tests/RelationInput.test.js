@@ -7,47 +7,40 @@ import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { RelationInput } from '../index';
 
 const FIXTURES_RELATIONS = {
-  data: {
-    pages: [
-      [
-        {
-          id: 1,
-          href: '/',
-          mainField: 'Relation 1',
-          publicationState: 'draft',
-        },
-        {
-          id: 2,
-          href: '',
-          mainField: 'Relation 2',
-          publicationState: 'published',
-        },
-        {
-          id: 3,
-          href: '',
-          mainField: 'Relation 3',
-          publicationState: false,
-        },
-      ],
-    ],
-  },
+  data: [
+    {
+      id: 1,
+      href: '/',
+      mainField: 'Relation 1',
+      publicationState: 'draft',
+    },
+    {
+      id: 2,
+      href: '',
+      mainField: 'Relation 2',
+      publicationState: 'published',
+    },
+    {
+      id: 3,
+      href: '',
+      mainField: 'Relation 3',
+      publicationState: false,
+    },
+  ],
   isLoading: false,
   isSuccess: true,
   hasNextPage: true,
+  isFetchingNextPage: false,
 };
 
 const FIXTURES_SEARCH = {
-  data: {
-    pages: [
-      [
-        {
-          id: 4,
-          mainField: 'Relation 4',
-          publicationState: 'draft',
-        },
-      ],
-    ],
-  },
+  data: [
+    {
+      id: 4,
+      mainField: 'Relation 4',
+      publicationState: 'draft',
+    },
+  ],
   isLoading: false,
   isSuccess: true,
 };
@@ -63,12 +56,11 @@ const setup = (props) =>
             name="some-relation-1"
             label="Some Relation"
             labelLoadMore="Load more"
-            loadingMessage={() => 'Relations are loading'}
+            loadingMessage="Relations are loading"
             labelDisconnectRelation="Remove"
             numberOfRelationsToDisplay={5}
+            noRelationsMessage="No relations available"
             onRelationConnect={() => jest.fn()}
-            onSearchOpen={() => jest.fn()}
-            onSearchClose={() => jest.fn()}
             onRelationDisconnect={() => jest.fn()}
             onRelationLoadMore={() => jest.fn()}
             onSearch={() => jest.fn()}
@@ -104,19 +96,18 @@ describe('Content-Manager || RelationInput', () => {
   });
 
   describe('Callbacks', () => {
-    test('should call onSearchOpen', () => {
+    test('should call onSearch', () => {
       const spy = jest.fn();
-      setup({ onSearchOpen: spy });
+      setup({ onSearch: spy });
 
       fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
 
       expect(spy).toHaveBeenCalled();
     });
 
-    test('should call onRelationConnect and onSearchClose', () => {
+    test('should call onRelationConnect', () => {
       const onAddSpy = jest.fn();
-      const onCloseSpy = jest.fn();
-      setup({ onRelationConnect: onAddSpy, onSearchClose: onCloseSpy });
+      setup({ onRelationConnect: onAddSpy });
 
       fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
       expect(screen.getByText('Relation 4')).toBeInTheDocument();
@@ -124,7 +115,6 @@ describe('Content-Manager || RelationInput', () => {
       fireEvent.click(screen.getByText('Relation 4'));
 
       expect(onAddSpy).toHaveBeenCalled();
-      expect(onCloseSpy).toHaveBeenCalled();
     });
 
     test('should call onRelationDisconnect', () => {
@@ -173,7 +163,7 @@ describe('Content-Manager || RelationInput', () => {
 
   describe('States', () => {
     test('should display search loading state', () => {
-      setup({ searchResults: { data: { pages: [] }, isLoading: true, isSuccess: true } });
+      setup({ searchResults: { data: [], isLoading: true, isSuccess: true } });
 
       fireEvent.mouseDown(screen.getByText(/select\.\.\./i));
 
@@ -182,7 +172,13 @@ describe('Content-Manager || RelationInput', () => {
 
     test('should display load more button loading if loading is true', () => {
       setup({
-        relations: { data: { pages: [] }, isLoading: true, isSuccess: true, hasNextPage: true },
+        relations: {
+          data: [],
+          isLoading: true,
+          isSuccess: true,
+          hasNextPage: true,
+          isFetchingNextPage: false,
+        },
       });
 
       expect(screen.getByRole('button', { name: /load more/i })).toHaveAttribute(
@@ -193,7 +189,13 @@ describe('Content-Manager || RelationInput', () => {
 
     test('should not display load more button loading if there is no next page', () => {
       setup({
-        relations: { data: { pages: [] }, isLoading: false, isSuccess: true, hasNextPage: false },
+        relations: {
+          data: [],
+          isLoading: false,
+          isSuccess: true,
+          hasNextPage: false,
+          isFetchingNextPage: false,
+        },
       });
 
       expect(screen.queryByText('Load more')).not.toBeInTheDocument();
@@ -201,7 +203,13 @@ describe('Content-Manager || RelationInput', () => {
 
     test('should display load more button loading if there is no next page but loading is true', () => {
       setup({
-        relations: { data: { pages: [] }, isLoading: true, isSuccess: true, hasNextPage: false },
+        relations: {
+          data: [],
+          isLoading: true,
+          isSuccess: true,
+          hasNextPage: false,
+          isFetchingNextPage: false,
+        },
       });
 
       expect(screen.getByRole('button', { name: /load more/i })).toHaveAttribute(
@@ -217,11 +225,11 @@ describe('Content-Manager || RelationInput', () => {
     });
 
     test('should apply disabled state', () => {
-      setup({ disabled: true });
+      const { queryByText, getByTestId, container } = setup({ disabled: true });
 
-      expect(screen.queryByText('Load more')).not.toBeInTheDocument();
-      expect(screen.getByRole('textbox')).toBeDisabled();
-      expect(screen.getByTestId('remove-relation-1')).toBeDisabled();
+      expect(queryByText('Load more')).not.toBeInTheDocument();
+      expect(container.querySelector('input')).toBeDisabled();
+      expect(getByTestId('remove-relation-1')).toBeDisabled();
     });
   });
 });

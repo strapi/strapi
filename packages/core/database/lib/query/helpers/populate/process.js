@@ -82,7 +82,13 @@ const processPopulate = (populate, ctx) => {
       continue;
     }
 
-    // make sure id is present for future populate queries
+    // Make sure to query the join column value if needed,
+    // so that we can apply the populate later on
+    if (attribute.joinColumn) {
+      qb.addSelect(attribute.joinColumn.name);
+    }
+
+    // Make sure id is present for future populate queries
     if (_.has('id', meta.attributes)) {
       qb.addSelect('id');
     }

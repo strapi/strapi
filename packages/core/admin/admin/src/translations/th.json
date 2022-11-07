@@ -67,7 +67,7 @@
   "Settings.permissions.conditions.anytime": "ทุกที่ทุกเวลา",
   "Settings.permissions.conditions.apply": "นำไปใช้",
   "Settings.permissions.conditions.can": "สามารถ",
-  "Settings.permissions.conditions.define-conditions": "กำหนดเงื่อนไข",
+  "Settings.permissions.conditions.conditions": "กำหนดเงื่อนไข",
   "Settings.permissions.conditions.links": "ลิงก์",
   "Settings.permissions.conditions.no-actions": "ไม่มีการดำเนินการ",
   "Settings.permissions.conditions.or": "หรือ",
