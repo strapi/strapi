@@ -184,13 +184,15 @@ export const RelationInputDataManager = ({
         defaultMessage: 'Remove',
       })}
       listHeight={320}
-      loadingMessage={() =>
-        formatMessage({
-          id: getTrad('relation.isLoading'),
-          defaultMessage: 'Relations are loading',
-        })
-      }
+      loadingMessage={formatMessage({
+        id: getTrad('relation.isLoading'),
+        defaultMessage: 'Relations are loading',
+      })}
       name={name}
+      noRelationsMessage={formatMessage({
+        id: getTrad('relation.notAvailable'),
+        defaultMessage: 'No relations available',
+      })}
       numberOfRelationsToDisplay={RELATIONS_TO_DISPLAY}
       onRelationConnect={(relation) => handleRelationConnect(relation)}
       onRelationDisconnect={(relation) => handleRelationDisconnect(relation)}

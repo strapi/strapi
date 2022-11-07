@@ -107,7 +107,7 @@
   "Settings.permissions.conditions.anytime": "किसी भी समय",
   "Settings.permissions.conditions.apply": "आवेदन करना",
   "Settings.permissions.conditions.can": "कर सकना",
-  "Settings.permissions.conditions.define-conditions": "शर्तों को परिभाषित करें",
+  "Settings.permissions.conditions.conditions": "शर्तों को परिभाषित करें",
   "Settings.permissions.conditions.links": "लिंक",
   "Settings.permissions.conditions.no-actions": "उन पर शर्तों को परिभाषित करने से पहले आपको पहले क्रियाओं का चयन करना होगा (बनाएं, पढ़ें, अपडेट करें, ...)",
   "Settings.permissions.conditions.none-selected": "किसी भी समय",

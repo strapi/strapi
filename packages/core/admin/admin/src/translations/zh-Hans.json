@@ -106,7 +106,7 @@
   "Settings.permissions.conditions.anytime": "任何时候",
   "Settings.permissions.conditions.apply": "启用",
   "Settings.permissions.conditions.can": "可以",
-  "Settings.permissions.conditions.define-conditions": "定义条件",
+  "Settings.permissions.conditions.conditions": "定义条件",
   "Settings.permissions.conditions.links": "链接",
   "Settings.permissions.conditions.no-actions": "你首先需要选择动作（创建、读取、更新......），然后再对其定义条件。",
   "Settings.permissions.conditions.none-selected": "任何时候",
