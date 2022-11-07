@@ -47,7 +47,6 @@ const jestCmd =
   );
 
 const runAllTests = async (args) => {
-  console.log(args);
   return execa('yarn', [...jestCmd, ...args], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),

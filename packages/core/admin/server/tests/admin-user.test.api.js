@@ -33,7 +33,7 @@ const omitRegistrationToken = omit(['registrationToken']);
  * 16. Finds a list of users (missing user)
  */
 
-describe('Admin User CRUD (e2e)', () => {
+describe('Admin User CRUD (api)', () => {
   let rq;
   let utils;
   let strapi;
@@ -50,7 +50,7 @@ describe('Admin User CRUD (e2e)', () => {
   const createUserRole = async () =>
     utils.createRole({
       name: 'user_test_role',
-      description: 'Only used for user crud test (e2e)',
+      description: 'Only used for user crud test (api)',
     });
 
   // Initialization Actions

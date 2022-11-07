@@ -114,7 +114,7 @@ The administration panel should now be available at http://localhost:4000/admin.
 - `yarn test:front` runs front-end related tests.
 - `yarn test:front:watch` runs an interactive test watcher for the front-end.
 - `yarn test:unit` runs the back-end unit tests.
-- `yarn test:api` runs an end-to-end test suite.
+- `yarn test:api` runs the api integration tests.
 - `yarn test:generate-app` generates a test application.
 - `yarn test:start-app` starts the test application.
 
