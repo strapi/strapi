@@ -123,7 +123,6 @@ const DraggedItem = ({
     end() {
       // Update the errors
       triggerFormValidation();
-      // setIsDraggingSibling(false);
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
