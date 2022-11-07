@@ -128,3 +128,9 @@ schema.graphql
 front-workspace.code-workspace
 .yarn
 .yarnrc
+
+############################
+# Playwright
+############################
+playwright-report
+test-results
