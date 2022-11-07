@@ -105,7 +105,7 @@
   "Settings.permissions.conditions.anytime": "いつでも",
   "Settings.permissions.conditions.apply": "適用",
   "Settings.permissions.conditions.can": "可能",
-  "Settings.permissions.conditions.define-conditions": "条件を定義",
+  "Settings.permissions.conditions.conditions": "条件を定義",
   "Settings.permissions.conditions.links": "リンク",
   "Settings.permissions.conditions.no-actions": "条件を定義する前に最初に作業（作成・閲覧・更新等）を選択する必要があります。",
   "Settings.permissions.conditions.none-selected": "Anytime",

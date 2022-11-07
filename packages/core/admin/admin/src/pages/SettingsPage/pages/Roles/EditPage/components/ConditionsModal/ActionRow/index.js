@@ -5,14 +5,9 @@ import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
 import { MultiSelectNested } from '@strapi/design-system/Select';
-import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
-import { rowHeight } from '../../Permissions/utils/constants';
 
-const FlexWrapper = styled(Flex)`
-  height: ${rowHeight};
-`;
+import { getNestedOptions, getSelectedValues, getNewStateFromChangedValues } from './utils/options';
 
 const ActionRow = ({
   arrayOfOptionsGroupedByCategory,
@@ -24,40 +19,13 @@ const ActionRow = ({
   value,
 }) => {
   const { formatMessage } = useIntl();
-  const options = arrayOfOptionsGroupedByCategory.reduce((arr, curr) => {
-    const [label, children] = curr;
-    const obj = {
-      label: upperFirst(label),
-      children: children.map((child) => ({
-        label: child.displayName,
-        value: child.id,
-      })),
-    };
 
-    return [...arr, obj];
-  }, []);
-
-  // Output: ['value1', 'value2']
-  const values = Object.values(value)
-    .map((x) =>
-      Object.entries(x)
-        .filter(([, value]) => value)
-        .map(([key]) => key)
-    )
-    .flat();
-
-  // ! Only expects arrayOfOpt to be [['default', obj]] - might break in future changes
   const handleChange = (val) => {
-    const [[, values]] = arrayOfOptionsGroupedByCategory;
-    const formattedValues = values.reduce(
-      (acc, curr) => ({ [curr.id]: val.includes(curr.id), ...acc }),
-      {}
-    );
-    onChange(name, formattedValues);
+    onChange(name, getNewStateFromChangedValues(arrayOfOptionsGroupedByCategory, val));
   };
 
   return (
-    <FlexWrapper as="li" background={isGrey ? 'neutral100' : 'neutral0'}>
+    <Flex as="li" background={isGrey ? 'neutral100' : 'neutral0'} paddingBottom={3} paddingTop={3}>
       <Flex paddingLeft={6} style={{ width: 180 }}>
         <Typography variant="sigma" textColor="neutral600">
           {formatMessage({
@@ -85,12 +53,12 @@ const ActionRow = ({
           id={name}
           customizeContent={(values) => `${values.length} currently selected`}
           onChange={handleChange}
-          value={values}
-          options={options}
+          value={getSelectedValues(value)}
+          options={getNestedOptions(arrayOfOptionsGroupedByCategory)}
           disabled={isFormDisabled || IS_DISABLED}
         />
       </Box>
-    </FlexWrapper>
+    </Flex>
   );
 };
 
@@ -103,4 +71,5 @@ ActionRow.propTypes = {
   value: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
 };
+
 export default ActionRow;
