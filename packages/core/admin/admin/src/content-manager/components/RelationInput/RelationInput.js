@@ -204,6 +204,10 @@ const RelationInput = ({
     onSearch();
   };
 
+  useEffect(() => {
+    listRef.current.scrollToItem(relations.length, 'end');
+  }, [relations]);
+
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
@@ -231,13 +235,6 @@ const RelationInput = ({
               onChange={(relation) => {
                 setValue(null);
                 onRelationConnect(relation);
-
-                // scroll to the end of the list
-                if (relations.length > 0) {
-                  setTimeout(() => {
-                    listRef.current.scrollToItem(relations.length, 'end');
-                  });
-                }
               }}
               onInputChange={(value) => {
                 setValue(value);
