@@ -141,7 +141,7 @@ const DraggedItem = ({
   const composedBoxRefs = composeRefs(boxRef, dropRef);
 
   return (
-    <Box ref={composedBoxRefs} style={{ border: '1px solid red' }}>
+    <Box ref={composedBoxRefs}>
       {isDragging ? (
         <Preview ref={previewRef} />
       ) : (
