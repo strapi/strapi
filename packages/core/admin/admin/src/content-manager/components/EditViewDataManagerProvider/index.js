@@ -498,12 +498,12 @@ const EditViewDataManagerProvider = ({
     [shouldCheckDZErrors]
   );
 
-  const moveComponentField = useCallback((pathToComponent, dragIndex, hoverIndex) => {
+  const moveComponentField = useCallback(({ name, newIndex, currentIndex }) => {
     dispatch({
       type: 'MOVE_COMPONENT_FIELD',
-      pathToComponent,
-      dragIndex,
-      hoverIndex,
+      keys: name.split('.'),
+      newIndex,
+      oldIndex: currentIndex,
     });
   }, []);
 

@@ -178,6 +178,7 @@ const reducer = (state, action) =>
 
         break;
       }
+      case 'MOVE_COMPONENT_FIELD':
       case 'REORDER_RELATION': {
         const { oldIndex, newIndex, keys } = action;
         const path = ['modifiedData', ...keys];
@@ -263,25 +264,6 @@ const reducer = (state, action) =>
 
         draftState.modifiedDZName = null;
         draftState.shouldCheckErrors = false;
-        break;
-      }
-      case 'MOVE_COMPONENT_FIELD': {
-        const currentValue = get(state, ['modifiedData', ...action.pathToComponent]);
-        const valueToInsert = get(state, [
-          'modifiedData',
-          ...action.pathToComponent,
-          action.dragIndex,
-        ]);
-
-        const updatedValue = moveFields(
-          currentValue,
-          action.dragIndex,
-          action.hoverIndex,
-          valueToInsert
-        );
-
-        set(draftState, ['modifiedData', ...action.pathToComponent], updatedValue);
-
         break;
       }
       case 'MOVE_COMPONENT_UP':
