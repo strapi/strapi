@@ -49,11 +49,11 @@ const client = new QueryClient({
   },
 });
 
-const waitForReload = async () => {
+const waitForReload = async (options) => {
   await waitFor(() => {
     expect(screen.queryByTestId('loader')).toBe(null);
     expect(screen.getByRole('heading', { name: /marketplace/i })).toBeInTheDocument();
-  });
+  }, options);
 };
 
 describe('Marketplace page - plugins tab', () => {
@@ -246,7 +246,6 @@ describe('Marketplace page - plugins tab', () => {
     expect(notCategoryPlugin).toEqual(null);
   });
 
-  // filters collections and categories together
   it('filters a category and a collection option', async () => {
     // When a user clicks the filters button
     userEvent.click(screen.getByRole('button', { name: /filters/i }));
@@ -259,7 +258,7 @@ describe('Marketplace page - plugins tab', () => {
     // When they click the option
     userEvent.click(collectionOption);
     // The page should reload
-    await waitForReload();
+    await waitForReload({ timeout: 5000 });
     // When they click the filters button again
     userEvent.click(screen.getByRole('button', { name: 'Filters' }));
     // They should see the collections button indicating 1 option selected
@@ -270,7 +269,7 @@ describe('Marketplace page - plugins tab', () => {
     const categoryOption = screen.getByRole('option', { name: `Custom fields (4)` });
     userEvent.click(categoryOption);
     // The page should reload
-    await waitForReload();
+    await waitForReload({ timeout: 5000 });
     // When the page reloads they should see a tag for the selected option
     const madeByStrapiTag = screen.getByRole('button', { name: 'Made by Strapi' });
     const customFieldsTag = screen.getByRole('button', { name: 'Custom fields' });
