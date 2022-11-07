@@ -7,34 +7,59 @@ const {
   // TODO: we need to solve this issue with typescript modules
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
+const _ = require('lodash/fp');
 
-module.exports = async () => {
-  console.log('Importing data...');
+const strapi = require('../../Strapi');
 
-  // From file
-  const source = createLocalFileSourceProvider({ backupFilePath: './backup.tar.gz' });
+const logger = console;
 
-  // To Strapi
-  const destination = createLocalStrapiDestinationProvider({
+module.exports = async (filename, opts) => {
+  // validate inputs from Commander
+  if (!_.isString(filename) || !_.isObject(opts)) {
+    logger.error('Could not parse arguments');
+    process.exit(1);
+  }
+
+  /**
+   * From strapi backup file
+   */
+
+  // treat any unknown arguments as filenames
+  const sourceOptions = {
+    backupFilePath: filename,
+  };
+  const source = createLocalFileSourceProvider(sourceOptions);
+
+  /**
+   * To local Strapi instance
+   */
+  const destinationOptions = {
     getStrapi() {
       return strapi().load();
     },
-  });
+  };
+  const destination = createLocalStrapiDestinationProvider(destinationOptions);
 
-  const engine = createTransferEngine(source, destination, {
-    strategy: 'restore',
-    versionMatching: 'ignore',
-  });
+  /**
+   * Configure and run the transfer engine
+   */
+  const engineOptions = {
+    strategy: opts.conflictStrategy,
+    versionMatching: opts.schemaComparison,
+    exclude: opts.exclude,
+  };
+  const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
+    logger.log('Importing data...');
     const result = await engine.transfer();
-    console.log('Import process has been completed successfully!');
+    logger.log('Import process has been completed successfully!');
 
     // TODO: this won't dump the entire results, we will print a pretty summary
-    console.log('Results:', result);
+    logger.log('Results:', result);
     process.exit(0);
   } catch (e) {
-    console.log('Import process failed unexpectedly');
+    logger.log('Import process failed unexpectedly');
     process.exit(1);
   }
 };

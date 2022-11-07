@@ -7,6 +7,7 @@ const {
   // TODO: we need to solve this issue with typescript modules
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
+const _ = require('lodash/fp');
 
 const strapi = require('../../Strapi');
 
@@ -14,35 +15,55 @@ const getDefaultExportBackupName = () => `strapi-backup`;
 
 const logger = console;
 
-module.exports = async (args) => {
-  // From strapi
-  const inputOptions = {
+const BYTES_IN_MB = 1024 * 1024;
+
+module.exports = async (filename, opts) => {
+  // validate inputs from Commander
+  if (!_.isObject(opts)) {
+    logger.error('Could not parse arguments');
+    process.exit(1);
+  }
+  /**
+   * From local Strapi instance
+   */
+  const sourceOptions = {
     getStrapi() {
       return strapi().load();
     },
   };
-  const source = createLocalStrapiSourceProvider(inputOptions);
+  const source = createLocalStrapiSourceProvider(sourceOptions);
 
-  // To file
-  const outputOptions = {
+  /**
+   * To a Strapi backup file
+   */
+  // treat any unknown arguments as filenames
+  const destinationOptions = {
     file: {
-      path: args.output || getDefaultExportBackupName(),
+      path: _.isString(filename) && filename.length > 0 ? filename : getDefaultExportBackupName(),
+      maxSize: _.isFinite(opts.maxSize) ? Math.floor(opts.maxSize) * BYTES_IN_MB : undefined,
+      maxSizeJsonl: _.isFinite(opts.maxSizeJsonl)
+        ? Math.floor(opts.maxSizeJsonl) * BYTES_IN_MB
+        : undefined,
     },
     encryption: {
-      enabled: args.encrypt,
-      key: args.key,
+      enabled: opts.encrypt,
+      key: opts.key,
     },
     compression: {
-      enabled: args.compress,
+      enabled: opts.compress,
     },
   };
-  const destination = createLocalFileDestinationProvider(outputOptions);
+  const destination = createLocalFileDestinationProvider(destinationOptions);
 
-  // create transfer engine
-  const engine = createTransferEngine(source, destination, {
-    strategy: 'restore',
-    versionMatching: 'minor',
-  });
+  /**
+   * Configure and run the transfer engine
+   */
+  const engineOptions = {
+    strategy: opts.conflictStrategy,
+    versionMatching: opts.schemaComparison,
+    exclude: opts.exclude,
+  };
+  const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
     const result = await engine.transfer();

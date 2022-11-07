@@ -24,6 +24,7 @@ export interface ILocalFileDestinationProviderOptions {
   file: {
     path: string;
     maxSize?: number;
+    maxSizeJsonl?: number;
   };
 }
 
@@ -93,7 +94,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
-    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
+    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSizeJsonl);
 
     // Full pipeline
     const streams = transforms.concat(fileStream);
@@ -123,7 +124,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
-    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
+    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSizeJsonl);
 
     // Full pipelines
     const streams = transforms.concat(fileStream);
