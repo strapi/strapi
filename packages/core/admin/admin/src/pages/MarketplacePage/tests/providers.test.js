@@ -49,10 +49,13 @@ const client = new QueryClient({
 });
 
 const waitForReload = async () => {
-  await waitFor(() => {
-    expect(screen.queryByTestId('loader')).toBe(null);
-    expect(screen.getByRole('heading', { name: /marketplace/i })).toBeInTheDocument();
-  });
+  await waitFor(
+    () => {
+      expect(screen.queryByTestId('loader')).toBe(null);
+      expect(screen.getByRole('heading', { name: /marketplace/i })).toBeInTheDocument();
+    },
+    { timeout: 5000 }
+  );
 };
 
 describe('Marketplace page - providers tab', () => {
@@ -135,7 +138,6 @@ describe('Marketplace page - providers tab', () => {
 
   it('shows the installed text for installed providers', () => {
     // Open providers tab
-
     const providersTab = screen.getByRole('tab', { name: /providers/i });
     userEvent.click(providersTab);
 
