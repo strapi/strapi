@@ -277,7 +277,12 @@ program
       .argParser(parseInputBool)
   )
   .addOption(
-    new Option('--compress [boolean]', 'Compress output file using gz')
+    new Option('--compress [boolean]', 'Compress output file using gzip compression')
+      .default(true)
+      .argParser(parseInputBool)
+  )
+  .addOption(
+    new Option('--archive [boolean]', 'Archive output files using tar')
       .default(true)
       .argParser(parseInputBool)
   )
@@ -310,7 +315,7 @@ program
   .addOption(
     new Option(
       '--schemaComparison <schemaComparison>',
-      'exact requires every field to match, strict requires Strapi version and schemas to match, subset requires source schema to exist in destination, bypass skips checks',
+      'exact requires every field to match, strict requires Strapi version and content type schema fields do not break, subset requires source schema to exist in destination, bypass skips checks',
       parseInputList
     )
       .choices(['exact', 'strict', 'subset', 'bypass'])

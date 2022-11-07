@@ -20,6 +20,11 @@ export interface ILocalFileDestinationProviderOptions {
     enabled: boolean;
   };
 
+  // Archive
+  archive: {
+    enabled: boolean;
+  };
+
   // File
   file: {
     path: string;
