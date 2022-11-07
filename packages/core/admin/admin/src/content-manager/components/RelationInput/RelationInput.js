@@ -427,8 +427,8 @@ const ListItem = ({ data, index, style }) => {
       }
       style={{
         ...style,
-        bottom: style.bottom + RELATION_GUTTER,
-        height: style.height - RELATION_GUTTER,
+        bottom: style.bottom ?? 0 + RELATION_GUTTER,
+        height: style.height ?? 0 - RELATION_GUTTER,
       }}
     >
       <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>

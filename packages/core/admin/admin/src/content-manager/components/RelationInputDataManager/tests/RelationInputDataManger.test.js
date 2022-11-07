@@ -1,6 +1,6 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { fireEvent, render, act } from '@testing-library/react';
+import { fireEvent, render, act, screen } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -100,6 +100,7 @@ jest.mock('@strapi/helper-plugin', () => ({
     loadRelation: jest.fn(),
     connectRelation: jest.fn(),
     disconnectRelation: jest.fn(),
+    reorderRelation: jest.fn(),
   }),
 }));
 
@@ -386,6 +387,20 @@ describe('RelationInputDataManager', () => {
         }),
       })
     );
+  });
+
+  test('Reorder an entity', () => {
+    const { reorderRelation } = useCMEditViewDataManager();
+    setup();
+
+    const [draggedItem, dropZone] = screen.getAllByLabelText('Drag');
+
+    fireEvent.dragStart(draggedItem);
+    fireEvent.dragEnter(dropZone);
+    fireEvent.dragOver(dropZone);
+    fireEvent.drop(dropZone);
+
+    expect(reorderRelation).toBeCalledWith({ name: 'relation', newIndex: 0, oldIndex: 1 });
   });
 
   describe('Counting relations', () => {

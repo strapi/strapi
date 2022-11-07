@@ -151,6 +151,20 @@ describe('Content-Manager || RelationInput', () => {
       expect(spy).toHaveBeenCalled();
     });
 
+    test('should call onRelationReorder', () => {
+      const spy = jest.fn();
+      setup({ onRelationReorder: spy });
+
+      const [draggedItem, dropZone] = screen.getAllByLabelText('Drag');
+
+      fireEvent.dragStart(draggedItem);
+      fireEvent.dragEnter(dropZone);
+      fireEvent.dragOver(dropZone);
+      fireEvent.drop(dropZone);
+
+      expect(spy).toHaveBeenCalled();
+    });
+
     // TODO: check if it is possible to fire scroll event here
     // test.only('should call onSearchNextPage', () => {
     //   const spy = jest.fn();
