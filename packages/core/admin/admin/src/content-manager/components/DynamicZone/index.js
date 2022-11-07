@@ -13,6 +13,7 @@ import DzLabel from './components/DzLabel';
 import Component from './components/Component';
 
 import ComponentPicker from './components/ComponentPicker';
+import { useContentTypeLayout } from '../../hooks';
 
 /* eslint-disable react/no-array-index-key */
 
@@ -38,6 +39,7 @@ const DynamicZone = ({
   const toggleNotification = useNotification();
   const [isOpen, setIsOpen] = useState(false);
   const [shouldOpenAddedComponent, setShouldOpenAddedComponent] = useState(false);
+  const { getComponentLayout, components } = useContentTypeLayout();
   const dynamicDisplayedComponentsLength = dynamicDisplayedComponents.length;
   const intlDescription = metadatas.description
     ? { id: metadatas.description, defaultMessage: metadatas.description }
@@ -92,10 +94,12 @@ const DynamicZone = ({
     (componentUid) => {
       setIsOpen(false);
 
-      addComponentToDynamicZone(name, componentUid, hasError);
+      const componentLayoutData = getComponentLayout(componentUid);
+
+      addComponentToDynamicZone(name, componentLayoutData, components, hasError);
       setShouldOpenAddedComponent(true);
     },
-    [addComponentToDynamicZone, hasError, name]
+    [addComponentToDynamicZone, hasError, name, components, getComponentLayout]
   );
 
   const handleClickOpenPicker = () => {

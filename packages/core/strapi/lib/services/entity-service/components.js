@@ -47,12 +47,10 @@ const createComponents = async (uid, data) => {
           componentValue.map((value) => createComponent(componentUID, value))
         );
 
-        // TODO: add order
-        componentBody[attributeName] = components.map(({ id }, idx) => {
+        componentBody[attributeName] = components.map(({ id }) => {
           return {
             id,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
               component_type: componentUID,
             },
@@ -63,7 +61,6 @@ const createComponents = async (uid, data) => {
         componentBody[attributeName] = {
           id: component.id,
           __pivot: {
-            order: 1,
             field: attributeName,
             component_type: componentUID,
           },
@@ -81,13 +78,12 @@ const createComponents = async (uid, data) => {
       }
 
       componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async (value, idx) => {
+        dynamiczoneValues.map(async (value) => {
           const { id } = await createComponent(value.__component, value);
           return {
             id,
             __component: value.__component,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
             },
           };
@@ -145,11 +141,10 @@ const updateComponents = async (uid, entityToUpdate, data) => {
           componentValue.map((value) => updateOrCreateComponent(componentUID, value))
         );
 
-        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }, idx) => {
+        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
           return {
             id,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
               component_type: componentUID,
             },
@@ -160,7 +155,6 @@ const updateComponents = async (uid, entityToUpdate, data) => {
         componentBody[attributeName] = component && {
           id: component.id,
           __pivot: {
-            order: 1,
             field: attributeName,
             component_type: componentUID,
           },
@@ -180,14 +174,13 @@ const updateComponents = async (uid, entityToUpdate, data) => {
       }
 
       componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async (value, idx) => {
+        dynamiczoneValues.map(async (value) => {
           const { id } = await updateOrCreateComponent(value.__component, value);
 
           return {
             id,
             __component: value.__component,
             __pivot: {
-              order: idx + 1,
               field: attributeName,
             },
           };
@@ -274,44 +267,34 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
   }
 };
 
-const deleteComponents = async (uid, entityToDelete) => {
+const deleteComponents = async (uid, entityToDelete, { loadComponents = true } = {}) => {
   const { attributes = {} } = strapi.getModel(uid);
 
   for (const attributeName of Object.keys(attributes)) {
     const attribute = attributes[attributeName];
 
-    if (attribute.type === 'component') {
-      const { component: componentUID } = attribute;
-
-      // Load attribute value if it's not already loaded
-      const value =
-        entityToDelete[attributeName] ||
-        (await strapi.query(uid).load(entityToDelete, attributeName));
-
-      if (!value) {
-        continue;
-      }
-
-      if (Array.isArray(value)) {
-        await Promise.all(value.map((subValue) => deleteComponent(componentUID, subValue)));
+    if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
+      let value;
+      if (loadComponents) {
+        value = await strapi.query(uid).load(entityToDelete, attributeName);
       } else {
-        await deleteComponent(componentUID, value);
+        value = entityToDelete[attributeName];
       }
-
-      continue;
-    }
-
-    if (attribute.type === 'dynamiczone') {
-      const value =
-        entityToDelete[attributeName] ||
-        (await strapi.query(uid).load(entityToDelete, attributeName));
 
       if (!value) {
         continue;
       }
 
-      if (Array.isArray(value)) {
-        await Promise.all(value.map((subValue) => deleteComponent(subValue.__component, subValue)));
+      if (attribute.type === 'component') {
+        const { component: componentUID } = attribute;
+        await Promise.all(
+          _.castArray(value).map((subValue) => deleteComponent(componentUID, subValue))
+        );
+      } else {
+        // delete dynamic zone components
+        await Promise.all(
+          _.castArray(value).map((subValue) => deleteComponent(subValue.__component, subValue))
+        );
       }
 
       continue;

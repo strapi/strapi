@@ -4,8 +4,7 @@ const { join, extname, basename } = require('path');
 const { existsSync } = require('fs-extra');
 const _ = require('lodash');
 const fse = require('fs-extra');
-const { isKebabCase } = require('@strapi/utils');
-const { importDefault } = require('../../utils');
+const { isKebabCase, importDefault } = require('@strapi/utils');
 
 const DEFAULT_CONTENT_TYPE = {
   schema: {},
