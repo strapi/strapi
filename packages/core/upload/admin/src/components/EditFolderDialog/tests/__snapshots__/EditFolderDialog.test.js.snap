@@ -13,8 +13,57 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c25 {
-  padding-right: 12px;
+.c21 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c35 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c22 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c22 > * + * {
+  margin-top: 4px;
+}
+
+.c36 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c36 > * + * {
+  margin-left: 8px;
+}
+
+.c7 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c34 {
@@ -94,7 +143,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c32 .sc-kBzgEd {
+.c32 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -164,7 +213,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c37 .sc-kBzgEd {
+.c37 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -222,71 +271,8 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   fill: #ffffff;
 }
 
-.c24 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c23 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c21 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c35 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c22 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c22 > * + * {
-  margin-top: 4px;
-}
-
-.c36 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c36 > * + * {
-  margin-left: 8px;
+.c25 {
+  padding-right: 12px;
 }
 
 .c14 {
@@ -412,11 +398,25 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   margin-top: 4px;
 }
 
-.c7 {
+.c24 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c23 {
   font-weight: 600;
   color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c26 {
@@ -696,218 +696,235 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
       class="c1"
     >
       <div>
-        <div
-          aria-labelledby="title"
-          aria-modal="true"
-          class="c2 c3"
-          role="dialog"
-        >
-          <form
-            action="#"
-            novalidate=""
+        <div>
+          <div
+            aria-labelledby="title"
+            aria-modal="true"
+            class="c2 c3"
+            role="dialog"
           >
-            <div
-              class="c4 c5"
+            <form
+              action="#"
+              novalidate=""
             >
               <div
-                class="c6"
-              >
-                <h2
-                  class="c7"
-                  id="title"
-                >
-                  Add new folder
-                </h2>
-                <button
-                  aria-disabled="false"
-                  aria-label="Close the modal"
-                  class="c8 c9"
-                  type="button"
-                >
-                  <svg
-                    fill="none"
-                    height="1em"
-                    viewBox="0 0 24 24"
-                    width="1em"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                      fill="#212134"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div
-              class="c10 c11"
-            >
-              <div
-                class="c12"
+                class="c4 c5"
               >
                 <div
-                  class="c13"
+                  class="c6"
                 >
-                  <div
-                    class=""
+                  <h2
+                    class="c7"
+                    id="title"
                   >
-                    <div>
-                      <div>
-                        <div
-                          class="c14 c15"
-                          spacing="1"
-                        >
-                          <label
-                            class="c16"
-                            for="textinput-1"
-                          >
-                            <div
-                              class="c17"
-                            >
-                              Name
-                            </div>
-                          </label>
-                          <div
-                            class="c18 c19"
-                          >
-                            <input
-                              aria-disabled="false"
-                              aria-invalid="false"
-                              class="c20"
-                              id="textinput-1"
-                              name="name"
-                              value=""
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="c13"
-                >
-                  <div
-                    class=""
-                  >
-                    <div
-                      class="c21 c22"
-                      spacing="1"
-                    >
-                      <label
-                        class="c23"
-                        for="folder-parent"
-                      >
-                        <div
-                          class="c24"
-                        >
-                          Location
-                        </div>
-                      </label>
-                      <div
-                        class=" css-1tkrshn-container"
-                      >
-                        <div
-                          class=" css-1sb7bue-control"
-                        >
-                          <div
-                            class=" css-1kj7tu4-ValueContainer"
-                          >
-                            <div
-                              class=" css-p5rves-singleValue"
-                            >
-                              Media Library
-                            </div>
-                            <input
-                              aria-autocomplete="list"
-                              class="css-wmatm6-dummyInput-DummyInput"
-                              id="folder-parent"
-                              readonly=""
-                              tabindex="0"
-                              value=""
-                            />
-                          </div>
-                          <div
-                            class=" css-1hb7zxy-IndicatorsContainer"
-                          >
-                            <button
-                              class="c25 c26 c27"
-                              type="button"
-                            >
-                              <svg
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 14 8"
-                                width="1em"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                        <input
-                          name="parent"
-                          type="hidden"
-                          value=""
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              class="c4 c28"
-            >
-              <div
-                class="c6"
-              >
-                <div
-                  class="c29 c30"
-                >
+                    Add new folder
+                  </h2>
                   <button
                     aria-disabled="false"
-                    class="c31 c32"
-                    name="cancel"
+                    aria-label="Close the modal"
+                    class="c8 c9"
                     type="button"
                   >
-                    <span
-                      class="c33 c34"
+                    <svg
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      Cancel
-                    </span>
+                      <path
+                        d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                        fill="#212134"
+                      />
+                    </svg>
                   </button>
                 </div>
+              </div>
+              <div
+                class="c10 c11"
+              >
                 <div
-                  class="c29 c30"
+                  class="c12"
                 >
                   <div
-                    class="c35 c36"
-                    spacing="2"
+                    class="c13"
+                  >
+                    <div
+                      class=""
+                    >
+                      <div>
+                        <div>
+                          <div
+                            class="c14 c15"
+                            spacing="1"
+                          >
+                            <label
+                              class="c16"
+                              for="textinput-1"
+                            >
+                              <div
+                                class="c17"
+                              >
+                                Name
+                              </div>
+                            </label>
+                            <div
+                              class="c18 c19"
+                            >
+                              <input
+                                aria-disabled="false"
+                                aria-invalid="false"
+                                class="c20"
+                                id="textinput-1"
+                                name="name"
+                                value=""
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="c13"
+                  >
+                    <div
+                      class=""
+                    >
+                      <div
+                        class="c21 c22"
+                        spacing="1"
+                      >
+                        <label
+                          class="c23"
+                          for="folder-parent"
+                        >
+                          <div
+                            class="c24"
+                          >
+                            Location
+                          </div>
+                        </label>
+                        <div
+                          class=" css-1iyvlxg-container"
+                        >
+                          <span
+                            class="css-1f43avz-a11yText-A11yText"
+                            id="react-select-2-live-region"
+                          />
+                          <span
+                            aria-atomic="false"
+                            aria-live="polite"
+                            aria-relevant="additions text"
+                            class="css-1f43avz-a11yText-A11yText"
+                          />
+                          <div
+                            class=" css-1e1stxh-control"
+                          >
+                            <div
+                              class=" css-do2euy-ValueContainer"
+                            >
+                              <div
+                                class=" css-1sqm0gs-singleValue"
+                              >
+                                Media Library
+                              </div>
+                              <input
+                                aria-autocomplete="list"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-invalid="false"
+                                aria-readonly="true"
+                                class="css-mohuvp-dummyInput-DummyInput"
+                                id="folder-parent"
+                                inputmode="none"
+                                role="combobox"
+                                tabindex="0"
+                                value=""
+                              />
+                            </div>
+                            <div
+                              class=" css-1hb7zxy-IndicatorsContainer"
+                            >
+                              <button
+                                class="c25 c26 c27"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 14 8"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                          <input
+                            name="parent"
+                            type="hidden"
+                            value=""
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c4 c28"
+              >
+                <div
+                  class="c6"
+                >
+                  <div
+                    class="c29 c30"
                   >
                     <button
                       aria-disabled="false"
-                      class="c31 c37"
-                      name="submit"
-                      type="submit"
+                      class="c31 c32"
+                      name="cancel"
+                      type="button"
                     >
                       <span
                         class="c33 c34"
                       >
-                        Create
+                        Cancel
                       </span>
                     </button>
                   </div>
+                  <div
+                    class="c29 c30"
+                  >
+                    <div
+                      class="c35 c36"
+                      spacing="2"
+                    >
+                      <button
+                        aria-disabled="false"
+                        class="c31 c37"
+                        name="submit"
+                        type="submit"
+                      >
+                        <span
+                          class="c33 c34"
+                        >
+                          Create
+                        </span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>

@@ -92,10 +92,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c38 {
-        padding-left: 4px;
-      }
-
       .c34 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -114,103 +110,39 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         justify-content: end;
       }
 
-      .c25 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
+      .c23 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
       }
 
-      .c25 svg {
-        height: 12px;
-        width: 12px;
+      .c30 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #ffffff;
+      .c32 {
+        color: #32324d;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
-      .c25[aria-disabled='true'] {
-        pointer-events: none;
+      .c33 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
-      .c25:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c25:focus-visible {
-        outline: none;
-      }
-
-      .c25:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c26 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-        border: none;
-      }
-
-      .c26 svg > g,
-      .c26 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c26:hover svg > g,
-      .c26:hover svg path {
-        fill: #666687;
-      }
-
-      .c26:active svg > g,
-      .c26:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c26[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c26[aria-disabled='true'] svg path {
-        fill: #666687;
+      .c38 {
+        padding-left: 4px;
       }
 
       .c13 {
@@ -324,35 +256,103 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
         height: 0.25rem;
       }
 
-      .c23 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
+      .c25 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
-      .c30 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c25 svg {
+        height: 12px;
+        width: 12px;
       }
 
-      .c32 {
-        color: #32324d;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c25 svg > g,
+      .c25 svg path {
+        fill: #ffffff;
       }
 
-      .c33 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c25[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c25:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c25:focus-visible {
+        outline: none;
+      }
+
+      .c25:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c26 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+        border: none;
+      }
+
+      .c26 svg > g,
+      .c26 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c26:hover svg > g,
+      .c26:hover svg path {
+        fill: #666687;
+      }
+
+      .c26:active svg > g,
+      .c26:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c26[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c26[aria-disabled='true'] svg path {
+        fill: #666687;
       }
 
       .c28 {

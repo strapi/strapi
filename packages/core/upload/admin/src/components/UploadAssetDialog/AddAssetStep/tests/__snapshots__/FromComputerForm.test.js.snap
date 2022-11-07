@@ -13,40 +13,43 @@ exports[`FromComputerForm snapshots the component 1`] = `
   width: 1px;
 }
 
-.c0 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
+.c3 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
 }
 
-.c1 {
-  background: #f6f6f9;
-  padding-top: 64px;
-  padding-bottom: 64px;
-  border-radius: 4px;
-  border-color: #c0c0cf;
-  border: 1px solid #c0c0cf;
-  position: relative;
+.c4 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c7 {
-  padding-top: 12px;
-  padding-bottom: 20px;
-}
-
-.c9 {
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
-  z-index: 1;
-  width: 100%;
-}
-
-.c11 {
-  position: relative;
+.c8 {
+  color: #666687;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
 }
 
 .c15 {
@@ -124,7 +127,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c13 .sc-kBzgEd {
+.c13 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -194,7 +197,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c21 .sc-kBzgEd {
+.c21 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -254,43 +257,40 @@ exports[`FromComputerForm snapshots the component 1`] = `
   fill: #32324d;
 }
 
-.c3 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
+.c0 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
 }
 
-.c4 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c1 {
+  background: #f6f6f9;
+  padding-top: 64px;
+  padding-bottom: 64px;
+  border-radius: 4px;
+  border-color: #c0c0cf;
+  border: 1px solid #c0c0cf;
+  position: relative;
 }
 
-.c8 {
-  color: #666687;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
+.c7 {
+  padding-top: 12px;
+  padding-bottom: 20px;
+}
+
+.c9 {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  z-index: 1;
+  width: 100%;
+}
+
+.c11 {
+  position: relative;
 }
 
 .c16 {

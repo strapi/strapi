@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "4.4.5",
+  "version": "4.4.7",
   "description": "Strapi maintained Custom Fields",
   "strapi": {
     "name": "color-picker",
@@ -9,7 +9,9 @@
     "displayName": "Color Picker"
   },
   "dependencies": {
-    "react-colorful": "5.6.1"
+    "react": "^17.0.2",
+    "react-colorful": "5.6.1",
+    "react-dom": "^17.0.2"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.4.0"
