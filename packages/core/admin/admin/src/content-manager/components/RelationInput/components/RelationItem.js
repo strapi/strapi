@@ -75,7 +75,7 @@ export const RelationItem = ({
 
   const [{ isDragging }, dragRef, dragPreviewRef] = useDrag({
     type: RELATION_ITEM_DRAG_TYPE,
-    item: { index, id },
+    item: { index },
     canDrag,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
