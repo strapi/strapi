@@ -9,6 +9,8 @@ const {
 } = require('@strapi/data-transfer');
 const _ = require('lodash/fp');
 
+const fs = require('fs');
+
 const strapi = require('../../Strapi');
 
 const getDefaultExportBackupName = () => `strapi-backup`;
@@ -33,13 +35,16 @@ module.exports = async (filename, opts) => {
   };
   const source = createLocalStrapiSourceProvider(sourceOptions);
 
+  const file =
+    _.isString(filename) && filename.length > 0 ? filename : getDefaultExportBackupName();
+
   /**
    * To a Strapi backup file
    */
   // treat any unknown arguments as filenames
   const destinationOptions = {
     file: {
-      path: _.isString(filename) && filename.length > 0 ? filename : getDefaultExportBackupName(),
+      path: file,
       maxSize: _.isFinite(opts.maxSize) ? Math.floor(opts.maxSize) * BYTES_IN_MB : undefined,
       maxSizeJsonl: _.isFinite(opts.maxSizeJsonl)
         ? Math.floor(opts.maxSizeJsonl) * BYTES_IN_MB
@@ -66,12 +71,13 @@ module.exports = async (filename, opts) => {
   const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
-    const result = await engine.transfer();
-    if (!result?.destination?.path) throw new Error('Export file not created');
-    logger.log(
-      'Export process has been completed successfully! Export archive is in %s',
-      result.destination.path
-    );
+    await engine.transfer();
+    // TODO: once archiving is implemented, we need to check file extensions
+    if (!fs.existsSync(file)) {
+      logger.log(file);
+      throw new Error('Export file not created');
+    }
+    logger.log('Export process has been completed successfully! Export archive is in %s', file);
     process.exit(0);
   } catch (e) {
     logger.error('Export process failed unexpectedly:', e.toString());
