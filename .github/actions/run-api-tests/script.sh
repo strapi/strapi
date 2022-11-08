@@ -3,7 +3,7 @@ if [[ -z "$RUN_EE" ]]; then
   export STRAPI_DISABLE_EE=true
 fi
 
-export ENV_PATH="$(pwd)/testApp/.env"
+export ENV_PATH="$(pwd)/test-apps/api/.env"
 export JWT_SECRET="aSecret"
 
 opts=($DB_OPTIONS)

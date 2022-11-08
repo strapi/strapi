@@ -98,7 +98,7 @@ package-lock.json
 # Tests
 ############################
 
-testApp
+test-apps
 coverage
 
 ############################
