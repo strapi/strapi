@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Marketplace page - layout renders the online layout 1`] = `
+exports[`Marketplace page - plugins tab renders and matches the plugin tab snapshot 1`] = `
 .c36 {
   padding-bottom: 16px;
 }
@@ -1738,46 +1738,38 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             </svg>
                           </div>
                         </a>
-                        <span>
+                        <button
+                          aria-disabled="false"
+                          class="c52 c85"
+                          type="button"
+                        >
                           <div
-                            aria-describedby="tooltip-3"
-                            class=""
-                            tabindex="0"
+                            aria-hidden="true"
+                            class="c55 c56 c57"
                           >
-                            <button
-                              aria-disabled="false"
-                              class="c52 c85"
-                              type="button"
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <div
-                                aria-hidden="true"
-                                class="c55 c56 c57"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 24 24"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                    fill="#212134"
-                                  />
-                                  <path
-                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                    fill="#212134"
-                                  />
-                                </svg>
-                              </div>
-                              <span
-                                class="c58 c59"
-                              >
-                                Copy install command
-                              </span>
-                            </button>
+                              <path
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                fill="#212134"
+                              />
+                            </svg>
                           </div>
-                        </span>
+                          <span
+                            class="c58 c59"
+                          >
+                            Copy install command
+                          </span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1895,47 +1887,38 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             </svg>
                           </div>
                         </a>
-                        <span>
+                        <button
+                          aria-disabled="false"
+                          class="c52 c85"
+                          type="button"
+                        >
                           <div
-                            aria-describedby="tooltip-5"
-                            class=""
-                            tabindex="0"
+                            aria-hidden="true"
+                            class="c55 c56 c57"
                           >
-                            <button
-                              aria-disabled="true"
-                              class="c52 c85"
-                              disabled=""
-                              type="button"
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <div
-                                aria-hidden="true"
-                                class="c55 c56 c57"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 24 24"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                    fill="#212134"
-                                  />
-                                  <path
-                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                    fill="#212134"
-                                  />
-                                </svg>
-                              </div>
-                              <span
-                                class="c58 c59"
-                              >
-                                Copy install command
-                              </span>
-                            </button>
+                              <path
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                fill="#212134"
+                              />
+                            </svg>
                           </div>
-                        </span>
+                          <span
+                            class="c58 c59"
+                          >
+                            Copy install command
+                          </span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -2042,7 +2025,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                               Documentation
                               <span>
                                 <div
-                                  aria-describedby="tooltip-7"
+                                  aria-describedby="tooltip-3"
                                   class="c78"
                                   tabindex="0"
                                 >
@@ -2243,47 +2226,38 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                             </svg>
                           </div>
                         </a>
-                        <span>
+                        <button
+                          aria-disabled="false"
+                          class="c52 c85"
+                          type="button"
+                        >
                           <div
-                            aria-describedby="tooltip-9"
-                            class=""
-                            tabindex="0"
+                            aria-hidden="true"
+                            class="c55 c56 c57"
                           >
-                            <button
-                              aria-disabled="true"
-                              class="c52 c85"
-                              disabled=""
-                              type="button"
+                            <svg
+                              fill="none"
+                              height="1em"
+                              viewBox="0 0 24 24"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <div
-                                aria-hidden="true"
-                                class="c55 c56 c57"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 24 24"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
-                                    fill="#212134"
-                                  />
-                                  <path
-                                    d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
-                                    fill="#212134"
-                                  />
-                                </svg>
-                              </div>
-                              <span
-                                class="c58 c59"
-                              >
-                                Copy install command
-                              </span>
-                            </button>
+                              <path
+                                d="M1.056 24h15.906c.583 0 1.056-.473 1.056-1.056V7.028c0-.583-.473-1.056-1.056-1.056H1.056C.473 5.972 0 6.445 0 7.028v15.916C0 23.527.473 24 1.056 24z"
+                                fill="#212134"
+                              />
+                              <path
+                                d="M8.094 2.111h13.795v13.795h-1.127v2.112h2.182A1.056 1.056 0 0024 16.962V1.056A1.056 1.056 0 0022.944 0H7.038a1.056 1.056 0 00-1.056 1.056v2.252h2.112V2.11z"
+                                fill="#212134"
+                              />
+                            </svg>
                           </div>
-                        </span>
+                          <span
+                            class="c58 c59"
+                          >
+                            Copy install command
+                          </span>
+                        </button>
                       </div>
                     </div>
                   </div>
