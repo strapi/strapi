@@ -130,13 +130,13 @@ $ yarn test:generate-app postgres
 $ yarn test:generate-app mysql
 ```
 
-A new app is required every time you run the API integration tests otherwise, the test suite will fail. A command is available to make this process easier: `yarn test:api`.
+A new app is required every time you run the API integration tests, otherwise the test suite will fail. A command is available to make this process easier: `yarn test:api`.
 
-This command runs tests using jest behing the scenes. Options for jest can be passed in the command. (e.g. to update snapshots `yarn test:api -u`).
+This command runs tests using jest behind the scenes. Options for jest can be passed to the command. (e.g. to update snapshots `yarn test:api -u`).
 
 ### Changing the database
 
-By default the script test commmand creates an app that uses `sqlite`. But you can run the test suites using different databases:
+By default the script run by `test:api` an app that uses `sqlite` as a database. But you can run the test suites using different databases:
 
 ```bash
 $ yarn test:api --db=sqlite
