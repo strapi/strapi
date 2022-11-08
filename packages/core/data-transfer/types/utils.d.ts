@@ -27,8 +27,9 @@ export type TransformFunction = (chunk: any, encoding?: string) => any;
 export type StreamItem = Stream | TransformFunction;
 type Stream = Readable | Writable | Duplex | Transform;
 
+export type TransferStage = 'entities' | 'links' | 'media' | 'schemas' | 'configuration';
+
 export interface IProviderStageResults {
-  success?: boolean;
   items?: number;
 }
 export interface ISourceProviderStageResults extends IProviderStageResults {}

@@ -1,10 +1,15 @@
-import type { ISourceProvider, ProviderType } from '../../../types';
-
+import type {
+  ISourceProvider,
+  ISourceProviderTransferResults,
+  ProviderType,
+  TransferStage,
+} from '../../../types';
 import { chain } from 'stream-chain';
 import { Readable } from 'stream';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
+import { onItemPassthrough } from '../util';
 
 export interface ILocalStrapiSourceProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
@@ -22,10 +27,22 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   options: ILocalStrapiSourceProviderOptions;
   strapi?: Strapi.Strapi;
+  results: ISourceProviderTransferResults = {};
 
   constructor(options: ILocalStrapiSourceProviderOptions) {
     this.options = options;
   }
+
+  #transferCounter = (transferStage: TransferStage) => {
+    return onItemPassthrough(() => {
+      if (!this.results[transferStage]) {
+        this.results[transferStage] = {
+          items: 0,
+        };
+      }
+      this.results[transferStage]!.items!++;
+    });
+  };
 
   async bootstrap(): Promise<void> {
     this.strapi = await this.options.getStrapi();
@@ -53,6 +70,10 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     return chain([
       // Entities stream
       createEntitiesStream(this.strapi),
+
+      // Count
+      this.#transferCounter('entities'),
+
       // Transform stream
       createEntitiesTransformStream(),
     ]);
@@ -63,7 +84,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       throw new Error('Not able to stream links. Strapi instance not found');
     }
 
-    return createLinksStream(this.strapi);
+    return chain([createLinksStream(this.strapi), this.#transferCounter('links')]);
   }
 
   streamConfiguration(): NodeJS.ReadableStream {
@@ -71,7 +92,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       throw new Error('Not able to stream configuration. Strapi instance not found');
     }
 
-    return createConfigurationStream(strapi);
+    return chain([createConfigurationStream(strapi), this.#transferCounter('configuration')]);
   }
 
   getSchemas() {
@@ -79,7 +100,12 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       throw new Error('Not able to get Schemas. Strapi instance not found');
     }
 
-    return [...Object.values(this.strapi.contentTypes), ...Object.values(this.strapi.components)];
+    const schemas = [
+      ...Object.values(this.strapi.contentTypes),
+      ...Object.values(this.strapi.components),
+    ];
+    this.results.schemas = { items: schemas.length };
+    return schemas;
   }
 
   streamSchemas(): NodeJS.ReadableStream {
