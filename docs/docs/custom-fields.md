@@ -40,62 +40,9 @@ The custom field will be added to Strapi during the server [register lifecycle](
 
 ### Admin
 
-Here's how you register a Custom Field on the admin:
+To register a custom field on the server, see [documentation](https://docs.strapi.io/developer-docs/latest/development/custom-fields.html#registering-a-custom-field-on-the-server).
 
-```tsx
-
-// You can also pass an array of objects to register several custom fields at once
-app.customFields.register(
-  options: CustomFieldAdminOptions | CustomFieldAdminOptions[]
-);
-
-interface CustomFieldAdminOptions {
-  // The name of the custom field
-  name: string;
-  // The name of the plugin creating the custom field
-  pluginId?: string;
-  // The existing Strapi data type the custom field will use
-  type: string;
-  // The translation for the name
-  intlLabel: IntlObject;
-  // The translation for the description
-  intlDescription: IntlObject;
-  // The icon for the custom field
-  icon?: React.ComponentType;
-  // The components needed to display the custom field in the Content Manager
-  components: {
-    // Input component for the Edit view
-    Input: () => Promise<{ default: React.ReactComponent }>;
-    // Read only component for the List view
-    View: () => Promise<{ default: React.ReactComponent }>;
-  };
-  // The settings to extend in the Content-Type Builder
-  options?: {
-    base: CTBFormSection[];
-    advanced: CTBFormSection[];
-    validator: (args) => object;
-  }
-}
-
-interface IntlObject {
-  id: string;
-  defaultMessage: string;
-}
-
-interface CTBFormSection {
-  sectionTitle: IntlObject;
-  items: CTBFormInput[];
-}
-
-interface CTBFormInput {
-  name: string;
-  description: InltObject;
-  type: string;
-  intlLabel: IntlObject;
-}
-```
-
-For the admin, we will expose a new `customFields` object with a `register` method on the `StrapiApp` instance. The custom field can then be added to Strapi during the admin [bootstrap lifecycle](https://docs.strapi.io/developer-docs/latest/developer-resources/plugin-api-reference/admin-panel.html#bootstrap) by providing the following object to `customFields.register()`.
+To register a custom field to the admin panel, see [documentation](https://docs.strapi.io/developer-docs/latest/development/custom-fields.html#registering-a-custom-field-in-the-admin-panel).
 
 Note: You can only share a custom field by packaging it into a plugin.
 
