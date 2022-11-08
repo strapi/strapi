@@ -24,7 +24,7 @@ describe('Admin Auth End to End', () => {
     if (edition === 'EE') {
       internals.role = await utils.createRole({
         name: 'auth_test_role',
-        description: 'Only used for auth crud test (e2e)',
+        description: 'Only used for auth crud test (api)',
       });
     } else {
       internals.role = await utils.getSuperAdminRole();
