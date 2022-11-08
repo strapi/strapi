@@ -32,7 +32,7 @@ const config = {
           resolve: {
             alias: {
               // assuming root node_modules is up from "./packages/<your-docusaurus>
-              react: path.resolve('../node_modules/react'),
+              react: path.resolve('./node_modules/react'),
             },
           },
         };
