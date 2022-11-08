@@ -9,7 +9,7 @@ const config = {
   title: 'Doc',
   tagline: 'Dinosaurs are cool',
   url: 'https://strapi.github.io/strapi',
-  baseUrl: '/strapi/',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.png',
