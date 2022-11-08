@@ -117,9 +117,9 @@ export const RelationItem = ({
           {...props}
         >
           {/* TODO: swap this out for using children when DS is updated */}
-          {canDrag ? (
+          {canDrag && (
             <IconButton marginRight={1} aria-label="Drag" noBorder icon={<Drag />} />
-          ) : null}
+          )}
           <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
           {endAction && <Box paddingLeft={4}>{endAction}</Box>}
         </Flex>
