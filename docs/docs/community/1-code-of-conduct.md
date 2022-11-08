@@ -1,7 +1,6 @@
 ---
-title: Contributing
+title: Code of conduct
 hide_title: true
-sidebar_label: Contributing
 ---
 
 ```mdx-code-block
