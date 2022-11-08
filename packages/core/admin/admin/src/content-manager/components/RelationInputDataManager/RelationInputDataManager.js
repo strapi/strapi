@@ -49,7 +49,7 @@ export const RelationInputDataManager = ({
 
   const relationsFromModifiedData = get(modifiedData, name);
 
-  const currentLastPage = Math.ceil(relationsFromModifiedData.length / RELATIONS_TO_DISPLAY);
+  const currentLastPage = Math.ceil(get(initialData, name, []).length / RELATIONS_TO_DISPLAY);
 
   const { relations, search, searchFor } = useRelation(`${slug}-${name}-${initialData?.id ?? ''}`, {
     name,
