@@ -116,18 +116,14 @@ class TransferEngine<
       }
 
       await this.transferSchemas();
-      await this.transferEntities()
-        // Temporary while we don't have the final API for streaming data from the database
-        .catch((e) => {
-          console.log(`Could not complete the entities transfer. ${e.message}`);
-        });
+      await this.transferEntities();
       await this.transferMedia();
       await this.transferLinks();
       await this.transferConfiguration();
 
       await this.close();
-    } catch (e) {
-      console.log('error', e);
+    } catch (e: any) {
+      throw new Error(e);
       // Rollback the destination provider if an exception is thrown during the transfer
       // Note: This will be configurable in the future
       // await this.destinationProvider?.rollback(e);
