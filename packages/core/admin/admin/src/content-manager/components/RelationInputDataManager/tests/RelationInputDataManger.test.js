@@ -97,10 +97,10 @@ jest.mock('@strapi/helper-plugin', () => ({
         },
       ],
     },
-    loadRelation: jest.fn(),
-    connectRelation: jest.fn(),
-    disconnectRelation: jest.fn(),
-    reorderRelation: jest.fn(),
+    relationLoad: jest.fn(),
+    relationConnect: jest.fn(),
+    relationDisconnect: jest.fn(),
+    relationReorder: jest.fn(),
   }),
 }));
 
@@ -227,7 +227,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
-      loadRelation: jest.fn(),
+      relationLoad: jest.fn(),
     });
 
     const { container } = setup({
@@ -246,7 +246,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
-      loadRelation: jest.fn(),
+      relationLoad: jest.fn(),
     });
 
     const { container } = setup({
@@ -267,7 +267,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: [],
       slug: 'test',
       initialData: {},
-      loadRelation: jest.fn(),
+      relationLoad: jest.fn(),
     });
 
     const { container } = setup();
@@ -298,14 +298,14 @@ describe('RelationInputDataManager', () => {
   });
 
   test('Disconnect new entity', async () => {
-    const { disconnectRelation } = useCMEditViewDataManager();
+    const { relationDisconnect } = useCMEditViewDataManager();
     const { findByTestId } = setup();
 
     await act(async () => {
       fireEvent.click(await findByTestId('remove-relation-1'));
     });
 
-    expect(disconnectRelation).toBeCalledWith(
+    expect(relationDisconnect).toBeCalledWith(
       expect.objectContaining({
         id: 1,
       })
@@ -328,7 +328,7 @@ describe('RelationInputDataManager', () => {
       updateActionAllowedFields: ['relation'],
       slug: 'test',
       initialData: {},
-      loadRelation: jest.fn(),
+      relationLoad: jest.fn(),
     });
 
     const { queryByText } = setup();
@@ -356,7 +356,7 @@ describe('RelationInputDataManager', () => {
   });
 
   test('Connect new entity', async () => {
-    const { connectRelation } = useCMEditViewDataManager();
+    const { relationConnect } = useCMEditViewDataManager();
     const { container, findByText } = setup({
       mainField: {
         name: 'title',
@@ -378,7 +378,7 @@ describe('RelationInputDataManager', () => {
       fireEvent.click(searchResult);
     });
 
-    expect(connectRelation).toBeCalledWith(
+    expect(relationConnect).toBeCalledWith(
       expect.objectContaining({
         name: expect.any(String),
         toOneRelation: expect.any(Boolean),
@@ -390,7 +390,7 @@ describe('RelationInputDataManager', () => {
   });
 
   test('Reorder an entity', () => {
-    const { reorderRelation } = useCMEditViewDataManager();
+    const { relationReorder } = useCMEditViewDataManager();
     setup();
 
     const [draggedItem, dropZone] = screen.getAllByLabelText('Drag');
@@ -400,7 +400,7 @@ describe('RelationInputDataManager', () => {
     fireEvent.dragOver(dropZone);
     fireEvent.drop(dropZone);
 
-    expect(reorderRelation).toBeCalledWith({ name: 'relation', newIndex: 0, oldIndex: 1 });
+    expect(relationReorder).toBeCalledWith({ name: 'relation', newIndex: 0, oldIndex: 1 });
   });
 
   describe('Counting relations', () => {

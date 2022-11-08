@@ -2,6 +2,7 @@ import React, { useRef, useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
+import { useIntl } from 'react-intl';
 
 import { ReactSelect } from '@strapi/helper-plugin';
 import { Status } from '@strapi/design-system/Status';
@@ -21,6 +22,8 @@ import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
 import { RELATION_GUTTER, RELATION_ITEM_HEIGHT } from './constants';
+
+import { getTrad } from '../../utils';
 
 const LinkEllipsis = styled(Link)`
   white-space: nowrap;
@@ -81,6 +84,8 @@ const RelationInput = ({
   const [overflow, setOverflow] = useState('');
 
   const { data } = searchResults;
+
+  const { formatMessage } = useIntl();
 
   const relations = paginatedRelations.data;
   const totalNumberOfRelations = relations.length ?? 0;
@@ -295,6 +300,10 @@ const RelationInput = ({
             itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
             itemData={{
               disabled,
+              iconButtonAriaLabel: formatMessage({
+                id: getTrad('components.RelationInput.icon-button-aria-label'),
+                defaultMessage: 'Drag',
+              }),
               labelDisconnectRelation,
               onRelationDisconnect,
               publicationStateTranslations,

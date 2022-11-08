@@ -216,7 +216,7 @@ const EditViewDataManagerProvider = ({
   /**
    * @type {({ name: string, value: Relation, toOneRelation: boolean}) => void}
    */
-  const connectRelation = useCallback(({ name, value, toOneRelation }) => {
+  const relationConnect = useCallback(({ name, value, toOneRelation }) => {
     dispatch({
       type: 'CONNECT_RELATION',
       keys: name.split('.'),
@@ -225,7 +225,7 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const loadRelation = useCallback(({ target: { name, value } }) => {
+  const relationLoad = useCallback(({ target: { name, value } }) => {
     dispatch({
       type: 'LOAD_RELATION',
       keys: name.split('.'),
@@ -507,7 +507,7 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const disconnectRelation = useCallback(({ name, id }) => {
+  const relationDisconnect = useCallback(({ name, id }) => {
     dispatch({
       type: 'DISCONNECT_RELATION',
       keys: name.split('.'),
@@ -525,7 +525,7 @@ const EditViewDataManagerProvider = ({
    *
    * @type {(payload: Payload) => void}
    */
-  const reorderRelation = useCallback(({ name, oldIndex, newIndex }) => {
+  const relationReorder = useCallback(({ name, oldIndex, newIndex }) => {
     dispatch({
       type: 'REORDER_RELATION',
       keys: name.split('.'),
@@ -584,7 +584,6 @@ const EditViewDataManagerProvider = ({
       value={{
         addComponentToDynamicZone,
         addNonRepeatableComponentToField,
-        connectRelation,
         addRepeatableComponentToField,
         allLayoutData,
         checkFormErrors,
@@ -597,7 +596,6 @@ const EditViewDataManagerProvider = ({
         shouldNotRunValidations,
         status,
         layout: currentContentTypeLayout,
-        loadRelation,
         modifiedData,
         moveComponentDown,
         moveComponentField,
@@ -605,13 +603,15 @@ const EditViewDataManagerProvider = ({
         onChange: handleChange,
         onPublish: handlePublish,
         onUnpublish,
-        disconnectRelation,
         readActionAllowedFields,
         redirectToPreviousPage,
         removeComponentFromDynamicZone,
         removeComponentFromField,
         removeRepeatableField,
-        reorderRelation,
+        relationConnect,
+        relationDisconnect,
+        relationLoad,
+        relationReorder,
         slug,
         triggerFormValidation,
         updateActionAllowedFields,

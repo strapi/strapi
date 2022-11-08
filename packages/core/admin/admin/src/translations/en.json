@@ -554,6 +554,7 @@
   "content-manager.components.LeftMenu.single-types": "Single Types",
   "content-manager.components.LimitSelect.itemsPerPage": "Items per page",
   "content-manager.components.NotAllowedInput.text": "No permissions to see this field",
+  "content-manager.components.RelationInput.icon-button-aria-label": "Drag",
   "content-manager.components.RepeatableComponent.error-message": "The component(s) contain error(s)",
   "content-manager.components.Search.placeholder": "Search for an entry...",
   "content-manager.components.Select.draft-info-title": "State: Draft",
