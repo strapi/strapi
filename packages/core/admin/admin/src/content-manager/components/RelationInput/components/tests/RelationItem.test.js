@@ -10,11 +10,27 @@ const setup = ({ endAction, testingDnd = false, ...props }) =>
   render(
     <ThemeProvider theme={lightTheme}>
       <DndProvider backend={HTML5Backend}>
-        <RelationItem canDrag={testingDnd} id={0} index={0} endAction={endAction} {...props}>
+        <RelationItem
+          ariaDescribedBy="test"
+          iconButtonAriaLabel="Drag"
+          canDrag={testingDnd}
+          id={0}
+          index={0}
+          endAction={endAction}
+          {...props}
+        >
           First relation
         </RelationItem>
         {testingDnd ? (
-          <RelationItem canDrag={testingDnd} id={1} index={1} endAction={endAction} {...props}>
+          <RelationItem
+            ariaDescribedBy="test"
+            iconButtonAriaLabel="Drag"
+            canDrag={testingDnd}
+            id={1}
+            index={1}
+            endAction={endAction}
+            {...props}
+          >
             Second relation
           </RelationItem>
         ) : null}
@@ -39,7 +55,10 @@ describe('Content-Manager || RelationInput || RelationItem', () => {
     it('should not move with arrow keys if the button is not pressed first', () => {
       const updatePositionOfRelationMock = jest.fn();
 
-      setup({ updatePositionOfRelation: updatePositionOfRelationMock, testingDnd: true });
+      setup({
+        updatePositionOfRelation: updatePositionOfRelationMock,
+        testingDnd: true,
+      });
 
       const [draggedItem] = screen.getAllByLabelText('Drag');
 
@@ -61,7 +80,7 @@ describe('Content-Manager || RelationInput || RelationItem', () => {
       expect(updatePositionOfRelationMock).toBeCalledWith(1, 0);
     });
 
-    it('should not fire reorderRelation if the item is trying to go up and is the first item', () => {
+    it('should move with the arrow keys if the button has been activated and then not move after the button has been deactivated', () => {
       const updatePositionOfRelationMock = jest.fn();
 
       setup({ updatePositionOfRelation: updatePositionOfRelationMock, testingDnd: true });
@@ -69,9 +88,11 @@ describe('Content-Manager || RelationInput || RelationItem', () => {
       const [draggedItem] = screen.getAllByLabelText('Drag');
 
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
-      fireEvent.keyDown(draggedItem, { key: 'ArrowUp', code: 'ArrowUp' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
 
-      expect(updatePositionOfRelationMock).not.toBeCalled();
+      expect(updatePositionOfRelationMock).toBeCalledTimes(1);
     });
 
     it('should exit drag and drop mode when the escape key is pressed', () => {

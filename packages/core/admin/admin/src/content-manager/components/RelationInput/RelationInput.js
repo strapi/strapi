@@ -511,8 +511,8 @@ const ListItem = ({ data, index, style }) => {
         </DisconnectButton>
       }
       onCancel={handleCancel}
-      onDrop={handleDropItem}
-      onGrab={handleGrabItem}
+      onDropItem={handleDropItem}
+      onGrabItem={handleGrabItem}
       style={{
         ...style,
         bottom: style.bottom ?? 0 + RELATION_GUTTER,

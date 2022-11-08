@@ -12,10 +12,22 @@ const setup = ({ endAction }) =>
     <ThemeProvider theme={lightTheme}>
       <DndProvider backend={HTML5Backend}>
         <RelationList>
-          <RelationItem index={0} id={0} endAction={endAction}>
+          <RelationItem
+            ariaDescribedBy="test"
+            iconButtonAriaLabel="Drag"
+            index={0}
+            id={0}
+            endAction={endAction}
+          >
             First relation
           </RelationItem>
-          <RelationItem index={1} id={1} endAction={endAction}>
+          <RelationItem
+            ariaDescribedBy="test"
+            iconButtonAriaLabel="Drag"
+            index={1}
+            id={1}
+            endAction={endAction}
+          >
             Second relation
           </RelationItem>
         </RelationList>
