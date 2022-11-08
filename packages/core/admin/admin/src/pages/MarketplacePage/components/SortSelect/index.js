@@ -37,6 +37,26 @@ const SortSelect = ({ sortQuery, handleSelectChange }) => {
         defaultMessage: 'Newest',
       },
     },
+    'githubStars:desc': {
+      selected: {
+        id: 'admin.pages.MarketPlacePage.sort.githubStars.selected',
+        defaultMessage: 'Sort by github stars',
+      },
+      option: {
+        id: 'admin.pages.MarketPlacePage.sort.githubStars',
+        defaultMessage: 'Number of GitHub stars',
+      },
+    },
+    'npmDownloads:desc': {
+      selected: {
+        id: 'admin.pages.MarketPlacePage.sort.npmDownloads.selected',
+        defaultMessage: 'Sort by npm downloads',
+      },
+      option: {
+        id: 'admin.pages.MarketPlacePage.sort.npmDownloads',
+        defaultMessage: 'Number of downloads',
+      },
+    },
   };
 
   return (
