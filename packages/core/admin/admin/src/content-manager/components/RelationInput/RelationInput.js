@@ -370,6 +370,10 @@ const RelationInput = ({
               handleCancel,
               handleDropItem,
               handleGrabItem,
+              iconButtonAriaLabel: formatMessage({
+                id: getTrad('components.RelationInput.icon-button-aria-label'),
+                defaultMessage: 'Drag',
+              }),
               labelDisconnectRelation,
               onRelationDisconnect,
               publicationStateTranslations,
@@ -475,6 +479,7 @@ const ListItem = ({ data, index, style }) => {
     handleCancel,
     handleDropItem,
     handleGrabItem,
+    iconButtonAriaLabel,
     labelDisconnectRelation,
     onRelationDisconnect,
     publicationStateTranslations,
@@ -491,6 +496,7 @@ const ListItem = ({ data, index, style }) => {
       ariaDescribedBy={ariaDescribedBy}
       canDrag={canDrag}
       disabled={disabled}
+      iconButtonAriaLabel={iconButtonAriaLabel}
       id={id}
       index={index}
       endAction={
@@ -550,6 +556,7 @@ ListItem.propTypes = {
     handleCancel: PropTypes.func,
     handleDropItem: PropTypes.func,
     handleGrabItem: PropTypes.func,
+    iconButtonAriaLabel: PropTypes.string.isRequired,
     labelDisconnectRelation: PropTypes.string.isRequired,
     onRelationDisconnect: PropTypes.func.isRequired,
     publicationStateTranslations: PropTypes.shape({

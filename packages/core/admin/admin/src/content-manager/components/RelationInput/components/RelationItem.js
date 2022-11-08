@@ -26,6 +26,7 @@ export const RelationItem = ({
   canDrag,
   disabled,
   endAction,
+  iconButtonAriaLabel,
   style,
   id,
   index,
@@ -202,7 +203,7 @@ export const RelationItem = ({
           {canDrag ? (
             <IconButton
               marginRight={1}
-              aria-label="Drag"
+              aria-label={iconButtonAriaLabel}
               noBorder
               icon={<Drag />}
               onClick={handleDragClick}
@@ -235,6 +236,7 @@ RelationItem.propTypes = {
   children: PropTypes.node.isRequired,
   disabled: PropTypes.bool,
   endAction: PropTypes.node,
+  iconButtonAriaLabel: PropTypes.string.isRequired,
   id: PropTypes.number.isRequired,
   index: PropTypes.number.isRequired,
   onCancel: PropTypes.func,
