@@ -9,11 +9,11 @@ const generateNew = require('../../packages/generators/app/lib/generate-new');
 
 /**
  * Delete the testApp folder
- * @param {string} appName - name of the app / folder where the app is located
+ * @param {string} appPath - name of the app / folder where the app is located
  */
-const cleanTestApp = (appName) => {
+const cleanTestApp = (appPath) => {
   return new Promise((resolve, reject) => {
-    rimraf(path.resolve(appName), (err) => {
+    rimraf(path.resolve(appPath), (err) => {
       if (err) reject(err);
       resolve();
     });
@@ -23,14 +23,14 @@ const cleanTestApp = (appName) => {
 /**
  * Runs strapi generate new
  * @param {Object} options - Options
- * @param {string} options.appName - Name of the app that will be created (also the name of the folder)
+ * @param {string} options.appPath - Name of the app that will be created (also the name of the folder)
  * @param {database} options.database - Arguments to create the testApp with the provided database params
  */
-const generateTestApp = async ({ appName, database }) => {
+const generateTestApp = async ({ appPath, database }) => {
   const scope = {
     database,
-    rootPath: path.resolve(appName),
-    name: appName,
+    rootPath: path.resolve(appPath),
+    name: path.basename(appPath),
     // disable quickstart run app after creation
     runQuickstartApp: false,
     // use package version as strapiVersion (all packages have the same version);

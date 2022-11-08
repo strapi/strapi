@@ -53,8 +53,9 @@
     "test:playwright": "playwright test",
     "test:playwright:codegen": "playwright codegen",
     "test:unit": "jest --verbose",
-    "test:api": "node test/api.js",
-    "test:generate-app": "node test/create-test-app.js",
+    "test:api": "node test/scripts/run-api-tests.js",
+    "test:generate-app": "node test/scripts/create-test-app.js",
+    "test:run-app": "node test/scripts/run-test-app.js",
     "doc:api": "node scripts/open-api/serve.js"
   },
   "lint-staged": {
