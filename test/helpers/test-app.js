@@ -2,13 +2,11 @@
 
 const path = require('path');
 const rimraf = require('rimraf');
+const execa = require('execa');
 const generateNew = require('../../packages/generators/app/lib/generate-new');
 
-// FIXME
-/* eslint-disable import/extensions */
-
 /**
- * Delete the testApp folder
+ * Deletes a test app
  * @param {string} appPath - name of the app / folder where the app is located
  */
 const cleanTestApp = (appPath) => {
@@ -55,7 +53,35 @@ const generateTestApp = async ({ appPath, database }) => {
   await generateNew(scope);
 };
 
+/**
+ * Runs a test app
+ * @param {string} appPath - name of the app / folder where the app is located
+ */
+const runTestApp = async (appPath) => {
+  const cmdContext = {
+    stdio: 'inherit',
+    cwd: path.resolve(__dirname, '../..', appPath),
+    env: {
+      // if STRAPI_LICENSE is in the env the test will run in ee automatically
+      STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
+      FORCE_COLOR: 1,
+      JWT_SECRET: 'aSecret',
+    },
+  };
+
+  try {
+    await execa('yarn', ['strapi', 'build'], cmdContext);
+    await execa('yarn', ['strapi', 'start'], cmdContext);
+
+    process.exit(0);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+};
+
 module.exports = {
   cleanTestApp,
   generateTestApp,
+  runTestApp,
 };
