@@ -13,7 +13,9 @@ const fs = require('fs');
 
 const strapi = require('../../Strapi');
 
-const getDefaultExportBackupName = () => `strapi-backup`;
+const getDefaultExportBackupName = () => {
+  return `backup_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
+};
 
 const logger = console;
 
