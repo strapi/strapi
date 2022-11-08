@@ -33,6 +33,7 @@ const databases = {
     connection: {
       filename: './tmp/data.db',
     },
+    useNullAsDefault: true,
   },
 };
 
