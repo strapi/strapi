@@ -6,7 +6,7 @@ import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
 import type { IDestinationProvider, ProviderType, Stream } from '../../types';
-import { createCipher } from '../encryption/encrypt';
+import { createEncryptionCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {
   // Encryption
@@ -55,7 +55,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     // Encryption
     if (this.options.encryption.enabled) {
-      const cipher = createCipher(this.options.encryption.key);
+      const cipher = createEncryptionCipher(this.options.encryption.key);
       transforms.push(cipher);
     }
 
