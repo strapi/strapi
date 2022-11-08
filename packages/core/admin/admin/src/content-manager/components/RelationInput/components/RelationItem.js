@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { forwardRef, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useDrag, useDrop } from 'react-dnd';
@@ -171,19 +171,7 @@ export const RelationItem = ({
       cursor={canDrag ? 'all-scroll' : 'default'}
     >
       {isDragging ? (
-        <Box
-          ref={dragPreviewRef}
-          paddingTop={2}
-          paddingBottom={2}
-          paddingLeft={4}
-          paddingRight={4}
-          hasRadius
-          borderStyle="dashed"
-          borderColor="primary600"
-          borderWidth="1px"
-          background="primary100"
-          height={`calc(100% - ${RELATION_GUTTER}px)`}
-        />
+        <RelationItemPlaceholder ref={dragPreviewRef} />
       ) : (
         <Flex
           paddingTop={2}
@@ -217,6 +205,22 @@ export const RelationItem = ({
     </Box>
   );
 };
+
+const RelationItemPlaceholder = forwardRef((_, ref) => (
+  <Box
+    ref={ref}
+    paddingTop={2}
+    paddingBottom={2}
+    paddingLeft={4}
+    paddingRight={4}
+    hasRadius
+    borderStyle="dashed"
+    borderColor="primary600"
+    borderWidth="1px"
+    background="primary100"
+    height={`calc(100% - ${RELATION_GUTTER}px)`}
+  />
+));
 
 RelationItem.defaultProps = {
   ariaDescribedBy: '',
