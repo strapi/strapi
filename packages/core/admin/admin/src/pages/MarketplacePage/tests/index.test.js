@@ -1,5 +1,13 @@
 import React from 'react';
-import { render, waitFor, screen, getByRole, fireEvent } from '@testing-library/react';
+import {
+  render,
+  waitFor,
+  screen,
+  getByRole,
+  fireEvent,
+  queryByLabelText,
+  getByLabelText,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -172,5 +180,32 @@ describe('Marketplace page - layout', () => {
     expect(toggleNotification).toHaveBeenCalledTimes(1);
     // Should not show install buttons
     expect(screen.queryByText(/copy install command/i)).toEqual(null);
+  });
+
+  it('shows only downloads count and not github stars if there are no or 0 stars and no downloads available for any package', async () => {
+    client.clear();
+    render(App);
+
+    await waitForReload();
+
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    userEvent.click(providersTab);
+
+    const nodeMailerCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Nodemailer'));
+
+    const githubStarsLabel = queryByLabelText(
+      nodeMailerCard,
+      /this provider was starred \d+ on GitHub/i
+    );
+
+    expect(githubStarsLabel).toBe(null);
+
+    const downloadsLabel = getByLabelText(
+      nodeMailerCard,
+      /this provider has \d+ weekly downloads/i
+    );
+    expect(downloadsLabel).toBeVisible();
   });
 });

@@ -16,14 +16,14 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   height: 100%;
 }
 
-.c82 {
+.c92 {
   background: #ffffff;
   padding: 24px;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c83 {
+.c93 {
   background: #f6ecfc;
   padding: 12px;
   border-radius: 4px;
@@ -62,11 +62,11 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   justify-content: space-between;
 }
 
-.c67 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
+.c64 {
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -74,10 +74,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-}
-
-.c72 {
-  padding-top: 24px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
 .c73 {
@@ -94,7 +94,25 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   flex-direction: row;
 }
 
-.c85 {
+.c78 {
+  padding-top: 24px;
+}
+
+.c66 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c95 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -108,41 +126,56 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   flex-direction: column;
 }
 
-.c86 > * {
+.c96 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c74 > * {
+.c67 > * {
   margin-left: 0;
   margin-right: 0;
 }
 
-.c74 > * + * {
+.c67 > * + * {
+  margin-left: 4px;
+}
+
+.c79 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c79 > * + * {
   margin-left: 8px;
 }
 
-.c66 {
+.c70 {
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c72 {
   color: #32324d;
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.25;
 }
 
-.c70 {
+.c76 {
   color: #666687;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c80 {
+.c90 {
   font-weight: 600;
   color: #328048;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c87 {
+.c97 {
   font-weight: 500;
   color: #32324d;
   font-size: 0.75rem;
@@ -294,7 +327,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   fill: #32324d;
 }
 
-.c76 {
+.c81 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -306,7 +339,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   background: #f0f0ff;
 }
 
-.c76 .c55 {
+.c81 .c55 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -317,62 +350,62 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   align-items: center;
 }
 
-.c76 .c58 {
+.c81 .c58 {
   color: #ffffff;
 }
 
-.c76[aria-disabled='true'] {
+.c81[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c76[aria-disabled='true'] .c58 {
+.c81[aria-disabled='true'] .c58 {
   color: #666687;
 }
 
-.c76[aria-disabled='true'] svg > g,
-.c76[aria-disabled='true'] svg path {
+.c81[aria-disabled='true'] svg > g,
+.c81[aria-disabled='true'] svg path {
   fill: #666687;
 }
 
-.c76[aria-disabled='true']:active {
+.c81[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
 }
 
-.c76[aria-disabled='true']:active .c58 {
+.c81[aria-disabled='true']:active .c58 {
   color: #666687;
 }
 
-.c76[aria-disabled='true']:active svg > g,
-.c76[aria-disabled='true']:active svg path {
+.c81[aria-disabled='true']:active svg > g,
+.c81[aria-disabled='true']:active svg path {
   fill: #666687;
 }
 
-.c76:hover {
+.c81:hover {
   background-color: #ffffff;
 }
 
-.c76:active {
+.c81:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
 }
 
-.c76:active .c58 {
+.c81:active .c58 {
   color: #4945ff;
 }
 
-.c76:active svg > g,
-.c76:active svg path {
+.c81:active svg > g,
+.c81:active svg path {
   fill: #4945ff;
 }
 
-.c76 .c58 {
+.c81 .c58 {
   color: #271fe0;
 }
 
-.c76 svg > g,
-.c76 svg path {
+.c81 svg > g,
+.c81 svg path {
   fill: #271fe0;
 }
 
@@ -390,31 +423,31 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   padding-bottom: 4px;
 }
 
-.c64 {
+.c65 {
   border-radius: 4px;
   width: 64px;
   height: 64px;
 }
 
-.c65 {
+.c71 {
   padding-top: 16px;
 }
 
-.c69 {
+.c75 {
   padding-top: 8px;
 }
 
-.c68 {
+.c74 {
   margin-left: 4px;
   width: 24px;
   height: auto;
 }
 
-.c77 {
+.c87 {
   padding-left: 16px;
 }
 
-.c81 {
+.c91 {
   padding-top: 32px;
 }
 
@@ -561,26 +594,38 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   width: 100%;
 }
 
-.c78 {
+.c68 {
+  color: #666687;
+}
+
+.c82 {
+  color: #f29d41;
+}
+
+.c88 {
   color: #328048;
   margin-right: 8px;
   width: 12;
   height: 12;
 }
 
-.c89 {
+.c99 {
   color: #666687;
   margin-left: 8px;
   width: 12px;
   height: 12px;
 }
 
-.c79 path {
-  fill: #328048;
+.c69 path {
+  fill: #666687;
 }
 
-.c90 path {
-  fill: #666687;
+.c83 path {
+  fill: #f29d41;
+}
+
+.c89 path {
+  fill: #328048;
 }
 
 .c25 {
@@ -743,7 +788,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   padding-right: 8px;
 }
 
-.c75 {
+.c80 {
   padding-left: 8px;
 }
 
@@ -884,16 +929,16 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   fill: #32324d;
 }
 
-.c84 {
+.c94 {
   margin-right: 24px;
 }
 
-.c84 svg {
+.c94 svg {
   width: 2rem;
   height: 2rem;
 }
 
-.c88 {
+.c98 {
   word-break: break-all;
 }
 
@@ -1015,7 +1060,22 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
   max-width: 100%;
 }
 
-.c71 {
+.c84 {
+  background: #dcdce4;
+}
+
+.c85 {
+  height: 1px;
+  border: none;
+}
+
+.c86 {
+  -webkit-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+
+.c77 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -1367,32 +1427,64 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       <div
                         class=""
                       >
-                        <img
-                          alt="Amazon Ses logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/04be9ade6077d029a9d4108cd2f47c8e/f5fe8d67/amazonSES.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=0561c26f91b25e21"
-                          width="11"
-                        />
                         <div
-                          class="c65"
+                          class="c64"
+                        >
+                          <img
+                            alt="Amazon Ses logo"
+                            class="c65"
+                            height="11"
+                            src="https://dl.airtable.com/.attachments/04be9ade6077d029a9d4108cd2f47c8e/f5fe8d67/amazonSES.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=0561c26f91b25e21"
+                            width="11"
+                          />
+                          <div
+                            class="c66 c67"
+                            spacing="1"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="c68 c69"
+                              fill="none"
+                              viewBox="0 0 24 25"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                            <p
+                              aria-label="This provider has 0 weekly downloads"
+                            >
+                              <span
+                                class="c70"
+                              >
+                                0
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="c71"
                         >
                           <h3
-                            class="c66"
+                            class="c72"
                           >
                             <div
-                              class="c67"
+                              class="c73"
                             >
                               Amazon Ses
                               <span>
                                 <div
                                   aria-describedby="tooltip-5"
-                                  class="c67"
+                                  class="c73"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c68"
+                                    class="c74"
                                     height="auto"
                                     src="IMAGE_MOCK"
                                     width="6"
@@ -1403,17 +1495,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c69"
+                          class="c75"
                         >
                           <p
-                            class="c70 c71"
+                            class="c76 c77"
                           >
                             Amazon Ses provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c72 c73 c74"
+                        class="c78 c66 c79"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -1432,7 +1524,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c11 c75"
+                            class="c11 c80"
                           >
                             <svg
                               fill="none"
@@ -1450,7 +1542,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c52 c76"
+                          class="c52 c81"
                           type="button"
                         >
                           <div
@@ -1499,32 +1591,64 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       <div
                         class=""
                       >
-                        <img
-                          alt="AWS S3 logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/e24c0ef99b1e952cbf0c8cbeed8cc24f/da30ba27/Amazon-S3-Logo.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=953eaf833eba09a2"
-                          width="11"
-                        />
                         <div
-                          class="c65"
+                          class="c64"
+                        >
+                          <img
+                            alt="AWS S3 logo"
+                            class="c65"
+                            height="11"
+                            src="https://dl.airtable.com/.attachments/e24c0ef99b1e952cbf0c8cbeed8cc24f/da30ba27/Amazon-S3-Logo.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=953eaf833eba09a2"
+                            width="11"
+                          />
+                          <div
+                            class="c66 c67"
+                            spacing="1"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="c68 c69"
+                              fill="none"
+                              viewBox="0 0 24 25"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                            <p
+                              aria-label="This provider has 0 weekly downloads"
+                            >
+                              <span
+                                class="c70"
+                              >
+                                0
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="c71"
                         >
                           <h3
-                            class="c66"
+                            class="c72"
                           >
                             <div
-                              class="c67"
+                              class="c73"
                             >
                               AWS S3
                               <span>
                                 <div
                                   aria-describedby="tooltip-7"
-                                  class="c67"
+                                  class="c73"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c68"
+                                    class="c74"
                                     height="auto"
                                     src="IMAGE_MOCK"
                                     width="6"
@@ -1535,17 +1659,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c69"
+                          class="c75"
                         >
                           <p
-                            class="c70 c71"
+                            class="c76 c77"
                           >
                             AWS S3 provider for Strapi uploads
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c72 c73 c74"
+                        class="c78 c66 c79"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -1564,7 +1688,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c11 c75"
+                            class="c11 c80"
                           >
                             <svg
                               fill="none"
@@ -1582,7 +1706,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c52 c76"
+                          class="c52 c81"
                           type="button"
                         >
                           <div
@@ -1631,32 +1755,100 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       <div
                         class=""
                       >
-                        <img
-                          alt="Cloudinary logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/74df39c3715a78589be1cbff69009dc2/14734e59/cloudinary.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=d82f74e2c1563864"
-                          width="11"
-                        />
                         <div
-                          class="c65"
+                          class="c64"
+                        >
+                          <img
+                            alt="Cloudinary logo"
+                            class="c65"
+                            height="11"
+                            src="https://dl.airtable.com/.attachments/74df39c3715a78589be1cbff69009dc2/14734e59/cloudinary.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=d82f74e2c1563864"
+                            width="11"
+                          />
+                          <div
+                            class="c66 c67"
+                            spacing="1"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="c68 c69"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M12 0C5.373 0 0 5.501 0 12.288c0 5.43 3.438 10.035 8.206 11.66.6.114.82-.266.82-.59 0-.294-.01-1.262-.016-2.289-3.338.744-4.043-1.45-4.043-1.45-.546-1.42-1.332-1.797-1.332-1.797-1.089-.763.082-.747.082-.747 1.205.086 1.84 1.266 1.84 1.266 1.07 1.878 2.807 1.335 3.491 1.021.108-.794.42-1.336.762-1.643-2.665-.31-5.467-1.364-5.467-6.073 0-1.341.469-2.437 1.236-3.298-.124-.31-.535-1.56.117-3.252 0 0 1.007-.33 3.3 1.26A11.25 11.25 0 0112 5.942c1.02.005 2.047.141 3.006.414 2.29-1.59 3.297-1.26 3.297-1.26.653 1.693.242 2.943.118 3.252.77.86 1.235 1.957 1.235 3.298 0 4.72-2.808 5.76-5.48 6.063.43.382.814 1.13.814 2.276 0 1.644-.014 2.967-.014 3.372 0 .327.216.71.825.59C20.566 22.32 24 17.715 24 12.288 24 5.501 18.627 0 12 0z"
+                                fill="#161614"
+                              />
+                            </svg>
+                            <svg
+                              aria-hidden="true"
+                              class="c82 c83"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M12 18.26l-7.053 3.948 1.575-7.928L.587 8.792l8.027-.952L12 .5l3.386 7.34 8.027.952-5.935 5.488 1.575 7.928L12 18.26z"
+                                fill="#212134"
+                              />
+                            </svg>
+                            <p
+                              aria-label="This provider was starred 49130 on GitHub"
+                            >
+                              <span
+                                class="c70"
+                              >
+                                49130
+                              </span>
+                            </p>
+                            <hr
+                              class="c84 c85 c86"
+                            />
+                            <svg
+                              aria-hidden="true"
+                              class="c68 c69"
+                              fill="none"
+                              viewBox="0 0 24 25"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                            <p
+                              aria-label="This provider has 7492 weekly downloads"
+                            >
+                              <span
+                                class="c70"
+                              >
+                                7492
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="c71"
                         >
                           <h3
-                            class="c66"
+                            class="c72"
                           >
                             <div
-                              class="c67"
+                              class="c73"
                             >
                               Cloudinary
                               <span>
                                 <div
                                   aria-describedby="tooltip-9"
-                                  class="c67"
+                                  class="c73"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c68"
+                                    class="c74"
                                     height="auto"
                                     src="IMAGE_MOCK"
                                     width="6"
@@ -1667,17 +1859,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c69"
+                          class="c75"
                         >
                           <p
-                            class="c70 c71"
+                            class="c76 c77"
                           >
                             Cloudinary provider for Strapi uploads
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c72 c73 c74"
+                        class="c78 c66 c79"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -1696,7 +1888,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c11 c75"
+                            class="c11 c80"
                           >
                             <svg
                               fill="none"
@@ -1713,10 +1905,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </div>
                         </a>
                         <div
-                          class="c77"
+                          class="c87"
                         >
                           <svg
-                            class="c78 c79"
+                            class="c88 c89"
                             fill="none"
                             height="12"
                             viewBox="0 0 24 24"
@@ -1729,7 +1921,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                             />
                           </svg>
                           <span
-                            class="c80"
+                            class="c90"
                           >
                             Installed
                           </span>
@@ -1753,32 +1945,100 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       <div
                         class=""
                       >
-                        <img
-                          alt="Local Upload logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/6707fcab8f5530214160bacf6f4369ec/9ed22aaf/typeplaceholderversion1.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=35d9e0bb75e4528a"
-                          width="11"
-                        />
                         <div
-                          class="c65"
+                          class="c64"
+                        >
+                          <img
+                            alt="Local Upload logo"
+                            class="c65"
+                            height="11"
+                            src="https://dl.airtable.com/.attachments/6707fcab8f5530214160bacf6f4369ec/9ed22aaf/typeplaceholderversion1.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=35d9e0bb75e4528a"
+                            width="11"
+                          />
+                          <div
+                            class="c66 c67"
+                            spacing="1"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="c68 c69"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M12 0C5.373 0 0 5.501 0 12.288c0 5.43 3.438 10.035 8.206 11.66.6.114.82-.266.82-.59 0-.294-.01-1.262-.016-2.289-3.338.744-4.043-1.45-4.043-1.45-.546-1.42-1.332-1.797-1.332-1.797-1.089-.763.082-.747.082-.747 1.205.086 1.84 1.266 1.84 1.266 1.07 1.878 2.807 1.335 3.491 1.021.108-.794.42-1.336.762-1.643-2.665-.31-5.467-1.364-5.467-6.073 0-1.341.469-2.437 1.236-3.298-.124-.31-.535-1.56.117-3.252 0 0 1.007-.33 3.3 1.26A11.25 11.25 0 0112 5.942c1.02.005 2.047.141 3.006.414 2.29-1.59 3.297-1.26 3.297-1.26.653 1.693.242 2.943.118 3.252.77.86 1.235 1.957 1.235 3.298 0 4.72-2.808 5.76-5.48 6.063.43.382.814 1.13.814 2.276 0 1.644-.014 2.967-.014 3.372 0 .327.216.71.825.59C20.566 22.32 24 17.715 24 12.288 24 5.501 18.627 0 12 0z"
+                                fill="#161614"
+                              />
+                            </svg>
+                            <svg
+                              aria-hidden="true"
+                              class="c82 c83"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M12 18.26l-7.053 3.948 1.575-7.928L.587 8.792l8.027-.952L12 .5l3.386 7.34 8.027.952-5.935 5.488 1.575 7.928L12 18.26z"
+                                fill="#212134"
+                              />
+                            </svg>
+                            <p
+                              aria-label="This provider was starred 30 on GitHub"
+                            >
+                              <span
+                                class="c70"
+                              >
+                                30
+                              </span>
+                            </p>
+                            <hr
+                              class="c84 c85 c86"
+                            />
+                            <svg
+                              aria-hidden="true"
+                              class="c68 c69"
+                              fill="none"
+                              viewBox="0 0 24 25"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                            <p
+                              aria-label="This provider has 2492 weekly downloads"
+                            >
+                              <span
+                                class="c70"
+                              >
+                                2492
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="c71"
                         >
                           <h3
-                            class="c66"
+                            class="c72"
                           >
                             <div
-                              class="c67"
+                              class="c73"
                             >
                               Local Upload
                               <span>
                                 <div
                                   aria-describedby="tooltip-11"
-                                  class="c67"
+                                  class="c73"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c68"
+                                    class="c74"
                                     height="auto"
                                     src="IMAGE_MOCK"
                                     width="6"
@@ -1789,17 +2049,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c69"
+                          class="c75"
                         >
                           <p
-                            class="c70 c71"
+                            class="c76 c77"
                           >
                             Local upload provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c72 c73 c74"
+                        class="c78 c66 c79"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -1818,7 +2078,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c11 c75"
+                            class="c11 c80"
                           >
                             <svg
                               fill="none"
@@ -1836,7 +2096,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c52 c76"
+                          class="c52 c81"
                           type="button"
                         >
                           <div
@@ -1885,32 +2145,64 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       <div
                         class=""
                       >
-                        <img
-                          alt="Mailgun logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/73118ab0aea4d9eae66edc18a1db4982/808842ba/mailgun-logo-5388F66106-seeklogo_com.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=2e2e9ecb19e752ca"
-                          width="11"
-                        />
                         <div
-                          class="c65"
+                          class="c64"
+                        >
+                          <img
+                            alt="Mailgun logo"
+                            class="c65"
+                            height="11"
+                            src="https://dl.airtable.com/.attachments/73118ab0aea4d9eae66edc18a1db4982/808842ba/mailgun-logo-5388F66106-seeklogo_com.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=2e2e9ecb19e752ca"
+                            width="11"
+                          />
+                          <div
+                            class="c66 c67"
+                            spacing="1"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="c68 c69"
+                              fill="none"
+                              viewBox="0 0 24 25"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                            <p
+                              aria-label="This provider has 0 weekly downloads"
+                            >
+                              <span
+                                class="c70"
+                              >
+                                0
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="c71"
                         >
                           <h3
-                            class="c66"
+                            class="c72"
                           >
                             <div
-                              class="c67"
+                              class="c73"
                             >
                               Mailgun
                               <span>
                                 <div
                                   aria-describedby="tooltip-13"
-                                  class="c67"
+                                  class="c73"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c68"
+                                    class="c74"
                                     height="auto"
                                     src="IMAGE_MOCK"
                                     width="6"
@@ -1921,17 +2213,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c69"
+                          class="c75"
                         >
                           <p
-                            class="c70 c71"
+                            class="c76 c77"
                           >
                             Mailgun provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c72 c73 c74"
+                        class="c78 c66 c79"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -1950,7 +2242,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c11 c75"
+                            class="c11 c80"
                           >
                             <svg
                               fill="none"
@@ -1968,7 +2260,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c52 c76"
+                          class="c52 c81"
                           type="button"
                         >
                           <div
@@ -2017,32 +2309,64 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       <div
                         class=""
                       >
-                        <img
-                          alt="Nodemailer logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/73bea518f68fc312ec15a4a988da3bbc/4c024fea/Nodemailer.jpeg?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=a5dec98be44fa4e6"
-                          width="11"
-                        />
                         <div
-                          class="c65"
+                          class="c64"
+                        >
+                          <img
+                            alt="Nodemailer logo"
+                            class="c65"
+                            height="11"
+                            src="https://dl.airtable.com/.attachments/73bea518f68fc312ec15a4a988da3bbc/4c024fea/Nodemailer.jpeg?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=a5dec98be44fa4e6"
+                            width="11"
+                          />
+                          <div
+                            class="c66 c67"
+                            spacing="1"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="c68 c69"
+                              fill="none"
+                              viewBox="0 0 24 25"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                            <p
+                              aria-label="This provider has 0 weekly downloads"
+                            >
+                              <span
+                                class="c70"
+                              >
+                                0
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="c71"
                         >
                           <h3
-                            class="c66"
+                            class="c72"
                           >
                             <div
-                              class="c67"
+                              class="c73"
                             >
                               Nodemailer
                               <span>
                                 <div
                                   aria-describedby="tooltip-15"
-                                  class="c67"
+                                  class="c73"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c68"
+                                    class="c74"
                                     height="auto"
                                     src="IMAGE_MOCK"
                                     width="6"
@@ -2053,17 +2377,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c69"
+                          class="c75"
                         >
                           <p
-                            class="c70 c71"
+                            class="c76 c77"
                           >
                             Nodemailer provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c72 c73 c74"
+                        class="c78 c66 c79"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -2082,7 +2406,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c11 c75"
+                            class="c11 c80"
                           >
                             <svg
                               fill="none"
@@ -2100,7 +2424,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c52 c76"
+                          class="c52 c81"
                           type="button"
                         >
                           <div
@@ -2149,32 +2473,64 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       <div
                         class=""
                       >
-                        <img
-                          alt="Rackspace logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/f1e20497044cc6035f43b94f46bd5381/c78cbd9f/rackspace-logo.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=641682ec9adc2d1c"
-                          width="11"
-                        />
                         <div
-                          class="c65"
+                          class="c64"
+                        >
+                          <img
+                            alt="Rackspace logo"
+                            class="c65"
+                            height="11"
+                            src="https://dl.airtable.com/.attachments/f1e20497044cc6035f43b94f46bd5381/c78cbd9f/rackspace-logo.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=641682ec9adc2d1c"
+                            width="11"
+                          />
+                          <div
+                            class="c66 c67"
+                            spacing="1"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="c68 c69"
+                              fill="none"
+                              viewBox="0 0 24 25"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                            <p
+                              aria-label="This provider has 0 weekly downloads"
+                            >
+                              <span
+                                class="c70"
+                              >
+                                0
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="c71"
                         >
                           <h3
-                            class="c66"
+                            class="c72"
                           >
                             <div
-                              class="c67"
+                              class="c73"
                             >
                               Rackspace
                               <span>
                                 <div
                                   aria-describedby="tooltip-17"
-                                  class="c67"
+                                  class="c73"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c68"
+                                    class="c74"
                                     height="auto"
                                     src="IMAGE_MOCK"
                                     width="6"
@@ -2185,17 +2541,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c69"
+                          class="c75"
                         >
                           <p
-                            class="c70 c71"
+                            class="c76 c77"
                           >
                             Rackspace provider for Strapi uploads
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c72 c73 c74"
+                        class="c78 c66 c79"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -2214,7 +2570,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c11 c75"
+                            class="c11 c80"
                           >
                             <svg
                               fill="none"
@@ -2232,7 +2588,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c52 c76"
+                          class="c52 c81"
                           type="button"
                         >
                           <div
@@ -2281,32 +2637,64 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       <div
                         class=""
                       >
-                        <img
-                          alt="SendGrid logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/c09bfc173321ee79a972a10735ed6cf7/4e0a5321/sendgrid-logo-7574E52082-seeklogo_com.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=1ff0a128488e143f"
-                          width="11"
-                        />
                         <div
-                          class="c65"
+                          class="c64"
+                        >
+                          <img
+                            alt="SendGrid logo"
+                            class="c65"
+                            height="11"
+                            src="https://dl.airtable.com/.attachments/c09bfc173321ee79a972a10735ed6cf7/4e0a5321/sendgrid-logo-7574E52082-seeklogo_com.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=1ff0a128488e143f"
+                            width="11"
+                          />
+                          <div
+                            class="c66 c67"
+                            spacing="1"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="c68 c69"
+                              fill="none"
+                              viewBox="0 0 24 25"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                            <p
+                              aria-label="This provider has 0 weekly downloads"
+                            >
+                              <span
+                                class="c70"
+                              >
+                                0
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="c71"
                         >
                           <h3
-                            class="c66"
+                            class="c72"
                           >
                             <div
-                              class="c67"
+                              class="c73"
                             >
                               SendGrid
                               <span>
                                 <div
                                   aria-describedby="tooltip-19"
-                                  class="c67"
+                                  class="c73"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c68"
+                                    class="c74"
                                     height="auto"
                                     src="IMAGE_MOCK"
                                     width="6"
@@ -2317,17 +2705,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c69"
+                          class="c75"
                         >
                           <p
-                            class="c70 c71"
+                            class="c76 c77"
                           >
                             SendGrid provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c72 c73 c74"
+                        class="c78 c66 c79"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -2346,7 +2734,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c11 c75"
+                            class="c11 c80"
                           >
                             <svg
                               fill="none"
@@ -2364,7 +2752,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c52 c76"
+                          class="c52 c81"
                           type="button"
                         >
                           <div
@@ -2413,32 +2801,64 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                       <div
                         class=""
                       >
-                        <img
-                          alt="Sendmail logo"
-                          class="c64"
-                          height="11"
-                          src="https://dl.airtable.com/.attachments/0f14c78742105dffd36d6e253612f992/2f0e8605/sendmail-logo-png-transparent.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=65d4bd3786c6b0a2"
-                          width="11"
-                        />
                         <div
-                          class="c65"
+                          class="c64"
+                        >
+                          <img
+                            alt="Sendmail logo"
+                            class="c65"
+                            height="11"
+                            src="https://dl.airtable.com/.attachments/0f14c78742105dffd36d6e253612f992/2f0e8605/sendmail-logo-png-transparent.png?ts=1654603863&userId=usrUa8HWbsGCCzcQm&cs=65d4bd3786c6b0a2"
+                            width="11"
+                          />
+                          <div
+                            class="c66 c67"
+                            spacing="1"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="c68 c69"
+                              fill="none"
+                              viewBox="0 0 24 25"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                clip-rule="evenodd"
+                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 00-.14.343l9.512 9.401a.2.2 0 00.282 0l9.513-9.401a.2.2 0 00-.14-.342H13.57V5.85zM2.2 3.027a.2.2 0 01-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 01-.2.2H2.2z"
+                                fill="#212134"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                            <p
+                              aria-label="This provider has 0 weekly downloads"
+                            >
+                              <span
+                                class="c70"
+                              >
+                                0
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          class="c71"
                         >
                           <h3
-                            class="c66"
+                            class="c72"
                           >
                             <div
-                              class="c67"
+                              class="c73"
                             >
                               Sendmail
                               <span>
                                 <div
                                   aria-describedby="tooltip-21"
-                                  class="c67"
+                                  class="c73"
                                   tabindex="0"
                                 >
                                   <img
                                     alt="Made by Strapi"
-                                    class="c68"
+                                    class="c74"
                                     height="auto"
                                     src="IMAGE_MOCK"
                                     width="6"
@@ -2449,17 +2869,17 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </h3>
                         </div>
                         <div
-                          class="c69"
+                          class="c75"
                         >
                           <p
-                            class="c70 c71"
+                            class="c76 c77"
                           >
                             Sendmail provider for Strapi
                           </p>
                         </div>
                       </div>
                       <div
-                        class="c72 c73 c74"
+                        class="c78 c66 c79"
                         spacing="2"
                         style="align-self: flex-end;"
                       >
@@ -2478,7 +2898,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                           </span>
                           <div
                             aria-hidden="true"
-                            class="c11 c75"
+                            class="c11 c80"
                           >
                             <svg
                               fill="none"
@@ -2496,7 +2916,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                         </a>
                         <button
                           aria-disabled="false"
-                          class="c52 c76"
+                          class="c52 c81"
                           type="button"
                         >
                           <div
@@ -2535,7 +2955,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
           </div>
         </div>
         <div
-          class="c81"
+          class="c91"
         >
           <a
             href="https://strapi.canny.io/plugin-requests"
@@ -2544,10 +2964,10 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
             target="_blank"
           >
             <div
-              class="c82 c67"
+              class="c92 c73"
             >
               <div
-                class="c83 c67 c84"
+                class="c93 c73 c94"
               >
                 <svg
                   fill="none"
@@ -2569,18 +2989,18 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                 </svg>
               </div>
               <div
-                class="c85 c86"
+                class="c95 c96"
               >
                 <div
-                  class="c67"
+                  class="c73"
                 >
                   <span
-                    class="c87 c88"
+                    class="c97 c98"
                   >
                     Documentation
                   </span>
                   <svg
-                    class="c89 c90"
+                    class="c99 c69"
                     fill="none"
                     height="3"
                     viewBox="0 0 24 24"
@@ -2594,7 +3014,7 @@ exports[`Marketplace page - providers tab renders and matches the providers tab 
                   </svg>
                 </div>
                 <span
-                  class="c70"
+                  class="c76"
                 >
                   Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!
                 </span>

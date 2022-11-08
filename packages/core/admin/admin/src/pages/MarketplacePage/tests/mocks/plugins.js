@@ -39,6 +39,9 @@ const plugins = {
         validated: false,
         madeByStrapi: false,
         strapiCompatibility: 'v3',
+        strapiVersion: '^4.0.0',
+        githubStars: 23,
+        npmDownloads: 5623,
       },
     },
     {
@@ -212,6 +215,9 @@ const plugins = {
         validated: false,
         madeByStrapi: false,
         strapiCompatibility: 'v4',
+        strapiVersion: '4.x.x',
+        githubStars: 323,
+        npmDownloads: 1123,
       },
     },
     {
@@ -282,6 +288,7 @@ const plugins = {
         validated: true,
         madeByStrapi: false,
         strapiCompatibility: 'v4',
+        strapiVersion: 'Contact developer',
       },
     },
     {
@@ -352,6 +359,7 @@ const plugins = {
         validated: false,
         madeByStrapi: false,
         strapiCompatibility: 'v4',
+        strapiVersion: '^3.4.2',
       },
     },
     {
@@ -394,6 +402,9 @@ const plugins = {
         validated: true,
         madeByStrapi: true,
         strapiCompatibility: 'v4',
+        strapiVersion: '^4.0.7',
+        githubStars: 49130,
+        npmDownloads: 7492,
       },
     },
     {
@@ -436,6 +447,7 @@ const plugins = {
         validated: true,
         madeByStrapi: false,
         strapiCompatibility: 'v3',
+        strapiVersion: '^4.3.0',
       },
     },
     {

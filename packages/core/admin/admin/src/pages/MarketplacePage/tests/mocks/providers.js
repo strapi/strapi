@@ -126,6 +126,8 @@ const providers = {
         validated: true,
         madeByStrapi: true,
         strapiCompatibility: 'v4',
+        githubStars: 49130,
+        npmDownloads: 7492,
       },
     },
     {
@@ -168,6 +170,8 @@ const providers = {
         developerName: 'Strapi team',
         validated: true,
         madeByStrapi: true,
+        githubStars: 30,
+        npmDownloads: 2492,
       },
     },
     {

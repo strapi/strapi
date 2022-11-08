@@ -6,6 +6,7 @@ import {
   screen,
   getByText,
   queryByText,
+  getByLabelText,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -402,5 +403,24 @@ describe('Marketplace page - plugins tab', () => {
     const newestOption = screen.getByRole('option', { name: 'Newest' });
     userEvent.click(newestOption);
     expect(history.location.search).toEqual('?sort=submissionDate:desc');
+  });
+
+  it('shows github stars and weekly downloads count for each plugin', () => {
+    const documentationCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Documentation'));
+
+    const githubStarsLabel = getByLabelText(
+      documentationCard,
+      /this plugin was starred \d+ on GitHub/i
+    );
+
+    expect(githubStarsLabel).toBeVisible();
+
+    const downloadsLabel = getByLabelText(
+      documentationCard,
+      /this plugin has \d+ weekly downloads/i
+    );
+    expect(downloadsLabel).toBeVisible();
   });
 });

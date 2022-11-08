@@ -6,6 +6,7 @@ import {
   screen,
   getByText,
   queryByText,
+  getByLabelText,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -297,5 +298,26 @@ describe('Marketplace page - providers tab', () => {
     const newestOption = screen.getByRole('option', { name: 'Newest' });
     userEvent.click(newestOption);
     expect(history.location.search).toEqual('?npmPackageType=provider&sort=submissionDate:desc');
+  });
+
+  it('shows github stars and weekly downloads count for each provider', () => {
+    const providersTab = screen.getByRole('tab', { name: /providers/i });
+    userEvent.click(providersTab);
+
+    const cloudinaryCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Cloudinary'));
+
+    const githubStarsLabel = getByLabelText(
+      cloudinaryCard,
+      /this provider was starred \d+ on GitHub/i
+    );
+    expect(githubStarsLabel).toBeVisible();
+
+    const downloadsLabel = getByLabelText(
+      cloudinaryCard,
+      /this provider has \d+ weekly downloads/i
+    );
+    expect(downloadsLabel).toBeVisible();
   });
 });
