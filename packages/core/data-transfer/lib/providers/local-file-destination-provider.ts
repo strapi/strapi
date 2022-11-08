@@ -12,7 +12,7 @@ export interface ILocalFileDestinationProviderOptions {
   // Encryption
   encryption: {
     enabled: boolean;
-    key: string;
+    key?: string;
   };
 
   // Compressions
@@ -56,6 +56,9 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     // Encryption
     if (this.options.encryption.enabled) {
+      if (!this.options.encryption.key) {
+        throw new Error("Can't encrypt without a key");
+      }
       const cipher = createCipher(this.options.encryption.key);
       transforms.push(cipher);
     }
@@ -69,6 +72,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     if (dirExists) {
       fs.rmSync(rootDir, { force: true, recursive: true });
+    }
+
+    if (this.options.encryption.enabled) {
+      if (!this.options.encryption.key) {
+        throw new Error("Can't encrypt without a key");
+      }
     }
 
     fs.mkdirSync(rootDir, { recursive: true });
