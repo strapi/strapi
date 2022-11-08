@@ -74,6 +74,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       fs.rmSync(rootDir, { force: true, recursive: true });
     }
 
+    if (this.options.encryption.enabled) {
+      if (!this.options.encryption.key) {
+        throw new Error("Can't encrypt without a key");
+      }
+    }
+
     fs.mkdirSync(rootDir, { recursive: true });
     fs.mkdirSync(path.join(rootDir, 'schemas'));
     fs.mkdirSync(path.join(rootDir, 'entities'));
