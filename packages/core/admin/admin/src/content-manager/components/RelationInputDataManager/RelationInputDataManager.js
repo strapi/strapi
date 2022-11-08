@@ -37,10 +37,17 @@ export const RelationInputDataManager = ({
   targetModel,
 }) => {
   const { formatMessage } = useIntl();
-  const { connectRelation, disconnectRelation, loadRelation, modifiedData, slug, initialData } =
-    useCMEditViewDataManager();
+  const {
+    slug,
+    initialData,
+    modifiedData,
+    relationConnect,
+    relationDisconnect,
+    relationLoad,
+    relationReorder,
+  } = useCMEditViewDataManager();
 
-  const relationsFromModifiedData = get(modifiedData, name) ?? [];
+  const relationsFromModifiedData = get(modifiedData, name);
 
   const currentLastPage = Math.ceil(relationsFromModifiedData.length / RELATIONS_TO_DISPLAY);
 
@@ -54,7 +61,7 @@ export const RelationInputDataManager = ({
         ...defaultParams,
         pageSize: RELATIONS_TO_DISPLAY,
       },
-      onLoad: loadRelation,
+      onLoad: relationLoad,
       normalizeArguments: {
         mainFieldName: mainField.name,
         shouldAddLink: shouldDisplayRelationLink,
@@ -104,11 +111,11 @@ export const RelationInputDataManager = ({
       targetModel,
     });
 
-    connectRelation({ name, value: normalizedRelation, toOneRelation });
+    relationConnect({ name, value: normalizedRelation, toOneRelation });
   };
 
   const handleRelationDisconnect = (relation) => {
-    disconnectRelation({ name, id: relation.id });
+    relationDisconnect({ name, id: relation.id });
   };
 
   const handleRelationLoadMore = () => {
@@ -129,6 +136,19 @@ export const RelationInputDataManager = ({
 
   const handleSearchMore = () => {
     search.fetchNextPage();
+  };
+
+  /**
+   *
+   * @param {number} currentIndex
+   * @param {number} oldIndex
+   */
+  const handleRelationReorder = (oldIndex, newIndex) => {
+    relationReorder({
+      name,
+      newIndex,
+      oldIndex,
+    });
   };
 
   if (
@@ -194,9 +214,10 @@ export const RelationInputDataManager = ({
         defaultMessage: 'No relations available',
       })}
       numberOfRelationsToDisplay={RELATIONS_TO_DISPLAY}
-      onRelationConnect={(relation) => handleRelationConnect(relation)}
-      onRelationDisconnect={(relation) => handleRelationDisconnect(relation)}
-      onRelationLoadMore={() => handleRelationLoadMore()}
+      onRelationConnect={handleRelationConnect}
+      onRelationDisconnect={handleRelationDisconnect}
+      onRelationLoadMore={handleRelationLoadMore}
+      onRelationReorder={handleRelationReorder}
       onSearch={(term) => handleSearch(term)}
       onSearchNextPage={() => handleSearchMore()}
       placeholder={formatMessage(

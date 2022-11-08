@@ -53,6 +53,7 @@ exports[`Content-Manager || RelationInput || RelationItem should render and matc
   >
     <div
       class="c0 c1"
+      data-handler-id="T0"
     >
       <div
         class="c1 c2"

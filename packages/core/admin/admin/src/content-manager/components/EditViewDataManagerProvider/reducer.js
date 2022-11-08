@@ -172,10 +172,24 @@ const reducer = (state, action) =>
         const { id } = action;
         const modifiedDataRelation = get(state, [...path]);
 
-        /**
-         * TODO: before merge make this performant (e.g. 1000 relations === long time)
-         */
         const newRelations = modifiedDataRelation.filter((rel) => rel.id !== id);
+
+        set(draftState, path, newRelations);
+
+        break;
+      }
+      case 'MOVE_COMPONENT_FIELD':
+      case 'REORDER_RELATION': {
+        const { oldIndex, newIndex, keys } = action;
+        const path = ['modifiedData', ...keys];
+        const modifiedDataRelations = get(state, [...path]);
+
+        const currentItem = modifiedDataRelations[oldIndex];
+
+        const newRelations = [...modifiedDataRelations];
+
+        newRelations.splice(oldIndex, 1);
+        newRelations.splice(newIndex, 0, currentItem);
 
         set(draftState, path, newRelations);
 
@@ -250,25 +264,6 @@ const reducer = (state, action) =>
 
         draftState.modifiedDZName = null;
         draftState.shouldCheckErrors = false;
-        break;
-      }
-      case 'MOVE_COMPONENT_FIELD': {
-        const currentValue = get(state, ['modifiedData', ...action.pathToComponent]);
-        const valueToInsert = get(state, [
-          'modifiedData',
-          ...action.pathToComponent,
-          action.dragIndex,
-        ]);
-
-        const updatedValue = moveFields(
-          currentValue,
-          action.dragIndex,
-          action.hoverIndex,
-          valueToInsert
-        );
-
-        set(draftState, ['modifiedData', ...action.pathToComponent], updatedValue);
-
         break;
       }
       case 'MOVE_COMPONENT_UP':

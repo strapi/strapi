@@ -1,13 +1,19 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { RelationItem } from '../RelationItem';
 
 const setup = ({ endAction }) =>
   render(
     <ThemeProvider theme={lightTheme}>
-      <RelationItem endAction={endAction}>First relation</RelationItem>
+      <DndProvider backend={HTML5Backend}>
+        <RelationItem id={0} index={0} endAction={endAction}>
+          First relation
+        </RelationItem>
+      </DndProvider>
     </ThemeProvider>
   );
 

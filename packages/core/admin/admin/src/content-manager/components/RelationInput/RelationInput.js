@@ -2,6 +2,7 @@ import React, { useRef, useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
+import { useIntl } from 'react-intl';
 
 import { ReactSelect } from '@strapi/helper-plugin';
 import { Status } from '@strapi/design-system/Status';
@@ -20,7 +21,9 @@ import { Relation } from './components/Relation';
 import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
-import { RELATION_ITEM_HEIGHT } from './constants';
+import { RELATION_GUTTER, RELATION_ITEM_HEIGHT } from './constants';
+
+import { getTrad } from '../../utils';
 
 const LinkEllipsis = styled(Link)`
   white-space: nowrap;
@@ -65,6 +68,7 @@ const RelationInput = ({
   onRelationConnect,
   onRelationLoadMore,
   onRelationDisconnect,
+  onRelationReorder,
   onSearchNextPage,
   onSearch,
   placeholder,
@@ -81,15 +85,19 @@ const RelationInput = ({
 
   const { data } = searchResults;
 
+  const { formatMessage } = useIntl();
+
   const relations = paginatedRelations.data;
   const totalNumberOfRelations = relations.length ?? 0;
 
   const dynamicListHeight = useMemo(
     () =>
       totalNumberOfRelations > numberOfRelationsToDisplay
-        ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT +
+        ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) *
+            (RELATION_ITEM_HEIGHT + RELATION_GUTTER) +
           RELATION_ITEM_HEIGHT / 2
-        : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT,
+        : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) *
+          (RELATION_ITEM_HEIGHT + RELATION_GUTTER),
     [totalNumberOfRelations, numberOfRelationsToDisplay]
   );
 
@@ -143,6 +151,9 @@ const RelationInput = ({
     };
   }, [paginatedRelations, relations, numberOfRelationsToDisplay, totalNumberOfRelations]);
 
+  /**
+   * --- ReactSelect Workaround START ---
+   */
   /**
    * This code is being isolated because it's a hack to fix a placement bug in
    * `react-select` where when the options prop is updated the position of the
@@ -198,10 +209,19 @@ const RelationInput = ({
   const handleMenuClose = () => {
     setIsMenuOpen(false);
   };
+  /**
+   * --- ReactSelect Workaround END ---
+   */
 
   const handleMenuOpen = () => {
     setIsMenuOpen(true);
     onSearch();
+  };
+
+  const handleUpdatePositionOfRelation = (newIndex, currentIndex) => {
+    if (onRelationReorder) {
+      onRelationReorder(currentIndex, newIndex);
+    }
   };
 
   return (
@@ -277,55 +297,24 @@ const RelationInput = ({
             ref={listRef}
             outerRef={outerListRef}
             itemCount={totalNumberOfRelations}
-            itemSize={RELATION_ITEM_HEIGHT}
-            itemData={relations}
+            itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
+            itemData={{
+              disabled,
+              iconButtonAriaLabel: formatMessage({
+                id: getTrad('components.RelationInput.icon-button-aria-label'),
+                defaultMessage: 'Drag',
+              }),
+              labelDisconnectRelation,
+              onRelationDisconnect,
+              publicationStateTranslations,
+              relations,
+              totalNumberOfRelations,
+              updatePositionOfRelation: handleUpdatePositionOfRelation,
+            }}
+            itemKey={(index, { relations: relationsItems }) => relationsItems[index].id}
             innerElementType="ol"
           >
-            {({ data, index, style }) => {
-              const { publicationState, href, mainField, id } = data[index];
-              const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
-
-              return (
-                <RelationItem
-                  disabled={disabled}
-                  key={`relation-${name}-${id}`}
-                  endAction={
-                    <DisconnectButton
-                      data-testid={`remove-relation-${id}`}
-                      disabled={disabled}
-                      type="button"
-                      onClick={() => onRelationDisconnect(data[index])}
-                      aria-label={labelDisconnectRelation}
-                    >
-                      <Icon width="12px" as={Cross} />
-                    </DisconnectButton>
-                  }
-                  style={style}
-                >
-                  <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                    <Tooltip description={mainField ?? `${id}`}>
-                      {href ? (
-                        <LinkEllipsis to={href} disabled={disabled}>
-                          {mainField ?? id}
-                        </LinkEllipsis>
-                      ) : (
-                        <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
-                          {mainField ?? id}
-                        </Typography>
-                      )}
-                    </Tooltip>
-                  </BoxEllipsis>
-
-                  {publicationState && (
-                    <Status variant={statusColor} showBullet={false} size="S">
-                      <Typography fontWeight="bold" textColor={`${statusColor}700`}>
-                        {publicationStateTranslations[publicationState]}
-                      </Typography>
-                    </Status>
-                  )}
-                </RelationItem>
-              );
-            }}
+            {ListItem}
           </List>
         </RelationList>
         {(description || error) && (
@@ -395,6 +384,7 @@ RelationInput.propTypes = {
   onRelationConnect: PropTypes.func.isRequired,
   onRelationDisconnect: PropTypes.func.isRequired,
   onRelationLoadMore: PropTypes.func.isRequired,
+  onRelationReorder: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
   onSearchNextPage: PropTypes.func.isRequired,
   placeholder: PropTypes.string.isRequired,
@@ -406,6 +396,101 @@ RelationInput.propTypes = {
   searchResults: SearchResults,
   size: PropTypes.number.isRequired,
   relations: RelationsResult,
+};
+
+/**
+ * This is in a seperate component to enforce passing all the props the component requires to react-window
+ * to ensure drag & drop correctly works.
+ */
+const ListItem = ({ data, index, style }) => {
+  const {
+    disabled,
+    labelDisconnectRelation,
+    onRelationDisconnect,
+    publicationStateTranslations,
+    relations,
+    totalNumberOfRelations,
+    updatePositionOfRelation,
+  } = data;
+  const { publicationState, href, mainField, id } = relations[index];
+  const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
+  const canDrag = totalNumberOfRelations > 1;
+
+  return (
+    <RelationItem
+      disabled={disabled}
+      canDrag={canDrag}
+      id={id}
+      index={index}
+      updatePositionOfRelation={updatePositionOfRelation}
+      endAction={
+        <DisconnectButton
+          data-testid={`remove-relation-${id}`}
+          disabled={disabled}
+          type="button"
+          onClick={() => onRelationDisconnect(relations[index])}
+          aria-label={labelDisconnectRelation}
+        >
+          <Icon width="12px" as={Cross} />
+        </DisconnectButton>
+      }
+      style={{
+        ...style,
+        bottom: style.bottom ?? 0 + RELATION_GUTTER,
+        height: style.height ?? 0 - RELATION_GUTTER,
+      }}
+    >
+      <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+        <Tooltip description={mainField ?? `${id}`}>
+          {href ? (
+            <LinkEllipsis to={href} disabled={disabled}>
+              {mainField ?? id}
+            </LinkEllipsis>
+          ) : (
+            <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
+              {mainField ?? id}
+            </Typography>
+          )}
+        </Tooltip>
+      </BoxEllipsis>
+
+      {publicationState && (
+        <Status variant={statusColor} showBullet={false} size="S">
+          <Typography fontWeight="bold" textColor={`${statusColor}700`}>
+            {publicationStateTranslations[publicationState]}
+          </Typography>
+        </Status>
+      )}
+    </RelationItem>
+  );
+};
+
+ListItem.defaultProps = {
+  data: {},
+};
+
+ListItem.propTypes = {
+  data: PropTypes.shape({
+    disabled: PropTypes.bool.isRequired,
+    labelDisconnectRelation: PropTypes.string.isRequired,
+    onRelationDisconnect: PropTypes.func.isRequired,
+    publicationStateTranslations: PropTypes.shape({
+      draft: PropTypes.string.isRequired,
+      published: PropTypes.string.isRequired,
+    }).isRequired,
+    relations: PropTypes.arrayOf(
+      PropTypes.shape({
+        href: PropTypes.string,
+        id: PropTypes.number.isRequired,
+        publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+        mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      })
+    ),
+    totalNumberOfRelations: PropTypes.number.isRequired,
+    updatePositionOfRelation: PropTypes.func.isRequired,
+  }),
+  index: PropTypes.number.isRequired,
+  style: PropTypes.object.isRequired,
 };
 
 export default RelationInput;
