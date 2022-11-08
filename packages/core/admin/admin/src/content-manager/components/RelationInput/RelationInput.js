@@ -25,6 +25,7 @@ import { Option } from './components/Option';
 import { RELATION_GUTTER, RELATION_ITEM_HEIGHT } from './constants';
 
 import { getTrad } from '../../utils';
+import { usePrev } from '../../hooks';
 
 const LinkEllipsis = styled(Link)`
   white-space: nowrap;
@@ -283,6 +284,31 @@ const RelationInput = ({
     setLiveText(`${item.mainField ?? item.id}, dropped. Re-order cancelled.`);
   };
 
+  const previewRelationsLength = usePrev(relations.length);
+  /**
+   * @type {React.MutableRefObject<'onChange' | 'loadMore'>}
+   */
+  const updatedRelationsWith = useRef();
+
+  const handleLoadMore = () => {
+    updatedRelationsWith.current = 'loadMore';
+    onRelationLoadMore();
+  };
+
+  useEffect(() => {
+    if (
+      updatedRelationsWith.current === 'onChange' &&
+      relations.length !== previewRelationsLength
+    ) {
+      listRef.current.scrollToItem(relations.length, 'end');
+    } else if (
+      updatedRelationsWith.current === 'loadMore' &&
+      relations.length !== previewRelationsLength
+    ) {
+      listRef.current.scrollToItem(0, 'start');
+    }
+  }, [previewRelationsLength, relations]);
+
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
@@ -310,13 +336,7 @@ const RelationInput = ({
               onChange={(relation) => {
                 setValue(null);
                 onRelationConnect(relation);
-
-                // scroll to the end of the list
-                if (relations.length > 0) {
-                  setTimeout(() => {
-                    listRef.current.scrollToItem(relations.length, 'end');
-                  });
-                }
+                updatedRelationsWith.current = 'onChange';
               }}
               onInputChange={(value) => {
                 setValue(value);
@@ -341,7 +361,7 @@ const RelationInput = ({
           shouldDisplayLoadMoreButton && (
             <TextButton
               disabled={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
-              onClick={() => onRelationLoadMore()}
+              onClick={handleLoadMore}
               loading={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
               startIcon={<Refresh />}
             >
