@@ -1,5 +1,5 @@
-name: 'Run E2E tests'
-description: 'Run end to end tests'
+name: 'Run API tests'
+description: 'Run api tests'
 inputs:
   dbOptions:
     description: 'Database options'

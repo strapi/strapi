@@ -114,15 +114,15 @@ The administration panel should now be available at http://localhost:4000/admin.
 - `yarn test:front` runs front-end related tests.
 - `yarn test:front:watch` runs an interactive test watcher for the front-end.
 - `yarn test:unit` runs the back-end unit tests.
-- `yarn test:e2e` runs an end-to-end test suite.
+- `yarn test:api` runs the api integration tests.
 - `yarn test:generate-app` generates a test application.
 - `yarn test:start-app` starts the test application.
 
 ---
 
-## Running the End-To-End (e2e) tests
+## Running the API Integration tests
 
-The end-to-end tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
+The API integration tests require a Strapi app to be able to run. You can generate a "test app" using `yarn test:generate-app <database>`:
 
 ```bash
 $ yarn test:generate-app sqlite
@@ -130,36 +130,27 @@ $ yarn test:generate-app postgres
 $ yarn test:generate-app mysql
 ```
 
-A new app is required every time you run the end-to-end tests otherwise, the test suite will fail. A script is available to make this process easier: `node test/e2e.js`. It will delete the current test app, generate a new one and run the test suite.
+A new app is required every time you run the API integration tests, otherwise the test suite will fail. A command is available to make this process easier: `yarn test:api`.
 
-The script takes a path as optional argument (e.g. `node test/e2e.js path/to/test`). Options for jest can be passed using the double-dash notion: e.g. to update snapshots `node test/e2e.js -- -u`.
+This command runs tests using jest behind the scenes. Options for jest can be passed to the command. (e.g. to update snapshots `yarn test:api -u`).
 
 ### Changing the database
 
-By default the script `test/e2e.js` creates an app that uses `sqlite`. But you can run the test suites using different databases:
+By default the script run by `test:api` an app that uses `sqlite` as a database. But you can run the test suites using different databases:
 
 ```bash
-$ node test/e2e.js --db=sqlite
-$ node test/e2e.js --db=postgres
-$ node test/e2e.js --db=mysql
+$ yarn test:api --db=sqlite
+$ yarn test:api --db=postgres
+$ yarn test:api --db=mysql
 ```
 
-### Running the tests for the Community Editon (CE)\*\*
+### Running the tests for the Enterprise Editon (EE)
 
-The test suites run the tests for the Enterprise Edition (EE) version of Strapi by default. Should you want to test the Community Edition (CE) version, you will need to set the environment variable `STRAPI_DISABLE_EE` to true:
-
-```bash
-$ STRAPI_DISABLE_EE=true node test/e2e.js
-$ STRAPI_DISABLE_EE=true yarn test:e2e
-```
-
-### Specifying a license to use for the Enterprise Edition (EE)
-
-The Enterprise Edition tests need a valid license to run correctly. To specify a license, you can use the environment variable `STRAPI_LICENSE`:
+The test suites run the tests for the Community Edition (CE) version of Strapi by default.
+In order to run the Enterprise Edition tests you need a valid license. To specify a license, you can use the environment variable `STRAPI_LICENSE`:
 
 ```bash
-$ STRAPI_LICENSE=<license> node test/e2e.js
-$ STRAPI_LICENSE=<license> yarn test:e2e
+$ STRAPI_LICENSE=<license> yarn test:api
 ```
 
 ---
