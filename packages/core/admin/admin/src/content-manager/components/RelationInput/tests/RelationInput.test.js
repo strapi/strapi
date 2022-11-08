@@ -65,6 +65,7 @@ const Component = (props) => (
             onRelationConnect={() => jest.fn()}
             onRelationDisconnect={() => jest.fn()}
             onRelationLoadMore={() => jest.fn()}
+            onRelationReorder={() => jest.fn()}
             onSearch={() => jest.fn()}
             onSearchNextPage={() => jest.fn()}
             placeholder="Select..."
