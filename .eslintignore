@@ -2,7 +2,7 @@
 **/build/**
 **/dist/**
 **/OLD/**
-testApp/**
+test-apps/**
 examples/**
 packages/generators/generators/lib/files/
 packages/generators/app/lib/resources/files/

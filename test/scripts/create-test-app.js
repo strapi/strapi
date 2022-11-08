@@ -3,7 +3,7 @@
 process.env.NODE_ENV = 'test';
 
 const yargs = require('yargs');
-const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
+const { cleanTestApp, generateTestApp } = require('../helpers/test-app-generator');
 
 const databases = {
   postgres: {
@@ -36,10 +36,10 @@ const databases = {
   },
 };
 
-const main = async (database, appName) => {
+const main = async (database, appPath) => {
   try {
-    await cleanTestApp(appName);
-    await generateTestApp({ appName, database });
+    await cleanTestApp(appPath);
+    await generateTestApp({ appPath, database });
   } catch (error) {
     console.error(error);
     process.exit(1);
@@ -60,15 +60,15 @@ yargs
 
       yargs.demandOption('database');
 
-      yarg.positional('appName', {
+      yarg.positional('appPath', {
         type: 'string',
-        default: 'testApp',
+        default: 'test-apps/base',
       });
     },
     (argv) => {
-      const { database, appName = 'testApp' } = argv;
+      const { database, appPath = 'test-apps/base' } = argv;
       if (database) {
-        return main(databases[database], appName);
+        return main(databases[database], appPath);
       }
 
       return main(
@@ -83,7 +83,7 @@ yargs
             filename: argv.dbfile,
           },
         },
-        appName
+        appPath
       );
     }
   )
