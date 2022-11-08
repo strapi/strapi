@@ -71,13 +71,19 @@ module.exports = async (filename, opts) => {
   const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
-    await engine.transfer();
+    const results = await engine.transfer();
+
+    console.log('Transfer Results', JSON.stringify(results, undefined, 2));
+
     // TODO: once archiving is implemented, we need to check file extensions
     if (!fs.existsSync(file)) {
       logger.log(file);
       throw new Error('Export file not created');
     }
-    logger.log('Export process has been completed successfully! Export archive is in %s', file);
+    logger.log(
+      'Export process has been completed successfully! Export archive is in %s',
+      results.destination.file.path
+    );
     process.exit(0);
   } catch (e) {
     logger.error('Export process failed unexpectedly:', e.toString());

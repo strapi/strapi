@@ -1,4 +1,9 @@
-import { Stream } from './utils';
+import {
+  IDestinationProviderTransferResults,
+  IProviderTransferResults,
+  ISourceProviderTransferResults,
+  Stream,
+} from './utils';
 import { IMetadata } from './common-entities';
 import { PipelineSource, PipelineDestination } from 'stream';
 
@@ -7,6 +12,7 @@ type ProviderType = 'source' | 'destination';
 interface IProvider {
   type: ProviderType;
   name: string;
+  results?: IProviderTransferResults;
 
   bootstrap?(): Promise<void> | void;
   close?(): Promise<void> | void;
@@ -14,6 +20,8 @@ interface IProvider {
 }
 
 export interface ISourceProvider extends IProvider {
+  results?: ISourceProviderTransferResults;
+
   // Getters for the source's transfer streams
   streamEntities?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
   streamLinks?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
@@ -24,6 +32,8 @@ export interface ISourceProvider extends IProvider {
 }
 
 export interface IDestinationProvider extends IProvider {
+  results?: IDestinationProviderTransferResults;
+
   /**
    * Optional rollback implementation
    */

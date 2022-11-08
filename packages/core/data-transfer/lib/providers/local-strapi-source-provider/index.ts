@@ -86,3 +86,5 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     return Readable.from(this.getSchemas());
   }
 }
+
+export type ILocalStrapiSourceProvider = InstanceType<typeof LocalStrapiSourceProvider>;

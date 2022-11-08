@@ -3,9 +3,14 @@ import type {
   ISourceProvider,
   ITransferEngine,
   ITransferEngineOptions,
+  ITransferResults,
 } from '../../types';
 
-class TransferEngine implements ITransferEngine {
+class TransferEngine<
+  S extends ISourceProvider = ISourceProvider,
+  D extends IDestinationProvider = IDestinationProvider
+> implements ITransferEngine
+{
   sourceProvider: ISourceProvider;
   destinationProvider: IDestinationProvider;
   options: ITransferEngineOptions;
@@ -98,7 +103,7 @@ class TransferEngine implements ITransferEngine {
     }
   }
 
-  async transfer(): Promise<void> {
+  async transfer(): Promise<ITransferResults<S, D>> {
     try {
       await this.boostrap();
 
@@ -127,6 +132,11 @@ class TransferEngine implements ITransferEngine {
       // Note: This will be configurable in the future
       // await this.destinationProvider?.rollback(e);
     }
+
+    return {
+      source: this.sourceProvider.results,
+      destination: this.destinationProvider.results,
+    };
   }
 
   async transferSchemas(): Promise<void> {
@@ -242,10 +252,10 @@ class TransferEngine implements ITransferEngine {
   }
 }
 
-export const createTransferEngine = <T extends ISourceProvider, U extends IDestinationProvider>(
-  sourceProvider: T,
-  destinationProvider: U,
+export const createTransferEngine = <S extends ISourceProvider, D extends IDestinationProvider>(
+  sourceProvider: S,
+  destinationProvider: D,
   options: ITransferEngineOptions
-): TransferEngine => {
-  return new TransferEngine(sourceProvider, destinationProvider, options);
+): TransferEngine<S, D> => {
+  return new TransferEngine<S, D>(sourceProvider, destinationProvider, options);
 };

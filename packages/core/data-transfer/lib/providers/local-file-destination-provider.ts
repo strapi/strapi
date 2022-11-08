@@ -5,7 +5,11 @@ import { Writable } from 'stream';
 import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import type { IDestinationProvider, ProviderType, Stream } from '../../types';
+import type {
+  IDestinationProvider,
+  IDestinationProviderTransferResults,
+  ProviderType,
+} from '../../types';
 import { createCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {
@@ -28,6 +32,13 @@ export interface ILocalFileDestinationProviderOptions {
   };
 }
 
+export interface ILocalFileDestinationProviderTransferResults
+  extends IDestinationProviderTransferResults {
+  file?: {
+    path?: string;
+  };
+}
+
 export const createLocalFileDestinationProvider = (
   options: ILocalFileDestinationProviderOptions
 ) => {
@@ -38,6 +49,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   name: string = 'destination::local-file';
   type: ProviderType = 'destination';
   options: ILocalFileDestinationProviderOptions;
+  results: ILocalFileDestinationProviderTransferResults = {};
 
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
@@ -80,6 +92,8 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     fs.mkdirSync(path.join(rootDir, 'links'));
     fs.mkdirSync(path.join(rootDir, 'media'));
     fs.mkdirSync(path.join(rootDir, 'configuration'));
+
+    this.results.file = { path: this.options.file.path };
   }
 
   rollback(): void | Promise<void> {
@@ -149,6 +163,11 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     return chain(streams);
   }
+
+  close = async () => {
+    // TODO: this will need to be updated with extension
+    this.results.file = { path: this.options.file.path };
+  };
 }
 
 /**
@@ -220,3 +239,5 @@ const createFilePathFactory =
       `${prefix}_${String(fileIndex).padStart(5, '0')}.jsonl`
     );
   };
+
+export type ILocalFileDestinationProvider = InstanceType<typeof LocalFileDestinationProvider>;
