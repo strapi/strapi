@@ -1,15 +1,10 @@
-import type {
-  ISourceProvider,
-  ISourceProviderTransferResults,
-  ProviderType,
-  TransferStage,
-} from '../../../types';
+import type { ISourceProvider, ISourceProviderTransferResults, ProviderType } from '../../../types';
 import { chain } from 'stream-chain';
 import { Readable } from 'stream';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
-import { onItemPassthrough } from '../util';
+import { providerResultsCounter } from '../util';
 
 export interface ILocalStrapiSourceProviderOptions {
   getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>;
@@ -32,17 +27,6 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   constructor(options: ILocalStrapiSourceProviderOptions) {
     this.options = options;
   }
-
-  #transferCounter = (transferStage: TransferStage) => {
-    return onItemPassthrough(() => {
-      if (!this.results[transferStage]) {
-        this.results[transferStage] = {
-          items: 0,
-        };
-      }
-      this.results[transferStage]!.items!++;
-    });
-  };
 
   async bootstrap(): Promise<void> {
     this.strapi = await this.options.getStrapi();
@@ -72,7 +56,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       createEntitiesStream(this.strapi),
 
       // Count
-      this.#transferCounter('entities'),
+      providerResultsCounter(this.results, 'entities'),
 
       // Transform stream
       createEntitiesTransformStream(),
@@ -84,7 +68,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       throw new Error('Not able to stream links. Strapi instance not found');
     }
 
-    return chain([createLinksStream(this.strapi), this.#transferCounter('links')]);
+    return chain([createLinksStream(this.strapi), providerResultsCounter(this.results, 'links')]);
   }
 
   streamConfiguration(): NodeJS.ReadableStream {
@@ -92,7 +76,10 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       throw new Error('Not able to stream configuration. Strapi instance not found');
     }
 
-    return chain([createConfigurationStream(strapi), this.#transferCounter('configuration')]);
+    return chain([
+      createConfigurationStream(strapi),
+      providerResultsCounter(this.results, 'configuration'),
+    ]);
   }
 
   getSchemas() {
