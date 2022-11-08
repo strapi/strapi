@@ -3,7 +3,7 @@
 process.env.NODE_ENV = 'test';
 
 const yargs = require('yargs');
-const { cleanTestApp, generateTestApp } = require('../helpers/test-app-generator');
+const { cleanTestApp, generateTestApp, runTestApp } = require('../helpers/test-app');
 
 const databases = {
   postgres: {
@@ -36,10 +36,14 @@ const databases = {
   },
 };
 
-const main = async (database, appPath) => {
+const main = async (database, appPath, opts) => {
   try {
     await cleanTestApp(appPath);
     await generateTestApp({ appPath, database });
+
+    if (opts.run) {
+      await runTestApp(appPath);
+    }
   } catch (error) {
     console.error(error);
     process.exit(1);
@@ -56,9 +60,10 @@ yargs
         alias: 'db',
         describe: 'Database',
         choices: Object.keys(databases),
+        default: 'sqlite',
       });
 
-      yargs.demandOption('database');
+      yarg.boolean('run');
 
       yarg.positional('appPath', {
         type: 'string',
@@ -66,25 +71,27 @@ yargs
       });
     },
     (argv) => {
-      const { database, appPath = 'test-apps/base' } = argv;
-      if (database) {
-        return main(databases[database], appPath);
+      const { database, run, appPath = 'test-apps/base' } = argv;
+
+      if (argv.dbclient) {
+        return main(
+          {
+            client: argv.dbclient,
+            connection: {
+              host: argv.dbhost,
+              port: argv.dbport,
+              database: argv.dbname,
+              username: argv.dbusername,
+              password: argv.dbpassword,
+              filename: argv.dbfile,
+            },
+          },
+          appPath,
+          { run }
+        );
       }
 
-      return main(
-        {
-          client: argv.dbclient,
-          connection: {
-            host: argv.dbhost,
-            port: argv.dbport,
-            database: argv.dbname,
-            username: argv.dbusername,
-            password: argv.dbpassword,
-            filename: argv.dbfile,
-          },
-        },
-        appPath
-      );
+      return main(databases[database], appPath, { run });
     }
   )
   .help().argv;
