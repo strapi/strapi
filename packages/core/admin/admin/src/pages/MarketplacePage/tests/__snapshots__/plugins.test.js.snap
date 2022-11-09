@@ -1378,6 +1378,7 @@ exports[`Marketplace page - plugins tab renders and matches the plugin tab snaps
               <button
                 aria-disabled="false"
                 class="c52 c53 c54"
+                data-testid="filters-button"
                 type="button"
               >
                 <div
