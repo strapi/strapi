@@ -15,17 +15,23 @@ module.exports = {
   },
   overrides: [
     {
-      files: [
-        'packages/**/*.js',
-        'test/**/*.js',
-        'scripts/**/*.js',
-        'packages/**/*.ts',
-        'test/**/*.ts',
-        'scripts/**/*.ts',
-      ],
+      // Backend javascript
+      files: ['packages/**/*.js', 'test/**/*.js', 'scripts/**/*.js'],
       excludedFiles: frontPaths,
       ...backendRules,
     },
+
+    // Backend typescript
+    {
+      parser: '@typescript-eslint/parser',
+      plugins: ['@typescript-eslint'],
+      extends: ['plugin:@typescript-eslint/recommended'],
+      files: ['packages/**/*.ts', 'test/**/*.ts', 'scripts/**/*.ts'],
+      excludedFiles: frontPaths,
+      //...backendRules, // TODO: write a typescript-friendly version of this
+    },
+
+    // Frontend
     {
       files: frontPaths,
       ...require('./.eslintrc.front.js'),
