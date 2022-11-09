@@ -109,9 +109,6 @@ function ListView({
 
       try {
         const opts = source ? { cancelToken: source.token } : null;
-        console.warn(
-          'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
-        );
         const {
           data: { results, pagination: paginationResult },
         } = await axiosInstance.get(endPoint, opts);
@@ -162,9 +159,6 @@ function ListView({
   const handleConfirmDeleteAllData = useCallback(
     async (ids) => {
       try {
-        console.warn(
-          'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
-        );
         await axiosInstance.post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
           ids,
         });
@@ -185,9 +179,6 @@ function ListView({
   const handleConfirmDeleteData = useCallback(
     async (idToDelete) => {
       try {
-        console.warn(
-          'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function deleteClient'
-        );
         await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
 
         const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);

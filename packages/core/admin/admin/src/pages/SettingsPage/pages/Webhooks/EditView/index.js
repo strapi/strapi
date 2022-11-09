@@ -65,10 +65,6 @@ const EditView = () => {
     isIdle: isTriggerIdle,
     mutate,
   } = useMutation(() => {
-    console.warn(
-      'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
-    );
-
     return axiosInstance.post(`/admin/webhooks/${id}/trigger`);
   });
 

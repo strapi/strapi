@@ -137,9 +137,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       dispatch(getData());
 
       try {
-        console.warn(
-          'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
-        );
         const { data } = await axiosInstance.get(requestURL, { cancelToken: source.token });
 
         dispatch(getDataSucceeded(cleanReceivedData(cleanClonedData(data))));
@@ -222,9 +219,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        console.warn(
-          'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function deleteClient'
-        );
         const { data } = await axiosInstance.delete(
           getRequestUrl(`collection-types/${slug}/${id}`)
         );
@@ -258,9 +252,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
 
-        console.warn(
-          'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
-        );
         const { data } = await axiosInstance.post(endPoint, body);
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
@@ -311,9 +302,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         `collection-types/${slug}/${id}/actions/numberOfDraftRelations`
       );
       dispatch(setStatus('draft-relation-check-pending'));
-      console.warn(
-        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
-      );
       const numberOfDraftRelations = await axiosInstance.get(endPoint);
       trackUsageRef.current('didCheckDraftRelations');
 
@@ -335,9 +323,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
       dispatch(setStatus('publish-pending'));
 
-      console.warn(
-        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
-      );
       const { data } = await axiosInstance.post(endPoint);
 
       trackUsageRef.current('didPublishEntry');
@@ -368,9 +353,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         dispatch(setStatus('submit-pending'));
 
-        console.warn(
-          'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function putClient'
-        );
         const { data } = await axiosInstance.put(endPoint, body);
 
         trackUsageRef.current('didEditEntry', { trackerProperty });
@@ -407,9 +389,6 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     try {
       trackUsageRef.current('willUnpublishEntry');
 
-      console.warn(
-        'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function postClient'
-      );
       const { data } = await axiosInstance.post(endPoint);
 
       trackUsageRef.current('didUnpublishEntry');

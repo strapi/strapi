@@ -2,9 +2,6 @@ import { getRequestURL, axiosInstance } from '../../../../utils';
 
 export const fetchData = async (toggleNotification, notifyStatus) => {
   try {
-    console.warn(
-      'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
-    );
     const { data } = await axiosInstance.get(getRequestURL('roles'));
     notifyStatus('The roles have loaded successfully');
 
@@ -21,9 +18,6 @@ export const fetchData = async (toggleNotification, notifyStatus) => {
 
 export const deleteData = async (id, toggleNotification) => {
   try {
-    console.warn(
-      'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function deleteClient'
-    );
     await axiosInstance.delete(`${getRequestURL('roles')}/${id}`);
   } catch (error) {
     toggleNotification({

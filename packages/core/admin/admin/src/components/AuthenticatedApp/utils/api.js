@@ -38,9 +38,6 @@ const fetchStrapiLatestRelease = async (toggleNotification) => {
 
 const fetchAppInfo = async () => {
   try {
-    console.warn(
-      'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
-    );
     const { data, headers } = await axiosInstance.get('/admin/information');
 
     if (!headers['content-type'].includes('application/json')) {
@@ -55,9 +52,6 @@ const fetchAppInfo = async () => {
 
 const fetchCurrentUserPermissions = async () => {
   try {
-    console.warn(
-      'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
-    );
     const { data, headers } = await axiosInstance.get('/admin/users/me/permissions');
 
     if (!headers['content-type'].includes('application/json')) {
@@ -72,9 +66,6 @@ const fetchCurrentUserPermissions = async () => {
 
 const fetchUserRoles = async () => {
   try {
-    console.warn(
-      'Deprecation warning: Usage of "axiosInstance" utility is deprecated. This is discouraged and will be removed in the next major release. Please use instead the useFetchClient hook inside the helper plugin and its function getClient'
-    );
     const {
       data: {
         data: { roles },
