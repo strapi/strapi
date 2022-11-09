@@ -6,7 +6,7 @@
 'use strict';
 
 const { uniqBy, castArray, isNil } = require('lodash');
-const { has, assoc, prop, isObject } = require('lodash/fp');
+const { has, assoc, prop, isObject, isEmpty } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const validators = require('./validators');
 
@@ -248,7 +248,7 @@ const createValidateEntity =
  * @returns
  */
 const buildRelationsStore = ({ uid, data, relationsStore = {} }) => {
-  if (!uid || !data) {
+  if (isEmpty(data)) {
     return relationsStore;
   }
 
@@ -265,11 +265,12 @@ const buildRelationsStore = ({ uid, data, relationsStore = {} }) => {
     switch (attribute.type) {
       case 'relation':
       case 'media': {
-        const target = attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
-        if (!target) {
+        if (attribute.relation === 'morphToMany' || attribute.relation === 'morphToOne') {
+          // TODO: handle polymorphic relations
           break;
         }
 
+        const target = attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
         // As there are multiple formats supported for associating relations
         // with an entity, the value here can be an: array, object or number.
         let source;

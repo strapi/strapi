@@ -221,10 +221,10 @@ describe('Create Strapi API End to End', () => {
       expect(body.data.attributes.tags.data.length).toBe(3);
     });
 
-    test('Update article1 adding a non existent tag', async () => {
+    test('Error when updating article1 with some non existent tags', async () => {
       const { id, attributes } = data.articles[0];
       const entry = { ...attributes };
-      entry.tags = [1000, 1001, 1002];
+      entry.tags = [1000, 1001, 1002, ...data.tags.slice(-1).map((t) => t.id)];
 
       cleanDate(entry);
 

@@ -105,7 +105,7 @@ describe('Entity service', () => {
           },
         };
 
-        const fakeModel = {
+        const fakeModels = {
           [entityUID]: {
             uid: entityUID,
             kind: 'contentType',
@@ -175,7 +175,7 @@ describe('Entity service', () => {
 
         global.strapi = {
           getModel: jest.fn((uid) => {
-            return fakeModel[uid];
+            return fakeModels[uid];
           }),
           db: fakeDB,
         };
@@ -334,7 +334,7 @@ describe('Entity service', () => {
           },
         },
       };
-      const fakeModel = {
+      const fakeModels = {
         [entityUID]: {
           kind: 'collectionType',
           modelName: 'entity',
@@ -398,7 +398,7 @@ describe('Entity service', () => {
 
         global.strapi = {
           getModel: jest.fn((uid) => {
-            return fakeModel[uid];
+            return fakeModels[uid];
           }),
           db: fakeDB,
         };
