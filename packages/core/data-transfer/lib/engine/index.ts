@@ -123,7 +123,7 @@ class TransferEngine<
 
       await this.close();
     } catch (e: any) {
-      throw new Error(e);
+      throw e;
       // Rollback the destination provider if an exception is thrown during the transfer
       // Note: This will be configurable in the future
       // await this.destinationProvider?.rollback(e);

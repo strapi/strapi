@@ -9,7 +9,7 @@ const {
 } = require('@strapi/data-transfer');
 const _ = require('lodash/fp');
 
-const fs = require('fs');
+const fs = require('fs-extra');
 
 const strapi = require('../../Strapi');
 
@@ -95,7 +95,7 @@ module.exports = async (filename, opts) => {
     console.log('Transfer Results', JSON.stringify(results, undefined, 2));
 
     // TODO: once archiving is implemented, we need to check file extensions
-    if (!fs.existsSync(file)) {
+    if (!fs.pathExistsSync(file)) {
       logger.log(file);
       throw new Error('Export file not created');
     }

@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import zip from 'zlib';
 import { Writable } from 'stream';
@@ -85,10 +85,10 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   bootstrap(): void | Promise<void> {
     const rootDir = this.options.file.path;
-    const dirExists = fs.existsSync(rootDir);
+    const dirExists = fs.pathExistsSync(rootDir);
 
     if (dirExists) {
-      fs.rmSync(rootDir, { force: true, recursive: true });
+      throw new Error('File with that name already exists');
     }
 
     fs.mkdirSync(rootDir, { recursive: true });
