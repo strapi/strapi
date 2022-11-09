@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
 
 import { ReactSelect } from '@strapi/helper-plugin';
-import { Badge } from '@strapi/design-system/Badge';
+import { Status } from '@strapi/design-system/Status';
 import { Box } from '@strapi/design-system/Box';
 import { Link } from '@strapi/design-system/Link';
 import { Icon } from '@strapi/design-system/Icon';
@@ -21,6 +21,7 @@ import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
 import { RELATION_ITEM_HEIGHT } from './constants';
+import { usePrev } from '../../hooks';
 
 const LinkEllipsis = styled(Link)`
   white-space: nowrap;
@@ -61,6 +62,7 @@ const RelationInput = ({
   labelLoadMore,
   labelDisconnectRelation,
   loadingMessage,
+  noRelationsMessage,
   onRelationConnect,
   onRelationLoadMore,
   onRelationDisconnect,
@@ -203,6 +205,31 @@ const RelationInput = ({
     onSearch();
   };
 
+  const previewRelationsLength = usePrev(relations.length);
+  /**
+   * @type {React.MutableRefObject<'onChange' | 'loadMore'>}
+   */
+  const updatedRelationsWith = useRef();
+
+  const handleLoadMore = () => {
+    updatedRelationsWith.current = 'loadMore';
+    onRelationLoadMore();
+  };
+
+  useEffect(() => {
+    if (
+      updatedRelationsWith.current === 'onChange' &&
+      relations.length !== previewRelationsLength
+    ) {
+      listRef.current.scrollToItem(relations.length, 'end');
+    } else if (
+      updatedRelationsWith.current === 'loadMore' &&
+      relations.length !== previewRelationsLength
+    ) {
+      listRef.current.scrollToItem(0, 'start');
+    }
+  }, [previewRelationsLength, relations]);
+
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
@@ -226,17 +253,11 @@ const RelationInput = ({
               inputId={id}
               isSearchable
               isClear
-              loadingMessage={loadingMessage}
+              loadingMessage={() => loadingMessage}
               onChange={(relation) => {
                 setValue(null);
                 onRelationConnect(relation);
-
-                // scroll to the end of the list
-                if (relations.length > 0) {
-                  setTimeout(() => {
-                    listRef.current.scrollToItem(relations.length, 'end');
-                  });
-                }
+                updatedRelationsWith.current = 'onChange';
               }}
               onInputChange={(value) => {
                 setValue(value);
@@ -245,6 +266,7 @@ const RelationInput = ({
               onMenuClose={handleMenuClose}
               onMenuOpen={handleMenuOpen}
               menuIsOpen={isMenuOpen}
+              noOptionsMessage={() => noRelationsMessage}
               onMenuScrollToBottom={() => {
                 if (searchResults.hasNextPage) {
                   onSearchNextPage();
@@ -260,7 +282,7 @@ const RelationInput = ({
           shouldDisplayLoadMoreButton && (
             <TextButton
               disabled={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
-              onClick={() => onRelationLoadMore()}
+              onClick={handleLoadMore}
               loading={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
               startIcon={<Refresh />}
             >
@@ -281,7 +303,7 @@ const RelationInput = ({
           >
             {({ data, index, style }) => {
               const { publicationState, href, mainField, id } = data[index];
-              const badgeColor = publicationState === 'draft' ? 'secondary' : 'success';
+              const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
 
               return (
                 <RelationItem
@@ -315,15 +337,11 @@ const RelationInput = ({
                   </BoxEllipsis>
 
                   {publicationState && (
-                    <Badge
-                      borderSize={1}
-                      borderColor={`${badgeColor}200`}
-                      backgroundColor={`${badgeColor}100`}
-                      textColor={`${badgeColor}700`}
-                      shrink={0}
-                    >
-                      {publicationStateTranslations[publicationState]}
-                    </Badge>
+                    <Status variant={statusColor} showBullet={false} size="S">
+                      <Typography fontWeight="bold" textColor={`${statusColor}700`}>
+                        {publicationStateTranslations[publicationState]}
+                      </Typography>
+                    </Status>
                   )}
                 </RelationItem>
               );
@@ -390,8 +408,9 @@ RelationInput.propTypes = {
   labelAction: PropTypes.element,
   labelLoadMore: PropTypes.string,
   labelDisconnectRelation: PropTypes.string.isRequired,
-  loadingMessage: PropTypes.func.isRequired,
+  loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  noRelationsMessage: PropTypes.string.isRequired,
   numberOfRelationsToDisplay: PropTypes.number.isRequired,
   onRelationConnect: PropTypes.func.isRequired,
   onRelationDisconnect: PropTypes.func.isRequired,

@@ -105,7 +105,7 @@
   "Settings.permissions.conditions.anytime": "Bármikor",
   "Settings.permissions.conditions.apply": "Alkalmaz",
   "Settings.permissions.conditions.can": "Tudja",
-  "Settings.permissions.conditions.define-conditions": "Határozza meg a feltételeket",
+  "Settings.permissions.conditions.conditions": "Határozza meg a feltételeket",
   "Settings.permissions.conditions.links": "Linkek",
   "Settings.permissions.conditions.no-actions": "Először választania kell egy műveletet (create, read, update, ...) mielőtt megadja a feltételeket.",
   "Settings.permissions.conditions.none-selected": "Bármikor",

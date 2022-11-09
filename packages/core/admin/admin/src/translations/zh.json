@@ -106,7 +106,7 @@
   "Settings.permissions.conditions.anytime": "隨時",
   "Settings.permissions.conditions.apply": "套用",
   "Settings.permissions.conditions.can": "可以",
-  "Settings.permissions.conditions.define-conditions": "設定條件",
+  "Settings.permissions.conditions.conditions": "設定條件",
   "Settings.permissions.conditions.links": "連結",
   "Settings.permissions.conditions.no-actions": "在設定條件之前，你要先選則動作（新增、讀取、更新...）",
   "Settings.permissions.conditions.none-selected": "隨時",

@@ -107,7 +107,7 @@
   "Settings.permissions.conditions.anytime": "എപ്പോൾ വേണമെങ്കിലും",
   "Settings.permissions.conditions.apply": "അപേക്ഷിക്കുക",
   "Settings.permissions.conditions.can": "കഴിയും",
-  "Settings.permissions.conditions.define-conditions": "നിബന്ധനകൾ നിർവചിക്കുക",
+  "Settings.permissions.conditions.conditions": "നിബന്ധനകൾ നിർവചിക്കുക",
   "Settings.permissions.conditions.links": "ലിങ്കുകൾ",
   "Settings.permissions.conditions.no-actions": "അവയിലെ വ്യവസ്ഥകൾ നിർവചിക്കുന്നതിന് മുമ്പ് നിങ്ങൾ ആദ്യം പ്രവർത്തനങ്ങൾ (സൃഷ്ടിക്കുക, വായിക്കുക, അപ്ഡേറ്റ് ചെയ്യുക, ...) തിരഞ്ഞെടുക്കേണ്ടതുണ്ട്.",
   "Settings.permissions.conditions.none-selected": "എപ്പോൾ വേണമെങ്കിലും",

@@ -5,7 +5,7 @@ const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
 const constants = require('../services/constants');
 
-describe('Admin API Token v2 CRUD (e2e)', () => {
+describe('Admin API Token v2 CRUD (api)', () => {
   let rq;
   let strapi;
 
