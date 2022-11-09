@@ -13,8 +13,9 @@ import { Tooltip } from '@strapi/design-system/Tooltip';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import CheckCircle from '@strapi/icons/CheckCircle';
 import { useTracking } from '@strapi/helper-plugin';
-import madeByStrapiIcon from '../../../../assets/images/icon_made-by-strapi.svg';
+import StrapiLogo from '../../../../assets/images/logo-strapi-2022.svg';
 import InstallPluginButton from './InstallPluginButton';
+import PackageStats from './PackageStats';
 
 // Custom component to have an ellipsis after the 2nd line
 const EllipsisText = styled(Typography)`
@@ -67,14 +68,21 @@ const NpmPackageCard = ({
       data-testid="npm-package-card"
     >
       <Box>
-        <Box
-          as="img"
-          src={attributes.logo.url}
-          alt={`${attributes.name} logo`}
-          hasRadius
-          width={11}
-          height={11}
-        />
+        <Flex direction="row" justifyContent="space-between" alignItems="flex-start">
+          <Box
+            as="img"
+            src={attributes.logo.url}
+            alt={`${attributes.name} logo`}
+            hasRadius
+            width={11}
+            height={11}
+          />
+          <PackageStats
+            githubStars={attributes.githubStars}
+            npmDownloads={attributes.npmDownloads}
+            npmPackageType={npmPackageType}
+          />
+        </Flex>
         <Box paddingTop={4}>
           <Typography as="h3" variant="delta">
             <Flex alignItems="center">
@@ -96,7 +104,7 @@ const NpmPackageCard = ({
                   <Flex>
                     <Box
                       as="img"
-                      src={madeByStrapiIcon}
+                      src={StrapiLogo}
                       alt={madeByStrapiMessage}
                       marginLeft={1}
                       width={6}
@@ -170,6 +178,8 @@ NpmPackageCard.propTypes = {
       madeByStrapi: PropTypes.bool.isRequired,
       strapiCompatibility: PropTypes.oneOf(['v3', 'v4']),
       strapiVersion: PropTypes.string,
+      githubStars: PropTypes.number,
+      npmDownloads: PropTypes.number,
     }).isRequired,
   }).isRequired,
   isInstalled: PropTypes.bool.isRequired,

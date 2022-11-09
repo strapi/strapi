@@ -127,7 +127,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c13 .sc-haTkiu {
+.c13 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -197,7 +197,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c21 .sc-haTkiu {
+.c21 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
