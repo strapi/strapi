@@ -93,6 +93,12 @@ module.exports = ({
         },
         {
           test: /\.m?jsx?$/,
+          resolve: {
+            fullySpecified: false,
+          },
+        },
+        {
+          test: /\.m?jsx?$/,
           include: cacheDir,
           oneOf: [
             // Use babel-loader for files that distinct the ee and ce code
