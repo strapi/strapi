@@ -49,9 +49,12 @@ const client = new QueryClient({
 });
 
 const waitForReload = async () => {
-  await waitFor(() => {
-    expect(screen.queryByTestId('loader')).toBe(null);
-  });
+  await waitFor(
+    () => {
+      expect(screen.queryByTestId('loader')).toBe(null);
+    },
+    { timeout: 5000 }
+  );
 };
 
 describe('Marketplace page - plugins tab', () => {
