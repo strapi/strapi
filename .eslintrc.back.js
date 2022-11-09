@@ -25,7 +25,7 @@ module.exports = {
     'import/no-cycle': 'error',
     'import/no-useless-path-segments': 'error',
     'import/first': 'error',
-    'import/extensions': ['error', 'never'],
+    'import/extensions': ['warn', 'never'],
     'import/newline-after-import': 'error',
     'node/exports-style': ['error', 'module.exports'],
     'node/no-new-require': 'error',
