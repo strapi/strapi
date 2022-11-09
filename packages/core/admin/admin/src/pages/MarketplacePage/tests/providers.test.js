@@ -68,6 +68,8 @@ describe('Marketplace page - providers tab', () => {
   afterAll(() => server.close());
 
   beforeEach(async () => {
+    // Increase the jest timeout to accommodate long running tests
+    jest.setTimeout(30000);
     history = createMemoryHistory();
     // Make sure each test isolated
     const { container } = render(
