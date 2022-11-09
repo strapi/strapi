@@ -20,6 +20,8 @@ import { createMemoryHistory } from 'history';
 import MarketPlacePage from '../index';
 import server from './server';
 
+// Increase the jest timeout to accommodate long running tests
+jest.setTimeout(50000);
 const toggleNotification = jest.fn();
 jest.mock('../../../hooks/useNavigatorOnLine', () => jest.fn(() => true));
 jest.mock('@strapi/helper-plugin', () => ({
@@ -58,8 +60,6 @@ const waitForReload = async () => {
 };
 
 describe('Marketplace page - plugins tab', () => {
-  // Increase the jest timeout to accommodate long running tests
-  jest.setTimeout(30000);
   let renderedContainer;
   let history;
 
