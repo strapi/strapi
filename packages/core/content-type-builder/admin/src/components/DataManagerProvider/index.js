@@ -108,6 +108,7 @@ const DataManagerProvider = ({
         { data: reservedNames },
       ] = await Promise.all(
         ['components', 'content-types', 'reserved-names'].map((endPoint) => {
+          // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from fetchClient
           return axiosInstance.get(endPoint);
         })
       );
@@ -265,7 +266,7 @@ const DataManagerProvider = ({
 
       if (userConfirm) {
         lockAppWithAutoreload();
-
+        // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from fetchClient
         await axiosInstance.delete(requestURL);
 
         // Make sure the server has restarted
@@ -315,6 +316,7 @@ const DataManagerProvider = ({
         }
 
         lockAppWithAutoreload();
+        // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from fetchClient
         await axiosInstance.delete(requestURL);
 
         // Make sure the server has restarted
@@ -348,6 +350,7 @@ const DataManagerProvider = ({
       lockAppWithAutoreload();
 
       // Update the category
+      // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from fetchClient
       await axiosInstance({ url: requestURL, method: 'PUT', data: body });
 
       // Make sure the server has restarted
@@ -505,7 +508,7 @@ const DataManagerProvider = ({
 
       // Lock the app
       lockAppWithAutoreload();
-
+      // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from fetchClient
       await axiosInstance({
         url: requestURL,
         method,
