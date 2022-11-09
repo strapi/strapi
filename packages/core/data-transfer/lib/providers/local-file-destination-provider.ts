@@ -1,4 +1,4 @@
-import fs from 'fs';
+import * as fs from 'fs';
 import path from 'path';
 import zip from 'zlib';
 import { Writable } from 'stream';
