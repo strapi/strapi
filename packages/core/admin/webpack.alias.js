@@ -40,7 +40,7 @@ const aliasExactMatch = [
 // See https://webpack.js.org/configuration/resolve/
 module.exports = {
   ...aliasExactMatch.reduce((acc, name) => {
-    acc[`${name}$`] = require.resolve(name);
+    acc[`${name}$`] = path.resolve(__dirname, '..', '..', '..', 'node_modules', name);
     return acc;
   }, {}),
 
