@@ -10,7 +10,7 @@ const config = {
   tagline: 'Dinosaurs are cool',
   url: 'https://contributor.strapi.io',
   baseUrl: '/',
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.png',
   organizationName: 'strapi',
@@ -31,8 +31,7 @@ const config = {
         return {
           resolve: {
             alias: {
-              // assuming root node_modules is up from "./packages/<your-docusaurus>
-              react: path.resolve('./node_modules/react'),
+              react: path.resolve(__dirname, './node_modules/react'),
             },
           },
         };
