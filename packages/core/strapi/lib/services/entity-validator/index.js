@@ -277,7 +277,7 @@ const buildRelationsStore = ({ uid, data, relationsStore = {} }) => {
         if (Array.isArray(value)) {
           source = value;
         } else if (isObject(value)) {
-          source = value?.connect ?? value?.set ?? [];
+          source = value.connect ?? value.set ?? [];
         } else {
           source = castArray(value);
         }
@@ -291,12 +291,20 @@ const buildRelationsStore = ({ uid, data, relationsStore = {} }) => {
       }
       case 'component': {
         return castArray(value).forEach((componentValue) =>
-          buildRelationsStore({ uid: attribute.component, data: componentValue, relationsStore })
+          buildRelationsStore({
+            uid: attribute.component,
+            data: componentValue,
+            relationsStore,
+          })
         );
       }
       case 'dynamiczone': {
         return value.forEach((dzValue) =>
-          buildRelationsStore({ uid: dzValue.__component, data: dzValue, relationsStore })
+          buildRelationsStore({
+            uid: dzValue.__component,
+            data: dzValue,
+            relationsStore,
+          })
         );
       }
       default:
