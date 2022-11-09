@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "4.4.3",
+  "version": "4.4.6",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -28,6 +28,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "clean": "rimraf ./dist",
+    "build:clean": "yarn clean && yarn build",
     "watch": "yarn build -w",
     "test:unit": "jest --verbose"
   },
@@ -35,7 +37,7 @@
     "lib": "./dist"
   },
   "dependencies": {
-    "@strapi/logger": "4.4.3",
+    "@strapi/logger": "4.4.6",
     "chalk": "4.1.2",
     "prettier": "2.7.1",
     "stream-chain": "2.2.5",
@@ -48,6 +50,7 @@
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.2",
     "@types/tar": "6.1.3",
+    "rimraf": "3.0.2",
     "typescript": "4.8.4"
   },
   "engines": {

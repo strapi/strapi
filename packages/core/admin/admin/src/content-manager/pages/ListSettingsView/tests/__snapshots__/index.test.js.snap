@@ -13,23 +13,119 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: 1px;
 }
 
-.c22 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
+.c26 {
   padding-bottom: 24px;
-  padding-left: 32px;
+}
+
+.c65 {
+  padding-top: 16px;
+  padding-right: 16px;
+  padding-left: 16px;
   border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
 }
 
-.c23 {
-  padding-bottom: 16px;
+.c72 {
+  background: #f6f6f9;
+  border-radius: 4px;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
 }
 
-.c62 {
-  padding-top: 24px;
-  padding-bottom: 24px;
+.c79 {
+  padding-left: 12px;
+}
+
+.c27 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c66 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c73 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c69 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c70 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c70 > * + * {
+  margin-left: 12px;
+}
+
+.c25 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c78 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c19 {
@@ -173,82 +269,23 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   fill: #ffffff;
 }
 
-.c26 {
+.c22 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
   padding-bottom: 24px;
-}
-
-.c65 {
-  padding-top: 16px;
-  padding-right: 16px;
-  padding-left: 16px;
+  padding-left: 32px;
   border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c72 {
-  background: #f6f6f9;
-  border-radius: 4px;
-  border-color: #eaeaef;
-  border: 1px solid #eaeaef;
+.c23 {
+  padding-bottom: 16px;
 }
 
-.c79 {
-  padding-left: 12px;
-}
-
-.c27 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c66 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c73 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+.c62 {
+  padding-top: 24px;
+  padding-bottom: 24px;
 }
 
 .c82 {
@@ -509,29 +546,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: 100%;
 }
 
-.c69 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c70 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c70 > * + * {
-  margin-left: 12px;
-}
-
 .c36 {
   background: #f6f6f9;
   padding: 4px;
@@ -688,20 +702,6 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
-}
-
-.c25 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c78 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
 }
 
 .c9 {
@@ -1650,7 +1650,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                           <span
                             class="c24 c78"
                           >
-                            hey
+                            id
                           </span>
                         </div>
                         <div
@@ -1881,23 +1881,119 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 1px;
 }
 
-.c22 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
+.c26 {
   padding-bottom: 24px;
-  padding-left: 32px;
+}
+
+.c65 {
+  padding-top: 16px;
+  padding-right: 16px;
+  padding-left: 16px;
   border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
 }
 
-.c23 {
-  padding-bottom: 16px;
+.c72 {
+  background: #f6f6f9;
+  border-radius: 4px;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
 }
 
-.c62 {
-  padding-top: 24px;
-  padding-bottom: 24px;
+.c79 {
+  padding-left: 12px;
+}
+
+.c27 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c66 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c73 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c69 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c70 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c70 > * + * {
+  margin-left: 12px;
+}
+
+.c25 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c78 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c19 {
@@ -2041,82 +2137,23 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   fill: #ffffff;
 }
 
-.c26 {
+.c22 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
   padding-bottom: 24px;
-}
-
-.c65 {
-  padding-top: 16px;
-  padding-right: 16px;
-  padding-left: 16px;
+  padding-left: 32px;
   border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
-.c72 {
-  background: #f6f6f9;
-  border-radius: 4px;
-  border-color: #eaeaef;
-  border: 1px solid #eaeaef;
+.c23 {
+  padding-bottom: 16px;
 }
 
-.c79 {
-  padding-left: 12px;
-}
-
-.c27 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c66 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c73 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+.c62 {
+  padding-top: 24px;
+  padding-bottom: 24px;
 }
 
 .c82 {
@@ -2377,29 +2414,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 100%;
 }
 
-.c69 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c70 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c70 > * + * {
-  margin-left: 12px;
-}
-
 .c36 {
   background: #f6f6f9;
   padding: 4px;
@@ -2556,20 +2570,6 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
-}
-
-.c25 {
-  color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-}
-
-.c78 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
 }
 
 .c9 {
@@ -3517,7 +3517,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           <span
                             class="c24 c78"
                           >
-                            hey
+                            id
                           </span>
                         </div>
                         <div
@@ -3680,7 +3680,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           spacing="3"
                         >
                           <span
-                            aria-label="Move cover"
+                            aria-label="Move Cover"
                             class="c75 c76 c77"
                             draggable="true"
                             type="button"
@@ -3725,14 +3725,14 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                           <span
                             class="c24 c78"
                           >
-                            michka
+                            Cover
                           </span>
                         </div>
                         <div
                           class="c79 c66"
                         >
                           <button
-                            aria-label="Edit cover"
+                            aria-label="Edit Cover"
                             class="c76"
                             type="button"
                           >
@@ -3752,7 +3752,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                             </svg>
                           </button>
                           <button
-                            aria-label="Delete cover"
+                            aria-label="Delete Cover"
                             class="c76"
                             data-testid="delete-cover"
                             type="button"

@@ -1,5 +1,5 @@
 import { Attribute, ComponentAttribute } from '../attributes';
-import { KeysBy, StringRecord } from '../../utils';
+import { KeysBy, SchemaUID, StringRecord } from '../../utils';
 
 /**
  * Literal union type representing the possible natures of a content type
@@ -101,7 +101,7 @@ export interface ContentTypeSchema extends Schema {
   /**
    * Unique identifier of the schema
    */
-  uid: string;
+  uid: SchemaUID;
 
   /**
    * Determine the type of the content type (single-type or collection-type)

@@ -7,11 +7,16 @@
 const _ = require('lodash');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
-const { Command } = require('commander');
+const { Command, Option } = require('commander');
 
 const program = new Command();
 
 const packageJSON = require('../package.json');
+const {
+  parseInputList,
+  parseInputBool,
+  promptEncryptionKey,
+} = require('../lib/commands/utils/commander');
 
 const checkCwdIsStrapiApp = (name) => {
   const logErrorAndExit = () => {
@@ -59,6 +64,13 @@ const getLocalScript =
         process.exit(1);
       });
   };
+
+// option to exclude types of data for the export, import, and transfer commands
+// TODO: validate these inputs. Hopefully here, but worst case it may require adding a hook on each command
+const excludeOption = new Option(
+  '--exclude <data,to,exclude>',
+  'Comma-separated list of data to exclude (files [localMediaFiles, providerMediaFiles], content [entities, links], schema, configuration)' // ['webhooks', 'content', 'localmedia', 'providermedia', 'relations']
+).argParser(parseInputList);
 
 // Initial program setup
 program.storeOptionsAsProperties(false).allowUnknownOption(true);
@@ -254,5 +266,61 @@ program
   .option('--verbose', `Display more information about the types generation`, false)
   .option('-s, --silent', `Run the generation silently, without any output`, false)
   .action(getLocalScript('ts/generate-types'));
+
+// `$ strapi export`
+program
+  .command('export')
+  .description('Export data from Strapi to file')
+  .addOption(
+    new Option('--encrypt [boolean]', `Encrypt output file using the 'aes-128-ecb' algorithm`)
+      .default(true)
+      .argParser(parseInputBool)
+  )
+  .addOption(
+    new Option('--compress [boolean]', 'Compress output file using gz')
+      .default(true)
+      .argParser(parseInputBool)
+  )
+  .addOption(new Option('--key', 'Provide encryption key in command instead of using a prompt'))
+  .addOption(
+    new Option('--max-size <max MB per file>', 'split final file when exceeding size in MB')
+  )
+  .addOption(
+    new Option(
+      '--max-size-jsonl <max MB per internal backup file>',
+      'split internal jsonl files when exceeding max size in MB'
+    )
+  )
+  .addOption(excludeOption)
+  .arguments('[filename]')
+  .allowExcessArguments(false)
+  .hook('preAction', promptEncryptionKey)
+  .action(require('../lib/commands/transfer/export'));
+
+// `$ strapi import`
+program
+  .command('import')
+  .description('Import data from file to Strapi')
+  .addOption(
+    new Option('--conflictStrategy <conflictStrategy>', 'Which strategy to use for ID conflicts')
+      .choices(['restore', 'abort', 'keep', 'replace'])
+      .default('restore')
+  )
+  .addOption(excludeOption)
+  .addOption(
+    new Option(
+      '--schemaComparison <schemaComparison>',
+      'exact requires every field to match, strict requires Strapi version and schemas to match, subset requires source schema to exist in destination, bypass skips checks',
+      parseInputList
+    )
+      .choices(['exact', 'strict', 'subset', 'bypass'])
+      .default('exact')
+  )
+  .addOption(
+    new Option('--key [encryptionKey]', 'prompt for [or provide directly] the decryption key')
+  )
+  .arguments('<filename>')
+  .allowExcessArguments(false)
+  .action(require('../lib/commands/transfer/import'));
 
 program.parseAsync(process.argv);

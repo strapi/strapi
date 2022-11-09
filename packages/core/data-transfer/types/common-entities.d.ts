@@ -1,5 +1,5 @@
-import { GetAttributesValues } from '@strapi/strapi';
-import { SchemaUID } from '@strapi/strapi/lib/types/utils';
+import type { GetAttributesValues, RelationsType } from '@strapi/strapi';
+import type { SchemaUID } from '@strapi/strapi/lib/types/utils';
 
 export interface IMetadata {
   strapi?: {
@@ -18,7 +18,7 @@ export interface IMetadata {
  * Common TransferEngine format to represent a Strapi entity
  * @template T The schema UID this entity represents
  */
-export interface IEntity<T extends SchemaUID> {
+export interface IEntity<T extends SchemaUID | string> {
   /**
    * UID of the parent type (content-type, component, etc...)
    */
@@ -39,7 +39,7 @@ export interface IEntity<T extends SchemaUID> {
 /**
  * Union type that regroups all the different kinds of link
  */
-export type ILink = IBasicLink | IMorphLink | ICircularLink | IComponentLink | IDynamicZoneLink;
+export type ILink = IBasicLink | IMorphLink | ICircularLink;
 
 /**
  * Default generic link structure
@@ -52,6 +52,11 @@ interface IDefaultLink {
   kind: string;
 
   /**
+   * The relation type
+   */
+  relation: RelationsType;
+
+  /**
    * Left side of the link
    * It should hold information about the entity that owns the dominant side of the link
    */
@@ -60,11 +65,19 @@ interface IDefaultLink {
      * Entity UID
      * (restricted to content type)
      */
-    type: Strapi.ContentTypeUIDs;
+    type: string;
     /**
      * Reference ID of the entity
      */
     ref: number | string;
+    /**
+     * Field used to hold the link in the entity
+     */
+    field: string;
+    /**
+     * If the link is part of a collection, keep its position here
+     */
+    pos?: number;
   };
 
   /**
@@ -76,11 +89,15 @@ interface IDefaultLink {
      * Entity UID
      * (can be a content type or a component)
      */
-    type: SchemaUID;
+    type: string;
     /**
      * Reference ID of the entity
      */
     ref: number | string;
+    /**
+     * Field used to hold the link in the entity
+     */
+    field?: string;
   };
 }
 
@@ -89,17 +106,6 @@ interface IDefaultLink {
  */
 interface IBasicLink extends IDefaultLink {
   kind: 'relation.basic';
-
-  right: {
-    /**
-     * The right side of a relation.basic link must be a content type
-     */
-    type: Strapi.ContentTypeUIDs;
-    /**
-     * Reference ID of the entity
-     */
-    ref: number | string;
-  };
 }
 
 /**
@@ -107,25 +113,6 @@ interface IBasicLink extends IDefaultLink {
  */
 interface IMorphLink extends IDefaultLink {
   kind: 'relation.morph';
-
-  right: {
-    /**
-     * The right side of a relation.morph link must be a content type
-     */
-    type: Strapi.ContentTypeUIDs;
-    /**
-     * Reference ID of the target entity
-     */
-    ref: number | string;
-    /**
-     * The target attribute used to hold the value
-     */
-    attribute: string;
-    /**
-     * Can contain the link's position (relative to other similar links)
-     */
-    order: number;
-  };
 }
 
 /**
@@ -133,60 +120,6 @@ interface IMorphLink extends IDefaultLink {
  */
 interface ICircularLink extends IDefaultLink {
   kind: 'relation.circular';
-}
-
-/**
- * Link from a content type to a component
- */
-interface IComponentLink extends IDefaultLink {
-  kind: 'relation.component';
-
-  right: {
-    /**
-     * The right side of the link must be a component
-     */
-    type: Strapi.ComponentUIDs;
-    /**
-     * Reference ID of the component
-     */
-    ref: number | string;
-    /**
-     * The attribute used to hold the link value in the component
-     */
-    attribute: string;
-    /**
-     * Can contain the link's position (relative to other similar links)
-     */
-    order: number;
-  };
-}
-
-/**
- * Link from a content type to a dynamic zone
- * Very similar to the component link but with a different name
- */
-interface IDynamicZoneLink extends IDefaultLink {
-  kind: 'relation.dynamiczone';
-
-  right: {
-    /**
-     * The right side of the link must be a component
-     */
-    type: Strapi.ComponentUIDs;
-    /**
-     * Reference ID of the component
-     */
-    ref: number | string;
-    /**
-     * The attribute used to hold the link value in the component
-     */
-    attribute: string;
-    /**
-     * MUST contain the link's position relative to other links
-     * bound to the same dynamic zone (aka. left side of the link)
-     */
-    order: number;
-  };
 }
 
 /**
