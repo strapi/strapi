@@ -7,7 +7,7 @@ const frontPaths = [
   'test/config/front/**/*.js',
 ];
 
-const backendRules = (module.exports = {
+module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
   },
@@ -32,4 +32,4 @@ const backendRules = (module.exports = {
       ...require('./.eslintrc.front.js'),
     },
   ],
-});
+};
