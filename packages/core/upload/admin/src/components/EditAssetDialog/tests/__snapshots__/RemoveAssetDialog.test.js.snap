@@ -438,91 +438,34 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
       class="c1"
     >
       <div>
-        <div
-          aria-labelledby="dialog-1-label"
-          aria-modal="true"
-          class="c2 c3"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c4 c5 c6"
-          >
-            <h2
-              class="c7"
-              id="dialog-1-label"
-            >
-              Confirmation
-            </h2>
-          </div>
-          <div
-            class=""
+            aria-labelledby="dialog-1-label"
+            aria-modal="true"
+            class="c2 c3"
+            role="dialog"
           >
             <div
-              class="c8"
+              class="c4 c5 c6"
             >
-              <div
-                class="c9 c10"
+              <h2
+                class="c7"
+                id="dialog-1-label"
               >
-                <div
-                  class="c5"
-                >
-                  <svg
-                    fill="none"
-                    height="1em"
-                    viewBox="0 0 24 24"
-                    width="1em"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0zm1.154 18.456h-2.308V16.15h2.308v2.307zm-.23-3.687h-1.847l-.346-9.23h2.538l-.346 9.23z"
-                      fill="#212134"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <div
-                class="c11 c12"
-                spacing="2"
-              >
-                <div
-                  class="c13"
-                >
-                  <span
-                    class="c14"
-                    id="confirm-description"
-                  >
-                    Are you sure you want to delete this?
-                  </span>
-                </div>
-              </div>
+                Confirmation
+              </h2>
             </div>
             <div
-              class="c15 c16"
+              class=""
             >
               <div
-                class="c17 c18"
-                spacing="2"
+                class="c8"
               >
-                <button
-                  aria-disabled="false"
-                  class="c19 c20"
-                  type="button"
-                >
-                  <span
-                    class="c21 c22"
-                  >
-                    Cancel
-                  </span>
-                </button>
-                <button
-                  aria-disabled="false"
-                  class="c19 c23"
-                  id="confirm-delete"
-                  type="button"
+                <div
+                  class="c9 c10"
                 >
                   <div
-                    aria-hidden="true"
-                    class="c24 c25 c26"
+                    class="c5"
                   >
                     <svg
                       fill="none"
@@ -532,17 +475,76 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
-                        fill="#32324D"
+                        d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0zm1.154 18.456h-2.308V16.15h2.308v2.307zm-.23-3.687h-1.847l-.346-9.23h2.538l-.346 9.23z"
+                        fill="#212134"
                       />
                     </svg>
                   </div>
-                  <span
-                    class="c21 c22"
+                </div>
+                <div
+                  class="c11 c12"
+                  spacing="2"
+                >
+                  <div
+                    class="c13"
                   >
-                    Confirm
-                  </span>
-                </button>
+                    <span
+                      class="c14"
+                      id="confirm-description"
+                    >
+                      Are you sure you want to delete this?
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c15 c16"
+              >
+                <div
+                  class="c17 c18"
+                  spacing="2"
+                >
+                  <button
+                    aria-disabled="false"
+                    class="c19 c20"
+                    type="button"
+                  >
+                    <span
+                      class="c21 c22"
+                    >
+                      Cancel
+                    </span>
+                  </button>
+                  <button
+                    aria-disabled="false"
+                    class="c19 c23"
+                    id="confirm-delete"
+                    type="button"
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="c24 c25 c26"
+                    >
+                      <svg
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M3.236 6.149a.2.2 0 00-.197.233L6 24h12l2.96-17.618a.2.2 0 00-.196-.233H3.236zM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 01-.2.2H2.2a.2.2 0 01-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8z"
+                          fill="#32324D"
+                        />
+                      </svg>
+                    </div>
+                    <span
+                      class="c21 c22"
+                    >
+                      Confirm
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

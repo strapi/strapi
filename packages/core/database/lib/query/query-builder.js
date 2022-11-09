@@ -5,33 +5,41 @@ const _ = require('lodash/fp');
 const { DatabaseError } = require('../errors');
 const helpers = require('./helpers');
 
-const createQueryBuilder = (uid, db) => {
+const createQueryBuilder = (uid, db, initialState = {}) => {
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
 
-  const state = {
-    type: 'select',
-    select: [],
-    count: null,
-    max: null,
-    first: false,
-    data: null,
-    where: [],
-    joins: [],
-    populate: null,
-    limit: null,
-    offset: null,
-    transaction: null,
-    forUpdate: false,
-    orderBy: [],
-    groupBy: [],
-  };
+  const state = _.defaults(
+    {
+      type: 'select',
+      select: [],
+      count: null,
+      max: null,
+      first: false,
+      data: null,
+      where: [],
+      joins: [],
+      populate: null,
+      limit: null,
+      offset: null,
+      transaction: null,
+      forUpdate: false,
+      onConflict: null,
+      merge: null,
+      ignore: false,
+      orderBy: [],
+      groupBy: [],
+      increments: [],
+      decrements: [],
+      aliasCounter: 0,
+    },
+    initialState
+  );
 
-  let counter = 0;
   const getAlias = () => {
-    const alias = `t${counter}`;
+    const alias = `t${state.aliasCounter}`;
 
-    counter += 1;
+    state.aliasCounter += 1;
 
     return alias;
   };
@@ -40,6 +48,10 @@ const createQueryBuilder = (uid, db) => {
     alias: getAlias(),
     getAlias,
     state,
+
+    clone() {
+      return createQueryBuilder(uid, db, state);
+    },
 
     select(args) {
       state.type = 'select';
@@ -61,6 +73,24 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
+    onConflict(args) {
+      state.onConflict = args;
+
+      return this;
+    },
+
+    merge(args) {
+      state.merge = args;
+
+      return this;
+    },
+
+    ignore() {
+      state.ignore = true;
+
+      return this;
+    },
+
     delete() {
       state.type = 'delete';
 
@@ -74,6 +104,20 @@ const createQueryBuilder = (uid, db) => {
     update(data) {
       state.type = 'update';
       state.data = data;
+
+      return this;
+    },
+
+    increment(column, amount = 1) {
+      state.type = 'update';
+      state.increments.push({ column, amount });
+
+      return this;
+    },
+
+    decrement(column, amount = 1) {
+      state.type = 'update';
+      state.decrements.push({ column, amount });
 
       return this;
     },
@@ -196,7 +240,24 @@ const createQueryBuilder = (uid, db) => {
     },
 
     join(join) {
-      state.joins.push(join);
+      if (!join.targetField) {
+        state.joins.push(join);
+        return this;
+      }
+
+      const model = db.metadata.get(uid);
+      const attribute = model.attributes[join.targetField];
+
+      helpers.createJoin(
+        { db, qb: this },
+        {
+          alias: this.alias,
+          refAlias: join.alias,
+          attributeName: join.targetField,
+          attribute,
+        }
+      );
+
       return this;
     },
 
@@ -326,7 +387,9 @@ const createQueryBuilder = (uid, db) => {
           break;
         }
         case 'update': {
-          qb.update(state.data);
+          if (state.data) {
+            qb.update(state.data);
+          }
           break;
         }
         case 'delete': {
@@ -349,6 +412,22 @@ const createQueryBuilder = (uid, db) => {
 
       if (state.forUpdate) {
         qb.forUpdate();
+      }
+
+      if (!_.isEmpty(state.increments)) {
+        state.increments.forEach((incr) => qb.increment(incr.column, incr.amount));
+      }
+
+      if (!_.isEmpty(state.decrements)) {
+        state.decrements.forEach((decr) => qb.decrement(decr.column, decr.amount));
+      }
+
+      if (state.onConflict) {
+        if (state.merge) {
+          qb.onConflict(state.onConflict).merge(state.merge);
+        } else if (state.ignore) {
+          qb.onConflict(state.onConflict).ignore();
+        }
       }
 
       if (state.limit) {

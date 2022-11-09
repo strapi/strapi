@@ -20,7 +20,7 @@ export interface ISourceProvider extends IProvider {
   streamMedia?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
   streamConfiguration?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
   getSchemas?(): any;
-  streamSchemas?(): NodeJS.ReadableStream;
+  streamSchemas?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
 }
 
 export interface IDestinationProvider extends IProvider {

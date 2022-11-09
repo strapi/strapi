@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "4.4.6",
+  "version": "4.4.7",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",

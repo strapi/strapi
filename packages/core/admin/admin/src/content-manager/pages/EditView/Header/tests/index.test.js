@@ -12,12 +12,10 @@ import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
 import { Header } from '../index';
-import components from '../utils/tests/data/compos-schema.json';
-import ct from '../utils/tests/data/ct-schema.json';
+import ct from './data/ct-schema.json';
 
 const defaultProps = {
   allowedActions: { canUpdate: true, canCreate: true, canPublish: true },
-  componentLayouts: components,
   initialData: {},
   isCreatingEntry: true,
   isSingleType: false,
@@ -25,8 +23,13 @@ const defaultProps = {
   layout: ct,
   modifiedData: {},
   onPublish: jest.fn(),
+  onPublishPromptDismissal: jest.fn(),
   onUnpublish: jest.fn(),
   status: 'resolved',
+  publishConfirmation: {
+    show: false,
+    draftCount: 0,
+  },
 };
 
 const makeApp = (props = defaultProps) => {
@@ -148,7 +151,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 1px solid #4945ff;
       }
 
-      .c12 .sc-cfJLRR {
+      .c12 .sc-jCHUfY {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;

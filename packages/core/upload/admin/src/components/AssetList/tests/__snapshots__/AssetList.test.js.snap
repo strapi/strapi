@@ -334,7 +334,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   cursor: pointer;
 }
 
-.c4:hover .sc-OVzLa {
+.c4:hover .sc-uWCef {
   opacity: 1;
 }
 

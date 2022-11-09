@@ -12,7 +12,7 @@ export interface ILocalFileDestinationProviderOptions {
   // Encryption
   encryption: {
     enabled: boolean;
-    key: string;
+    key?: string;
   };
 
   // Compressions
@@ -24,6 +24,7 @@ export interface ILocalFileDestinationProviderOptions {
   file: {
     path: string;
     maxSize?: number;
+    maxSizeJsonl?: number;
   };
 }
 
@@ -55,7 +56,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     // Encryption
     if (this.options.encryption.enabled) {
+      if (!this.options.encryption.key) {
+        throw new Error("Can't encrypt without a key");
+      }
+
       const cipher = createEncryptionCipher(this.options.encryption.key);
+
       transforms.push(cipher);
     }
 
@@ -68,6 +74,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     if (dirExists) {
       fs.rmSync(rootDir, { force: true, recursive: true });
+    }
+
+    if (this.options.encryption.enabled) {
+      if (!this.options.encryption.key) {
+        throw new Error("Can't encrypt without a key");
+      }
     }
 
     fs.mkdirSync(rootDir, { recursive: true });
@@ -93,7 +105,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
-    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
+    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSizeJsonl);
 
     // Full pipeline
     const streams = transforms.concat(fileStream);
@@ -123,7 +135,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     const transforms: Writable[] = this.#getDataTransformers();
 
     // FS write stream
-    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSize);
+    const fileStream = createMultiFilesWriteStream(filePathFactory, this.options.file.maxSizeJsonl);
 
     // Full pipelines
     const streams = transforms.concat(fileStream);
