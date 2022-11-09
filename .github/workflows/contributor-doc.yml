@@ -1,4 +1,4 @@
-name: Deploy static content to Pages
+name: Deploy contributor doc
 
 on:
   push:
