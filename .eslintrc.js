@@ -7,9 +7,7 @@ const frontPaths = [
   'test/config/front/**/*.js',
 ];
 
-const backendRules = require('./.eslintrc.back.js');
-
-module.exports = {
+const backendRules = (module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
   },
@@ -18,17 +16,14 @@ module.exports = {
       // Backend javascript
       files: ['packages/**/*.js', 'test/**/*.js', 'scripts/**/*.js'],
       excludedFiles: frontPaths,
-      ...backendRules,
+      ...require('./.eslintrc.back.js'),
     },
 
     // Backend typescript
     {
-      parser: '@typescript-eslint/parser',
-      plugins: ['@typescript-eslint'],
-      extends: ['plugin:@typescript-eslint/recommended'],
       files: ['packages/**/*.ts', 'test/**/*.ts', 'scripts/**/*.ts'],
       excludedFiles: frontPaths,
-      //...backendRules, // TODO: write a typescript-friendly version of this
+      ...require('./.eslintrc.back.typescript.js'),
     },
 
     // Frontend
@@ -37,4 +32,4 @@ module.exports = {
       ...require('./.eslintrc.front.js'),
     },
   ],
-};
+});
