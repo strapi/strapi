@@ -13,8 +13,25 @@ const fs = require('fs');
 
 const strapi = require('../../Strapi');
 
+const pad = (n) => {
+  return (n < 10 ? '0' : '') + String(n);
+};
+
+const yyyymmddHHMMSS = () => {
+  const date = new Date();
+
+  return (
+    date.getFullYear() +
+    pad(date.getMonth() + 1) +
+    pad(date.getDate()) +
+    pad(date.getHours()) +
+    pad(date.getMinutes()) +
+    pad(date.getSeconds())
+  );
+};
+
 const getDefaultExportBackupName = () => {
-  return `backup_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`;
+  return `backup_${yyyymmddHHMMSS()}`;
 };
 
 const logger = console;
