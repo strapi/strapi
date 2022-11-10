@@ -6,21 +6,19 @@ const getRelationModel = (targetModel, models) => models.find((model) => model.u
 const formatLayouts = (initialData, models) => {
   const data = createMetasSchema(initialData, models);
 
-  const formattedCTEditLayout = formatLayoutWithMetas(data.contentType, null, models);
-  const ctUid = data.contentType.uid;
+  const formattedCTEditLayout = formatLayoutWithMetas(data.contentType, models);
   const formattedListLayout = formatListLayoutWithMetas(data.contentType, data.components);
 
   set(data, ['contentType', 'layouts', 'edit'], formattedCTEditLayout);
   set(data, ['contentType', 'layouts', 'list'], formattedListLayout);
 
-  Object.keys(data.components).forEach((compoUID) => {
-    const formattedCompoEditLayout = formatLayoutWithMetas(
-      data.components[compoUID],
-      ctUid,
+  Object.keys(data.components).forEach((componentUid) => {
+    const formattedComponentEditLayout = formatLayoutWithMetas(
+      data.components[componentUid],
       models
     );
 
-    set(data, ['components', compoUID, 'layouts', 'edit'], formattedCompoEditLayout);
+    set(data, ['components', componentUid, 'layouts', 'edit'], formattedComponentEditLayout);
   });
 
   return data;
@@ -73,8 +71,8 @@ const createMetasSchema = (initialData, models) => {
   return data;
 };
 
-const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
-  const formatted = contentTypeConfiguration.layouts.edit.reduce((acc, current) => {
+const formatLayoutWithMetas = (contentTypeConfiguration, models) =>
+  contentTypeConfiguration.layouts.edit.reduce((acc, current) => {
     const row = current.map((attribute) => {
       const fieldSchema = get(contentTypeConfiguration, ['attributes', attribute.name], {});
 
@@ -85,20 +83,17 @@ const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
       };
 
       if (fieldSchema.type === 'relation') {
-        const targetModelUID = fieldSchema.targetModel;
-        const targetModelSchema = getRelationModel(targetModelUID, models);
+        const targetModelSchema = getRelationModel(fieldSchema.targetModel, models);
         const targetModelPluginOptions = targetModelSchema.pluginOptions || {};
 
-        const queryInfos = ctUid
-          ? generateRelationQueryInfosForComponents(
-              contentTypeConfiguration,
-              attribute.name,
-              models
-            )
-          : generateRelationQueryInfos(contentTypeConfiguration, attribute.name, models);
-
         set(data, 'targetModelPluginOptions', targetModelPluginOptions);
-        set(data, 'queryInfos', queryInfos);
+        set(data, 'queryInfos', {
+          shouldDisplayRelationLink: shouldDisplayRelationLink(
+            contentTypeConfiguration,
+            attribute.name,
+            models
+          ),
+        });
       }
 
       return data;
@@ -109,9 +104,6 @@ const formatLayoutWithMetas = (contentTypeConfiguration, ctUid, models) => {
     return acc;
   }, []);
 
-  return formatted;
-};
-
 const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
   const formatted = contentTypeConfiguration.layouts.list.reduce((acc, current) => {
     const fieldSchema = get(contentTypeConfiguration, ['attributes', current], {});
@@ -120,11 +112,7 @@ const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
     const type = fieldSchema.type;
 
     if (type === 'relation') {
-      const queryInfos = {
-        defaultParams: {},
-      };
-
-      acc.push({ key: `__${current}_key__`, name: current, fieldSchema, metadatas, queryInfos });
+      acc.push({ key: `__${current}_key__`, name: current, fieldSchema, metadatas });
 
       return acc;
     }
@@ -158,26 +146,10 @@ const formatListLayoutWithMetas = (contentTypeConfiguration, components) => {
   return formatted;
 };
 
-const generateRelationQueryInfos = (contentTypeConfiguration, fieldName, models) => {
+const shouldDisplayRelationLink = (contentTypeConfiguration, fieldName, models) => {
   const targetModel = get(contentTypeConfiguration, ['attributes', fieldName, 'targetModel'], '');
-  const shouldDisplayRelationLink = getDisplayedModels(models).includes(targetModel);
 
-  return {
-    defaultParams: {},
-    shouldDisplayRelationLink,
-  };
-};
-
-const generateRelationQueryInfosForComponents = (contentTypeConfiguration, fieldName, models) => {
-  const targetModel = get(contentTypeConfiguration, ['attributes', fieldName, 'targetModel'], '');
-  const shouldDisplayRelationLink = getDisplayedModels(models).includes(targetModel);
-
-  return {
-    defaultParams: {
-      component: contentTypeConfiguration.uid,
-    },
-    shouldDisplayRelationLink,
-  };
+  return getDisplayedModels(models).includes(targetModel);
 };
 
 const getDisplayedModels = (models) =>
@@ -187,7 +159,6 @@ export default formatLayouts;
 export {
   formatLayoutWithMetas,
   formatListLayoutWithMetas,
-  generateRelationQueryInfos,
-  generateRelationQueryInfosForComponents,
+  shouldDisplayRelationLink,
   getDisplayedModels,
 };

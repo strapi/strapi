@@ -1,24 +1,25 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
 /* eslint-disable import/no-cycle */
-import { useDrop } from 'react-dnd';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-import { useNotification } from '@strapi/helper-plugin';
+
+import { useNotification, useCMEditViewDataManager } from '@strapi/helper-plugin';
+
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { TextButton } from '@strapi/design-system/TextButton';
 import Plus from '@strapi/icons/Plus';
+
 import { getMaxTempKey, getTrad } from '../../utils';
 import { useContentTypeLayout } from '../../hooks';
-import ItemTypes from '../../utils/ItemTypes';
+
 import ComponentInitializer from '../ComponentInitializer';
-import connect from './utils/connect';
-import select from './utils/select';
-import getComponentErrorKeys from './utils/getComponentErrorKeys';
 import DraggedItem from './DraggedItem';
 import AccordionGroupCustom from './AccordionGroupCustom';
+
+import getComponentErrorKeys from './utils/getComponentErrorKeys';
 
 const TextButtonCustom = styled(TextButton)`
   height: 100%;
@@ -33,8 +34,6 @@ const TextButtonCustom = styled(TextButton)`
 `;
 
 const RepeatableComponent = ({
-  addRepeatableComponentToField,
-  formErrors,
   componentUid,
   componentValue,
   componentValueLength,
@@ -43,12 +42,12 @@ const RepeatableComponent = ({
   min,
   name,
 }) => {
+  const { addRepeatableComponentToField, formErrors, moveComponentField } =
+    useCMEditViewDataManager();
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const [collapseToOpen, setCollapseToOpen] = useState('');
-  const [isDraggingSibling, setIsDraggingSibling] = useState(false);
-  const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
-  const { getComponentLayout } = useContentTypeLayout();
+  const { getComponentLayout, components } = useContentTypeLayout();
   const componentLayoutData = useMemo(
     () => getComponentLayout(componentUid),
     [componentUid, getComponentLayout]
@@ -73,7 +72,7 @@ const RepeatableComponent = ({
       if (componentValueLength < max) {
         const shouldCheckErrors = hasMinError;
 
-        addRepeatableComponentToField(name, componentUid, shouldCheckErrors);
+        addRepeatableComponentToField(name, componentLayoutData, components, shouldCheckErrors);
 
         setCollapseToOpen(nextTempKey);
       } else if (componentValueLength >= max) {
@@ -84,8 +83,9 @@ const RepeatableComponent = ({
       }
     }
   }, [
+    components,
     addRepeatableComponentToField,
-    componentUid,
+    componentLayoutData,
     componentValueLength,
     hasMinError,
     isReadOnly,
@@ -123,8 +123,16 @@ const RepeatableComponent = ({
     };
   }
 
+  const handleMoveComponentField = (newIndex, currentIndex) => {
+    moveComponentField({
+      name,
+      newIndex,
+      currentIndex,
+    });
+  };
+
   return (
-    <Box hasRadius ref={drop}>
+    <Box hasRadius>
       <AccordionGroupCustom
         error={errorMessage}
         footer={
@@ -150,7 +158,6 @@ const RepeatableComponent = ({
               componentUid={componentUid}
               hasErrors={hasErrors}
               hasMinError={hasMinError}
-              isDraggingSibling={isDraggingSibling}
               isOpen={isOpen}
               isReadOnly={isReadOnly}
               key={key}
@@ -161,10 +168,11 @@ const RepeatableComponent = ({
                   setCollapseToOpen(key);
                 }
               }}
+              moveComponentField={handleMoveComponentField}
               parentName={name}
               schema={componentLayoutData}
-              setIsDraggingSibling={setIsDraggingSibling}
               toggleCollapses={toggleCollapses}
+              index={index}
             />
           );
         })}
@@ -176,25 +184,20 @@ const RepeatableComponent = ({
 RepeatableComponent.defaultProps = {
   componentValue: null,
   componentValueLength: 0,
-  formErrors: {},
   max: Infinity,
   min: 0,
 };
 
 RepeatableComponent.propTypes = {
-  addRepeatableComponentToField: PropTypes.func.isRequired,
   componentUid: PropTypes.string.isRequired,
   componentValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   componentValueLength: PropTypes.number,
-  formErrors: PropTypes.object,
   isReadOnly: PropTypes.bool.isRequired,
   max: PropTypes.number,
   min: PropTypes.number,
   name: PropTypes.string.isRequired,
 };
 
-const Memoized = memo(RepeatableComponent);
-
-export default connect(Memoized, select);
+export default memo(RepeatableComponent);
 
 export { RepeatableComponent };

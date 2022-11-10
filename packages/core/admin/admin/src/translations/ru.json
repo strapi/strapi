@@ -84,7 +84,7 @@
         "Settings.permissions.conditions.anytime": "Всегда",
         "Settings.permissions.conditions.apply": "Применить",
         "Settings.permissions.conditions.can": "Можно",
-        "Settings.permissions.conditions.define-conditions": "Определить условия",
+        "Settings.permissions.conditions.conditions": "Определить условия",
         "Settings.permissions.conditions.links": "Ссылки",
         "Settings.permissions.conditions.no-actions": "Нет действия",
         "Settings.permissions.conditions.none-selected": "Любое время",

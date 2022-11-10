@@ -1,24 +1,27 @@
 /* eslint-disable import/no-cycle */
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import toString from 'lodash/toString';
+
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { Grid, GridItem } from '@strapi/design-system/Grid';
 import { Stack } from '@strapi/design-system/Stack';
 import { Box } from '@strapi/design-system/Box';
 import { Tooltip } from '@strapi/design-system/Tooltip';
+
 import Trash from '@strapi/icons/Trash';
 import Drag from '@strapi/icons/Drag';
-import ItemTypes from '../../../utils/ItemTypes';
-import getTrad from '../../../utils/getTrad';
+
+import { composeRefs, getTrad, ItemTypes } from '../../../utils';
+
 import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
+
 import Preview from './Preview';
-import DraggingSibling from './DraggingSibling';
 import { CustomIconButton } from './IconButtonCustoms';
 import { connect, select } from './utils';
 
@@ -48,7 +51,7 @@ const DraggedItem = ({
   // Errors are retrieved from the AccordionGroupCustom cloneElement
   hasErrorMessage,
   hasErrors,
-  isDraggingSibling,
+  index,
   isOpen,
   isReadOnly,
   onClickToggle,
@@ -57,90 +60,69 @@ const DraggedItem = ({
   // Retrieved from the select function
   moveComponentField,
   removeRepeatableField,
-  setIsDraggingSibling,
   triggerFormValidation,
-  // checkFormErrors,
   displayedValue,
 }) => {
-  const dragRef = useRef(null);
-  const dropRef = useRef(null);
-  const [, forceRerenderAfterDnd] = useState(false);
+  const accordionRef = useRef(null);
+  const boxRef = useRef(null);
   const { formatMessage } = useIntl();
 
   const fields = schema.layouts.edit;
 
-  const [, drop] = useDrop({
+  const [{ handlerId }, dropRef] = useDrop({
     accept: ItemTypes.COMPONENT,
-    canDrop() {
-      return false;
+    collect(monitor) {
+      return {
+        handlerId: monitor.getHandlerId(),
+      };
     },
     hover(item, monitor) {
-      if (!dropRef.current) {
+      if (!boxRef.current) {
         return;
       }
 
-      const dragPath = item.originalPath;
-      const hoverPath = componentFieldName;
-      const fullPathToComponentArray = dragPath.split('.');
-      const dragIndexString = fullPathToComponentArray.slice().splice(-1).join('');
-      const hoverIndexString = hoverPath.split('.').splice(-1).join('');
-      const pathToComponentArray = fullPathToComponentArray.slice(
-        0,
-        fullPathToComponentArray.length - 1
-      );
-      const dragIndex = parseInt(dragIndexString, 10);
-      const hoverIndex = parseInt(hoverIndexString, 10);
+      const dragIndex = item.index;
+      const currentIndex = index;
 
       // Don't replace items with themselves
-      if (dragIndex === hoverIndex) {
+      if (dragIndex === currentIndex) {
         return;
       }
 
-      // Determine rectangle on screen
-      const hoverBoundingRect = dropRef.current.getBoundingClientRect();
-      // Get vertical middle
+      const hoverBoundingRect = boxRef.current.getBoundingClientRect();
       const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      // Determine mouse position
       const clientOffset = monitor.getClientOffset();
-      // Get pixels to the top
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
       // Dragging downwards
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+      if (dragIndex < currentIndex && hoverClientY < hoverMiddleY) {
         return;
       }
-      // Dragging upwards
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      // If They are not in the same level, should not move
-      if (dragPath.split('.').length !== hoverPath.split('.').length) {
-        return;
-      }
-      // Time to actually perform the action in the data
-      moveComponentField(pathToComponentArray, dragIndex, hoverIndex);
 
-      item.originalPath = hoverPath;
+      // Dragging upwards
+      if (dragIndex > currentIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
+
+      // Time to actually perform the action
+      moveComponentField(dragIndex, currentIndex);
+
+      item.index = currentIndex;
     },
   });
-  const [{ isDragging }, drag, preview] = useDrag({
+  const [{ isDragging }, dragRef, previewRef] = useDrag({
     type: ItemTypes.COMPONENT,
     item() {
       // Close all collapses
       toggleCollapses(-1);
 
       return {
-        displayedValue,
-        originalPath: componentFieldName,
+        index,
       };
     },
     end() {
       // Update the errors
       triggerFormValidation();
-      setIsDraggingSibling(false);
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
@@ -148,43 +130,20 @@ const DraggedItem = ({
   });
 
   useEffect(() => {
-    preview(getEmptyImage(), { captureDraggingState: false });
-  }, [preview]);
-
-  useEffect(() => {
-    if (isDragging) {
-      setIsDraggingSibling(true);
-    }
-  }, [isDragging, setIsDraggingSibling]);
-
-  // Effect in order to force a rerender after reordering the components
-  // Since we are removing the Accordion when doing the DnD  we are losing the dragRef, therefore the replaced element cannot be dragged
-  // anymore, this hack forces a rerender in order to apply the dragRef
-  useEffect(() => {
-    if (!isDraggingSibling) {
-      forceRerenderAfterDnd((prev) => !prev);
-    }
-  }, [isDraggingSibling]);
-
-  // Create the refs
-  // We need 1 for the drop target
-  // 1 for the drag target
-  const refs = {
-    dragRef: drag(dragRef),
-    dropRef: drop(dropRef),
-  };
+    previewRef(getEmptyImage(), { captureDraggingState: false });
+  }, [previewRef]);
 
   const accordionTitle = toString(displayedValue);
   const accordionHasError = hasErrors ? 'error' : undefined;
 
-  return (
-    <Box ref={refs ? refs.dropRef : null}>
-      {isDragging && <Preview />}
-      {!isDragging && isDraggingSibling && (
-        <DraggingSibling displayedValue={accordionTitle} componentFieldName={componentFieldName} />
-      )}
+  const composedAccordionRefs = composeRefs(accordionRef, dragRef);
+  const composedBoxRefs = composeRefs(boxRef, dropRef);
 
-      {!isDragging && !isDraggingSibling && (
+  return (
+    <Box ref={composedBoxRefs}>
+      {isDragging ? (
+        <Preview ref={previewRef} />
+      ) : (
         <Accordion
           error={accordionHasError}
           hasErrorMessage={hasErrorMessage}
@@ -220,8 +179,9 @@ const DraggedItem = ({
                     <DragButton
                       role="button"
                       tabIndex={-1}
-                      ref={refs.dragRef}
+                      ref={composedAccordionRefs}
                       onClick={(e) => e.stopPropagation()}
+                      data-handler-id={handlerId}
                     >
                       <Drag />
                     </DragButton>
@@ -290,9 +250,7 @@ const DraggedItem = ({
 
 DraggedItem.defaultProps = {
   componentUid: undefined,
-  isDraggingSibling: false,
   isOpen: false,
-  setIsDraggingSibling() {},
   toggleCollapses() {},
 };
 
@@ -301,7 +259,7 @@ DraggedItem.propTypes = {
   componentUid: PropTypes.string,
   hasErrorMessage: PropTypes.bool.isRequired,
   hasErrors: PropTypes.bool.isRequired,
-  isDraggingSibling: PropTypes.bool,
+  index: PropTypes.number.isRequired,
   isOpen: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
   onClickToggle: PropTypes.func.isRequired,
@@ -309,9 +267,7 @@ DraggedItem.propTypes = {
   toggleCollapses: PropTypes.func,
   moveComponentField: PropTypes.func.isRequired,
   removeRepeatableField: PropTypes.func.isRequired,
-  setIsDraggingSibling: PropTypes.func,
   triggerFormValidation: PropTypes.func.isRequired,
-  // checkFormErrors: PropTypes.func.isRequired,
   displayedValue: PropTypes.string.isRequired,
 };
 

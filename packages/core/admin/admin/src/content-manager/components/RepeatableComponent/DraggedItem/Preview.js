@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
 const StyledSpan = styled.span`
@@ -9,8 +9,8 @@ const StyledSpan = styled.span`
   padding: ${({ theme }) => theme.spaces[6]};
 `;
 
-const Preview = () => {
-  return <StyledSpan padding={6} background="primary100" />;
-};
+const Preview = forwardRef((_, ref) => {
+  return <StyledSpan ref={ref} padding={6} background="primary100" />;
+});
 
 export default Preview;

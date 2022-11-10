@@ -107,7 +107,7 @@
   "Settings.permissions.conditions.anytime": "Jederzeit",
   "Settings.permissions.conditions.apply": "Anwenden",
   "Settings.permissions.conditions.can": "Kann",
-  "Settings.permissions.conditions.define-conditions": "Bedingungen definieren",
+  "Settings.permissions.conditions.conditions": "Bedingungen definieren",
   "Settings.permissions.conditions.links": "Links",
   "Settings.permissions.conditions.no-actions": "Keine Aktionen",
   "Settings.permissions.conditions.none-selected": "Jederzeit",

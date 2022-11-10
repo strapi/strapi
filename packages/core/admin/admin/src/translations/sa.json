@@ -107,7 +107,7 @@
     "Settings.permissions.conditions.anytime": "कदापि",
     "Settings.permissions.conditions.apply": "प्रयोजयन्तु",
     "Settings.permissions.conditions.can": "कर्तुं शक्नुवन्ति",
-    "Settings.permissions.conditions.define-conditions": "शर्ताः परिभाषयन्तु",
+    "Settings.permissions.conditions.conditions": "शर्ताः परिभाषयन्तु",
     "Settings.permissions.conditions.links": "लिङ्क्स्",
     "Settings.permissions.conditions.no-actions": "भवतः प्रथमं क्रियाः (निर्माणं, पठनं, अद्यतनीकरणं, ...) चयनं कर्तव्यं तेषु शर्ताः परिभाषयितुं पूर्वं।",
     "Settings.permissions.conditions.none-selected": "कदापि",

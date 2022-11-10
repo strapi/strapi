@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-constructed-context-values */
 import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
@@ -20,7 +21,7 @@ import {
 
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
-import { cleanData, createYupSchema } from './utils';
+import { cleanData, createYupSchema, recursivelyFindPathsBasedOnCondition } from './utils';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
@@ -46,6 +47,10 @@ const EditViewDataManagerProvider = ({
   status,
   updateActionAllowedFields,
 }) => {
+  /**
+   * TODO: this should be moved into the global reducer
+   * to match ever other reducer in the CM.
+   */
   const [reducerState, dispatch] = useReducer(reducer, initialState);
   const {
     formErrors,
@@ -137,49 +142,90 @@ const EditViewDataManagerProvider = ({
     });
   }, [componentsDataStructure, contentTypeDataStructure]);
 
+  const { components } = allLayoutData;
+
   useEffect(() => {
-    if (initialValues) {
-      const relationalFields = Object.keys(initialValues).filter(
-        (key) => currentContentTypeLayout?.attributes[key]?.type === 'relation'
-      );
+    if (initialValues && currentContentTypeLayout?.attributes) {
+      /**
+       * This will return an array of paths:
+       * ['many_to_one', 'one_to_many', 'one_to_one']
+       * it can also return a path to a relation:
+       * ['relation_component.categories']
+       */
+      const relationalFieldPaths = recursivelyFindPathsBasedOnCondition(
+        components,
+        (value) => value.type === 'relation'
+      )(currentContentTypeLayout.attributes);
+
+      const componentPaths = recursivelyFindPathsBasedOnCondition(
+        components,
+        (value) => value.type === 'component' && !value.repeatable
+      )(currentContentTypeLayout.attributes);
+
+      const repeatableComponentPaths = recursivelyFindPathsBasedOnCondition(
+        components,
+        (value) => value.type === 'component' && value.repeatable
+      )(currentContentTypeLayout.attributes);
+
+      const dynamicZonePaths = recursivelyFindPathsBasedOnCondition(
+        components,
+        (value) => value.type === 'dynamiczone'
+      )(currentContentTypeLayout.attributes);
 
       dispatch({
         type: 'INIT_FORM',
         initialValues,
-        relationalFields,
+        relationalFieldPaths,
+        componentPaths,
+        repeatableComponentPaths,
+        dynamicZonePaths,
       });
     }
-  }, [initialValues, currentContentTypeLayout]);
+  }, [initialValues, currentContentTypeLayout, components]);
 
-  const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
-    trackUsageRef.current('didAddComponentToDynamicZone');
+  const dispatchAddComponent = useCallback(
+    (type) =>
+      (keys, componentLayoutData, components, shouldCheckErrors = false) => {
+        trackUsageRef.current('didAddComponentToDynamicZone');
 
-    dispatch({
-      type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
-      keys: keys.split('.'),
-      componentUid,
-      shouldCheckErrors,
-    });
-  }, []);
+        dispatch({
+          type,
+          keys: keys.split('.'),
+          componentLayoutData,
+          allComponents: components,
+          shouldCheckErrors,
+        });
+      },
+    []
+  );
 
-  const addNonRepeatableComponentToField = useCallback((keys, componentUid) => {
-    dispatch({
-      type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
-      keys: keys.split('.'),
-      componentUid,
-    });
-  }, []);
+  const addComponentToDynamicZone = dispatchAddComponent('ADD_COMPONENT_TO_DYNAMIC_ZONE');
 
-  const connectRelation = useCallback(({ target: { name, value, replace } }) => {
+  const addNonRepeatableComponentToField = useCallback(
+    (keys, componentLayoutData, allComponents) => {
+      dispatch({
+        type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
+        keys: keys.split('.'),
+        componentLayoutData,
+        allComponents,
+      });
+    },
+    []
+  );
+
+  /**
+   * @type {({ name: string, value: Relation, toOneRelation: boolean}) => void}
+   */
+  const relationConnect = useCallback(({ name, value, toOneRelation }) => {
     dispatch({
       type: 'CONNECT_RELATION',
       keys: name.split('.'),
       value,
-      replace,
+      toOneRelation,
     });
   }, []);
 
-  const loadRelation = useCallback(({ target: { name, value } }) => {
+  const relationLoad = useCallback(({ target: { name, value } }) => {
     dispatch({
       type: 'LOAD_RELATION',
       keys: name.split('.'),
@@ -187,17 +233,7 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const addRepeatableComponentToField = useCallback(
-    (keys, componentUid, shouldCheckErrors = false) => {
-      dispatch({
-        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
-        keys: keys.split('.'),
-        componentUid,
-        shouldCheckErrors,
-      });
-    },
-    []
-  );
+  const addRepeatableComponentToField = dispatchAddComponent('ADD_REPEATABLE_COMPONENT_TO_FIELD');
 
   const yupSchema = useMemo(() => {
     const options = { isCreatingEntry, isDraft: shouldNotRunValidations, isFromComponent: false };
@@ -287,12 +323,12 @@ const EditViewDataManagerProvider = ({
   );
 
   const createFormData = useCallback(
-    (data) => {
+    (modifiedData, initialData) => {
       // First we need to remove the added keys needed for the dnd
-      const preparedData = removeKeyInObject(cloneDeep(data), '__temp_key__');
+      const preparedData = removeKeyInObject(cloneDeep(modifiedData), '__temp_key__');
       // Then we need to apply our helper
       const cleanedData = cleanData(
-        preparedData,
+        { browserState: preparedData, serverState: initialData },
         currentContentTypeLayout,
         allLayoutData.components
       );
@@ -331,7 +367,7 @@ const EditViewDataManagerProvider = ({
 
       try {
         if (isEmpty(errors)) {
-          const formData = createFormData(modifiedData);
+          const formData = createFormData(modifiedData, initialData);
 
           if (isCreatingEntry) {
             await onPost(formData, trackerProperty);
@@ -351,7 +387,16 @@ const EditViewDataManagerProvider = ({
         errors,
       });
     },
-    [createFormData, isCreatingEntry, modifiedData, onPost, onPut, trackerProperty, yupSchema]
+    [
+      createFormData,
+      isCreatingEntry,
+      modifiedData,
+      initialData,
+      onPost,
+      onPut,
+      trackerProperty,
+      yupSchema,
+    ]
   );
 
   const handlePublish = useCallback(async () => {
@@ -453,20 +498,39 @@ const EditViewDataManagerProvider = ({
     [shouldCheckDZErrors]
   );
 
-  const moveComponentField = useCallback((pathToComponent, dragIndex, hoverIndex) => {
+  const moveComponentField = useCallback(({ name, newIndex, currentIndex }) => {
     dispatch({
       type: 'MOVE_COMPONENT_FIELD',
-      pathToComponent,
-      dragIndex,
-      hoverIndex,
+      keys: name.split('.'),
+      newIndex,
+      oldIndex: currentIndex,
     });
   }, []);
 
-  const disconnectRelation = useCallback(({ target: { name, value } }) => {
+  const relationDisconnect = useCallback(({ name, id }) => {
     dispatch({
       type: 'DISCONNECT_RELATION',
       keys: name.split('.'),
-      value,
+      id,
+    });
+  }, []);
+
+  /**
+   * @typedef Payload
+   * @type {object}
+   * @property {string} name - The name of the field in `modifiedData`
+   * @property {number} oldIndex - The relation's current index
+   * @property {number} newIndex - The relation's new index
+   *
+   *
+   * @type {(payload: Payload) => void}
+   */
+  const relationReorder = useCallback(({ name, oldIndex, newIndex }) => {
+    dispatch({
+      type: 'REORDER_RELATION',
+      keys: name.split('.'),
+      oldIndex,
+      newIndex,
     });
   }, []);
 
@@ -520,7 +584,6 @@ const EditViewDataManagerProvider = ({
       value={{
         addComponentToDynamicZone,
         addNonRepeatableComponentToField,
-        connectRelation,
         addRepeatableComponentToField,
         allLayoutData,
         checkFormErrors,
@@ -533,7 +596,6 @@ const EditViewDataManagerProvider = ({
         shouldNotRunValidations,
         status,
         layout: currentContentTypeLayout,
-        loadRelation,
         modifiedData,
         moveComponentDown,
         moveComponentField,
@@ -541,12 +603,15 @@ const EditViewDataManagerProvider = ({
         onChange: handleChange,
         onPublish: handlePublish,
         onUnpublish,
-        disconnectRelation,
         readActionAllowedFields,
         redirectToPreviousPage,
         removeComponentFromDynamicZone,
         removeComponentFromField,
         removeRepeatableField,
+        relationConnect,
+        relationDisconnect,
+        relationLoad,
+        relationReorder,
         slug,
         triggerFormValidation,
         updateActionAllowedFields,
@@ -554,23 +619,21 @@ const EditViewDataManagerProvider = ({
         publishConfirmation,
       }}
     >
-      <>
-        {isLoadingForData || (!isCreatingEntry && !initialData.id) ? (
-          <Main aria-busy="true">
-            <LoadingIndicatorPage />
-          </Main>
-        ) : (
-          <>
-            <Prompt
-              when={!isEqual(modifiedData, initialData)}
-              message={formatMessage({ id: 'global.prompt.unsaved' })}
-            />
-            <form noValidate onSubmit={handleSubmit}>
-              {children}
-            </form>
-          </>
-        )}
-      </>
+      {isLoadingForData || (!isCreatingEntry && !initialData.id) ? (
+        <Main aria-busy="true">
+          <LoadingIndicatorPage />
+        </Main>
+      ) : (
+        <>
+          <Prompt
+            when={!isEqual(modifiedData, initialData)}
+            message={formatMessage({ id: 'global.prompt.unsaved' })}
+          />
+          <form noValidate onSubmit={handleSubmit}>
+            {children}
+          </form>
+        </>
+      )}
     </ContentManagerEditViewDataManagerContext.Provider>
   );
 };

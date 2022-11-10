@@ -33,19 +33,25 @@ const ComponentFixture = ({ children }) => (
   <QueryClientProvider client={client}>{children}</QueryClientProvider>
 );
 
-function setup(name = 'test', args) {
+function setup(args, name = 'test') {
   return new Promise((resolve) => {
     act(() => {
       resolve(
         renderHook(
           () =>
             useRelation(name, {
+              name,
               relation: {
                 enabled: true,
                 endpoint: '/',
                 pageParams: {
                   limit: 10,
                   ...(args?.relation?.pageParams ?? {}),
+                },
+                normalizeArguments: {
+                  mainFieldName: 'name',
+                  shouldAddLink: false,
+                  targetModel: 'api::tag.tag',
                 },
                 ...(args?.relation ?? {}),
               },
@@ -67,26 +73,40 @@ function setup(name = 'test', args) {
 }
 
 describe('useRelation', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('fetch relations', async () => {
-    const { result, waitForNextUpdate } = await setup(undefined);
+  test('fetch relations and calls onLoadRelationsCallback', async () => {
+    const onLoadMock = jest.fn();
+    const { waitFor } = await setup({
+      relation: {
+        onLoad: onLoadMock,
+      },
+    });
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(axiosInstance.get).toBeCalledTimes(1));
 
-    expect(result.current.relations.isSuccess).toBe(true);
-    expect(axiosInstance.get).toBeCalledTimes(1);
     expect(axiosInstance.get).toBeCalledWith('/', {
       params: {
         limit: 10,
         page: 1,
       },
     });
+
+    await waitFor(() =>
+      expect(onLoadMock).toBeCalledWith({
+        target: {
+          name: 'test',
+          value: [expect.objectContaining({ id: 1 }), expect.objectContaining({ id: 2 })],
+        },
+      })
+    );
   });
 
   test('fetch and normalize relations for xToOne', async () => {
+    const onLoadMock = jest.fn();
+
     const FIXTURE = {
       id: 1,
       title: 'xToOne relation',
@@ -98,17 +118,26 @@ describe('useRelation', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = await setup(undefined);
+    const { result, waitFor } = await setup({
+      relation: {
+        onLoad: onLoadMock,
+      },
+    });
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.relations.isSuccess).toBe(true));
 
-    expect(result.current.relations.isSuccess).toBe(true);
-    expect(result.current.relations.data.pages[0].results[0]).toStrictEqual(FIXTURE);
-    expect(result.current.relations.data.pages[0]?.data).toBeUndefined();
+    await waitFor(() =>
+      expect(onLoadMock).toBeCalledWith({
+        target: {
+          name: 'test',
+          value: [expect.objectContaining({ id: 1 })],
+        },
+      })
+    );
   });
 
   test('fetch relations with different limit', async () => {
-    const { waitForNextUpdate } = await setup(undefined, {
+    const { waitForNextUpdate } = await setup({
       relation: { pageParams: { limit: 5 } },
     });
 
@@ -123,7 +152,7 @@ describe('useRelation', () => {
   });
 
   test('does not fetch relations if it was not enabled', async () => {
-    await setup(undefined, { relation: { enabled: false } });
+    await setup({ relation: { enabled: false } });
 
     expect(axiosInstance.get).not.toBeCalled();
   });
@@ -154,7 +183,7 @@ describe('useRelation', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = await setup(undefined);
+    const { result, waitForNextUpdate } = await setup();
 
     await waitForNextUpdate();
 
@@ -190,7 +219,7 @@ describe('useRelation', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = await setup(undefined);
+    const { result, waitForNextUpdate } = await setup();
 
     await waitForNextUpdate();
 
@@ -232,7 +261,7 @@ describe('useRelation', () => {
   });
 
   test('does fetch search results with a different limit', async () => {
-    const { result, waitForNextUpdate } = await setup(undefined, {
+    const { result, waitForNextUpdate } = await setup({
       search: { pageParams: { limit: 5 } },
     });
 
@@ -260,7 +289,7 @@ describe('useRelation', () => {
   });
 
   test('fetch search next page, if there is one', async () => {
-    const { result, waitForNextUpdate } = await setup(undefined);
+    const { result, waitForNextUpdate } = await setup();
 
     const spy = jest
       .fn()
@@ -297,7 +326,7 @@ describe('useRelation', () => {
   });
 
   test("does not fetch search next page, if there isn't one", async () => {
-    const { result, waitForNextUpdate } = await setup(undefined);
+    const { result, waitForNextUpdate } = await setup();
 
     const spy = jest.fn().mockResolvedValueOnce({
       data: { results: [], pagination: { page: 1, pageCount: 1 } },

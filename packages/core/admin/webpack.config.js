@@ -13,6 +13,7 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 
 const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
+const createPluginsExcludePath = require('./utils/create-plugins-exclude-path');
 
 const EE_REGEX = /from.* ['"]ee_else_ce\//;
 
@@ -49,6 +50,8 @@ module.exports = ({
       ]
     : [];
 
+  const excludeRegex = createPluginsExcludePath(pluginsPath);
+
   return {
     mode: isProduction ? 'production' : 'development',
     bail: !!isProduction,
@@ -82,7 +85,7 @@ module.exports = ({
           test: /\.tsx?$/,
           loader: require.resolve('esbuild-loader'),
           include: [cacheDir, ...pluginsPath],
-          exclude: /node_modules/,
+          exclude: excludeRegex,
           options: {
             loader: 'tsx',
             target: 'es2015',

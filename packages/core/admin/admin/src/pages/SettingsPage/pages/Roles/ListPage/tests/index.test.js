@@ -61,6 +61,14 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c24 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
       .c11 {
         font-weight: 600;
         color: #32324d;
@@ -371,14 +379,6 @@ describe('<ListPage />', () => {
         display: block;
         width: 100%;
         border: none;
-      }
-
-      .c24 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
       }
 
       .c26 {

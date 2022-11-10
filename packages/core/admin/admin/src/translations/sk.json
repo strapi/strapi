@@ -67,7 +67,7 @@
   "Settings.permissions.conditions.anytime": "Kedykoľvek",
   "Settings.permissions.conditions.apply": "Použiť",
   "Settings.permissions.conditions.can": "Môcť",
-  "Settings.permissions.conditions.define-conditions": "Zadajte podmienky",
+  "Settings.permissions.conditions.conditions": "Zadajte podmienky",
   "Settings.permissions.conditions.links": "Odkazy",
   "Settings.permissions.conditions.no-actions": "Akcia neexistuje",
   "Settings.permissions.conditions.or": "ALEBO",

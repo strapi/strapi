@@ -4,14 +4,31 @@ import isObject from 'lodash/isObject';
 
 /* eslint-disable indent */
 
-const cleanData = (retrievedData, currentSchema, componentsSchema) => {
+/**
+ *
+ * @param {{ browserState: object, serverState: object }} browserState – the modifiedData from REDUX, serverState - the initialData from REDUX
+ * @param {object} currentSchema
+ * @param {object} componentsSchema
+ * @returns
+ */
+const cleanData = ({ browserState, serverState }, currentSchema, componentsSchema) => {
   const getType = (schema, attrName) => get(schema, ['attributes', attrName, 'type'], '');
   const getOtherInfos = (schema, arr) => get(schema, ['attributes', ...arr], '');
 
-  const recursiveCleanData = (data, schema) => {
-    return Object.keys(data).reduce((acc, current) => {
+  /**
+   *
+   * @param {object} browserState – the modifiedData from REDUX
+   * @param {object} serverState – the initialData from REDUX
+   * @param {*} schema
+   * @returns
+   */
+  const recursiveCleanData = (browserState, serverState, schema) => {
+    return Object.keys(browserState).reduce((acc, current) => {
       const attrType = getType(schema, current);
-      const value = get(data, current);
+
+      // This is the field value
+      const value = get(browserState, current);
+      const oldValue = get(serverState, current);
       const component = getOtherInfos(schema, [current, 'component']);
       const isRepeatable = getOtherInfos(schema, [current, 'repeatable']);
       let cleanedData;
@@ -40,34 +57,71 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
         case 'component':
           if (isRepeatable) {
             cleanedData = value
-              ? value.map((data) => {
-                  const subCleanedData = recursiveCleanData(data, componentsSchema[component]);
+              ? value.map((data, index) => {
+                  const subCleanedData = recursiveCleanData(
+                    data,
+                    (oldValue ?? [])[index],
+                    componentsSchema[component]
+                  );
 
                   return subCleanedData;
                 })
               : value;
           } else {
-            cleanedData = value ? recursiveCleanData(value, componentsSchema[component]) : value;
+            cleanedData = value
+              ? recursiveCleanData(value, oldValue, componentsSchema[component])
+              : value;
           }
 
           break;
 
-        case 'relation':
-          // Instead of the full relation object, we only want to send its ID
-          // and need to clean-up the connect|disconnect arrays
-          cleanedData = Object.entries(value).reduce((acc, [key, value]) => {
-            if (['connect', 'disconnect'].includes(key)) {
-              acc[key] = value.map((currentValue) => ({ id: currentValue.id }));
+        case 'relation': {
+          /**
+           * Because of how repeatable components work when you dig into them the server
+           * will have no object to compare too therefore no relation array will be setup
+           * because the component has not been initialised, therefore we can safely assume
+           * it needs to be added and provide a default empty array.
+           */
+          let actualOldValue = oldValue ?? [];
+
+          /**
+           * Instead of the full relation object, we only want to send its ID
+           *  connectedRelations are the items that are in the browserState
+           * array but not in the serverState
+           */
+          const connectedRelations = value.reduce((acc, relation) => {
+            if (!actualOldValue.find((oldRelation) => oldRelation.id === relation.id)) {
+              return [...acc, { id: relation.id }];
             }
 
             return acc;
-          }, {});
+          }, []);
+
+          /**
+           * disconnectedRelations are the items that are in the serverState but
+           * are no longer in the browserState
+           */
+          const disconnectedRelations = actualOldValue.reduce((acc, relation) => {
+            if (!value.find((newRelation) => newRelation.id === relation.id)) {
+              return [...acc, { id: relation.id }];
+            }
+
+            return acc;
+          }, []);
+
+          cleanedData = {
+            disconnect: disconnectedRelations,
+            connect: connectedRelations,
+          };
+
           break;
+        }
 
         case 'dynamiczone':
-          cleanedData = value.map((componentData) => {
+          cleanedData = value.map((componentData, index) => {
             const subCleanedData = recursiveCleanData(
               componentData,
+              (oldValue ?? [])[index],
               componentsSchema[componentData.__component]
             );
 
@@ -84,7 +138,7 @@ const cleanData = (retrievedData, currentSchema, componentsSchema) => {
     }, {});
   };
 
-  return recursiveCleanData(retrievedData, currentSchema);
+  return recursiveCleanData(browserState, serverState, currentSchema);
 };
 
 // TODO: check which parts are still needed: I suspect the

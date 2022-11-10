@@ -2,9 +2,10 @@ import React, { useRef, useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
+import { useIntl } from 'react-intl';
 
 import { ReactSelect } from '@strapi/helper-plugin';
-import { Badge } from '@strapi/design-system/Badge';
+import { Status } from '@strapi/design-system/Status';
 import { Box } from '@strapi/design-system/Box';
 import { Link } from '@strapi/design-system/Link';
 import { Icon } from '@strapi/design-system/Icon';
@@ -20,7 +21,10 @@ import { Relation } from './components/Relation';
 import { RelationItem } from './components/RelationItem';
 import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
-import { RELATION_ITEM_HEIGHT } from './constants';
+import { RELATION_GUTTER, RELATION_ITEM_HEIGHT } from './constants';
+
+import { getTrad } from '../../utils';
+import { usePrev } from '../../hooks';
 
 const LinkEllipsis = styled(Link)`
   white-space: nowrap;
@@ -61,12 +65,12 @@ const RelationInput = ({
   labelLoadMore,
   labelDisconnectRelation,
   loadingMessage,
+  noRelationsMessage,
   onRelationConnect,
   onRelationLoadMore,
   onRelationDisconnect,
-  onSearchClose,
+  onRelationReorder,
   onSearchNextPage,
-  onSearchOpen,
   onSearch,
   placeholder,
   publicationStateTranslations,
@@ -80,19 +84,21 @@ const RelationInput = ({
   const outerListRef = useRef();
   const [overflow, setOverflow] = useState('');
 
-  const {
-    data: { pages },
-  } = searchResults;
+  const { data } = searchResults;
 
-  const relations = useMemo(() => paginatedRelations.data.pages.flat(), [paginatedRelations]);
+  const { formatMessage } = useIntl();
+
+  const relations = paginatedRelations.data;
   const totalNumberOfRelations = relations.length ?? 0;
 
   const dynamicListHeight = useMemo(
     () =>
       totalNumberOfRelations > numberOfRelationsToDisplay
-        ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT +
+        ? Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) *
+            (RELATION_ITEM_HEIGHT + RELATION_GUTTER) +
           RELATION_ITEM_HEIGHT / 2
-        : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) * RELATION_ITEM_HEIGHT,
+        : Math.min(totalNumberOfRelations, numberOfRelationsToDisplay) *
+          (RELATION_ITEM_HEIGHT + RELATION_GUTTER),
     [totalNumberOfRelations, numberOfRelationsToDisplay]
   );
 
@@ -102,12 +108,15 @@ const RelationInput = ({
 
   const options = useMemo(
     () =>
-      pages.flat().map((result) => ({
-        ...result,
-        value: result.id,
-        label: result.mainField,
-      })),
-    [pages]
+      data
+        .flat()
+        .filter(Boolean)
+        .map((result) => ({
+          ...result,
+          value: result.id,
+          label: result.mainField,
+        })),
+    [data]
   );
 
   useEffect(() => {
@@ -143,6 +152,9 @@ const RelationInput = ({
     };
   }, [paginatedRelations, relations, numberOfRelationsToDisplay, totalNumberOfRelations]);
 
+  /**
+   * --- ReactSelect Workaround START ---
+   */
   /**
    * This code is being isolated because it's a hack to fix a placement bug in
    * `react-select` where when the options prop is updated the position of the
@@ -197,16 +209,46 @@ const RelationInput = ({
 
   const handleMenuClose = () => {
     setIsMenuOpen(false);
-
-    if (onSearchClose) {
-      onSearchClose();
-    }
   };
+  /**
+   * --- ReactSelect Workaround END ---
+   */
 
   const handleMenuOpen = () => {
     setIsMenuOpen(true);
-    onSearchOpen();
+    onSearch();
   };
+
+  const handleUpdatePositionOfRelation = (newIndex, currentIndex) => {
+    if (onRelationReorder) {
+      onRelationReorder(currentIndex, newIndex);
+    }
+  };
+
+  const previewRelationsLength = usePrev(relations.length);
+  /**
+   * @type {React.MutableRefObject<'onChange' | 'loadMore'>}
+   */
+  const updatedRelationsWith = useRef();
+
+  const handleLoadMore = () => {
+    updatedRelationsWith.current = 'loadMore';
+    onRelationLoadMore();
+  };
+
+  useEffect(() => {
+    if (
+      updatedRelationsWith.current === 'onChange' &&
+      relations.length !== previewRelationsLength
+    ) {
+      listRef.current.scrollToItem(relations.length, 'end');
+    } else if (
+      updatedRelationsWith.current === 'loadMore' &&
+      relations.length !== previewRelationsLength
+    ) {
+      listRef.current.scrollToItem(0, 'start');
+    }
+  }, [previewRelationsLength, relations]);
 
   return (
     <Field error={error} name={name} hint={description} id={id}>
@@ -231,17 +273,11 @@ const RelationInput = ({
               inputId={id}
               isSearchable
               isClear
-              loadingMessage={loadingMessage}
+              loadingMessage={() => loadingMessage}
               onChange={(relation) => {
                 setValue(null);
                 onRelationConnect(relation);
-
-                // scroll to the end of the list
-                if (relations.length > 0) {
-                  setTimeout(() => {
-                    listRef.current.scrollToItem(relations.length, 'end');
-                  });
-                }
+                updatedRelationsWith.current = 'onChange';
               }}
               onInputChange={(value) => {
                 setValue(value);
@@ -250,6 +286,7 @@ const RelationInput = ({
               onMenuClose={handleMenuClose}
               onMenuOpen={handleMenuOpen}
               menuIsOpen={isMenuOpen}
+              noOptionsMessage={() => noRelationsMessage}
               onMenuScrollToBottom={() => {
                 if (searchResults.hasNextPage) {
                   onSearchNextPage();
@@ -265,7 +302,7 @@ const RelationInput = ({
           shouldDisplayLoadMoreButton && (
             <TextButton
               disabled={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
-              onClick={() => onRelationLoadMore()}
+              onClick={handleLoadMore}
               loading={paginatedRelations.isLoading || paginatedRelations.isFetchingNextPage}
               startIcon={<Refresh />}
             >
@@ -280,59 +317,24 @@ const RelationInput = ({
             ref={listRef}
             outerRef={outerListRef}
             itemCount={totalNumberOfRelations}
-            itemSize={RELATION_ITEM_HEIGHT}
-            itemData={relations}
+            itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
+            itemData={{
+              disabled,
+              iconButtonAriaLabel: formatMessage({
+                id: getTrad('components.RelationInput.icon-button-aria-label'),
+                defaultMessage: 'Drag',
+              }),
+              labelDisconnectRelation,
+              onRelationDisconnect,
+              publicationStateTranslations,
+              relations,
+              totalNumberOfRelations,
+              updatePositionOfRelation: handleUpdatePositionOfRelation,
+            }}
+            itemKey={(index, { relations: relationsItems }) => relationsItems[index].id}
             innerElementType="ol"
           >
-            {({ data, index, style }) => {
-              const { publicationState, href, mainField, id } = data[index];
-              const badgeColor = publicationState === 'draft' ? 'secondary' : 'success';
-
-              return (
-                <RelationItem
-                  disabled={disabled}
-                  key={`relation-${name}-${id}`}
-                  endAction={
-                    <DisconnectButton
-                      data-testid={`remove-relation-${id}`}
-                      disabled={disabled}
-                      type="button"
-                      onClick={() => onRelationDisconnect(data[index])}
-                      aria-label={labelDisconnectRelation}
-                    >
-                      <Icon width="12px" as={Cross} />
-                    </DisconnectButton>
-                  }
-                  style={style}
-                >
-                  <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                    <Tooltip description={mainField ?? `${id}`}>
-                      {href ? (
-                        <LinkEllipsis to={href} disabled={disabled}>
-                          {mainField ?? id}
-                        </LinkEllipsis>
-                      ) : (
-                        <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
-                          {mainField ?? id}
-                        </Typography>
-                      )}
-                    </Tooltip>
-                  </BoxEllipsis>
-
-                  {publicationState && (
-                    <Badge
-                      borderSize={1}
-                      borderColor={`${badgeColor}200`}
-                      backgroundColor={`${badgeColor}100`}
-                      textColor={`${badgeColor}700`}
-                      shrink={0}
-                    >
-                      {publicationStateTranslations[publicationState]}
-                    </Badge>
-                  )}
-                </RelationItem>
-              );
-            }}
+            {ListItem}
           </List>
         </RelationList>
         {(description || error) && (
@@ -346,37 +348,30 @@ const RelationInput = ({
   );
 };
 
-const ReactQueryRelationResult = PropTypes.shape({
-  data: PropTypes.shape({
-    pages: PropTypes.arrayOf(
-      PropTypes.arrayOf(
-        PropTypes.shape({
-          href: PropTypes.string,
-          id: PropTypes.number.isRequired,
-          publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-          mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        })
-      )
-    ),
-  }),
+const RelationsResult = PropTypes.shape({
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      href: PropTypes.string,
+      id: PropTypes.number.isRequired,
+      publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+      mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    })
+  ),
   hasNextPage: PropTypes.bool,
   isFetchingNextPage: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
 });
 
-const ReactQuerySearchResult = PropTypes.shape({
-  data: PropTypes.shape({
-    pages: PropTypes.arrayOf(
-      PropTypes.arrayOf(
-        PropTypes.shape({
-          id: PropTypes.number.isRequired,
-          mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-          publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-        })
-      )
-    ),
-  }),
+const SearchResults = PropTypes.shape({
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      href: PropTypes.string,
+      mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+    })
+  ),
   hasNextPage: PropTypes.bool,
   isLoading: PropTypes.bool.isRequired,
   isSuccess: PropTypes.bool.isRequired,
@@ -388,10 +383,9 @@ RelationInput.defaultProps = {
   error: undefined,
   labelAction: null,
   labelLoadMore: null,
-  onSearchClose: undefined,
   required: false,
-  relations: [],
-  searchResults: [],
+  relations: { data: [] },
+  searchResults: { data: [] },
 };
 
 RelationInput.propTypes = {
@@ -403,25 +397,120 @@ RelationInput.propTypes = {
   labelAction: PropTypes.element,
   labelLoadMore: PropTypes.string,
   labelDisconnectRelation: PropTypes.string.isRequired,
-  loadingMessage: PropTypes.func.isRequired,
+  loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  noRelationsMessage: PropTypes.string.isRequired,
   numberOfRelationsToDisplay: PropTypes.number.isRequired,
   onRelationConnect: PropTypes.func.isRequired,
   onRelationDisconnect: PropTypes.func.isRequired,
   onRelationLoadMore: PropTypes.func.isRequired,
+  onRelationReorder: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired,
   onSearchNextPage: PropTypes.func.isRequired,
-  onSearchClose: PropTypes.func,
-  onSearchOpen: PropTypes.func.isRequired,
   placeholder: PropTypes.string.isRequired,
   publicationStateTranslations: PropTypes.shape({
     draft: PropTypes.string.isRequired,
     published: PropTypes.string.isRequired,
   }).isRequired,
   required: PropTypes.bool,
-  searchResults: ReactQuerySearchResult,
+  searchResults: SearchResults,
   size: PropTypes.number.isRequired,
-  relations: ReactQueryRelationResult,
+  relations: RelationsResult,
+};
+
+/**
+ * This is in a seperate component to enforce passing all the props the component requires to react-window
+ * to ensure drag & drop correctly works.
+ */
+const ListItem = ({ data, index, style }) => {
+  const {
+    disabled,
+    labelDisconnectRelation,
+    onRelationDisconnect,
+    publicationStateTranslations,
+    relations,
+    totalNumberOfRelations,
+    updatePositionOfRelation,
+  } = data;
+  const { publicationState, href, mainField, id } = relations[index];
+  const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
+  const canDrag = totalNumberOfRelations > 1;
+
+  return (
+    <RelationItem
+      disabled={disabled}
+      canDrag={canDrag}
+      id={id}
+      index={index}
+      updatePositionOfRelation={updatePositionOfRelation}
+      endAction={
+        <DisconnectButton
+          data-testid={`remove-relation-${id}`}
+          disabled={disabled}
+          type="button"
+          onClick={() => onRelationDisconnect(relations[index])}
+          aria-label={labelDisconnectRelation}
+        >
+          <Icon width="12px" as={Cross} />
+        </DisconnectButton>
+      }
+      style={{
+        ...style,
+        bottom: style.bottom ?? 0 + RELATION_GUTTER,
+        height: style.height ?? 0 - RELATION_GUTTER,
+      }}
+    >
+      <BoxEllipsis minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+        <Tooltip description={mainField ?? `${id}`}>
+          {href ? (
+            <LinkEllipsis to={href} disabled={disabled}>
+              {mainField ?? id}
+            </LinkEllipsis>
+          ) : (
+            <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
+              {mainField ?? id}
+            </Typography>
+          )}
+        </Tooltip>
+      </BoxEllipsis>
+
+      {publicationState && (
+        <Status variant={statusColor} showBullet={false} size="S">
+          <Typography fontWeight="bold" textColor={`${statusColor}700`}>
+            {publicationStateTranslations[publicationState]}
+          </Typography>
+        </Status>
+      )}
+    </RelationItem>
+  );
+};
+
+ListItem.defaultProps = {
+  data: {},
+};
+
+ListItem.propTypes = {
+  data: PropTypes.shape({
+    disabled: PropTypes.bool.isRequired,
+    labelDisconnectRelation: PropTypes.string.isRequired,
+    onRelationDisconnect: PropTypes.func.isRequired,
+    publicationStateTranslations: PropTypes.shape({
+      draft: PropTypes.string.isRequired,
+      published: PropTypes.string.isRequired,
+    }).isRequired,
+    relations: PropTypes.arrayOf(
+      PropTypes.shape({
+        href: PropTypes.string,
+        id: PropTypes.number.isRequired,
+        publicationState: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+        mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      })
+    ),
+    totalNumberOfRelations: PropTypes.number.isRequired,
+    updatePositionOfRelation: PropTypes.func.isRequired,
+  }),
+  index: PropTypes.number.isRequired,
+  style: PropTypes.object.isRequired,
 };
 
 export default RelationInput;
