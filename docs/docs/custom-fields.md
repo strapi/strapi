@@ -38,6 +38,8 @@ strapi.customFields.register(
 
 The custom field will be added to Strapi during the server [register lifecycle](https://docs.strapi.io/developer-docs/latest/developer-resources/plugin-api-reference/server.html#register).
 
+The `type: customField` saved on the schema.json for a content-type or component is converted to the underlying Strapi data type by calling the [convertCustomFieldType function](https://github.com/strapi/strapi/blob/a8f807d27ebc9c8b9b335e885154a06c60a896ae/packages/core/strapi/lib/Strapi.js#L395) as soon as the app starts during the `register` lifecycle, right after all custom fields have been loaded.
+
 ### Admin
 
 To register a custom field on the server, see [documentation](https://docs.strapi.io/developer-docs/latest/development/custom-fields.html#registering-a-custom-field-on-the-server).
