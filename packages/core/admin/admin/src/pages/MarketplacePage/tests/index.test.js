@@ -2,17 +2,19 @@ import React from 'react';
 import {
   render,
   waitFor,
-  waitForElementToBeRemoved,
-  getByPlaceholderText,
-  fireEvent,
   screen,
-  getByText,
-  queryByText,
+  getByRole,
+  fireEvent,
+  queryByLabelText,
+  getByLabelText,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { useTracking, useAppInfos } from '@strapi/helper-plugin';
+import { Router } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 import useNavigatorOnLine from '../../../hooks/useNavigatorOnLine';
 import MarketPlacePage from '../index';
 import server from './server';
@@ -35,6 +37,7 @@ jest.mock('@strapi/helper-plugin', () => ({
       '@strapi/plugin-documentation': '4.2.0',
       '@strapi/provider-upload-cloudinary': '4.2.0',
     },
+    strapiVersion: '4.1.0',
     useYarn: true,
   })),
 }));
@@ -47,109 +50,123 @@ const client = new QueryClient({
   },
 });
 
+const history = createMemoryHistory();
+
 const App = (
   <QueryClientProvider client={client}>
     <IntlProvider locale="en" messages={{}} textComponent="span">
       <ThemeProvider theme={lightTheme}>
-        <MarketPlacePage />
+        <Router history={history}>
+          <MarketPlacePage />
+        </Router>
       </ThemeProvider>
     </IntlProvider>
   </QueryClientProvider>
 );
 
-describe('Marketplace page', () => {
+const waitForReload = async () => {
+  await waitFor(() => {
+    expect(screen.getByRole('heading', { name: /marketplace/i })).toBeInTheDocument();
+  });
+};
+
+describe('Marketplace page - layout', () => {
   beforeAll(() => server.listen());
 
   afterEach(() => server.resetHandlers());
 
   afterAll(() => server.close());
 
-  it('renders and matches the plugin tab snapshot', async () => {
-    const { container, getByTestId, getByRole } = render(App);
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
-    await waitFor(() => expect(getByRole('heading', { name: /marketplace/i })).toBeInTheDocument());
-
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it('renders and matches the provider tab snapshot', async () => {
-    const { container, getByRole } = render(App);
-    await waitFor(() => expect(getByRole('heading', { name: /marketplace/i })).toBeInTheDocument());
-    const providersTab = screen.getByRole('tab', { selected: false });
-    fireEvent.click(providersTab);
-
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it('sends a single tracking event when the user enters the marketplace', () => {
+  it('renders the online layout', async () => {
     const trackUsage = jest.fn();
-    useTracking.mockImplementation(() => ({ trackUsage }));
-    render(App);
+    useTracking.mockImplementationOnce(() => ({ trackUsage }));
 
+    const { container } = render(App);
+    await waitForReload();
+    // Check snapshot
+    expect(container.firstChild).toMatchSnapshot();
+    // Calls the tracking event
     expect(trackUsage).toHaveBeenCalledWith('didGoToMarketplace');
     expect(trackUsage).toHaveBeenCalledTimes(1);
+    const offlineText = screen.queryByText('You are offline');
+    expect(offlineText).toEqual(null);
+    // Shows the sort button
+    const sortButton = screen.getByRole('button', { name: /Sort by/i });
+    expect(sortButton).toBeVisible();
+    // Shows the filters button
+    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    expect(filtersButton).toBeVisible();
   });
 
-  it('should return plugin search results matching the query', async () => {
-    const { container } = render(App);
-    const input = await getByPlaceholderText(container, 'Search');
-    fireEvent.change(input, { target: { value: 'comment' } });
-    const match = screen.getByText('Comments');
-    const notMatch = screen.queryByText('Sentry');
-    const provider = screen.queryByText('Cloudinary');
+  it('renders the offline layout', async () => {
+    useNavigatorOnLine.mockReturnValueOnce(false);
+    render(App);
 
-    expect(match).toBeVisible();
-    expect(notMatch).toEqual(null);
-    expect(provider).toEqual(null);
+    const offlineText = screen.getByText('You are offline');
+
+    expect(offlineText).toBeVisible();
   });
 
-  it('should return provider search results matching the query', async () => {
-    const { container } = render(App);
-    const providersTab = screen.getByRole('tab', { selected: false });
-    fireEvent.click(providersTab);
+  it('disables the button and shows compatibility tooltip message when version provided', async () => {
+    client.clear();
+    const { getByTestId } = render(App);
+    await waitForReload();
 
-    const input = await getByPlaceholderText(container, 'Search');
-    fireEvent.change(input, { target: { value: 'cloudina' } });
-    const match = screen.getByText('Cloudinary');
-    const notMatch = screen.queryByText('Mailgun');
-    const plugin = screen.queryByText('Comments');
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Transformer'));
 
-    expect(match).toBeVisible();
-    expect(notMatch).toEqual(null);
-    expect(plugin).toEqual(null);
+    const button = getByRole(alreadyInstalledCard, 'button', { name: /copy install command/i });
+
+    // User event throws an error that there are no pointer events
+    fireEvent.mouseOver(button);
+    const tooltip = getByTestId(`tooltip-Transformer`);
+    await waitFor(() => {
+      expect(tooltip).toBeVisible();
+    });
+    expect(button).toBeDisabled();
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent('Update your Strapi version: "4.1.0" to: "4.0.7"');
   });
 
-  it('should return empty plugin search results given a bad query', async () => {
-    const { container } = render(App);
-    const input = await getByPlaceholderText(container, 'Search');
-    const badQuery = 'asdf';
-    fireEvent.change(input, { target: { value: badQuery } });
-    const noResult = screen.getByText(`No result for "${badQuery}"`);
+  it('shows compatibility tooltip message when no version provided', async () => {
+    client.clear();
+    const { getByTestId } = render(App);
+    await waitForReload();
 
-    expect(noResult).toBeVisible();
+    const alreadyInstalledCard = screen
+      .getAllByTestId('npm-package-card')
+      .find((div) => div.innerHTML.includes('Config Sync'));
+
+    const button = getByRole(alreadyInstalledCard, 'button', {
+      name: /copy install command/i,
+    });
+
+    userEvent.hover(button);
+    const tooltip = getByTestId(`tooltip-Config Sync`);
+
+    await waitFor(() => {
+      expect(tooltip).toBeVisible();
+    });
+    expect(button).not.toBeDisabled();
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent(
+      'Unable to verify compatibility with your Strapi version: "4.1.0"'
+    );
   });
 
-  it('should return empty provider search results given a bad query', async () => {
-    const { container } = render(App);
-    const providersTab = screen.getByRole('tab', { selected: false });
-    fireEvent.click(providersTab);
-    const input = await getByPlaceholderText(container, 'Search');
-    const badQuery = 'asdf';
-    fireEvent.change(input, { target: { value: badQuery } });
-    const noResult = screen.getByText(`No result for "${badQuery}"`);
-
-    expect(noResult).toBeVisible();
-  });
-
-  it('handles production environment', () => {
+  it('handles production environment', async () => {
+    client.clear();
     // Simulate production environment
-    useAppInfos.mockImplementationOnce(() => ({
+    useAppInfos.mockImplementation(() => ({
       autoReload: false,
       dependencies: {},
       useYarn: true,
     }));
-    const { queryByText } = render(App);
 
+    render(App);
+
+    await waitForReload();
     // Should display notification
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'info',
@@ -159,100 +176,35 @@ describe('Marketplace page', () => {
       },
       blockTransition: true,
     });
-
     expect(toggleNotification).toHaveBeenCalledTimes(1);
-
     // Should not show install buttons
-    expect(queryByText(/copy install command/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/copy install command/i)).toEqual(null);
   });
 
-  it('shows an online layout', () => {
+  it('shows only downloads count and not github stars if there are no or 0 stars and no downloads available for any package', async () => {
+    client.clear();
     render(App);
-    const offlineText = screen.queryByText('You are offline');
 
-    expect(offlineText).toEqual(null);
-  });
+    await waitForReload();
 
-  it('shows the offline layout', () => {
-    useNavigatorOnLine.mockReturnValueOnce(false);
-    render(App);
-    const offlineText = screen.getByText('You are offline');
-
-    expect(offlineText).toBeVisible();
-  });
-
-  it('defaults to plugins tab', async () => {
-    const { container } = render(App);
-    const button = screen.getByRole('tab', { selected: true });
-    const pluginsTabActive = await getByText(button, /Plugins/i);
-
-    const tabPanel = screen.getByRole('tabpanel');
-    const pluginCardText = await getByText(tabPanel, 'Comments');
-    const providerCardText = await queryByText(tabPanel, 'Cloudinary');
-    const submitPluginText = await queryByText(container, 'Submit plugin');
-
-    expect(pluginsTabActive).not.toBe(null);
-    expect(pluginCardText).toBeVisible();
-    expect(submitPluginText).toBeVisible();
-    expect(providerCardText).toEqual(null);
-  });
-
-  it('switches to providers tab', async () => {
-    const { container } = render(App);
-    const providersTab = screen.getByRole('tab', { selected: false });
-    fireEvent.click(providersTab);
-    const button = screen.getByRole('tab', { selected: true });
-    const providersTabActive = await getByText(button, /Providers/i);
-
-    const tabPanel = screen.getByRole('tabpanel');
-    const providerCardText = await getByText(tabPanel, 'Cloudinary');
-    const pluginCardText = await queryByText(tabPanel, 'Comments');
-    const submitProviderText = await queryByText(container, 'Submit provider');
-
-    expect(providersTabActive).not.toBe(null);
-    expect(providerCardText).toBeVisible();
-    expect(submitProviderText).toBeVisible();
-    expect(pluginCardText).toEqual(null);
-  });
-
-  it('shows the installed text for installed plugins', async () => {
-    render(App);
-    const pluginsTab = screen.getByRole('tab', { name: /plugins/i });
-    fireEvent.click(pluginsTab);
-
-    // Plugin that's already installed
-    const alreadyInstalledCard = screen
-      .getAllByTestId('npm-package-card')
-      .find((div) => div.innerHTML.includes('Documentation'));
-    const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
-    expect(alreadyInstalledText).toBeVisible();
-
-    // Plugin that's not installed
-    const notInstalledCard = screen
-      .getAllByTestId('npm-package-card')
-      .find((div) => div.innerHTML.includes('Comments'));
-    const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
-    expect(notInstalledText).toBeVisible();
-  });
-
-  it('shows the installed text for installed providers', async () => {
-    // Open providers tab
-    render(App);
     const providersTab = screen.getByRole('tab', { name: /providers/i });
-    fireEvent.click(providersTab);
+    userEvent.click(providersTab);
 
-    // Provider that's already installed
-    const alreadyInstalledCard = screen
+    const nodeMailerCard = screen
       .getAllByTestId('npm-package-card')
-      .find((div) => div.innerHTML.includes('Cloudinary'));
-    const alreadyInstalledText = queryByText(alreadyInstalledCard, /installed/i);
-    expect(alreadyInstalledText).toBeVisible();
+      .find((div) => div.innerHTML.includes('Nodemailer'));
 
-    // Provider that's not installed
-    const notInstalledCard = screen
-      .getAllByTestId('npm-package-card')
-      .find((div) => div.innerHTML.includes('Rackspace'));
-    const notInstalledText = queryByText(notInstalledCard, /copy install command/i);
-    expect(notInstalledText).toBeVisible();
+    const githubStarsLabel = queryByLabelText(
+      nodeMailerCard,
+      /this provider was starred \d+ on GitHub/i
+    );
+
+    expect(githubStarsLabel).toBe(null);
+
+    const downloadsLabel = getByLabelText(
+      nodeMailerCard,
+      /this provider has \d+ weekly downloads/i
+    );
+    expect(downloadsLabel).toBeVisible();
   });
 });

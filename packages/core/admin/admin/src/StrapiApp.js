@@ -10,8 +10,7 @@ import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
 import { customFields, Plugin } from './core/apis';
 import App from './pages/App';
-import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
-import MenuLogo from './assets/images/logo_strapi_menu.png';
+import Logo from './assets/images/logo-strapi-2022.svg';
 import Providers from './components/Providers';
 import languageNativeNames from './translations/languageNativeNames';
 import {
@@ -21,17 +20,18 @@ import {
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
 import injectionZones from './injectionZones';
-import favicon from './favicon.ico';
+import favicon from './favicon.png';
+import localStorageKey from './components/LanguageProvider/utils/localStorageKey';
 
 class StrapiApp {
   constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
     this.customConfigurations = adminConfig.config;
     this.customBootstrapConfiguration = adminConfig.bootstrap;
     this.configurations = {
-      authLogo: AuthLogo,
+      authLogo: Logo,
       head: { favicon },
       locales: ['en'],
-      menuLogo: MenuLogo,
+      menuLogo: Logo,
       notifications: { releases: true },
       themes: { light: lightTheme, dark: darkTheme },
       translations: {},
@@ -226,7 +226,19 @@ class StrapiApp {
     }
 
     if (this.customConfigurations?.theme) {
-      merge(this.configurations.themes.light, this.customConfigurations.theme);
+      const darkTheme = this.customConfigurations.theme.dark;
+      const lightTheme = this.customConfigurations.theme.light;
+
+      if (!darkTheme && !lightTheme) {
+        console.warn(
+          `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`
+        );
+        merge(this.configurations.themes.light, this.customConfigurations.theme);
+      }
+
+      if (lightTheme) merge(this.configurations.themes.light, lightTheme);
+
+      if (darkTheme) merge(this.configurations.themes.dark, darkTheme);
     }
 
     if (this.customConfigurations?.notifications?.releases !== undefined) {
@@ -449,6 +461,7 @@ class StrapiApp {
                 href: this.configurations.head.favicon,
               },
             ]}
+            htmlAttributes={{ lang: localStorage.getItem(localStorageKey) || 'en' }}
           />
           <BrowserRouter basename={basename}>
             <App store={store} />

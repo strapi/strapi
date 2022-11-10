@@ -13,31 +13,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c10 {
-  padding-bottom: 24px;
-}
-
-.c17 {
-  padding-right: 8px;
-  padding-bottom: 4px;
-  padding-left: 0px;
-}
-
-.c18 {
-  padding: 16px;
-  border-radius: 4px;
-}
-
-.c22 {
-  padding-left: 16px;
-}
-
-.c25 {
-  padding-right: 0px;
-  padding-bottom: 4px;
-  padding-left: 8px;
-}
-
 .c2 {
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -111,6 +86,31 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
+}
+
+.c10 {
+  padding-bottom: 24px;
+}
+
+.c17 {
+  padding-right: 8px;
+  padding-bottom: 4px;
+  padding-left: 0px;
+}
+
+.c18 {
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.c22 {
+  padding-left: 16px;
+}
+
+.c25 {
+  padding-right: 0px;
+  padding-bottom: 4px;
+  padding-left: 8px;
 }
 
 .c11 {

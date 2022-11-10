@@ -16,7 +16,6 @@ const ALLOWED_TYPES = [
   'string',
   'text',
   'time',
-  'timestamp',
   'uid',
 ];
 

@@ -4,8 +4,13 @@ import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { useRBAC } from '@strapi/helper-plugin';
-import { ProvidersPage } from '../index';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faDiscord } from '@fortawesome/free-brands-svg-icons';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import server from './server';
+import { ProvidersPage } from '../index';
+
+library.add(faDiscord, faEnvelope);
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -55,6 +60,24 @@ describe('Admin | containers | ProvidersPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c10 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c11 {
+        -webkit-animation: gzYjWD 1s infinite linear;
+        animation: gzYjWD 1s infinite linear;
+        will-change: transform;
+      }
+
       .c8 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -71,23 +94,6 @@ describe('Admin | containers | ProvidersPage', () => {
         -webkit-justify-content: space-around;
         -ms-flex-pack: space-around;
         justify-content: space-around;
-      }
-
-      .c10 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c11 {
-        -webkit-animation: gzYjWD 1s infinite linear;
-        animation: gzYjWD 1s infinite linear;
       }
 
       .c9 {

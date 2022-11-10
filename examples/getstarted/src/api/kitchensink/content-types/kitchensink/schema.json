@@ -133,10 +133,7 @@
     },
     "custom_field": {
       "type": "customField",
-      "customField": "plugin::mycustomfields.color",
-      "options": {
-        "format": "hex"
-      }
+      "customField": "plugin::color-picker.color"
     }
   }
 }

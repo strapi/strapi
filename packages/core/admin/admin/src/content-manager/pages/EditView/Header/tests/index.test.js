@@ -12,12 +12,10 @@ import { lightTheme, darkTheme } from '@strapi/design-system';
 import Theme from '../../../../../components/Theme';
 import ThemeToggleProvider from '../../../../../components/ThemeToggleProvider';
 import { Header } from '../index';
-import components from '../utils/tests/data/compos-schema.json';
-import ct from '../utils/tests/data/ct-schema.json';
+import ct from './data/ct-schema.json';
 
 const defaultProps = {
   allowedActions: { canUpdate: true, canCreate: true, canPublish: true },
-  componentLayouts: components,
   initialData: {},
   isCreatingEntry: true,
   isSingleType: false,
@@ -25,8 +23,13 @@ const defaultProps = {
   layout: ct,
   modifiedData: {},
   onPublish: jest.fn(),
+  onPublishPromptDismissal: jest.fn(),
   onUnpublish: jest.fn(),
   status: 'resolved',
+  publishConfirmation: {
+    show: false,
+    draftCount: 0,
+  },
 };
 
 const makeApp = (props = defaultProps) => {
@@ -50,6 +53,29 @@ describe('CONTENT MANAGER | EditView | Header', () => {
     } = render(makeApp());
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c9 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c10 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c10 > * + * {
+        margin-left: 8px;
+      }
+
       .c14 {
         font-weight: 600;
         color: #32324d;
@@ -125,7 +151,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         border: 1px solid #4945ff;
       }
 
-      .c12 .sc-kBzgEd {
+      .c12 .sc-jCHUfY {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -181,29 +207,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       .c12 svg > g,
       .c12 svg path {
         fill: #ffffff;
-      }
-
-      .c9 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c10 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c10 > * + * {
-        margin-left: 8px;
       }
 
       .c5 {

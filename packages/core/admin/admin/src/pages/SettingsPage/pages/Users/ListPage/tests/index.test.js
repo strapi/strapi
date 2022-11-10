@@ -70,90 +70,86 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
     const { container } = render(app);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c34 {
-        margin: 0;
-        height: 18px;
-        min-width: 18px;
-        border-radius: 4px;
-        border: 1px solid #c0c0cf;
-        -webkit-appearance: none;
-        background-color: #ffffff;
-        cursor: pointer;
+      .c43 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
-      .c34:checked {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
+      .c44 {
+        -webkit-animation: gzYjWD 1s infinite linear;
+        animation: gzYjWD 1s infinite linear;
+        will-change: transform;
       }
 
-      .c34:checked:after {
-        content: '';
-        display: block;
-        position: relative;
-        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
-        width: 10px;
-        height: 10px;
-        left: 50%;
-        top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
-        transform: translateX(-50%) translateY(-50%);
+      .c41 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
       }
 
-      .c34:checked:disabled:after {
-        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
+      .c46 {
+        -webkit-align-items: flex-end;
+        -webkit-box-align: flex-end;
+        -ms-flex-align: flex-end;
+        align-items: flex-end;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
       }
 
-      .c34:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
+      .c47 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
-      .c34:indeterminate {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
+      .c36 {
+        color: #666687;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
       }
 
-      .c34:indeterminate:after {
-        content: '';
-        display: block;
-        position: relative;
-        color: white;
-        height: 2px;
-        width: 10px;
-        background-color: #ffffff;
-        left: 50%;
-        top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
-        transform: translateX(-50%) translateY(-50%);
-      }
-
-      .c34:indeterminate:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
-      }
-
-      .c34:indeterminate:disabled:after {
-        background-color: #8e8ea9;
-      }
-
-      .c22 {
-        padding-top: 4px;
-        padding-bottom: 4px;
-      }
-
-      .c42 {
-        background: #ffffff;
-        padding: 64px;
-      }
-
-      .c45 {
-        padding-top: 16px;
-      }
-
-      .c60 {
-        padding-left: 8px;
+      .c61 {
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c11 {
@@ -369,7 +365,103 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #32324d;
       }
 
-      .c41 {
+      .c22 {
+        padding-top: 4px;
+        padding-bottom: 4px;
+      }
+
+      .c42 {
+        background: #ffffff;
+        padding: 64px;
+      }
+
+      .c45 {
+        padding-top: 16px;
+      }
+
+      .c60 {
+        padding-left: 8px;
+      }
+
+      .c24 {
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c27 {
+        padding-right: 24px;
+        padding-left: 24px;
+      }
+
+      .c25 {
+        overflow: hidden;
+        border: 1px solid #eaeaef;
+      }
+
+      .c29 {
+        width: 100%;
+        white-space: nowrap;
+      }
+
+      .c26 {
+        position: relative;
+      }
+
+      .c26:before {
+        background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        opacity: 0.2;
+        position: absolute;
+        height: 100%;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        width: 8px;
+        left: 0;
+      }
+
+      .c26:after {
+        background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        opacity: 0.2;
+        position: absolute;
+        height: 100%;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        width: 8px;
+        right: 0;
+        top: 0;
+      }
+
+      .c28 {
+        overflow-x: auto;
+      }
+
+      .c40 tr:last-of-type {
+        border-bottom: none;
+      }
+
+      .c30 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c31 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c31 td,
+      .c31 th {
+        padding: 16px;
+      }
+
+      .c31 td:first-of-type,
+      .c31 th:first-of-type {
+        padding: 0 4px;
+      }
+
+      .c31 th {
+        padding-top: 0;
+        padding-bottom: 0;
+        height: 3.5rem;
+      }
+
+      .c33 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -381,50 +473,89 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
       }
 
-      .c46 {
-        -webkit-align-items: flex-end;
-        -webkit-box-align: flex-end;
-        -ms-flex-align: flex-end;
-        align-items: flex-end;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
+      .c32 {
+        vertical-align: middle;
+        text-align: left;
+        color: #666687;
+        outline-offset: -4px;
       }
 
-      .c47 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
+      .c32 input {
+        vertical-align: sub;
       }
 
-      .c20 {
-        color: #32324d;
+      .c35 svg {
+        height: 0.25rem;
       }
 
-      .c21 path {
-        fill: #32324d;
+      .c34 {
+        margin: 0;
+        height: 18px;
+        min-width: 18px;
+        border-radius: 4px;
+        border: 1px solid #c0c0cf;
+        -webkit-appearance: none;
+        background-color: #ffffff;
+        cursor: pointer;
+      }
+
+      .c34:checked {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c34:checked:after {
+        content: '';
+        display: block;
+        position: relative;
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
+        width: 10px;
+        height: 10px;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c34:checked:disabled:after {
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
+      }
+
+      .c34:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c34:indeterminate {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c34:indeterminate:after {
+        content: '';
+        display: block;
+        position: relative;
+        color: white;
+        height: 2px;
+        width: 10px;
+        background-color: #ffffff;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c34:indeterminate:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c34:indeterminate:disabled:after {
+        background-color: #8e8ea9;
       }
 
       .c18 {
@@ -566,7 +697,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #666687;
       }
 
-      .c43 {
+      .c39 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -576,111 +707,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         padding: 0;
         position: absolute;
         width: 1px;
-      }
-
-      .c44 {
-        -webkit-animation: gzYjWD 1s infinite linear;
-        animation: gzYjWD 1s infinite linear;
-      }
-
-      .c62 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c63 > * + * {
-        margin-left: 4px;
-      }
-
-      .c66 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c64 {
-        padding: 12px;
-        border-radius: 4px;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        position: relative;
-        outline: none;
-      }
-
-      .c64:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c64:focus-visible {
-        outline: none;
-      }
-
-      .c64:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c65 {
-        font-size: 0.7rem;
-        pointer-events: none;
-      }
-
-      .c65 svg path {
-        fill: #c0c0cf;
-      }
-
-      .c65:focus svg path,
-      .c65:hover svg path {
-        fill: #c0c0cf;
-      }
-
-      .c67 {
-        font-size: 0.7rem;
-      }
-
-      .c67 svg path {
-        fill: #666687;
-      }
-
-      .c67:focus svg path,
-      .c67:hover svg path {
-        fill: #4a4a6a;
       }
 
       .c52 {
@@ -826,85 +852,15 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         width: 100%;
       }
 
-      .c24 {
-        background: #ffffff;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      .c20 {
+        color: #32324d;
       }
 
-      .c27 {
-        padding-right: 24px;
-        padding-left: 24px;
+      .c21 path {
+        fill: #32324d;
       }
 
-      .c25 {
-        overflow: hidden;
-        border: 1px solid #eaeaef;
-      }
-
-      .c29 {
-        width: 100%;
-        white-space: nowrap;
-      }
-
-      .c26 {
-        position: relative;
-      }
-
-      .c26:before {
-        background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
-        opacity: 0.2;
-        position: absolute;
-        height: 100%;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-        width: 8px;
-        left: 0;
-      }
-
-      .c26:after {
-        background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
-        opacity: 0.2;
-        position: absolute;
-        height: 100%;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-        width: 8px;
-        right: 0;
-        top: 0;
-      }
-
-      .c28 {
-        overflow-x: auto;
-      }
-
-      .c40 tr:last-of-type {
-        border-bottom: none;
-      }
-
-      .c30 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
-      .c31 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
-      .c31 td,
-      .c31 th {
-        padding: 16px;
-      }
-
-      .c31 td:first-of-type,
-      .c31 th:first-of-type {
-        padding: 0 4px;
-      }
-
-      .c31 th {
-        padding-top: 0;
-        padding-bottom: 0;
-        height: 3.5rem;
-      }
-
-      .c33 {
+      .c62 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -918,36 +874,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         flex-direction: row;
       }
 
-      .c32 {
-        vertical-align: middle;
-        text-align: left;
-        color: #666687;
-        outline-offset: -4px;
+      .c63 > * + * {
+        margin-left: 4px;
       }
 
-      .c32 input {
-        vertical-align: sub;
-      }
-
-      .c35 svg {
-        height: 0.25rem;
-      }
-
-      .c36 {
-        color: #666687;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
-      .c61 {
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c39 {
+      .c66 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -957,6 +888,76 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         padding: 0;
         position: absolute;
         width: 1px;
+      }
+
+      .c64 {
+        padding: 12px;
+        border-radius: 4px;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        position: relative;
+        outline: none;
+      }
+
+      .c64:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c64:focus-visible {
+        outline: none;
+      }
+
+      .c64:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c65 {
+        font-size: 0.7rem;
+        pointer-events: none;
+      }
+
+      .c65 svg path {
+        fill: #c0c0cf;
+      }
+
+      .c65:focus svg path,
+      .c65:hover svg path {
+        fill: #c0c0cf;
+      }
+
+      .c67 {
+        font-size: 0.7rem;
+      }
+
+      .c67 svg path {
+        fill: #666687;
+      }
+
+      .c67:focus svg path,
+      .c67:hover svg path {
+        fill: #4a4a6a;
       }
 
       .c38 {
@@ -1262,6 +1263,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       <th
                         aria-colindex="2"
                         class="c32"
+                        tabindex="-1"
                       >
                         <div
                           class="c33"
@@ -1565,7 +1567,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
               </div>
               <nav
                 aria-label="pagination"
-                class="sc-XxNYO"
+                class="sc-haTkiu"
               >
                 <ul
                   class="c62 c63"

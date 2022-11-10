@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-sendgrid",
-  "version": "4.3.8",
+  "version": "4.5.0",
   "description": "Sendgrid provider for strapi email",
   "keywords": [
     "email",
@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@sendgrid/mail": "7.7.0",
-    "@strapi/utils": "4.3.8"
+    "@strapi/utils": "4.5.0"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",

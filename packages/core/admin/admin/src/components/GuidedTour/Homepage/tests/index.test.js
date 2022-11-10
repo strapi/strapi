@@ -49,178 +49,6 @@ describe('GuidedTour Homepage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c0 {
-        background: #ffffff;
-        padding-top: 32px;
-        padding-right: 16px;
-        padding-bottom: 16px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c5 {
-        margin-right: 20px;
-        min-width: 1.875rem;
-      }
-
-      .c12 {
-        background: #7b79ff;
-        border-radius: 4px;
-        width: 0.125rem;
-        height: 100%;
-        min-height: 5.3125rem;
-      }
-
-      .c13 {
-        margin-top: 8px;
-      }
-
-      .c22 {
-        background: #c0c0cf;
-        border-radius: 4px;
-        width: 0.125rem;
-        height: 100%;
-        min-height: 4.0625rem;
-      }
-
-      .c27 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c24 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c24 svg > g,
-      .c24 svg path {
-        fill: #ffffff;
-      }
-
-      .c24[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c24:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c24:focus-visible {
-        outline: none;
-      }
-
-      .c24:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c25 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        padding: 8px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-        border: 1px solid #dcdce4;
-        background: #ffffff;
-      }
-
-      .c25 .sc-hKwDye {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c25 .c26 {
-        color: #ffffff;
-      }
-
-      .c25[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c25[aria-disabled='true'] .c26 {
-        color: #666687;
-      }
-
-      .c25[aria-disabled='true'] svg > g,
-      .c25[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c25[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c25[aria-disabled='true']:active .c26 {
-        color: #666687;
-      }
-
-      .c25[aria-disabled='true']:active svg > g,
-      .c25[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c25:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c25:active {
-        background-color: #eaeaef;
-      }
-
-      .c25 .c26 {
-        color: #32324d;
-      }
-
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #32324d;
-      }
-
       .c6 {
         background: #4945ff;
         padding: 8px;
@@ -359,6 +187,178 @@ describe('GuidedTour Homepage', () => {
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
+      }
+
+      .c27 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c24 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c24 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c24 svg > g,
+      .c24 svg path {
+        fill: #ffffff;
+      }
+
+      .c24[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c24:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c24:focus-visible {
+        outline: none;
+      }
+
+      .c24:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c25 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        padding: 8px 16px;
+        background: #4945ff;
+        border: 1px solid #4945ff;
+        border: 1px solid #dcdce4;
+        background: #ffffff;
+      }
+
+      .c25 .sc-bkkeKt {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c25 .c26 {
+        color: #ffffff;
+      }
+
+      .c25[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c25[aria-disabled='true'] .c26 {
+        color: #666687;
+      }
+
+      .c25[aria-disabled='true'] svg > g,
+      .c25[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c25[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c25[aria-disabled='true']:active .c26 {
+        color: #666687;
+      }
+
+      .c25[aria-disabled='true']:active svg > g,
+      .c25[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c25:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c25:active {
+        background-color: #eaeaef;
+      }
+
+      .c25 .c26 {
+        color: #32324d;
+      }
+
+      .c25 svg > g,
+      .c25 svg path {
+        fill: #32324d;
+      }
+
+      .c0 {
+        background: #ffffff;
+        padding-top: 32px;
+        padding-right: 16px;
+        padding-bottom: 16px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c5 {
+        margin-right: 20px;
+        min-width: 1.875rem;
+      }
+
+      .c12 {
+        background: #7b79ff;
+        border-radius: 4px;
+        width: 0.125rem;
+        height: 100%;
+        min-height: 5.3125rem;
+      }
+
+      .c13 {
+        margin-top: 8px;
+      }
+
+      .c22 {
+        background: #c0c0cf;
+        border-radius: 4px;
+        width: 0.125rem;
+        height: 100%;
+        min-height: 4.0625rem;
       }
 
       .c17 {
