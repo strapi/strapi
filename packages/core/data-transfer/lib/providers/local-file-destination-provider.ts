@@ -6,13 +6,13 @@ import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
 import type { IDestinationProvider, ProviderType, Stream } from '../../types';
-import { createCipher } from '../encryption/encrypt';
+import { createEncryptionCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {
   // Encryption
   encryption: {
     enabled: boolean;
-    key: string;
+    key?: string;
   };
 
   // Compressions
@@ -61,7 +61,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     // Encryption
     if (this.options.encryption.enabled) {
-      const cipher = createCipher(this.options.encryption.key);
+      if (!this.options.encryption.key) {
+        throw new Error("Can't encrypt without a key");
+      }
+
+      const cipher = createEncryptionCipher(this.options.encryption.key);
+
       transforms.push(cipher);
     }
 
@@ -74,6 +79,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     if (dirExists) {
       fs.rmSync(rootDir, { force: true, recursive: true });
+    }
+
+    if (this.options.encryption.enabled) {
+      if (!this.options.encryption.key) {
+        throw new Error("Can't encrypt without a key");
+      }
     }
 
     fs.mkdirSync(rootDir, { recursive: true });

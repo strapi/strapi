@@ -120,7 +120,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   background: #ffffff;
 }
 
-.c25 .sc-haTkiu {
+.c25 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -190,7 +190,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c28 .sc-haTkiu {
+.c28 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -550,173 +550,190 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
       class="c1"
     >
       <div>
-        <div
-          aria-labelledby="title"
-          aria-modal="true"
-          class="c2 c3"
-          role="dialog"
-        >
-          <form
-            action="#"
-            novalidate=""
+        <div>
+          <div
+            aria-labelledby="title"
+            aria-modal="true"
+            class="c2 c3"
+            role="dialog"
           >
-            <div
-              class="c4 c5"
+            <form
+              action="#"
+              novalidate=""
             >
               <div
-                class="c6"
-              >
-                <h2
-                  class="c7"
-                  id="title"
-                >
-                  Move elements to
-                </h2>
-                <button
-                  aria-disabled="false"
-                  aria-label="Close the modal"
-                  class="c8 c9"
-                  type="button"
-                >
-                  <svg
-                    fill="none"
-                    height="1em"
-                    viewBox="0 0 24 24"
-                    width="1em"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                      fill="#212134"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div
-              class="c10 c11"
-            >
-              <div
-                class="c12"
+                class="c4 c5"
               >
                 <div
-                  class="c13"
+                  class="c6"
+                >
+                  <h2
+                    class="c7"
+                    id="title"
+                  >
+                    Move elements to
+                  </h2>
+                  <button
+                    aria-disabled="false"
+                    aria-label="Close the modal"
+                    class="c8 c9"
+                    type="button"
+                  >
+                    <svg
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 24 24"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                        fill="#212134"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div
+                class="c10 c11"
+              >
+                <div
+                  class="c12"
                 >
                   <div
-                    class=""
+                    class="c13"
                   >
                     <div
-                      class="c14 c15"
-                      spacing="1"
+                      class=""
                     >
-                      <label
-                        class="c16"
-                        for="folder-destination"
-                      >
-                        <div
-                          class="c17"
-                        >
-                          Location
-                        </div>
-                      </label>
                       <div
-                        class=" css-1tkrshn-container"
+                        class="c14 c15"
+                        spacing="1"
                       >
-                        <div
-                          class=" css-1sb7bue-control"
+                        <label
+                          class="c16"
+                          for="folder-destination"
                         >
                           <div
-                            class=" css-1kj7tu4-ValueContainer"
+                            class="c17"
+                          >
+                            Location
+                          </div>
+                        </label>
+                        <div
+                          class=" css-1iyvlxg-container"
+                        >
+                          <span
+                            class="css-1f43avz-a11yText-A11yText"
+                            id="react-select-2-live-region"
+                          />
+                          <span
+                            aria-atomic="false"
+                            aria-live="polite"
+                            aria-relevant="additions text"
+                            class="css-1f43avz-a11yText-A11yText"
+                          />
+                          <div
+                            class=" css-1e1stxh-control"
                           >
                             <div
-                              class=" css-p5rves-singleValue"
+                              class=" css-do2euy-ValueContainer"
                             >
-                              Media Library
-                            </div>
-                            <input
-                              aria-autocomplete="list"
-                              class="css-wmatm6-dummyInput-DummyInput"
-                              id="folder-destination"
-                              readonly=""
-                              tabindex="0"
-                              value=""
-                            />
-                          </div>
-                          <div
-                            class=" css-1hb7zxy-IndicatorsContainer"
-                          >
-                            <button
-                              class="c18 c19 c20"
-                              type="button"
-                            >
-                              <svg
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 14 8"
-                                width="1em"
-                                xmlns="http://www.w3.org/2000/svg"
+                              <div
+                                class=" css-1sqm0gs-singleValue"
                               >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </button>
+                                Media Library
+                              </div>
+                              <input
+                                aria-autocomplete="list"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-invalid="false"
+                                aria-readonly="true"
+                                class="css-mohuvp-dummyInput-DummyInput"
+                                id="folder-destination"
+                                inputmode="none"
+                                role="combobox"
+                                tabindex="0"
+                                value=""
+                              />
+                            </div>
+                            <div
+                              class=" css-1hb7zxy-IndicatorsContainer"
+                            >
+                              <button
+                                class="c18 c19 c20"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 14 8"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
                           </div>
+                          <input
+                            name="destination"
+                            type="hidden"
+                            value=""
+                          />
                         </div>
-                        <input
-                          name="destination"
-                          type="hidden"
-                          value=""
-                        />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div
-              class="c4 c21"
-            >
               <div
-                class="c6"
+                class="c4 c21"
               >
                 <div
-                  class="c22 c23"
+                  class="c6"
                 >
-                  <button
-                    aria-disabled="false"
-                    class="c24 c25"
-                    name="cancel"
-                    type="button"
+                  <div
+                    class="c22 c23"
                   >
-                    <span
-                      class="c26 c27"
+                    <button
+                      aria-disabled="false"
+                      class="c24 c25"
+                      name="cancel"
+                      type="button"
                     >
-                      Cancel
-                    </span>
-                  </button>
-                </div>
-                <div
-                  class="c22 c23"
-                >
-                  <button
-                    aria-disabled="false"
-                    class="c24 c28"
-                    type="submit"
+                      <span
+                        class="c26 c27"
+                      >
+                        Cancel
+                      </span>
+                    </button>
+                  </div>
+                  <div
+                    class="c22 c23"
                   >
-                    <span
-                      class="c26 c27"
+                    <button
+                      aria-disabled="false"
+                      class="c24 c28"
+                      type="submit"
                     >
-                      Move
-                    </span>
-                  </button>
+                      <span
+                        class="c26 c27"
+                      >
+                        Move
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>

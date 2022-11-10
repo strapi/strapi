@@ -33,6 +33,9 @@ const getEncryptionStrategy = (algorithm: Algorithm): EncryptionStrategy => {
   return strategies[algorithm];
 };
 
-export const createCipher = (key: string, algorithm: Algorithm = 'aes-128-ecb'): Cipher => {
+export const createEncryptionCipher = (
+  key: string,
+  algorithm: Algorithm = 'aes-128-ecb'
+): Cipher => {
   return getEncryptionStrategy(algorithm)(key);
 };
