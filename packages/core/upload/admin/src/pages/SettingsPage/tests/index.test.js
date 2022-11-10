@@ -49,7 +49,7 @@ describe('Upload | SettingsPage', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c42 {
+      .c43 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -61,11 +61,53 @@ describe('Upload | SettingsPage', () => {
         width: 1px;
       }
 
-      .c19 {
-        background: #ffffff;
-        padding: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      .c21 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c17 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c18 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c20 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c20 > * + * {
+        margin-top: 16px;
+      }
+
+      .c22 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
       }
 
       .c11 {
@@ -209,46 +251,11 @@ describe('Upload | SettingsPage', () => {
         fill: #ffffff;
       }
 
-      .c21 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c17 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c18 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c20 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c20 > * + * {
-        margin-top: 16px;
+      .c19 {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
       .c32 {
@@ -258,15 +265,15 @@ describe('Upload | SettingsPage', () => {
         border-style: solid;
         border-width: 1px;
         border-color: #dcdce4;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
       }
 
       .c34 {
-        padding-right: 32px;
-        padding-left: 32px;
+        padding-right: 12px;
+        padding-left: 12px;
         border-radius: 4px;
       }
 
@@ -298,6 +305,24 @@ describe('Upload | SettingsPage', () => {
         flex-direction: row;
       }
 
+      .c35 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
       .c29 {
         font-weight: 600;
         color: #32324d;
@@ -305,7 +330,7 @@ describe('Upload | SettingsPage', () => {
         line-height: 1.33;
       }
 
-      .c36 {
+      .c37 {
         font-weight: 600;
         color: #666687;
         text-transform: uppercase;
@@ -313,7 +338,7 @@ describe('Upload | SettingsPage', () => {
         line-height: 1.33;
       }
 
-      .c38 {
+      .c39 {
         font-weight: 600;
         color: #4945ff;
         text-transform: uppercase;
@@ -321,13 +346,13 @@ describe('Upload | SettingsPage', () => {
         line-height: 1.33;
       }
 
-      .c40 {
+      .c41 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c41 {
+      .c42 {
         font-weight: 600;
         color: #b72b1a;
         text-transform: uppercase;
@@ -359,11 +384,15 @@ describe('Upload | SettingsPage', () => {
       .c30 {
         position: relative;
         display: inline-block;
+        z-index: 0;
+        width: 100%;
       }
 
       .c33 {
-        height: 2.5rem;
         overflow: hidden;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -377,7 +406,7 @@ describe('Upload | SettingsPage', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c35 {
+      .c36 {
         background-color: transparent;
         border: 1px solid #f6f6f9;
         position: relative;
@@ -386,9 +415,14 @@ describe('Upload | SettingsPage', () => {
         -ms-user-select: none;
         user-select: none;
         z-index: 2;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
+        padding-top: 6px;
+        padding-bottom: 6px;
       }
 
-      .c37 {
+      .c38 {
         background-color: #ffffff;
         border: 1px solid #dcdce4;
         position: relative;
@@ -397,9 +431,14 @@ describe('Upload | SettingsPage', () => {
         -ms-user-select: none;
         user-select: none;
         z-index: 2;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
+        padding-top: 6px;
+        padding-bottom: 6px;
       }
 
-      .c39 {
+      .c40 {
         height: 100%;
         left: 0;
         opacity: 0;
@@ -410,16 +449,7 @@ describe('Upload | SettingsPage', () => {
       }
 
       .c25 {
-        width: -webkit-fit-content;
-        width: -moz-fit-content;
-        width: fit-content;
-      }
-
-      .c22 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
+        max-width: 320px;
       }
 
       .c0:focus-visible {
@@ -654,24 +684,24 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                     <div
                                       class="c32 c33"
-                                      display="inline-flex"
+                                      display="flex"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c34 c28 c35"
+                                        class="c34 c35 c36"
                                       >
                                         <span
-                                          class="c36"
+                                          class="c37"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c34 c28 c37"
+                                        class="c34 c35 c38"
                                       >
                                         <span
-                                          class="c38"
+                                          class="c39"
                                         >
                                           On
                                         </span>
@@ -680,7 +710,7 @@ describe('Upload | SettingsPage', () => {
                                         aria-disabled="false"
                                         aria-label="responsiveDimensions"
                                         checked=""
-                                        class="c39"
+                                        class="c40"
                                         data-testid="responsiveDimensions"
                                         id="toggleinput-1"
                                         name="responsiveDimensions"
@@ -689,7 +719,7 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                   </label>
                                   <p
-                                    class="c40"
+                                    class="c41"
                                     id="toggleinput-1-hint"
                                   >
                                     Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.
@@ -735,24 +765,24 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                     <div
                                       class="c32 c33"
-                                      display="inline-flex"
+                                      display="flex"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c34 c28 c37"
+                                        class="c34 c35 c38"
                                       >
                                         <span
-                                          class="c41"
+                                          class="c42"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c34 c28 c35"
+                                        class="c34 c35 c36"
                                       >
                                         <span
-                                          class="c36"
+                                          class="c37"
                                         >
                                           On
                                         </span>
@@ -760,7 +790,7 @@ describe('Upload | SettingsPage', () => {
                                       <input
                                         aria-disabled="false"
                                         aria-label="sizeOptimization"
-                                        class="c39"
+                                        class="c40"
                                         data-testid="sizeOptimization"
                                         id="toggleinput-2"
                                         name="sizeOptimization"
@@ -769,7 +799,7 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                   </label>
                                   <p
-                                    class="c40"
+                                    class="c41"
                                     id="toggleinput-2-hint"
                                   >
                                     Enabling this option will reduce the image size and slightly reduce its quality.
@@ -815,24 +845,24 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                     <div
                                       class="c32 c33"
-                                      display="inline-flex"
+                                      display="flex"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c34 c28 c35"
+                                        class="c34 c35 c36"
                                       >
                                         <span
-                                          class="c36"
+                                          class="c37"
                                         >
                                           Off
                                         </span>
                                       </div>
                                       <div
                                         aria-hidden="true"
-                                        class="c34 c28 c37"
+                                        class="c34 c35 c38"
                                       >
                                         <span
-                                          class="c38"
+                                          class="c39"
                                         >
                                           On
                                         </span>
@@ -841,7 +871,7 @@ describe('Upload | SettingsPage', () => {
                                         aria-disabled="false"
                                         aria-label="autoOrientation"
                                         checked=""
-                                        class="c39"
+                                        class="c40"
                                         data-testid="autoOrientation"
                                         id="toggleinput-3"
                                         name="autoOrientation"
@@ -850,7 +880,7 @@ describe('Upload | SettingsPage', () => {
                                     </div>
                                   </label>
                                   <p
-                                    class="c40"
+                                    class="c41"
                                     id="toggleinput-3-hint"
                                   >
                                     Enabling this option will automatically rotate the image according to EXIF orientation tag.
@@ -869,7 +899,7 @@ describe('Upload | SettingsPage', () => {
           </form>
         </main>
         <div
-          class="c42"
+          class="c43"
         >
           <p
             aria-live="polite"

@@ -54,6 +54,43 @@ describe('Admin | ee | SettingsPage | SSO', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c17 {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c18 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c19 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c19 > * + * {
+        margin-top: 16px;
+      }
+
+      .c20 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
       .c14 {
         font-weight: 600;
         color: #32324d;
@@ -195,7 +232,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         fill: #ffffff;
       }
 
-      .c44 {
+      .c45 {
         position: absolute;
         left: 0;
         right: 0;
@@ -206,24 +243,24 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         border: none;
       }
 
-      .c44:focus {
+      .c45:focus {
         outline: none;
       }
 
-      .c44[aria-disabled='true'] {
+      .c45[aria-disabled='true'] {
         cursor: not-allowed;
       }
 
-      .c47 {
+      .c48 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c49 {
+      .c50 {
         padding-left: 12px;
       }
 
-      .c39 {
+      .c40 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -237,7 +274,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         flex-direction: column;
       }
 
-      .c42 {
+      .c43 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -251,7 +288,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         flex-direction: row;
       }
 
-      .c45 {
+      .c46 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -269,14 +306,14 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         justify-content: space-between;
       }
 
-      .c41 {
+      .c42 {
         font-weight: 600;
         color: #32324d;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c48 {
+      .c49 {
         color: #32324d;
         display: block;
         white-space: nowrap;
@@ -286,22 +323,22 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         line-height: 1.43;
       }
 
-      .c52 {
+      .c53 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c40 > * {
+      .c41 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c40 > * + * {
+      .c41 > * + * {
         margin-top: 4px;
       }
 
-      .c43 {
+      .c44 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -317,28 +354,28 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         transition-duration: 0.2s;
       }
 
-      .c43:focus-within {
+      .c44:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c50 {
+      .c51 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c50 svg {
+      .c51 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c50 svg path {
+      .c51 svg path {
         fill: #666687;
       }
 
-      .c51 {
+      .c52 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -347,42 +384,12 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         border: none;
       }
 
-      .c51 svg {
+      .c52 svg {
         width: 0.375rem;
       }
 
-      .c46 {
+      .c47 {
         width: 100%;
-      }
-
-      .c17 {
-        background: #ffffff;
-        padding: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c18 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c19 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c19 > * + * {
-        margin-top: 16px;
       }
 
       .c30 {
@@ -392,15 +399,15 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         border-style: solid;
         border-width: 1px;
         border-color: #dcdce4;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
       }
 
       .c32 {
-        padding-right: 32px;
-        padding-left: 32px;
+        padding-right: 12px;
+        padding-left: 12px;
         border-radius: 4px;
       }
 
@@ -432,6 +439,24 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         flex-direction: row;
       }
 
+      .c33 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
       .c27 {
         font-weight: 600;
         color: #32324d;
@@ -439,7 +464,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         line-height: 1.33;
       }
 
-      .c34 {
+      .c35 {
         font-weight: 600;
         color: #666687;
         text-transform: uppercase;
@@ -447,7 +472,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         line-height: 1.33;
       }
 
-      .c36 {
+      .c37 {
         font-weight: 600;
         color: #4945ff;
         text-transform: uppercase;
@@ -455,7 +480,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         line-height: 1.33;
       }
 
-      .c38 {
+      .c39 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
@@ -485,11 +510,15 @@ describe('Admin | ee | SettingsPage | SSO', () => {
       .c28 {
         position: relative;
         display: inline-block;
+        z-index: 0;
+        width: 100%;
       }
 
       .c31 {
-        height: 2.5rem;
         overflow: hidden;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
         outline: none;
         box-shadow: 0;
         -webkit-transition-property: border-color,box-shadow,fill;
@@ -503,7 +532,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c33 {
+      .c34 {
         background-color: transparent;
         border: 1px solid #f6f6f9;
         position: relative;
@@ -512,9 +541,14 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         -ms-user-select: none;
         user-select: none;
         z-index: 2;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
+        padding-top: 6px;
+        padding-bottom: 6px;
       }
 
-      .c35 {
+      .c36 {
         background-color: #ffffff;
         border: 1px solid #dcdce4;
         position: relative;
@@ -523,9 +557,14 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         -ms-user-select: none;
         user-select: none;
         z-index: 2;
+        -webkit-flex: 1 1 50%;
+        -ms-flex: 1 1 50%;
+        flex: 1 1 50%;
+        padding-top: 6px;
+        padding-bottom: 6px;
       }
 
-      .c37 {
+      .c38 {
         height: 100%;
         left: 0;
         opacity: 0;
@@ -536,16 +575,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
       }
 
       .c23 {
-        width: -webkit-fit-content;
-        width: -moz-fit-content;
-        width: fit-content;
-      }
-
-      .c20 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
+        max-width: 320px;
       }
 
       .c1 {
@@ -768,24 +798,24 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                               </div>
                               <div
                                 class="c30 c31"
-                                display="inline-flex"
+                                display="flex"
                               >
                                 <div
                                   aria-hidden="true"
-                                  class="c32 c26 c33"
+                                  class="c32 c33 c34"
                                 >
                                   <span
-                                    class="c34"
+                                    class="c35"
                                   >
                                     Off
                                   </span>
                                 </div>
                                 <div
                                   aria-hidden="true"
-                                  class="c32 c26 c35"
+                                  class="c32 c33 c36"
                                 >
                                   <span
-                                    class="c36"
+                                    class="c37"
                                   >
                                     On
                                   </span>
@@ -794,7 +824,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                                   aria-disabled="false"
                                   aria-label="autoRegister"
                                   checked=""
-                                  class="c37"
+                                  class="c38"
                                   data-testid="autoRegister"
                                   id="toggleinput-1"
                                   name="autoRegister"
@@ -803,7 +833,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                               </div>
                             </label>
                             <p
-                              class="c38"
+                              class="c39"
                               id="toggleinput-1-hint"
                             >
                               Create new user on SSO login if no account exists
@@ -820,22 +850,22 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                       >
                         <div>
                           <div
-                            class="c39 c40"
+                            class="c40 c41"
                             spacing="1"
                           >
                             <span
-                              class="c41"
+                              class="c42"
                               for="select-1"
                               id="select-1-label"
                             >
                               <div
-                                class="c42"
+                                class="c43"
                               >
                                 Default role
                               </div>
                             </span>
                             <div
-                              class="c42 c43"
+                              class="c43 c44"
                             >
                               <button
                                 aria-describedby="select-1-hint"
@@ -843,22 +873,22 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                                 aria-expanded="false"
                                 aria-haspopup="listbox"
                                 aria-labelledby="select-1-label select-1-content"
-                                class="c44"
+                                class="c45"
                                 id="select-1"
                                 name="defaultRole"
                                 type="button"
                               />
                               <div
-                                class="c45 c46"
+                                class="c46 c47"
                               >
                                 <div
-                                  class="c42"
+                                  class="c43"
                                 >
                                   <div
-                                    class="c47"
+                                    class="c48"
                                   >
                                     <span
-                                      class="c48"
+                                      class="c49"
                                       id="select-1-content"
                                     >
                                       Editor
@@ -866,11 +896,11 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                                   </div>
                                 </div>
                                 <div
-                                  class="c42"
+                                  class="c43"
                                 >
                                   <button
                                     aria-hidden="true"
-                                    class="c49 c50 c51"
+                                    class="c50 c51 c52"
                                     tabindex="-1"
                                     type="button"
                                   >
@@ -893,7 +923,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                               </div>
                             </div>
                             <p
-                              class="c52"
+                              class="c53"
                               id="select-1-hint"
                             >
                               It will attach the new authenticated user to the selected role
