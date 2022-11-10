@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { DateTimePicker } from '@strapi/helper-plugin';
+import { DateTimePicker } from '@strapi/design-system/DateTimePicker';
 import { Select, Option } from '@strapi/design-system/Select';
 import { useIntl } from 'react-intl';
 

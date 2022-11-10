@@ -11,6 +11,7 @@ import formatISO from 'date-fns/formatISO';
 import { useIntl } from 'react-intl';
 import { Checkbox } from '@strapi/design-system/Checkbox';
 import { DatePicker } from '@strapi/design-system/DatePicker';
+import { DateTimePicker } from '@strapi/design-system/DateTimePicker';
 import { NumberInput } from '@strapi/design-system/NumberInput';
 import { Select, Option } from '@strapi/design-system/Select';
 import { Textarea } from '@strapi/design-system/Textarea';
@@ -20,7 +21,6 @@ import { ToggleInput } from '@strapi/design-system/ToggleInput';
 import { Icon } from '@strapi/design-system/Icon';
 import EyeStriked from '@strapi/icons/EyeStriked';
 import Eye from '@strapi/icons/Eye';
-import DateTimePicker from '../DateTimePicker';
 import NotSupported from './NotSupported';
 
 const GenericInput = ({

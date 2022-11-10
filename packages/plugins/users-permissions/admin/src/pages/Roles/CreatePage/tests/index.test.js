@@ -783,7 +783,7 @@ describe('Admin | containers | RoleCreatePage', () => {
         border: 1px solid #4945ff;
       }
 
-      .c44:hover:not([aria-disabled='true']) .sc-eHyqeh {
+      .c44:hover:not([aria-disabled='true']) .sc-djoyIk {
         color: #271fe0;
       }
 
@@ -1161,7 +1161,7 @@ describe('Admin | containers | RoleCreatePage', () => {
                                   class="c55 c56"
                                 >
                                   <span
-                                    class="c55 sc-eHyqeh c57"
+                                    class="c55 sc-djoyIk c57"
                                     id="accordion-label-accordion-1"
                                   >
                                     Address

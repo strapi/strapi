@@ -1232,6 +1232,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                                 aria-disabled="false"
                                 aria-label="Clear the interface language selected"
                                 class="c48"
+                                title="Clear the interface language selected"
                                 type="button"
                               >
                                 <svg
@@ -1251,6 +1252,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                                 aria-hidden="true"
                                 class="c49 c48 c50"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -1340,6 +1342,7 @@ exports[`ADMIN | Pages | Profile page renders and matches the snapshot 1`] = `
                                 aria-hidden="true"
                                 class="c49 c48 c50"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg

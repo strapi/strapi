@@ -70,7 +70,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
     const { container } = render(app);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c43 {
+      .c44 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -82,13 +82,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         width: 1px;
       }
 
-      .c44 {
+      .c45 {
         -webkit-animation: gzYjWD 1s infinite linear;
         animation: gzYjWD 1s infinite linear;
         will-change: transform;
       }
 
-      .c41 {
+      .c42 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -106,7 +106,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         justify-content: center;
       }
 
-      .c46 {
+      .c47 {
         -webkit-align-items: flex-end;
         -webkit-box-align: flex-end;
         -ms-flex-align: flex-end;
@@ -124,7 +124,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         justify-content: space-between;
       }
 
-      .c47 {
+      .c48 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -138,7 +138,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         flex-direction: row;
       }
 
-      .c36 {
+      .c37 {
         color: #666687;
         font-weight: 600;
         font-size: 0.6875rem;
@@ -146,7 +146,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         text-transform: uppercase;
       }
 
-      .c61 {
+      .c62 {
         color: #666687;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -293,7 +293,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #ffffff;
       }
 
-      .c23 {
+      .c24 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -305,7 +305,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         background: #ffffff;
       }
 
-      .c23 .c7 {
+      .c24 .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -316,99 +316,99 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
-      .c23 .c10 {
+      .c24 .c10 {
         color: #ffffff;
       }
 
-      .c23[aria-disabled='true'] {
+      .c24[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c23[aria-disabled='true'] .c10 {
+      .c24[aria-disabled='true'] .c10 {
         color: #666687;
       }
 
-      .c23[aria-disabled='true'] svg > g,
-      .c23[aria-disabled='true'] svg path {
+      .c24[aria-disabled='true'] svg > g,
+      .c24[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c23[aria-disabled='true']:active {
+      .c24[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c23[aria-disabled='true']:active .c10 {
+      .c24[aria-disabled='true']:active .c10 {
         color: #666687;
       }
 
-      .c23[aria-disabled='true']:active svg > g,
-      .c23[aria-disabled='true']:active svg path {
+      .c24[aria-disabled='true']:active svg > g,
+      .c24[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c23:hover {
+      .c24:hover {
         background-color: #f6f6f9;
       }
 
-      .c23:active {
+      .c24:active {
         background-color: #eaeaef;
       }
 
-      .c23 .c10 {
+      .c24 .c10 {
         color: #32324d;
       }
 
-      .c23 svg > g,
-      .c23 svg path {
+      .c24 svg > g,
+      .c24 svg path {
         fill: #32324d;
       }
 
-      .c22 {
+      .c23 {
         padding-top: 4px;
         padding-bottom: 4px;
       }
 
-      .c42 {
+      .c43 {
         background: #ffffff;
         padding: 64px;
       }
 
-      .c45 {
+      .c46 {
         padding-top: 16px;
       }
 
-      .c60 {
+      .c61 {
         padding-left: 8px;
       }
 
-      .c24 {
+      .c25 {
         background: #ffffff;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c27 {
+      .c28 {
         padding-right: 24px;
         padding-left: 24px;
       }
 
-      .c25 {
+      .c26 {
         overflow: hidden;
         border: 1px solid #eaeaef;
       }
 
-      .c29 {
+      .c30 {
         width: 100%;
         white-space: nowrap;
       }
 
-      .c26 {
+      .c27 {
         position: relative;
       }
 
-      .c26:before {
+      .c27:before {
         background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -418,7 +418,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         left: 0;
       }
 
-      .c26:after {
+      .c27:after {
         background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -429,39 +429,39 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         top: 0;
       }
 
-      .c28 {
+      .c29 {
         overflow-x: auto;
       }
 
-      .c40 tr:last-of-type {
+      .c41 tr:last-of-type {
         border-bottom: none;
-      }
-
-      .c30 {
-        border-bottom: 1px solid #eaeaef;
       }
 
       .c31 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c31 td,
-      .c31 th {
+      .c32 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c32 td,
+      .c32 th {
         padding: 16px;
       }
 
-      .c31 td:first-of-type,
-      .c31 th:first-of-type {
+      .c32 td:first-of-type,
+      .c32 th:first-of-type {
         padding: 0 4px;
       }
 
-      .c31 th {
+      .c32 th {
         padding-top: 0;
         padding-bottom: 0;
         height: 3.5rem;
       }
 
-      .c33 {
+      .c34 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -475,22 +475,22 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         flex-direction: row;
       }
 
-      .c32 {
+      .c33 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c32 input {
+      .c33 input {
         vertical-align: sub;
       }
 
-      .c35 svg {
+      .c36 svg {
         height: 0.25rem;
       }
 
-      .c34 {
+      .c35 {
         margin: 0;
         height: 18px;
         min-width: 18px;
@@ -501,12 +501,12 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         cursor: pointer;
       }
 
-      .c34:checked {
+      .c35:checked {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c34:checked:after {
+      .c35:checked:after {
         content: '';
         display: block;
         position: relative;
@@ -520,21 +520,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c34:checked:disabled:after {
+      .c35:checked:disabled:after {
         background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
       }
 
-      .c34:disabled {
+      .c35:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c34:indeterminate {
+      .c35:indeterminate {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c34:indeterminate:after {
+      .c35:indeterminate:after {
         content: '';
         display: block;
         position: relative;
@@ -549,13 +549,25 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c34:indeterminate:disabled {
+      .c35:indeterminate:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c34:indeterminate:disabled:after {
+      .c35:indeterminate:disabled:after {
         background-color: #8e8ea9;
+      }
+
+      .c20 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c18 {
@@ -656,7 +668,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #666687;
       }
 
-      .c37 {
+      .c38 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -674,30 +686,30 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: none;
       }
 
-      .c37 svg > g,
-      .c37 svg path {
+      .c38 svg > g,
+      .c38 svg path {
         fill: #8e8ea9;
       }
 
-      .c37:hover svg > g,
-      .c37:hover svg path {
+      .c38:hover svg > g,
+      .c38:hover svg path {
         fill: #666687;
       }
 
-      .c37:active svg > g,
-      .c37:active svg path {
+      .c38:active svg > g,
+      .c38:active svg path {
         fill: #a5a5ba;
       }
 
-      .c37[aria-disabled='true'] {
+      .c38[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c37[aria-disabled='true'] svg path {
+      .c38[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c39 {
+      .c40 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -709,7 +721,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         width: 1px;
       }
 
-      .c52 {
+      .c53 {
         position: absolute;
         left: 0;
         right: 0;
@@ -720,24 +732,24 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: none;
       }
 
-      .c52:focus {
+      .c53:focus {
         outline: none;
       }
 
-      .c52[aria-disabled='true'] {
+      .c53[aria-disabled='true'] {
         cursor: not-allowed;
       }
 
-      .c55 {
+      .c56 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c57 {
+      .c58 {
         padding-left: 12px;
       }
 
-      .c48 {
+      .c49 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -751,7 +763,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         flex-direction: column;
       }
 
-      .c50 {
+      .c51 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -765,7 +777,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         flex-direction: row;
       }
 
-      .c53 {
+      .c54 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -783,7 +795,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         justify-content: space-between;
       }
 
-      .c56 {
+      .c57 {
         color: #32324d;
         display: block;
         white-space: nowrap;
@@ -793,12 +805,12 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         line-height: 1.43;
       }
 
-      .c49 > * {
+      .c50 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c51 {
+      .c52 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -814,28 +826,28 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         transition-duration: 0.2s;
       }
 
-      .c51:focus-within {
+      .c52:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      .c58 {
+      .c59 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c58 svg {
+      .c59 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c58 svg path {
+      .c59 svg path {
         fill: #666687;
       }
 
-      .c59 {
+      .c60 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -844,23 +856,23 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: none;
       }
 
-      .c59 svg {
+      .c60 svg {
         width: 0.375rem;
       }
 
-      .c54 {
+      .c55 {
         width: 100%;
       }
 
-      .c20 {
+      .c21 {
         color: #32324d;
       }
 
-      .c21 path {
+      .c22 path {
         fill: #32324d;
       }
 
-      .c62 {
+      .c63 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -874,11 +886,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         flex-direction: row;
       }
 
-      .c63 > * + * {
+      .c64 > * + * {
         margin-left: 4px;
       }
 
-      .c66 {
+      .c67 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -890,7 +902,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         width: 1px;
       }
 
-      .c64 {
+      .c65 {
         padding: 12px;
         border-radius: 4px;
         -webkit-text-decoration: none;
@@ -903,7 +915,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         outline: none;
       }
 
-      .c64:after {
+      .c65:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -918,11 +930,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: 2px solid transparent;
       }
 
-      .c64:focus-visible {
+      .c65:focus-visible {
         outline: none;
       }
 
-      .c64:focus-visible:after {
+      .c65:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -933,34 +945,34 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: 2px solid #4945ff;
       }
 
-      .c65 {
+      .c66 {
         font-size: 0.7rem;
         pointer-events: none;
       }
 
-      .c65 svg path {
+      .c66 svg path {
         fill: #c0c0cf;
       }
 
-      .c65:focus svg path,
-      .c65:hover svg path {
+      .c66:focus svg path,
+      .c66:hover svg path {
         fill: #c0c0cf;
       }
 
-      .c67 {
+      .c68 {
         font-size: 0.7rem;
       }
 
-      .c67 svg path {
+      .c68 svg path {
         fill: #666687;
       }
 
-      .c67:focus svg path,
-      .c67:hover svg path {
+      .c68:focus svg path,
+      .c68:hover svg path {
         fill: #4a4a6a;
       }
 
-      .c38 {
+      .c39 {
         -webkit-transform: rotate(0deg);
         -ms-transform: rotate(0deg);
         transform: rotate(0deg);
@@ -1163,9 +1175,16 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     tabindex="0"
                     type="button"
                   >
+                    <span
+                      class="c20"
+                    >
+                      Search
+                    </span>
                     <svg
-                      class="c20 c21"
+                      aria-hidden="true"
+                      class="c21 c22"
                       fill="none"
+                      focusable="false"
                       height="1em"
                       viewBox="0 0 24 24"
                       width="1em"
@@ -1181,11 +1200,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   </button>
                 </span>
                 <div
-                  class="c22"
+                  class="c23"
                 >
                   <button
                     aria-disabled="false"
-                    class="c5 c23"
+                    class="c5 c24"
                     type="button"
                   >
                     <div
@@ -1222,56 +1241,60 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
           class="c13"
         >
           <div
-            class="c24 c25"
+            class="c25 c26"
           >
             <div
-              class="c26"
+              class="c27"
             >
               <div
-                class="c27 c28"
+                class="c28 c29"
               >
                 <table
                   aria-colcount="8"
                   aria-rowcount="1"
-                  class="c29"
+                  class="c30"
                 >
                   <thead
-                    class="c30"
+                    class="c31"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c31"
+                      class="c32"
                     >
                       <th
                         aria-colindex="1"
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class="c34"
                         >
-                          <input
-                            aria-label="Select all entries"
-                            class="c34"
-                            tabindex="0"
-                            type="checkbox"
-                          />
+                          <div
+                            class=""
+                          >
+                            <input
+                              aria-label="Select all entries"
+                              class="c35"
+                              tabindex="0"
+                              type="checkbox"
+                            />
+                          </div>
                           <span
-                            class="c35"
+                            class="c36"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c32"
+                        class="c33"
                         tabindex="-1"
                       >
                         <div
-                          class="c33"
+                          class="c34"
                         >
                           <span>
                             <span
                               aria-labelledby="tooltip-1"
-                              class="c36"
+                              class="c37"
                               label="Firstname"
                               tabindex="-1"
                             >
@@ -1279,19 +1302,26 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c35"
+                            class="c36"
                           >
                             <span>
                               <button
                                 aria-disabled="false"
                                 aria-labelledby="tooltip-3"
-                                class="c18 c37"
+                                class="c18 c38"
                                 tabindex="-1"
                                 type="button"
                               >
+                                <span
+                                  class="c20"
+                                >
+                                  Sort on Firstname
+                                </span>
                                 <svg
-                                  class="c38"
+                                  aria-hidden="true"
+                                  class="c39"
                                   fill="none"
+                                  focusable="false"
                                   height="1em"
                                   viewBox="0 0 14 8"
                                   width="1em"
@@ -1311,15 +1341,15 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class="c34"
                         >
                           <span>
                             <button
                               aria-labelledby="tooltip-3"
-                              class="c36"
+                              class="c37"
                               label="Lastname"
                               tabindex="-1"
                             >
@@ -1327,21 +1357,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </button>
                           </span>
                           <span
-                            class="c35"
+                            class="c36"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="4"
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class="c34"
                         >
                           <span>
                             <button
                               aria-labelledby="tooltip-5"
-                              class="c36"
+                              class="c37"
                               label="Email"
                               tabindex="-1"
                             >
@@ -1349,21 +1379,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </button>
                           </span>
                           <span
-                            class="c35"
+                            class="c36"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="5"
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class="c34"
                         >
                           <span>
                             <span
                               aria-labelledby="tooltip-7"
-                              class="c36"
+                              class="c37"
                               label="Roles"
                               tabindex="-1"
                             >
@@ -1371,21 +1401,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c35"
+                            class="c36"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="6"
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class="c34"
                         >
                           <span>
                             <button
                               aria-labelledby="tooltip-9"
-                              class="c36"
+                              class="c37"
                               label="Username"
                               tabindex="-1"
                             >
@@ -1393,21 +1423,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </button>
                           </span>
                           <span
-                            class="c35"
+                            class="c36"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="7"
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class="c34"
                         >
                           <span>
                             <span
                               aria-labelledby="tooltip-11"
-                              class="c36"
+                              class="c37"
                               label="User status"
                               tabindex="-1"
                             >
@@ -1415,61 +1445,61 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c35"
+                            class="c36"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="8"
-                        class="c32"
+                        class="c33"
                         tabindex="-1"
                       >
                         <div
-                          class="c33"
+                          class="c34"
                         >
                           <div
-                            class="c39"
+                            class="c40"
                           >
                             Actions
                           </div>
                           <span
-                            class="c35"
+                            class="c36"
                           />
                         </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody
-                    class="c40"
+                    class="c41"
                   >
                     <tr
                       aria-rowindex="2"
-                      class="c31"
+                      class="c32"
                     >
                       <td
                         aria-colindex="1"
-                        class="c32"
+                        class="c33"
                         colspan="8"
                         tabindex="-1"
                       >
                         <div
-                          class="c41"
+                          class="c42"
                         >
                           <div
-                            class="c42"
+                            class="c43"
                           >
                             <div
                               aria-live="assertive"
                               role="alert"
                             >
                               <div
-                                class="c43"
+                                class="c44"
                               >
                                 Loading content...
                               </div>
                               <img
                                 aria-hidden="true"
-                                class="c44"
+                                class="c45"
                                 src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjMiIGhlaWdodD0iNjMiIHZpZXdCb3g9IjAgMCA2MyA2MyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQyLjU1NjMgMTEuOTgxNkMzOS40ODQgMTAuMzA3MSAzNS44NTc1IDkuMjkwOTcgMzIuMzM1NCA5LjEzNTIxQzI4LjY0NDMgOC45Mjg4OCAyNC44Mjk1IDkuNzIzMTggMjEuMzMzNiAxMS40MTI5QzIwLjkxMjMgMTEuNTkwMSAyMC41Mzc2IDExLjgxMDEgMjAuMTcyMiAxMi4wMjQ5TDIwLjAxMDggMTIuMTE3OUMxOS44Nzc0IDEyLjE5NTEgMTkuNzQ0MSAxMi4yNzI0IDE5LjYwOCAxMi4zNTM2QzE5LjMyNTMgMTIuNTE0NiAxOS4wNDkyIDEyLjY3NDQgMTguNzU0NCAxMi44NzkyQzE4LjU0NjMgMTMuMDMyOSAxOC4zMzk1IDEzLjE3NTkgMTguMTMwMSAxMy4zMjNDMTcuNTY1OCAxMy43MjA4IDE2Ljk4NjggMTQuMTMxNyAxNi40OTgzIDE0LjU5NzlDMTQuODQ3NiAxNS45NTI0IDEzLjU1NzEgMTcuNjA3NSAxMi42MDcxIDE4LjkyMTRDMTAuNDM2NSAyMi4xNTY2IDkuMDg2MjIgMjUuOTU2NyA4LjgwNzAyIDI5LjYxNDNMOC43NzY0IDMwLjE1ODhDOC43MzMyOCAzMC45MTk2IDguNjg0NzYgMzEuNzA1NyA4Ljc1MzUzIDMyLjQ1NTVDOC43NjY0OCAzMi42MDg0IDguNzY2MSAzMi43NjM4IDguNzc1MDYgMzIuOTE0QzguNzg4OTUgMzMuMjI5IDguODAxNTIgMzMuNTM3MyA4Ljg0NiAzMy44NjcyTDkuMDczOTYgMzUuNDIyMUM5LjA5NzU2IDM1LjU3NjQgOS4xMTk4IDM1Ljc0MTMgOS4xNjMzIDM1LjkyNjNMOS42NTkxOSAzNy45MjcyTDEwLjEzOCAzOS4yODIzQzEwLjI3MjkgMzkuNjY3MyAxMC40MTU4IDQwLjA3NTEgMTAuNiA0MC40M0MxMi4wMjkyIDQzLjYzNyAxNC4xNDI1IDQ2LjQ1NzggMTYuNzA2MyA0OC41ODVDMTkuMDUwOCA1MC41Mjk2IDIxLjgyNCA1Mi4wMDIzIDI0Ljc0OTEgNTIuODQ1MkwyNi4yMzcxIDUzLjIzNzZDMjYuMzc4MSA1My4yNjkzIDI2LjQ5MjYgNTMuMjg4OSAyNi42MDMxIDUzLjMwNThMMjYuNzc3NSA1My4zMzExQzI3LjAwNTIgNTMuMzYzNiAyNy4yMTk1IDUzLjM5ODYgMjcuNDQ0NSA1My40MzVDMjcuODU5OCA1My41MDc2IDI4LjI2NzIgNTMuNTc0OCAyOC43MDc5IDUzLjYxODNMMzAuNTY0MSA1My43MjI5QzMwLjk1MTYgNTMuNzI0OSAzMS4zMzUyIDUzLjcwNjggMzEuNzA4MSA1My42ODc0QzMxLjkwMzkgNTMuNjgxIDMyLjA5ODQgNTMuNjY4MSAzMi4zMjg4IDUzLjY2MkMzNC41MjUzIDUzLjQ3NzIgMzYuNTEwNiA1My4wNjM0IDM4LjA1MTYgNTIuNDY1MkMzOC4xNzY5IDUyLjQxNzEgMzguMzAwOCA1Mi4zNzk2IDM4LjQyMzQgNTIuMzM1NUMzOC42NzI3IDUyLjI0OTkgMzguOTI1OSA1Mi4xNjcgMzkuMTQzMiA1Mi4wNTk5TDQwLjg1OTEgNTEuMjYyNkw0Mi41NzAyIDUwLjI2NkM0Mi45MDA5IDUwLjA2ODIgNDMuMDIwNSA0OS42NDE0IDQyLjgyODIgNDkuMjk4NEM0Mi42MzIgNDguOTUyNiA0Mi4yMDM0IDQ4LjgzMDggNDEuODYzNCA0OS4wMTY2TDQwLjE3OTIgNDkuOTIxOEwzOC40OTk1IDUwLjYyMjRDMzguMzE2OSA1MC42OTUzIDM4LjEyMSA1MC43NTM0IDM3LjkyMjQgNTAuODE1NUMzNy43ODM4IDUwLjg0ODkgMzcuNjUxOCA1MC44OTgzIDM3LjUwMTIgNTAuOTQwOEMzNi4wNzExIDUxLjQzNSAzNC4yNDQ1IDUxLjc0MjUgMzIuMjQ0IDUxLjgzNDZDMzIuMDQ0MiA1MS44MzgzIDMxLjg0NzEgNTEuODM3OSAzMS42NTQgNTEuODQwM0MzMS4zMDUxIDUxLjg0MTQgMzAuOTYwMiA1MS44NDUxIDMwLjYzOTIgNTEuODMwNUwyOC45MTc3IDUxLjY3MjVDMjguNTQ3NiA1MS42MTkgMjguMTY5NSA1MS41NDI3IDI3Ljc4NDggNTEuNDY3OEMyNy41NjM5IDUxLjQxNjcgMjcuMzM3NiA1MS4zNzM3IDI3LjEyOTkgNTEuMzM3NEwyNi45NTI5IDUxLjI5ODdDMjYuODcwNCA1MS4yODM0IDI2Ljc3NzIgNTEuMjY2NyAyNi43MzMzIDUxLjI1NDNMMjUuMzQ2NiA1MC44MzIyQzIyLjc2NTEgNDkuOTc4OSAyMC4zMyA0OC41NzI5IDE4LjI5NDIgNDYuNzU1N0MxNi4xMDU2IDQ0Ljc5NTEgMTQuMzMzOSA0Mi4yMzM1IDEzLjE3NDIgMzkuMzU4MkMxMi4wMjc2IDM2LjYwMTMgMTEuNTk4OCAzMy4yNzkyIDExLjk3MTYgMzAuMDA3NkMxMi4zMTQ1IDI3LjAyMTMgMTMuMzk0OCAyNC4xNjM1IDE1LjE4NTggMjEuNTA4M0MxNS4zMDM0IDIxLjMzMzkgMTUuNDIxIDIxLjE1OTYgMTUuNTIxMiAyMS4wMTk2QzE2LjQzMDkgMTkuODY4OCAxNy41NDA4IDE4LjU1ODkgMTguOTQ4MyAxNy40OTZDMTkuMzM2NyAxNy4xNTI1IDE5Ljc4NjIgMTYuODU2IDIwLjI2MTEgMTYuNTQ3OEMyMC40ODc4IDE2LjQwMDkgMjAuNzA3OSAxNi4yNTUzIDIwLjg5MDcgMTYuMTMwNkMyMS4wOTc0IDE2LjAwNDggMjEuMzE4OCAxNS44ODMxIDIxLjUzNDggMTUuNzY5NEMyMS42NzYxIDE1LjY5NzUgMjEuODE2MiAxNS42MTkgMjEuOTM4OCAxNS41NTc2TDIyLjEwMDIgMTUuNDY0NkMyMi40MDAyIDE1LjMwMzcgMjIuNjc0OSAxNS4xNTQ2IDIyLjk5MDggMTUuMDM5TDI0LjExODYgMTQuNTcxNUMyNC4zMzk5IDE0LjQ4NDQgMjQuNTcxOCAxNC40MTU5IDI0Ljc5OTcgMTQuMzQ0N0MyNC45NTMgMTQuMjk4MiAyNS4wOTgyIDE0LjI2MzUgMjUuMjYzNSAxNC4yMDc4QzI1Ljc4NiAxNC4wMTgyIDI2LjMyODMgMTMuOTExMiAyNi45MTA1IDEzLjc5NjVDMjcuMTE3IDEzLjc1NzEgMjcuMzMwMiAxMy43MTYzIDI3LjU2MDggMTMuNjU4NUMyNy43NTUzIDEzLjYxMSAyNy45NzM3IDEzLjU5NjkgMjguMjA4MiAxMy41NzYyQzI4LjM2NCAxMy41NjAzIDI4LjUxNzIgMTMuNTQ4MyAyOC42MzE4IDEzLjUzMzNDMjguNzg3NiAxMy41MTczIDI4LjkzNDIgMTMuNTA2NiAyOS4wOTI3IDEzLjQ4NjdDMjkuMzI4NSAxMy40NTU1IDI5LjU0NTYgMTMuNDM0NyAyOS43NDk0IDEzLjQzMzdDMzAuMDIzNyAxMy40NCAzMC4yOTk0IDEzLjQzNTcgMzAuNTc3NyAxMy40Mjc0QzMxLjA4MTEgMTMuNDIxIDMxLjU1NzkgMTMuNDE5NyAzMi4wMzE4IDEzLjQ5MTRDMzQuOTY2NCAxMy43MzUyIDM3LjcxNDQgMTQuNjA4NSA0MC4yMDUyIDE2LjA4NjhDNDIuMzQ4OSAxNy4zNjU1IDQ0LjI3MTYgMTkuMTUyNSA0NS43NjA3IDIxLjI2NEM0Ny4wMjU1IDIzLjA2MjggNDcuOTc1NiAyNS4wNTI4IDQ4LjQ5MjggMjcuMDM5M0M0OC41NzIgMjcuMzE3NiA0OC42Mjk5IDI3LjU5MzEgNDguNjgzOSAyNy44NjU5QzQ4LjcxNTQgMjguMDQyOCA0OC43NTYzIDI4LjIxNDUgNDguNzg5MiAyOC4zNjM2QzQ4LjgwMzcgMjguNDU0MSA0OC44MjA4IDI4LjU0MDYgNDguODQ0NSAyOC42MjU4QzQ4Ljg3NDkgMjguNzQ0MyA0OC44OTg2IDI4Ljg2NCA0OC45MTE2IDI4Ljk2NTFMNDguOTc5MyAyOS42MDQ3QzQ4Ljk5MjIgMjkuNzc0OCA0OS4wMTMyIDI5LjkzMzEgNDkuMDMwMSAzMC4wODg3QzQ5LjA2NjggMzAuMzI2OCA0OS4wODg5IDMwLjU2MDggNDkuMDk2NCAzMC43NTYxTDQ5LjEwODMgMzEuOTAwMUM0OS4xMzEyIDMyLjMzMDcgNDkuMDg5IDMyLjcxMTYgNDkuMDUyMiAzMy4wNjczQzQ5LjAzODQgMzMuMjU5OCA0OS4wMTI2IDMzLjQ0NDMgNDkuMDEyMyAzMy41ODI0QzQ4Ljk5NjEgMzMuNjkyNiA0OC45OTE4IDMzLjc5MzUgNDguOTgzNiAzMy44OTE3QzQ4Ljk3NTMgMzQuMDA3MiA0OC45NzI0IDM0LjExNDggNDguOTQxNCAzNC4yNTU0TDQ4LjU0NDkgMzYuMzA1OUM0OC4zMTM0IDM3Ljg2MjMgNDkuMzc5MyAzOS4zMzY1IDUwLjk0ODggMzkuNTgyMkM1Mi4wNDE3IDM5Ljc2MDEgNTMuMTUzNiAzOS4yODE5IDUzLjc3MTEgMzguMzY2NEM1NC4wMDYzIDM4LjAxNzYgNTQuMTYwNCAzNy42MjU3IDU0LjIyMjcgMzcuMjA2NEw1NC41MjE3IDM1LjI1NzRDNTQuNTUxNCAzNS4wNzU2IDU0LjU3MiAzNC44MyA1NC41ODQ2IDM0LjU3OTFMNTQuNjAyOCAzNC4yMzM4QzU0LjYwOTggMzQuMDU5OCA1NC42MjIzIDMzLjg3NzkgNTQuNjM0NyAzMy42Nzg4QzU0LjY3MzQgMzMuMTA1MiA1NC43MTYzIDMyLjQ0NzkgNTQuNjYxOSAzMS44MDU4TDU0LjU4NjcgMzAuNDI4OUM1NC41NjIyIDMwLjA5NTIgNTQuNTA5NyAyOS43NiA1NC40NTU5IDI5LjQxODFDNTQuNDMxIDI5LjI1NzIgNTQuNDA0OCAyOS4wODk2IDU0LjM4MjYgMjguOTA3NEw1NC4yNjg3IDI4LjEwNEM1NC4yMzMyIDI3LjkyNDQgNTQuMTgwNCAyNy43MjczIDU0LjEzMjkgMjcuNTM5Nkw1NC4wNjQzIDI3LjI0NTRDNTQuMDE5NSAyNy4wNzEgNTMuOTc3MyAyNi44OTI3IDUzLjkzMzggMjYuNzA3NkM1My44NDU1IDI2LjMzMDkgNTMuNzQ3OSAyNS45NDIyIDUzLjYxMyAyNS41NTcxQzUyLjg0IDIzLjAyOTIgNTEuNTM4MyAyMC41MTk0IDQ5LjgzMzggMTguMjc5OUM0Ny44NTQ0IDE1LjY4MiA0NS4zMzMzIDEzLjUwODcgNDIuNTU2MyAxMS45ODE2WiIgZmlsbD0iIzQ5NDVGRiIvPgo8L3N2Zz4K"
                               />
                             </div>
@@ -1483,20 +1513,20 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
             </div>
           </div>
           <div
-            class="c45"
+            class="c46"
           >
             <div
-              class="c46"
+              class="c47"
             >
               <div
-                class="c47"
+                class="c48"
               >
                 <div>
                   <div
-                    class="c48 c49"
+                    class="c49 c50"
                   >
                     <div
-                      class="c50 c51"
+                      class="c51 c52"
                     >
                       <button
                         aria-disabled="false"
@@ -1504,21 +1534,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                         aria-haspopup="listbox"
                         aria-label="Entries per page"
                         aria-labelledby="select-1-label select-1-content"
-                        class="c52"
+                        class="c53"
                         id="select-1"
                         type="button"
                       />
                       <div
-                        class="c53 c54"
+                        class="c54 c55"
                       >
                         <div
-                          class="c50"
+                          class="c51"
                         >
                           <div
-                            class="c55"
+                            class="c56"
                           >
                             <span
-                              class="c56"
+                              class="c57"
                               id="select-1-content"
                             >
                               10
@@ -1526,12 +1556,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           </div>
                         </div>
                         <div
-                          class="c50"
+                          class="c51"
                         >
                           <button
                             aria-hidden="true"
-                            class="c57 c58 c59"
+                            class="c58 c59 c60"
                             tabindex="-1"
+                            title="Carret Down Button"
                             type="button"
                           >
                             <svg
@@ -1555,10 +1586,10 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   </div>
                 </div>
                 <div
-                  class="c60"
+                  class="c61"
                 >
                   <label
-                    class="c61"
+                    class="c62"
                     for="page-size"
                   >
                     Entries per page
@@ -1567,21 +1598,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
               </div>
               <nav
                 aria-label="pagination"
-                class="sc-haTkiu"
+                class="sc-dYtuZ"
               >
                 <ul
-                  class="c62 c63"
+                  class="c63 c64"
                 >
                   <li>
                     <a
                       aria-current="page"
                       aria-disabled="true"
-                      class="c64 c65 active"
+                      class="c65 c66 active"
                       href="/settings/user"
                       tabindex="-1"
                     >
                       <div
-                        class="c66"
+                        class="c67"
                       >
                         Go to previous page
                       </div>
@@ -1604,11 +1635,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     <a
                       aria-current="page"
                       aria-disabled="false"
-                      class="c64 c67 active"
+                      class="c65 c68 active"
                       href="/settings/user?pageSize=10&page=1&sort=firstname"
                     >
                       <div
-                        class="c66"
+                        class="c67"
                       >
                         Go to next page
                       </div>

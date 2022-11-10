@@ -431,6 +431,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
                     aria-hidden="true"
                     class="c12 c13 c14"
                     tabindex="-1"
+                    title="Carret Down Button"
                     type="button"
                   >
                     <svg
@@ -466,7 +467,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
       </div>
       <nav
         aria-label="pagination"
-        class="sc-fAyhPT"
+        class="sc-cBsmfy"
       >
         <ul
           class="c17 c18"

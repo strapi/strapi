@@ -250,6 +250,7 @@ describe('<PageSizeURLQuery />', () => {
                     aria-hidden="true"
                     class="c10 c11 c12"
                     tabindex="-1"
+                    title="Carret Down Button"
                     type="button"
                   >
                     <svg

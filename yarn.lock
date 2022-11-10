@@ -5822,10 +5822,10 @@
     regenerator-runtime "^0.13.7"
     resolve-from "^5.0.0"
 
-"@strapi/design-system@1.2.7":
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.2.7.tgz#242535918d49a4db115d2fa0f46e3a6604fdd138"
-  integrity sha512-J1fxQMrJXHy9MXn7Dd57uyJ/nTpQMcI5IXjt0GpwE6gqUvHdjxVa3gKWRBpt3Ijt5vWP7SVyx+7woN1q4+ugcQ==
+"@strapi/design-system@1.3.0-beta.2":
+  version "1.3.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.3.0-beta.2.tgz#89957efbc5dc6eae8e3082c67b4401af11cf0728"
+  integrity sha512-f1jbD32Q8SN3tKe9riilAU9p09W+Otr/R3IfQNHJ6AHAhQ0/qrNi2cqOSeJVI+01KTAtrobNz5o1LhPKV6gWkw==
   dependencies:
     "@floating-ui/react-dom" "^1.0.0"
     "@internationalized/number" "^3.1.1"

@@ -1349,6 +1349,7 @@ exports[`Marketplace page - layout renders the online layout 1`] = `
                           aria-hidden="true"
                           class="c48 c49 c50"
                           tabindex="-1"
+                          title="Carret Down Button"
                           type="button"
                         >
                           <svg

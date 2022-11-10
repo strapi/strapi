@@ -69,7 +69,7 @@
     "@storybook/builder-webpack5": "6.5.9",
     "@storybook/manager-webpack5": "6.4.10",
     "@storybook/react": "^6.5.10",
-    "@strapi/design-system": "1.2.7",
+    "@strapi/design-system": "1.3.0-beta.2",
     "@strapi/icons": "1.2.7",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",

@@ -334,7 +334,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   cursor: pointer;
 }
 
-.c4:hover .sc-uWCef {
+.c4:hover .sc-kmiuhe {
   opacity: 1;
 }
 
@@ -395,11 +395,15 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c7 c8 c9 c10"
                   spacing="2"
                 >
-                  <input
-                    aria-labelledby="card-1-title"
-                    class="c11"
-                    type="checkbox"
-                  />
+                  <div
+                    class=""
+                  >
+                    <input
+                      aria-labelledby="card-1-title"
+                      class="c11"
+                      type="checkbox"
+                    />
+                  </div>
                 </div>
               </div>
               <div
@@ -483,11 +487,15 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c7 c8 c9 c10"
                   spacing="2"
                 >
-                  <input
-                    aria-labelledby="card-2-title"
-                    class="c11"
-                    type="checkbox"
-                  />
+                  <div
+                    class=""
+                  >
+                    <input
+                      aria-labelledby="card-2-title"
+                      class="c11"
+                      type="checkbox"
+                    />
+                  </div>
                 </div>
               </div>
               <div
@@ -599,11 +607,15 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                   class="c7 c8 c9 c10"
                   spacing="2"
                 >
-                  <input
-                    aria-labelledby="card-3-title"
-                    class="c11"
-                    type="checkbox"
-                  />
+                  <div
+                    class=""
+                  >
+                    <input
+                      aria-labelledby="card-3-title"
+                      class="c11"
+                      type="checkbox"
+                    />
+                  </div>
                 </div>
               </div>
               <div

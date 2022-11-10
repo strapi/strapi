@@ -868,7 +868,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                               class="c43 c44"
                             >
                               <button
-                                aria-describedby="select-1-hint"
+                                aria-describedby="select-1-error"
                                 aria-disabled="false"
                                 aria-expanded="false"
                                 aria-haspopup="listbox"
@@ -902,6 +902,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                                     aria-hidden="true"
                                     class="c50 c51 c52"
                                     tabindex="-1"
+                                    title="Carret Down Button"
                                     type="button"
                                   >
                                     <svg

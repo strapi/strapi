@@ -519,6 +519,7 @@ exports[`DateTimePicker snapshots the component 1`] = `
                   aria-hidden="true"
                   class="c22 c26 c27"
                   tabindex="-1"
+                  title="Carret Down Button"
                   type="button"
                 >
                   <svg
