@@ -66,7 +66,6 @@ const App = (
 
 const waitForReload = async () => {
   await waitFor(() => {
-    expect(screen.queryByTestId('loader')).toBe(null);
     expect(screen.getByRole('heading', { name: /marketplace/i })).toBeInTheDocument();
   });
 };

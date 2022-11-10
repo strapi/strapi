@@ -209,6 +209,7 @@ describe('File', () => {
         data.files[1] = file;
       });
     });
+
     describe('Move a file from root level to a folder', () => {
       test('when replacing the file', async () => {
         const res = await rq({

@@ -1,14 +1,14 @@
 'use strict';
 
-const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createTestBuilder } = require('../../../../../test/helpers/builder');
-const { createContentAPIRequest } = require('../../../../../test/helpers/request');
+const { createTestBuilder } = require('../../../../../../test/helpers/builder');
+const { createStrapiInstance } = require('../../../../../../test/helpers/strapi');
+const { createAuthRequest } = require('../../../../../../test/helpers/request');
 
 const builder = createTestBuilder();
 let strapi;
 let rq;
 const data = {
-  productWithDz: [],
+  productsWithDz: [],
 };
 
 const compo = {
@@ -40,19 +40,19 @@ const productWithDz = {
       required: true,
     },
   },
-  displayName: 'product-with-dz',
+  displayName: 'Product with dz',
   singularName: 'product-with-dz',
   pluralName: 'product-with-dzs',
   description: '',
   collectionName: '',
 };
 
-describe('Core API - Basic + dz', () => {
+describe('CM API - Basic + dz', () => {
   beforeAll(async () => {
     await builder.addComponent(compo).addContentType(productWithDz).build();
 
     strapi = await createStrapiInstance();
-    rq = await createContentAPIRequest({ strapi });
+    rq = await createAuthRequest({ strapi });
   });
 
   afterAll(async () => {
@@ -72,45 +72,27 @@ describe('Core API - Basic + dz', () => {
         },
       ],
     };
-
-    const { statusCode, body } = await rq({
+    const res = await rq({
       method: 'POST',
-      url: '/product-with-dzs',
-      body: {
-        data: product,
-      },
-      qs: {
-        populate: ['dz'],
-      },
+      url: '/content-manager/collection-types/api::product-with-dz.product-with-dz',
+      body: product,
     });
 
-    expect(statusCode).toBe(200);
-
-    expect(body.data).toMatchObject({
-      id: expect.anything(),
-      attributes: product,
-    });
-
-    expect(body.data.attributes.publishedAt).toBeUndefined();
-
-    data.productWithDz.push(body.data);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject(product);
+    expect(res.body.publishedAt).toBeUndefined();
+    data.productsWithDz.push(res.body);
   });
 
   test('Read product with compo', async () => {
-    const { statusCode, body } = await rq({
+    const res = await rq({
       method: 'GET',
-      url: '/product-with-dzs',
-      qs: {
-        populate: ['dz'],
-      },
+      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${data.productsWithDz[0].id}`,
     });
 
-    expect(statusCode).toBe(200);
-    expect(body.data).toHaveLength(1);
-    expect(body.data[0]).toMatchObject(data.productWithDz[0]);
-    body.data.forEach((p) => {
-      expect(p.attributes.publishedAt).toBeUndefined();
-    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject(data.productsWithDz[0]);
+    expect(res.body.publishedAt).toBeUndefined();
   });
 
   test('Update product with compo', async () => {
@@ -125,42 +107,30 @@ describe('Core API - Basic + dz', () => {
         },
       ],
     };
-
-    const { statusCode, body } = await rq({
+    const res = await rq({
       method: 'PUT',
-      url: `/product-with-dzs/${data.productWithDz[0].id}`,
-      body: {
-        data: product,
-      },
-      qs: {
-        populate: ['dz'],
-      },
+      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${data.productsWithDz[0].id}`,
+      body: product,
     });
 
-    expect(statusCode).toBe(200);
-    expect(body.data).toMatchObject({
-      id: data.productWithDz[0].id,
-      attributes: product,
-    });
-
-    expect(body.data.attributes.publishedAt).toBeUndefined();
-    data.productWithDz[0] = body.data;
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject(product);
+    expect(res.body.id).toEqual(data.productsWithDz[0].id);
+    expect(res.body.publishedAt).toBeUndefined();
+    data.productsWithDz[0] = res.body;
   });
 
   test('Delete product with compo', async () => {
-    const { statusCode, body } = await rq({
+    const res = await rq({
       method: 'DELETE',
-      url: `/product-with-dzs/${data.productWithDz[0].id}`,
-      qs: {
-        populate: ['dz'],
-      },
+      url: `/content-manager/collection-types/api::product-with-dz.product-with-dz/${data.productsWithDz[0].id}`,
     });
 
-    expect(statusCode).toBe(200);
-
-    expect(body.data).toMatchObject(data.productWithDz[0]);
-    expect(body.data.attributes.publishedAt).toBeUndefined();
-    data.productWithDz.shift();
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject(data.productsWithDz[0]);
+    expect(res.body.id).toEqual(data.productsWithDz[0].id);
+    expect(res.body.publishedAt).toBeUndefined();
+    data.productsWithDz.shift();
   });
 
   describe('validation', () => {
@@ -171,10 +141,8 @@ describe('Core API - Basic + dz', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-dzs',
-        body: {
-          data: product,
-        },
+        url: '/content-manager/collection-types/api::product-with-dz.product-with-dz',
+        body: product,
       });
 
       expect(res.statusCode).toBe(400);
@@ -211,10 +179,8 @@ describe('Core API - Basic + dz', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-dzs',
-        body: {
-          data: product,
-        },
+        url: '/content-manager/collection-types/api::product-with-dz.product-with-dz',
+        body: product,
       });
 
       expect(res.statusCode).toBe(400);
@@ -251,10 +217,8 @@ describe('Core API - Basic + dz', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-dzs',
-        body: {
-          data: product,
-        },
+        url: '/content-manager/collection-types/api::product-with-dz.product-with-dz',
+        body: product,
       });
 
       expect(res.statusCode).toBe(400);
@@ -290,10 +254,8 @@ describe('Core API - Basic + dz', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-dzs',
-        body: {
-          data: product,
-        },
+        url: '/content-manager/collection-types/api::product-with-dz.product-with-dz',
+        body: product,
       });
 
       expect(res.statusCode).toBe(400);
@@ -329,10 +291,8 @@ describe('Core API - Basic + dz', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/product-with-dzs',
-        body: {
-          data: product,
-        },
+        url: '/content-manager/collection-types/api::product-with-dz.product-with-dz',
+        body: product,
       });
 
       expect(res.statusCode).toBe(400);
@@ -341,13 +301,18 @@ describe('Core API - Basic + dz', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'dz[0].__component is a required field',
+          message: '2 errors occurred',
           details: {
             errors: [
               {
                 path: ['dz', '0', '__component'],
                 message: 'dz[0].__component is a required field',
                 name: 'ValidationError',
+              },
+              {
+                message: "Cannot read properties of undefined (reading 'attributes')",
+                name: 'ValidationError',
+                path: [],
               },
             ],
           },
