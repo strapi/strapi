@@ -721,10 +721,12 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
               data-handler-id="T0"
               draggable="true"
             >
-              <button
+              <div
                 aria-disabled="false"
                 aria-label="Drag"
                 class="c19 c20"
+                role="button"
+                tabindex="0"
                 type="button"
               >
                 <svg
@@ -763,7 +765,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     fill="#212134"
                   />
                 </svg>
-              </button>
+              </div>
               <div
                 class="c18 c21"
               >
@@ -833,10 +835,12 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
               data-handler-id="T2"
               draggable="true"
             >
-              <button
+              <div
                 aria-disabled="false"
                 aria-label="Drag"
                 class="c19 c20"
+                role="button"
+                tabindex="0"
                 type="button"
               >
                 <svg
@@ -875,7 +879,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     fill="#212134"
                   />
                 </svg>
-              </button>
+              </div>
               <div
                 class="c18 c21"
               >
@@ -939,10 +943,12 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
               data-handler-id="T4"
               draggable="true"
             >
-              <button
+              <div
                 aria-disabled="false"
                 aria-label="Drag"
                 class="c19 c20"
+                role="button"
+                tabindex="0"
                 type="button"
               >
                 <svg
@@ -981,7 +987,7 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
                     fill="#212134"
                   />
                 </svg>
-              </button>
+              </div>
               <div
                 class="c18 c21"
               >
