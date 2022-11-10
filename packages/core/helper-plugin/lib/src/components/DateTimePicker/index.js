@@ -124,6 +124,14 @@ const DateTimePicker = ({
     }
   }, [value]);
 
+  useEffect(() => {
+    console.warn(
+      `
+      Deprecation warning: Usage of "DateTimePicker" component from the helper-plugin is deprecated and will be removed in the next major release. Instead, use the DateTimePicker from the Design System: import { DateTimePicker } from '@strapi/design-system/DateTimePicker';"
+      `
+    );
+  }, []);
+
   return (
     <CustomField
       name={name}
