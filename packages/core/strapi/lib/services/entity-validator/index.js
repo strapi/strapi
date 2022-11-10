@@ -6,7 +6,7 @@
 'use strict';
 
 const { uniqBy, castArray, isNil } = require('lodash');
-const { has, assoc, prop, isObject, isEmpty } = require('lodash/fp');
+const { has, assoc, prop, isObject, isEmpty, merge } = require('lodash/fp');
 const strapiUtils = require('@strapi/utils');
 const validators = require('./validators');
 
@@ -244,22 +244,20 @@ const createValidateEntity =
  * Builds an object containing all the media and relations being associated with an entity
  * @param {String} uid of the model
  * @param {Object} data
- * @param {Object} relationsStore to be updated and returned
- * @returns
+ * @returns {Object}
  */
-const buildRelationsStore = ({ uid, data, relationsStore = {} }) => {
+const buildRelationsStore = ({ uid, data }) => {
   if (isEmpty(data)) {
-    return relationsStore;
+    return {};
   }
-
   const currentModel = strapi.getModel(uid);
 
-  Object.keys(currentModel.attributes).forEach((attributeName) => {
+  return Object.keys(currentModel.attributes).reduce((result, attributeName) => {
     const attribute = currentModel.attributes[attributeName];
-
     const value = data[attributeName];
+
     if (isNil(value)) {
-      return;
+      return result;
     }
 
     switch (attribute.type) {
@@ -285,34 +283,42 @@ const buildRelationsStore = ({ uid, data, relationsStore = {} }) => {
 
         // Update the relationStore to keep track of all associations being made
         // with relations and media.
-        relationsStore[target] = relationsStore[target] || [];
-        relationsStore[target].push(...idArray);
+        result[target] = result[target] || [];
+        result[target].push(...idArray);
         break;
       }
       case 'component': {
-        return castArray(value).forEach((componentValue) =>
-          buildRelationsStore({
-            uid: attribute.component,
-            data: componentValue,
-            relationsStore,
-          })
+        return castArray(value).reduce(
+          (relationsStore, componentValue) =>
+            merge(
+              relationsStore,
+              buildRelationsStore({
+                uid: attribute.component,
+                data: componentValue,
+              })
+            ),
+          result
         );
       }
       case 'dynamiczone': {
-        return value.forEach((dzValue) =>
-          buildRelationsStore({
-            uid: dzValue.__component,
-            data: dzValue,
-            relationsStore,
-          })
+        return value.reduce(
+          (relationsStore, dzValue) =>
+            merge(
+              relationsStore,
+              buildRelationsStore({
+                uid: dzValue.__component,
+                data: dzValue,
+              })
+            ),
+          result
         );
       }
       default:
         break;
     }
-  });
 
-  return relationsStore;
+    return result;
+  }, {});
 };
 
 /**
