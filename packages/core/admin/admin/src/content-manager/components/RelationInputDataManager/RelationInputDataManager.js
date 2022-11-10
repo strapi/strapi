@@ -152,7 +152,9 @@ export const RelationInputDataManager = ({
    * @param {number} oldIndex
    */
   const handleRelationReorder = (oldIndex, newIndex) => {
-    const item = relations[oldIndex];
+    const item = relationsFromModifiedData[oldIndex];
+    console.log(oldIndex, item);
+
     setLiveText(
       formatMessage(
         {
@@ -179,7 +181,7 @@ export const RelationInputDataManager = ({
    * @returns {void}
    */
   const handleGrabItem = (index) => {
-    const item = relations[index];
+    const item = relationsFromModifiedData[index];
 
     setLiveText(
       formatMessage(
@@ -201,7 +203,7 @@ export const RelationInputDataManager = ({
    * @returns {void}
    */
   const handleDropItem = (index) => {
-    const item = relations[index];
+    const item = relationsFromModifiedData[index];
 
     setLiveText(
       formatMessage(
@@ -223,7 +225,7 @@ export const RelationInputDataManager = ({
    * @returns {void}
    */
   const handleCancel = (index) => {
-    const item = relations[index];
+    const item = relationsFromModifiedData[index];
 
     setLiveText(
       formatMessage(
@@ -282,10 +284,13 @@ export const RelationInputDataManager = ({
         defaultMessage: intlLabel.defaultMessage,
       })} ${totalRelations > 0 ? `(${totalRelations})` : ''}`}
       labelAction={labelAction}
-      labelLoadMore={formatMessage({
-        id: getTrad('relation.loadMore'),
-        defaultMessage: 'Load More',
-      })}
+      labelLoadMore={
+        isCreatingEntry &&
+        formatMessage({
+          id: getTrad('relation.loadMore'),
+          defaultMessage: 'Load More',
+        })
+      }
       labelDisconnectRelation={formatMessage({
         id: getTrad('relation.disconnect'),
         defaultMessage: 'Remove',
