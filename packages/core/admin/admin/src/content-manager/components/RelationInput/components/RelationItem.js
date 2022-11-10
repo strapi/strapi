@@ -141,6 +141,7 @@ export const RelationItem = ({
 
     switch (e.key) {
       case ' ':
+      case 'Enter':
         handleDragClick();
         break;
 
@@ -190,11 +191,13 @@ export const RelationItem = ({
           {/* TODO: swap this out for using children when DS is updated */}
           {canDrag ? (
             <IconButton
+              forwardedAs="div"
+              role="button"
+              tabIndex={0}
               marginRight={1}
               aria-label={iconButtonAriaLabel}
               noBorder
               icon={<Drag />}
-              onClick={handleDragClick}
               onKeyDown={handleKeyDown}
             />
           ) : null}
