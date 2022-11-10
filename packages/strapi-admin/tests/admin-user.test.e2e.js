@@ -8,7 +8,7 @@ const { createUtils } = require('../../../test/helpers/utils');
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const omitTimestamps = obj => _.omit(obj, ['updatedAt', 'createdAt', 'updated_at', 'created_at']);
-
+const omitRegistrationToken = _.omit(['registrationToken']);
 /**
  * == Test Suite Overview ==
  *
@@ -116,9 +116,10 @@ describe('Admin User CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(201);
     expect(res.body.data).not.toBeNull();
+    expect(res.body.data).toHaveProperty('registrationToken')
 
     // Using the created user as an example for the rest of the tests
-    testData.user = res.body.data;
+    testData.user = omitRegistrationToken(res.body.data);
   });
 
   test('3. Creates users with superAdmin role (success)', async () => {
@@ -142,6 +143,7 @@ describe('Admin User CRUD (e2e)', () => {
       expect(res.body.data).not.toBeNull();
 
       testData.otherSuperAdminUsers.push(res.body.data);
+      testData.otherSuperAdminUsers.push(omitRegistrationToken(res.body.data));
     }
   });
 
