@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useQuery } from 'react-query';
 import { useIntl } from 'react-intl';
@@ -28,10 +28,13 @@ const fetchRelation = async (endPoint, notifyStatus) => {
   return { results, pagination };
 };
 
-const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) => {
+const RelationMultiple = ({ fieldSchema, metadatas, name, entityId, value, contentType }) => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
-  const requestURL = getRequestUrl(`${queryInfos.endPoint}/${rowId}/${name.split('.')[0]}`);
+  const relationFetchEndpoint = useMemo(
+    () => getRequestUrl(`relations/${contentType.uid}/${entityId}/${name.split('.')[0]}`),
+    [entityId, name, contentType]
+  );
   const [isOpen, setIsOpen] = useState(false);
 
   const Label = (
@@ -56,8 +59,8 @@ const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, val
   };
 
   const { data, status } = useQuery(
-    [fieldSchema.targetModel, rowId],
-    () => fetchRelation(requestURL, notify),
+    [fieldSchema.targetModel, entityId],
+    () => fetchRelation(relationFetchEndpoint, notify),
     {
       enabled: isOpen,
       staleTime: 0,
@@ -104,7 +107,7 @@ const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, val
                   defaultMessage: 'This relation contains more entities than displayed',
                 })}
               >
-                <Typography>...</Typography>
+                <Typography>…</Typography>
               </MenuItem>
             )}
           </>
@@ -115,6 +118,9 @@ const RelationMultiple = ({ fieldSchema, metadatas, queryInfos, name, rowId, val
 };
 
 RelationMultiple.propTypes = {
+  contentType: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+  }).isRequired,
   fieldSchema: PropTypes.shape({
     relation: PropTypes.string,
     targetModel: PropTypes.string,
@@ -127,8 +133,7 @@ RelationMultiple.propTypes = {
     }),
   }).isRequired,
   name: PropTypes.string.isRequired,
-  rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  queryInfos: PropTypes.shape({ endPoint: PropTypes.string.isRequired }).isRequired,
+  entityId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   value: PropTypes.object.isRequired,
 };
 

@@ -553,6 +553,7 @@ describe('Application page', () => {
       .c41 {
         padding-right: 8px;
         padding-left: 8px;
+        overflow: hidden;
         width: 100%;
       }
 
@@ -984,6 +985,7 @@ describe('Application page', () => {
                                     <div
                                       aria-live="polite"
                                       class="c41 c42"
+                                      overflow="hidden"
                                       width="100%"
                                     >
                                       <div
