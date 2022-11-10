@@ -177,12 +177,12 @@ describe('Admin API Token v2 CRUD (api)', () => {
     });
   });
 
-  test('Creates a token with a lifespan', async () => {
+  test('Creates a token with a 7-day lifespan', async () => {
     const now = Date.now();
     jest.useFakeTimers('modern').setSystemTime(now);
 
     const body = {
-      name: 'api-token_tests-lifespan',
+      name: 'api-token_tests-lifespan7',
       description: 'api-token_tests-description',
       type: 'read-only',
       lifespan: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -206,7 +206,85 @@ describe('Admin API Token v2 CRUD (api)', () => {
       lastUsedAt: null,
       updatedAt: expect.toBeISODate(),
       expiresAt: expect.toBeISODate(),
-      lifespan: body.lifespan,
+      lifespan: String(body.lifespan),
+    });
+
+    // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
+    expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
+    expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
+
+    jest.useRealTimers();
+  });
+
+  test('Creates a token with a 30-day lifespan', async () => {
+    const now = Date.now();
+    jest.useFakeTimers('modern').setSystemTime(now);
+
+    const body = {
+      name: 'api-token_tests-lifespan30',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+      lifespan: 30 * 24 * 60 * 60 * 1000, // 7 days
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toStrictEqual({
+      accessKey: expect.any(String),
+      name: body.name,
+      permissions: [],
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+      createdAt: expect.toBeISODate(),
+      lastUsedAt: null,
+      updatedAt: expect.toBeISODate(),
+      expiresAt: expect.toBeISODate(),
+      lifespan: String(body.lifespan),
+    });
+
+    // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
+    expect(Date.parse(res.body.data.expiresAt)).toBeGreaterThan(now + body.lifespan - 2000);
+    expect(Date.parse(res.body.data.expiresAt)).toBeLessThan(now + body.lifespan + 2000);
+
+    jest.useRealTimers();
+  });
+
+  test('Creates a token with a 90-day lifespan', async () => {
+    const now = Date.now();
+    jest.useFakeTimers('modern').setSystemTime(now);
+
+    const body = {
+      name: 'api-token_tests-lifespan90',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+      lifespan: 90 * 24 * 60 * 60 * 1000, // 90 days
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toStrictEqual({
+      accessKey: expect.any(String),
+      name: body.name,
+      permissions: [],
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+      createdAt: expect.toBeISODate(),
+      lastUsedAt: null,
+      updatedAt: expect.toBeISODate(),
+      expiresAt: expect.toBeISODate(),
+      lifespan: String(body.lifespan),
     });
 
     // Datetime stored in some databases may lose ms accuracy, so allow a range of 2 seconds for timing edge cases
