@@ -38,7 +38,7 @@ const {
   deleteRelations,
   cleanOrderColumns,
 } = require('./regular-relations');
-const FractionalOrderer = require('./relations-orderer');
+const relationsSorter = require('./relations-sorter');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -843,6 +843,7 @@ const createEntityManager = (db) => {
                         )
                       ),
                     },
+                    ...(joinTable.on || {}),
                   })
                   .transacting(trx)
                   .execute();
@@ -855,18 +856,11 @@ const createEntityManager = (db) => {
                   .transacting(trx)
                   .execute();
 
-                // If maxOrder.max value is not in adjacentRelations, it means that the last relation
-                if (!adjacentRelations.find((r) => r[orderColumnName] === maxOrder.max)) {
-                  adjacentRelations.push({
-                    [inverseJoinColumn.name]: -1,
-                    [joinTable.orderColumnName]: maxOrder.max || 0,
-                  });
-                }
-
-                const orderMap = new FractionalOrderer(
+                const orderMap = relationsSorter(
                   adjacentRelations,
                   inverseJoinColumn.name,
-                  joinTable.orderColumnName
+                  joinTable.orderColumnName,
+                  maxOrder
                 )
                   .connect(cleanRelationData.connect)
                   .getOrderMap();
