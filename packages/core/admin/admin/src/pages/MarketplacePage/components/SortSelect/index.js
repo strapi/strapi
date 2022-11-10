@@ -40,7 +40,7 @@ const SortSelect = ({ sortQuery, handleSelectChange }) => {
     'githubStars:desc': {
       selected: {
         id: 'admin.pages.MarketPlacePage.sort.githubStars.selected',
-        defaultMessage: 'Sort by github stars',
+        defaultMessage: 'Sort by GitHub stars',
       },
       option: {
         id: 'admin.pages.MarketPlacePage.sort.githubStars',
