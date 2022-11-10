@@ -2,10 +2,11 @@
   "private": true,
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.12.1",
-    "@swc-node/jest": "^1.1.0",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.6",
     "@testing-library/react-hooks": "^3.4.2",
+    "@swc/core": "1.3.14",
+    "@swc/jest": "0.2.23",
     "axios-mock-adapter": "^1.19.0",
     "babel-eslint": "^10.0.0",
     "chalk": "4.1.1",
