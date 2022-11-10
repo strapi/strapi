@@ -52,7 +52,7 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.7",
     "@strapi/babel-plugin-switch-ee-ce": "4.4.7",
-    "@strapi/design-system": "1.2.7",
+    "@strapi/design-system": "1.2.8",
     "@strapi/helper-plugin": "4.4.7",
     "@strapi/icons": "1.2.7",
     "@strapi/permissions": "4.4.7",

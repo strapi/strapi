@@ -188,7 +188,6 @@ export const RelationItem = ({
           data-handler-id={handlerId}
           {...props}
         >
-          {/* TODO: swap this out for using children when DS is updated */}
           {canDrag ? (
             <IconButton
               forwardedAs="div"
@@ -197,9 +196,10 @@ export const RelationItem = ({
               marginRight={1}
               aria-label={iconButtonAriaLabel}
               noBorder
-              icon={<Drag />}
               onKeyDown={handleKeyDown}
-            />
+            >
+              <Drag />
+            </IconButton>
           ) : null}
           <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
           {endAction && <Box paddingLeft={4}>{endAction}</Box>}
