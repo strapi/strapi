@@ -1,5 +1,6 @@
 ---
 title: Custom fields
+slug: /custom-fields
 tags:
   - content-type-builder
   - plugins
@@ -17,24 +18,7 @@ A custom field needs to be registered in both the admin and server.
 
 ### Server
 
-We need to ensure that an attribute using a custom field is valid, we expose a new `customFields` object with a `register` method on the `Strapi` instance.
-
-Here's how you register a Custom Field on the server:
-
-```ts
-interface CustomFieldServerOptions {
-  // The name of the custom field
-  name: string;
-  // The name of the plugin creating the custom field
-  plugin?: string;
-  // The existing Strapi data type the custom field will use
-  type: string;
-}
-
-strapi.customFields.register(
-  options: CustomFieldServerOptions | CustomFieldServerOptions[]
-);
-```
+To register a custom field on the server, see [documentation](https://docs.strapi.io/developer-docs/latest/development/custom-fields.html#registering-a-custom-field-on-the-server).
 
 The custom field will be added to Strapi during the server [register lifecycle](https://docs.strapi.io/developer-docs/latest/developer-resources/plugin-api-reference/server.html#register).
 
@@ -42,11 +26,13 @@ The `type: customField` saved on the schema.json for a content-type or component
 
 ### Admin
 
-To register a custom field on the server, see [documentation](https://docs.strapi.io/developer-docs/latest/development/custom-fields.html#registering-a-custom-field-on-the-server).
-
 To register a custom field to the admin panel, see [documentation](https://docs.strapi.io/developer-docs/latest/development/custom-fields.html#registering-a-custom-field-in-the-admin-panel).
 
-Note: You can only share a custom field by packaging it into a plugin.
+A custom field being saved on a content-type or component will have it’s underlying data type converted from the underlying data type to `type: customField` just before save in the [formatAttributes function](https://github.com/strapi/strapi/blob/33debd57010667a3fc5dfa343a673206cfb956e1/packages/core/content-type-builder/admin/src/components/DataManagerProvider/utils/cleanData.js#L97-L100) of the `cleanData` util
+
+### Packaging
+
+A custom field can be registered in either a Strapi application or Strapi plugin. However, they can only be shared through plugins by publishing the package on npm.
 
 ### Example
 
