@@ -993,7 +993,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c67:hover:not([aria-disabled='true']) .sc-igcPbY {
+.c67:hover:not([aria-disabled='true']) .sc-djoyIk {
   color: #271fe0;
 }
 
@@ -1017,7 +1017,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c85:hover:not([aria-disabled='true']) .sc-igcPbY {
+.c85:hover:not([aria-disabled='true']) .sc-djoyIk {
   color: #271fe0;
 }
 
@@ -1612,7 +1612,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c78 c79"
                           >
                             <span
-                              class="c78 sc-igcPbY c80"
+                              class="c78 sc-djoyIk c80"
                               id="accordion-label-accordion-1"
                             >
                               Address
@@ -1677,7 +1677,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c78 c79"
                           >
                             <span
-                              class="c78 sc-igcPbY c80"
+                              class="c78 sc-djoyIk c80"
                               id="accordion-label-accordion-2"
                             >
                               Category
@@ -2964,7 +2964,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c78:hover:not([aria-disabled='true']) .sc-igcPbY {
+.c78:hover:not([aria-disabled='true']) .sc-djoyIk {
   color: #271fe0;
 }
 
@@ -2988,7 +2988,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
   border: 1px solid #4945ff;
 }
 
-.c96:hover:not([aria-disabled='true']) .sc-igcPbY {
+.c96:hover:not([aria-disabled='true']) .sc-djoyIk {
   color: #271fe0;
 }
 
@@ -3659,7 +3659,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c89 c90"
                           >
                             <span
-                              class="c89 sc-igcPbY c91"
+                              class="c89 sc-djoyIk c91"
                               id="accordion-label-accordion-7"
                             >
                               Address
@@ -3724,7 +3724,7 @@ exports[`ADMIN | Pages | API TOKENS | EditView renders and matches the snapshot 
                             class="c89 c90"
                           >
                             <span
-                              class="c89 sc-igcPbY c91"
+                              class="c89 sc-djoyIk c91"
                               id="accordion-label-accordion-8"
                             >
                               Category
