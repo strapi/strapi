@@ -13,46 +13,50 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   width: 1px;
 }
 
-.c10 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-left: 40px;
+.c22 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
 }
 
-.c19 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
+.c23 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c20 {
-  background: #f6f6f9;
-  padding-top: 64px;
-  padding-bottom: 64px;
-  border-radius: 4px;
-  border-color: #c0c0cf;
-  border: 1px solid #c0c0cf;
-  position: relative;
+.c7 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
-.c26 {
-  padding-top: 12px;
-  padding-bottom: 20px;
-}
-
-.c28 {
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
-  z-index: 1;
-  width: 100%;
-}
-
-.c30 {
-  position: relative;
+.c27 {
+  color: #666687;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
 }
 
 .c34 {
@@ -130,7 +134,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c32 .sc-kBzgEd {
+.c32 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -200,7 +204,7 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c38 .sc-kBzgEd {
+.c38 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -260,50 +264,46 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
   fill: #32324d;
 }
 
-.c22 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
+.c10 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-left: 40px;
 }
 
-.c23 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c19 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
 }
 
-.c7 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c20 {
+  background: #f6f6f9;
+  padding-top: 64px;
+  padding-bottom: 64px;
+  border-radius: 4px;
+  border-color: #c0c0cf;
+  border: 1px solid #c0c0cf;
+  position: relative;
 }
 
-.c27 {
-  color: #666687;
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
+.c26 {
+  padding-top: 12px;
+  padding-bottom: 20px;
+}
+
+.c28 {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  z-index: 1;
+  width: 100%;
+}
+
+.c30 {
+  position: relative;
 }
 
 .c2 {
@@ -587,203 +587,205 @@ exports[`UploadAssetDialog from computer snapshots the component 1`] = `
       class="c1"
     >
       <div>
-        <div
-          aria-labelledby="title"
-          aria-modal="true"
-          class="c2 c3"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c4 c5"
+            aria-labelledby="title"
+            aria-modal="true"
+            class="c2 c3"
+            role="dialog"
           >
             <div
-              class="c6"
-            >
-              <h2
-                class="c7"
-                id="title"
-              >
-                Add new assets
-              </h2>
-              <button
-                aria-disabled="false"
-                aria-label="Close the modal"
-                class="c8 c9"
-                type="button"
-              >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                    fill="#212134"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div>
-            <div
-              class="c10"
+              class="c4 c5"
             >
               <div
-                aria-label="How do you want to upload your assets?"
-                role="tablist"
+                class="c6"
               >
-                <button
-                  aria-controls="tabgroup-1-0-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c11"
-                  id="tabgroup-1-0-tab"
-                  role="tab"
-                  tabindex="0"
-                  type="button"
+                <h2
+                  class="c7"
+                  id="title"
                 >
-                  <div
-                    class="c12 c13"
-                  >
-                    <span
-                      class="c14"
-                    >
-                      From computer
-                    </span>
-                  </div>
-                </button>
+                  Add new assets
+                </h2>
                 <button
                   aria-disabled="false"
-                  aria-selected="false"
-                  class="c11"
-                  id="tabgroup-1-1-tab"
-                  role="tab"
-                  tabindex="-1"
+                  aria-label="Close the modal"
+                  class="c8 c9"
                   type="button"
                 >
-                  <div
-                    class="c12 c15"
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <span
-                      class="c16"
-                    >
-                      From url
-                    </span>
-                  </div>
+                    <path
+                      d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                      fill="#212134"
+                    />
+                  </svg>
                 </button>
               </div>
-              <hr
-                class="c17 c18"
-              />
             </div>
             <div>
               <div
-                aria-labelledby="tabgroup-1-0-tab"
-                id="tabgroup-1-0-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                class="c10"
               >
-                <form>
-                  <div
-                    class="c19"
+                <div
+                  aria-label="How do you want to upload your assets?"
+                  role="tablist"
+                >
+                  <button
+                    aria-controls="tabgroup-1-0-tabpanel"
+                    aria-disabled="false"
+                    aria-selected="true"
+                    class="c11"
+                    id="tabgroup-1-0-tab"
+                    role="tab"
+                    tabindex="0"
+                    type="button"
                   >
-                    <label>
-                      <div
-                        class="c20 c21"
+                    <div
+                      class="c12 c13"
+                    >
+                      <span
+                        class="c14"
                       >
+                        From computer
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    aria-disabled="false"
+                    aria-selected="false"
+                    class="c11"
+                    id="tabgroup-1-1-tab"
+                    role="tab"
+                    tabindex="-1"
+                    type="button"
+                  >
+                    <div
+                      class="c12 c15"
+                    >
+                      <span
+                        class="c16"
+                      >
+                        From url
+                      </span>
+                    </div>
+                  </button>
+                </div>
+                <hr
+                  class="c17 c18"
+                />
+              </div>
+              <div>
+                <div
+                  aria-labelledby="tabgroup-1-0-tab"
+                  id="tabgroup-1-0-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <form>
+                    <div
+                      class="c19"
+                    >
+                      <label>
                         <div
-                          class="c22"
+                          class="c20 c21"
                         >
                           <div
-                            class="c23 c24"
+                            class="c22"
                           >
                             <div
-                              class="c25"
+                              class="c23 c24"
                             >
-                              <svg
-                                aria-hidden="true"
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 24 20"
-                                width="1em"
-                                xmlns="http://www.w3.org/2000/svg"
+                              <div
+                                class="c25"
                               >
-                                <path
-                                  d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
-                                  fill="#32324D"
-                                />
-                                <path
-                                  d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
-                                  fill="#32324D"
-                                />
-                              </svg>
-                            </div>
-                            <div
-                              class="c26"
-                            >
-                              <span
-                                class="c27"
-                              >
-                                Drag & Drop here or
-                              </span>
-                            </div>
-                            <input
-                              class="c28 c29"
-                              multiple=""
-                              name="files"
-                              tabindex="-1"
-                              type="file"
-                              width="100%"
-                            />
-                            <div
-                              class="c30"
-                            >
-                              <button
-                                aria-disabled="false"
-                                class="c31 c32"
-                                type="button"
+                                <svg
+                                  aria-hidden="true"
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 24 20"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 00-.74-.55 2.214 2.214 0 00-.912-.196 2.215 2.215 0 00-.912.191 2.131 2.131 0 00-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 00-.741-.545 2.228 2.228 0 00-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 00.504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 00-.652-1.81 2.706 2.706 0 00-1.776-.87z"
+                                    fill="#32324D"
+                                  />
+                                  <path
+                                    d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585zM3.303 6.408h.826V3.997h2.477v-.793-.793H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826z"
+                                    fill="#32324D"
+                                  />
+                                </svg>
+                              </div>
+                              <div
+                                class="c26"
                               >
                                 <span
-                                  class="c33 c34"
+                                  class="c27"
                                 >
-                                  Browse files
+                                  Drag & Drop here or
                                 </span>
-                              </button>
+                              </div>
+                              <input
+                                class="c28 c29"
+                                multiple=""
+                                name="files"
+                                tabindex="-1"
+                                type="file"
+                                width="100%"
+                              />
+                              <div
+                                class="c30"
+                              >
+                                <button
+                                  aria-disabled="false"
+                                  class="c31 c32"
+                                  type="button"
+                                >
+                                  <span
+                                    class="c33 c34"
+                                  >
+                                    Browse files
+                                  </span>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </label>
-                  </div>
-                  <div
-                    class="c4 c35"
-                  >
+                      </label>
+                    </div>
                     <div
-                      class="c6"
+                      class="c4 c35"
                     >
                       <div
-                        class="c36 c37"
+                        class="c6"
                       >
-                        <button
-                          aria-disabled="false"
-                          class="c31 c38"
-                          type="button"
+                        <div
+                          class="c36 c37"
                         >
-                          <span
-                            class="c33 c34"
+                          <button
+                            aria-disabled="false"
+                            class="c31 c38"
+                            type="button"
                           >
-                            app.components.Button.cancel
-                          </span>
-                        </button>
+                            <span
+                              class="c33 c34"
+                            >
+                              app.components.Button.cancel
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          class="c36 c37"
+                        />
                       </div>
-                      <div
-                        class="c36 c37"
-                      />
                     </div>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
@@ -834,17 +836,11 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
       />
     </div>
   </div>
-  .c9 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-left: 40px;
-}
-
-.c18 {
-  padding-top: 24px;
-  padding-right: 40px;
-  padding-bottom: 24px;
-  padding-left: 40px;
+  .c6 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.875rem;
+  line-height: 1.43;
 }
 
 .c33 {
@@ -922,7 +918,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   border: 1px solid #4945ff;
 }
 
-.c34 .sc-kBzgEd {
+.c34 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -992,7 +988,7 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   background: #ffffff;
 }
 
-.c31 .sc-kBzgEd {
+.c31 .sc-cfJLRR {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1050,6 +1046,19 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
 .c31 svg > g,
 .c31 svg path {
   fill: #32324d;
+}
+
+.c9 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-left: 40px;
+}
+
+.c18 {
+  padding-top: 24px;
+  padding-right: 40px;
+  padding-bottom: 24px;
+  padding-left: 40px;
 }
 
 .c20 {
@@ -1193,13 +1202,6 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
   line-height: 1.43;
   color: #8e8ea9;
   opacity: 1;
-}
-
-.c6 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
 }
 
 .c1 {
@@ -1433,193 +1435,195 @@ exports[`UploadAssetDialog from url snapshots the component 1`] = `
       class="c0"
     >
       <div>
-        <div
-          aria-labelledby="title"
-          aria-modal="true"
-          class="c1 c2"
-          role="dialog"
-        >
+        <div>
           <div
-            class="c3 c4"
+            aria-labelledby="title"
+            aria-modal="true"
+            class="c1 c2"
+            role="dialog"
           >
             <div
-              class="c5"
-            >
-              <h2
-                class="c6"
-                id="title"
-              >
-                Add new assets
-              </h2>
-              <button
-                aria-disabled="false"
-                aria-label="Close the modal"
-                class="c7 c8"
-                type="button"
-              >
-                <svg
-                  fill="none"
-                  height="1em"
-                  viewBox="0 0 24 24"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                    fill="#212134"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div>
-            <div
-              class="c9"
+              class="c3 c4"
             >
               <div
-                aria-label="How do you want to upload your assets?"
-                role="tablist"
+                class="c5"
               >
+                <h2
+                  class="c6"
+                  id="title"
+                >
+                  Add new assets
+                </h2>
                 <button
                   aria-disabled="false"
-                  aria-selected="false"
-                  class="c10"
-                  id="tabgroup-8-0-tab"
-                  role="tab"
-                  tabindex="-1"
+                  aria-label="Close the modal"
+                  class="c7 c8"
                   type="button"
                 >
-                  <div
-                    class="c11 c12"
+                  <svg
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <span
-                      class="c13"
-                    >
-                      From computer
-                    </span>
-                  </div>
-                </button>
-                <button
-                  aria-controls="tabgroup-8-1-tabpanel"
-                  aria-disabled="false"
-                  aria-selected="true"
-                  class="c10"
-                  id="tabgroup-8-1-tab"
-                  role="tab"
-                  tabindex="0"
-                  type="button"
-                >
-                  <div
-                    class="c11 c14"
-                  >
-                    <span
-                      class="c15"
-                    >
-                      From url
-                    </span>
-                  </div>
+                    <path
+                      d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                      fill="#212134"
+                    />
+                  </svg>
                 </button>
               </div>
-              <hr
-                class="c16 c17"
-              />
             </div>
             <div>
               <div
-                aria-labelledby="tabgroup-8-1-tab"
-                id="tabgroup-8-1-tabpanel"
-                role="tabpanel"
-                tabindex="0"
+                class="c9"
               >
-                <form
-                  action="#"
-                  novalidate=""
+                <div
+                  aria-label="How do you want to upload your assets?"
+                  role="tablist"
                 >
-                  <div
-                    class="c18"
+                  <button
+                    aria-disabled="false"
+                    aria-selected="false"
+                    class="c10"
+                    id="tabgroup-8-0-tab"
+                    role="tab"
+                    tabindex="-1"
+                    type="button"
                   >
                     <div
-                      class="c19"
+                      class="c11 c12"
                     >
-                      <div>
-                        <div
-                          class="c20 c21"
-                          spacing="1"
-                        >
+                      <span
+                        class="c13"
+                      >
+                        From computer
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    aria-controls="tabgroup-8-1-tabpanel"
+                    aria-disabled="false"
+                    aria-selected="true"
+                    class="c10"
+                    id="tabgroup-8-1-tab"
+                    role="tab"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <div
+                      class="c11 c14"
+                    >
+                      <span
+                        class="c15"
+                      >
+                        From url
+                      </span>
+                    </div>
+                  </button>
+                </div>
+                <hr
+                  class="c16 c17"
+                />
+              </div>
+              <div>
+                <div
+                  aria-labelledby="tabgroup-8-1-tab"
+                  id="tabgroup-8-1-tabpanel"
+                  role="tabpanel"
+                  tabindex="0"
+                >
+                  <form
+                    action="#"
+                    novalidate=""
+                  >
+                    <div
+                      class="c18"
+                    >
+                      <div
+                        class="c19"
+                      >
+                        <div>
                           <div
-                            class="c22"
+                            class="c20 c21"
+                            spacing="1"
                           >
-                            <label
-                              class="c23"
-                              for="textarea-1"
+                            <div
+                              class="c22"
                             >
-                              <div
-                                class="c22"
+                              <label
+                                class="c23"
+                                for="textarea-1"
                               >
-                                URL
-                              </div>
-                            </label>
+                                <div
+                                  class="c22"
+                                >
+                                  URL
+                                </div>
+                              </label>
+                            </div>
+                            <div
+                              class="c24"
+                            >
+                              <textarea
+                                aria-describedby="textarea-1-hint"
+                                aria-invalid="false"
+                                class="c25"
+                                id="textarea-1"
+                                name="urls"
+                              />
+                            </div>
+                            <p
+                              class="c26"
+                              id="textarea-1-hint"
+                            >
+                              Separate your URL links by a carriage return.
+                            </p>
                           </div>
-                          <div
-                            class="c24"
-                          >
-                            <textarea
-                              aria-describedby="textarea-1-hint"
-                              aria-invalid="false"
-                              class="c25"
-                              id="textarea-1"
-                              name="urls"
-                            />
-                          </div>
-                          <p
-                            class="c26"
-                            id="textarea-1-hint"
-                          >
-                            Separate your URL links by a carriage return.
-                          </p>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div
-                    class="c3 c27"
-                  >
                     <div
-                      class="c5"
+                      class="c3 c27"
                     >
                       <div
-                        class="c28 c29"
+                        class="c5"
                       >
-                        <button
-                          aria-disabled="false"
-                          class="c30 c31"
-                          type="button"
+                        <div
+                          class="c28 c29"
                         >
-                          <span
-                            class="c32 c33"
+                          <button
+                            aria-disabled="false"
+                            class="c30 c31"
+                            type="button"
                           >
-                            app.components.Button.cancel
-                          </span>
-                        </button>
-                      </div>
-                      <div
-                        class="c28 c29"
-                      >
-                        <button
-                          aria-disabled="false"
-                          class="c30 c34"
-                          type="submit"
+                            <span
+                              class="c32 c33"
+                            >
+                              app.components.Button.cancel
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          class="c28 c29"
                         >
-                          <span
-                            class="c32 c33"
+                          <button
+                            aria-disabled="false"
+                            class="c30 c34"
+                            type="submit"
                           >
-                            Next
-                          </span>
-                        </button>
+                            <span
+                              class="c32 c33"
+                            >
+                              Next
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
           </div>

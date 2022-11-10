@@ -32,35 +32,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c1 {
-        padding-top: 24px;
-        padding-right: 40px;
-      }
-
-      .c9 {
-        padding-top: 8px;
-        padding-bottom: 64px;
-      }
-
-      .c11 {
-        background: #ffffff;
-        padding-top: 48px;
-        padding-right: 56px;
-        padding-bottom: 48px;
-        padding-left: 56px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c16 {
-        padding-top: 24px;
-        padding-bottom: 32px;
-      }
-
-      .c19 {
-        padding-top: 16px;
-      }
-
       .c0 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -122,6 +93,35 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
+      }
+
+      .c1 {
+        padding-top: 24px;
+        padding-right: 40px;
+      }
+
+      .c9 {
+        padding-top: 8px;
+        padding-bottom: 64px;
+      }
+
+      .c11 {
+        background: #ffffff;
+        padding-top: 48px;
+        padding-right: 56px;
+        padding-bottom: 48px;
+        padding-left: 56px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c16 {
+        padding-top: 24px;
+        padding-bottom: 32px;
+      }
+
+      .c19 {
+        padding-top: 16px;
       }
 
       .c22 {

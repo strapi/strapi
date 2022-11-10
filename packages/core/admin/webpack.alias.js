@@ -37,21 +37,8 @@ const aliasExactMatch = [
   'yup',
 ];
 
-const alias = [
-  'react-select/animated',
-  'react-select/async',
-  'react-select/async-creatable',
-  'react-select/base',
-  'react-select/creatable',
-];
-
 // See https://webpack.js.org/configuration/resolve/
 module.exports = {
-  ...alias.reduce((acc, name) => {
-    acc[name] = require.resolve(name);
-    return acc;
-  }, {}),
-
   ...aliasExactMatch.reduce((acc, name) => {
     acc[`${name}$`] = require.resolve(name);
     return acc;
