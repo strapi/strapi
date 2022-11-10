@@ -6,13 +6,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { Box } from '@strapi/design-system/Box';
 import { Typography } from '@strapi/design-system/Typography';
 import { Stack } from '@strapi/design-system/Stack';
 import { pxToRem } from '@strapi/helper-plugin';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import styled from 'styled-components';
-import { useIntl } from 'react-intl';
 
 const StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
   width: ${pxToRem(32)} !important;
@@ -53,19 +53,14 @@ const ComponentBox = styled(Box)`
   }
 `;
 
-function ComponentCard({ componentUid, intlLabel, icon, onClick }) {
-  const { formatMessage } = useIntl();
-  const handleClick = () => {
-    onClick(componentUid);
-  };
-
+export default function ComponentCard({ children, icon, onClick }) {
   return (
-    <button type="button" onClick={handleClick}>
+    <button type="button" onClick={onClick}>
       <ComponentBox borderRadius="borderRadius">
         <Stack spacing={1} style={{ justifyContent: 'center', alignItems: 'center' }}>
           <StyledFontAwesomeIcon icon={icon} />
           <Typography variant="pi" fontWeight="bold" textColor="neutral600">
-            {formatMessage(intlLabel)}
+            {children}
           </Typography>
         </Stack>
       </ComponentBox>
@@ -79,13 +74,7 @@ ComponentCard.defaultProps = {
 };
 
 ComponentCard.propTypes = {
-  componentUid: PropTypes.string.isRequired,
-  intlLabel: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    defaultMessage: PropTypes.string.isRequired,
-  }).isRequired,
+  children: PropTypes.node.isRequired,
   icon: PropTypes.string,
   onClick: PropTypes.func,
 };
-
-export default ComponentCard;

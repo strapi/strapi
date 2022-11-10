@@ -10,7 +10,7 @@ import { ThemeProvider, lightTheme, Tooltip } from '@strapi/design-system';
 import Earth from '@strapi/icons/Earth';
 import { IntlProvider } from 'react-intl';
 import styled from 'styled-components';
-import DzLabel from '../index';
+import DynamicZoneLabel from '../DynamicZoneLabel';
 
 const Button = styled.button`
   border: none;
@@ -36,12 +36,12 @@ const LabelAction = () => {
   );
 };
 
-describe('<DzLabel />', () => {
+describe('DynamicZoneLabel', () => {
   it('renders and matches the snapshot', () => {
     const { container } = render(
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <DzLabel label="dz" name="test" numberOfComponents={1} />
+          <DynamicZoneLabel label="dz" name="test" numberOfComponents={1} />
         </IntlProvider>
       </ThemeProvider>
     );
@@ -53,7 +53,7 @@ describe('<DzLabel />', () => {
     const { container } = render(
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <DzLabel name="test" numberOfComponents={1} />
+          <DynamicZoneLabel name="test" numberOfComponents={1} />
         </IntlProvider>
       </ThemeProvider>
     );
@@ -65,7 +65,12 @@ describe('<DzLabel />', () => {
     const { container } = render(
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <DzLabel label="dz" name="test" numberOfComponents={1} labelAction={<LabelAction />} />
+          <DynamicZoneLabel
+            label="dz"
+            name="test"
+            numberOfComponents={1}
+            labelAction={<LabelAction />}
+          />
         </IntlProvider>
       </ThemeProvider>
     );

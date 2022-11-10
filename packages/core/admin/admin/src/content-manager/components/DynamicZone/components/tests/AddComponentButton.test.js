@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
-import AddComponentButton from '../index';
+import AddComponentButton from '../AddComponentButton';
 
 describe('<AddComponentButton />', () => {
   it('renders and matches the snapshot', () => {

@@ -13,7 +13,8 @@ import { BaseButton } from '@strapi/design-system/BaseButton';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
-import { getTrad } from '../../../../utils';
+
+import { getTrad } from '../../../utils';
 
 const StyledAddIcon = styled(PlusCircle)`
   transform: ${({ $isOpen }) => ($isOpen ? 'rotate(45deg)' : 'rotate(0deg)')};

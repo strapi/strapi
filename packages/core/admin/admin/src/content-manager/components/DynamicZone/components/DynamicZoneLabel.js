@@ -17,7 +17,14 @@ const StyledBox = styled(Box)`
   border-radius: ${pxToRem(26)};
 `;
 
-const DzLabel = ({ label, labelAction, name, numberOfComponents, required, intlDescription }) => {
+const DynamicZoneLabel = ({
+  label,
+  labelAction,
+  name,
+  numberOfComponents,
+  required,
+  intlDescription,
+}) => {
   const { formatMessage } = useIntl();
   const intlLabel = formatMessage({ id: label || name, defaultMessage: label || name });
 
@@ -58,14 +65,14 @@ const DzLabel = ({ label, labelAction, name, numberOfComponents, required, intlD
   );
 };
 
-DzLabel.defaultProps = {
+DynamicZoneLabel.defaultProps = {
   intlDescription: undefined,
   label: '',
   labelAction: undefined,
   required: false,
 };
 
-DzLabel.propTypes = {
+DynamicZoneLabel.propTypes = {
   intlDescription: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
@@ -77,4 +84,4 @@ DzLabel.propTypes = {
   required: PropTypes.bool,
 };
 
-export default DzLabel;
+export default DynamicZoneLabel;

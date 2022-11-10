@@ -4,6 +4,7 @@ import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-sys
 import { Box } from '@strapi/design-system/Box';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
+
 import ComponentCard from './ComponentCard';
 
 const Grid = styled.div`
@@ -12,7 +13,7 @@ const Grid = styled.div`
   grid-gap: ${({ theme }) => theme.spaces[1]};
 `;
 
-const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggle }) => {
+const ComponentCategory = ({ category, components, variant, isOpen, onAddComponent, onToggle }) => {
   const { formatMessage } = useIntl();
 
   const handleToggle = () => {
@@ -22,24 +23,18 @@ const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggl
   return (
     <Accordion expanded={isOpen} onToggle={handleToggle} size="S">
       <AccordionToggle
-        variant={isOdd ? 'primary' : 'secondary'}
+        variant={variant}
         title={formatMessage({ id: category, defaultMessage: category })}
         togglePosition="left"
       />
       <AccordionContent>
         <Box paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           <Grid>
-            {components.map(({ componentUid, info: { displayName, icon } }) => {
-              return (
-                <ComponentCard
-                  key={componentUid}
-                  componentUid={componentUid}
-                  intlLabel={{ id: displayName, defaultMessage: displayName }}
-                  icon={icon}
-                  onClick={onAddComponent}
-                />
-              );
-            })}
+            {components.map(({ componentUid, info: { displayName, icon } }) => (
+              <ComponentCard key={componentUid} icon={icon} onClick={onAddComponent(componentUid)}>
+                {formatMessage({ id: displayName, defaultMessage: displayName })}
+              </ComponentCard>
+            ))}
           </Grid>
         </Box>
       </AccordionContent>
@@ -47,13 +42,13 @@ const Category = ({ category, components, isOdd, isOpen, onAddComponent, onToggl
   );
 };
 
-Category.propTypes = {
+ComponentCategory.propTypes = {
   category: PropTypes.string.isRequired,
   components: PropTypes.array.isRequired,
-  isOdd: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool.isRequired,
   onAddComponent: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
+  variant: PropTypes.oneOf(['primary', 'secondary']).isRequired,
 };
 
-export default Category;
+export default ComponentCategory;
