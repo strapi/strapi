@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "4.4.6",
+  "version": "4.5.0",
   "description": "Helper for Strapi plugins development",
   "repository": {
     "type": "git",
@@ -58,7 +58,7 @@
     "react-intl": "5.25.1",
     "react-router": "^5.2.0",
     "react-router-dom": "5.2.0",
-    "react-select": "4.0.2",
+    "react-select": "5.6.0",
     "styled-components": "5.3.3",
     "whatwg-fetch": "^3.6.2"
   },
@@ -69,8 +69,8 @@
     "@storybook/builder-webpack5": "6.5.9",
     "@storybook/manager-webpack5": "6.4.10",
     "@storybook/react": "^6.5.10",
-    "@strapi/design-system": "1.2.5",
-    "@strapi/icons": "1.2.5",
+    "@strapi/design-system": "1.2.7",
+    "@strapi/icons": "1.2.7",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
     "cross-env": "^7.0.3",

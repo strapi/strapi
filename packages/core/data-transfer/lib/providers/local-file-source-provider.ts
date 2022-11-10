@@ -2,8 +2,10 @@ import fs from 'fs';
 import zip from 'zlib';
 import tar from 'tar';
 import { chain } from 'stream-chain';
-import { pipeline, Duplex } from 'stream';
+import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
+
+import { createDecryptionCipher } from '../encryption';
 
 import { IMetadata, ISourceProvider, ProviderType } from '../../types';
 
@@ -80,6 +82,10 @@ class LocalFileSourceProvider implements ISourceProvider {
     return this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
 
+  streamSchemas(): NodeJS.ReadableStream {
+    return this.#streamJsonlDirectory('schemas');
+  }
+
   streamEntities(): NodeJS.ReadableStream {
     return this.#streamJsonlDirectory('entities');
   }
@@ -107,9 +113,10 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   #streamJsonlDirectory(directory: string) {
+    const options = this.options;
     const inStream = this.#getBackupStream();
 
-    const outStream = new Duplex();
+    const outStream = new PassThrough({ objectMode: true });
 
     pipeline(
       [
@@ -130,17 +137,26 @@ class LocalFileSourceProvider implements ISourceProvider {
           },
 
           onentry(entry) {
-            const transforms = chain([
-              // TODO: Add the decryption transform stream before parsing each line
+            const transforms = [];
+
+            if (options.encrypted) {
+              transforms.push(createDecryptionCipher(options.encryptionKey!));
+            }
+
+            if (options.compressed) {
+              transforms.push(zip.createGunzip());
+            }
+
+            transforms.push(
               // JSONL parser to read the data chunks one by one (line by line)
               parser(),
               // The JSONL parser returns each line as key/value
-              (line: { key: string; value: any }) => line.value,
-            ]);
+              (line: { key: string; value: any }) => line.value
+            );
 
             entry
               // Pipe transforms
-              .pipe(transforms)
+              .pipe(chain(transforms))
               // Pipe the out stream to the whole pipeline
               // DO NOT send the 'end' event when this entry has finished
               // emitting data, so that it doesn't close the out stream

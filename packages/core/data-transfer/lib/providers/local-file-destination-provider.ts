@@ -11,7 +11,7 @@ import type {
   ProviderType,
   TransferStage,
 } from '../../types';
-import { createCipher } from '../encryption/encrypt';
+import { createEncryptionCipher } from '../encryption/encrypt';
 import { providerResultsCounter } from './util';
 
 export interface ILocalFileDestinationProviderOptions {
@@ -76,7 +76,9 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       if (!this.options.encryption.key) {
         throw new Error("Can't encrypt without a key");
       }
-      const cipher = createCipher(this.options.encryption.key);
+
+      const cipher = createEncryptionCipher(this.options.encryption.key);
+
       transforms.push(cipher);
     }
 
@@ -89,6 +91,12 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     if (dirExists) {
       throw new Error('File with that name already exists');
+    }
+
+    if (this.options.encryption.enabled) {
+      if (!this.options.encryption.key) {
+        throw new Error("Can't encrypt without a key");
+      }
     }
 
     fs.mkdirSync(rootDir, { recursive: true });

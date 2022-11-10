@@ -69,6 +69,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
 .c7 {
   padding-right: 8px;
   padding-left: 8px;
+  overflow: hidden;
   width: 100%;
 }
 
@@ -194,6 +195,7 @@ exports[`<MediaLibraryInput /> renders and matches the snapshot 1`] = `
               <div
                 aria-live="polite"
                 class="c7 c8"
+                overflow="hidden"
                 width="100%"
               >
                 <div
