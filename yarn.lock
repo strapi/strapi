@@ -5854,10 +5854,10 @@
   optionalDependencies:
     typescript "^4.6.2"
 
-"@strapi/icons@1.2.7":
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.2.7.tgz#35862d7f6a088f9a0016b1d81687294c77526d0d"
-  integrity sha512-Uae7t/N4d+9zolgPFsbU4bq4+Y9zE90Lv1HKFKvF/3DFWX5W8Q1HRMN+sawdno7LXlHqav2TUXssJ18wwYfrRw==
+"@strapi/icons@1.3.0-beta.2":
+  version "1.3.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.3.0-beta.2.tgz#21f1039501773650fe8262b1478a2492d2511bc1"
+  integrity sha512-w4ckOHNtGiwo5Eg+DK+4QQ0Q8dt2l8j6Wlk5n/FfAWcO92aKvY89mvVaTA5lomHEyrPIaZvjSWgTAxA+d69cYw==
 
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.3"
