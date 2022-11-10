@@ -71,27 +71,6 @@ describe('GuidedTour Stepper', () => {
         min-height: 4.0625rem;
       }
 
-      .c4 {
-        font-weight: 500;
-        color: #ffffff;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c5 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c11 {
-        font-weight: 500;
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c2 {
         background: #4945ff;
         padding: 8px;
@@ -161,6 +140,27 @@ describe('GuidedTour Stepper', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c4 {
+        font-weight: 500;
+        color: #ffffff;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c5 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c11 {
+        font-weight: 500;
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       <div
@@ -331,27 +331,6 @@ describe('GuidedTour Stepper', () => {
         min-height: 5.3125rem;
       }
 
-      .c6 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c11 {
-        font-weight: 500;
-        color: #ffffff;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c14 {
-        font-weight: 500;
-        color: #666687;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
       .c2 {
         background: #4945ff;
         padding: 8px;
@@ -421,6 +400,27 @@ describe('GuidedTour Stepper', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c6 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c11 {
+        font-weight: 500;
+        color: #ffffff;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c14 {
+        font-weight: 500;
+        color: #666687;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       .c4 {
@@ -601,13 +601,6 @@ describe('GuidedTour Stepper', () => {
         margin-top: 8px;
       }
 
-      .c6 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
       .c2 {
         background: #4945ff;
         padding: 8px;
@@ -667,6 +660,13 @@ describe('GuidedTour Stepper', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+      }
+
+      .c6 {
+        color: #32324d;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
       }
 
       .c4 {

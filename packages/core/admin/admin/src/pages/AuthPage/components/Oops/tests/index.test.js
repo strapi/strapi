@@ -32,98 +32,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c22 {
-        color: #4945ff;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c21 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        position: relative;
-        outline: none;
-      }
-
-      .c21 svg path {
-        fill: #4945ff;
-      }
-
-      .c21 svg {
-        font-size: 0.625rem;
-      }
-
-      .c21:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c21:focus-visible {
-        outline: none;
-      }
-
-      .c21:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c1 {
-        padding-top: 24px;
-        padding-right: 40px;
-      }
-
-      .c9 {
-        padding-top: 8px;
-        padding-bottom: 64px;
-      }
-
-      .c11 {
-        background: #ffffff;
-        padding-top: 48px;
-        padding-right: 56px;
-        padding-bottom: 48px;
-        padding-left: 56px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c16 {
-        padding-top: 24px;
-        padding-bottom: 32px;
-      }
-
-      .c19 {
-        padding-top: 16px;
-      }
-
-      .c10:focus-visible {
-        outline: none;
-      }
-
       .c0 {
         -webkit-align-items: center;
         -webkit-box-align: center;
@@ -185,6 +93,98 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         color: #32324d;
         font-size: 0.875rem;
         line-height: 1.43;
+      }
+
+      .c1 {
+        padding-top: 24px;
+        padding-right: 40px;
+      }
+
+      .c9 {
+        padding-top: 8px;
+        padding-bottom: 64px;
+      }
+
+      .c11 {
+        background: #ffffff;
+        padding-top: 48px;
+        padding-right: 56px;
+        padding-bottom: 48px;
+        padding-left: 56px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c16 {
+        padding-top: 24px;
+        padding-bottom: 32px;
+      }
+
+      .c19 {
+        padding-top: 16px;
+      }
+
+      .c22 {
+        color: #4945ff;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c21 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        position: relative;
+        outline: none;
+      }
+
+      .c21 svg path {
+        fill: #4945ff;
+      }
+
+      .c21 svg {
+        font-size: 0.625rem;
+      }
+
+      .c21:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c21:focus-visible {
+        outline: none;
+      }
+
+      .c21:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c10:focus-visible {
+        outline: none;
       }
 
       .c5 {

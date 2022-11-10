@@ -54,75 +54,41 @@ describe('Admin | ee | SettingsPage | SSO', () => {
     );
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c1 {
-        padding-bottom: 56px;
+      .c17 {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c4 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c16 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .c2 {
-        overflow-x: hidden;
-      }
-
-      .c5 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+      .c18 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
-      .c6 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
+      .c19 > * {
+        margin-top: 0;
+        margin-bottom: 0;
       }
 
-      .c7 {
+      .c19 > * + * {
+        margin-top: 16px;
+      }
+
+      .c20 {
         color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-      }
-
-      .c15 {
-        color: #666687;
+        font-weight: 500;
         font-size: 1rem;
-        line-height: 1.5;
+        line-height: 1.25;
       }
 
       .c14 {
@@ -266,18 +232,35 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         fill: #ffffff;
       }
 
-      .c3:focus-visible {
+      .c45 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c45:focus {
         outline: none;
       }
 
-      .c17 {
-        background: #ffffff;
-        padding: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      .c45[aria-disabled='true'] {
+        cursor: not-allowed;
       }
 
-      .c18 {
+      .c48 {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .c50 {
+        padding-left: 12px;
+      }
+
+      .c40 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -291,20 +274,122 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         flex-direction: column;
       }
 
-      .c19 > * {
+      .c43 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c46 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+      }
+
+      .c42 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c49 {
+        color: #32324d;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c53 {
+        color: #666687;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c41 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c19 > * + * {
-        margin-top: 16px;
+      .c41 > * + * {
+        margin-top: 4px;
       }
 
-      .c20 {
-        color: #32324d;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
+      .c44 {
+        position: relative;
+        border: 1px solid #dcdce4;
+        padding-right: 12px;
+        border-radius: 4px;
+        background: #ffffff;
+        overflow: hidden;
+        min-height: 2.5rem;
+        outline: none;
+        box-shadow: 0;
+        -webkit-transition-property: border-color,box-shadow,fill;
+        transition-property: border-color,box-shadow,fill;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+      }
+
+      .c44:focus-within {
+        border: 1px solid #4945ff;
+        box-shadow: #4945ff 0px 0px 0px 2px;
+      }
+
+      .c51 {
+        background: transparent;
+        border: none;
+        position: relative;
+        z-index: 1;
+      }
+
+      .c51 svg {
+        height: 0.6875rem;
+        width: 0.6875rem;
+      }
+
+      .c51 svg path {
+        fill: #666687;
+      }
+
+      .c52 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        background: none;
+        border: none;
+      }
+
+      .c52 svg {
+        width: 0.375rem;
+      }
+
+      .c47 {
+        width: 100%;
       }
 
       .c30 {
@@ -493,63 +578,33 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         max-width: 320px;
       }
 
-      .c45 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
+      .c1 {
+        padding-bottom: 56px;
       }
 
-      .c45:focus {
-        outline: none;
+      .c4 {
+        background: #f6f6f9;
+        padding-top: 40px;
+        padding-right: 56px;
+        padding-bottom: 40px;
+        padding-left: 56px;
       }
 
-      .c45[aria-disabled='true'] {
-        cursor: not-allowed;
+      .c16 {
+        padding-right: 56px;
+        padding-left: 56px;
       }
 
-      .c48 {
-        padding-right: 16px;
-        padding-left: 16px;
+      .c0 {
+        display: grid;
+        grid-template-columns: 1fr;
       }
 
-      .c50 {
-        padding-left: 12px;
+      .c2 {
+        overflow-x: hidden;
       }
 
-      .c40 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c43 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c46 {
+      .c5 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -567,90 +622,35 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         justify-content: space-between;
       }
 
-      .c42 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c49 {
-        color: #32324d;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.875rem;
-        line-height: 1.43;
-      }
-
-      .c53 {
-        color: #666687;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c41 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c41 > * + * {
-        margin-top: 4px;
-      }
-
-      .c44 {
-        position: relative;
-        border: 1px solid #dcdce4;
-        padding-right: 12px;
-        border-radius: 4px;
-        background: #ffffff;
-        overflow: hidden;
-        min-height: 2.5rem;
-        outline: none;
-        box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
-        transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-      }
-
-      .c44:focus-within {
-        border: 1px solid #4945ff;
-        box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      .c51 {
-        background: transparent;
-        border: none;
-        position: relative;
-        z-index: 1;
-      }
-
-      .c51 svg {
-        height: 0.6875rem;
-        width: 0.6875rem;
-      }
-
-      .c51 svg path {
-        fill: #666687;
-      }
-
-      .c52 {
+      .c6 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        background: none;
-        border: none;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
-      .c52 svg {
-        width: 0.375rem;
+      .c7 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
       }
 
-      .c47 {
-        width: 100%;
+      .c15 {
+        color: #666687;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .c3:focus-visible {
+        outline: none;
       }
 
       .c21 {

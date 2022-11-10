@@ -13,8 +13,167 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   width: 1px;
 }
 
+.c0 {
+  padding-bottom: 12px;
+}
+
+.c15 {
+  background: #ffffff;
+  padding-top: 8px;
+  padding-right: 16px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+}
+
+.c1 {
+  -webkit-align-items: end;
+  -webkit-box-align: end;
+  -ms-flex-align: end;
+  align-items: end;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  gap: 8px;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c16 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.c2 {
+  -webkit-flex-basis: 70%;
+  -ms-flex-preferred-size: 70%;
+  flex-basis: 70%;
+}
+
+.c3 {
+  -webkit-align-items: stretch;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.c4 > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.c4 > * + * {
+  margin-top: 4px;
+}
+
+.c26 {
+  font-weight: 600;
+  color: #006096;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c31 {
+  color: #4945ff;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c34 {
+  font-weight: 600;
+  color: #2f6846;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
 .c7 {
   padding-right: 12px;
+}
+
+.c18 {
+  padding-top: 4px;
+  padding-right: 16px;
+  padding-bottom: 4px;
+  min-width: 0px;
+}
+
+.c27 {
+  padding-left: 16px;
+}
+
+.c35 {
+  padding-top: 8px;
+}
+
+.c29 {
+  color: #666687;
+  width: 12px;
+}
+
+.c30 path {
+  fill: #666687;
+}
+
+.c6 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c5 {
+  font-weight: 600;
+  color: #32324d;
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.c36 {
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.33;
 }
 
 .c8 {
@@ -74,21 +233,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
 
 .c33 .sc-cZrumJ {
   color: #328048;
-}
-
-.c18 {
-  padding-top: 4px;
-  padding-right: 16px;
-  padding-bottom: 4px;
-  min-width: 0px;
-}
-
-.c27 {
-  padding-left: 16px;
-}
-
-.c35 {
-  padding-top: 8px;
 }
 
 .c23 {
@@ -165,42 +309,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c29 {
-  color: #666687;
-  width: 12px;
-}
-
-.c30 path {
-  fill: #666687;
-}
-
-.c6 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c5 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.75rem;
-  line-height: 1.33;
-}
-
-.c36 {
-  color: #666687;
-  font-size: 0.75rem;
-  line-height: 1.33;
 }
 
 .c12 {
@@ -282,114 +390,6 @@ exports[`Content-Manager || RelationInput should render and match snapshot 1`] =
   left: -5px;
   right: -5px;
   border: 2px solid #4945ff;
-}
-
-.c26 {
-  font-weight: 600;
-  color: #006096;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c31 {
-  color: #4945ff;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c34 {
-  font-weight: 600;
-  color: #2f6846;
-  font-size: 0.875rem;
-  line-height: 1.43;
-}
-
-.c2 {
-  -webkit-flex-basis: 70%;
-  -ms-flex-preferred-size: 70%;
-  flex-basis: 70%;
-}
-
-.c3 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c4 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.c4 > * + * {
-  margin-top: 4px;
-}
-
-.c0 {
-  padding-bottom: 12px;
-}
-
-.c15 {
-  background: #ffffff;
-  padding-top: 8px;
-  padding-right: 16px;
-  padding-bottom: 8px;
-  padding-left: 16px;
-  border-radius: 4px;
-  border-color: #dcdce4;
-  border: 1px solid #dcdce4;
-}
-
-.c1 {
-  -webkit-align-items: end;
-  -webkit-box-align: end;
-  -ms-flex-align: end;
-  align-items: end;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  gap: 8px;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c16 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
 }
 
 .c17 {
