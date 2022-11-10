@@ -53,7 +53,6 @@ const waitForReload = async () => {
   await waitFor(
     () => {
       expect(screen.queryByTestId('loader')).toBe(null);
-      expect(screen.getByRole('heading', { name: /marketplace/i })).toBeInTheDocument();
     },
     { timeout: 5000 }
   );
@@ -158,7 +157,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows providers filters popover', () => {
-    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    const filtersButton = screen.getByTestId('filters-button');
 
     // Only show collections filters on providers
     const providersTab = screen.getByRole('tab', { name: /providers/i });
@@ -168,10 +167,10 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('shows the collections filter options', () => {
-    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    const filtersButton = screen.getByTestId('filters-button');
     userEvent.click(filtersButton);
 
-    const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
+    const collectionsButton = screen.getByTestId('Collections-button');
 
     userEvent.click(collectionsButton);
 
@@ -183,16 +182,16 @@ describe('Marketplace page - providers tab', () => {
     };
 
     Object.entries(mockedServerCollections).forEach(([collectionName, count]) => {
-      const option = screen.getByRole('option', { name: `${collectionName} (${count})` });
+      const option = screen.getByTestId(`${collectionName}-${count}`);
       expect(option).toBeVisible();
     });
   });
 
   it('filters a collection option', async () => {
-    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    const filtersButton = screen.getByTestId('filters-button');
     userEvent.click(filtersButton);
 
-    const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
+    const collectionsButton = screen.getByTestId('Collections-button');
     userEvent.click(collectionsButton);
 
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
@@ -213,13 +212,13 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('filters multiple collection options', async () => {
-    userEvent.click(screen.getByRole('button', { name: /filters/i }));
-    userEvent.click(screen.getByRole('button', { name: 'No collections selected' }));
+    userEvent.click(screen.getByTestId('filters-button'));
+    userEvent.click(screen.getByTestId('Collections-button'));
     userEvent.click(screen.getByRole('option', { name: `Made by Strapi (6)` }));
 
     await waitForReload();
 
-    userEvent.click(screen.getByRole('button', { name: /filters/i }));
+    userEvent.click(screen.getByTestId('filters-button'));
     userEvent.click(screen.getByRole('button', { name: `1 collection selected Made by Strapi` }));
     userEvent.click(screen.getByRole('option', { name: `Verified (6)` }));
 
@@ -236,10 +235,10 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('removes a filter option tag', async () => {
-    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    const filtersButton = screen.getByTestId('filters-button');
     userEvent.click(filtersButton);
 
-    const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
+    const collectionsButton = screen.getByTestId('Collections-button');
     userEvent.click(collectionsButton);
 
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
@@ -257,10 +256,10 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('only filters in the providers tab', async () => {
-    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    const filtersButton = screen.getByTestId('filters-button');
     userEvent.click(filtersButton);
 
-    const collectionsButton = screen.getByRole('button', { name: 'No collections selected' });
+    const collectionsButton = screen.getByTestId('Collections-button');
     userEvent.click(collectionsButton);
 
     const option = screen.getByRole('option', { name: `Made by Strapi (6)` });
