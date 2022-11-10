@@ -53,162 +53,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
     } = render(makeApp());
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c9 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c10 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c10 > * + * {
-        margin-left: 8px;
-      }
-
-      .c14 {
-        font-weight: 600;
-        color: #32324d;
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
-      .c11 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c11 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c11 svg > g,
-      .c11 svg path {
-        fill: #ffffff;
-      }
-
-      .c11[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c11:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c11:focus-visible {
-        outline: none;
-      }
-
-      .c11:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c12 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        padding: 8px 16px;
-        background: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c12 .sc-jCHUfY {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c12 .c13 {
-        color: #ffffff;
-      }
-
-      .c12[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c12[aria-disabled='true'] .c13 {
-        color: #666687;
-      }
-
-      .c12[aria-disabled='true'] svg > g,
-      .c12[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c12[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c12[aria-disabled='true']:active .c13 {
-        color: #666687;
-      }
-
-      .c12[aria-disabled='true']:active svg > g,
-      .c12[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c12:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c12:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c12 svg > g,
-      .c12 svg path {
-        fill: #ffffff;
-      }
-
       .c5 {
         color: #4945ff;
         font-size: 0.875rem;
@@ -334,6 +178,162 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         color: #666687;
         font-size: 1rem;
         line-height: 1.5;
+      }
+
+      .c14 {
+        font-weight: 600;
+        color: #32324d;
+        font-size: 0.75rem;
+        line-height: 1.33;
+      }
+
+      .c11 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
+      }
+
+      .c11 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c11 svg > g,
+      .c11 svg path {
+        fill: #ffffff;
+      }
+
+      .c11[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c11:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c11:focus-visible {
+        outline: none;
+      }
+
+      .c11:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c12 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        padding: 8px 16px;
+        background: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c12 .sc-kBysnm {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c12 .c13 {
+        color: #ffffff;
+      }
+
+      .c12[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c12[aria-disabled='true'] .c13 {
+        color: #666687;
+      }
+
+      .c12[aria-disabled='true'] svg > g,
+      .c12[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c12[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c12[aria-disabled='true']:active .c13 {
+        color: #666687;
+      }
+
+      .c12[aria-disabled='true']:active svg > g,
+      .c12[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c12:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c12:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
+      }
+
+      .c12 svg > g,
+      .c12 svg path {
+        fill: #ffffff;
+      }
+
+      .c9 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c10 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c10 > * + * {
+        margin-left: 8px;
       }
 
       <div

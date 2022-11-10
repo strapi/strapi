@@ -47,20 +47,6 @@ describe('<InputUID />', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c11 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
       .c7 {
         padding-right: 12px;
         padding-left: 8px;
@@ -187,6 +173,20 @@ describe('<InputUID />', () => {
 
       .c1 > * + * {
         margin-top: 4px;
+      }
+
+      .c11 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
       }
 
       .c9 {

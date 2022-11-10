@@ -5832,6 +5832,16 @@
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"
 
+"@strapi/design-system@1.3.0-beta.3":
+  version "1.3.0-beta.3"
+  resolved "https://registry.yarnpkg.com/@strapi/design-system/-/design-system-1.3.0-beta.3.tgz#666183dc11301a4664939bbb1dbf6a341d070ed3"
+  integrity sha512-eOkkBOv/o4c/zq7D1TIGUgmi6v2OD2UjVZPo1+cjF40iYYNsz+Zr+f2nUToirSfD8T5gJNK9s1Nn0Rf1b7gbsQ==
+  dependencies:
+    "@floating-ui/react-dom" "^1.0.0"
+    "@internationalized/number" "^3.1.1"
+    compute-scroll-into-view "^1.0.17"
+    prop-types "^15.7.2"
+
 "@strapi/eslint-config@0.1.2":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@strapi/eslint-config/-/eslint-config-0.1.2.tgz#e8327169eccce78b5f9e1589cb243c0f84343caf"
@@ -5858,6 +5868,11 @@
   version "1.3.0-beta.2"
   resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.3.0-beta.2.tgz#21f1039501773650fe8262b1478a2492d2511bc1"
   integrity sha512-w4ckOHNtGiwo5Eg+DK+4QQ0Q8dt2l8j6Wlk5n/FfAWcO92aKvY89mvVaTA5lomHEyrPIaZvjSWgTAxA+d69cYw==
+
+"@strapi/icons@1.3.0-beta.3":
+  version "1.3.0-beta.3"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-1.3.0-beta.3.tgz#50dbe3766d4815ce608c6afad6a7718f1c1c78c5"
+  integrity sha512-gXu+cFBAvWlMBs3/AAkl41mjqEC/IqAWeUk8A0GlfF8PZuhpEeyR89jOycASVIHIytoHKQ5EM7RKTcOFfG4Plw==
 
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.3"

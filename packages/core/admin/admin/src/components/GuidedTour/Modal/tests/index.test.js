@@ -48,6 +48,18 @@ describe('<GuidedTourModal />', () => {
     expect(screen.getByText('🧠 Create a first Collection type')).toBeInTheDocument();
 
     expect(document.body).toMatchInlineSnapshot(`
+      .c0 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c1 {
         padding: 40px;
       }
@@ -147,6 +159,25 @@ describe('<GuidedTourModal />', () => {
         justify-content: center;
       }
 
+      .c11 {
+        padding-right: 32px;
+        padding-bottom: 0px;
+        padding-left: 32px;
+      }
+
+      .c14 {
+        background: #7b79ff;
+        border-radius: 4px;
+        width: 0.125rem;
+        height: 100%;
+        min-height: 1.5rem;
+      }
+
+      .c17 {
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+
       .c4 {
         background: #ffffff;
         padding: 16px;
@@ -191,33 +222,114 @@ describe('<GuidedTourModal />', () => {
         margin-top: 16px;
       }
 
-      .c15 {
-        color: #4945ff;
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
+      .c10 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
-      .c19 {
-        font-weight: 500;
-        color: #ffffff;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+        position: relative;
+        outline: none;
       }
 
-      .c20 {
-        font-weight: 600;
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
+      .c8 svg {
+        height: 12px;
+        width: 12px;
       }
 
-      .c24 {
-        color: #32324d;
-        font-size: 0.875rem;
-        line-height: 1.43;
+      .c8 svg > g,
+      .c8 svg path {
+        fill: #ffffff;
+      }
+
+      .c8[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c8:after {
+        -webkit-transition-property: all;
+        transition-property: all;
+        -webkit-transition-duration: 0.2s;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c8:focus-visible {
+        outline: none;
+      }
+
+      .c8:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c9 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+      }
+
+      .c9 svg > g,
+      .c9 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c9:hover svg > g,
+      .c9:hover svg path {
+        fill: #666687;
+      }
+
+      .c9:active svg > g,
+      .c9:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c9[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c9[aria-disabled='true'] svg path {
+        fill: #666687;
       }
 
       .c28 {
@@ -429,152 +541,40 @@ describe('<GuidedTourModal />', () => {
         fill: #32324d;
       }
 
-      .c11 {
-        padding-right: 32px;
-        padding-bottom: 0px;
-        padding-left: 32px;
-      }
-
-      .c14 {
-        background: #7b79ff;
-        border-radius: 4px;
-        width: 0.125rem;
-        height: 100%;
-        min-height: 1.5rem;
-      }
-
-      .c17 {
-        padding-top: 12px;
-        padding-bottom: 12px;
-      }
-
-      .c10 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c8 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-        position: relative;
-        outline: none;
-      }
-
-      .c8 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c8 svg > g,
-      .c8 svg path {
-        fill: #ffffff;
-      }
-
-      .c8[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c8:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c8:focus-visible {
-        outline: none;
-      }
-
-      .c8:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c9 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        height: 2rem;
-        width: 2rem;
-      }
-
-      .c9 svg > g,
-      .c9 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c9:hover svg > g,
-      .c9:hover svg path {
-        fill: #666687;
-      }
-
-      .c9:active svg > g,
-      .c9:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c9[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c9[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c0 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
       .c3 {
         position: fixed;
         z-index: 4;
         inset: 0;
         background: #32324d1F;
+      }
+
+      .c15 {
+        color: #4945ff;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c19 {
+        font-weight: 500;
+        color: #ffffff;
+        font-size: 0.875rem;
+        line-height: 1.43;
+      }
+
+      .c20 {
+        font-weight: 600;
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+      }
+
+      .c24 {
+        color: #32324d;
+        font-size: 0.875rem;
+        line-height: 1.43;
       }
 
       <body>

@@ -13,6 +13,20 @@ exports[`<DzLabel /> displays the labelAction correctly 1`] = `
   width: 1px;
 }
 
+.c1 {
+  background: #ffffff;
+  color: #8e8ea9;
+  padding-top: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c8 {
+  padding-left: 4px;
+}
+
 .c4 {
   max-width: 22.25rem;
 }
@@ -83,20 +97,6 @@ exports[`<DzLabel /> displays the labelAction correctly 1`] = `
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
-}
-
-.c1 {
-  background: #ffffff;
-  color: #8e8ea9;
-  padding-top: 12px;
-  padding-right: 16px;
-  padding-bottom: 12px;
-  padding-left: 16px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c8 {
-  padding-left: 4px;
 }
 
 .c2 {
@@ -226,6 +226,16 @@ exports[`<DzLabel /> displays the name of the dz when the label is empty 1`] = `
   width: 1px;
 }
 
+.c1 {
+  background: #ffffff;
+  color: #8e8ea9;
+  padding-top: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
 .c4 {
   max-width: 22.25rem;
 }
@@ -296,16 +306,6 @@ exports[`<DzLabel /> displays the name of the dz when the label is empty 1`] = `
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
-}
-
-.c1 {
-  background: #ffffff;
-  color: #8e8ea9;
-  padding-top: 12px;
-  padding-right: 16px;
-  padding-bottom: 12px;
-  padding-left: 16px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
 .c2 {
@@ -384,6 +384,16 @@ exports[`<DzLabel /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
+.c1 {
+  background: #ffffff;
+  color: #8e8ea9;
+  padding-top: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
 .c4 {
   max-width: 22.25rem;
 }
@@ -454,16 +464,6 @@ exports[`<DzLabel /> renders and matches the snapshot 1`] = `
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
-}
-
-.c1 {
-  background: #ffffff;
-  color: #8e8ea9;
-  padding-top: 12px;
-  padding-right: 16px;
-  padding-bottom: 12px;
-  padding-left: 16px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
 .c2 {

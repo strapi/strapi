@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1`] = `
-.c85 {
+.c86 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -13,67 +13,136 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   width: 1px;
 }
 
-.c26 {
+.c9 {
+  color: #4945ff;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c7 {
+  padding-right: 8px;
+}
+
+.c6 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c6 svg path {
+  fill: #4945ff;
+}
+
+.c6 svg {
+  font-size: 0.625rem;
+}
+
+.c6:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c6:focus-visible {
+  outline: none;
+}
+
+.c6:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c8 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c22 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c23 {
+  padding-bottom: 16px;
+}
+
+.c63 {
+  padding-top: 24px;
   padding-bottom: 24px;
 }
 
-.c66 {
-  padding-top: 16px;
-  padding-right: 16px;
-  padding-left: 16px;
-  border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
+.c64 {
+  background: #eaeaef;
 }
 
-.c73 {
+.c65 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c1 {
+  padding-bottom: 56px;
+}
+
+.c4 {
   background: #f6f6f9;
-  border-radius: 4px;
-  border-color: #eaeaef;
-  border: 1px solid #eaeaef;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
 }
 
-.c80 {
-  padding-left: 12px;
+.c5 {
+  padding-bottom: 8px;
 }
 
-.c27 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+.c21 {
+  padding-right: 56px;
+  padding-left: 56px;
 }
 
-.c67 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c0 {
+  display: grid;
+  grid-template-columns: 1fr;
 }
 
-.c74 {
+.c2 {
+  overflow-x: hidden;
+}
+
+.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -91,7 +160,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   justify-content: space-between;
 }
 
-.c70 {
+.c11 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -105,27 +174,21 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   flex-direction: row;
 }
 
-.c71 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c71 > * + * {
-  margin-left: 12px;
-}
-
-.c25 {
+.c12 {
   color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
+  font-weight: 600;
+  font-size: 2rem;
   line-height: 1.25;
 }
 
-.c79 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c20 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c3:focus-visible {
+  outline: none;
 }
 
 .c19 {
@@ -269,121 +332,98 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   fill: #ffffff;
 }
 
-.c22 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c23 {
-  padding-bottom: 16px;
-}
-
-.c63 {
-  padding-top: 24px;
+.c26 {
   padding-bottom: 24px;
 }
 
-.c83 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
+.c66 {
+  padding-top: 16px;
+  padding-right: 16px;
+  padding-left: 16px;
   border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
 }
 
-.c83 svg {
-  height: 12px;
-  width: 12px;
+.c73 {
+  background: #f6f6f9;
+  border-radius: 4px;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
 }
 
-.c83 svg > g,
-.c83 svg path {
-  fill: #ffffff;
+.c80 {
+  padding-left: 12px;
 }
 
-.c83[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c83:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c83:focus-visible {
-  outline: none;
-}
-
-.c83:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c84 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
+.c27 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
-.c84 svg > g,
-.c84 svg path {
-  fill: #8e8ea9;
+.c67 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c84:hover svg > g,
-.c84:hover svg path {
-  fill: #666687;
+.c74 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
-.c84:active svg > g,
-.c84:active svg path {
-  fill: #a5a5ba;
+.c46 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
 }
 
-.c84[aria-disabled='true'] {
-  background-color: #eaeaef;
+.c47 {
+  grid-column: span 6;
+  max-width: 100%;
 }
 
-.c84[aria-disabled='true'] svg path {
-  fill: #666687;
+.c62 {
+  grid-column: span 3;
+  max-width: 100%;
 }
 
 .c53 {
@@ -734,40 +774,88 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   max-width: 320px;
 }
 
-.c9 {
-  color: #4945ff;
+.c25 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c79 {
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c7 {
-  padding-right: 8px;
+.c28 {
+  gap: 16px;
 }
 
-.c6 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
+.c70 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c71 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c71 > * + * {
+  margin-left: 12px;
+}
+
+.c85 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c83 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
   position: relative;
   outline: none;
 }
 
-.c6 svg path {
-  fill: #4945ff;
+.c83 svg {
+  height: 12px;
+  width: 12px;
 }
 
-.c6 svg {
-  font-size: 0.625rem;
+.c83 svg > g,
+.c83 svg path {
+  fill: #ffffff;
 }
 
-.c6:after {
+.c83[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c83:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -782,11 +870,11 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid transparent;
 }
 
-.c6:focus-visible {
+.c83:focus-visible {
   outline: none;
 }
 
-.c6:focus-visible:after {
+.c83:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -797,120 +885,44 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
   border: 2px solid #4945ff;
 }
 
-.c8 {
+.c84 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c64 {
-  background: #eaeaef;
-}
-
-.c65 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c1 {
-  padding-bottom: 56px;
-}
-
-.c4 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
-}
-
-.c5 {
-  padding-bottom: 8px;
-}
-
-.c21 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c0 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.c2 {
-  overflow-x: hidden;
-}
-
-.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
 }
 
-.c11 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c84 svg > g,
+.c84 svg path {
+  fill: #8e8ea9;
 }
 
-.c12 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
+.c84:hover svg > g,
+.c84:hover svg path {
+  fill: #666687;
 }
 
-.c20 {
-  color: #666687;
-  font-size: 1rem;
-  line-height: 1.5;
+.c84:active svg > g,
+.c84:active svg path {
+  fill: #a5a5ba;
 }
 
-.c3:focus-visible {
-  outline: none;
+.c84[aria-disabled='true'] {
+  background-color: #eaeaef;
 }
 
-.c46 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c47 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c62 {
-  grid-column: span 3;
-  max-width: 100%;
-}
-
-.c28 {
-  gap: 16px;
+.c84[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c77 {
@@ -1400,6 +1412,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 aria-hidden="true"
                                 class="c58 c59 c60"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -1489,6 +1502,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 aria-hidden="true"
                                 class="c58 c59 c60"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -1572,6 +1586,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                                 aria-hidden="true"
                                 class="c58 c59 c60"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -1850,8 +1865,15 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
                         tabindex="0"
                         type="button"
                       >
+                        <span
+                          class="c85"
+                        >
+                          Add a field
+                        </span>
                         <svg
+                          aria-hidden="true"
                           fill="none"
+                          focusable="false"
                           height="1em"
                           viewBox="0 0 24 24"
                           width="1em"
@@ -1874,7 +1896,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
     </div>
   </div>
   <div
-    class="c85"
+    class="c86"
   >
     <p
       aria-live="polite"
@@ -1899,7 +1921,7 @@ exports[`ADMIN | CM | LV | Configure the view renders and matches the snapshot 1
 `;
 
 exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
-.c85 {
+.c86 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -1911,67 +1933,136 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   width: 1px;
 }
 
-.c26 {
+.c9 {
+  color: #4945ff;
+  font-size: 0.875rem;
+  line-height: 1.43;
+}
+
+.c7 {
+  padding-right: 8px;
+}
+
+.c6 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+}
+
+.c6 svg path {
+  fill: #4945ff;
+}
+
+.c6 svg {
+  font-size: 0.625rem;
+}
+
+.c6:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c6:focus-visible {
+  outline: none;
+}
+
+.c6:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c8 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c22 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c23 {
+  padding-bottom: 16px;
+}
+
+.c63 {
+  padding-top: 24px;
   padding-bottom: 24px;
 }
 
-.c66 {
-  padding-top: 16px;
-  padding-right: 16px;
-  padding-left: 16px;
-  border-radius: 4px;
-  border-style: dashed;
-  border-width: 1px;
-  border-color: #c0c0cf;
+.c64 {
+  background: #eaeaef;
 }
 
-.c73 {
+.c65 {
+  height: 1px;
+  border: none;
+  margin: 0;
+}
+
+.c1 {
+  padding-bottom: 56px;
+}
+
+.c4 {
   background: #f6f6f9;
-  border-radius: 4px;
-  border-color: #eaeaef;
-  border: 1px solid #eaeaef;
+  padding-top: 24px;
+  padding-right: 56px;
+  padding-bottom: 40px;
+  padding-left: 56px;
 }
 
-.c80 {
-  padding-left: 12px;
+.c5 {
+  padding-bottom: 8px;
 }
 
-.c27 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+.c21 {
+  padding-right: 56px;
+  padding-left: 56px;
 }
 
-.c67 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c0 {
+  display: grid;
+  grid-template-columns: 1fr;
 }
 
-.c74 {
+.c2 {
+  overflow-x: hidden;
+}
+
+.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -1989,7 +2080,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   justify-content: space-between;
 }
 
-.c70 {
+.c11 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -2003,27 +2094,21 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   flex-direction: row;
 }
 
-.c71 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c71 > * + * {
-  margin-left: 12px;
-}
-
-.c25 {
+.c12 {
   color: #32324d;
-  font-weight: 500;
-  font-size: 1rem;
+  font-weight: 600;
+  font-size: 2rem;
   line-height: 1.25;
 }
 
-.c79 {
-  font-weight: 600;
-  color: #32324d;
-  font-size: 0.875rem;
-  line-height: 1.43;
+.c20 {
+  color: #666687;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.c3:focus-visible {
+  outline: none;
 }
 
 .c19 {
@@ -2167,121 +2252,98 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   fill: #ffffff;
 }
 
-.c22 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c23 {
-  padding-bottom: 16px;
-}
-
-.c63 {
-  padding-top: 24px;
+.c26 {
   padding-bottom: 24px;
 }
 
-.c83 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  cursor: pointer;
-  padding: 8px;
+.c66 {
+  padding-top: 16px;
+  padding-right: 16px;
+  padding-left: 16px;
   border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #dcdce4;
-  position: relative;
-  outline: none;
+  border-style: dashed;
+  border-width: 1px;
+  border-color: #c0c0cf;
 }
 
-.c83 svg {
-  height: 12px;
-  width: 12px;
+.c73 {
+  background: #f6f6f9;
+  border-radius: 4px;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
 }
 
-.c83 svg > g,
-.c83 svg path {
-  fill: #ffffff;
+.c80 {
+  padding-left: 12px;
 }
 
-.c83[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c83:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c83:focus-visible {
-  outline: none;
-}
-
-.c83:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c84 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
+.c27 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 2rem;
-  width: 2rem;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
-.c84 svg > g,
-.c84 svg path {
-  fill: #8e8ea9;
+.c67 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
 }
 
-.c84:hover svg > g,
-.c84:hover svg path {
-  fill: #666687;
+.c74 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
-.c84:active svg > g,
-.c84:active svg path {
-  fill: #a5a5ba;
+.c46 {
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
+  gap: 16px;
 }
 
-.c84[aria-disabled='true'] {
-  background-color: #eaeaef;
+.c47 {
+  grid-column: span 6;
+  max-width: 100%;
 }
 
-.c84[aria-disabled='true'] svg path {
-  fill: #666687;
+.c62 {
+  grid-column: span 3;
+  max-width: 100%;
 }
 
 .c53 {
@@ -2632,40 +2694,88 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   max-width: 320px;
 }
 
-.c9 {
-  color: #4945ff;
+.c25 {
+  color: #32324d;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.c79 {
+  font-weight: 600;
+  color: #32324d;
   font-size: 0.875rem;
   line-height: 1.43;
 }
 
-.c7 {
-  padding-right: 8px;
+.c28 {
+  gap: 16px;
 }
 
-.c6 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
+.c70 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c71 > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.c71 > * + * {
+  margin-left: 12px;
+}
+
+.c85 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c83 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #dcdce4;
   position: relative;
   outline: none;
 }
 
-.c6 svg path {
-  fill: #4945ff;
+.c83 svg {
+  height: 12px;
+  width: 12px;
 }
 
-.c6 svg {
-  font-size: 0.625rem;
+.c83 svg > g,
+.c83 svg path {
+  fill: #ffffff;
 }
 
-.c6:after {
+.c83[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c83:after {
   -webkit-transition-property: all;
   transition-property: all;
   -webkit-transition-duration: 0.2s;
@@ -2680,11 +2790,11 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 2px solid transparent;
 }
 
-.c6:focus-visible {
+.c83:focus-visible {
   outline: none;
 }
 
-.c6:focus-visible:after {
+.c83:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -2695,120 +2805,44 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c8 {
+.c84 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-
-.c64 {
-  background: #eaeaef;
-}
-
-.c65 {
-  height: 1px;
-  border: none;
-  margin: 0;
-}
-
-.c1 {
-  padding-bottom: 56px;
-}
-
-.c4 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
-}
-
-.c5 {
-  padding-bottom: 8px;
-}
-
-.c21 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c0 {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.c2 {
-  overflow-x: hidden;
-}
-
-.c10 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
 }
 
-.c11 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c84 svg > g,
+.c84 svg path {
+  fill: #8e8ea9;
 }
 
-.c12 {
-  color: #32324d;
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
+.c84:hover svg > g,
+.c84:hover svg path {
+  fill: #666687;
 }
 
-.c20 {
-  color: #666687;
-  font-size: 1rem;
-  line-height: 1.5;
+.c84:active svg > g,
+.c84:active svg path {
+  fill: #a5a5ba;
 }
 
-.c3:focus-visible {
-  outline: none;
+.c84[aria-disabled='true'] {
+  background-color: #eaeaef;
 }
 
-.c46 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c47 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c62 {
-  grid-column: span 3;
-  max-width: 100%;
-}
-
-.c28 {
-  gap: 16px;
+.c84[aria-disabled='true'] svg path {
+  fill: #666687;
 }
 
 .c77 {
@@ -3297,6 +3331,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 aria-hidden="true"
                                 class="c58 c59 c60"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -3386,6 +3421,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 aria-hidden="true"
                                 class="c58 c59 c60"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -3469,6 +3505,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                                 aria-hidden="true"
                                 class="c58 c59 c60"
                                 tabindex="-1"
+                                title="Carret Down Button"
                                 type="button"
                               >
                                 <svg
@@ -3851,8 +3888,15 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
                         tabindex="0"
                         type="button"
                       >
+                        <span
+                          class="c85"
+                        >
+                          Add a field
+                        </span>
                         <svg
+                          aria-hidden="true"
                           fill="none"
+                          focusable="false"
                           height="1em"
                           viewBox="0 0 24 24"
                           width="1em"
@@ -3875,7 +3919,7 @@ exports[`ADMIN | CM | LV | Configure the view should add field 1`] = `
     </div>
   </div>
   <div
-    class="c85"
+    class="c86"
   >
     <p
       aria-live="polite"

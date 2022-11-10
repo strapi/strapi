@@ -25,47 +25,6 @@ describe('NotFoundPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c11 {
-        color: #666687;
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-      }
-
-      .c6 {
-        background: #ffffff;
-        padding: 64px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c8 {
-        padding-bottom: 24px;
-      }
-
-      .c10 {
-        padding-bottom: 16px;
-      }
-
-      .c7 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
-      }
-
-      .c9 svg {
-        height: 5.5rem;
-      }
-
       .c15 {
         font-weight: 600;
         color: #32324d;
@@ -274,6 +233,47 @@ describe('NotFoundPage', () => {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
+      }
+
+      .c11 {
+        color: #666687;
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+      }
+
+      .c6 {
+        background: #ffffff;
+        padding: 64px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c8 {
+        padding-bottom: 24px;
+      }
+
+      .c10 {
+        padding-bottom: 16px;
+      }
+
+      .c7 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      .c9 svg {
+        height: 5.5rem;
       }
 
       <main
