@@ -81,7 +81,6 @@ const relationsSorter = (initArr, idColumn, orderColumn, maxOrder = 0) => {
   };
 
   return {
-    relationsArr: arr,
     disconnect(relations) {
       _.castArray(relations).forEach((relation) => {
         removeRelation(relation);
@@ -104,6 +103,9 @@ const relationsSorter = (initArr, idColumn, orderColumn, maxOrder = 0) => {
         }
       });
       return this;
+    },
+    get() {
+      return arr;
     },
     /**
      * Get a map between the relation id and its order

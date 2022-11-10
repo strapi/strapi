@@ -8,7 +8,7 @@ describe('relations orderer', () => {
 
     orderer.connect([{ id: 4, position: { end: true } }, { id: 5 }]);
 
-    expect(orderer.relationsArr).toMatchObject([
+    expect(orderer.get()).toMatchObject([
       { id: 2, order: 4 },
       { id: 4, order: 10.5 },
       { id: 5, order: 10.5 },
@@ -20,7 +20,7 @@ describe('relations orderer', () => {
 
     orderer.connect([{ id: 4, position: { start: true } }]);
 
-    expect(orderer.relationsArr).toMatchObject([
+    expect(orderer.get()).toMatchObject([
       { id: 4, order: 0.5 },
       { id: 2, order: 4 },
     ]);
@@ -43,7 +43,7 @@ describe('relations orderer', () => {
       { id: 5, position: { before: 4 } },
     ]);
 
-    expect(orderer.relationsArr).toMatchObject([
+    expect(orderer.get()).toMatchObject([
       { id: 2, order: 4 },
       { id: 5, order: 9.5 },
       { id: 4, order: 9.5 },
