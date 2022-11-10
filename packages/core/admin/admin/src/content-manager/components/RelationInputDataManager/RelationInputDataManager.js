@@ -153,7 +153,6 @@ export const RelationInputDataManager = ({
    */
   const handleRelationReorder = (oldIndex, newIndex) => {
     const item = relationsFromModifiedData[oldIndex];
-    console.log(oldIndex, item);
 
     setLiveText(
       formatMessage(
@@ -285,11 +284,12 @@ export const RelationInputDataManager = ({
       })} ${totalRelations > 0 ? `(${totalRelations})` : ''}`}
       labelAction={labelAction}
       labelLoadMore={
-        isCreatingEntry &&
-        formatMessage({
-          id: getTrad('relation.loadMore'),
-          defaultMessage: 'Load More',
-        })
+        !isCreatingEntry
+          ? formatMessage({
+              id: getTrad('relation.loadMore'),
+              defaultMessage: 'Load More',
+            })
+          : null
       }
       labelDisconnectRelation={formatMessage({
         id: getTrad('relation.disconnect'),

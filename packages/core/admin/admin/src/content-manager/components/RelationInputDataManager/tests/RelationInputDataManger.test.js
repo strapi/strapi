@@ -1,6 +1,6 @@
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { fireEvent, render, act, screen } from '@testing-library/react';
+import { fireEvent, render, act, screen, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -585,6 +585,64 @@ describe('RelationInputDataManager', () => {
       rerender(<RelationInputDataManagerComponent />);
 
       expect(queryByText(/\(7\)/)).toBeInTheDocument();
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('should have have description text', () => {
+      setup();
+
+      expect(screen.queryByText('Press spacebar to grab and re-order')).toBeInTheDocument();
+    });
+
+    it('should update the live text when an item has been grabbed', async () => {
+      setup();
+
+      await waitFor(() => expect(screen.getAllByLabelText('Drag')).toHaveLength(2));
+
+      const [draggedItem] = screen.getAllByLabelText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+
+      expect(
+        screen.queryByText(
+          /Press up and down arrow to change position, Spacebar to drop, Escape to cancel/
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should change the live text when an item has been moved', () => {
+      setup();
+
+      const [draggedItem] = screen.getAllByLabelText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+
+      expect(screen.queryByText(/New position in list/)).toBeInTheDocument();
+    });
+
+    it('should change the live text when an item has been dropped', () => {
+      setup();
+
+      const [draggedItem] = screen.getAllByLabelText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+
+      expect(screen.queryByText(/Final position in list/)).toBeInTheDocument();
+    });
+
+    it('should change the live text after the reordering interaction has been cancelled', () => {
+      setup();
+
+      const [draggedItem] = screen.getAllByLabelText('Drag');
+
+      fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
+      fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
+
+      expect(screen.queryByText(/Re-order cancelled/)).toBeInTheDocument();
     });
   });
 });
