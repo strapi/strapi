@@ -2,7 +2,6 @@ import React, { useRef, useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { FixedSizeList as List } from 'react-window';
-import { useIntl } from 'react-intl';
 
 import { ReactSelect } from '@strapi/helper-plugin';
 import { Status } from '@strapi/design-system/Status';
@@ -24,7 +23,6 @@ import { RelationList } from './components/RelationList';
 import { Option } from './components/Option';
 import { RELATION_GUTTER, RELATION_ITEM_HEIGHT } from './constants';
 
-import { getTrad } from '../../utils';
 import { usePrev } from '../../hooks';
 
 const LinkEllipsis = styled(Link)`
@@ -58,6 +56,7 @@ const RelationInput = ({
   description,
   disabled,
   error,
+  iconButtonAriaLabel,
   id,
   name,
   numberOfRelationsToDisplay,
@@ -65,7 +64,12 @@ const RelationInput = ({
   labelAction,
   labelLoadMore,
   labelDisconnectRelation,
+  listAriaDescription,
+  liveText,
   loadingMessage,
+  onCancel,
+  onDropItem,
+  onGrabItem,
   noRelationsMessage,
   onRelationConnect,
   onRelationLoadMore,
@@ -82,12 +86,9 @@ const RelationInput = ({
 }) => {
   const [value, setValue] = useState(null);
   const [overflow, setOverflow] = useState('');
-  const [liveText, setLiveText] = useState('');
 
   const listRef = useRef();
   const outerListRef = useRef();
-
-  const { formatMessage } = useIntl();
 
   const { data } = searchResults;
 
@@ -232,56 +233,7 @@ const RelationInput = ({
   const handleUpdatePositionOfRelation = (newIndex, currentIndex) => {
     if (onRelationReorder && newIndex >= 0 && newIndex < relations.length) {
       onRelationReorder(currentIndex, newIndex);
-
-      const item = relations[currentIndex];
-      setLiveText(`${item.mainField ?? item.id}. New position in list: ${getItemPos(newIndex)}`);
     }
-  };
-
-  /**
-   *
-   * @param {number} index
-   * @returns {string}
-   */
-  const getItemPos = (index) => `${index + 1} of ${relations.length}`;
-
-  /**
-   *
-   * @param {number} index
-   * @returns {void}
-   */
-  const handleGrabItem = (index) => {
-    const item = relations[index];
-
-    setLiveText(
-      `${item.mainField ?? item.id}, grabbed. Current position in list: ${getItemPos(
-        index
-      )}. Press up and down arrow to change position, Spacebar to drop, Escape to cancel.`
-    );
-  };
-
-  /**
-   *
-   * @param {number} index
-   * @returns {void}
-   */
-  const handleDropItem = (index) => {
-    const item = relations[index];
-
-    setLiveText(
-      `${item.mainField ?? item.id}, dropped. Final position in list: ${getItemPos(index)}`
-    );
-  };
-
-  /**
-   *
-   * @param {number} index
-   * @returns {void}
-   */
-  const handleCancel = (index) => {
-    const item = relations[index];
-
-    setLiveText(`${item.mainField ?? item.id}, dropped. Re-order cancelled.`);
   };
 
   const previewRelationsLength = usePrev(relations.length);
@@ -371,12 +323,7 @@ const RelationInput = ({
         }
       >
         <RelationList overflow={overflow}>
-          <VisuallyHidden id={`${name}-item-instructions`}>
-            {formatMessage({
-              id: getTrad('components.RelationInput.instructions'),
-              defaultMessage: `Press spacebar to grab and re-order`,
-            })}
-          </VisuallyHidden>
+          <VisuallyHidden id={`${name}-item-instructions`}>{listAriaDescription}</VisuallyHidden>
           <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
           <List
             height={dynamicListHeight}
@@ -387,13 +334,10 @@ const RelationInput = ({
             itemData={{
               ariaDescribedBy: `${name}-item-instructions`,
               disabled,
-              handleCancel,
-              handleDropItem,
-              handleGrabItem,
-              iconButtonAriaLabel: formatMessage({
-                id: getTrad('components.RelationInput.icon-button-aria-label'),
-                defaultMessage: 'Drag',
-              }),
+              handleCancel: onCancel,
+              handleDropItem: onDropItem,
+              handleGrabItem: onGrabItem,
+              iconButtonAriaLabel,
               labelDisconnectRelation,
               onRelationDisconnect,
               publicationStateTranslations,
@@ -451,8 +395,14 @@ RelationInput.defaultProps = {
   description: undefined,
   disabled: false,
   error: undefined,
+  iconButtonAriaLabel: 'Drag',
   labelAction: null,
   labelLoadMore: null,
+  listAriaDescription: 'Press spacebar to grab and re-order',
+  liveText: undefined,
+  onCancel: undefined,
+  onDropItem: undefined,
+  onGrabItem: undefined,
   required: false,
   relations: { data: [] },
   searchResults: { data: [] },
@@ -462,15 +412,21 @@ RelationInput.propTypes = {
   error: PropTypes.string,
   description: PropTypes.string,
   disabled: PropTypes.bool,
+  iconButtonAriaLabel: PropTypes.string,
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   labelAction: PropTypes.element,
   labelLoadMore: PropTypes.string,
   labelDisconnectRelation: PropTypes.string.isRequired,
+  listAriaDescription: PropTypes.string,
+  liveText: PropTypes.string,
   loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   noRelationsMessage: PropTypes.string.isRequired,
   numberOfRelationsToDisplay: PropTypes.number.isRequired,
+  onCancel: PropTypes.func,
+  onDropItem: PropTypes.func,
+  onGrabItem: PropTypes.func,
   onRelationConnect: PropTypes.func.isRequired,
   onRelationDisconnect: PropTypes.func.isRequired,
   onRelationLoadMore: PropTypes.func.isRequired,
