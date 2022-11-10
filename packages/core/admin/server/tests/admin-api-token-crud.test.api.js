@@ -224,7 +224,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
       name: 'api-token_tests-lifespan30',
       description: 'api-token_tests-description',
       type: 'read-only',
-      lifespan: 30 * 24 * 60 * 60 * 1000, // 7 days
+      lifespan: 30 * 24 * 60 * 60 * 1000, // 30 days
     };
 
     const res = await rq({
