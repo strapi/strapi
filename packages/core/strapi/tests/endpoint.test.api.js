@@ -143,6 +143,30 @@ describe('Create Strapi API End to End', () => {
       expect(body.data.attributes.tags.data[0].id).toBe(data.tags[0].id);
     });
 
+    test('Create article with non existent tag', async () => {
+      const entry = {
+        title: 'Article 3',
+        content: 'Content 3',
+        tags: [1000],
+      };
+
+      const res = await rq({
+        url: '/articles',
+        method: 'POST',
+        body: {
+          data: entry,
+        },
+        qs: {
+          populate: ['tags'],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(JSON.parse(res.error.text).error.message).toContain(
+        `1 relation(s) of type api::tag.tag associated with this entity do not exist`
+      );
+    });
+
     test('Update article1 add tag2', async () => {
       const { id, attributes } = data.articles[0];
       const entry = { ...attributes, tags: [data.tags[1].id] };
@@ -195,6 +219,30 @@ describe('Create Strapi API End to End', () => {
       expect(body.data.attributes.content).toBe(entry.content);
       expect(Array.isArray(body.data.attributes.tags.data)).toBeTruthy();
       expect(body.data.attributes.tags.data.length).toBe(3);
+    });
+
+    test('Error when updating article1 with some non existent tags', async () => {
+      const { id, attributes } = data.articles[0];
+      const entry = { ...attributes };
+      entry.tags = [1000, 1001, 1002, ...data.tags.slice(-1).map((t) => t.id)];
+
+      cleanDate(entry);
+
+      const res = await rq({
+        url: `/articles/${id}`,
+        method: 'PUT',
+        body: {
+          data: entry,
+        },
+        qs: {
+          populate: ['tags'],
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(JSON.parse(res.error.text).error.message).toContain(
+        `3 relation(s) of type api::tag.tag associated with this entity do not exist`
+      );
     });
 
     test('Update article1 remove one tag', async () => {
