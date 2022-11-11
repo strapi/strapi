@@ -143,17 +143,22 @@ const AddComponentButton = ({
 };
 
 AddComponentButton.defaultProps = {
+  hasError: false,
+  hasMaxError: false,
+  hasMinError: false,
+  isDisabled: false,
+  isOpen: false,
   label: '',
   missingComponentNumber: 0,
 };
 
 AddComponentButton.propTypes = {
   label: PropTypes.string,
-  hasError: PropTypes.bool.isRequired,
-  hasMaxError: PropTypes.bool.isRequired,
-  hasMinError: PropTypes.bool.isRequired,
-  isDisabled: PropTypes.bool.isRequired,
-  isOpen: PropTypes.bool.isRequired,
+  hasError: PropTypes.bool,
+  hasMaxError: PropTypes.bool,
+  hasMinError: PropTypes.bool,
+  isDisabled: PropTypes.bool,
+  isOpen: PropTypes.bool,
   missingComponentNumber: PropTypes.number,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,

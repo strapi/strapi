@@ -69,6 +69,7 @@ DynamicZoneLabel.defaultProps = {
   intlDescription: undefined,
   label: '',
   labelAction: undefined,
+  numberOfComponents: 0,
   required: false,
 };
 
@@ -80,7 +81,7 @@ DynamicZoneLabel.propTypes = {
   label: PropTypes.string,
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
-  numberOfComponents: PropTypes.number.isRequired,
+  numberOfComponents: PropTypes.number,
   required: PropTypes.bool,
 };
 
