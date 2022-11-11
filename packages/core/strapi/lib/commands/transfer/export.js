@@ -11,6 +11,7 @@ const _ = require('lodash/fp');
 
 const fs = require('fs-extra');
 
+const chalk = require('chalk');
 const strapi = require('../../Strapi');
 
 const pad = (n) => {
@@ -90,18 +91,35 @@ module.exports = async (filename, opts) => {
   const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
+    let resultData;
+    console.log(`Starting export...`);
+    engine.progressStream.on('data', ({ type, name, data }) => {
+      if (type === 'complete') {
+        // if (data[name]?.count) {
+        //   console.log(`${chalk.green(name)}: ${data[name]?.count} items`);
+        // }
+        console.log(`.${name} complete`);
+      } else if (type === 'start') {
+        process.stdout.write(`Starting transfer of ${name}..`);
+      } else if (type === 'progress') {
+        // updated counts
+        // console.log(`Updated ${type}`, data);
+      } else {
+        console.warn('unknown type/name', type, name);
+      }
+      resultData = data;
+    });
     const results = await engine.transfer();
-
-    console.log('Transfer Results', JSON.stringify(results, undefined, 2));
-
+    console.table(resultData);
     // TODO: once archiving is implemented, we need to check file extensions
     if (!fs.pathExistsSync(file)) {
       logger.log(file);
       throw new Error('Export file not created');
     }
     logger.log(
-      'Export process has been completed successfully! Export archive is in %s',
-      results.destination.file.path
+      `Export process has been completed successfully! Export archive is in ${chalk.green(
+        results.destination.file.path
+      )}`
     );
     process.exit(0);
   } catch (e) {
