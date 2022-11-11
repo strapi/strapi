@@ -157,7 +157,7 @@ describe('Content-Manager || RelationInput', () => {
       const spy = jest.fn();
       setup({ onRelationReorder: spy });
 
-      const [draggedItem, dropZone] = screen.getAllByLabelText('Drag');
+      const [draggedItem, dropZone] = screen.getAllByText('Drag');
 
       fireEvent.dragStart(draggedItem);
       fireEvent.dragEnter(dropZone);
@@ -171,7 +171,7 @@ describe('Content-Manager || RelationInput', () => {
       const spy = jest.fn();
       setup({ onRelationReorder: spy });
 
-      const [draggedItem] = screen.getAllByLabelText('Drag');
+      const [draggedItem] = screen.getAllByText('Drag');
 
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowUp', code: 'ArrowUp' });

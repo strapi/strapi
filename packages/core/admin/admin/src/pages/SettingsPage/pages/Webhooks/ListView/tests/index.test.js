@@ -130,20 +130,20 @@ describe('Admin | containers | ListView', () => {
         width: 60%;
       }
 
-      .c46 {
+      .c47 {
         background: #eaeaef;
       }
 
-      .c48 {
+      .c49 {
         background: #f0f0ff;
         padding: 20px;
       }
 
-      .c50 {
+      .c51 {
         background: #d9d8ff;
       }
 
-      .c52 {
+      .c53 {
         padding-left: 12px;
       }
 
@@ -243,20 +243,20 @@ describe('Admin | containers | ListView', () => {
         height: 0.25rem;
       }
 
-      .c47 {
+      .c48 {
         height: 1px;
         border: none;
         margin: 0;
       }
 
-      .c53 {
+      .c54 {
         font-weight: 600;
         color: #4945ff;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c51 {
+      .c52 {
         height: 1.5rem;
         width: 1.5rem;
         border-radius: 50%;
@@ -274,16 +274,16 @@ describe('Admin | containers | ListView', () => {
         align-items: center;
       }
 
-      .c51 svg {
+      .c52 svg {
         height: 0.625rem;
         width: 0.625rem;
       }
 
-      .c51 svg path {
+      .c52 svg path {
         fill: #4945ff;
       }
 
-      .c49 {
+      .c50 {
         border-radius: 0 0 4px 4px;
         display: block;
         width: 100%;
@@ -356,6 +356,18 @@ describe('Admin | containers | ListView', () => {
 
       .c26:indeterminate:disabled:after {
         background-color: #8e8ea9;
+      }
+
+      .c45 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
       }
 
       .c43 {
@@ -685,7 +697,7 @@ describe('Admin | containers | ListView', () => {
         padding-left: 8px;
       }
 
-      .c45 {
+      .c46 {
         color: #d02b20;
         padding-left: 8px;
       }
@@ -857,12 +869,16 @@ describe('Admin | containers | ListView', () => {
                             <div
                               class="c25"
                             >
-                              <input
-                                aria-label="Select all entries"
-                                class="c26"
-                                tabindex="0"
-                                type="checkbox"
-                              />
+                              <div
+                                class=""
+                              >
+                                <input
+                                  aria-label="Select all entries"
+                                  class="c26"
+                                  tabindex="0"
+                                  type="checkbox"
+                                />
+                              </div>
                               <span
                                 class="c27"
                               />
@@ -959,14 +975,18 @@ describe('Admin | containers | ListView', () => {
                             class="c24"
                             role="button"
                           >
-                            <input
-                              aria-label="Select test"
-                              class="c26"
-                              id="select"
-                              name="select"
-                              tabindex="-1"
-                              type="checkbox"
-                            />
+                            <div
+                              class=""
+                            >
+                              <input
+                                aria-label="Select test"
+                                class="c26"
+                                id="select"
+                                name="select"
+                                tabindex="-1"
+                                type="checkbox"
+                              />
+                            </div>
                           </td>
                           <td
                             aria-colindex="2"
@@ -1048,8 +1068,15 @@ describe('Admin | containers | ListView', () => {
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c45"
+                                  >
+                                    Update
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1073,8 +1100,15 @@ describe('Admin | containers | ListView', () => {
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c45"
+                                  >
+                                    Delete
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1101,14 +1135,18 @@ describe('Admin | containers | ListView', () => {
                             class="c24"
                             role="button"
                           >
-                            <input
-                              aria-label="Select test2"
-                              class="c26"
-                              id="select"
-                              name="select"
-                              tabindex="-1"
-                              type="checkbox"
-                            />
+                            <div
+                              class=""
+                            >
+                              <input
+                                aria-label="Select test2"
+                                class="c26"
+                                id="select"
+                                name="select"
+                                tabindex="-1"
+                                type="checkbox"
+                              />
+                            </div>
                           </td>
                           <td
                             aria-colindex="2"
@@ -1164,7 +1202,7 @@ describe('Admin | containers | ListView', () => {
                                   </div>
                                   <span
                                     aria-hidden="true"
-                                    class="c45"
+                                    class="c46"
                                   >
                                     Disabled
                                   </span>
@@ -1190,8 +1228,15 @@ describe('Admin | containers | ListView', () => {
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c45"
+                                  >
+                                    Update
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1215,8 +1260,15 @@ describe('Admin | containers | ListView', () => {
                                   tabindex="-1"
                                   type="button"
                                 >
+                                  <span
+                                    class="c45"
+                                  >
+                                    Delete
+                                  </span>
                                   <svg
+                                    aria-hidden="true"
                                     fill="none"
+                                    focusable="false"
                                     height="1em"
                                     viewBox="0 0 24 24"
                                     width="1em"
@@ -1238,17 +1290,17 @@ describe('Admin | containers | ListView', () => {
                 </div>
                 <div>
                   <hr
-                    class="c46 c47"
+                    class="c47 c48"
                   />
                   <button
-                    class="c48 c49"
+                    class="c49 c50"
                   >
                     <div
                       class="c25"
                     >
                       <div
                         aria-hidden="true"
-                        class="c50 c51"
+                        class="c51 c52"
                       >
                         <svg
                           fill="none"
@@ -1264,10 +1316,10 @@ describe('Admin | containers | ListView', () => {
                         </svg>
                       </div>
                       <div
-                        class="c52"
+                        class="c53"
                       >
                         <span
-                          class="c53"
+                          class="c54"
                         >
                           Create new webhook
                         </span>

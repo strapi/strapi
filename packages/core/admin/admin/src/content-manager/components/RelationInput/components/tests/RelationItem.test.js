@@ -60,7 +60,7 @@ describe('Content-Manager || RelationInput || RelationItem', () => {
         testingDnd: true,
       });
 
-      const [draggedItem] = screen.getAllByLabelText('Drag');
+      const [draggedItem] = screen.getAllByText('Drag');
 
       fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
 
@@ -72,7 +72,7 @@ describe('Content-Manager || RelationInput || RelationItem', () => {
 
       setup({ updatePositionOfRelation: updatePositionOfRelationMock, testingDnd: true });
 
-      const [draggedItem] = screen.getAllByLabelText('Drag');
+      const [draggedItem] = screen.getAllByText('Drag');
 
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
@@ -85,7 +85,7 @@ describe('Content-Manager || RelationInput || RelationItem', () => {
 
       setup({ updatePositionOfRelation: updatePositionOfRelationMock, testingDnd: true });
 
-      const [draggedItem] = screen.getAllByLabelText('Drag');
+      const [draggedItem] = screen.getAllByText('Drag');
 
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'ArrowDown', code: 'ArrowDown' });
@@ -100,7 +100,7 @@ describe('Content-Manager || RelationInput || RelationItem', () => {
 
       setup({ updatePositionOfRelation: updatePositionOfRelationMock, testingDnd: true });
 
-      const [draggedItem] = screen.getAllByLabelText('Drag');
+      const [draggedItem] = screen.getAllByText('Drag');
 
       fireEvent.keyDown(draggedItem, { key: ' ', code: 'Space' });
       fireEvent.keyDown(draggedItem, { key: 'Escape', code: 'Escape' });
