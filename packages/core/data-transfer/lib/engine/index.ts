@@ -6,21 +6,11 @@ import type {
   ITransferEngine,
   ITransferEngineOptions,
   ITransferResults,
+  TransferStage,
 } from '../../types';
 
-type TransferAction =
-  | 'entities'
-  | 'schemas'
-  | 'configuration'
-  | 'media'
-  | 'links'
-  | 'close'
-  | 'schemaCheck'
-  | 'bootstrap'
-  | 'close';
-
 type TransferProgress = {
-  [key in TransferAction]?: {
+  [key in TransferStage]?: {
     count: number;
     bytes?: number;
   };
@@ -34,8 +24,6 @@ class TransferEngine<
   sourceProvider: ISourceProvider;
   destinationProvider: IDestinationProvider;
   options: ITransferEngineOptions;
-
-  // TODO: add typings
   transferProgress: TransferProgress = {};
 
   #progressStream: PassThrough = new PassThrough({ objectMode: true });
@@ -53,7 +41,7 @@ class TransferEngine<
     this.options = options;
   }
 
-  incrementTransferProgress(name: TransferAction, data: any) {
+  incrementTransferProgress(name: TransferStage, data: any) {
     if (!_.has(name, this.transferProgress)) {
       this.transferProgress[name] = { count: 0, bytes: 0 };
     }
@@ -61,7 +49,7 @@ class TransferEngine<
     this.transferProgress[name]!.bytes! += JSON.stringify(data).length;
   }
 
-  countRecorder = (name: TransferAction) => {
+  countRecorder = (name: TransferStage) => {
     return new PassThrough({
       objectMode: true,
       transform: (data, encoding, callback) => {
@@ -76,7 +64,7 @@ class TransferEngine<
     });
   };
 
-  #updateStep = (type: 'start' | 'complete', name: TransferAction) => {
+  #updateStep = (type: 'start' | 'complete', name: TransferStage) => {
     this.progressStream.write({
       type,
       data: this.transferProgress,
@@ -120,30 +108,21 @@ class TransferEngine<
   }
 
   async boostrap(): Promise<void> {
-    const stepName: TransferAction = 'bootstrap';
-    this.#updateStep('start', stepName);
-
     await Promise.all([
       // bootstrap source provider
       this.sourceProvider.bootstrap?.(),
       // bootstrap destination provider
       this.destinationProvider.bootstrap?.(),
     ]);
-
-    this.#updateStep('complete', stepName);
   }
 
   async close(): Promise<void> {
-    const stepName: TransferAction = 'close';
-    this.#updateStep('start', stepName);
     await Promise.all([
       // close source provider
       this.sourceProvider.close?.(),
       // close destination provider
       this.destinationProvider.close?.(),
     ]);
-
-    this.#updateStep('complete', stepName);
   }
 
   async integrityCheck(): Promise<boolean> {
@@ -202,7 +181,7 @@ class TransferEngine<
   }
 
   async transferSchemas(): Promise<void> {
-    const stepName: TransferAction = 'schemas';
+    const stepName: TransferStage = 'schemas';
     const inStream = await this.sourceProvider.streamSchemas?.();
     const outStream = await this.destinationProvider.getSchemasStream?.();
 
@@ -234,7 +213,7 @@ class TransferEngine<
   }
 
   async transferEntities(): Promise<void> {
-    const stepName: TransferAction = 'entities';
+    const stepName: TransferStage = 'entities';
     const inStream = await this.sourceProvider.streamEntities?.();
     const outStream = await this.destinationProvider.getEntitiesStream?.();
 
@@ -271,7 +250,7 @@ class TransferEngine<
   }
 
   async transferLinks(): Promise<void> {
-    const stepName: TransferAction = 'links';
+    const stepName: TransferStage = 'links';
     const inStream = await this.sourceProvider.streamLinks?.();
     const outStream = await this.destinationProvider.getLinksStream?.();
 
@@ -304,7 +283,7 @@ class TransferEngine<
   }
 
   async transferMedia(): Promise<void> {
-    const stepName: TransferAction = 'media';
+    const stepName: TransferStage = 'media';
     this.#updateStep('start', stepName);
     console.warn('transferMedia not yet implemented');
     return new Promise((resolve) =>
@@ -316,7 +295,7 @@ class TransferEngine<
   }
 
   async transferConfiguration(): Promise<void> {
-    const stepName: TransferAction = 'configuration';
+    const stepName: TransferStage = 'configuration';
     const inStream = await this.sourceProvider.streamConfiguration?.();
     const outStream = await this.destinationProvider.getConfigurationStream?.();
 

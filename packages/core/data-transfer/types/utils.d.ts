@@ -29,22 +29,6 @@ type Stream = Readable | Writable | Duplex | Transform;
 
 export type TransferStage = 'entities' | 'links' | 'media' | 'schemas' | 'configuration';
 
-export interface IProviderStageResults {
-  items?: number;
-}
-export interface ISourceProviderStageResults extends IProviderStageResults {}
-export interface IDestinationProviderStageResults extends IProviderStageResults {}
-
-export interface IProviderTransferResults {
-  entities?: ISourceProviderStageResults;
-  links?: ISourceProviderStageResults;
-  media?: ISourceProviderStageResults;
-  schemas?: ISourceProviderStageResults;
-  configuration?: ISourceProviderStageResults;
-}
-export interface ISourceProviderTransferResults extends IProviderTransferResults {}
-export interface IDestinationProviderTransferResults extends IProviderTransferResults {}
-
 export interface ITransferResults<S extends ISourceProvider, D extends IDestinationProvider> {
   source?: S['results'];
   destination?: D['results'];

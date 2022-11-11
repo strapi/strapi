@@ -5,14 +5,8 @@ import { Writable } from 'stream';
 import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import type {
-  IDestinationProvider,
-  IDestinationProviderTransferResults,
-  ProviderType,
-  TransferStage,
-} from '../../types';
+import type { IDestinationProvider, ProviderType, TransferStage } from '../../types';
 import { createEncryptionCipher } from '../encryption/encrypt';
-import { providerResultsCounter } from './util';
 
 export interface ILocalFileDestinationProviderOptions {
   // Encryption
@@ -34,8 +28,7 @@ export interface ILocalFileDestinationProviderOptions {
   };
 }
 
-export interface ILocalFileDestinationProviderTransferResults
-  extends IDestinationProviderTransferResults {
+export interface ILocalFileDestinationProviderTransferResults {
   file?: {
     path?: string;
   };
@@ -62,9 +55,6 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
     // Convert to stringified JSON lines
     transforms.push(stringer());
-
-    // add counter
-    transforms.push(providerResultsCounter(this.results, stage));
 
     // Compression
     if (this.options.compression.enabled) {
