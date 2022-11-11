@@ -242,21 +242,23 @@ const cleanOrderColumns = async ({ id, attribute, db, inverseRelIds, transaction
         )
         .transacting(trx);
       break;
-    default:
-      await db
-        .getConnection()
+    default: {
+      const dbConnection =
+        strapi.db.dialect.client === 'postgres' ? db.connection : db.getConnection();
+      await dbConnection
         .raw(
           `UPDATE ?? as a
-            SET ${update.join(', ')}
-            FROM (
-              SELECT ${select.join(', ')}
-              FROM ??
-              WHERE ${where.join(' OR ')}
-            ) AS b
-            WHERE b.id = a.id`,
+              SET ${update.join(', ')}
+              FROM (
+                SELECT ${select.join(', ')}
+                FROM ??
+                WHERE ${where.join(' OR ')}
+              ) AS b
+              WHERE b.id = a.id`,
           [joinTable.name, ...updateBinding, ...selectBinding, joinTable.name, ...whereBinding]
         )
         .transacting(trx);
+    }
     /*
       `UPDATE :joinTable: as a
         SET :orderColumn: = b.src_order, :inverseOrderColumn: = b.inv_order
