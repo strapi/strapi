@@ -8,7 +8,7 @@ const {
   // eslint-disable-next-line import/no-unresolved, node/no-missing-require
 } = require('@strapi/data-transfer');
 const _ = require('lodash/fp');
-
+const Table = require('cli-table3');
 const fs = require('fs-extra');
 
 const chalk = require('chalk');
@@ -113,16 +113,39 @@ module.exports = async (filename, opts) => {
 
     const results = await engine.transfer();
 
-    // TODO: This should be replaced before release!
-    console.table(
-      _.mapValues((values) => {
-        const { bytes, ...rest } = values;
-        return {
-          ...rest,
-          size: readableBytes(bytes, 1, 10),
-        };
-      }, resultData)
-    );
+    // Build pretty table
+    const table = new Table({
+      head: ['Type', 'Count', 'Size'],
+      colWidths: [55, 10, 15],
+    });
+
+    let totalBytes = 0;
+    let totalItems = 0;
+    Object.keys(resultData).forEach((key) => {
+      const item = resultData[key];
+
+      table.push([chalk.bold(key), item.count, readableBytes(item.bytes, 1, 12)]);
+      totalBytes += item.bytes;
+      totalItems += 1;
+
+      if (item.aggregates) {
+        Object.keys(item.aggregates).forEach((subkey) => {
+          const subitem = item.aggregates[subkey];
+
+          table.push([
+            `-- ${chalk.bold(subkey)}`,
+            subitem.count,
+            `(${chalk.grey(readableBytes(subitem.bytes, 1, 11))})`,
+          ]);
+        });
+      }
+    });
+    table.push([
+      chalk.bold.green('Total'),
+      chalk.bold.green(totalItems),
+      chalk.bold.green(readableBytes(totalBytes, 1, 12)),
+    ]);
+    console.log(table.toString());
 
     // TODO: once archiving is implemented, we need to check file extensions
     if (!fs.pathExistsSync(file)) {
