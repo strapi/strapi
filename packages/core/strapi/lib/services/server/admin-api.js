@@ -3,8 +3,10 @@
 const { createAPI } = require('./api');
 
 const createAdminAPI = (strapi) => {
+  const prefix = strapi.config.server.url || '';
+
   const opts = {
-    prefix: '', // '/admin';
+    prefix, // config server
     type: 'admin',
   };
 
