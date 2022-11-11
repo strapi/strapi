@@ -18,7 +18,7 @@ const createUserBodySchema = yup.object().shape({
             connect: yup
               .array()
               .of(yup.object().shape({ id: yup.strapiID().required() }))
-              .min(1)
+              .min(1, 'Users must have a role')
               .required(),
           })
           .required()
@@ -36,7 +36,16 @@ const updateUserBodySchema = yup.object().shape({
           connect: yup
             .array()
             .of(yup.object().shape({ id: yup.strapiID().required() }))
-            .min(1)
+            .required(),
+          disconnect: yup
+            .array()
+            .test('CheckDisconnect', 'Cannot remove role', function test(disconnectValue) {
+              if (value.connect.length === 0 && disconnectValue.length > 0) {
+                return false;
+              }
+
+              return true;
+            })
             .required(),
         })
       : yup.strapiID()
