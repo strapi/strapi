@@ -53,7 +53,7 @@ const castValue = (value, attribute) => {
     return value;
   }
 
-  if (types.isScalar(attribute.type)) {
+  if (types.isScalar(attribute.type) && !isKnexQuery(value)) {
     const field = createField(attribute);
 
     return value === null ? null : field.toDB(value);
