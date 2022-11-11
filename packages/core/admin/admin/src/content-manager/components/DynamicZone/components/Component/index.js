@@ -194,7 +194,4 @@ Component.propTypes = {
 
 const Memoized = memo(Component, isEqual);
 
-export default connect(
-  Memoized,
-  select
-);
+export default connect(Memoized, select);
