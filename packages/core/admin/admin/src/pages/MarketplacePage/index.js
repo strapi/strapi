@@ -32,6 +32,7 @@ import MissingPluginBanner from './components/MissingPluginBanner';
 import NpmPackagesGrid from './components/NpmPackagesGrid';
 import SortSelect from './components/SortSelect';
 import NpmPackagesFilters from './components/NpmPackagesFilters';
+import NpmPackagesPagination from './components/NpmPackagesPagination';
 
 const matchSearch = (npmPackages, search) => {
   return matchSorter(npmPackages, search, {
@@ -60,6 +61,11 @@ const MarketPlacePage = () => {
 
   const npmPackageType = query?.npmPackageType || 'plugin';
 
+  const paginationParams = {
+    page: query?.page || 1,
+    pageSize: query?.pageSize || 24,
+  };
+
   const [tabQuery, setTabQuery] = useState({
     plugin: npmPackageType === 'plugin' ? { ...query } : {},
     provider: npmPackageType === 'provider' ? { ...query } : {},
@@ -85,10 +91,16 @@ const MarketPlacePage = () => {
   };
 
   const { status: marketplaceProvidersStatus, data: marketplaceProvidersResponse } =
-    useFetchMarketplaceProviders(notifyMarketplaceLoad, tabQuery.provider);
+    useFetchMarketplaceProviders(notifyMarketplaceLoad, {
+      ...tabQuery.provider,
+      pagination: paginationParams,
+    });
 
   const { status: marketplacePluginsStatus, data: marketplacePluginsResponse } =
-    useFetchMarketplacePlugins(notifyMarketplaceLoad, tabQuery.plugin);
+    useFetchMarketplacePlugins(notifyMarketplaceLoad, {
+      ...tabQuery.plugin,
+      pagination: paginationParams,
+    });
 
   const isLoading = [marketplacePluginsStatus, marketplaceProvidersStatus].includes('loading');
 
@@ -185,7 +197,7 @@ const MarketPlacePage = () => {
     const hasTabQuery = tabQuery[selectedTab] && Object.keys(tabQuery[selectedTab]).length;
 
     if (hasTabQuery) {
-      setQuery({ ...tabQuery[selectedTab], npmPackageType: selectedTab });
+      setQuery({ ...tabQuery[selectedTab], npmPackageType: selectedTab, page: 1 });
     } else {
       setQuery({
         npmPackageType: selectedTab,
@@ -193,6 +205,7 @@ const MarketPlacePage = () => {
         collections: [],
         categories: [],
         sort: 'name:asc',
+        page: 1,
       });
     }
   };
@@ -218,6 +231,11 @@ const MarketPlacePage = () => {
       ? marketplacePluginsResponse.meta.collections
       : marketplaceProvidersResponse.meta.collections;
   const possibleCategories = marketplacePluginsResponse.meta.categories;
+
+  const { pagination } =
+    npmPackageType === 'plugin'
+      ? marketplacePluginsResponse.meta
+      : marketplaceProvidersResponse.meta;
 
   return (
     <Layout>
@@ -326,7 +344,8 @@ const MarketPlacePage = () => {
               </TabPanel>
             </TabPanels>
           </TabGroup>
-          <Box paddingTop={7}>
+          <NpmPackagesPagination pagination={pagination} />
+          <Box paddingTop={8}>
             <MissingPluginBanner />
           </Box>
         </ContentLayout>
