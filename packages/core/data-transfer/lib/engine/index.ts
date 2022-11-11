@@ -59,7 +59,7 @@ class TransferEngine<
           name,
           data: this.transferProgress,
         });
-        callback();
+        callback(null, data);
       },
     });
   };
