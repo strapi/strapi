@@ -1,4 +1,4 @@
-import type { ISourceProvider, ISourceProviderTransferResults, ProviderType } from '../../../types';
+import type { ISourceProvider, ProviderType } from '../../../types';
 import { chain } from 'stream-chain';
 import { Readable } from 'stream';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
