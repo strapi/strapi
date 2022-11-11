@@ -13,6 +13,7 @@ const fs = require('fs-extra');
 
 const chalk = require('chalk');
 const strapi = require('../../Strapi');
+const { readableBytes } = require('../utils');
 
 const pad = (n) => {
   return (n < 10 ? '0' : '') + String(n);
@@ -91,7 +92,7 @@ module.exports = async (filename, opts) => {
   const engine = createTransferEngine(source, destination, engineOptions);
 
   try {
-    let resultData;
+    let resultData = [];
     console.log(`Starting export...`);
     engine.progressStream.on('data', ({ type, name, data }) => {
       if (type === 'complete') {
@@ -99,6 +100,7 @@ module.exports = async (filename, opts) => {
         //   console.log(`${chalk.green(name)}: ${data[name]?.count} items`);
         // }
         console.log(`.${name} complete`);
+        resultData = data;
       } else if (type === 'start') {
         process.stdout.write(`Starting transfer of ${name}..`);
       } else if (type === 'progress') {
@@ -107,10 +109,21 @@ module.exports = async (filename, opts) => {
       } else {
         console.warn('unknown type/name', type, name);
       }
-      resultData = data;
     });
+
     const results = await engine.transfer();
-    console.table(resultData);
+
+    // TODO: This should be replaced before release!
+    console.table(
+      _.mapValues((values) => {
+        const { bytes, ...rest } = values;
+        return {
+          ...rest,
+          size: readableBytes(bytes, 1, 10),
+        };
+      }, resultData)
+    );
+
     // TODO: once archiving is implemented, we need to check file extensions
     if (!fs.pathExistsSync(file)) {
       logger.log(file);

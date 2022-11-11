@@ -22,6 +22,7 @@ type TransferAction =
 type TransferProgress = {
   [key in TransferAction]?: {
     count: number;
+    bytes?: number;
   };
 };
 
@@ -52,18 +53,19 @@ class TransferEngine<
     this.options = options;
   }
 
-  incrementTransferProgress(name: TransferAction, ...args: Array<string>) {
+  incrementTransferProgress(name: TransferAction, data: any) {
     if (!_.has(name, this.transferProgress)) {
-      this.transferProgress[name] = { count: 0 };
+      this.transferProgress[name] = { count: 0, bytes: 0 };
     }
-    this.transferProgress[name]!.count++;
+    this.transferProgress[name]!.count += 1;
+    this.transferProgress[name]!.bytes! += JSON.stringify(data).length;
   }
 
   countRecorder = (name: TransferAction) => {
     return new PassThrough({
       objectMode: true,
       transform: (data, encoding, callback) => {
-        this.incrementTransferProgress(name);
+        this.incrementTransferProgress(name, data);
         this.#progressStream.write({
           type: 'progress',
           name,
