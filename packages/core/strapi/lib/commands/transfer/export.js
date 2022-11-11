@@ -152,11 +152,11 @@ module.exports = async (filename, opts) => {
       logger.log(file);
       throw new Error('Export file not created');
     }
-    logger.log(
-      `Export process has been completed successfully! Export archive is in ${chalk.green(
-        results.destination.file.path
-      )}`
-    );
+
+    logger.log(`
+${chalk.bold('Export process has been completed successfully!')}
+Export archive is in ${chalk.green(results.destination.file.path)}
+`);
     process.exit(0);
   } catch (e) {
     logger.error('Export process failed unexpectedly:', e.toString());
