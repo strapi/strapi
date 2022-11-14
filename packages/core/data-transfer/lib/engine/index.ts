@@ -121,7 +121,6 @@ class TransferEngine implements ITransferEngine {
 
       if (sourceSchemas && destinationSchemas) {
         this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
-        console.log('IS VALID');
       }
 
       return true;
@@ -163,7 +162,6 @@ class TransferEngine implements ITransferEngine {
 
   async transferSchemas(): Promise<void> {
     const inStream = await this.sourceProvider.streamSchemas?.();
-    inStream?.on('data', (data) => console.log('data', data));
     const outStream = await this.destinationProvider.getSchemasStream?.();
 
     if (!inStream) {

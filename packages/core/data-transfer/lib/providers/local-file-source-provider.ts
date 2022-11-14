@@ -132,7 +132,6 @@ class LocalFileSourceProvider implements ISourceProvider {
         inStream,
         new tar.Parse({
           filter(path, entry) {
-            console.log('path', path);
             if (entry.type !== 'File') {
               return false;
             }
