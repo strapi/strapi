@@ -9,6 +9,7 @@ import { ProgressBar } from '@strapi/design-system/ProgressBar';
 import { useIntl } from 'react-intl';
 
 const BoxWrapper = styled(Flex)`
+  border-radius: ${({ theme }) => `${theme.borderRadius} ${theme.borderRadius} 0 0`};
   width: 100%;
   height: 100%;
   flex-direction: column;
@@ -44,7 +45,6 @@ export const UploadProgress = ({ onCancel, progress, error }) => {
       background={error ? 'danger100' : 'neutral700'}
       justifyContent="center"
       error={error}
-      hasRadius
     >
       {error ? (
         <Cross aria-label={error?.message} />
