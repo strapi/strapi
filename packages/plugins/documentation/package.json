@@ -49,7 +49,7 @@
     "@strapi/strapi": "^4.0.0"
   },
   "devDependencies": {
-    "@testing-library/react": "11.2.7",
+    "@testing-library/react": "12.1.4",
     "msw": "0.42.3"
   },
   "engines": {
