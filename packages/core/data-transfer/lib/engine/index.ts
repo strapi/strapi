@@ -111,11 +111,7 @@ class TransferEngine implements ITransferEngine {
       }
 
       await this.transferSchemas();
-      await this.transferEntities()
-        // Temporary while we don't have the final API for streaming data from the database
-        .catch((e) => {
-          console.log(`Could not complete the entities transfer. ${e.message}`);
-        });
+      await this.transferEntities();
       await this.transferMedia();
       await this.transferLinks();
       await this.transferConfiguration();
@@ -133,8 +129,12 @@ class TransferEngine implements ITransferEngine {
     const inStream = await this.sourceProvider.streamSchemas?.();
     const outStream = await this.destinationProvider.getSchemasStream?.();
 
-    if (!inStream || !outStream) {
-      throw new Error('Unable to transfer schemas, one of the streams is missing');
+    if (!inStream) {
+      throw new Error('Unable to transfer schemas, source stream is missing');
+    }
+
+    if (!outStream) {
+      throw new Error('Unable to transfer schemas, destination stream is missing');
     }
 
     return new Promise((resolve, reject) => {
@@ -144,9 +144,7 @@ class TransferEngine implements ITransferEngine {
 
       outStream
         // Throw on error in the destination
-        .on('error', (e) => {
-          reject(e);
-        })
+        .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', resolve);
 
@@ -161,6 +159,7 @@ class TransferEngine implements ITransferEngine {
     if (!inStream) {
       throw new Error('Unable to transfer entities, source stream is missing');
     }
+
     if (!outStream) {
       throw new Error('Unable to transfer entities, destination stream is missing');
     }
@@ -191,6 +190,7 @@ class TransferEngine implements ITransferEngine {
     if (!inStream) {
       throw new Error('Unable to transfer links, source stream is missing');
     }
+
     if (!outStream) {
       throw new Error('Unable to transfer links, destination stream is missing');
     }
@@ -211,7 +211,7 @@ class TransferEngine implements ITransferEngine {
   }
 
   async transferMedia(): Promise<void> {
-    console.log('transferMedia not yet implemented');
+    console.warn('transferMedia not yet implemented');
     return new Promise((resolve) => resolve());
   }
 
@@ -222,6 +222,7 @@ class TransferEngine implements ITransferEngine {
     if (!inStream) {
       throw new Error('Unable to transfer configuration, source stream is missing');
     }
+
     if (!outStream) {
       throw new Error('Unable to transfer configuration, destination stream is missing');
     }

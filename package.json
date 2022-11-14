@@ -51,7 +51,7 @@
     "test:front:watch:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:front:update:ce": "cross-env IS_EE=false jest --config ./jest.config.front.js --u",
     "test:unit": "jest --verbose",
-    "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --verbose --runInBand --testRunner=jest-circus/runner --forceExit --detectOpenHandles",
+    "test:api": "node test/api.js",
     "test:generate-app": "node test/create-test-app.js",
     "doc:api": "node scripts/open-api/serve.js"
   },
@@ -107,7 +107,7 @@
     "supertest": "6.2.4",
     "ts-jest": "29.0.3",
     "typescript": "4.8.4",
-    "yargs": "13.3.2"
+    "yargs": "17.6.0"
   },
   "engines": {
     "node": ">=14.19.1 <=18.x.x",
