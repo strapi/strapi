@@ -18,6 +18,10 @@ const ChildrenWrapper = styled(Flex)`
   min-width: 0;
 `;
 
+const IconButtonWrapper = styled.div`
+  margin-right: ${(props) => props.theme.spaces[1]};
+`;
+
 const RELATION_ITEM_DRAG_TYPE = 'RelationItem';
 
 export const RelationItem = ({
@@ -189,17 +193,18 @@ export const RelationItem = ({
           {...props}
         >
           {canDrag ? (
-            <IconButton
-              forwardedAs="div"
-              role="button"
-              tabIndex={0}
-              marginRight={1}
-              aria-label={iconButtonAriaLabel}
-              noBorder
-              onKeyDown={handleKeyDown}
-            >
-              <Drag />
-            </IconButton>
+            <IconButtonWrapper>
+              <IconButton
+                forwardedAs="div"
+                role="button"
+                tabIndex={0}
+                aria-label={iconButtonAriaLabel}
+                noBorder
+                onKeyDown={handleKeyDown}
+              >
+                <Drag />
+              </IconButton>
+            </IconButtonWrapper>
           ) : null}
           <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
           {endAction && <Box paddingLeft={4}>{endAction}</Box>}

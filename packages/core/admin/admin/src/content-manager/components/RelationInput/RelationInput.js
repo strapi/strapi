@@ -81,6 +81,7 @@ const RelationInput = ({
   publicationStateTranslations,
   required,
   relations: paginatedRelations,
+  toOneRelation,
   searchResults,
   size,
 }) => {
@@ -261,6 +262,8 @@ const RelationInput = ({
     }
   }, [previewRelationsLength, relations]);
 
+  const ariaDescriptionId = `${name}-item-instructions`;
+
   return (
     <Field error={error} name={name} hint={description} id={id}>
       <Relation
@@ -323,7 +326,7 @@ const RelationInput = ({
         }
       >
         <RelationList overflow={overflow}>
-          <VisuallyHidden id={`${name}-item-instructions`}>{listAriaDescription}</VisuallyHidden>
+          <VisuallyHidden id={ariaDescriptionId}>{listAriaDescription}</VisuallyHidden>
           <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
           <List
             height={dynamicListHeight}
@@ -332,7 +335,8 @@ const RelationInput = ({
             itemCount={totalNumberOfRelations}
             itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
             itemData={{
-              ariaDescribedBy: `${name}-item-instructions`,
+              ariaDescribedBy: ariaDescriptionId,
+              canDrag: !toOneRelation,
               disabled,
               handleCancel: onCancel,
               handleDropItem: onDropItem,
@@ -342,7 +346,6 @@ const RelationInput = ({
               onRelationDisconnect,
               publicationStateTranslations,
               relations,
-              totalNumberOfRelations,
               updatePositionOfRelation: handleUpdatePositionOfRelation,
             }}
             itemKey={(index, { relations: relationsItems }) => relationsItems[index].id}
@@ -395,16 +398,15 @@ RelationInput.defaultProps = {
   description: undefined,
   disabled: false,
   error: undefined,
-  iconButtonAriaLabel: 'Drag',
   labelAction: null,
   labelLoadMore: null,
-  listAriaDescription: 'Press spacebar to grab and re-order',
   liveText: undefined,
   onCancel: undefined,
   onDropItem: undefined,
   onGrabItem: undefined,
   required: false,
   relations: { data: [] },
+  toOneRelation: false,
   searchResults: { data: [] },
 };
 
@@ -412,13 +414,13 @@ RelationInput.propTypes = {
   error: PropTypes.string,
   description: PropTypes.string,
   disabled: PropTypes.bool,
-  iconButtonAriaLabel: PropTypes.string,
+  iconButtonAriaLabel: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   labelAction: PropTypes.element,
   labelLoadMore: PropTypes.string,
   labelDisconnectRelation: PropTypes.string.isRequired,
-  listAriaDescription: PropTypes.string,
+  listAriaDescription: PropTypes.string.isRequired,
   liveText: PropTypes.string,
   loadingMessage: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
@@ -439,6 +441,7 @@ RelationInput.propTypes = {
     published: PropTypes.string.isRequired,
   }).isRequired,
   required: PropTypes.bool,
+  toOneRelation: PropTypes.bool,
   searchResults: SearchResults,
   size: PropTypes.number.isRequired,
   relations: RelationsResult,
@@ -451,6 +454,7 @@ RelationInput.propTypes = {
 const ListItem = ({ data, index, style }) => {
   const {
     ariaDescribedBy,
+    canDrag,
     disabled,
     handleCancel,
     handleDropItem,
@@ -460,12 +464,10 @@ const ListItem = ({ data, index, style }) => {
     onRelationDisconnect,
     publicationStateTranslations,
     relations,
-    totalNumberOfRelations,
     updatePositionOfRelation,
   } = data;
   const { publicationState, href, mainField, id } = relations[index];
   const statusColor = publicationState === 'draft' ? 'secondary' : 'success';
-  const canDrag = totalNumberOfRelations > 1;
 
   return (
     <RelationItem
@@ -528,6 +530,7 @@ ListItem.defaultProps = {
 ListItem.propTypes = {
   data: PropTypes.shape({
     ariaDescribedBy: PropTypes.string.isRequired,
+    canDrag: PropTypes.bool.isRequired,
     disabled: PropTypes.bool.isRequired,
     handleCancel: PropTypes.func,
     handleDropItem: PropTypes.func,
@@ -547,7 +550,6 @@ ListItem.propTypes = {
         mainField: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       })
     ),
-    totalNumberOfRelations: PropTypes.number.isRequired,
     updatePositionOfRelation: PropTypes.func.isRequired,
   }),
   index: PropTypes.number.isRequired,

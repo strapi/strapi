@@ -346,6 +346,7 @@ export const RelationInputDataManager = ({
         'isSuccess'
       )}
       required={required}
+      toOneRelation={toOneRelation}
       searchResults={normalizeSearchResults(search, {
         mainFieldName: mainField.name,
       })}
