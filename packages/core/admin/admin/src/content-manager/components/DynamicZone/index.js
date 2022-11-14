@@ -11,7 +11,7 @@ import { getTrad } from '../../utils';
 import connect from './utils/connect';
 import select from './utils/select';
 
-import DynamicZoneComponent from './components/Component';
+import DynamicZoneComponent from './components/DynamicComponent';
 import AddComponentButton from './components/AddComponentButton';
 import DynamicZoneLabel from './components/DynamicZoneLabel';
 import ComponentPicker from './components/ComponentPicker';

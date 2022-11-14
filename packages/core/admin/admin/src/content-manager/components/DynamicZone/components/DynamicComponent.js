@@ -108,7 +108,7 @@ const DynamicZoneComponent = ({
                   <IconButtonCustom
                     noBorder
                     label={formatMessage({
-                      id: getTrad('components.DynamicZone.move-up-label'),
+                      id: getTrad('components.DynamicZone.move-down-label'),
                       defaultMessage: 'Move component down',
                     })}
                     onClick={onMoveComponentDownClick}
@@ -119,8 +119,8 @@ const DynamicZoneComponent = ({
                   <IconButtonCustom
                     noBorder
                     label={formatMessage({
-                      id: getTrad('components.DynamicZone.move-down-label'),
-                      defaultMessage: 'Move component down',
+                      id: getTrad('components.DynamicZone.move-up-label'),
+                      defaultMessage: 'Move component up',
                     })}
                     onClick={onMoveComponentUpClick}
                     icon={<ArrowUp />}
@@ -161,17 +161,25 @@ const DynamicZoneComponent = ({
   );
 };
 
+DynamicZoneComponent.defaultProps = {
+  formErrors: {},
+  index: 0,
+  isFieldAllowed: true,
+  showDownIcon: true,
+  showUpIcon: true,
+};
+
 DynamicZoneComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
-  formErrors: PropTypes.object.isRequired,
-  index: PropTypes.number.isRequired,
-  isFieldAllowed: PropTypes.bool.isRequired,
+  formErrors: PropTypes.object,
+  index: PropTypes.number,
+  isFieldAllowed: PropTypes.bool,
+  name: PropTypes.string.isRequired,
   onMoveComponentDownClick: PropTypes.func.isRequired,
   onMoveComponentUpClick: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired,
   onRemoveComponentClick: PropTypes.func.isRequired,
-  showDownIcon: PropTypes.bool.isRequired,
-  showUpIcon: PropTypes.bool.isRequired,
+  showDownIcon: PropTypes.bool,
+  showUpIcon: PropTypes.bool,
 };
 
 export default DynamicZoneComponent;
