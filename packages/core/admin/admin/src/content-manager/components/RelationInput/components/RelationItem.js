@@ -5,6 +5,7 @@ import { useDrag, useDrop } from 'react-dnd';
 
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
+import { Stack } from '@strapi/design-system/Stack';
 import { IconButton } from '@strapi/design-system/IconButton';
 
 import Drag from '@strapi/icons/Drag';
@@ -16,10 +17,6 @@ const ChildrenWrapper = styled(Flex)`
   width: 100%;
   /* Used to prevent endAction to be pushed out of container */
   min-width: 0;
-`;
-
-const IconButtonWrapper = styled.div`
-  margin-right: ${(props) => props.theme.spaces[1]};
 `;
 
 const RELATION_ITEM_DRAG_TYPE = 'RelationItem';
@@ -192,8 +189,8 @@ export const RelationItem = ({
           data-handler-id={handlerId}
           {...props}
         >
-          {canDrag ? (
-            <IconButtonWrapper>
+          <Stack spacing={1} horizontal>
+            {canDrag ? (
               <IconButton
                 forwardedAs="div"
                 role="button"
@@ -204,9 +201,9 @@ export const RelationItem = ({
               >
                 <Drag />
               </IconButton>
-            </IconButtonWrapper>
-          ) : null}
-          <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
+            ) : null}
+            <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
+          </Stack>
           {endAction && <Box paddingLeft={4}>{endAction}</Box>}
         </Flex>
       )}
