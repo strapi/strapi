@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { auth } from '@strapi/helper-plugin';
+import { auth, wrapAxiosInstance } from '@strapi/helper-plugin';
 // TODO: remember to pass also the pluginId when you use the new get, post, put, delete methods from fetchClient
 import pluginId from '../pluginId';
 
@@ -35,20 +35,6 @@ instance.interceptors.response.use(
   }
 );
 
-const wrapper = {};
-
-['request', 'get', 'head', 'delete', 'options', 'post', 'put', 'patch', 'getUri'].forEach(
-  (methodName) => {
-    wrapper[methodName] = (...args) => {
-      console.log(
-        'Deprecation warning: Usage of "axiosInstance" utility is deprecated and will be removed in the next major release. Instead, use the useFetchClient() hook, which is exported from the helper-plugin: { useFetchClient } from "@strapi/helper-plugin"'
-      );
-
-      return instance[methodName](...args);
-    };
-
-    return wrapper;
-  }
-);
+const wrapper = wrapAxiosInstance(instance);
 
 export default wrapper;

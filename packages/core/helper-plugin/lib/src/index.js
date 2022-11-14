@@ -96,6 +96,7 @@ export { default as contentManagementUtilRemoveFieldsFromData } from './content-
 export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';
 export * from './utils/stopPropagation';
 export { default as difference } from './utils/difference';
+export { default as wrapAxiosInstance } from './utils/wrapAxiosInstance';
 
 export { default as request } from './utils/request';
 export { default as getAPIInnerErrors } from './utils/getAPIInnerErrors';
