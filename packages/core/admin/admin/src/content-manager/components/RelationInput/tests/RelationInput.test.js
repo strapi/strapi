@@ -53,6 +53,7 @@ const Component = (props) => (
       <IntlProvider locale="en">
         <DndProvider backend={HTML5Backend}>
           <RelationInput
+            canReorder
             description="this is a description"
             iconButtonAriaLabel="Drag"
             id="1"
