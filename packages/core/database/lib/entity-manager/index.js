@@ -3,6 +3,7 @@
 const {
   isUndefined,
   castArray,
+  compact,
   isNil,
   has,
   isString,
@@ -37,6 +38,7 @@ const {
   deleteRelations,
   cleanOrderColumns,
 } = require('./regular-relations');
+const relationsSorter = require('./relations-sorter');
 
 const toId = (value) => value.id || value;
 const toIds = (value) => castArray(value || []).map(toId);
@@ -75,7 +77,10 @@ const toAssocs = (data) => {
   }
 
   return {
-    connect: toIdArray(data?.connect),
+    connect: toIdArray(data?.connect).map((elm) => ({
+      id: elm.id,
+      position: elm.position ? elm.position : { end: true },
+    })),
     disconnect: toIdArray(data?.disconnect),
   };
 };
@@ -825,20 +830,52 @@ const createEntityManager = (db) => {
                 ...(relToAdd.__pivot || {}),
               }));
 
-              // add order value
               if (hasOrderColumn(attribute)) {
-                const orderMax = (
-                  await this.createQueryBuilder(joinTable.name)
-                    .max(orderColumnName)
-                    .where({ [joinColumn.name]: id })
-                    .where(joinTable.on || {})
-                    .first()
-                    .transacting(trx)
-                    .execute()
-                ).max;
+                // Get all adjacent relations and the one with the highest order
+                const adjacentRelations = await this.createQueryBuilder(joinTable.name)
+                  .where({
+                    $or: [
+                      {
+                        [joinColumn.name]: id,
+                        [inverseJoinColumn.name]: {
+                          $in: compact(
+                            cleanRelationData.connect.map(
+                              (r) => r.position?.after || r.position?.before
+                            )
+                          ),
+                        },
+                      },
+                      {
+                        [orderColumnName]: this.createQueryBuilder(joinTable.name)
+                          .max(orderColumnName)
+                          .where({ [joinColumn.name]: id })
+                          .where(joinTable.on || {})
+                          .transacting(trx)
+                          .getKnexQuery(),
+                      },
+                    ],
+                  })
+                  .where(joinTable.on || {})
+                  .orderBy({ [orderColumnName]: 'ASC' })
+                  .transacting(trx)
+                  .execute();
 
-                insert.forEach((row, idx) => {
-                  row[orderColumnName] = orderMax + idx + 1;
+                const maxOrder = adjacentRelations.reduce(
+                  (acc, curr) => Math.max(acc, curr[orderColumnName]),
+                  0
+                );
+
+                const orderMap = relationsSorter(
+                  adjacentRelations,
+                  inverseJoinColumn.name,
+                  joinTable.orderColumnName,
+                  maxOrder
+                )
+                  .connect(cleanRelationData.connect)
+                  .getOrderMap();
+
+                insert.forEach((row) => {
+                  row[orderColumnName] = orderMap[row[inverseJoinColumn.name]];
                 });
               }
 
