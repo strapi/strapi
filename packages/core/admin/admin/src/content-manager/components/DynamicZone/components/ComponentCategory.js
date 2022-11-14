@@ -42,13 +42,19 @@ const ComponentCategory = ({ category, components, variant, isOpen, onAddCompone
   );
 };
 
+ComponentCategory.defaultProps = {
+  components: [],
+  isOpen: false,
+  variant: 'primary',
+};
+
 ComponentCategory.propTypes = {
   category: PropTypes.string.isRequired,
-  components: PropTypes.array.isRequired,
-  isOpen: PropTypes.bool.isRequired,
+  components: PropTypes.array,
+  isOpen: PropTypes.bool,
   onAddComponent: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
-  variant: PropTypes.oneOf(['primary', 'secondary']).isRequired,
+  variant: PropTypes.oneOf(['primary', 'secondary']),
 };
 
 export default ComponentCategory;

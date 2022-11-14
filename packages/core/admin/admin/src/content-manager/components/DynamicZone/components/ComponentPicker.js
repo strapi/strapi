@@ -34,7 +34,7 @@ const ComponentPicker = ({ components, isOpen, onClickAddComponent }) => {
   }, [components, getComponentLayout]);
 
   useEffect(() => {
-    if (isOpen && dynamicComponentCategories.length) {
+    if (isOpen && dynamicComponentCategories.length > 0) {
       setCategoryToOpen(dynamicComponentCategories[0].category);
     }
   }, [isOpen, dynamicComponentCategories]);
@@ -95,9 +95,14 @@ const ComponentPicker = ({ components, isOpen, onClickAddComponent }) => {
   );
 };
 
+ComponentPicker.defaultProps = {
+  components: [],
+  isOpen: false,
+};
+
 ComponentPicker.propTypes = {
-  components: PropTypes.array.isRequired,
-  isOpen: PropTypes.bool.isRequired,
+  components: PropTypes.array,
+  isOpen: PropTypes.bool,
   onClickAddComponent: PropTypes.func.isRequired,
 };
 

@@ -6,62 +6,41 @@ import { IntlProvider } from 'react-intl';
 import AddComponentButton from '../AddComponentButton';
 
 describe('<AddComponentButton />', () => {
-  it('should render the label by default', () => {
+  const setup = (props) =>
     render(
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <AddComponentButton label="test" name="name" onClick={jest.fn()} />
+          <AddComponentButton label="test" name="name" onClick={jest.fn()} {...props} />
         </IntlProvider>
       </ThemeProvider>
     );
+
+  it('should render the label by default', () => {
+    setup();
 
     expect(screen.getByText(/test/)).toBeInTheDocument();
   });
 
   it('should render the close label if the isOpen prop is true', () => {
-    render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <AddComponentButton label="test" isOpen name="name" onClick={jest.fn()} />
-        </IntlProvider>
-      </ThemeProvider>
-    );
+    setup({ isOpen: true });
 
     expect(screen.getByText(/Close/)).toBeInTheDocument();
   });
 
   it('should render the name of the field when the label is an empty string', () => {
-    render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <AddComponentButton label="" name="name" onClick={jest.fn()} />
-        </IntlProvider>
-      </ThemeProvider>
-    );
+    setup({ label: '' });
 
     expect(screen.getByText(/name/)).toBeInTheDocument();
   });
 
   it('should render a too high error if there is hasMaxError is true and the component is not open', () => {
-    render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <AddComponentButton hasMaxError label="test" name="name" onClick={jest.fn()} />
-        </IntlProvider>
-      </ThemeProvider>
-    );
+    setup({ hasMaxError: true });
 
     expect(screen.getByText(/The value is too high./)).toBeInTheDocument();
   });
 
   it('should render a label telling the user there are X missing components if hasMinError is true and the component is not open', () => {
-    render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <AddComponentButton hasMinError label="test" name="name" onClick={jest.fn()} />
-        </IntlProvider>
-      </ThemeProvider>
-    );
+    setup({ hasMinError: true });
 
     expect(screen.getByText(/missing components/)).toBeInTheDocument();
   });
@@ -69,13 +48,7 @@ describe('<AddComponentButton />', () => {
   it('should call the onClick handler when the button is clicked', () => {
     const onClick = jest.fn();
 
-    render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <AddComponentButton label="test" name="name" onClick={onClick} />
-        </IntlProvider>
-      </ThemeProvider>
-    );
+    setup({ onClick });
 
     screen.getByText(/test/).click();
 
@@ -85,13 +58,7 @@ describe('<AddComponentButton />', () => {
   it('should not call the onClick handler when the button is disabled', () => {
     const onClick = jest.fn();
 
-    render(
-      <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <AddComponentButton isDisabled label="test" name="name" onClick={onClick} />
-        </IntlProvider>
-      </ThemeProvider>
-    );
+    setup({ onClick, disabled: true });
 
     screen.getByText(/test/).click();
 

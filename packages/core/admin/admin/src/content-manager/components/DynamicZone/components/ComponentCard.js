@@ -58,7 +58,7 @@ export default function ComponentCard({ children, icon, onClick }) {
     <button type="button" onClick={onClick}>
       <ComponentBox borderRadius="borderRadius">
         <Stack spacing={1} style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <StyledFontAwesomeIcon icon={icon} />
+          <StyledFontAwesomeIcon data-testid="component-card-icon" icon={icon} />
           <Typography variant="pi" fontWeight="bold" textColor="neutral600">
             {children}
           </Typography>
