@@ -11,7 +11,6 @@ const makeArgv = (...args) => {
 describe('strapi command', () => {
   const exit = jest.spyOn(process, 'exit').mockImplementation(() => {});
   const stdoutWrite = jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
-  // const stderrWrite = jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
   const commanderWriteOut = jest.fn();
   const commanderWriteErr = jest.fn();
   let command;
@@ -35,8 +34,8 @@ describe('strapi command', () => {
 
     expect(exit).toHaveBeenCalledWith(1);
 
-    // trim to ignore newlines
     expect(commanderWriteErr).toHaveBeenCalledTimes(1);
+    // trim to ignore newlines
     expect(commanderWriteErr.mock.calls[0][0].trim()).toEqual(errString);
   });
 
@@ -44,6 +43,7 @@ describe('strapi command', () => {
     await runStrapiCommand(makeArgv('version'), command);
 
     expect(stdoutWrite).toHaveBeenCalledTimes(1);
+    // trim to ignore newlines
     expect(stdoutWrite.mock.calls[0][0].trim()).toEqual(require('../../../package.json').version);
     expect(exit).toHaveBeenCalledWith(0);
   });
