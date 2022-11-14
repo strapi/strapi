@@ -58,7 +58,7 @@ describe('<AddComponentButton />', () => {
   it('should not call the onClick handler when the button is disabled', () => {
     const onClick = jest.fn();
 
-    setup({ onClick, disabled: true });
+    setup({ onClick, isDisabled: true });
 
     screen.getByText(/test/).click();
 
