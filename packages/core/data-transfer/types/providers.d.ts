@@ -34,5 +34,6 @@ export interface IDestinationProvider extends IProvider {
   getLinksStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
   getMediaStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
   getConfigurationStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
+  getSchemas?(): any;
   getSchemasStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
 }

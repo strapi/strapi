@@ -1,9 +1,14 @@
+import { isEmpty } from 'lodash';
+import { uniq } from 'lodash/fp';
 import type {
+  Diff,
   IDestinationProvider,
   ISourceProvider,
   ITransferEngine,
   ITransferEngineOptions,
 } from '../../types';
+import calculateSchemaDiffs from '../strategies';
+import { jsonDiffs } from '../utils';
 
 class TransferEngine implements ITransferEngine {
   sourceProvider: ISourceProvider;
@@ -20,7 +25,7 @@ class TransferEngine implements ITransferEngine {
     this.options = options;
   }
 
-  private assertStrapiVersionIntegrity(sourceVersion?: string, destinationVersion?: string) {
+  #assertStrapiVersionIntegrity(sourceVersion?: string, destinationVersion?: string) {
     const strategy = this.options.versionMatching;
 
     if (!sourceVersion || !destinationVersion) {
@@ -51,8 +56,34 @@ class TransferEngine implements ITransferEngine {
     }
 
     throw new Error(
-      `Strapi versions doesn't match (${strategy} check): ${sourceVersion} does not match with ${destinationVersion} `
+      `Strapi versions doesn't match (${strategy} check): ${sourceVersion} does not match with ${destinationVersion}`
     );
+  }
+
+  #assertSchemasMatching(sourceSchemas: any, destinationSchemas: any) {
+    const chosenStrategy = this.options.schemasMatching || 'strict';
+    const keys = uniq(Object.keys(sourceSchemas).concat(Object.keys(destinationSchemas)));
+    const diffs: { [key: string]: Diff[] } = {};
+
+    keys.forEach((key) => {
+      const sourceSchema = sourceSchemas[key];
+      const destinationSchema = destinationSchemas[key];
+      const schemaDiffs = calculateSchemaDiffs(sourceSchema, destinationSchema);
+
+      const isValid = schemaDiffs[chosenStrategy]();
+
+      if (!isValid) {
+        diffs[key] = schemaDiffs.diffs;
+      }
+    });
+
+    if (!isEmpty(diffs)) {
+      throw new Error(
+        `Import process failed because the project doesn't have a matching data structure 
+        ${JSON.stringify(diffs, null, 2)}        
+        `
+      );
+    }
   }
 
   async boostrap(): Promise<void> {
@@ -74,24 +105,29 @@ class TransferEngine implements ITransferEngine {
   }
 
   async integrityCheck(): Promise<boolean> {
-    const sourceMetadata = await this.sourceProvider.getMetadata();
-    const destinationMetadata = await this.destinationProvider.getMetadata();
-
-    if (!sourceMetadata || !destinationMetadata) {
-      return true;
-    }
-
     try {
-      // Version check
-      this.assertStrapiVersionIntegrity(
-        sourceMetadata?.strapi?.version,
-        destinationMetadata?.strapi?.version
-      );
+      const sourceMetadata = await this.sourceProvider.getMetadata();
+      const destinationMetadata = await this.destinationProvider.getMetadata();
+
+      if (sourceMetadata && destinationMetadata) {
+        this.#assertStrapiVersionIntegrity(
+          sourceMetadata?.strapi?.version,
+          destinationMetadata?.strapi?.version
+        );
+      }
+
+      const sourceSchemas = await this.sourceProvider.getSchemas?.();
+      const destinationSchemas = await this.destinationProvider.getSchemas?.();
+
+      if (sourceSchemas && destinationSchemas) {
+        this.#assertSchemasMatching(sourceSchemas, destinationSchemas);
+        console.log('IS VALID');
+      }
 
       return true;
     } catch (error) {
       if (error instanceof Error) {
-        console.error('Integrity checks failed:', error.message);
+        console.error('Integrity checks failed:', error);
       }
 
       return false;
@@ -127,6 +163,7 @@ class TransferEngine implements ITransferEngine {
 
   async transferSchemas(): Promise<void> {
     const inStream = await this.sourceProvider.streamSchemas?.();
+    inStream?.on('data', (data) => console.log('data', data));
     const outStream = await this.destinationProvider.getSchemasStream?.();
 
     if (!inStream) {

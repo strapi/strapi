@@ -104,6 +104,11 @@ export interface ITransferEngineOptions {
    */
   versionMatching: 'exact' | 'ignore' | 'major' | 'minor' | 'patch';
 
+  /**
+   * Strategy used to do the schema matching in the integrity checks
+   */
+  schemasMatching: 'exact' | 'strict';
+
   // List of global transform streams to integrate into the final pipelines
   common?: {
     rules?: ITransferRule[];

@@ -1,6 +1,8 @@
 // import { createLogger } from '@strapi/logger';
 import chalk from 'chalk';
-import { Duplex } from 'stream-chain';
+
+import { pick, mapValues } from 'lodash/fp';
+import { Duplex } from 'stream';
 import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
 
 interface ILocalStrapiDestinationProviderOptions {
@@ -39,6 +41,31 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   // TODO
   getMetadata(): IMetadata | Promise<IMetadata> {
     return {};
+  }
+
+  getSchemas() {
+    if (!this.strapi) {
+      throw new Error('Not able to get Schemas. Strapi instance not found');
+    }
+
+    const selectedKeys = [
+      'collectionName',
+      'info',
+      'options',
+      'pluginOptions',
+      'attributes',
+      'kind',
+      'modelType',
+      'modelName',
+      'uid',
+      'plugin',
+      'globalId',
+    ];
+
+    return mapValues(pick(selectedKeys), {
+      ...this.strapi.contentTypes,
+      ...this.strapi.components,
+    });
   }
 
   getEntitiesStream(): Duplex {

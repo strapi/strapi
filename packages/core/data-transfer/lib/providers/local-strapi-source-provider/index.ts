@@ -1,6 +1,7 @@
 import type { ISourceProvider, ProviderType } from '../../../types';
 
 import { chain } from 'stream-chain';
+import { mapValues, pick } from 'lodash/fp';
 import { Readable } from 'stream';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
@@ -79,10 +80,27 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       throw new Error('Not able to get Schemas. Strapi instance not found');
     }
 
-    return [...Object.values(this.strapi.contentTypes), ...Object.values(this.strapi.components)];
+    const selectedKeys = [
+      'collectionName',
+      'info',
+      'options',
+      'pluginOptions',
+      'attributes',
+      'kind',
+      'modelType',
+      'modelName',
+      'uid',
+      'plugin',
+      'globalId',
+    ];
+
+    return mapValues(pick(selectedKeys), {
+      ...this.strapi.contentTypes,
+      ...this.strapi.components,
+    });
   }
 
   streamSchemas(): NodeJS.ReadableStream {
-    return Readable.from(this.getSchemas());
+    return Readable.from(Object.values(this.getSchemas()));
   }
 }
