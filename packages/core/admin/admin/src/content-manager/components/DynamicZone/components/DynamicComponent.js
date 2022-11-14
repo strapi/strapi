@@ -3,12 +3,15 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import get from 'lodash/get';
 
 import { Accordion, AccordionToggle, AccordionContent } from '@strapi/design-system/Accordion';
 import { IconButton } from '@strapi/design-system/IconButton';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Stack } from '@strapi/design-system/Stack';
+
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 import Trash from '@strapi/icons/Trash';
 import ArrowDown from '@strapi/icons/ArrowDown';
@@ -62,13 +65,23 @@ const DynamicZoneComponent = ({
   const [isOpen, setIsOpen] = useState(true);
   const { formatMessage } = useIntl();
   const { getComponentLayout } = useContentTypeLayout();
-  const { icon, friendlyName } = useMemo(() => {
+  const { modifiedData } = useCMEditViewDataManager();
+  const { icon, friendlyName, mainValue } = useMemo(() => {
+    const componentLayoutData = getComponentLayout(componentUid);
+
     const {
       info: { icon, displayName },
-    } = getComponentLayout(componentUid);
+    } = componentLayoutData;
 
-    return { friendlyName: displayName, icon };
-  }, [componentUid, getComponentLayout]);
+    const mainField = get(componentLayoutData, ['settings', 'mainField'], 'id');
+
+    const displayedValue =
+      mainField === 'id' ? '' : toString(get(modifiedData, [name, index, mainField], ''));
+
+    const mainValue = displayedValue.trim().length < 1 ? '' : ` - ${displayedValue}`;
+
+    return { friendlyName: displayName, icon, mainValue };
+  }, [componentUid, getComponentLayout, modifiedData, name, index]);
 
   const fieldsErrors = Object.keys(formErrors).filter((errorKey) => {
     const errorKeysArray = errorKey.split('.');
@@ -142,7 +155,7 @@ const DynamicZoneComponent = ({
                 )}
               </ActionStack>
             }
-            title={friendlyName}
+            title={`${friendlyName}${mainValue}`}
             togglePosition="left"
           />
           <AccordionContent>
