@@ -49,23 +49,14 @@ describe('<UploadProgress />', () => {
     } = renderCompo();
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c6 {
-        color: #dcdce4;
+      .c11 {
+        color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
       }
 
-      .c3 {
-        padding-bottom: 8px;
-      }
-
-      .c7 {
-        padding-left: 8px;
-      }
-
       .c0 {
-        background: #4a4a6a;
-        border-radius: 4px;
+        background: #eaeaef;
       }
 
       .c1 {
@@ -80,13 +71,59 @@ describe('<UploadProgress />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
+      }
+
+      .c3 {
+        width: 100%;
       }
 
       .c4 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c9 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+      }
+
+      .c5 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c5 > * + * {
+        margin-top: 8px;
+      }
+
+      .c10 > * {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .c10 > * + * {
+        margin-left: 4px;
+      }
+
+      .c6 {
         background: #666687;
         border-radius: 4px;
         position: relative;
@@ -94,7 +131,7 @@ describe('<UploadProgress />', () => {
         height: 4px;
       }
 
-      .c4:before {
+      .c6:before {
         content: '';
         position: absolute;
         top: 0;
@@ -104,79 +141,80 @@ describe('<UploadProgress />', () => {
         background: #eaeaef;
       }
 
+      .c7 {
+        width: 102px;
+        height: 8px;
+      }
+
       .c2 {
+        border-radius: 4px 4px 0 0;
         width: 100%;
         height: 100%;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
       }
 
-      .c5 {
+      .c8 {
         border: none;
         background: none;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+        width: -webkit-min-content;
+        width: -moz-min-content;
+        width: min-content;
       }
 
-      .c5 svg {
-        height: 10px;
-        width: 10px;
+      .c8 svg {
+        height: 8px;
+        width: 8px;
       }
 
-      .c5 svg path {
-        fill: #dcdce4;
+      .c8 svg path {
+        fill: #666687;
       }
 
       <div
         class="c0 c1 c2"
       >
         <div
-          class="c3"
+          class="c3 c4 c5"
+          spacing="2"
+          width="100%"
         >
           <div
             aria-label="0/100%"
             aria-valuemax="100"
             aria-valuemin="0"
             aria-valuenow="0"
-            class="c4"
+            class="c6 c7"
             role="progressbar"
             value="0"
           />
-        </div>
-        <button
-          class="c5"
-          type="button"
-        >
-          <span
-            class="c6"
+          <button
+            class="c8"
+            type="button"
           >
-            Cancel
-          </span>
-          <span
-            aria-hidden="true"
-            class="c7"
-          >
-            <svg
-              fill="none"
-              height="1em"
-              viewBox="0 0 24 24"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
+            <div
+              class="c9 c10"
+              spacing="1"
             >
-              <path
-                d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                fill="#212134"
-              />
-            </svg>
-          </span>
-        </button>
+              <span
+                class="c11"
+              >
+                Cancel
+              </span>
+              <svg
+                aria-hidden="true"
+                fill="none"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                  fill="#212134"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
       </div>
     `);
   });
@@ -189,7 +227,6 @@ describe('<UploadProgress />', () => {
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {
         background: #fcecea;
-        border-radius: 4px;
       }
 
       .c1 {
@@ -204,18 +241,12 @@ describe('<UploadProgress />', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
       }
 
       .c2 {
+        border-radius: 4px 4px 0 0;
         width: 100%;
         height: 100%;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
       }
 
       .c2 svg path {
