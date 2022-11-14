@@ -113,14 +113,10 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
         data-handler-id="T0"
       >
         <div
-          class="c4 c5"
+          class="c4 c5 c6"
           spacing="1"
         >
-          <div
-            class="c3 c6"
-          >
-            First relation
-          </div>
+          First relation
         </div>
       </div>
     </li>
@@ -134,14 +130,10 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
         data-handler-id="T2"
       >
         <div
-          class="c4 c5"
+          class="c4 c5 c6"
           spacing="1"
         >
-          <div
-            class="c3 c6"
-          >
-            Second relation
-          </div>
+          Second relation
         </div>
       </div>
     </li>

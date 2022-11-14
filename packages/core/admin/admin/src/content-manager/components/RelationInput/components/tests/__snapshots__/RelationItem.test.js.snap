@@ -86,14 +86,10 @@ exports[`Content-Manager || RelationInput || RelationItem should render and matc
       data-handler-id="T0"
     >
       <div
-        class="c3 c4"
+        class="c3 c4 c5"
         spacing="1"
       >
-        <div
-          class="c2 c5"
-        >
-          First relation
-        </div>
+        First relation
       </div>
     </div>
   </li>

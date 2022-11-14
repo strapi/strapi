@@ -13,7 +13,7 @@ import Drag from '@strapi/icons/Drag';
 import { composeRefs } from '../../../utils';
 import { RELATION_GUTTER } from '../constants';
 
-const ChildrenWrapper = styled(Flex)`
+const StackWrapper = styled(Stack)`
   width: 100%;
   /* Used to prevent endAction to be pushed out of container */
   min-width: 0;
@@ -189,7 +189,7 @@ export const RelationItem = ({
           data-handler-id={handlerId}
           {...props}
         >
-          <Stack spacing={1} horizontal>
+          <StackWrapper spacing={1} horizontal>
             {canDrag ? (
               <IconButton
                 forwardedAs="div"
@@ -202,8 +202,8 @@ export const RelationItem = ({
                 <Drag />
               </IconButton>
             ) : null}
-            <ChildrenWrapper justifyContent="space-between">{children}</ChildrenWrapper>
-          </Stack>
+            {children}
+          </StackWrapper>
           {endAction && <Box paddingLeft={4}>{endAction}</Box>}
         </Flex>
       )}
