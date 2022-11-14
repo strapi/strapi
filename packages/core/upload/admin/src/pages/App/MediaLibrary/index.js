@@ -220,7 +220,7 @@ export const MediaLibrary = () => {
                 <ConfigureTheViewButton paddingTop={1} paddingBottom={1}>
                   <IconButton
                     onClick={() => {
-                      trackUsage('willEditMediaLibraryLayout');
+                      trackUsage('willEditMediaLibraryConfig');
                     }}
                     forwardedAs={ReactRouterLink}
                     to={{

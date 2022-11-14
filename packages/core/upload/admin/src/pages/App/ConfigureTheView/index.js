@@ -41,7 +41,7 @@ const ConfigureTheView = ({ config }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     toggleWarningSubmit();
-    trackUsage('willSaveMediaLibrarySettings');
+    trackUsage('willSaveMediaLibraryConfig');
   };
 
   const handleConfirm = async () => {

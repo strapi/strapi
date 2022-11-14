@@ -11,7 +11,7 @@ import { axiosInstance } from '../../utils';
 import { useConfig } from '../useConfig';
 import pluginId from '../../pluginId';
 
-const getResponse = {
+const mockGetResponse = {
   data: {
     data: {
       pageSize: pageSizes[0],
@@ -20,17 +20,15 @@ const getResponse = {
   },
 };
 
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  axiosInstance: {
-    put: jest.fn(() => {
-      const res = { data: { data: {} } };
-
-      return Promise.resolve(res);
-    }),
-    get: jest.fn(() => getResponse),
-  },
-}));
+jest.mock('../../utils', () => {
+  return {
+    ...jest.requireActual('../../utils'),
+    axiosInstance: {
+      put: jest.fn().mockResolvedValue({ data: { data: {} } }),
+      get: jest.fn(),
+    },
+  };
+});
 
 const notificationStatusMock = jest.fn();
 
@@ -89,15 +87,19 @@ describe('useConfig', () => {
 
   describe('query', () => {
     test('does call the get endpoint', async () => {
+      axiosInstance.get.mockResolvedValue(mockGetResponse);
+
       const { waitFor, result } = await setup();
       expect(axiosInstance.get).toHaveBeenCalledWith(`/${pluginId}/configuration`);
 
       await waitFor(() => !result.current.config.isLoading);
-      expect(result.current.config.data).toEqual(getResponse.data.data);
+      expect(result.current.config.data).toEqual(mockGetResponse.data.data);
     });
 
     test('calls toggleNotification in case of error', async () => {
+      const originalConsoleError = console.error;
       console.error = jest.fn();
+
       axiosInstance.get.mockRejectedValueOnce(new Error('Jest mock error'));
       const toggleNotification = useNotification();
       const { waitFor } = await setup({});
@@ -108,6 +110,8 @@ describe('useConfig', () => {
           message: { id: 'notification.error' },
         })
       );
+
+      console.error = originalConsoleError;
     });
   });
 
@@ -115,10 +119,16 @@ describe('useConfig', () => {
     test('does call the proper mutation endpoint', async () => {
       const queryClient = useQueryClient();
 
+      let setupResult;
+      await act(async () => {
+        setupResult = await setup();
+      });
+
       const {
-        result: { current },
-      } = await setup();
-      const { mutateConfig } = current;
+        result: {
+          current: { mutateConfig },
+        },
+      } = setupResult;
 
       const mutateWith = {};
       await act(async () => {
@@ -132,7 +142,9 @@ describe('useConfig', () => {
     });
 
     test('does handle errors', async () => {
+      const originalConsoleError = console.error;
       console.error = jest.fn();
+
       const toggleNotification = useNotification();
       axiosInstance.put.mockRejectedValueOnce(new Error('Jest mock error'));
 
@@ -142,16 +154,18 @@ describe('useConfig', () => {
       const { mutateConfig } = current;
 
       const mutateWith = {};
-      await act(async () => {
-        try {
+      try {
+        await act(async () => {
           await mutateConfig.mutateAsync(mutateWith);
-        } catch {
-          expect(toggleNotification).toBeCalledWith({
-            type: 'warning',
-            message: { id: 'notification.error' },
-          });
-        }
-      });
+        });
+      } catch {
+        expect(toggleNotification).toBeCalledWith({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      }
+
+      console.error = originalConsoleError;
     });
   });
 });

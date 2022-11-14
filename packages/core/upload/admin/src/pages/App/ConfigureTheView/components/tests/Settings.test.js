@@ -55,7 +55,7 @@ describe('Upload - Configure | Settings', () => {
       });
     });
 
-    it('call onChange', async () => {
+    it('call onChange when changing page size', async () => {
       const onChange = jest.fn();
       renderSettings({ onChange });
 
@@ -84,7 +84,7 @@ describe('Upload - Configure | Settings', () => {
       });
     });
 
-    it('call onChange', async () => {
+    it('call onChange when changing sort', async () => {
       const onChange = jest.fn();
       renderSettings({ onChange });
 
