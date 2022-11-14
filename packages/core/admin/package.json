@@ -142,7 +142,7 @@
     "@testing-library/dom": "8.17.1",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
-    "@testing-library/user-event": "13.5.0",
+    "@testing-library/user-event": "14.4.3",
     "duplicate-dependencies-webpack-plugin": "^1.0.2",
     "glob": "8.0.3",
     "react-test-renderer": "^17.0.2",
