@@ -29,6 +29,7 @@ function setup(props) {
   });
 }
 
+// wip
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useCMEditViewDataManager: jest.fn().mockReturnValue({
