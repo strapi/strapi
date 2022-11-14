@@ -26,6 +26,7 @@ import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAsse
 import { EditFolderDialog } from '../../components/EditFolderDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
 import { AssetGridList } from '../../components/AssetGridList';
+import { AssetTableList } from '../../components/AssetTableList';
 import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
@@ -71,6 +72,9 @@ export const MediaLibrary = () => {
   const { trackUsage } = useTracking();
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
+
+  // TODO: remove and replace with data stored
+  const isGrid = false;
 
   const {
     data: assetsData,
@@ -331,24 +335,28 @@ export const MediaLibrary = () => {
 
               {assetCount > 0 && (
                 <>
-                  <AssetGridList
-                    assets={assets}
-                    onEditAsset={setAssetToEdit}
-                    onSelectAsset={selectOne}
-                    selectedAssets={selected.filter(({ type }) => type === 'asset')}
-                    title={
-                      ((!isFiltering || (isFiltering && folderCount > 0)) &&
-                        assetsData?.pagination?.page === 1 &&
-                        formatMessage(
-                          {
-                            id: getTrad('list.assets.title'),
-                            defaultMessage: 'Assets ({count})',
-                          },
-                          { count: assetCount }
-                        )) ||
-                      ''
-                    }
-                  />
+                  {isGrid ? (
+                    <AssetGridList
+                      assets={assets}
+                      onEditAsset={setAssetToEdit}
+                      onSelectAsset={selectOne}
+                      selectedAssets={selected.filter(({ type }) => type === 'asset')}
+                      title={
+                        ((!isFiltering || (isFiltering && folderCount > 0)) &&
+                          assetsData?.pagination?.page === 1 &&
+                          formatMessage(
+                            {
+                              id: getTrad('list.assets.title'),
+                              defaultMessage: 'Assets ({count})',
+                            },
+                            { count: assetCount }
+                          )) ||
+                        ''
+                      }
+                    />
+                  ) : (
+                    <AssetTableList assets={assets} />
+                  )}
 
                   {assetsData?.pagination && (
                     <PaginationFooter pagination={assetsData.pagination} />
