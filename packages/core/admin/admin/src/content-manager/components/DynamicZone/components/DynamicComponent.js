@@ -69,12 +69,13 @@ const DynamicZoneComponent = ({
       info: { icon, displayName },
     } = componentLayoutData;
 
-    const mainField = get(componentLayoutData, ['settings', 'mainField'], 'id');
+    const mainFieldKey = get(componentLayoutData, ['settings', 'mainField'], 'id');
 
-    const displayedValue =
-      mainField === 'id' ? '' : toString(get(modifiedData, [name, index, mainField], ''));
+    const mainField = get(modifiedData, [name, index, mainFieldKey]) ?? '';
 
-    const mainValue = displayedValue.trim().length < 1 ? '' : ` - ${displayedValue}`;
+    const displayedValue = mainFieldKey === 'id' ? '' : mainField.trim();
+
+    const mainValue = displayedValue.length > 0 ? ` - ${displayedValue}` : displayedValue;
 
     return { friendlyName: displayName, icon, mainValue };
   }, [componentUid, getComponentLayout, modifiedData, name, index]);
