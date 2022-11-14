@@ -391,7 +391,7 @@ describe('RelationInputDataManager', () => {
 
   test('Reorder an entity', () => {
     const { relationReorder } = useCMEditViewDataManager();
-    setup();
+    setup({ relationType: 'manyToMany' });
 
     const [draggedItem, dropZone] = screen.getAllByText('Drag');
 
@@ -405,13 +405,13 @@ describe('RelationInputDataManager', () => {
 
   describe('Accessibility', () => {
     it('should have have description text', () => {
-      setup();
+      setup({ relationType: 'manyToMany' });
 
       expect(screen.queryByText('Press spacebar to grab and re-order')).toBeInTheDocument();
     });
 
     it('should update the live text when an item has been grabbed', async () => {
-      setup();
+      setup({ relationType: 'manyToMany' });
 
       const [draggedItem] = screen.getAllByText('Drag');
 
@@ -425,7 +425,7 @@ describe('RelationInputDataManager', () => {
     });
 
     it('should change the live text when an item has been moved', () => {
-      setup();
+      setup({ relationType: 'manyToMany' });
 
       const [draggedItem] = screen.getAllByText('Drag');
 
@@ -436,7 +436,7 @@ describe('RelationInputDataManager', () => {
     });
 
     it('should change the live text when an item has been dropped', () => {
-      setup();
+      setup({ relationType: 'manyToMany' });
 
       const [draggedItem] = screen.getAllByText('Drag');
 
@@ -448,7 +448,7 @@ describe('RelationInputDataManager', () => {
     });
 
     it('should change the live text after the reordering interaction has been cancelled', () => {
-      setup();
+      setup({ relationType: 'manyToMany' });
 
       const [draggedItem] = screen.getAllByText('Drag');
 

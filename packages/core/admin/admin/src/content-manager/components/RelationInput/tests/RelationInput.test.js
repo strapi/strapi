@@ -59,6 +59,7 @@ const Component = (props) => (
             name="some-relation-1"
             label="Some Relation"
             labelLoadMore="Load more"
+            listAriaDescription="Press spacebar to grab and re-order"
             loadingMessage="Relations are loading"
             labelDisconnectRelation="Remove"
             numberOfRelationsToDisplay={5}
