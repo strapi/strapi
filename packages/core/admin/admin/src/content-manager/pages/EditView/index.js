@@ -1,11 +1,11 @@
-import React, { Suspense, memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import {
   CheckPermissions,
-  LoadingIndicatorPage,
   useTracking,
   LinkButton,
+  LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { ContentLayout } from '@strapi/design-system/Layout';
@@ -29,9 +29,28 @@ import Informations from './Informations';
 import Header from './Header';
 import { createAttributesLayout, getFieldsActionMatchingPermissions } from './utils';
 import DeleteLink from './DeleteLink';
+import useLazyComponents from '../../hooks/useLazyComponents';
 
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
+
+const getCustomFieldUidsFromLayout = (layout) => {
+  // Get all the fields on the content-type and its components
+  const allFields = [
+    ...layout.contentType.layouts.edit,
+    ...Object.values(layout.components).flatMap((component) => component.layouts.edit),
+  ].flat();
+  // Filter that down to custom fields and map the uids
+  const customFieldUids = allFields
+    .filter((field) => field.fieldSchema.customField)
+    .map((customField) => customField.fieldSchema.customField);
+  // Make sure the list is unique
+  const uniqueCustomFieldUids = customFieldUids.filter(
+    (uid, index) => customFieldUids.indexOf(uid) === index
+  );
+
+  return uniqueCustomFieldUids;
+};
 
 /* eslint-disable  react/no-array-index-key */
 const EditView = ({
@@ -46,6 +65,10 @@ const EditView = ({
 }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
+
+  const customFieldUids = getCustomFieldUidsFromLayout(layout);
+  const { isLazyLoading, lazyComponentStore } = useLazyComponents(customFieldUids);
+
   const { createActionAllowedFields, readActionAllowedFields, updateActionAllowedFields } =
     useMemo(() => {
       return getFieldsActionMatchingPermissions(userPermissions, slug);
@@ -85,6 +108,10 @@ const EditView = ({
       currentContentTypeLayoutData.attributes
     );
   }, [currentContentTypeLayoutData]);
+
+  if (isLazyLoading) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
     <DataManagementWrapper allLayoutData={layout} slug={slug} id={id} origin={origin}>
@@ -132,110 +159,109 @@ const EditView = ({
               <ContentLayout>
                 <Grid gap={4}>
                   <GridItem col={9} s={12}>
-                    <Suspense fallback={<LoadingIndicatorPage />}>
-                      <Stack spacing={6}>
-                        {formattedContentTypeLayout.map((row, index) => {
-                          if (isDynamicZone(row)) {
-                            const {
-                              0: {
-                                0: { name, fieldSchema, metadatas, labelAction },
-                              },
-                            } = row;
-
-                            return (
-                              <Box key={index}>
-                                <Grid gap={4}>
-                                  <GridItem col={12} s={12} xs={12}>
-                                    <DynamicZone
-                                      name={name}
-                                      fieldSchema={fieldSchema}
-                                      labelAction={labelAction}
-                                      metadatas={metadatas}
-                                    />
-                                  </GridItem>
-                                </Grid>
-                              </Box>
-                            );
-                          }
+                    <Stack spacing={6}>
+                      {formattedContentTypeLayout.map((row, index) => {
+                        if (isDynamicZone(row)) {
+                          const {
+                            0: {
+                              0: { name, fieldSchema, metadatas, labelAction },
+                            },
+                          } = row;
 
                           return (
-                            <Box
-                              key={index}
-                              hasRadius
-                              background="neutral0"
-                              shadow="tableShadow"
-                              paddingLeft={6}
-                              paddingRight={6}
-                              paddingTop={6}
-                              paddingBottom={6}
-                              borderColor="neutral150"
-                            >
-                              <Stack spacing={6}>
-                                {row.map((grid, gridIndex) => {
-                                  return (
-                                    <Grid gap={4} key={gridIndex}>
-                                      {grid.map(
-                                        ({
-                                          fieldSchema,
-                                          labelAction,
-                                          metadatas,
-                                          name,
-                                          size,
-                                          queryInfos,
-                                        }) => {
-                                          const isComponent = fieldSchema.type === 'component';
+                            <Box key={index}>
+                              <Grid gap={4}>
+                                <GridItem col={12} s={12} xs={12}>
+                                  <DynamicZone
+                                    name={name}
+                                    fieldSchema={fieldSchema}
+                                    labelAction={labelAction}
+                                    metadatas={metadatas}
+                                  />
+                                </GridItem>
+                              </Grid>
+                            </Box>
+                          );
+                        }
 
-                                          if (isComponent) {
-                                            const {
-                                              component,
-                                              max,
-                                              min,
-                                              repeatable = false,
-                                              required = false,
-                                            } = fieldSchema;
+                        return (
+                          <Box
+                            key={index}
+                            hasRadius
+                            background="neutral0"
+                            shadow="tableShadow"
+                            paddingLeft={6}
+                            paddingRight={6}
+                            paddingTop={6}
+                            paddingBottom={6}
+                            borderColor="neutral150"
+                          >
+                            <Stack spacing={6}>
+                              {row.map((grid, gridIndex) => {
+                                return (
+                                  <Grid gap={4} key={gridIndex}>
+                                    {grid.map(
+                                      ({
+                                        fieldSchema,
+                                        labelAction,
+                                        metadatas,
+                                        name,
+                                        size,
+                                        queryInfos,
+                                      }) => {
+                                        const isComponent = fieldSchema.type === 'component';
 
-                                            return (
-                                              <GridItem col={size} s={12} xs={12} key={component}>
-                                                <FieldComponent
-                                                  componentUid={component}
-                                                  labelAction={labelAction}
-                                                  isRepeatable={repeatable}
-                                                  intlLabel={{
-                                                    id: metadatas.label,
-                                                    defaultMessage: metadatas.label,
-                                                  }}
-                                                  max={max}
-                                                  min={min}
-                                                  name={name}
-                                                  required={required}
-                                                />
-                                              </GridItem>
-                                            );
-                                          }
+                                        if (isComponent) {
+                                          const {
+                                            component,
+                                            max,
+                                            min,
+                                            repeatable = false,
+                                            required = false,
+                                          } = fieldSchema;
 
                                           return (
-                                            <GridItem col={size} key={name} s={12} xs={12}>
-                                              <Inputs
-                                                size={size}
-                                                fieldSchema={fieldSchema}
-                                                keys={name}
+                                            <GridItem col={size} s={12} xs={12} key={component}>
+                                              <FieldComponent
+                                                componentUid={component}
                                                 labelAction={labelAction}
-                                                metadatas={metadatas}
-                                                queryInfos={queryInfos}
+                                                isRepeatable={repeatable}
+                                                intlLabel={{
+                                                  id: metadatas.label,
+                                                  defaultMessage: metadatas.label,
+                                                }}
+                                                max={max}
+                                                min={min}
+                                                name={name}
+                                                required={required}
                                               />
                                             </GridItem>
                                           );
                                         }
-                                      )}
-                                    </Grid>
-                                  );
-                                })}
-                              </Stack>
-                            </Box>
-                          );
-                        })}
-                      </Stack>
-                    </Suspense>
+
+                                        return (
+                                          <GridItem col={size} key={name} s={12} xs={12}>
+                                            <Inputs
+                                              size={size}
+                                              fieldSchema={fieldSchema}
+                                              keys={name}
+                                              labelAction={labelAction}
+                                              metadatas={metadatas}
+                                              queryInfos={queryInfos}
+                                              customFieldInputs={lazyComponentStore}
+                                            />
+                                          </GridItem>
+                                        );
+                                      }
+                                    )}
+                                  </Grid>
+                                );
+                              })}
+                            </Stack>
+                          </Box>
+                        );
+                      })}
+                    </Stack>
                   </GridItem>
                   <GridItem col={3} s={12}>
                     <Stack spacing={2}>
