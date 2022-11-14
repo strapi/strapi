@@ -53,6 +53,7 @@ const DisconnectButton = styled.button`
 `;
 
 const RelationInput = ({
+  canReorder,
   description,
   disabled,
   error,
@@ -81,7 +82,6 @@ const RelationInput = ({
   publicationStateTranslations,
   required,
   relations: paginatedRelations,
-  toOneRelation,
   searchResults,
   size,
 }) => {
@@ -336,7 +336,7 @@ const RelationInput = ({
             itemSize={RELATION_ITEM_HEIGHT + RELATION_GUTTER}
             itemData={{
               ariaDescribedBy: ariaDescriptionId,
-              canDrag: !toOneRelation,
+              canDrag: canReorder,
               disabled,
               handleCancel: onCancel,
               handleDropItem: onDropItem,
@@ -395,6 +395,7 @@ const SearchResults = PropTypes.shape({
 });
 
 RelationInput.defaultProps = {
+  canReorder: false,
   description: undefined,
   disabled: false,
   error: undefined,
@@ -406,12 +407,12 @@ RelationInput.defaultProps = {
   onGrabItem: undefined,
   required: false,
   relations: { data: [] },
-  toOneRelation: false,
   searchResults: { data: [] },
 };
 
 RelationInput.propTypes = {
   error: PropTypes.string,
+  canReorder: PropTypes.bool,
   description: PropTypes.string,
   disabled: PropTypes.bool,
   iconButtonAriaLabel: PropTypes.string.isRequired,
@@ -441,7 +442,6 @@ RelationInput.propTypes = {
     published: PropTypes.string.isRequired,
   }).isRequired,
   required: PropTypes.bool,
-  toOneRelation: PropTypes.bool,
   searchResults: SearchResults,
   size: PropTypes.number.isRequired,
   relations: RelationsResult,

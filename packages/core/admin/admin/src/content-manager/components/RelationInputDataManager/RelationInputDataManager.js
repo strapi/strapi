@@ -271,6 +271,7 @@ export const RelationInputDataManager = ({
   return (
     <RelationInput
       error={error}
+      canReorder={!toOneRelation}
       description={description}
       disabled={isDisabled}
       iconButtonAriaLabel={formatMessage({
@@ -346,7 +347,6 @@ export const RelationInputDataManager = ({
         'isSuccess'
       )}
       required={required}
-      toOneRelation={toOneRelation}
       searchResults={normalizeSearchResults(search, {
         mainFieldName: mainField.name,
       })}
