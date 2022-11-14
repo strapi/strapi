@@ -17,6 +17,11 @@ jest.mock('../../../../hooks', () => ({
   }),
 }));
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useCMEditViewDataManager: jest.fn().mockImplementation(() => ({ modifiedData: {} })),
+}));
+
 /**
  * We _could_ unmock this and use it, but it requires more
  * harnessing then is necessary and it's not worth it for these

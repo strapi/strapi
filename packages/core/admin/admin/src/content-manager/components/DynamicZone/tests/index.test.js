@@ -15,6 +15,7 @@ const toggleNotification = jest.fn();
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
+  useCMEditViewDataManager: jest.fn().mockImplementation(() => ({ modifiedData: {} })),
   useNotification: jest.fn().mockImplementation(() => toggleNotification),
   NotAllowedInput: () => 'This field is not allowed',
 }));
