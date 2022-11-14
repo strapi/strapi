@@ -22,17 +22,13 @@ import { getTrad } from '../../../utils';
 
 import FieldComponent from '../../FieldComponent';
 
-const ActionStack = styled(Stack)`
-  svg {
-    path {
-      fill: ${({ theme, expanded }) =>
-        expanded ? theme.colors.primary600 : theme.colors.neutral600};
-    }
-  }
-`;
-
 const IconButtonCustom = styled(IconButton)`
   background-color: transparent;
+
+  svg path {
+    fill: ${({ theme, expanded }) =>
+      expanded ? theme.colors.primary600 : theme.colors.neutral600};
+  }
 `;
 
 const StyledBox = styled(Box)`
@@ -116,7 +112,7 @@ const DynamicZoneComponent = ({
           <AccordionToggle
             startIcon={<FontAwesomeIcon icon={icon} />}
             action={
-              <ActionStack horizontal spacing={0} expanded={isOpen}>
+              <Stack horizontal spacing={0} expanded={isOpen}>
                 {showDownIcon && (
                   <IconButtonCustom
                     noBorder
@@ -153,7 +149,7 @@ const DynamicZoneComponent = ({
                     icon={<Trash />}
                   />
                 )}
-              </ActionStack>
+              </Stack>
             }
             title={`${friendlyName}${mainValue}`}
             togglePosition="left"
