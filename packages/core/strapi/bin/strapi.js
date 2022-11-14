@@ -282,7 +282,7 @@ program
       .argParser(parseInputBool)
   )
   .addOption(
-    new Option('--archive [boolean]', 'Archive output files using tar')
+    new Option('--archive [boolean]', 'Archive output file as a tar')
       .default(true)
       .argParser(parseInputBool)
   )
