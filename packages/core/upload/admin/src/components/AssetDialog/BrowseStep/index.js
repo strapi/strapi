@@ -18,7 +18,7 @@ import { FolderDefinition, AssetDefinition } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
 import { getBreadcrumbDataCM } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
-import { AssetList } from '../../AssetList';
+import { AssetGridList } from '../../AssetGridList';
 import { FolderList } from '../../FolderList';
 import { EmptyAssets } from '../../EmptyAssets';
 import { Breadcrumbs } from '../../Breadcrumbs';
@@ -267,7 +267,7 @@ export const BrowseStep = ({
 
       {assetCount > 0 && (
         <Box paddingTop={6}>
-          <AssetList
+          <AssetGridList
             allowedTypes={allowedTypes}
             size="S"
             assets={assets}

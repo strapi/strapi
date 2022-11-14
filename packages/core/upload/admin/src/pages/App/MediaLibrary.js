@@ -25,7 +25,7 @@ import Pencil from '@strapi/icons/Pencil';
 import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { EditFolderDialog } from '../../components/EditFolderDialog';
 import { EditAssetDialog } from '../../components/EditAssetDialog';
-import { AssetList } from '../../components/AssetList';
+import { AssetGridList } from '../../components/AssetGridList';
 import { FolderList } from '../../components/FolderList';
 import SortPicker from '../../components/SortPicker';
 import { useAssets } from '../../hooks/useAssets';
@@ -331,7 +331,7 @@ export const MediaLibrary = () => {
 
               {assetCount > 0 && (
                 <>
-                  <AssetList
+                  <AssetGridList
                     assets={assets}
                     onEditAsset={setAssetToEdit}
                     onSelectAsset={selectOne}

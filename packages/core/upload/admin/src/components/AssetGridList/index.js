@@ -8,7 +8,7 @@ import { Typography } from '@strapi/design-system/Typography';
 import { AssetCard } from '../AssetCard/AssetCard';
 import { Draggable } from './Draggable';
 
-export const AssetList = ({
+export const AssetGridList = ({
   allowedTypes,
   assets,
   onEditAsset,
@@ -68,7 +68,7 @@ export const AssetList = ({
   );
 };
 
-AssetList.defaultProps = {
+AssetGridList.defaultProps = {
   allowedTypes: ['images', 'files', 'videos', 'audios'],
   onEditAsset: undefined,
   size: 'M',
@@ -76,7 +76,7 @@ AssetList.defaultProps = {
   title: null,
 };
 
-AssetList.propTypes = {
+AssetGridList.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
   assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   onEditAsset: PropTypes.func,
