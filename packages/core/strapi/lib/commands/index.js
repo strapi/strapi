@@ -7,58 +7,54 @@ const { Command } = require('commander');
 
 const packageJSON = require('../../package.json');
 
-const runStrapiCommand = async (argv, command = new Command()) => {
-  const exitWithCode = (code) => {
-    process.exit(code);
+const checkCwdIsStrapiApp = (name) => {
+  const logErrorAndExit = () => {
+    console.log(
+      `You need to run ${yellow(
+        `strapi ${name}`
+      )} in a Strapi project. Make sure you are in the right directory.`
+    );
+    process.exit(1);
   };
 
-  const checkCwdIsStrapiApp = (name) => {
-    const logErrorAndExit = () => {
-      console.log(
-        `You need to run ${yellow(
-          `strapi ${name}`
-        )} in a Strapi project. Make sure you are in the right directory.`
-      );
-      exitWithCode(1);
-    };
-
-    try {
-      const pkgJSON = require(`${process.cwd()}/package.json`);
-      if (!_.has(pkgJSON, 'dependencies.@strapi/strapi')) {
-        logErrorAndExit(name);
-      }
-    } catch (err) {
+  try {
+    const pkgJSON = require(`${process.cwd()}/package.json`);
+    if (!_.has(pkgJSON, 'dependencies.@strapi/strapi')) {
       logErrorAndExit(name);
     }
+  } catch (err) {
+    logErrorAndExit(name);
+  }
+};
+
+const getLocalScript =
+  (name) =>
+  (...args) => {
+    checkCwdIsStrapiApp(name);
+
+    const cmdPath = resolveCwd.silent(`@strapi/strapi/lib/commands/${name}`);
+    if (!cmdPath) {
+      console.log(
+        `Error loading the local ${yellow(
+          name
+        )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
+      );
+      process.exit(1);
+    }
+
+    const script = require(cmdPath);
+
+    Promise.resolve()
+      .then(() => {
+        return script(...args);
+      })
+      .catch((error) => {
+        console.error(error);
+        process.exit(1);
+      });
   };
 
-  const getLocalScript =
-    (name) =>
-    (...args) => {
-      checkCwdIsStrapiApp(name);
-
-      const cmdPath = resolveCwd.silent(`@strapi/strapi/lib/commands/${name}`);
-      if (!cmdPath) {
-        console.log(
-          `Error loading the local ${yellow(
-            name
-          )} command. Strapi might not be installed in your "node_modules". You may need to run "yarn install".`
-        );
-        exitWithCode(1);
-      }
-
-      const script = require(cmdPath);
-
-      Promise.resolve()
-        .then(() => {
-          return script(...args);
-        })
-        .catch((error) => {
-          console.error(error);
-          exitWithCode(1);
-        });
-    };
-
+const runStrapiCommand = async (argv, command = new Command()) => {
   // Initial program setup
   command.storeOptionsAsProperties(false).allowUnknownOption(true);
 
@@ -72,7 +68,7 @@ const runStrapiCommand = async (argv, command = new Command()) => {
     .description('Output the version of Strapi')
     .action(() => {
       process.stdout.write(`${packageJSON.version}\n`);
-      exitWithCode(0);
+      process.exit(0);
     });
 
   // `$ strapi console`
