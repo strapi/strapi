@@ -148,8 +148,7 @@ paths:
                 type: object
                 properties:
                   ok:
-                    type: enum
-                    enum: [true]
+                    type: boolean
         default:
           description: Error
           content:
@@ -273,8 +272,7 @@ paths:
                   email:
                     type: string
                   sent:
-                    type: enum
-                    enum: [true]
+                    type: boolean
         default:
           description: Error
           content:
@@ -381,8 +379,7 @@ paths:
                 type: object
                 properties:
                   ok:
-                    type: enum
-                    enum: [true]
+                    type: boolean
         default:
           description: Error
           content:
@@ -456,8 +453,7 @@ paths:
                 type: object
                 properties:
                   ok:
-                    type: enum
-                    enum: [true]
+                    type: boolean
         default:
           description: Error
           content:
@@ -485,8 +481,7 @@ paths:
                 type: object
                 properties:
                   ok:
-                    type: enum
-                    enum: [true]
+                    type: boolean
         default:
           description: Error
           content:
@@ -779,9 +774,11 @@ components:
         type:
           type: string
         createdAt:
-          type: datetime
+          type: string
+          format: date-time
         updatedAt:
-          type: datetime
+          type: string
+          format: date-time
 
     Users-Permissions-User:
       type: object
@@ -805,10 +802,12 @@ components:
           type: boolean
           example: false
         createdAt:
-          type: datetime
+          type: string
+          format: date-time
           example: '2022-06-02T08:32:06.258Z'
         updatedAt:
-          type: datetime
+          type: string
+          format: date-time
           example: '2022-06-02T08:32:06.267Z'
 
     Users-Permissions-UserRegistration:
