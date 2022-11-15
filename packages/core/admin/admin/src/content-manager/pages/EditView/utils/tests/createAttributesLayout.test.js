@@ -203,4 +203,9 @@ describe('Content Manager | EditView | utils | createAttributesLayout', () => {
 
     expect(createAttributesLayout(currentLayoutData)).toEqual(expected);
   });
+
+  it('Should return an empty array when no layouts are found', () => {
+    const currentLayoutData = {};
+    expect(createAttributesLayout(currentLayoutData)).toEqual([]);
+  });
 });

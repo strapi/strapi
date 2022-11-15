@@ -5,7 +5,7 @@ const createAttributesLayout = (currentContentTypeLayoutData) => {
   let currentRowIndex = 0;
   const newLayout = [];
 
-  if (!currentContentTypeLayoutData) {
+  if (!currentContentTypeLayoutData.layouts) {
     return newLayout;
   }
 
