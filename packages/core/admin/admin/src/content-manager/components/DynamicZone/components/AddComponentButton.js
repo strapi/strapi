@@ -13,7 +13,8 @@ import { BaseButton } from '@strapi/design-system/BaseButton';
 import { Box } from '@strapi/design-system/Box';
 import { Flex } from '@strapi/design-system/Flex';
 import { Typography } from '@strapi/design-system/Typography';
-import { getTrad } from '../../../../utils';
+
+import { getTrad } from '../../../utils';
 
 const StyledAddIcon = styled(PlusCircle)`
   transform: ${({ $isOpen }) => ($isOpen ? 'rotate(45deg)' : 'rotate(0deg)')};
@@ -142,17 +143,22 @@ const AddComponentButton = ({
 };
 
 AddComponentButton.defaultProps = {
+  hasError: false,
+  hasMaxError: false,
+  hasMinError: false,
+  isDisabled: false,
+  isOpen: false,
   label: '',
   missingComponentNumber: 0,
 };
 
 AddComponentButton.propTypes = {
   label: PropTypes.string,
-  hasError: PropTypes.bool.isRequired,
-  hasMaxError: PropTypes.bool.isRequired,
-  hasMinError: PropTypes.bool.isRequired,
-  isDisabled: PropTypes.bool.isRequired,
-  isOpen: PropTypes.bool.isRequired,
+  hasError: PropTypes.bool,
+  hasMaxError: PropTypes.bool,
+  hasMinError: PropTypes.bool,
+  isDisabled: PropTypes.bool,
+  isOpen: PropTypes.bool,
   missingComponentNumber: PropTypes.number,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
