@@ -1,4 +1,4 @@
-import React, { Suspense, memo, useCallback, useMemo } from 'react';
+import React, { Suspense, memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import {
@@ -63,28 +63,16 @@ const EditView = ({
   }/${slug}/configurations/edit`;
   const currentContentTypeLayoutData = get(layout, ['contentType'], {});
 
-  const DataManagementWrapper = useMemo(
-    () => (isSingleType ? SingleTypeFormWrapper : CollectionTypeFormWrapper),
-    [isSingleType]
-  );
+  const DataManagementWrapper = isSingleType ? SingleTypeFormWrapper : CollectionTypeFormWrapper;
 
   // Check if a block is a dynamic zone
-  const isDynamicZone = useCallback((block) => {
+  const isDynamicZone = (block) => {
     return block.every((subBlock) => {
       return subBlock.every((obj) => obj.fieldSchema.type === 'dynamiczone');
     });
-  }, []);
+  };
 
-  const formattedContentTypeLayout = useMemo(() => {
-    if (!currentContentTypeLayoutData.layouts) {
-      return [];
-    }
-
-    return createAttributesLayout(
-      currentContentTypeLayoutData.layouts.edit,
-      currentContentTypeLayoutData.attributes
-    );
-  }, [currentContentTypeLayoutData]);
+  const formattedContentTypeLayout = createAttributesLayout(currentContentTypeLayoutData);
 
   return (
     <DataManagementWrapper allLayoutData={layout} slug={slug} id={id} origin={origin}>

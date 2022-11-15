@@ -27,6 +27,12 @@ describe('Content Manager | EditView | utils | createAttributesLayout', () => {
       [{ name: 'postal_code', size: 6 }],
       [{ name: 'geolocation', size: 12 }],
     ];
+    const currentLayoutData = {
+      layouts: {
+        edit: currentLayout,
+      },
+      attributes,
+    };
     const expected = [
       [
         [
@@ -38,7 +44,7 @@ describe('Content Manager | EditView | utils | createAttributesLayout', () => {
       ],
     ];
 
-    expect(createAttributesLayout(currentLayout, attributes)).toEqual(expected);
+    expect(createAttributesLayout(currentLayoutData)).toEqual(expected);
   });
 
   it('Should return an array of size 2 if there is a dynamic zone at the end of the layout', () => {
@@ -68,6 +74,12 @@ describe('Content Manager | EditView | utils | createAttributesLayout', () => {
       [{ name: 'geolocation', size: 12 }],
       [{ name: 'dynamicZone1', size: 12 }],
     ];
+    const currentLayoutData = {
+      layouts: {
+        edit: currentLayout,
+      },
+      attributes,
+    };
     const expected = [
       [
         [
@@ -80,7 +92,7 @@ describe('Content Manager | EditView | utils | createAttributesLayout', () => {
       [[{ name: 'dynamicZone1', size: 12 }]],
     ];
 
-    expect(createAttributesLayout(currentLayout, attributes)).toEqual(expected);
+    expect(createAttributesLayout(currentLayoutData)).toEqual(expected);
   });
 
   it('Should return an array of size 2 if there is a dynamic zone at the beginning of the layout', () => {
@@ -114,6 +126,12 @@ describe('Content Manager | EditView | utils | createAttributesLayout', () => {
       [{ name: 'postal_code', size: 6 }],
       [{ name: 'geolocation', size: 12 }],
     ];
+    const currentLayoutData = {
+      layouts: {
+        edit: currentLayout,
+      },
+      attributes,
+    };
     const expected = [
       [[{ name: 'dynamicZone1', size: 12 }]],
       [
@@ -126,7 +144,7 @@ describe('Content Manager | EditView | utils | createAttributesLayout', () => {
       ],
     ];
 
-    expect(createAttributesLayout(currentLayout, attributes)).toEqual(expected);
+    expect(createAttributesLayout(currentLayoutData)).toEqual(expected);
   });
 
   it('Should return an array of size 5 if there are 3 dynamic zones', () => {
@@ -164,6 +182,12 @@ describe('Content Manager | EditView | utils | createAttributesLayout', () => {
       [{ name: 'geolocation', size: 12 }],
       [{ name: 'dynamicZone3', size: 12 }],
     ];
+    const currentLayoutData = {
+      layouts: {
+        edit: currentLayout,
+      },
+      attributes,
+    };
     const expected = [
       [[{ name: 'dynamicZone1', size: 12 }]],
       [
@@ -177,6 +201,6 @@ describe('Content Manager | EditView | utils | createAttributesLayout', () => {
       [[{ name: 'dynamicZone3', size: 12 }]],
     ];
 
-    expect(createAttributesLayout(currentLayout, attributes)).toEqual(expected);
+    expect(createAttributesLayout(currentLayoutData)).toEqual(expected);
   });
 });
