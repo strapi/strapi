@@ -42,7 +42,7 @@ export interface ITransferEngine<
    * Note: The bootstrap method can be used to initialize database
    * connections, open files, etc...
    */
-  boostrap(): Promise<void>;
+  bootstrap(): Promise<void>;
 
   /**
    * Run the close lifecycle method of each provider
