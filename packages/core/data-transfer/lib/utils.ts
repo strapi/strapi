@@ -94,7 +94,7 @@ export const jsonDiffs = (a: unknown, b: unknown, ctx: Context = createContext()
   return diffs;
 };
 
-const selectedKeys = [
+const schemaSelectedKeys = [
   'collectionName',
   'info',
   'options',
@@ -108,4 +108,4 @@ const selectedKeys = [
   'globalId',
 ];
 
-export const mapSchemasValues = (schemas: any) => mapValues(pick(selectedKeys), schemas);
+export const mapSchemasValues = (schemas: any) => mapValues(pick(schemaSelectedKeys), schemas);

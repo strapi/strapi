@@ -81,20 +81,6 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       throw new Error('Not able to get Schemas. Strapi instance not found');
     }
 
-    const selectedKeys = [
-      'collectionName',
-      'info',
-      'options',
-      'pluginOptions',
-      'attributes',
-      'kind',
-      'modelType',
-      'modelName',
-      'uid',
-      'plugin',
-      'globalId',
-    ];
-
     const schemas = {
       ...this.strapi.contentTypes,
       ...this.strapi.components,
