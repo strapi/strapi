@@ -125,6 +125,11 @@ const cleanData = ({ browserState, serverState }, currentSchema, componentsSchem
 
           cleanedData = {
             disconnect: disconnectedRelations,
+            /**
+             * Reverse the array because the API sequentially goes through the list
+             * so in an instance where you add two to the end it would fail because index0
+             * would want to attach itself to index1 which doesn't exist yet.
+             */
             connect: connectedRelations.reverse(),
           };
 
