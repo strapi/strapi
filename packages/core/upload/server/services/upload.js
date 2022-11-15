@@ -448,4 +448,14 @@ module.exports = ({ strapi }) => ({
 
     return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
   },
+
+  getConfiguration() {
+    return strapi.store({ type: 'plugin', name: 'upload', key: 'view_configuration' }).get();
+  },
+
+  setConfiguration(value) {
+    return strapi
+      .store({ type: 'plugin', name: 'upload', key: 'view_configuration' })
+      .set({ value });
+  },
 });

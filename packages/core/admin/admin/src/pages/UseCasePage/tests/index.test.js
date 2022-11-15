@@ -57,34 +57,88 @@ describe('Admin | UseCasePage', () => {
         width: 1px;
       }
 
-      .c1 {
-        padding-top: 24px;
-        padding-right: 40px;
+      .c13 {
+        padding-bottom: 32px;
       }
 
-      .c9 {
-        padding-top: 8px;
-        padding-bottom: 64px;
+      .c0 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: end;
+        -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+        justify-content: flex-end;
       }
 
-      .c11 {
-        background: #ffffff;
-        padding-top: 48px;
-        padding-right: 56px;
-        padding-bottom: 48px;
-        padding-left: 56px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      .c14 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
-      .c16 {
-        padding-top: 24px;
-        padding-bottom: 4px;
-        width: 15.625rem;
+      .c38 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
       }
 
-      .c39 {
-        padding-top: 16px;
+      .c19 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c20 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c20 > * + * {
+        margin-top: 24px;
+      }
+
+      .c17 {
+        color: #32324d;
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
       }
 
       .c37 {
@@ -171,7 +225,7 @@ describe('Admin | UseCasePage', () => {
         width: 100%;
       }
 
-      .c35 .sc-kBzgEd {
+      .c35 .sc-cfJLRR {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -229,58 +283,34 @@ describe('Admin | UseCasePage', () => {
         fill: #ffffff;
       }
 
-      .c13 {
-        padding-bottom: 32px;
+      .c1 {
+        padding-top: 24px;
+        padding-right: 40px;
       }
 
-      .c0 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: end;
-        -webkit-justify-content: flex-end;
-        -ms-flex-pack: end;
-        justify-content: flex-end;
+      .c9 {
+        padding-top: 8px;
+        padding-bottom: 64px;
       }
 
-      .c14 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
+      .c11 {
+        background: #ffffff;
+        padding-top: 48px;
+        padding-right: 56px;
+        padding-bottom: 48px;
+        padding-left: 56px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c38 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
+      .c16 {
+        padding-top: 24px;
+        padding-bottom: 4px;
+        width: 15.625rem;
+      }
+
+      .c39 {
+        padding-top: 16px;
       }
 
       .c26 {
@@ -435,36 +465,6 @@ describe('Admin | UseCasePage', () => {
 
       .c28 {
         width: 100%;
-      }
-
-      .c19 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c20 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c20 > * + * {
-        margin-top: 24px;
-      }
-
-      .c17 {
-        color: #32324d;
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
       }
 
       .c10:focus-visible {

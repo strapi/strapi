@@ -2,8 +2,10 @@ import axios from 'axios';
 
 const MARKETPLACE_API_URL = 'https://market-api.strapi.io';
 
-const fetchMarketplacePlugins = async () => {
-  const { data: response } = await axios.get(`${MARKETPLACE_API_URL}/plugins`);
+const fetchMarketplacePlugins = async (params = {}) => {
+  const { data: response } = await axios.get(`${MARKETPLACE_API_URL}/plugins`, {
+    params,
+  });
 
   // Only keep v4 plugins
   const filteredResponse = {
