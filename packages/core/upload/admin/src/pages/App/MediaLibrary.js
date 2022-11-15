@@ -73,8 +73,8 @@ export const MediaLibrary = () => {
   const [{ query }, setQuery] = useQueryParams();
   const isFiltering = Boolean(query._q || query.filters);
 
-  // TODO: remove and replace with data stored
-  const isGrid = false;
+  // TODO: remove and replace with data when available stored
+  const isGridView = false;
 
   const {
     data: assetsData,
@@ -335,7 +335,7 @@ export const MediaLibrary = () => {
 
               {assetCount > 0 && (
                 <>
-                  {isGrid ? (
+                  {isGridView ? (
                     <AssetGridList
                       assets={assets}
                       onEditAsset={setAssetToEdit}
@@ -355,7 +355,12 @@ export const MediaLibrary = () => {
                       }
                     />
                   ) : (
-                    <AssetTableList assets={assets} onEditAsset={setAssetToEdit} />
+                    <AssetTableList
+                      assets={assets}
+                      onEditAsset={setAssetToEdit}
+                      onSelectAsset={selectOne}
+                      selectedAssets={selected.filter(({ type }) => type === 'asset')}
+                    />
                   )}
 
                   {assetsData?.pagination && (
