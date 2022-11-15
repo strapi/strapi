@@ -22,6 +22,11 @@ type TransferProgress = {
   };
 };
 
+type TransferEngineProgress = {
+  data: any;
+  stream: PassThrough;
+};
+
 class TransferEngine<
   S extends ISourceProvider = ISourceProvider,
   D extends IDestinationProvider = IDestinationProvider
@@ -31,10 +36,13 @@ class TransferEngine<
   destinationProvider: IDestinationProvider;
   options: ITransferEngineOptions;
 
-  transferProgress: TransferProgress = {};
+  #transferProgress: TransferProgress = {};
   #progressStream: PassThrough = new PassThrough({ objectMode: true });
-  get progressStream() {
-    return this.#progressStream;
+  get progress(): TransferEngineProgress {
+    return {
+      data: this.#transferProgress,
+      stream: this.#progressStream,
+    };
   }
 
   constructor(
@@ -48,23 +56,23 @@ class TransferEngine<
   }
 
   #increaseTransferProgress(transferStage: TransferStage, data: any, aggregateKey?: string) {
-    if (!this.transferProgress[transferStage]) {
-      this.transferProgress[transferStage] = { count: 0, bytes: 0 };
+    if (!this.#transferProgress[transferStage]) {
+      this.#transferProgress[transferStage] = { count: 0, bytes: 0 };
     }
-    this.transferProgress[transferStage]!.count += 1;
+    this.#transferProgress[transferStage]!.count += 1;
     const size = JSON.stringify(data).length;
-    this.transferProgress[transferStage]!.bytes! += size;
+    this.#transferProgress[transferStage]!.bytes! += size;
 
     if (aggregateKey && _.has(aggregateKey, data)) {
       const aggKeyValue = data[aggregateKey];
-      if (!_.has('aggregates', this.transferProgress[transferStage])) {
-        this.transferProgress[transferStage]!.aggregates = {};
+      if (!_.has('aggregates', this.#transferProgress[transferStage])) {
+        this.#transferProgress[transferStage]!.aggregates = {};
       }
-      if (!_.has(aggKeyValue, this.transferProgress[transferStage]!.aggregates)) {
-        this.transferProgress[transferStage]!.aggregates![aggKeyValue] = { count: 0, bytes: 0 };
+      if (!_.has(aggKeyValue, this.#transferProgress[transferStage]!.aggregates)) {
+        this.#transferProgress[transferStage]!.aggregates![aggKeyValue] = { count: 0, bytes: 0 };
       }
-      this.transferProgress[transferStage]!.aggregates![aggKeyValue].count += 1;
-      this.transferProgress[transferStage]!.aggregates![aggKeyValue].bytes! += size;
+      this.#transferProgress[transferStage]!.aggregates![aggKeyValue].count += 1;
+      this.#transferProgress[transferStage]!.aggregates![aggKeyValue].bytes! += size;
     }
   }
 
@@ -80,8 +88,8 @@ class TransferEngine<
   };
 
   #updateStage = (type: 'start' | 'complete' | 'progress', transferStage: TransferStage) => {
-    this.progressStream.emit(type, {
-      data: this.transferProgress,
+    this.#progressStream.emit(type, {
+      data: this.#transferProgress,
       stage: transferStage,
     });
   };

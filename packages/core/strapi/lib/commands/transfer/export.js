@@ -94,18 +94,19 @@ module.exports = async (filename, opts) => {
   try {
     let resultData = [];
     console.log(`Starting export...`);
-    engine.progressStream.on('complete', ({ stage, data }) => {
-      console.log(`.${stage} complete`);
-      resultData = data;
-    });
 
-    engine.progressStream.on('start', ({ stage }) => {
+    engine.progress.stream.on('start', ({ stage }) => {
       process.stdout.write(`Starting transfer of ${stage}..`);
     });
 
-    // engine.progressStream.on('progress', ({ stage, data }) => {
+    // engine.progress.stream..on('progress', ({ stage, data }) => {
     //   console.log('progress');
     // });
+
+    engine.progress.stream.on('complete', ({ stage, data }) => {
+      console.log(`.${stage} complete`);
+      resultData = data;
+    });
 
     const results = await engine.transfer();
 
