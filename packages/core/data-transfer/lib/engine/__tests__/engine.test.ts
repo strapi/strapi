@@ -66,8 +66,6 @@ describe('Transfer engine', () => {
       const engine = createTransferEngine(mockedSource, mockedDestination, defaultOptions);
 
       await engine.transfer();
-      expect(mockedSource.bootstrap).toHaveBeenCalledTimes(1);
-      expect(mockedDestination.bootstrap).toHaveBeenCalledTimes(1);
     });
     test('bootstraps all providers with a bootstrap', async () => {
       const source = {
@@ -82,8 +80,8 @@ describe('Transfer engine', () => {
 
       await engine.transfer();
 
-      expect(mockedSource.bootstrap).toHaveBeenCalledTimes(1);
-      expect(mockedDestination.bootstrap).toHaveBeenCalledTimes(1);
+      expect(source.bootstrap).toHaveBeenCalledTimes(1);
+      expect(destination.bootstrap).toHaveBeenCalledTimes(1);
     });
   });
 
