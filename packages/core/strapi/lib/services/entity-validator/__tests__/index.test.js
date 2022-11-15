@@ -1,18 +1,20 @@
 'use strict';
 
-const entityValidator = require('../entity-validator');
+const entityValidator = require('..');
 
 describe('Entity validator', () => {
   describe('Published input', () => {
     describe('General Errors', () => {
-      it('Throws a badRequest error on invalid input', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
+      let model;
+      global.strapi = {
+        errors: {
+          badRequest: jest.fn(),
+        },
+        getModel: () => model,
+      };
 
-        const model = {
+      it('Throws a badRequest error on invalid input', async () => {
+        model = {
           attributes: {
             title: {
               type: 'string',
@@ -44,7 +46,7 @@ describe('Entity validator', () => {
       });
 
       it('Returns data on valid input', async () => {
-        const model = {
+        model = {
           attributes: {
             title: {
               type: 'string',
@@ -61,7 +63,7 @@ describe('Entity validator', () => {
       });
 
       it('Returns casted data when possible', async () => {
-        const model = {
+        model = {
           attributes: {
             title: {
               type: 'string',
@@ -84,13 +86,7 @@ describe('Entity validator', () => {
       });
 
       test('Throws on required not respected', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
-        const model = {
+        model = {
           attributes: {
             title: {
               type: 'string',
@@ -139,7 +135,7 @@ describe('Entity validator', () => {
       });
 
       it('Supports custom field types', async () => {
-        const model = {
+        model = {
           attributes: {
             uuid: {
               type: 'uuid',
@@ -164,6 +160,7 @@ describe('Entity validator', () => {
           errors: {
             badRequest: jest.fn(),
           },
+          getModel: () => model,
         };
 
         const model = {
@@ -199,12 +196,6 @@ describe('Entity validator', () => {
       });
 
       test('Throws on max length not respected', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
@@ -329,9 +320,11 @@ describe('Entity validator', () => {
           errors: {
             badRequest: jest.fn(),
           },
+          getModel: () => model,
         };
 
         const model = {
+          uid: 'api::test.test',
           attributes: {
             title: {
               type: 'string',
@@ -456,6 +449,13 @@ describe('Entity validator', () => {
           },
         };
 
+        global.strapi = {
+          errors: {
+            badRequest: jest.fn(),
+          },
+          getModel: () => model,
+        };
+
         const input = { title: 'tooSmall' };
 
         expect.hasAssertions();
@@ -465,12 +465,6 @@ describe('Entity validator', () => {
       });
 
       test('Throws on max length not respected', async () => {
-        global.strapi = {
-          errors: {
-            badRequest: jest.fn(),
-          },
-        };
-
         const model = {
           attributes: {
             title: {
