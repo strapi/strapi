@@ -295,75 +295,86 @@ const cleanOrderColumnsForOldDatabases = async ({
 
   if (hasOrderColumn(attribute) && id) {
     const tempOrderTableName = `tempOrderTableName_${now}`;
-    await db.connection
-      .raw(
-        `
-        CREATE TEMPORARY TABLE :tempOrderTableName:
-          SELECT
+    try {
+      await db.connection
+        .raw(
+          `
+          CREATE TEMPORARY TABLE :tempOrderTableName:
+            SELECT
+              id,
+              (
+                SELECT count(*)
+                FROM :joinTableName: b
+                WHERE a.:orderColumnName: >= b.:orderColumnName: AND a.:joinColumnName: = b.:joinColumnName: AND a.:joinColumnName: = :id
+              ) AS src_order
+            FROM :joinTableName: a`,
+          {
+            tempOrderTableName,
+            joinTableName: joinTable.name,
+            orderColumnName,
+            joinColumnName: joinColumn.name,
             id,
-            (
-              SELECT count(*)
-              FROM :joinTableName: b
-              WHERE a.:orderColumnName: >= b.:orderColumnName: AND a.:joinColumnName: = b.:joinColumnName: AND a.:joinColumnName: = :id
-            ) AS src_order
-          FROM :joinTableName: a`,
-        {
-          tempOrderTableName,
-          joinTableName: joinTable.name,
-          orderColumnName,
-          joinColumnName: joinColumn.name,
-          id,
-        }
-      )
-      .transacting(trx);
-    await db.connection
-      .raw(
-        `UPDATE ?? as a, (SELECT * FROM ??) AS b
+          }
+        )
+        .transacting(trx);
+      await db.connection
+        .raw(
+          `UPDATE ?? as a, (SELECT * FROM ??) AS b
           SET ?? = b.src_order
           WHERE a.id = b.id`,
-        [joinTable.name, tempOrderTableName, orderColumnName]
-      )
-      .transacting(trx);
-    await db.connection.raw(`DROP TEMPORARY TABLE ${tempOrderTableName}`).transacting(trx);
+          [joinTable.name, tempOrderTableName, orderColumnName]
+        )
+        .transacting(trx);
+    } finally {
+      await db.connection
+        .raw(`DROP TEMPORARY TABLE IF EXISTS ${tempOrderTableName}`)
+        .transacting(trx);
+    }
   }
+
   if (hasInverseOrderColumn(attribute) && !isEmpty(inverseRelIds)) {
     const tempInvOrderTableName = `tempInvOrderTableName_${now}`;
-    await db.connection
-      .raw(
-        `
-        CREATE TEMPORARY TABLE ??
-          SELECT
-            id,
-            (
-              SELECT count(*)
-              FROM ?? b
-              WHERE a.?? >= b.?? AND a.?? = b.?? AND a.?? IN (${inverseRelIds
-                .map(() => '?')
-                .join(', ')})
-            ) AS inv_order
-          FROM ?? a`,
-        [
-          tempInvOrderTableName,
-          joinTable.name,
-          inverseOrderColumnName,
-          inverseOrderColumnName,
-          inverseJoinColumn.name,
-          inverseJoinColumn.name,
-          inverseJoinColumn.name,
-          ...inverseRelIds,
-          joinTable.name,
-        ]
-      )
-      .transacting(trx);
-    await db.connection
-      .raw(
-        `UPDATE ?? as a, (SELECT * FROM ??) AS b
-          SET ?? = b.inv_order
-          WHERE a.id = b.id`,
-        [joinTable.name, tempInvOrderTableName, inverseOrderColumnName]
-      )
-      .transacting(trx);
-    await db.connection.raw(`DROP TEMPORARY TABLE ${tempInvOrderTableName}`).transacting(trx);
+    try {
+      await db.connection
+        .raw(
+          `
+          CREATE TEMPORARY TABLE ??
+            SELECT
+              id,
+              (
+                SELECT count(*)
+                FROM ?? b
+                WHERE a.?? >= b.?? AND a.?? = b.?? AND a.?? IN (${inverseRelIds
+                  .map(() => '?')
+                  .join(', ')})
+              ) AS inv_order
+            FROM ?? a`,
+          [
+            tempInvOrderTableName,
+            joinTable.name,
+            inverseOrderColumnName,
+            inverseOrderColumnName,
+            inverseJoinColumn.name,
+            inverseJoinColumn.name,
+            inverseJoinColumn.name,
+            ...inverseRelIds,
+            joinTable.name,
+          ]
+        )
+        .transacting(trx);
+      await db.connection
+        .raw(
+          `UPDATE ?? as a, (SELECT * FROM ??) AS b
+            SET ?? = b.inv_order
+            WHERE a.id = b.id`,
+          [joinTable.name, tempInvOrderTableName, inverseOrderColumnName]
+        )
+        .transacting(trx);
+    } finally {
+      await db.connection
+        .raw(`DROP TEMPORARY TABLE IF EXISTS ${tempInvOrderTableName}`)
+        .transacting(trx);
+    }
   }
 };
 
