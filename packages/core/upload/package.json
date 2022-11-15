@@ -45,7 +45,7 @@
     "sharp": "0.31.0"
   },
   "devDependencies": {
-    "@testing-library/dom": "8.17.1",
+    "@testing-library/dom": "8.19.0",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "3.7.0",
     "@testing-library/user-event": "13.5.0",
