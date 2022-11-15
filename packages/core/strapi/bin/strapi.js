@@ -282,7 +282,10 @@ program
       .argParser(parseInputBool)
   )
   .addOption(
-    new Option('--archive [boolean]', 'Archive output file as a tar')
+    new Option(
+      '--archive [boolean]',
+      'Export all backup files into a tar archive instead of a folder'
+    )
       .default(true)
       .argParser(parseInputBool)
   )
