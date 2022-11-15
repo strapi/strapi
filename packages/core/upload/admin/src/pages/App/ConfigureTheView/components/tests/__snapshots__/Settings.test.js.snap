@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Upload - Configure | Settings initial render renders and matches the snapshot 1`] = `
-.c16 {
+.c17 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -13,7 +13,17 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   width: 1px;
 }
 
-.c7 {
+.c0 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c8 {
   position: absolute;
   left: 0;
   right: 0;
@@ -24,24 +34,24 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   border: none;
 }
 
-.c7:focus {
+.c8:focus {
   outline: none;
 }
 
-.c7[aria-disabled='true'] {
+.c8[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c10 {
+.c11 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c12 {
+.c13 {
   padding-left: 12px;
 }
 
-.c2 {
+.c3 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -55,7 +65,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   flex-direction: column;
 }
 
-.c5 {
+.c6 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -69,7 +79,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   flex-direction: row;
 }
 
-.c8 {
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -87,14 +97,14 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   justify-content: space-between;
 }
 
-.c4 {
+.c5 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c11 {
+.c12 {
   color: #32324d;
   display: block;
   white-space: nowrap;
@@ -104,22 +114,22 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   line-height: 1.43;
 }
 
-.c15 {
+.c16 {
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c3 > * {
+.c4 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c3 > * + * {
+.c4 > * + * {
   margin-top: 4px;
 }
 
-.c6 {
+.c7 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -135,28 +145,28 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   transition-duration: 0.2s;
 }
 
-.c6:focus-within {
+.c7:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c13 {
+.c14 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c13 svg {
+.c14 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c13 svg path {
+.c14 svg path {
   fill: #666687;
 }
 
-.c14 {
+.c15 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -165,33 +175,33 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   border: none;
 }
 
-.c14 svg {
+.c15 svg {
   width: 0.375rem;
 }
 
-.c9 {
+.c10 {
   width: 100%;
 }
 
-.c0 {
+.c1 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c1 {
+.c2 {
   grid-column: span 6;
   max-width: 100%;
 }
 
 @media (max-width:68.75rem) {
-  .c1 {
+  .c2 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c1 {
+  .c2 {
     grid-column: span;
   }
 }
@@ -204,187 +214,191 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
       class="c1"
     >
       <div
-        class=""
+        class="c2"
       >
-        <div>
-          <div
-            class="c2 c3"
-            spacing="1"
-          >
-            <span
-              class="c4"
-              for="select-1"
-              id="select-1-label"
-            >
-              <div
-                class="c5"
-              >
-                Entries per page
-              </div>
-            </span>
+        <div
+          class=""
+        >
+          <div>
             <div
-              class="c5 c6"
+              class="c3 c4"
+              spacing="1"
             >
-              <button
-                aria-describedby="select-1-hint"
-                aria-disabled="false"
-                aria-expanded="false"
-                aria-haspopup="listbox"
-                aria-labelledby="select-1-label select-1-content"
-                class="c7"
-                data-testid="pageSize-select"
-                id="select-1"
-                name="pageSize"
-                type="button"
-              />
-              <div
-                class="c8 c9"
+              <span
+                class="c5"
+                for="select-1"
+                id="select-1-label"
               >
                 <div
-                  class="c5"
+                  class="c6"
+                >
+                  Entries per page
+                </div>
+              </span>
+              <div
+                class="c6 c7"
+              >
+                <button
+                  aria-describedby="select-1-hint"
+                  aria-disabled="false"
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  aria-labelledby="select-1-label select-1-content"
+                  class="c8"
+                  data-testid="pageSize-select"
+                  id="select-1"
+                  name="pageSize"
+                  type="button"
+                />
+                <div
+                  class="c9 c10"
                 >
                   <div
-                    class="c10"
+                    class="c6"
                   >
-                    <span
+                    <div
                       class="c11"
-                      id="select-1-content"
                     >
-                      10
-                    </span>
+                      <span
+                        class="c12"
+                        id="select-1-content"
+                      >
+                        10
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    class="c6"
+                  >
+                    <button
+                      aria-hidden="true"
+                      class="c13 c14 c15"
+                      tabindex="-1"
+                      type="button"
+                    >
+                      <svg
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 14 8"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          clip-rule="evenodd"
+                          d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                          fill="#32324D"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 </div>
-                <div
-                  class="c5"
-                >
-                  <button
-                    aria-hidden="true"
-                    class="c12 c13 c14"
-                    tabindex="-1"
-                    type="button"
-                  >
-                    <svg
-                      fill="none"
-                      height="1em"
-                      viewBox="0 0 14 8"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                        fill="#32324D"
-                        fill-rule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </div>
               </div>
+              <p
+                class="c16"
+                id="select-1-hint"
+              >
+                Number of assets displayed by default in the Media Library
+              </p>
             </div>
-            <p
-              class="c15"
-              id="select-1-hint"
-            >
-              Note: You can override this value in the media library.
-            </p>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="c1"
-    >
       <div
-        class=""
+        class="c2"
       >
-        <div>
-          <div
-            class="c2 c3"
-            spacing="1"
-          >
-            <span
-              class="c4"
-              for="select-2"
-              id="select-2-label"
-            >
-              <div
-                class="c5"
-              >
-                Default sort order
-              </div>
-            </span>
+        <div
+          class=""
+        >
+          <div>
             <div
-              class="c5 c6"
+              class="c3 c4"
+              spacing="1"
             >
-              <button
-                aria-describedby="select-2-hint"
-                aria-disabled="false"
-                aria-expanded="false"
-                aria-haspopup="listbox"
-                aria-labelledby="select-2-label select-2-content"
-                class="c7"
-                data-testid="sort-select"
-                id="select-2"
-                name="sort"
-                type="button"
-              />
-              <div
-                class="c8 c9"
+              <span
+                class="c5"
+                for="select-2"
+                id="select-2-label"
               >
                 <div
-                  class="c5"
+                  class="c6"
+                >
+                  Default sort order
+                </div>
+              </span>
+              <div
+                class="c6 c7"
+              >
+                <button
+                  aria-describedby="select-2-hint"
+                  aria-disabled="false"
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  aria-labelledby="select-2-label select-2-content"
+                  class="c8"
+                  data-testid="sort-select"
+                  id="select-2"
+                  name="sort"
+                  type="button"
+                />
+                <div
+                  class="c9 c10"
                 >
                   <div
-                    class="c10"
+                    class="c6"
                   >
-                    <span
+                    <div
                       class="c11"
-                      id="select-2-content"
                     >
-                      createdAt:DESC
-                    </span>
+                      <span
+                        class="c12"
+                        id="select-2-content"
+                      >
+                        createdAt:DESC
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    class="c6"
+                  >
+                    <button
+                      aria-hidden="true"
+                      class="c13 c14 c15"
+                      tabindex="-1"
+                      type="button"
+                    >
+                      <svg
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 14 8"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          clip-rule="evenodd"
+                          d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                          fill="#32324D"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 </div>
-                <div
-                  class="c5"
-                >
-                  <button
-                    aria-hidden="true"
-                    class="c12 c13 c14"
-                    tabindex="-1"
-                    type="button"
-                  >
-                    <svg
-                      fill="none"
-                      height="1em"
-                      viewBox="0 0 14 8"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        clip-rule="evenodd"
-                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                        fill="#32324D"
-                        fill-rule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </div>
               </div>
+              <p
+                class="c16"
+                id="select-2-hint"
+              >
+                Note: You can override this value in the media library.
+              </p>
             </div>
-            <p
-              class="c15"
-              id="select-2-hint"
-            >
-              Note: You can override this value in the media library.
-            </p>
           </div>
         </div>
       </div>
     </div>
   </div>
   <div
-    class="c16"
+    class="c17"
   >
     <p
       aria-live="polite"

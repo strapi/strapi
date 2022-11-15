@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Upload - Configure initial render renders and matches the snapshot 1`] = `
-.c38 {
+.c39 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -154,7 +154,17 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   fill: #ffffff;
 }
 
-.c29 {
+.c22 {
+  background: #ffffff;
+  padding-top: 24px;
+  padding-right: 32px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+}
+
+.c30 {
   position: absolute;
   left: 0;
   right: 0;
@@ -165,24 +175,24 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: none;
 }
 
-.c29:focus {
+.c30:focus {
   outline: none;
 }
 
-.c29[aria-disabled='true'] {
+.c30[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
-.c32 {
+.c33 {
   padding-right: 16px;
   padding-left: 16px;
 }
 
-.c34 {
+.c35 {
   padding-left: 12px;
 }
 
-.c24 {
+.c25 {
   -webkit-align-items: stretch;
   -webkit-box-align: stretch;
   -ms-flex-align: stretch;
@@ -196,7 +206,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   flex-direction: column;
 }
 
-.c27 {
+.c28 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -210,7 +220,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   flex-direction: row;
 }
 
-.c30 {
+.c31 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -228,14 +238,14 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   justify-content: space-between;
 }
 
-.c26 {
+.c27 {
   font-weight: 600;
   color: #32324d;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c33 {
+.c34 {
   color: #32324d;
   display: block;
   white-space: nowrap;
@@ -245,22 +255,22 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   line-height: 1.43;
 }
 
-.c37 {
+.c38 {
   color: #666687;
   font-size: 0.75rem;
   line-height: 1.33;
 }
 
-.c25 > * {
+.c26 > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
-.c25 > * + * {
+.c26 > * + * {
   margin-top: 4px;
 }
 
-.c28 {
+.c29 {
   position: relative;
   border: 1px solid #dcdce4;
   padding-right: 12px;
@@ -276,28 +286,28 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   transition-duration: 0.2s;
 }
 
-.c28:focus-within {
+.c29:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c35 {
+.c36 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c35 svg {
+.c36 svg {
   height: 0.6875rem;
   width: 0.6875rem;
 }
 
-.c35 svg path {
+.c36 svg path {
   fill: #666687;
 }
 
-.c36 {
+.c37 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -306,11 +316,11 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: none;
 }
 
-.c36 svg {
+.c37 svg {
   width: 0.375rem;
 }
 
-.c31 {
+.c32 {
   width: 100%;
 }
 
@@ -463,25 +473,25 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   outline: none;
 }
 
-.c22 {
+.c23 {
   display: grid;
   grid-template-columns: repeat(12,1fr);
   gap: 16px;
 }
 
-.c23 {
+.c24 {
   grid-column: span 6;
   max-width: 100%;
 }
 
 @media (max-width:68.75rem) {
-  .c23 {
+  .c24 {
     grid-column: span 12;
   }
 }
 
 @media (max-width:34.375rem) {
-  .c23 {
+  .c24 {
     grid-column: span;
   }
 }
@@ -600,180 +610,184 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                 class="c23"
               >
                 <div
-                  class=""
+                  class="c24"
                 >
-                  <div>
-                    <div
-                      class="c24 c25"
-                      spacing="1"
-                    >
-                      <span
-                        class="c26"
-                        for="select-1"
-                        id="select-1-label"
-                      >
-                        <div
-                          class="c27"
-                        >
-                          Entries per page
-                        </div>
-                      </span>
+                  <div
+                    class=""
+                  >
+                    <div>
                       <div
-                        class="c27 c28"
+                        class="c25 c26"
+                        spacing="1"
                       >
-                        <button
-                          aria-describedby="select-1-hint"
-                          aria-disabled="false"
-                          aria-expanded="false"
-                          aria-haspopup="listbox"
-                          aria-labelledby="select-1-label select-1-content"
-                          class="c29"
-                          data-testid="pageSize-select"
-                          id="select-1"
-                          name="pageSize"
-                          type="button"
-                        />
-                        <div
-                          class="c30 c31"
+                        <span
+                          class="c27"
+                          for="select-1"
+                          id="select-1-label"
                         >
                           <div
-                            class="c27"
+                            class="c28"
+                          >
+                            Entries per page
+                          </div>
+                        </span>
+                        <div
+                          class="c28 c29"
+                        >
+                          <button
+                            aria-describedby="select-1-hint"
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-haspopup="listbox"
+                            aria-labelledby="select-1-label select-1-content"
+                            class="c30"
+                            data-testid="pageSize-select"
+                            id="select-1"
+                            name="pageSize"
+                            type="button"
+                          />
+                          <div
+                            class="c31 c32"
                           >
                             <div
-                              class="c32"
+                              class="c28"
                             >
-                              <span
+                              <div
                                 class="c33"
-                                id="select-1-content"
                               >
-                                10
-                              </span>
+                                <span
+                                  class="c34"
+                                  id="select-1-content"
+                                >
+                                  10
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              class="c28"
+                            >
+                              <button
+                                aria-hidden="true"
+                                class="c35 c36 c37"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 14 8"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
                             </div>
                           </div>
-                          <div
-                            class="c27"
-                          >
-                            <button
-                              aria-hidden="true"
-                              class="c34 c35 c36"
-                              tabindex="-1"
-                              type="button"
-                            >
-                              <svg
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 14 8"
-                                width="1em"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </button>
-                          </div>
                         </div>
+                        <p
+                          class="c38"
+                          id="select-1-hint"
+                        >
+                          Number of assets displayed by default in the Media Library
+                        </p>
                       </div>
-                      <p
-                        class="c37"
-                        id="select-1-hint"
-                      >
-                        Note: You can override this value in the media library.
-                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div
-                class="c23"
-              >
                 <div
-                  class=""
+                  class="c24"
                 >
-                  <div>
-                    <div
-                      class="c24 c25"
-                      spacing="1"
-                    >
-                      <span
-                        class="c26"
-                        for="select-2"
-                        id="select-2-label"
-                      >
-                        <div
-                          class="c27"
-                        >
-                          Default sort order
-                        </div>
-                      </span>
+                  <div
+                    class=""
+                  >
+                    <div>
                       <div
-                        class="c27 c28"
+                        class="c25 c26"
+                        spacing="1"
                       >
-                        <button
-                          aria-describedby="select-2-hint"
-                          aria-disabled="false"
-                          aria-expanded="false"
-                          aria-haspopup="listbox"
-                          aria-labelledby="select-2-label select-2-content"
-                          class="c29"
-                          data-testid="sort-select"
-                          id="select-2"
-                          name="sort"
-                          type="button"
-                        />
-                        <div
-                          class="c30 c31"
+                        <span
+                          class="c27"
+                          for="select-2"
+                          id="select-2-label"
                         >
                           <div
-                            class="c27"
+                            class="c28"
+                          >
+                            Default sort order
+                          </div>
+                        </span>
+                        <div
+                          class="c28 c29"
+                        >
+                          <button
+                            aria-describedby="select-2-hint"
+                            aria-disabled="false"
+                            aria-expanded="false"
+                            aria-haspopup="listbox"
+                            aria-labelledby="select-2-label select-2-content"
+                            class="c30"
+                            data-testid="sort-select"
+                            id="select-2"
+                            name="sort"
+                            type="button"
+                          />
+                          <div
+                            class="c31 c32"
                           >
                             <div
-                              class="c32"
+                              class="c28"
                             >
-                              <span
+                              <div
                                 class="c33"
-                                id="select-2-content"
                               >
-                                createdAt:DESC
-                              </span>
+                                <span
+                                  class="c34"
+                                  id="select-2-content"
+                                >
+                                  createdAt:DESC
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              class="c28"
+                            >
+                              <button
+                                aria-hidden="true"
+                                class="c35 c36 c37"
+                                tabindex="-1"
+                                type="button"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 14 8"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </button>
                             </div>
                           </div>
-                          <div
-                            class="c27"
-                          >
-                            <button
-                              aria-hidden="true"
-                              class="c34 c35 c36"
-                              tabindex="-1"
-                              type="button"
-                            >
-                              <svg
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 14 8"
-                                width="1em"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </button>
-                          </div>
                         </div>
+                        <p
+                          class="c38"
+                          id="select-2-hint"
+                        >
+                          Note: You can override this value in the media library.
+                        </p>
                       </div>
-                      <p
-                        class="c37"
-                        id="select-2-hint"
-                      >
-                        Note: You can override this value in the media library.
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -785,7 +799,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
     </div>
   </div>
   <div
-    class="c38"
+    class="c39"
   >
     <p
       aria-live="polite"

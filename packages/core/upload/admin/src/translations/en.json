@@ -119,6 +119,7 @@
   "config.subtitle": "Define the view settings of the media library.",
   "config.entries.title": "Entries per page",
   "config.sort.title": "Default sort order",
+  "config.entries.note": "Number of assets displayed by default in the Media Library",
   "config.note": "Note: You can override this value in the media library.",
   "config.popUpWarning.warning.updateAllSettings": "This will modify all your settings"
 }
