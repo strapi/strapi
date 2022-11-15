@@ -97,7 +97,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     fs.mkdirSync(path.join(rootDir, 'configuration'));
   }
 
-  close(): void | Promise<void> {
+  close(): void {
     const metadata = this.#providersMetadata.source;
 
     if (metadata !== undefined) {
@@ -108,7 +108,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     }
   }
 
-  rollback(): void | Promise<void> {
+  rollback(): void {
     fs.rmSync(this.options.file.path, { force: true, recursive: true });
   }
 
