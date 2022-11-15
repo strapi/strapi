@@ -1,4 +1,5 @@
 import type { Diff } from '../../types';
+
 import { jsonDiffs } from '../utils';
 
 const calculateSchemaDiffs = <T, P>(a: T, b: P) => {

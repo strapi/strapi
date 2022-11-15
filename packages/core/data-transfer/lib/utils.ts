@@ -1,6 +1,7 @@
-import { isArray, isObject, zip, isEqual, uniq, mapValues, pick } from 'lodash/fp';
 import type { Readable } from 'stream';
 import type { Context, Diff } from '../types';
+
+import { isArray, isObject, zip, isEqual, uniq, mapValues, pick } from 'lodash/fp';
 
 /**
  * Collect every entity in a Readable stream

@@ -1,4 +1,3 @@
-import { isEmpty, uniq } from 'lodash/fp';
 import type {
   Diff,
   IDestinationProvider,
@@ -6,6 +5,9 @@ import type {
   ITransferEngine,
   ITransferEngineOptions,
 } from '../../types';
+
+import { isEmpty, uniq } from 'lodash/fp';
+
 import calculateSchemaDiffs from '../strategies';
 
 class TransferEngine implements ITransferEngine {

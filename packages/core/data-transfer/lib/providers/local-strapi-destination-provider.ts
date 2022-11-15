@@ -1,9 +1,9 @@
 // import { createLogger } from '@strapi/logger';
-import chalk from 'chalk';
-
-import { pick, mapValues } from 'lodash/fp';
-import { Duplex } from 'stream';
 import type { IDestinationProvider, IMetadata, ProviderType } from '../../types';
+
+import chalk from 'chalk';
+import { Duplex } from 'stream';
+
 import { mapSchemasValues } from '../utils';
 
 interface ILocalStrapiDestinationProviderOptions {

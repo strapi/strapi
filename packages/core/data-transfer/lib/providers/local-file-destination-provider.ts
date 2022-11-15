@@ -1,3 +1,5 @@
+import type { IDestinationProvider, ProviderType } from '../../types';
+
 import fs from 'fs';
 import path from 'path';
 import zip from 'zlib';
@@ -5,7 +7,6 @@ import { Writable } from 'stream';
 import { chain } from 'stream-chain';
 import { stringer } from 'stream-json/jsonl/Stringer';
 
-import type { IDestinationProvider, ProviderType } from '../../types';
 import { createEncryptionCipher } from '../encryption/encrypt';
 
 export interface ILocalFileDestinationProviderOptions {

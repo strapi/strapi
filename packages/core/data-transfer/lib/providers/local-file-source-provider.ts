@@ -1,3 +1,7 @@
+import type { Readable } from 'stream';
+
+import type { IMetadata, ISourceProvider, ProviderType } from '../../types';
+
 import fs from 'fs';
 import zip from 'zlib';
 import tar from 'tar';
@@ -5,11 +9,8 @@ import { keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
-import type { Readable } from 'stream';
 
 import { createDecryptionCipher } from '../encryption';
-
-import { IMetadata, ISourceProvider, ProviderType } from '../../types';
 import { collect } from '../utils';
 
 type StreamItemArray = Parameters<typeof chain>[0];
