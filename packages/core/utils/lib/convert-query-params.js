@@ -186,7 +186,7 @@ const convertPopulateObject = (populate, schema) => {
       return acc;
     }
 
-    if (subPopulate && 'on' in subPopulate) {
+    if (typeof subPopulate === 'object' && 'on' in subPopulate) {
       return {
         ...acc,
         [key]: {
