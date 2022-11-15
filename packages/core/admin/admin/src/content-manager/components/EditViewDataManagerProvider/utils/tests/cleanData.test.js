@@ -198,7 +198,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
       expect(result).toEqual({
         component: {
           relation: {
-            connect: [{ id: 1 }],
+            connect: [{ id: 1, position: { end: true } }],
             disconnect: [],
           },
         },
@@ -254,7 +254,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
         component: {
           component2: {
             relation: {
-              connect: [{ id: 1 }],
+              connect: [{ id: 1, position: { end: true } }],
               disconnect: [],
             },
           },
@@ -419,7 +419,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
       expect(result).toStrictEqual({
         relation: {
-          connect: [{ id: 1 }],
+          connect: [{ id: 1, position: { end: true } }],
           disconnect: [{ id: 2 }],
         },
       });
@@ -441,7 +441,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
 
       expect(result).toStrictEqual({
         relation: {
-          connect: [{ id: 1 }],
+          connect: [{ id: 1, position: { end: true } }],
           disconnect: [],
         },
       });
@@ -510,7 +510,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             relation_component: {
               relation: {
                 disconnect: [],
-                connect: [{ id: 1 }],
+                connect: [{ id: 1, position: { end: true } }],
               },
             },
           },
@@ -519,7 +519,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             relation_component: {
               relation: {
                 disconnect: [],
-                connect: [{ id: 2 }],
+                connect: [{ id: 2, position: { end: true } }],
               },
             },
           },
@@ -659,7 +659,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             __component: 'basic.relation',
             id: 1,
             relation: {
-              connect: [{ id: 1 }],
+              connect: [{ id: 1, position: { end: true } }],
               disconnect: [],
             },
           },
@@ -668,7 +668,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             id: 2,
             relation_component: {
               relation: {
-                connect: [{ id: 2 }],
+                connect: [{ id: 2, position: { end: true } }],
                 disconnect: [],
               },
             },
@@ -681,7 +681,7 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
                 __component: 'basic.relation',
                 id: 1,
                 relation: {
-                  connect: [{ id: 3 }],
+                  connect: [{ id: 3, position: { end: true } }],
                   disconnect: [],
                 },
               },
@@ -806,6 +806,91 @@ describe('CM || components || EditViewDataManagerProvider || utils || cleanData'
             ],
           },
         ],
+      });
+    });
+
+    test('given that a relation is reordered it should be in the connect array with its new position', () => {
+      const result = cleanData(
+        {
+          browserState: {
+            relation: [{ id: 1 }, { id: 2 }],
+          },
+          serverState: {
+            relation: [{ id: 2 }, { id: 1 }],
+          },
+        },
+        schema,
+        componentsSchema
+      );
+
+      expect(result).toStrictEqual({
+        relation: {
+          connect: [
+            { id: 1, position: { before: 2 } },
+            { id: 2, position: { end: true } },
+          ],
+          disconnect: [],
+        },
+      });
+    });
+
+    test('given a relation is not in the serverState but is added and then re-ordered to another position, it should appear in the connect array with the correct position', () => {
+      const result = cleanData(
+        {
+          browserState: {
+            relation: [{ id: 3 }, { id: 1 }, { id: 2 }],
+          },
+          serverState: {
+            relation: [{ id: 1 }, { id: 2 }],
+          },
+        },
+        schema,
+        componentsSchema
+      );
+
+      expect(result).toStrictEqual({
+        relation: {
+          connect: [
+            {
+              id: 3,
+              position: { before: 1 },
+            },
+            { id: 1, position: { before: 2 } },
+            { id: 2, position: { end: true } },
+          ],
+          disconnect: [],
+        },
+      });
+    });
+
+    test('given relations are added that are infront of the existing relations, it should only return the new relations', () => {
+      const result = cleanData(
+        {
+          browserState: {
+            relation: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
+          },
+          serverState: {
+            relation: [{ id: 1 }, { id: 2 }],
+          },
+        },
+        schema,
+        componentsSchema
+      );
+
+      expect(result).toStrictEqual({
+        relation: {
+          connect: [
+            {
+              id: 3,
+              position: { before: 4 },
+            },
+            {
+              id: 4,
+              position: { end: true },
+            },
+          ],
+          disconnect: [],
+        },
       });
     });
   });
