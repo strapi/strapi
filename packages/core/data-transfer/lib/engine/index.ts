@@ -37,6 +37,7 @@ class TransferEngine<
   options: ITransferEngineOptions;
 
   #transferProgress: TransferProgress = {};
+  // TODO: Type the stream chunks. Doesn't seem trivial, especially since PassThrough doesn't provide a PassThroughOptions type
   #progressStream: PassThrough = new PassThrough({ objectMode: true });
   get progress(): TransferEngineProgress {
     return {
