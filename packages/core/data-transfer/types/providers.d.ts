@@ -19,7 +19,7 @@ export interface ISourceProvider extends IProvider {
   streamLinks?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
   streamMedia?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
   streamConfiguration?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
-  getSchemas?(): any;
+  getSchemas?(): Strapi.Schemas;
   streamSchemas?(): NodeJS.ReadableStream | Promise<NodeJS.ReadableStream>;
 }
 
@@ -34,6 +34,6 @@ export interface IDestinationProvider extends IProvider {
   getLinksStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
   getMediaStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
   getConfigurationStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
-  getSchemas?(): any;
+  getSchemas?(): Strapi.Schemas;
   getSchemasStream?(): NodeJS.WritableStream | Promise<NodeJS.WritableStream>;
 }
