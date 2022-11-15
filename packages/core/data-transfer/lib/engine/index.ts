@@ -8,7 +8,7 @@ import type {
 
 import { isEmpty, uniq } from 'lodash/fp';
 
-import calculateSchemaDiffs from '../strategies';
+import compareSchemas from '../strategies';
 
 class TransferEngine implements ITransferEngine {
   sourceProvider: ISourceProvider;
@@ -61,19 +61,17 @@ class TransferEngine implements ITransferEngine {
   }
 
   #assertSchemasMatching(sourceSchemas: any, destinationSchemas: any) {
-    const chosenStrategy = this.options.schemasMatching || 'strict';
+    const strategy = this.options.schemasMatching || 'strict';
     const keys = uniq(Object.keys(sourceSchemas).concat(Object.keys(destinationSchemas)));
     const diffs: { [key: string]: Diff[] } = {};
 
     keys.forEach((key) => {
       const sourceSchema = sourceSchemas[key];
       const destinationSchema = destinationSchemas[key];
-      const schemaDiffs = calculateSchemaDiffs(sourceSchema, destinationSchema);
+      const schemaDiffs = compareSchemas(sourceSchema, destinationSchema, strategy);
 
-      const isValid = schemaDiffs[chosenStrategy]();
-
-      if (!isValid) {
-        diffs[key] = schemaDiffs.diffs;
+      if (schemaDiffs.length) {
+        diffs[key] = schemaDiffs;
       }
     });
 
@@ -126,7 +124,7 @@ class TransferEngine implements ITransferEngine {
       return true;
     } catch (error) {
       if (error instanceof Error) {
-        console.error('Integrity checks failed:', error);
+        console.error('Integrity checks failed:', error.message);
       }
 
       return false;
