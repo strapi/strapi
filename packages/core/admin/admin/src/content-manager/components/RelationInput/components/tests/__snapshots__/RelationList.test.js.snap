@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Content-Manager || RelationInput || RelationList should render and match snapshot 1`] = `
-.c7 {
+.c8 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -75,6 +75,11 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
   min-width: 0;
 }
 
+.c7 {
+  width: 100%;
+  min-width: 0;
+}
+
 .c0 {
   position: relative;
   overflow-x: hidden;
@@ -116,7 +121,11 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
           class="c4 c5 c6"
           spacing="1"
         >
-          First relation
+          <div
+            class="c3 c7"
+          >
+            First relation
+          </div>
         </div>
       </div>
     </li>
@@ -133,13 +142,17 @@ exports[`Content-Manager || RelationInput || RelationList should render and matc
           class="c4 c5 c6"
           spacing="1"
         >
-          Second relation
+          <div
+            class="c3 c7"
+          >
+            Second relation
+          </div>
         </div>
       </div>
     </li>
   </div>
   <div
-    class="c7"
+    class="c8"
   >
     <p
       aria-live="polite"
