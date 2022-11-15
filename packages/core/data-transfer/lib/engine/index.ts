@@ -9,9 +9,6 @@ import type {
   TransferStage,
 } from '../../types';
 
-type CategoryProgress = {
-  [key: string]: {};
-};
 type TransferProgress = {
   [key in TransferStage]?: {
     count: number;
@@ -33,6 +30,7 @@ class TransferEngine<
   sourceProvider: ISourceProvider;
   destinationProvider: IDestinationProvider;
   options: ITransferEngineOptions;
+
   transferProgress: TransferProgress = {};
   #progressStream: PassThrough = new PassThrough({ objectMode: true });
   get progressStream() {
@@ -49,35 +47,35 @@ class TransferEngine<
     this.options = options;
   }
 
-  #incrementTransferProgress(name: TransferStage, data: any, aggregateKey?: string) {
-    if (!_.has(name, this.transferProgress)) {
-      this.transferProgress[name] = { count: 0, bytes: 0 };
+  #increaseTransferProgress(transferStage: TransferStage, data: any, aggregateKey?: string) {
+    if (!this.transferProgress[transferStage]) {
+      this.transferProgress[transferStage] = { count: 0, bytes: 0 };
     }
-    this.transferProgress[name]!.count += 1;
+    this.transferProgress[transferStage]!.count += 1;
     const size = JSON.stringify(data).length;
-    this.transferProgress[name]!.bytes! += size;
+    this.transferProgress[transferStage]!.bytes! += size;
 
     if (aggregateKey && _.has(aggregateKey, data)) {
       const aggKeyValue = data[aggregateKey];
-      if (!_.has('aggregates', this.transferProgress[name])) {
-        this.transferProgress[name]!.aggregates = {};
+      if (!_.has('aggregates', this.transferProgress[transferStage])) {
+        this.transferProgress[transferStage]!.aggregates = {};
       }
-      if (!_.has(aggKeyValue, this.transferProgress[name]!.aggregates)) {
-        this.transferProgress[name]!.aggregates![aggKeyValue] = { count: 0, bytes: 0 };
+      if (!_.has(aggKeyValue, this.transferProgress[transferStage]!.aggregates)) {
+        this.transferProgress[transferStage]!.aggregates![aggKeyValue] = { count: 0, bytes: 0 };
       }
-      this.transferProgress[name]!.aggregates![aggKeyValue].count += 1;
-      this.transferProgress[name]!.aggregates![aggKeyValue].bytes! += size;
+      this.transferProgress[transferStage]!.aggregates![aggKeyValue].count += 1;
+      this.transferProgress[transferStage]!.aggregates![aggKeyValue].bytes! += size;
     }
   }
 
-  #countRecorder = (name: TransferStage, aggregateKey?: string) => {
+  #countRecorder = (transferStage: TransferStage, aggregateKey?: string) => {
     return new PassThrough({
       objectMode: true,
-      transform: (data, encoding, callback) => {
-        this.#incrementTransferProgress(name, data, aggregateKey);
+      transform: (data, _encoding, callback) => {
+        this.#increaseTransferProgress(transferStage, data, aggregateKey);
         this.#progressStream.write({
           type: 'progress',
-          name,
+          name: transferStage,
           data: this.transferProgress,
         });
         callback(null, data);
@@ -85,11 +83,11 @@ class TransferEngine<
     });
   };
 
-  #updateStep = (type: 'start' | 'complete', name: TransferStage) => {
+  #updateStage = (type: 'start' | 'complete', transferStage: TransferStage) => {
     this.progressStream.write({
       type,
       data: this.transferProgress,
-      name,
+      name: transferStage,
     });
   };
 
@@ -202,7 +200,7 @@ class TransferEngine<
   }
 
   async transferSchemas(): Promise<void> {
-    const stepName: TransferStage = 'schemas';
+    const stageName: TransferStage = 'schemas';
     const inStream = await this.sourceProvider.streamSchemas?.();
     const outStream = await this.destinationProvider.getSchemasStream?.();
 
@@ -214,7 +212,7 @@ class TransferEngine<
       throw new Error('Unable to transfer schemas, destination stream is missing');
     }
 
-    this.#updateStep('start', stepName);
+    this.#updateStage('start', stageName);
     return new Promise((resolve, reject) => {
       inStream
         // Throw on error in the source
@@ -225,16 +223,16 @@ class TransferEngine<
         .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#updateStep('complete', stepName);
+          this.#updateStage('complete', stageName);
           resolve();
         });
 
-      inStream.pipe(this.#countRecorder(stepName)).pipe(outStream);
+      inStream.pipe(this.#countRecorder(stageName)).pipe(outStream);
     });
   }
 
   async transferEntities(): Promise<void> {
-    const stepName: TransferStage = 'entities';
+    const stageName: TransferStage = 'entities';
     const inStream = await this.sourceProvider.streamEntities?.();
     const outStream = await this.destinationProvider.getEntitiesStream?.();
 
@@ -246,7 +244,7 @@ class TransferEngine<
       throw new Error('Unable to transfer entities, destination stream is missing');
     }
 
-    this.#updateStep('start', stepName);
+    this.#updateStage('start', stageName);
 
     return new Promise((resolve, reject) => {
       inStream
@@ -262,16 +260,16 @@ class TransferEngine<
         })
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#updateStep('complete', stepName);
+          this.#updateStage('complete', stageName);
           resolve();
         });
 
-      inStream.pipe(this.#countRecorder(stepName, 'type')).pipe(outStream);
+      inStream.pipe(this.#countRecorder(stageName, 'type')).pipe(outStream);
     });
   }
 
   async transferLinks(): Promise<void> {
-    const stepName: TransferStage = 'links';
+    const stageName: TransferStage = 'links';
     const inStream = await this.sourceProvider.streamLinks?.();
     const outStream = await this.destinationProvider.getLinksStream?.();
 
@@ -283,7 +281,7 @@ class TransferEngine<
       throw new Error('Unable to transfer links, destination stream is missing');
     }
 
-    this.#updateStep('start', 'links');
+    this.#updateStage('start', 'links');
 
     return new Promise((resolve, reject) => {
       inStream
@@ -295,28 +293,28 @@ class TransferEngine<
         .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#updateStep('complete', stepName);
+          this.#updateStage('complete', stageName);
           resolve();
         });
 
-      inStream.pipe(this.#countRecorder(stepName)).pipe(outStream);
+      inStream.pipe(this.#countRecorder(stageName)).pipe(outStream);
     });
   }
 
   async transferMedia(): Promise<void> {
-    const stepName: TransferStage = 'media';
-    this.#updateStep('start', stepName);
+    const stageName: TransferStage = 'media';
+    this.#updateStage('start', stageName);
     console.warn('transferMedia not yet implemented');
     return new Promise((resolve) =>
       (() => {
-        this.#updateStep('complete', stepName);
+        this.#updateStage('complete', stageName);
         resolve();
       })()
     );
   }
 
   async transferConfiguration(): Promise<void> {
-    const stepName: TransferStage = 'configuration';
+    const stageName: TransferStage = 'configuration';
     const inStream = await this.sourceProvider.streamConfiguration?.();
     const outStream = await this.destinationProvider.getConfigurationStream?.();
 
@@ -328,7 +326,7 @@ class TransferEngine<
       throw new Error('Unable to transfer configuration, destination stream is missing');
     }
 
-    this.#updateStep('start', stepName);
+    this.#updateStage('start', stageName);
 
     return new Promise((resolve, reject) => {
       inStream
@@ -340,11 +338,11 @@ class TransferEngine<
         .on('error', reject)
         // Resolve the promise when the destination has finished reading all the data from the source
         .on('close', () => {
-          this.#updateStep('complete', stepName);
+          this.#updateStage('complete', stageName);
           resolve();
         });
 
-      inStream.pipe(this.#countRecorder(stepName)).pipe(outStream);
+      inStream.pipe(this.#countRecorder(stageName)).pipe(outStream);
     });
   }
 }
