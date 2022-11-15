@@ -17,6 +17,7 @@ const {
   isPlainObject,
   cloneDeep,
   get,
+  mergeAll,
 } = require('lodash/fp');
 const _ = require('lodash');
 const parseType = require('./parse-type');
@@ -185,19 +186,37 @@ const convertPopulateObject = (populate, schema) => {
       return acc;
     }
 
-    if (subPopulate && subPopulate.on) {
+    if (subPopulate && 'on' in subPopulate) {
       return {
         ...acc,
         [key]: {
-          ...subPopulate,
           on: Object.entries(subPopulate.on).reduce(
-            (newTypeSubPopulate, [type, typeSubPopulate]) => ({
-              ...newTypeSubPopulate,
+            (acc, [type, typeSubPopulate]) => ({
+              ...acc,
               [type]: convertNestedPopulate(typeSubPopulate, strapi.getModel(type)),
             }),
             {}
           ),
         },
+      };
+    }
+
+    // TODO: Deprecated way of handling dynamic zone populate queries. It's kept as is,
+    // as removing it could break existing user queries but should be removed in V5.
+    if (attribute.type === 'dynamiczone') {
+      const populates = attribute.components
+        .map((uid) => strapi.getModel(uid))
+        .map((schema) => convertNestedPopulate(subPopulate, schema))
+        .map((populate) => (populate === true ? {} : populate)) // cast boolean to empty object to avoid merging issues
+        .filter((populate) => populate !== false);
+
+      if (isEmpty(populates)) {
+        return acc;
+      }
+
+      return {
+        ...acc,
+        [key]: mergeAll(populates),
       };
     }
 
