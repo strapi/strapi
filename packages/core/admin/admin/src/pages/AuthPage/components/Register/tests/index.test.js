@@ -285,6 +285,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         padding-bottom: 32px;
       }
 
+      .c45 {
+        padding-left: 8px;
+      }
+
       .c44 {
         margin: 0;
         height: 18px;
@@ -351,10 +355,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
       .c44:indeterminate:disabled:after {
         background-color: #8e8ea9;
-      }
-
-      .c45 {
-        padding-left: 8px;
       }
 
       .c40 {
@@ -1185,13 +1185,17 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                       <label
                         class="c42 c43"
                       >
-                        <input
-                          aria-label="news"
-                          class="c44"
-                          id="checkbox-1"
-                          name="news"
-                          type="checkbox"
-                        />
+                        <div
+                          class=""
+                        >
+                          <input
+                            aria-label="news"
+                            class="c44"
+                            id="checkbox-1"
+                            name="news"
+                            type="checkbox"
+                          />
+                        </div>
                         <div
                           class="c45"
                         >

@@ -114,5 +114,11 @@
   "sort.updated_at_desc": "Most recent updates",
   "tabs.title": "How do you want to upload your assets?",
   "window.confirm.close-modal.file": "Are you sure? Your changes will be lost.",
-  "window.confirm.close-modal.files": "Are you sure? You have some files that have not been uploaded yet."
+  "window.confirm.close-modal.files": "Are you sure? You have some files that have not been uploaded yet.",
+  "config.back": "Back",
+  "config.subtitle": "Define the view settings of the media library.",
+  "config.entries.title": "Entries per page",
+  "config.sort.title": "Default sort order",
+  "config.note": "Note: You can override this value in the media library.",
+  "config.popUpWarning.warning.updateAllSettings": "This will modify all your settings"
 }

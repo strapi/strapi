@@ -272,6 +272,18 @@ describe('Application page', () => {
         max-height: 40%;
       }
 
+      .c51 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
       .c49 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -567,7 +579,7 @@ describe('Application page', () => {
         width: 100%;
       }
 
-      .c51 {
+      .c52 {
         padding-top: 8px;
         padding-right: 16px;
         padding-left: 16px;
@@ -580,7 +592,7 @@ describe('Application page', () => {
         line-height: 1.33;
       }
 
-      .c52 {
+      .c53 {
         color: #666687;
         display: block;
         white-space: nowrap;
@@ -590,7 +602,7 @@ describe('Application page', () => {
         line-height: 1.33;
       }
 
-      .c53 {
+      .c54 {
         color: #666687;
         font-size: 0.75rem;
         line-height: 1.33;
@@ -1015,8 +1027,15 @@ describe('Application page', () => {
                                           tabindex="0"
                                           type="button"
                                         >
+                                          <span
+                                            class="c51"
+                                          >
+                                            Change logo
+                                          </span>
                                           <svg
+                                            aria-hidden="true"
                                             fill="none"
+                                            focusable="false"
                                             height="1em"
                                             viewBox="0 0 24 24"
                                             width="1em"
@@ -1037,8 +1056,15 @@ describe('Application page', () => {
                                           tabindex="0"
                                           type="button"
                                         >
+                                          <span
+                                            class="c51"
+                                          >
+                                            Reset logo
+                                          </span>
                                           <svg
+                                            aria-hidden="true"
                                             fill="none"
+                                            focusable="false"
                                             height="1em"
                                             viewBox="0 0 24 24"
                                             width="1em"
@@ -1056,7 +1082,7 @@ describe('Application page', () => {
                                     </div>
                                   </section>
                                   <div
-                                    class="c51"
+                                    class="c52"
                                   >
                                     <span>
                                       <div
@@ -1065,7 +1091,7 @@ describe('Application page', () => {
                                         tabindex="0"
                                       >
                                         <span
-                                          class="c52"
+                                          class="c53"
                                         >
                                           michka.svg
                                         </span>
@@ -1075,7 +1101,7 @@ describe('Application page', () => {
                                 </div>
                               </div>
                               <p
-                                class="c53"
+                                class="c54"
                                 id="carouselinput-1-hint"
                               >
                                 Change the admin panel logo (Max dimension: 750x750, Max file size: 100KB)

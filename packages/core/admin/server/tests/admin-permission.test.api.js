@@ -226,6 +226,12 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "assets",
               },
               {
+                "action": "plugin::upload.configure-view",
+                "displayName": "Configure view",
+                "plugin": "upload",
+                "subCategory": "general",
+              },
+              {
                 "action": "plugin::upload.read",
                 "displayName": "Access the Media Library",
                 "plugin": "upload",
@@ -727,6 +733,12 @@ describe('Role CRUD End to End', () => {
                 "displayName": "Update (crop, details, replace) + delete",
                 "plugin": "upload",
                 "subCategory": "assets",
+              },
+              {
+                "action": "plugin::upload.configure-view",
+                "displayName": "Configure view",
+                "plugin": "upload",
+                "subCategory": "general",
               },
               {
                 "action": "plugin::upload.read",
@@ -1237,6 +1249,12 @@ describe('Role CRUD End to End', () => {
                   "displayName": "Update (crop, details, replace) + delete",
                   "plugin": "upload",
                   "subCategory": "assets",
+                },
+                {
+                  "action": "plugin::upload.configure-view",
+                  "displayName": "Configure view",
+                  "plugin": "upload",
+                  "subCategory": "general",
                 },
                 {
                   "action": "plugin::upload.read",
