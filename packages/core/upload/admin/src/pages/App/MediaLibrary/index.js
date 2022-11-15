@@ -219,9 +219,6 @@ export const MediaLibrary = () => {
               <CheckPermissions permissions={pluginPermissions.configureView}>
                 <ConfigureTheViewButton paddingTop={1} paddingBottom={1}>
                   <IconButton
-                    onClick={() => {
-                      trackUsage('willEditMediaLibraryConfig');
-                    }}
                     forwardedAs={ReactRouterLink}
                     to={{
                       pathname: `${pathname}/configuration`,

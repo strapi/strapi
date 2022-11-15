@@ -41,10 +41,10 @@ const ConfigureTheView = ({ config }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     toggleWarningSubmit();
-    trackUsage('willSaveMediaLibraryConfig');
   };
 
   const handleConfirm = async () => {
+    trackUsage('willEditMediaLibraryConfig');
     await mutateConfig.mutateAsync(modifiedData);
     toggleWarningSubmit();
     dispatch(setLoaded());
